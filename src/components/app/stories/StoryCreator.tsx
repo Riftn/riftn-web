@@ -12,7 +12,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { AtSign, Sticker, Timer, Pencil, RefreshCw, RotateCw, Type, Undo2, Users, Globe2, Volume2, VolumeX, Scissors } from 'lucide-react';
+import { AtSign, Sticker, Wand2, Timer, Pencil, RefreshCw, RotateCw, Type, Undo2, Users, Globe2, Volume2, VolumeX, Scissors } from 'lucide-react';
 import Back from '@/components/ui/cut-icons/back';
 import Close from '@/components/ui/cut-icons/close';
 import Images from '@/components/ui/cut-icons/images';
@@ -28,7 +28,7 @@ import { getMediaUrl } from '@/lib/api/dehub/core';
 import { useRefreshStoryShelf } from '@/hooks/use-story-shelf';
 import { useQuery } from '@tanstack/react-query';
 import type { StoryRemixSource } from '@/store/storiesStore';
-import { composeOverlay, composePhoto, grabFrame, mentionBoxes, OUT_H, OUT_W, TEXT_COLORS, type TextLayer } from './story-compose';
+import { backdropCss, composeOverlay, composePhoto, grabFrame, mentionBoxes, OUT_H, OUT_W, PHOTO_BACKDROPS, PHOTO_LOOKS, TEXT_COLORS, type PhotoBackdrop, type PhotoLook, type TextLayer } from './story-compose';
 import { CAPTION_FONTS, captionFonts, captionFontStyle, type CaptionFont } from "./caption-fonts";
 import { shareMoment } from './story-upload';
 import '@/styles/stories.css';
@@ -45,7 +45,7 @@ function readCloseFriends(): DeHubUser[] {
 }
 
 type Media = { kind: 'photo' | 'video'; url: string; blob: Blob; duration?: number };
-type Tool = null | 'text' | 'draw' | 'mention' | 'trim' | 'timer' | 'lifetime' | 'audience' | 'sticker';
+type Tool = null | 'text' | 'draw' | 'mention' | 'trim' | 'timer' | 'lifetime' | 'audience' | 'sticker' | 'effects';
 
 /** Stickers are big glyph layers: emoji keep their own colours, the shapes take the text colour. */
 const STICKER_EMOJI = ['🔥', '😂', '😍', '🥳', '👀', '💯', '🎉', '❤️', '✨', '👏', '🙌', '😎', '🤯', '🫶', '🙏', '💀', '🚀', '⚡', '🌙', '☀️'];
@@ -300,6 +300,8 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
   const [soundOpen, setSoundOpen] = useState(false);
   const [muted, setMuted] = useState(false);
   const [photoSeconds, setPhotoSeconds] = useState(5);
+  const [look, setLook] = useState<PhotoLook>('none');
+  const [backdrop, setBackdrop] = useState<PhotoBackdrop>('blur');
   const [trim, setTrim] = useState<[number, number]>([0, Math.min(MAX_VIDEO_S, media.duration || MAX_VIDEO_S)]);
   const [audience, setAudience] = useState<StoryAudience>(() => {
     try { return localStorage.getItem(AUDIENCE_KEY) === 'followers' ? 'followers' : 'everyone'; } catch { return 'everyone'; }
@@ -484,7 +486,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
       if (media.kind === 'photo') {
         const img = imgRef.current!;
         if (!img.complete) await new Promise(r => { img.onload = r; });
-        const blob = await composePhoto(img, drew ? drawRef.current : null, visible);
+        const blob = await composePhoto(img, drew ? drawRef.current : null, visible, look, backdrop);
         shareMoment({ kind: 'photo', file: blob, preview: URL.createObjectURL(blob), fields: { ...fields, photoDurationSeconds: customPhotoDuration ? photoSeconds : undefined } }, onShared);
       } else {
         const overlay = await composeOverlay(drawRef.current, drew, visible);
@@ -520,7 +522,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
           {isVideo ? (
             <video ref={videoRef} src={media.url} autoPlay loop playsInline muted={muted || !!song} className="absolute inset-0 w-full h-full object-cover" />
           ) : (
-            <PhotoPreview imgRef={imgRef} url={media.url} />
+            <PhotoPreview imgRef={imgRef} url={media.url} look={look} backdrop={backdrop} />
           )}
           <canvas
             ref={drawRef}
@@ -580,6 +582,9 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
           </button>
         )}
         <button type="button" data-sc-btn data-st-dark-glass data-on={tool === 'text' ? 'true' : 'false'} onClick={addText} aria-label={t('stories.text', { defaultValue: 'Text' })}><Type className="w-5 h-5" /></button>
+        {!isVideo && (
+          <button type="button" data-sc-btn data-st-dark-glass data-on={tool === 'effects' || look !== 'none' ? 'true' : 'false'} onClick={() => setTool(tl => (tl === 'effects' ? null : 'effects'))} aria-label={t('stories.effects', { defaultValue: 'Effects' })}><Wand2 className="w-5 h-5" /></button>
+        )}
         <button type="button" data-sc-btn data-st-dark-glass data-on={tool === 'sticker' ? 'true' : 'false'} onClick={() => setTool(tl => (tl === 'sticker' ? null : 'sticker'))} aria-label={t('stories.stickers', { defaultValue: 'Stickers' })}><Sticker className="w-5 h-5" /></button>
         <button type="button" data-sc-btn data-st-dark-glass data-on={tool === 'draw' ? 'true' : 'false'} onClick={() => setTool(tl => (tl === 'draw' ? null : 'draw'))} aria-label={t('stories.draw', { defaultValue: 'Draw' })}><Pencil className="w-5 h-5" /></button>
         <button type="button" data-sc-btn data-st-dark-glass data-on={song ? 'true' : 'false'} onClick={() => setSoundOpen(true)} aria-label={t('stories.song', { defaultValue: 'Song' })}><Music className="w-5 h-5" /></button>
@@ -744,6 +749,33 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
         </div>
       )}
 
+      {tool === 'effects' && !isVideo && (
+        <div data-sc-panel data-st-dark-glass data-sc-effects onPointerDown={e => e.stopPropagation()}>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-white text-sm font-semibold">{t('stories.effects', { defaultValue: 'Effects' })}</span>
+            <button type="button" data-sc-btn data-st-dark-glass onClick={() => setTool(null)} aria-label={t('common.done', { defaultValue: 'Done' })}><Check className="w-5 h-5" /></button>
+          </div>
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            {(Object.keys(PHOTO_LOOKS) as PhotoLook[]).map(key => (
+              <button key={key} type="button" data-sc-chip data-st-dark-glass aria-pressed={look === key} onClick={() => setLook(key)}>
+                {look === key && <Check className="size-4" />}{t(`stories.looks.${key}`, { defaultValue: key === 'none' ? 'Original' : key[0].toUpperCase() + key.slice(1) })}
+              </button>
+            ))}
+          </div>
+          <span className="block text-white/60 text-xs mb-1">{t('stories.backdrop', { defaultValue: 'Background (shows around wide photos)' })}</span>
+          <div className="flex gap-2 overflow-x-auto">
+            {(Object.keys(PHOTO_BACKDROPS) as PhotoBackdrop[]).map(key => (
+              <button key={key} type="button" aria-pressed={backdrop === key} onClick={() => setBackdrop(key)}
+                aria-label={t(`stories.backdrops.${key}`, { defaultValue: key })}
+                className="size-10 shrink-0 rounded-full border-2"
+                style={{ borderColor: backdrop === key ? '#fff' : 'rgba(255,255,255,.25)', background: backdropCss(key) ?? 'rgba(255,255,255,.15)' }}>
+                {key === 'blur' && <span className="text-[10px] text-white">{t('stories.backdrops.blur', { defaultValue: 'Blur' })}</span>}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {tool === 'sticker' && (
         <div data-sc-panel data-st-dark-glass data-sc-stickers onPointerDown={e => e.stopPropagation()}>
           <div className="flex items-center justify-between mb-2">
@@ -830,11 +862,14 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
   );
 }
 
-function PhotoPreview({ imgRef, url }: { imgRef: React.RefObject<HTMLImageElement>; url: string }) {
+function PhotoPreview({ imgRef, url, look = 'none', backdrop = 'blur' }: { imgRef: React.RefObject<HTMLImageElement>; url: string; look?: PhotoLook; backdrop?: PhotoBackdrop }) {
   const [wide, setWide] = useState(false);
+  const fill = backdropCss(backdrop);
   return (
     <>
-      {wide && <img src={url} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ filter: 'blur(40px) brightness(0.6)', transform: 'scale(1.2)' }} />}
+      {wide && (fill
+        ? <div className="absolute inset-0" style={{ background: fill }} />
+        : <img src={url} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ filter: 'blur(40px) brightness(0.6)', transform: 'scale(1.2)' }} />)}
       <img
         ref={imgRef}
         data-sc-media
@@ -842,7 +877,7 @@ function PhotoPreview({ imgRef, url }: { imgRef: React.RefObject<HTMLImageElemen
         alt=""
         draggable={false}
         className="absolute inset-0 w-full h-full"
-        style={{ objectFit: wide ? 'contain' : 'cover' }}
+        style={{ objectFit: wide ? 'contain' : 'cover', filter: PHOTO_LOOKS[look] === 'none' ? undefined : PHOTO_LOOKS[look] }}
         onLoad={e => setWide(e.currentTarget.naturalWidth / e.currentTarget.naturalHeight > 0.75)}
       />
     </>

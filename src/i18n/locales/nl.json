@@ -7424,7 +7424,7 @@
     "transferGuarantee": "Je krijgt het hele account — handle, posts, volgers, tipgeschiedenis en badge-rechten. De verkoper behoudt zijn wallet en alles erin. De overdracht loopt pas nadat Riftn je tokenbetaling terug van de chain heeft gelezen; als deze wordt onderbroken, hervat het opnieuw proberen van de aankoop deze.",
     "shareTitle": "@{{handle}} te koop op Riftn"
   },
-  "stories": {"stickers":"Stickers","shapes":"Pijlen en vormen. Tik erop na het toevoegen om kleur, grootte of hoek te wijzigen.","closeFriends":"Goede vrienden","closeFriendsSaved":"Opgeslagen als Goede vrienden","saveCloseFriends":"Opslaan als Goede vrienden",
+  "stories": {"effects":"Effecten","backdrop":"Achtergrond","looks":{"none": "Origineel", "warm": "Warm", "cool": "Koel", "vivid": "Levendig", "fade": "Vervaagd", "mono": "Mono", "noir": "Noir", "retro": "Retro"},"backdrops":{"blur": "Vervagen", "black": "Zwart", "dusk": "Schemer", "sunset": "Zonsondergang", "ocean": "Oceaan", "forest": "Bos"},"stickers":"Stickers","shapes":"Pijlen en vormen. Tik erop na het toevoegen om kleur, grootte of hoek te wijzigen.","closeFriends":"Goede vrienden","closeFriendsSaved":"Opgeslagen als Goede vrienden","saveCloseFriends":"Opslaan als Goede vrienden",
     "mute": "Dempen",
     "unfollow": "Ontvolgen",
     "mutedToast": "Gedempt. Je ziet hun Momenten en berichten niet meer.",

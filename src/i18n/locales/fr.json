@@ -7238,7 +7238,7 @@
     "transferGuarantee": "Vous obtenez le compte entier — handle, publications, abonnés, historique des pourboires et droits aux badges. Le vendeur conserve son portefeuille et tout ce qu'il contient. Le transfert ne s'exécute qu'après que Riftn ait lu votre paiement en tokens hors de la chaîne ; s'il est interrompu, réessayer l'achat le reprend.",
     "shareTitle": "@{{handle}} est à vendre sur Riftn"
   },
-  "stories": {"stickers":"Stickers","shapes":"Flèches et formes. Touchez-les après ajout pour changer couleur, taille ou angle.","closeFriends":"Amis proches","closeFriendsSaved":"Enregistré comme Amis proches","saveCloseFriends":"Enregistrer comme Amis proches",
+  "stories": {"effects":"Effets","backdrop":"Arrière-plan","looks":{"none": "Original", "warm": "Chaud", "cool": "Froid", "vivid": "Vif", "fade": "Délavé", "mono": "Mono", "noir": "Noir", "retro": "Rétro"},"backdrops":{"blur": "Flou", "black": "Noir", "dusk": "Crépuscule", "sunset": "Coucher de soleil", "ocean": "Océan", "forest": "Forêt"},"stickers":"Stickers","shapes":"Flèches et formes. Touchez-les après ajout pour changer couleur, taille ou angle.","closeFriends":"Amis proches","closeFriendsSaved":"Enregistré comme Amis proches","saveCloseFriends":"Enregistrer comme Amis proches",
     "mute": "Masquer",
     "unfollow": "Ne plus suivre",
     "mutedToast": "Masqué. Vous ne verrez plus ses Moments ni ses publications.",
