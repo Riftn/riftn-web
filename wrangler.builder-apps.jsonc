@@ -27,7 +27,7 @@
   "migrations": [{ "tag": "cloud-v1", "new_sqlite_classes": ["CloudRegistry", "CloudApp"] }],
   "vars": {
     // Staff who can list every app and switch one off.
-    "ADMIN_WALLETS": "0x9324840523a5d17dd12a2f11a9472e5a199c1937",
+    "ADMIN_WALLETS": "0xec4e2c7417f781b35d830671f013b3b91f29ba64",
     // Emergency off switch: space-separated app addresses that stop serving.
     "BLOCKED_SLUGS": ""
   }
