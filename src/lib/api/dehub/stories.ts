@@ -88,7 +88,7 @@ export interface StoryViewer extends StoryAuthor {
   viewedAt: string;
 }
 
-export function getStoryShelf(liveHosts: string, signedIn: boolean): Promise<{ shelf: ShelfEntry[]; signedIn: boolean; liveHosts?: string[]; supportsCustomLifetime?: boolean; supportsCustomAudience?: boolean }> {
+export function getStoryShelf(liveHosts: string, signedIn: boolean): Promise<{ shelf: ShelfEntry[]; signedIn: boolean; liveHosts?: string[]; supportsCustomLifetime?: boolean; supportsPhotoDuration?: boolean; supportsCustomAudience?: boolean }> {
   return apiCall('/api/stories/shelf', { params: { liveHosts: liveHosts || undefined }, requiresAuth: signedIn });
 }
 
@@ -112,6 +112,7 @@ export interface CreateStoryFields {
   audience: StoryAudience;
   audienceAddresses?: string[];
   expiresInHours?: StoryLifetime;
+  photoDurationSeconds?: number;
   allowReplies?: boolean;
   muted?: boolean;
   caption?: string;
@@ -135,6 +136,7 @@ export function createStory(
   form.append('audience', fields.audience);
   const customAudience = fields.audience === 'selected' || fields.audience === 'except';
   if (customAudience) form.append('audienceAddresses', JSON.stringify(fields.audienceAddresses ?? []));
+  if (fields.photoDurationSeconds != null) form.append('photoDurationSeconds', String(fields.photoDurationSeconds));
   if (fields.expiresInHours != null) form.append('expiresInHours', String(fields.expiresInHours));
   form.append('allowReplies', String(fields.allowReplies !== false));
   form.append('muted', String(!!fields.muted));

@@ -12,7 +12,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { AtSign, Pencil, RefreshCw, RotateCw, Type, Undo2, Users, Globe2, Volume2, VolumeX, Scissors } from 'lucide-react';
+import { AtSign, Timer, Pencil, RefreshCw, RotateCw, Type, Undo2, Users, Globe2, Volume2, VolumeX, Scissors } from 'lucide-react';
 import Back from '@/components/ui/cut-icons/back';
 import Close from '@/components/ui/cut-icons/close';
 import Images from '@/components/ui/cut-icons/images';
@@ -36,7 +36,7 @@ const MAX_VIDEO_S = 60;
 const AUDIENCE_KEY = 'riftn.stories.audience';
 
 type Media = { kind: 'photo' | 'video'; url: string; blob: Blob; duration?: number };
-type Tool = null | 'text' | 'draw' | 'mention' | 'trim' | 'lifetime' | 'audience';
+type Tool = null | 'text' | 'draw' | 'mention' | 'trim' | 'timer' | 'lifetime' | 'audience';
 
 const uid = () => Math.random().toString(36).slice(2, 9);
 
@@ -45,7 +45,7 @@ export function StoryCreator({ onClose, remixSource }: { onClose: () => void; re
   const refreshShelf = useRefreshStoryShelf();
   const { data: storyCapabilities } = useQuery({
     queryKey: ['story-posting-capabilities'],
-    queryFn: async () => getStoryShelf('', false).then(({ supportsCustomAudience, supportsCustomLifetime }) => ({ supportsCustomAudience, supportsCustomLifetime })),
+    queryFn: async () => getStoryShelf('', false).then(({ supportsCustomAudience, supportsCustomLifetime, supportsPhotoDuration }) => ({ supportsCustomAudience, supportsCustomLifetime, supportsPhotoDuration })),
     staleTime: 60_000,
     retry: false,
   });
@@ -65,7 +65,7 @@ export function StoryCreator({ onClose, remixSource }: { onClose: () => void; re
           media={media}
           remixSourceId={remixSource?.id}
           remixLabel={remixLabel}
-          customLifetime={!!storyCapabilities?.supportsCustomLifetime} customAudience={!!storyCapabilities?.supportsCustomAudience}
+          customLifetime={!!storyCapabilities?.supportsCustomLifetime} customAudience={!!storyCapabilities?.supportsCustomAudience} customPhotoDuration={!!storyCapabilities?.supportsPhotoDuration}
           onBack={() => { URL.revokeObjectURL(media.url); setMedia(null); }}
           onClose={onClose}
           onShared={() => refreshShelf()}
@@ -261,7 +261,7 @@ function useStageBox(ref: React.RefObject<HTMLDivElement>) {
   return box;
 }
 
-function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, customLifetime, customAudience }: {
+function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, customLifetime, customAudience, customPhotoDuration }: {
   media: Media;
   onBack: () => void;
   onClose: () => void;
@@ -270,6 +270,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
   remixLabel?: string;
   customLifetime: boolean;
   customAudience: boolean;
+  customPhotoDuration: boolean;
 }) {
   const { t } = useTranslation();
   const areaRef = useRef<HTMLDivElement>(null);
@@ -285,6 +286,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
   const [song, setSong] = useState<AttachedSound | null>(null);
   const [soundOpen, setSoundOpen] = useState(false);
   const [muted, setMuted] = useState(false);
+  const [photoSeconds, setPhotoSeconds] = useState(5);
   const [trim, setTrim] = useState<[number, number]>([0, Math.min(MAX_VIDEO_S, media.duration || MAX_VIDEO_S)]);
   const [audience, setAudience] = useState<StoryAudience>(() => {
     try { return localStorage.getItem(AUDIENCE_KEY) === 'followers' ? 'followers' : 'everyone'; } catch { return 'everyone'; }
@@ -465,7 +467,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
         const img = imgRef.current!;
         if (!img.complete) await new Promise(r => { img.onload = r; });
         const blob = await composePhoto(img, drew ? drawRef.current : null, visible);
-        shareMoment({ kind: 'photo', file: blob, preview: URL.createObjectURL(blob), fields }, onShared);
+        shareMoment({ kind: 'photo', file: blob, preview: URL.createObjectURL(blob), fields: { ...fields, photoDurationSeconds: customPhotoDuration ? photoSeconds : undefined } }, onShared);
       } else {
         const overlay = await composeOverlay(drawRef.current, drew, visible);
         shareMoment({
@@ -482,7 +484,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
       toast.error(t('stories.couldNotPrepare', { defaultValue: "Couldn't get your moment ready. Try again." }));
       setBusy(false);
     }
-  }, [busy, audience, audiencePeople, restrictPeople, customLifetime, lifetime, layers, song, media, muted, drew, trim, remixSourceId, onShared, onClose, t]);
+  }, [busy, audience, audiencePeople, restrictPeople, customLifetime, lifetime, layers, song, media, muted, drew, trim, photoSeconds, customPhotoDuration, remixSourceId, onShared, onClose, t]);
 
   const isVideo = media.kind === 'video';
   const duration = media.duration || MAX_VIDEO_S;
@@ -551,6 +553,13 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
       </div>
 
       <div data-sc-tools>
+        {!isVideo && customPhotoDuration && (
+          <button type="button" data-sc-btn data-st-dark-glass data-on={tool === 'timer' ? 'true' : 'false'}
+            onClick={() => setTool(tl => tl === 'timer' ? null : 'timer')}
+            aria-label={t('liveStudio.fields.duration', { defaultValue: 'Seconds on screen' })}>
+            <Timer className="w-5 h-5" />
+          </button>
+        )}
         <button type="button" data-sc-btn data-st-dark-glass data-on={tool === 'text' ? 'true' : 'false'} onClick={addText} aria-label={t('stories.text', { defaultValue: 'Text' })}><Type className="w-5 h-5" /></button>
         <button type="button" data-sc-btn data-st-dark-glass data-on={tool === 'draw' ? 'true' : 'false'} onClick={() => setTool(tl => (tl === 'draw' ? null : 'draw'))} aria-label={t('stories.draw', { defaultValue: 'Draw' })}><Pencil className="w-5 h-5" /></button>
         <button type="button" data-sc-btn data-st-dark-glass data-on={song ? 'true' : 'false'} onClick={() => setSoundOpen(true)} aria-label={t('stories.song', { defaultValue: 'Song' })}><Music className="w-5 h-5" /></button>
@@ -704,6 +713,19 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
         </div>
       )}
 
+      {tool === 'timer' && !isVideo && (
+        <div data-sc-panel data-st-dark-glass onPointerDown={e => e.stopPropagation()}>
+          <label className="block text-sm font-semibold">
+            {t('liveStudio.fields.duration', { defaultValue: 'Seconds on screen' })} · {photoSeconds}s
+            <input type="range" min={1} max={60} step={1} value={photoSeconds} className="my-3 w-full"
+              onChange={e => setPhotoSeconds(e.target.valueAsNumber)} />
+          </label>
+          <button type="button" data-sc-chip data-st-dark-glass onClick={() => setTool(null)}>
+            <Check className="w-4 h-4" />{t('common.done', { defaultValue: 'Done' })}
+          </button>
+        </div>
+      )}
+
       {tool === 'trim' && isVideo && (
         <div data-sc-panel data-st-dark-glass onPointerDown={e => e.stopPropagation()}>
           <p className="text-[14px] font-semibold mb-1">{t('stories.trimTitle', { defaultValue: 'Keep up to 60 seconds' })}</p>
@@ -729,7 +751,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
           aboveMomentEditor
           onSelect={selectSong}
           currentSound={song}
-          clipSeconds={isVideo ? Math.round(trim[1] - trim[0]) : 15}
+          clipSeconds={isVideo ? Math.round(trim[1] - trim[0]) : photoSeconds}
         />
       )}
     </>

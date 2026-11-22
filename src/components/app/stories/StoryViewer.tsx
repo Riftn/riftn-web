@@ -165,7 +165,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
     const tick = (now: number) => {
       elapsedRef.current += now - last;
       last = now;
-      const p = elapsedRef.current / Math.max(1000, item.durationMs);
+      const p = elapsedRef.current / Math.max(1000, item.durationMs || 5000);
       setProgress(Math.min(1, p));
       if (p >= 1) {
         goItem(1);
