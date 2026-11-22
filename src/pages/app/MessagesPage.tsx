@@ -563,20 +563,15 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   }, [selectedConversation, showPublicChat, selectedRoom]);
   const [clearTarget, setClearTarget] = useState<DeHubConversation | null>(null);
   const lastActivity = (c: DeHubConversation) => c.lastMessage?.createdAt || c.updatedAt;
-  const archivedConversations = richList
-    ? visibleConversations.filter(c => isArchived(chatPrefs.get(c.id), lastActivity(c)))
-    : [];
+  const archivedConversations = visibleConversations.filter(c => isArchived(chatPrefs.get(c.id), lastActivity(c)));
   const pinnedAt = (c: DeHubConversation) => {
     const at = chatPrefs.get(c.id)?.pinnedAt;
     return at ? new Date(at).getTime() : 0;
   };
-  const listedConversations = !richList
-    ? visibleConversations
-    : showArchived
-      ? archivedConversations
-      : visibleConversations
-          .filter(c => !isArchived(chatPrefs.get(c.id), lastActivity(c)))
-          .sort((a, b) => pinnedAt(b) - pinnedAt(a));
+  const otherConversations = visibleConversations.filter(c => !isArchived(chatPrefs.get(c.id), lastActivity(c)));
+  const phoneSearch = phonePill && !!searchQuery.trim();
+  const listedConversations = phoneSearch ? visibleConversations : showArchived ? archivedConversations
+    : richList ? otherConversations.sort((a, b) => pinnedAt(b) - pinnedAt(a)) : otherConversations;
   // Group, channel and community chats share the same settings, keyed by
   // community id: archived ones move under Archived chats, pinned ones go first.
   const roomPref = (c: { id: string }) => chatPrefs.get(roomChatId(c.id));
@@ -584,12 +579,10 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     const at = roomPref(c)?.pinnedAt;
     return at ? new Date(at).getTime() : 0;
   };
-  const archivedRooms = richList ? groupChats.filter(c => isArchived(roomPref(c))) : [];
-  const listedRooms = !richList
-    ? groupChats
-    : showArchived
-      ? archivedRooms
-      : groupChats.filter(c => !isArchived(roomPref(c))).sort((a, b) => roomPinnedAt(b) - roomPinnedAt(a));
+  const archivedRooms = groupChats.filter(c => isArchived(roomPref(c)));
+  const otherRooms = groupChats.filter(c => !isArchived(roomPref(c)));
+  const listedRooms = phoneSearch ? groupChats : showArchived ? archivedRooms
+    : richList ? otherRooms.sort((a, b) => roomPinnedAt(b) - roomPinnedAt(a)) : otherRooms;
   // "Add to tab" in a chat's menu.
   const tabMenuFor = (chatId: string): Pick<ChatOptionsHandlers, 'tabs' | 'onToggleTab' | 'onNewTabWith'> => (guest ? {} : {
     tabs: chatTabs.tabs.filter(x => !x.builtin).map(x => ({ id: x.id, name: x.name, emoji: x.emoji, has: x.chats.includes(chatId) })),
@@ -688,7 +681,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     e.preventDefault();
     holdToPick(id);
   };
-  // The phone list does not pin, archive or show mutes, but a chat you marked
+  // The phone list does not pin or show mutes, but a chat you marked
   // unread (here or on another device) still shows its marker.
   const unreadOnly = (p: ChatPref | undefined): ChatPref | undefined =>
     p?.markedUnread ? { ...p, pinnedAt: null, mutedUntil: null } : undefined;
@@ -706,6 +699,18 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const bulkAllUnread = bulkCount > 0
     && bulkChats.every(c => c.unreadCount > 0 || !!chatPrefs.get(c.id)?.markedUnread)
     && bulkRooms.every(c => !!roomPref(c)?.markedUnread);
+  const bulkAllArchived = bulkChats.every(c => isArchived(chatPrefs.get(c.id), lastActivity(c)))
+    && bulkRooms.every(c => isArchived(roomPref(c)));
+  const archiveWallet = useRef(walletAddress);
+  archiveWallet.current = walletAddress;
+  const bulkToggleArchive = async () => {
+    const ids = [...bulkChats.map(c => c.id), ...bulkRooms.map(c => roomChatId(c.id))];
+    setBulkIds(null);
+    for (const id of ids) {
+      if (archiveWallet.current !== walletAddress) break;
+      await updateChatPref(id, { archived: !bulkAllArchived });
+    }
+  };
   const bulkToggleUnread = () => {
     const unread = !bulkAllUnread;
     for (const c of bulkChats) updateChatPref(c.id, { unread });
@@ -1329,9 +1334,9 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
       }}
       className={deskCards ? 'px-0 pb-0 pt-0' : phonePill ? 'pl-3 pr-1 pb-0 pt-0' : undefined}
       bare={phonePill}
-      trailing={deskCards && (archivedCount > 0 || showArchived) ? (
+      trailing={(deskCards || phonePill) && (archivedCount > 0 || showArchived) ? (
         <button type="button" role="tab" data-chat-tab="archived" data-msg-cards-archived aria-selected={showArchived}
-          onClick={() => { setShowRequests(false); setShowArchived(!showArchived); }}>
+          onClick={() => { setShowRequests(false); setActiveTab('all'); setShowArchived(!showArchived); }}>
           <Archive className="h-3.5 w-3.5" />
           <span className="whitespace-nowrap">{_copy('chatMenu.archived', { defaultValue: 'Archived' })}</span>
           {archivedCount > 0 && <span data-chat-tab-unread data-quiet>{formatCount(archivedCount)}</span>}
@@ -1863,6 +1868,8 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
               chatIds={bulkChats.map(c => c.id)}
               allUnread={bulkAllUnread}
               onToggleUnread={bulkToggleUnread}
+              allArchived={bulkAllArchived}
+              onToggleArchive={phonePill && !guest && !inRequests && !bulkChats.some(c => c.isRequest) ? bulkToggleArchive : undefined}
               onDelete={bulkDelete}
               onReply={bulkReply}
               onCancel={() => setBulkIds(null)}
