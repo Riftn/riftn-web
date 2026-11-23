@@ -28,7 +28,7 @@ import type { DeHubNFT } from '@/lib/api/dehub';
 import { DEHUB_API_BASE } from '@/lib/api/dehub/core';
 import { buildAvatarUrl } from '@/lib/media-url';
 import { outsideImage } from '@/lib/outside-image';
-import { bindSoundWindow, clock, soundWindow, withSoundWindow, SOUND_SOURCE_NAMES } from '@/lib/sound-window';
+import { bindSoundWindow, clock, soundWindow, suggestedSoundStart, withSoundWindow, SOUND_SOURCE_NAMES } from '@/lib/sound-window';
 import { AppState } from '@/components/app/AppState';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
@@ -224,9 +224,11 @@ export function SoundPicker({ isOpen, onClose, onSelect, currentSound, clipSecon
     stopPreview();
     setPicked(track);
     const resumed = currentSound && currentSound.title === track.title && currentSound.url.split('#')[0] === track.url
-      ? soundWindow(currentSound.url)?.start ?? 0 : 0;
+      ? soundWindow(currentSound.url)?.start ?? 0
+      // A new song opens on its likely chorus rather than the intro.
+      : suggestedSoundStart(track.duration, fixedLength ?? length);
     setStart(resumed);
-  }, [currentSound, stopPreview]);
+  }, [currentSound, stopPreview, fixedLength, length]);
 
   const partUrl = useCallback((track: SoundCandidate) => withSoundWindow(
     track.url,

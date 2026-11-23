@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildSoundtrackTag, parseSoundtrackTag } from '@/lib/soundtrack';
-import { bindSoundWindow, releaseSoundWindow, soundCredit, soundMix, soundTimeFor, soundWindow, withSoundMix, withSoundWindow } from '@/lib/sound-window';
+import { bindSoundWindow, releaseSoundWindow, soundCredit, soundMix, soundTimeFor, soundWindow, suggestedSoundStart, withSoundMix, withSoundWindow } from '@/lib/sound-window';
 
 const AUDIUS = 'https://api.audius.co/v1/tracks/ZlwB7/stream?app_name=Riftn';
 
@@ -98,5 +98,19 @@ describe('sound window guard', () => {
     Object.assign(el, { src: next, currentSrc: next, currentTime: 600 });
     el.dispatchEvent(new Event('timeupdate'));
     expect(el.currentTime).toBe(10);
+  });
+});
+
+describe("suggestedSoundStart", () => {
+  it("opens a long song about a third in, on its likely chorus", () => {
+    expect(suggestedSoundStart(200, 30)).toBe(60);
+  });
+  it("never runs the part past the end", () => {
+    expect(suggestedSoundStart(40, 30)).toBe(10);
+  });
+  it("starts short songs, unknown lengths and songs that fit whole at the top", () => {
+    expect(suggestedSoundStart(20, 15)).toBe(0);
+    expect(suggestedSoundStart(undefined, 30)).toBe(0);
+    expect(suggestedSoundStart(30, 30)).toBe(0);
   });
 });
