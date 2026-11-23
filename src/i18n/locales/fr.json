@@ -3759,6 +3759,7 @@
     "anonymousLikes_other": "{{count}} j'aime de détenteurs de badges anonymes"
   },
   "mintChain": {
+    "homeAllowance": "{{left}} mints sur {{total}} aujourd'hui atteignent l'Accueil. Les mints en plus vont sur ton profil et sur le marché.",
     "title": "Poste de menthe",
     "subtitle": "Choisissez une chaîne. Les prix sont en direct et mis à jour toutes les minutes.",
     "free": "Gratuit",
@@ -12726,6 +12727,8 @@
     "intro": "Chaque niveau coûte un montant fixe en dollars. Le nombre de tokens qui l'accompagne représente ce que cela coûte au prix de référence de 0,001 $ — l'application demande ce montant mis à l'échelle du prix en direct, et jamais plus que cela, donc une baisse de prix ne peut pas relever la barre ou reprendre un niveau que vous avez déjà gagné."
   },
   "postingAllowance": {
+    "mintsLabel": "mints",
+    "mintNote": "Les mints suivent les mêmes chiffres que les posts texte : ce nombre de mints par jour atteint le fil d'Accueil. Les mints en plus passent quand même et apparaissent sur ton profil, dans Abonnements et sur le marché des fractions. Le mint n'est jamais bloqué.",
     "footnote": "Le niveau de badge correspond à vos tokens Riftn détenus et stakés sur BNB Chain et Base — le même solde à partir duquel votre badge est tiré. L'échelle est tarifée en dollars, donc les chiffres des tokens ci-dessus représentent ce que chaque niveau coûte au prix de vente de 0,001 $ et l'exigence diminue à mesure que le prix du token augmente ; un niveau que vous avez déjà gagné n'est jamais repris par le prix. Un badge qui vous est prêté par un mécène s'affiche sur votre profil mais n'augmente pas votre allocation de publication — celle-ci provient de ce que vous détenez vous-même. Les allocations sont réinitialisées à 00h00 UTC, et un gigaoctet ici équivaut à 1 024 Mo."
   },
   "postComposer": {
@@ -13129,7 +13132,8 @@
           "3": "Lorsqu'une publication dépasse le quota, l'application la tarifie d'abord et vérifie si votre portefeuille peut la couvrir avant toute téléversement.",
           "4": "La publication s'effectue exactement comme si elle était dans le quota — la publication n'attend jamais un paiement.",
           "5": "Ensuite, vous approuvez un transfert pour cette publication uniquement, réglé sur la chaîne Base ou BNB qui détient suffisamment de jetons Riftn.",
-          "6": "Les deux pools sont réinitialisés à minuit UTC."
+          "6": "Les deux pools sont réinitialisés à minuit UTC.",
+          "7": "Les mints fonctionnent pareil : ton badge fixe combien de mints par jour atteignent le fil d'Accueil, le même nombre que tes posts texte. Les mints en plus passent quand même et apparaissent sur ton profil, dans Abonnements et sur le marché des fractions."
         },
         "tips": {
           "1": "Le dépassement est au prorata : 200 Mo au-delà de votre quota coûtent 200 Mo, pas un gigaoctet entier.",

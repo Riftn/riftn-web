@@ -1596,7 +1596,7 @@ function MintChainGallery() {
         <Button variant="glass" size="sm" data-open-mint-sheet="dehub" onClick={() => setOpen('dehub')}>Riftn wallet</Button>
         <Button variant="glass" size="sm" data-open-mint-sheet="own" onClick={() => setOpen('own')}>Own wallet</Button>
       </div>
-      <MintChainSheet open={open !== null} onOpenChange={(o) => { if (!o) setOpen(null); }} defaultChainId={8453} sponsored={open === 'dehub'} onConfirm={() => setOpen(null)} />
+      <MintChainSheet open={open !== null} onOpenChange={(o) => { if (!o) setOpen(null); }} defaultChainId={8453} sponsored={open === 'dehub'} homeAllowance={{ mintsPerDay: 3, homeMintsRemaining: 2 }} onConfirm={() => setOpen(null)} />
     </section>
   );
 }
