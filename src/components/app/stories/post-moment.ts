@@ -5,6 +5,7 @@
  */
 import { getNFTInfo } from '@/lib/api/dehub/feed';
 import { getMediaUrl } from '@/lib/api/dehub/core';
+import { buildFeedImageUrls, buildImageUrl, cdnImageSource } from '@/lib/media-url';
 
 export interface PostMomentMedia {
   kind: 'photo' | 'video';
@@ -44,11 +45,14 @@ export async function loadPostMoment(tokenId: number): Promise<PostMomentMedia> 
     const duration = Number(post.videoDuration);
     return { kind: 'video', url, duration: Number.isFinite(duration) && duration > 0 ? duration : undefined, postTokenId: tokenId };
   }
-  const image = (Array.isArray(post.imageUrls) && post.imageUrls[0]) || (PHOTO_TYPES.has(type) ? post.imageUrl : null);
+  // Photo posts' files live under feed-images/{filename}; the API's nfts/images/... path 403s.
+  const listed = Array.isArray(post.imageUrls) && post.imageUrls[0] ? buildFeedImageUrls([post.imageUrls[0]])?.[0] : undefined;
+  const image = listed || (PHOTO_TYPES.has(type) && post.imageUrl ? buildImageUrl(tokenId, post.imageUrl) : undefined);
   if (PHOTO_TYPES.has(type) && image) {
-    const src = getMediaUrl(image);
+    const src = cdnImageSource(image);
     if (!src) throw new PostMomentError('load');
-    const res = await fetch(src, { mode: 'cors' }).catch(() => null);
+    // no-store: a copy cached by a plain <img> carries no CORS header and would fail here.
+    const res = await fetch(src, { mode: 'cors', cache: 'no-store' }).catch(() => null);
     if (!res?.ok) throw new PostMomentError('load');
     const blob = await res.blob();
     return { kind: 'photo', url: URL.createObjectURL(blob), blob, postTokenId: tokenId };
