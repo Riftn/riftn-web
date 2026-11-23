@@ -9,7 +9,9 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { MapPin, Music2, Plus, SendHorizontal, X } from 'lucide-react';
+import { ChevronDown, MapPin, Music2, Pause, Play, Plus, SendHorizontal, X } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { withWalletHeader } from '@/lib/supabase-wallet-client';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { buildAvatarUrl } from '@/lib/media-url';
@@ -35,7 +37,7 @@ export function refreshNotes(): void {
   notesFetchedAt = Date.now();
   getNotes().then(d => { notesData = d; emit(); }).catch(() => {});
 }
-function useNotes(): NotesData | null {
+export function useNotes(): NotesData | null {
   const data = useSyncExternalStore(
     useCallback((l: () => void) => { listeners.add(l); return () => { listeners.delete(l); }; }, []),
     () => notesData,
@@ -64,17 +66,20 @@ function songFrom(sound: AttachedSound): StorySong | null {
   };
 }
 
+/** Note bubbles use the kit chip material, so every theme (light ones too) paints them. */
+const BUBBLE_STYLE = { background: 'var(--kit-chip-bg)', boxShadow: 'inset 0 0 0 1px var(--kit-hairline)' } as const;
+
 /** The small speech bubble above an avatar. */
 function NoteBubble({ note, placeholder }: { note: Note | null; placeholder?: string }) {
   if (!note) {
     return (
-      <span data-note-bubble className="flex max-w-[84px] items-center gap-1 truncate rounded-2xl bg-white/[0.08] px-2 py-1 text-[11px] text-zinc-400">
+      <span data-note-bubble style={BUBBLE_STYLE} className="flex max-w-[84px] items-center gap-1 truncate rounded-[10px] px-2 py-1 text-[11px] text-zinc-400">
         <Plus className="h-3 w-3 shrink-0" />{placeholder}
       </span>
     );
   }
   return (
-    <span data-note-bubble className="flex max-w-[84px] flex-col items-center gap-0.5 rounded-2xl bg-white/[0.12] px-2 py-1 text-[11px] leading-tight text-white">
+    <span data-note-bubble style={BUBBLE_STYLE} className="flex max-w-[84px] flex-col items-center gap-0.5 rounded-[10px] px-2 py-1 text-[11px] font-medium leading-tight text-white">
       {note.gifUrl && <img src={note.gifUrl} alt="" className="h-8 w-12 rounded-md object-cover" loading="lazy" />}
       {note.text && <span className="line-clamp-2 break-words text-center">{note.text}</span>}
       {!note.text && note.song && <span className="flex max-w-full items-center gap-0.5 truncate"><Music2 className="h-3 w-3 shrink-0" /><span className="truncate">{note.song.title}</span></span>}
@@ -84,7 +89,7 @@ function NoteBubble({ note, placeholder }: { note: Note | null; placeholder?: st
 }
 
 /** Share of the 24 hours a note has left, 0..1, refreshed every minute. */
-function useNoteLeft(note: Note | null): number {
+export function useNoteLeft(note: Note | null): number {
   const calc = useCallback(() => {
     if (!note) return 0;
     const start = Date.parse(note.postedAt);
@@ -102,24 +107,24 @@ function useNoteLeft(note: Note | null): number {
   return left;
 }
 
-const RING = 64;
-const RING_STROKE = 2.5;
-const RING_R = 14;
-const RING_SIDE = RING - RING_STROKE;
-const RING_LEN = 4 * (RING_SIDE - 2 * RING_R) + 2 * Math.PI * RING_R;
-
-/** Countdown ring: a rounded-square line that drains as the 24 hours run out. */
-function NoteRing({ left }: { left: number }) {
-  const box = { x: RING_STROKE / 2, y: RING_STROKE / 2, width: RING_SIDE, height: RING_SIDE, rx: RING_R, ry: RING_R, fill: 'none', strokeWidth: RING_STROKE };
+/**
+ * Countdown ring: a rounded-square line that drains as the 24 hours run out.
+ * Drawn in currentColor (text-white), so light themes repaint it with the ink.
+ */
+export function NoteRing({ left, size = 64, radius = 14 }: { left: number; size?: number; radius?: number }) {
+  const stroke = 2.5;
+  const side = size - stroke;
+  const len = 4 * (side - 2 * radius) + 2 * Math.PI * radius;
+  const box = { x: stroke / 2, y: stroke / 2, width: side, height: side, rx: radius, ry: radius, fill: 'none', strokeWidth: stroke };
   return (
-    <svg data-note-ring width={RING} height={RING} viewBox={`0 0 ${RING} ${RING}`} className="pointer-events-none absolute inset-0" aria-hidden>
-      <rect {...box} stroke="rgba(255,255,255,0.14)" />
+    <svg data-note-ring width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white" aria-hidden>
+      <rect {...box} stroke="currentColor" strokeOpacity={0.16} />
       <rect
         {...box}
-        stroke="rgba(255,255,255,0.92)"
+        stroke="currentColor"
         strokeLinecap="round"
-        strokeDasharray={`${RING_LEN} ${RING_LEN}`}
-        strokeDashoffset={RING_LEN * (1 - left)}
+        strokeDasharray={`${len} ${len}`}
+        strokeDashoffset={len * (1 - left)}
         style={{ transition: 'stroke-dashoffset 700ms cubic-bezier(.2,.8,.2,1)' }}
       />
     </svg>
@@ -131,17 +136,19 @@ function NoteRing({ left }: { left: number }) {
  * (empty when there are no words), the face inside its countdown ring, and
  * the name. A GIF note shows the GIF in place of the face.
  */
-function NoteTile({ author, note, label, own, onClick }: { author: StoryAuthor; note: Note | null; label: string; own?: boolean; onClick: () => void }) {
+export function NoteTile({ author, note, label, own, onClick, inCard }: { author: StoryAuthor; note: Note | null; label: string; own?: boolean; onClick: () => void; inCard?: boolean }) {
   const { t } = useTranslation();
   const avatar = buildAvatarUrl(author.address, author.avatarImageUrl, 112);
   const left = useNoteLeft(note);
   const gif = note?.gifUrl || null;
   const showBubble = !note || !!note.text || (!gif && (!!note.song || !!note.location));
+  const Root = inCard ? 'span' : 'button';
   return (
-    <button
-      type="button"
+    <Root
+      {...(inCard
+        ? { role: 'button', tabIndex: 0, onClick: (e: React.MouseEvent) => { e.stopPropagation(); onClick(); }, onKeyDown: (e: React.KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); onClick(); } } }
+        : { type: 'button' as const, onClick })}
       data-note-tile={own ? 'own' : ''}
-      onClick={onClick}
       className="relative flex w-[84px] shrink-0 flex-col items-center gap-1 pt-1 text-center"
     >
       <span className="flex h-9 items-end justify-center">
@@ -159,7 +166,7 @@ function NoteTile({ author, note, label, own, onClick }: { author: StoryAuthor; 
         {note && <NoteRing left={left} />}
       </span>
       <span className="w-full truncate text-[11px] text-zinc-400">{label}</span>
-    </button>
+    </Root>
   );
 }
 
@@ -189,7 +196,7 @@ function SongLine({ song, autoPlay, playToken = 0 }: { song: StorySong; autoPlay
     audio.play().then(() => setPlaying(true)).catch(() => {});
   };
   return (
-    <button type="button" data-note-song onClick={toggle} className="flex w-full items-center gap-2.5 rounded-xl bg-white/[0.06] px-3 py-2 text-left">
+    <button type="button" data-note-song onClick={toggle} className="flex w-full items-center gap-2.5 rounded-[12px] border border-white/10 bg-white/[0.06] px-3 py-2 text-left text-white">
       {song.artworkUrl
         ? <img src={song.artworkUrl} alt="" className="h-9 w-9 rounded-md object-cover" />
         : <span className="flex h-9 w-9 items-center justify-center rounded-md bg-white/10"><Music2 className="h-4 w-4" /></span>}
@@ -197,7 +204,7 @@ function SongLine({ song, autoPlay, playToken = 0 }: { song: StorySong; autoPlay
         <span className="block truncate text-[13px] font-medium text-white">{song.title}</span>
         {song.artist && <span className="block truncate text-[12px] text-zinc-400">{song.artist}</span>}
       </span>
-      <span className="text-[12px] text-zinc-400">{playing ? '❚❚' : '▶'}</span>
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-white/[0.08] text-white">{playing ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}</span>
       <audio ref={ref} src={song.audioUrl} preload="none" onEnded={() => setPlaying(false)} />
     </button>
   );
@@ -216,7 +223,8 @@ function NoteCard({ note }: { note: Note }) {
           data-note-text-bubble
           onClick={note.song ? () => setPlayToken(n => n + 1) : undefined}
           disabled={!note.song}
-          className="mx-auto max-w-full break-words rounded-[20px] rounded-bl-md bg-white/10 px-4 py-2.5 text-left text-[16px] font-medium text-white disabled:cursor-default"
+          style={BUBBLE_STYLE}
+          className="mx-auto max-w-full break-words rounded-[16px] rounded-bl-[6px] px-4 py-2.5 text-left text-[16px] font-medium text-white disabled:cursor-default"
         >
           {note.text}
         </button>
@@ -268,7 +276,7 @@ function NoteComposer({ mine, onClose }: { mine: Note | null; onClose: () => voi
             onChange={e => setText(e.target.value.replace(/\n/g, ' '))}
             onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); share(); } }}
             placeholder={t('notes.placeholder', { defaultValue: "Share a thought…" })}
-            className="w-full resize-none rounded-2xl bg-white/[0.08] px-4 py-3 text-center text-[16px] text-white placeholder:text-zinc-500 focus:outline-none"
+            className="w-full resize-none rounded-[12px] border border-white/10 bg-white/[0.06] px-4 py-3 text-center text-[16px] text-white placeholder:text-zinc-500 focus:outline-none"
           />
           <span className="absolute bottom-1.5 right-3 text-[11px] tabular-nums text-zinc-500">{NOTE_TEXT_MAX - text.length}</span>
         </div>
@@ -276,13 +284,13 @@ function NoteComposer({ mine, onClose }: { mine: Note | null; onClose: () => voi
         {gifUrl && (
           <div className="relative mx-auto">
             <img src={gifUrl} alt="" className="max-h-40 rounded-xl object-contain" />
-            <button type="button" aria-label={t('notes.removeGif', { defaultValue: 'Remove GIF' })} onClick={() => setGifUrl(null)} className="absolute right-1 top-1 rounded-full bg-black/60 p-1"><X className="h-3.5 w-3.5" /></button>
+            <button type="button" aria-label={t('notes.removeGif', { defaultValue: 'Remove GIF' })} onClick={() => setGifUrl(null)} data-keep-dark className="absolute right-1 top-1 rounded-[8px] bg-black/60 p-1 text-white"><X className="h-3.5 w-3.5" /></button>
           </div>
         )}
         {song && (
           <div className="flex items-center gap-2">
             <div className="min-w-0 flex-1"><SongLine song={song} /></div>
-            <button type="button" aria-label={t('notes.removeSong', { defaultValue: 'Remove song' })} onClick={() => setSong(null)} className="rounded-full bg-white/[0.06] p-2"><X className="h-4 w-4" /></button>
+            <button type="button" aria-label={t('notes.removeSong', { defaultValue: 'Remove song' })} onClick={() => setSong(null)} className="rounded-[10px] bg-white/[0.06] p-2.5 text-white"><X className="h-4 w-4" /></button>
           </div>
         )}
         {showPlace && (
@@ -310,7 +318,7 @@ function NoteComposer({ mine, onClose }: { mine: Note | null; onClose: () => voi
               if (isNoteGif(url)) setGifUrl(url);
               else toast.error(t('notes.gifHost', { defaultValue: 'Pick a GIF from the GIF tab for notes.' }));
             }}
-            triggerClassName="h-9 rounded-full border border-white/10 bg-white/[0.04] px-3 text-zinc-200"
+            triggerClassName="h-[42px] rounded-[10px] border border-white/10 bg-white/[0.06] px-[1.1rem] text-[14px] font-semibold text-white"
           />
           {!showPlace && (
             <button type="button" data-kit-button="quiet" data-note-add-place onClick={() => setShowPlace(true)}>
@@ -387,9 +395,9 @@ function NoteReply({ note, name, onSend }: { note: Note; name: string; onSend: (
         maxLength={1000}
         placeholder={t('notes.replyTo', { defaultValue: 'Reply to {{name}}…', name })}
         aria-label={t('notes.replyTo', { defaultValue: 'Reply to {{name}}…', name })}
-        className="h-11 min-w-0 flex-1 rounded-full border border-white/10 bg-white/[0.06] px-4 text-[15px] text-white outline-none placeholder:text-zinc-500 focus:border-white/30"
+        className="h-[42px] min-w-0 flex-1 rounded-[10px] border border-white/10 bg-white/[0.06] px-3.5 text-[15px] text-white outline-none placeholder:text-zinc-500 focus:border-white/30"
       />
-      <button type="submit" data-kit-button="primary" disabled={!text.trim()} aria-label={t('notes.send', { defaultValue: 'Send' })} className="!h-11 !w-11 !min-w-0 !rounded-full !p-0 flex items-center justify-center">
+      <button type="submit" data-kit-button="primary" disabled={!text.trim()} aria-label={t('notes.send', { defaultValue: 'Send' })} className="!w-[42px] !min-w-0 !p-0">
         <SendHorizontal className="h-[18px] w-[18px]" />
       </button>
     </form>
@@ -417,6 +425,151 @@ export function NotesStrip() {
   );
 }
 
+// ── Notes in the chat list ───────────────────────────────────────────────
+// A person's note rides in their own chat card; notes from members of a
+// group ride in that group's card (and atop the open group chat). There is no
+// separate strip, so the cards stay one clean stack.
+
+const lower = (a?: string | null) => (a || '').toLowerCase();
+
+/** Notes by author wallet (lower case), from the shared notes store. */
+export function useNotesByAuthor(): Map<string, NoteEntry> {
+  const data = useNotes();
+  const [map, setMap] = useState<Map<string, NoteEntry>>(new Map());
+  useEffect(() => {
+    setMap(new Map((data?.notes ?? []).map(e => [lower(e.author.address), e])));
+  }, [data]);
+  return map;
+}
+
+/**
+ * Which groups each note's author is in, for the groups you can see.
+ * One small query: members of these groups who have a note up.
+ */
+export function useGroupNotes(groupIds: string[], me: string | null): Record<string, NoteEntry[]> {
+  const byAuthor = useNotesByAuthor();
+  const [out, setOut] = useState<Record<string, NoteEntry[]>>({});
+  const key = `${groupIds.slice().sort().join(',')}|${[...byAuthor.keys()].sort().join(',')}`;
+  useEffect(() => {
+    if (!groupIds.length || !byAuthor.size) { setOut({}); return; }
+    let live = true;
+    const authors = [...byAuthor.keys()];
+    const wallets = [...new Set(authors.flatMap(a => [a, ...[...byAuthor.values()].filter(e => lower(e.author.address) === a).map(e => e.author.address)]))];
+    withWalletHeader(
+      supabase.from('community_members').select('community_id, wallet_address').in('community_id', groupIds).in('wallet_address', wallets).eq('status', 'active'),
+      me,
+    ).then(({ data }) => {
+      if (!live || !data) return;
+      const next: Record<string, NoteEntry[]> = {};
+      for (const row of data as { community_id: string; wallet_address: string }[]) {
+        const entry = byAuthor.get(lower(row.wallet_address));
+        if (!entry) continue;
+        const list = (next[row.community_id] ||= []);
+        if (!list.includes(entry)) list.push(entry);
+      }
+      setOut(next);
+    }, () => {});
+    return () => { live = false; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, me]);
+  return out;
+}
+
+/** A span that acts as a button, for use inside a chat card (itself a button). */
+function cardPress(onPress: () => void) {
+  return {
+    role: 'button' as const,
+    tabIndex: 0,
+    onClick: (e: React.MouseEvent) => { e.stopPropagation(); onPress(); },
+    onPointerDown: (e: React.PointerEvent) => e.stopPropagation(),
+    onKeyDown: (e: React.KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); onPress(); } },
+  };
+}
+
+/** What a note says in one line: its words, else its song or place. */
+function noteLine(note: Note): string {
+  return note.text || note.song?.title || note.location || '';
+}
+
+/** The note as a small tag at the start of a chat's preview line. */
+export function NoteTag({ entry }: { entry: NoteEntry }) {
+  const line = noteLine(entry.note);
+  if (!line && !entry.note.gifUrl) return null;
+  return (
+    <span
+      data-note-tag
+      {...cardPress(() => openNotesSheet(entry))}
+      style={BUBBLE_STYLE}
+      className="mr-1.5 inline-flex h-5 max-w-[60%] items-center gap-1 overflow-hidden rounded-[6px] px-1.5 align-[-3px] text-[12px] font-semibold text-white"
+    >
+      {!entry.note.text && entry.note.song && <Music2 className="h-3 w-3 shrink-0" />}
+      {!entry.note.text && !entry.note.song && entry.note.location && <MapPin className="h-3 w-3 shrink-0" />}
+      <span className="truncate">{line || 'GIF'}</span>
+    </span>
+  );
+}
+
+/** The 24h ring around a chat card's face (a 48px rounded square). */
+export function NoteFaceRing({ note }: { note: Note }) {
+  const left = useNoteLeft(note);
+  return <NoteRing left={left} size={58} radius={16} />;
+}
+
+/**
+ * Notes from members of a group, inside its chat card: the newest one or two
+ * as tags, and a Notes button that drops the card down to show them all.
+ */
+export function GroupCardNotes({ notes }: { notes: NoteEntry[] }) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  if (!notes.length) return null;
+  return (
+    <span data-group-notes={open ? 'open' : 'closed'} className="mt-2 flex flex-col gap-2">
+      <span className="flex min-w-0 items-center gap-2">
+        {!open && notes.slice(0, 2).map((e, i) => (
+          <span key={e.note.id} className={`min-w-0 items-center gap-1.5 ${i ? 'hidden sm:inline-flex' : 'inline-flex'}`}>
+            <img src={buildAvatarUrl(e.author.address, e.author.avatarImageUrl, 40)} alt="" className="h-5 w-5 shrink-0 rounded-[6px] object-cover" />
+            <NoteTag entry={e} />
+          </span>
+        ))}
+        {open && <span className="text-[12px] text-zinc-400">{t('notes.inGroup', { defaultValue: 'Notes from this group' })}</span>}
+        <span
+          data-kit-chip
+          data-size="sm"
+          data-active={open ? 'true' : undefined}
+          data-group-notes-toggle
+          aria-expanded={open}
+          {...cardPress(() => setOpen(v => !v))}
+          className="ml-auto"
+        >
+          {open ? t('notes.hide', { defaultValue: 'Hide' }) : t('notes.count', { defaultValue: 'Notes {{count}}', count: notes.length })}
+          <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+        </span>
+      </span>
+      {open && (
+        <span data-group-notes-all className="-ml-1 flex flex-wrap gap-x-1 gap-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
+          {notes.map(e => (
+            <NoteTile key={e.note.id} inCard author={e.author} note={e.note} label={nameOf(e.author)} onClick={() => openNotesSheet(e)} />
+          ))}
+        </span>
+      )}
+    </span>
+  );
+}
+
+/** Notes from the group's members, in a row across the top of the open group chat. */
+export function GroupChatNotesRow({ groupId, me }: { groupId: string; me: string | null }) {
+  const notes = useGroupNotes(groupId ? [groupId] : [], me)[groupId] ?? [];
+  if (!notes.length) return null;
+  return (
+    <div data-group-chat-notes className="flex shrink-0 gap-1 overflow-x-auto border-b border-white/[0.07] px-3 pb-2 pt-1 [scrollbar-width:none]">
+      {notes.map(e => (
+        <NoteTile key={e.note.id} author={e.author} note={e.note} label={nameOf(e.author)} onClick={() => openNotesSheet(e)} />
+      ))}
+    </div>
+  );
+}
+
 export function NotesSheetHost({ onMessage }: { onMessage: (author: StoryAuthor, reply?: string) => void }) {
   const { t } = useTranslation();
   const open = useSheetOpen();
@@ -433,7 +586,7 @@ export function NotesSheetHost({ onMessage }: { onMessage: (author: StoryAuthor,
 
   return (
     <Dialog open={open} onOpenChange={v => { if (!v) close(); }}>
-      <DialogContent data-note-sheet className="max-h-[90dvh] max-w-sm overflow-y-auto border-white/10 bg-zinc-950/95 p-5">
+      <DialogContent data-note-sheet className="max-h-[90dvh] max-w-sm overflow-y-auto border border-white/10 bg-black/60 p-5 text-white shadow-2xl backdrop-blur-[24px]">
         <DialogTitle className="text-center text-[15px]">
           {viewing ? nameOf(viewing.author) : t('notes.title', { defaultValue: 'Notes' })}
         </DialogTitle>

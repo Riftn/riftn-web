@@ -21833,6 +21833,9 @@
   "notes": {
     "add": "Note",
     "yourNote": "Ta note",
+    "count": "Notes {{count}}",
+    "hide": "Masquer",
+    "inGroup": "Notes de ce groupe",
     "shared": "Ta note est visible pendant 24 heures",
     "failed": "Ta note n'a pas été publiée. Réessaie.",
     "placeholder": "Partage une pensée…",

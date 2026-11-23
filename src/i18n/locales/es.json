@@ -21829,6 +21829,9 @@
   "notes": {
     "add": "Nota",
     "yourNote": "Tu nota",
+    "count": "Notas {{count}}",
+    "hide": "Ocultar",
+    "inGroup": "Notas de este grupo",
     "shared": "Tu nota estará visible 24 horas",
     "failed": "Tu nota no se publicó. Inténtalo de nuevo.",
     "placeholder": "Comparte una idea…",

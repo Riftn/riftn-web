@@ -186,7 +186,7 @@ export function MobileHeader({ isOpen, onOpenChange, children }: MobileHeaderPro
                   className="flex h-11 w-11 shrink-0 items-center justify-start rounded-lg hover:opacity-80 transition-opacity"
                   aria-label={_copy("copy.c02651240c87", { defaultValue: "Toggle menu" })}
                 >
-                  <Avatar data-own-avatar className="w-[26px] h-[26px]">
+                  <Avatar data-own-avatar className="w-[30px] h-[30px]">
                     {user.avatarImageUrl && user.address && (
                       <AvatarImage
                         src={buildAvatarUrl(user.address, user.avatarImageUrl)}
