@@ -307,7 +307,7 @@ export function UserFeedbackSurvey() {
                 "flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all",
                 hasAnswer
                   ? "bg-white text-black hover:bg-zinc-200"
-                  : "bg-zinc-800 text-zinc-600 cursor-not-allowed"
+                  : "bg-white text-black opacity-45 cursor-not-allowed"
               )}
             >
               {submitting ? (

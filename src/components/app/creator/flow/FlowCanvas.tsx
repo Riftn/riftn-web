@@ -709,7 +709,7 @@ function FlowCanvasInner({ onOpenLogin, signedIn, onSyncNow }: CanvasProps) {
 
   return (
     <FlowActionsContext.Provider value={actions}>
-      <div ref={wrapperRef} className={cn('cflow relative flex h-full min-h-0 w-full min-w-0 flex-1 flex-col', activeTool === 'hand' && 'canvas-hand-mode', isRubberBand && 'is-rubber-band-selecting')} onMouseMoveCapture={(e) => { mousePosRef.current = { x: e.clientX, y: e.clientY }; }}>
+      <div ref={wrapperRef} data-keep-dark className={cn('cflow relative flex h-full min-h-0 w-full min-w-0 flex-1 flex-col', activeTool === 'hand' && 'canvas-hand-mode', isRubberBand && 'is-rubber-band-selecting')} onMouseMoveCapture={(e) => { mousePosRef.current = { x: e.clientX, y: e.clientY }; }}>
         <ReactFlow
           nodes={computedNodes}
           edges={computedEdges}

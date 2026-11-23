@@ -4,6 +4,7 @@ export const STREAMER_BADGE_IDS = [
   'crowd', 'regular', 'storyteller', 'circle', 'enduring',
   'broadcaster', 'arena', 'iron-streak', 'legend', 'headliner',
   'centurion', 'century', 'cornerstone', 'icon', 'veteran',
+  'millennium',
 ] as const;
 export type StreamerBadgeId = typeof STREAMER_BADGE_IDS[number];
 
@@ -38,6 +39,7 @@ export const badgeMaterial = (theme: string): BadgeMaterial => BADGE_MATERIALS[t
 
 // Emblems share an optical centre and stroke weight across the collection.
 const EMBLEMS: Record<StreamerBadgeId, string> = {
+  millennium: 'M39 47l5 26h32l5-26-13 11-8-20-8 20zM44 81h32M33 48l-5 9 3 14 9 10M87 48l5 9-3 14-9 10',
   'first-light': 'M35 69H85M43 62a17 17 0 0 1 34 0M60 35v8M35 44l6 6M85 44l-6 6M29 60h8M83 60h8',
   ignition: 'M65 32L43 62h15l-3 26 24-35H63z',
   'on-air': 'M60 51v34M48 85h24M47 43a19 19 0 0 0 0 27M73 43a19 19 0 0 1 0 27M38 34a32 32 0 0 0 0 45M82 34a32 32 0 0 1 0 45M57 53h6v6h-6z',

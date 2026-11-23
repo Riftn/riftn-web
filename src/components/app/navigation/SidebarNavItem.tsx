@@ -40,7 +40,7 @@ export const NAV_LABEL_KEYS: Record<string, string> = {
   'Live TV': 'nav.liveTv', 'Buy Tokens': 'nav.buyDhb', Bridge: 'nav.bridge', 'Top 100': 'nav.top100',
   'AI Agents': 'nav.agents', Advertising: 'nav.advertising', Premium: 'nav.premium',
   Pricing: 'nav.pricing', Creators: 'nav.creators', 'Get the App': 'nav.getTheApp',
-  'Connect AI': 'nav.connectAi',
+  'Connect AI': 'nav.connectAi', 'Compare Riftn': 'nav.compareRiftn',
   Packs: 'creatorPacks.title', 'Public Chat': 'publicChat.title', Planned: 'planned.title',
   'Live Studio': 'liveStudio.title', Launchpad: 'nav.launchpad',
   // The bounty history page's own title key.

@@ -4225,7 +4225,7 @@
       "pageViewsTerm": "Lượt xem trang",
       "pageViews": "— các yêu cầu mà Cloudflare xếp là tải trang, không phải hình ảnh, tập lệnh hay lệnh gọi API.",
       "botsTerm": "Bao gồm cả bot",
-      "bots": "— đây là số đếm thô ở biên, nên có cả trình thu thập dữ liệu, bộ giám sát tình trạng hoạt động và ứng dụng chạy tự động. Bạn có thể tự thấy trong phần phân tích trình duyệt phía trên, nơi các mục như \"Curl\" và \"Không rõ\" là lưu lượng tự động chứ không phải con người. Lọc bot cần gói Cloudflare trả phí mà chúng tôi không dùng, và lặng lẽ trừ đi một con số ước tính chỉ khiến các số liệu khó kiểm chứng hơn.",
+      "bots": "— đây là số đếm thô ở biên, nên có cả trình thu thập dữ liệu, bộ giám sát tình trạng hoạt động và ứng dụng chạy tự động. Bạn có thể tự thấy trong phần phân tích trình duyệt phía trên, nơi các mục như \"Curl\" và \"Không rõ\" là lưu lượng tự động chứ không phải con người. Bot ngày càng khó phân biệt với khách truy cập là người thật và chẳng bao lâu nữa sẽ không thể phân biệt họ trong các số liệu này, nên cố lọc bot cũng vô ích.",
       "totalTerm": "Tổng theo khoảng",
       "total": "— lượt xem trang và yêu cầu được cộng dồn theo khoảng thời gian. Số khách truy cập cố tình không được cộng thành \"tổng khách truy cập\", vì người ghé cả thứ Hai và thứ Ba sẽ bị đếm hai lần.",
       "peakTerm": "Giờ / ngày bận nhất",

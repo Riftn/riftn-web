@@ -1093,7 +1093,7 @@ export function CommunityChat({ communityId, community, membership, isMember, me
         {/* Search bar */}
         <div className="px-1 pb-1 flex items-center gap-1">
           {!showSearch && isMember && communityKindOf(community) === 'group' ? (
-            <GroupCallButtons groupId={communityId} groupName={community?.name ?? ''} />
+            <GroupCallButtons groupId={communityId} groupName={community?.name ?? ''} canStart={abilities.isOwner || abilities.isAdmin || abilities.can('start_calls')} />
           ) : null}
           {showSearch ? (
             <div className="flex-1 min-w-0">
@@ -1650,6 +1650,7 @@ export function CommunityChat({ communityId, community, membership, isMember, me
                 query={mention.query}
                 isOpen={mention.isOpen}
                 position={mention.position}
+                armed={mention.armed}
                 selectedIndex={mention.selectedIndex}
                 onSelectedIndexChange={mention.setSelectedIndex}
                 onSelect={mention.handleSelect}

@@ -1,8 +1,9 @@
 import { useTranslation as _useCopy } from 'react-i18next';
 import { Suspense, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { X } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 
-import { Drawer, DrawerContent, DrawerTitle, DrawerDescription } from '@/components/ui/drawer';
+import { Drawer, DrawerClose, DrawerContent, DrawerTitle, DrawerDescription } from '@/components/ui/drawer';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { lazyWithRetry } from '@/lib/lazy-with-retry';
 import { preloadRoute } from '@/lib/route-preload';
@@ -83,17 +84,16 @@ export function NotificationsDrawer() {
   useDrawerPullClose(sheetRef, scrollRef, open, close, DRAWER_PULL);
   return (
     <Drawer open={open} onOpenChange={setOpen} handleOnly animatedExit>
-      {/* Phone only (the bell routes to the page on desktop). A glass sheet
-          with a small grab bar and no close button. It opens full; a pull down
-          on the header (the grab bar area) closes it in one go, with no stop
-          part way, and a small flick does too (useDrawerPullClose). Rows scrolling up under
-          the header blur out behind it (index.css). */}
-      <DrawerContent ref={sheetRef} glass overlayClassName="backdrop-blur-[24px] backdrop-saturate-[1.6]" data-notifications-drawer data-expanded="" className="!mt-0 h-[100dvh] max-h-[100dvh] !border-x-0 !border-b-0 flex flex-col" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+      <DrawerContent ref={sheetRef} glass hideClose overlayClassName="backdrop-blur-[24px] backdrop-saturate-[1.6]" data-notifications-drawer data-notifications-page data-notification-surface data-expanded="" className="!mt-0 h-[100dvh] max-h-[100dvh] !border-x-0 !border-b-0 flex flex-col" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         <DrawerTitle className="sr-only">{_copy("copy.788011833a5a", { defaultValue: "Notifications" })}</DrawerTitle>
         <DrawerDescription className="sr-only">{_copy("copy.efe4bbcc61b3", { defaultValue: "Your notifications" })}</DrawerDescription>
-        {/* Shows the sheet drags down. Over the pill's own top inset, so it
-            takes no room (index.css places it under the status bar when full). */}
-        <div data-bell-handle aria-hidden className="pointer-events-none absolute left-1/2 z-[60] h-1 w-9 -translate-x-1/2 rounded-full" style={{ backgroundColor: 'rgba(161, 161, 170, 0.6)' }} />
+        <div data-drawer-grab className="relative flex h-12 shrink-0 items-center px-4">
+          <span data-bell-handle aria-hidden className="pointer-events-none absolute left-1/2 top-3 h-1 w-9 -translate-x-1/2 rounded-full bg-current opacity-25" />
+          <DrawerClose aria-label={_copy('notifications.drawerClose', { defaultValue: 'Close notifications' })}
+            className="notification-drawer-action absolute right-3 top-1 inline-flex w-11 items-center justify-center rounded-xl">
+            <X className="size-5" aria-hidden />
+          </DrawerClose>
+        </div>
         <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain">
           <ErrorBoundary compact resetKey={String(open)} label={_copy("copy.788011833a5a", { defaultValue: "Notifications" })}>
             <Suspense fallback={<div role="status" className="p-4">{_copy("copy.eae12e0d3bab", { defaultValue: "Loading notifications…" })}</div>}>

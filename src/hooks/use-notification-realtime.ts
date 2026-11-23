@@ -4,7 +4,7 @@ import type { Socket } from 'socket.io-client';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { DEHUB_API_BASE, getAuthToken } from '@/lib/api/dehub';
-import { notificationKeys } from '@/hooks/use-notifications';
+import { MARK_ALL_READ_KEY, notificationKeys } from '@/hooks/use-notifications';
 import { customNotificationKeys } from '@/hooks/use-custom-notifications';
 
 /**
@@ -33,7 +33,12 @@ export function useNotificationRealtime() {
     const refresh = () => {
       clearTimeout(refreshTimer);
       refreshTimer = setTimeout(() => {
-        void queryClient.invalidateQueries({ queryKey: notificationKeys.all });
+        // "Mark all as read" refetches everything itself once its write lands.
+        // Reading before then (the custom-row write sends its own ping) hands
+        // every row back unread and lights the tab counts up again.
+        if (queryClient.isMutating({ mutationKey: MARK_ALL_READ_KEY }) === 0) {
+          void queryClient.invalidateQueries({ queryKey: notificationKeys.all });
+        }
         void queryClient.invalidateQueries({ queryKey: customNotificationKeys.all });
       }, 150);
     };

@@ -17,6 +17,30 @@ import { useAuth } from '@/contexts/AuthContext';
 import { withWalletHeader } from '@/lib/supabase-wallet-client';
 import { useEffect } from 'react';
 import { getAccountInfo } from '@/lib/api/dehub/users';
+import { apiCall } from '@/lib/api/dehub/core';
+
+/**
+ * Drops rows for posts this viewer must not see: mature posts (and posts of
+ * accounts marked mature) unless Show Mature Content is on, the same rule the
+ * home feed and the NFT market use. The backend decides from the signed-in
+ * account; a failed check keeps the rows rather than blanking the market.
+ */
+async function dropHiddenPosts<T extends { token_id: string }>(rows: T[]): Promise<T[]> {
+  const ids = [...new Set(rows.map(r => String(r.token_id)).filter(id => /^\d+$/.test(id)))];
+  if (!ids.length) return rows;
+  try {
+    const hidden = new Set<string>();
+    for (let i = 0; i < ids.length; i += 200) {
+      const res = await apiCall<{ hidden: string[] }>('/api/market/hidden-posts', {
+        params: { tokenIds: ids.slice(i, i + 200).join(',') },
+      });
+      for (const id of res?.hidden ?? []) hidden.add(String(id));
+    }
+    return hidden.size ? rows.filter(r => !hidden.has(String(r.token_id))) : rows;
+  } catch {
+    return rows;
+  }
+}
 
 /** Fractions minted per upload. Every token id is 1000 units, always. */
 export const TOTAL_FRACTIONS = 1000;
@@ -55,7 +79,7 @@ export interface FractionOffer {
   updated_at: string;
 }
 
-export type TradeStatus = 'awaiting_delivery' | 'awaiting_payment' | 'settled' | 'overdue';
+export type TradeStatus = 'awaiting_delivery' | 'awaiting_payment' | 'settled' | 'overdue' | 'declined';
 
 export interface FractionTrade {
   id: string;
@@ -217,6 +241,7 @@ export function useFractionTrades(tokenId: string | undefined) {
         .from('fraction_trades')
         .select('*')
         .eq('token_id', tokenId!)
+        .neq('status', 'declined')
         .order('created_at', { ascending: false })
         .limit(50);
       if (error) throw error;
@@ -275,9 +300,9 @@ export function useMarketListings(sort: MarketSort = 'newest', search = '') {
       // A listing whose whole quantity is reserved is still `active` until the
       // reservation lands, so drop it here rather than showing a card that
       // quotes "0 available".
-      return ((data || []) as FractionListing[]).filter(
+      return dropHiddenPosts(((data || []) as FractionListing[]).filter(
         l => l.quantity - l.filled_quantity > 0,
-      );
+      ));
     },
     // Sort/search changes keep the previous grid visible instead of flashing
     // skeletons, matching the stores browse grid.
@@ -304,10 +329,11 @@ export function useRecentTrades(limit = 30) {
       const { data, error } = await supabase
         .from('fraction_trades')
         .select('*')
+        .neq('status', 'declined')
         .order('created_at', { ascending: false })
         .limit(limit);
       if (error) throw error;
-      return (data || []) as FractionTrade[];
+      return dropHiddenPosts((data || []) as FractionTrade[]);
     },
     staleTime: 30_000,
   });

@@ -8,13 +8,12 @@
  * signed-in viewer of a stream that is on air; the creator manages theirs in
  * Live Studio.
  */
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { getMyStreamPoints, getStreamRewards, compactPoints } from '@/lib/api/dehub/live-rewards';
-import { watchLiveRoomEvents } from '@/lib/api/dehub/stream-presence';
 import { PointsIcon } from './PointsIcon';
 import { RewardsSheet } from './RewardsSheet';
 
@@ -27,7 +26,6 @@ interface Props {
 
 export function PointsButton({ streamId, variant, className }: Props) {
   const { t, i18n } = useTranslation();
-  const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const { isAuthenticated, walletAddress } = useAuth();
   const enabled = !!streamId && isAuthenticated;
@@ -47,15 +45,6 @@ export function PointsButton({ streamId, variant, className }: Props) {
     enabled,
     staleTime: 60_000,
   });
-
-  // The creator edits their rewards mid-stream: refetch rather than offer a stale one.
-  useEffect(() => {
-    if (!streamId) return;
-    const room = watchLiveRoomEvents(streamId, (event) => {
-      if (event.type === 'rewardsUpdated') void qc.invalidateQueries({ queryKey: ['live-rewards', streamId] });
-    });
-    return () => room.leave();
-  }, [streamId, qc]);
 
   const data = balance.data;
   // Nothing to show on your own stream, or on one that is not on air.
@@ -105,6 +94,7 @@ export function PointsButton({ streamId, variant, className }: Props) {
         balance={data}
         rewards={rewards.data?.rewards ?? []}
         loadingRewards={rewards.isLoading}
+        giving={rewards.data?.giving}
       />
     </>
   );

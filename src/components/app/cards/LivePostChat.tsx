@@ -1,6 +1,7 @@
 import { outsideImage } from '@/lib/outside-image';
 import { FullscreenImageViewerLazy } from '@/components/app/cards/FullscreenImageViewerLazy';
 import { useTranslation as _useCopy } from 'react-i18next';
+import { formatCount } from '@/lib/format-count';
 import { InPlaceEditField, editOnClick } from '@/components/app/chat/InPlaceEdit';
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
 /**
@@ -14,9 +15,11 @@ import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } fr
 import { createPortal } from 'react-dom';
 import { cn } from '@/lib/utils';
 import { BadgeIcon } from '@/components/app/BadgeIcon';
-import { Loader2, RotateCcw, Pin, CornerDownRight, SmilePlus } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { MoreReactionsButton } from "@/components/app/chat/MoreReactionsButton";
+import { Loader2, RotateCcw, Pin, CornerDownRight } from "lucide-react";
+import { MessageMenu, type MessageMenuAction } from '@/components/app/chat/MessageMenu';
+import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreButton, copyMediaWithToast } from '@/components/app/chat/message-menu-kit';
+import { ReactionGlyph, RollingCount, useReactionHost } from '@/components/app/chat/ReactionArrival';
+import { copyableMediaUrl } from '@/lib/copy-media';
 import { ChatReactorsDrawer } from '@/components/app/chat/ChatReactorsDrawer';
 import Eye from "@/components/ui/cut-icons/visibility";
 import Languages from "@/components/ui/cut-icons/language";
@@ -38,7 +41,11 @@ import { useMention } from '@/hooks/use-mention';
 import { useDraft } from '@/hooks/use-draft';
 import { useLiveViewerActions } from '@/components/app/live/live-viewer-actions';
 import { PointsIcon } from '@/components/app/live/points/PointsIcon';
+import { GivePointsSheet, type GiveTarget } from '@/components/app/live/points/GivePointsSheet';
+import { useQuery as useGivingQuery } from '@tanstack/react-query';
+import { getStreamRewards } from '@/lib/api/dehub/live-rewards';
 import { PointsButton } from '@/components/app/live/points/PointsButton';
+import { StreamChatRewards } from '@/components/app/live/points/StreamChatRewards';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { replaceLinksWithEmoji, renderTextWithLinks } from '@/components/app/TranslatableText';
 import { DehubLinkEmbeds, useDehubLinks } from '@/components/app/cards/DehubLinkEmbedsLazy';
@@ -293,6 +300,8 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
           ? t('liveHype.chat.giftedSubs', { count: moment.giftCount ?? 1 })
           : moment.type === 'reward'
             ? t('livePoints.chatRedeemed', { title: moment.rewardTitle || '' }) + (moment.message ? `: ${moment.message}` : '')
+          : moment.type === 'pointsGift'
+            ? t('livePoints.give.chatLine', { amount: formatCount(moment.pointsAmount ?? 0), name: moment.recipientName || '' })
           : t('live.chatJoined'),
       message_type: 'system', image_url: null, is_pinned: false, created_at: moment.timestamp,
     })),
@@ -304,6 +313,21 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
   // the host's own overlay. Null when the caller has no stream ObjectId to
   // resolve, and then nothing is drawn: no number beats a wrong one.
   const watching = useStreamAudience(liveStreamId, !isOffline);
+  // Channel points giving: when the creator has it on, a viewer's name in the
+  // chat is a button that opens the give sheet with that person filled in.
+  const givingInfo = useGivingQuery({
+    queryKey: ['live-rewards', liveStreamId],
+    queryFn: () => getStreamRewards(liveStreamId!),
+    enabled: !!liveStreamId && !isOffline && isAuthenticated,
+    staleTime: 60_000,
+  });
+  const giving = givingInfo.data?.live && givingInfo.data.giving?.enabled ? givingInfo.data.giving : null;
+  const givingCreator = givingInfo.data?.creator?.toLowerCase() || '';
+  const [giveTarget, setGiveTarget] = useState<GiveTarget | null>(null);
+  const canGiveTo = (address?: string | null) => {
+    const a = (address || '').toLowerCase();
+    return !!giving && !isHost && !!a && a !== (walletAddress || '').toLowerCase() && a !== givingCreator;
+  };
   const showInlinePoints = overlay && !isHost && !isOffline && isAuthenticated && !!liveStreamId && newMessage.trim().length === 0;
   // Lines already in the chat when it loaded sit still; anything after glides
   // in, and your own line or gift lands with its text softly glowing (no ring).
@@ -338,7 +362,12 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
     if (bottomRef.current) {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+          // Only the message list moves. scrollIntoView also scrolls every
+          // box around the chat, clipped ones included: in the Shorts viewer
+          // that slid the whole player up by most of a screen, and on the
+          // live page it dragged the page down to the chat.
+          const list = messagesContainerRef.current;
+          list?.scrollTo({ top: list.scrollHeight, behavior: 'smooth' });
         });
       });
     }
@@ -373,8 +402,11 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
 
   const scrollToMessage = useCallback((messageId: string) => {
     const el = messageRefs.current.get(messageId);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const list = messagesContainerRef.current;
+    if (el && list) {
+      // Centre the line inside the list without moving anything around it.
+      const offset = el.getBoundingClientRect().top - list.getBoundingClientRect().top;
+      list.scrollTo({ top: list.scrollTop + offset - (list.clientHeight - el.offsetHeight) / 2, behavior: 'smooth' });
       el.classList.add('bg-white/10');
       setTimeout(() => el.classList.remove('bg-white/10'), 1200);
     }
@@ -465,6 +497,9 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
   // another language, so for everyone else holding did nothing at all.
   const [held, setHeld] = useState<{ msg: SupabaseLiveChatMessage; el: HTMLElement } | null>(null);
   heldRef.current = !!held;
+  // Right-click (or the "..." on hover) on a computer.
+  const menuPoint = useMenuPoint();
+  const [menuMsg, setMenuMsg] = useState<SupabaseLiveChatMessage | null>(null);
   const [replyTo, setReplyTo] = useState<SupabaseLiveChatMessage | null>(null);
   useEffect(() => { setReplyTo(null); }, [streamId]);
   const messageHold = useHoldMenu((point, target) => {
@@ -477,9 +512,13 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
       setHeld({ msg, el: row });
       return;
     }
-    if (!canModerate && !isMine(msg) && !translateHandles.current.has(msg.id) && !canLinkMessage(msg.id)) return false;
-    setContextMenuPos(point);
-    setContextMenuMsg(msg);
+    // A computer: the same message menu as Public Chat. Links and selected
+    // text keep the browser's own menu.
+    if (msg.client_key && msg.send_state === 'failed') return false;
+    if (row && keepBrowserMenu(target, row)) return false;
+    setContextMenuMsg(null);
+    setMenuMsg(msg);
+    menuPoint.openAt(point);
   });
 
   const handleVoiceRecordingComplete = useCallback(async (blob: Blob, _duration: number) => {
@@ -539,10 +578,6 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
     }
   };
 
-  // Desktop: Reply and React sit on the line on hover, as in the public chat.
-  // A mouse has no hold, and right-click only opened for the host, your own
-  // lines or another language, so everyone else could not reply or react.
-  const [reactFor, setReactFor] = useState<string | null>(null);
   // Your own line whose "who reacted" list is open.
   const [reactorsFor, setReactorsFor] = useState<string | null>(null);
   const canReply = isAuthenticated && !isOffline && !bannedHere && !muted;
@@ -591,8 +626,8 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
         }, 0);
       },
     });
-    if (isMine(heldMsg)) holdActions.push({
-      key: 'delete', destructive: true, icon: <Trash2 />, label: _copy('copy.e2d0a54968ea', { defaultValue: 'Delete' }), onSelect: () => handleDeleteMessage(heldMsg),
+    if (isMine(heldMsg) || canModerate) holdActions.push({
+      key: 'delete', destructive: true, secondary: true, icon: <Trash2 />, label: _copy('copy.e2d0a54968ea', { defaultValue: 'Delete' }), onSelect: () => handleDeleteMessage(heldMsg),
     });
   }
   const viewer = walletAddress?.toLowerCase();
@@ -606,6 +641,59 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
     if (reactedBy(msg).includes(emoji)) removeReaction(msg.id, emoji);
     else addReaction(msg.id, emoji);
   };
+
+  // The right-click menu: quick reactions, who reacted, then the actions,
+  // in the same order as Public Chat's.
+  const menuActions: MessageMenuAction[] = [];
+  if (menuMsg) {
+    const textLine = !menuMsg.message_type || menuMsg.message_type === 'text';
+    const mineLine = isMine(menuMsg);
+    const menuTranslate = translateHandles.current.get(menuMsg.id);
+    if (canReply) menuActions.push({ key: 'reply', icon: menuIcons.reply, label: _copy('copy.c253f451bdd5', { defaultValue: 'Reply' }), hint: 'R', onSelect: () => { setReplyTo(menuMsg); textareaRef.current?.focus(); } });
+    if (mineLine && textLine && !menuMsg.send_state) menuActions.push({ key: 'edit', icon: menuIcons.edit, label: _copy('copy.464c4ffd019e', { defaultValue: 'Edit' }), hint: 'E', onSelect: () => startEditing(menuMsg) });
+    if (isHost) menuActions.push({
+      key: 'pin', hint: 'P',
+      icon: menuMsg.id === pinnedMessageId ? menuIcons.unpin : menuIcons.pin,
+      label: menuMsg.id === pinnedMessageId ? _copy('copy.ee3c71613054', { defaultValue: 'Unpin' }) : _copy('chatHold.pin', { defaultValue: 'Pin' }),
+      onSelect: () => { if (menuMsg.id === pinnedMessageId) void handleUnpinMessage(); else void handlePinMessage(menuMsg); },
+    });
+    if (textLine && menuMsg.content?.trim()) menuActions.push({
+      key: 'copy', icon: menuIcons.copy, label: _copy('msgMenu.copyText', { defaultValue: 'Copy Text' }), hint: 'C',
+      onSelect: () => { void navigator.clipboard?.writeText(menuMsg.content).then(() => toast.success(_copy('chatHold.copied', { defaultValue: 'Copied' })), () => undefined); },
+    });
+    if (canLinkMessage(menuMsg.id)) menuActions.push({ key: 'copy-link', icon: menuIcons.link, label: copyLinkLabel(), hint: 'L', onSelect: () => copyChatMessageLink({ kind: 'stream', tokenId }, menuMsg.id) });
+    const menuMedia = menuMsg.message_type === 'image' && menuMsg.image_url ? copyableMediaUrl(getMediaUrl(menuMsg.image_url) || menuMsg.image_url)
+      : menuMsg.message_type === 'gif' && (menuMsg.image_url || menuMsg.content) ? copyableMediaUrl(outsideImage(menuMsg.image_url || menuMsg.content)) : null;
+    if (menuMedia) menuActions.push({ key: 'copy-media', icon: menuIcons.copyMedia, label: _copy('msgMenu.copyMedia', { defaultValue: 'Copy Media' }), onSelect: () => copyMediaWithToast(menuMedia, menuMsg.message_type === 'gif' ? 'gif' : 'image', _copy) });
+    if (menuTranslate) menuActions.push(menuTranslate.isTranslated
+      ? { key: 'original', icon: menuIcons.translate, label: _copy('chatHold.showOriginal', { defaultValue: 'Original' }), onSelect: () => menuTranslate.toggle() }
+      : { key: 'translate', icon: menuIcons.translate, label: _copy('chatHold.translate', { defaultValue: 'Translate' }), hint: 'T', onSelect: () => menuTranslate.toggle() });
+    if (canModerate && !mineLine && menuMsg.sender_address) menuActions.push({
+      key: 'moderate', icon: menuIcons.ban, label: t('liveChatModeration.title', 'Moderate'),
+      // Timeouts, ban and make moderator: the moderation list, where the menu was.
+      onSelect: () => {
+        const at = menuPoint.point;
+        const msg = menuMsg;
+        window.setTimeout(() => {
+          setContextMenuPos(at ?? { x: window.innerWidth / 2, y: window.innerHeight / 2 });
+          setContextMenuMsg(msg);
+        }, 0);
+      },
+    });
+    if (mineLine || canModerate) menuActions.push({ key: 'delete', divided: true, destructive: true, icon: menuIcons.delete, label: _copy('copy.e2d0a54968ea', { defaultValue: 'Delete' }), onSelect: () => handleDeleteMessage(menuMsg) });
+  }
+  const lineMenu = menuPoint.mounted && menuMsg ? (
+    <MessageMenu
+      point={menuPoint.point}
+      onClose={menuPoint.close}
+      quickReactions={isAuthenticated ? QUICK_CHAT_REACTIONS : null}
+      mine={reactedBy(menuMsg)}
+      onReact={(emoji) => toggleReaction(menuMsg, emoji)}
+      actions={menuActions}
+      reactors={menuMsg.reactions ? { reactions: menuMsg.reactions, remoteMessageId: menuMsg.id } : null}
+      meta={messageMenuMeta(menuMsg.created_at, menuMsg.is_edited)}
+    />
+  ) : null;
 
   return (
     <div
@@ -657,6 +745,7 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
       {pinnedMessage && (
         <button
           onClick={() => scrollToMessage(pinnedMessage.id)}
+          data-keep-dark={overlay ? '' : undefined}
           className={cn(
             'w-full flex items-center gap-2 mb-2 px-3 py-2 border-l-2 border-blue-400 text-left transition-colors group',
             overlay
@@ -688,6 +777,9 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
         ref={messagesContainerRef}
         // Scrolling the messages is not a swipe to the next short.
         data-shorts-scrollable
+        // Over the picture the lines stay white with their shadow in every
+        // theme; System Light turned them dark ink on the video.
+        data-keep-dark={overlay ? '' : undefined}
         {...messageHold}
         className={cn(
           'chat-text-zone overflow-y-auto overscroll-contain scrollbar-hide',
@@ -720,12 +812,17 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
                       <>
                         <span className="text-zinc-400 ml-1.5">
                           {t('live.chatSentGift')}
-                          <DhbAmount amount={moment.giftAmount} currency={moment.giftCurrency} iconClassName="h-3 w-3" />
+                          <DhbAmount amount={moment.giftAmount} currency={moment.giftCurrency} iconClassName="h-3 w-3" className="ml-1" />
                         </span>
                         {msg.content && (
                           <p className="chat-body text-zinc-300 break-words whitespace-pre-wrap mt-0.5"><InlineEmoji value={msg.content} /></p>
                         )}
                       </>
+                    ) : moment?.type === 'pointsGift' ? (
+                      <span className="text-zinc-400 ml-1.5 inline-flex items-center gap-1 align-middle" data-points-gift-line>
+                        <PointsIcon className="h-3 w-3" />
+                        {msg.content}
+                      </span>
                     ) : moment?.type === 'reward' ? (
                       <>
                         <span className="text-zinc-400 ml-1.5 inline-flex items-center gap-1 align-middle">
@@ -776,9 +873,21 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
                     )}
                     <div className="flex items-baseline gap-1.5">
                       <span className="relative inline-flex items-baseline gap-1 shrink min-w-0 pr-3">
-                        <span className="text-xs font-semibold text-white truncate max-w-[120px]">
-                          {displayName}
-                        </span>
+                        {canGiveTo(msg.sender_address) ? (
+                          <button
+                            type="button"
+                            data-give-points-name
+                            onClick={() => setGiveTarget({ to: msg.sender_username || msg.sender_address, name: displayName })}
+                            title={t('livePoints.give.titleTo', { name: displayName })}
+                            className="text-xs font-semibold text-white truncate max-w-[120px] hover:underline"
+                          >
+                            {displayName}
+                          </button>
+                        ) : (
+                          <span className="text-xs font-semibold text-white truncate max-w-[120px]">
+                            {displayName}
+                          </span>
+                        )}
                         <LiveChatBadge badgeBalance={msg.sender_badge_balance} badgeLock={msg.sender_badge_lock} username={msg.sender_username} />
                         <CreatorBadges badges={msg.sender_creator_badges} />
                       </span>
@@ -819,110 +928,20 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
                         />
                       )}
                     </span>
-                    {msg.reactions && Object.values(msg.reactions).some((a) => a?.length) && (
-                      <div className="mt-1 flex flex-wrap gap-1">
-                        {Object.entries(msg.reactions).filter(([, a]) => a?.length).map(([emoji, addrs]) => {
-                          const mine = !!viewer && addrs.some((a) => a.toLowerCase() === viewer);
-                          return (
-                            <button
-                              key={emoji}
-                              type="button"
-                              data-chat-reaction-chip
-                              onClick={() => (isMine(msg) ? setReactorsFor(msg.id) : toggleReaction(msg, emoji))}
-                              className={cn(
-                                'inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] leading-none text-white',
-                                mine ? 'bg-sky-400/25 ring-1 ring-sky-400/60' : 'bg-black/30 ring-1 ring-white/10',
-                              )}
-                            >
-                              <span>{emoji}</span>
-                              {addrs.length > 1 && <span className="tabular-nums">{addrs.length}</span>}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
+                    <StreamReactionChips
+                      messageId={msg.id}
+                      reactions={msg.reactions}
+                      viewer={viewer}
+                      onChip={(emoji) => (isMine(msg) ? setReactorsFor(msg.id) : toggleReaction(msg, emoji))}
+                      overVideo={overlay}
+                    />
                   </div>
-                  {/* Reply and React on hover (desktop; a phone holds the line instead) */}
-                  {editingId !== msg.id && isAuthenticated && (
-                    <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 has-[[data-state=open]]:opacity-100 [@media(pointer:coarse)]:hidden">
-                      {canReply && (
-                        <button
-                          type="button"
-                          onClick={() => { setReplyTo(msg); textareaRef.current?.focus(); }}
-                          className="mt-0.5 text-zinc-500 transition-colors hover:text-white"
-                          title={_copy('copy.c253f451bdd5', { defaultValue: 'Reply' })}
-                          aria-label={_copy('copy.c253f451bdd5', { defaultValue: 'Reply' })}
-                        >
-                          <Reply className="h-3.5 w-3.5" />
-                        </button>
-                      )}
-                      <Popover open={reactFor === msg.id} onOpenChange={(open) => setReactFor(open ? msg.id : null)}>
-                        <PopoverTrigger asChild>
-                          <button
-                            type="button"
-                            className="mt-0.5 text-zinc-500 transition-colors hover:text-white"
-                            title={_copy('copy.01fad993ff61', { defaultValue: 'React' })}
-                            aria-label={_copy('copy.01fad993ff61', { defaultValue: 'React' })}
-                          >
-                            <SmilePlus className="h-3.5 w-3.5" />
-                          </button>
-                        </PopoverTrigger>
-                        <PopoverContent side="top" align="end" className="w-auto rounded-xl border-zinc-700 bg-zinc-800 p-1.5">
-                          <div className="flex gap-0.5">
-                            {QUICK_CHAT_REACTIONS.map((emoji) => (
-                              <button
-                                key={emoji}
-                                type="button"
-                                onClick={() => { toggleReaction(msg, emoji); setReactFor(null); }}
-                                className={cn(
-                                  'flex h-8 w-8 items-center justify-center rounded-lg text-lg transition-colors',
-                                  reactedBy(msg).includes(emoji) ? 'bg-white/15 ring-1 ring-white/30' : 'hover:bg-zinc-700',
-                                )}
-                              >
-                                {emoji}
-                              </button>
-                            ))}
-                            <MoreReactionsButton
-                              onPick={(emoji) => { toggleReaction(msg, emoji); setReactFor(null); }}
-                              reactions={msg.reactions}
-                              viewerAddress={viewer}
-                            />
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                  )}
-                  {/* Your own line — edit and remove, on hover like the host's pin */}
-                  {isMine(msg) && editingId !== msg.id && (
-                    <>
-                      {(!msg.message_type || msg.message_type === 'text') && (
-                        <button
-                          onClick={() => startEditing(msg)}
-                          className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-zinc-500 hover:text-white mt-0.5"
-                          title={_copy("copy.9757ccd5ef12", { defaultValue: "Edit message" })}
-                        >
-                          <Pencil className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                      <button
-                        onClick={() => handleDeleteMessage(msg)}
-                        className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-zinc-500 hover:text-red-400 mt-0.5"
-                        title={_copy("copy.87e7176a7ce7", { defaultValue: "Delete message" })}
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </>
-                  )}
-                  {/* Pin button on hover (host only) */}
-                  {isHost && (
-                    <button
-                      onClick={() => isPinned ? handleUnpinMessage() : handlePinMessage(msg)}
-                      disabled={isPinning}
-                      className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-zinc-500 hover:text-blue-400 mt-0.5"
-                      title={isPinned ? _copy("copy.ee3c71613054", { defaultValue: "Unpin" }) : _copy("copy.b936d7787033", { defaultValue: "Pin message" })}
-                    >
-                      <Pin className={`w-3.5 h-3.5 ${isPinned ? 'fill-current text-blue-400' : ''}`} />
-                    </button>
+                  {/* One "..." on hover: every action lives in the message menu, as in Public Chat. */}
+                  {editingId !== msg.id && !(msg.client_key && msg.send_state === 'failed') && (
+                    <MessageMoreButton
+                      className="mt-0.5"
+                      onOpen={(point) => { setContextMenuMsg(null); setMenuMsg(msg); menuPoint.openAt(point); }}
+                    />
                   )}
                 </div>
               </div>
@@ -932,11 +951,15 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
         <div ref={bottomRef} />
       </div>
 
-      {/* Right-click context menu for host */}
-      {/* Portalled: the chat often sits inside a blurred or transformed
-          panel, which turns `fixed` into "fixed to that panel" and threw the
-          menu off screen. */}
-      {contextMenuMsg && (canModerate || isMine(contextMenuMsg) || translateHandles.current.has(contextMenuMsg.id) || canLinkMessage(contextMenuMsg.id)) && createPortal(
+      {!!liveStreamId && !isOffline && <StreamChatRewards streamId={liveStreamId} />}
+
+      {lineMenu}
+
+      {/* Moderate: timeouts, ban and make moderator, opened from the message
+          menu or the hold sheet. Portalled: the chat often sits inside a
+          blurred or transformed panel, which turns `fixed` into "fixed to
+          that panel" and threw the menu off screen. */}
+      {contextMenuMsg && canModerate && !isMine(contextMenuMsg) && contextMenuMsg.message_type !== 'system' && contextMenuMsg.sender_address && createPortal(
         <div
           ref={contextMenuRef}
           data-glass-menu
@@ -944,53 +967,7 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
           style={{ top: contextMenuPlace?.top ?? contextMenuPos.y, left: contextMenuPlace?.left ?? contextMenuPos.x, visibility: contextMenuPlace ? undefined : 'hidden' }}
           onClick={(e) => e.stopPropagation()}
         >
-          {canLinkMessage(contextMenuMsg.id) && (
-            <button
-              onClick={() => { setContextMenuMsg(null); copyChatMessageLink({ kind: 'stream', tokenId }, contextMenuMsg.id); }}
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-white hover:bg-white/10 transition-colors"
-            >
-              <Link2 className="w-3.5 h-3.5" />{copyLinkLabel()}
-            </button>
-          )}
-          {(() => {
-            const translate = translateHandles.current.get(contextMenuMsg.id);
-            return translate && (
-              <button
-                onClick={() => { setContextMenuMsg(null); translate.toggle(); }}
-                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-white hover:bg-white/10 transition-colors"
-              >
-                {translate.isTranslated ? <RotateCcw className="w-3.5 h-3.5" /> : <Languages className="w-3.5 h-3.5" />}
-                {translate.isTranslated ? t('common.showOriginal') : t('comments.translate')}
-              </button>
-            );
-          })()}
-          {isHost && (
-            <button
-              onClick={() => contextMenuMsg.id === pinnedMessageId ? handleUnpinMessage() : handlePinMessage(contextMenuMsg)}
-              disabled={isPinning}
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-white hover:bg-white/10 transition-colors"
-            >
-              <Pin className="w-3.5 h-3.5" />
-              {contextMenuMsg.id === pinnedMessageId ? _copy("copy.be8d20ff25bd", { defaultValue: "Unpin message" }) : _copy("copy.b936d7787033", { defaultValue: "Pin message" })}
-            </button>
-          )}
-          {isMine(contextMenuMsg) && (!contextMenuMsg.message_type || contextMenuMsg.message_type === 'text') && (
-            <button
-              onClick={() => startEditing(contextMenuMsg)}
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-white hover:bg-white/10 transition-colors"
-            >
-              <Pencil className="w-3.5 h-3.5" />{_copy("copy.9757ccd5ef12", { defaultValue: "Edit message" })}</button>
-          )}
-          {isMine(contextMenuMsg) && (
-            <button
-              onClick={() => handleDeleteMessage(contextMenuMsg)}
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-400 hover:bg-white/10 transition-colors"
-            >
-              <Trash2 className="w-3.5 h-3.5" />{_copy("copy.87e7176a7ce7", { defaultValue: "Delete message" })}</button>
-          )}
-          {canModerate && !isMine(contextMenuMsg) && contextMenuMsg.message_type !== 'system' && contextMenuMsg.sender_address && (
-            <>
-              <div className="my-1 border-t border-white/10" />
+          <>
               {TIMEOUTS.map(({ seconds, key }) => (
                 <button
                   key={key}
@@ -1014,8 +991,7 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
                   <ShieldCheck className="w-3.5 h-3.5" />{t('liveChatModeration.makeModerator')}
                 </button>
               )}
-            </>
-          )}
+          </>
         </div>,
         document.body,
       )}
@@ -1036,10 +1012,13 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
         mine={heldMsg ? reactedBy(heldMsg) : []}
         onReact={(emoji) => { if (heldMsg) toggleReaction(heldMsg, emoji); }}
         actions={holdActions}
+        scrollActions
+        reactors={heldMsg?.reactions ? { reactions: heldMsg.reactions, remoteMessageId: heldMsg.id } : null}
+        meta={heldMsg ? messageMenuMeta(heldMsg.created_at, heldMsg.is_edited) ?? undefined : undefined}
       />
 
       {replyTo && (
-        <div className={cn('mb-2 flex items-center gap-1.5 rounded-xl px-2.5 py-1.5', overlay ? 'bg-black/45 backdrop-blur-md' : 'bg-white/[0.06]')}>
+        <div data-keep-dark={overlay ? '' : undefined} className={cn('mb-2 flex items-center gap-1.5 rounded-xl px-2.5 py-1.5', overlay ? 'bg-black/45 backdrop-blur-md' : 'bg-white/[0.06]')}>
           <Reply className="h-3.5 w-3.5 shrink-0 text-white" />
           <div className="min-w-0 flex-1 text-[11px] leading-tight">
             <span className="font-semibold text-white">{replyTo.sender_display_name || replyTo.sender_username || replyTo.sender_address.slice(0, 8)}</span>
@@ -1100,6 +1079,7 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
             query={mention.query}
             isOpen={mention.isOpen}
             position={mention.position}
+            armed={mention.armed}
             selectedIndex={mention.selectedIndex}
             onSelectedIndexChange={mention.setSelectedIndex}
             onSelect={mention.handleSelect}
@@ -1151,6 +1131,56 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
         onClose={() => setViewingImage(null)}
         downloadable
       />
+      {giving && liveStreamId && (
+        <GivePointsSheet
+          open={!!giveTarget}
+          onOpenChange={(open) => { if (!open) setGiveTarget(null); }}
+          streamId={liveStreamId}
+          dailyCap={giving.dailyCap}
+          target={giveTarget}
+        />
+      )}
+    </div>
+  );
+}
+
+/**
+ * A line's reactions, played in as they land (Fly, Pop or Burst from
+ * Settings), the same moving emoji and rolling count as Public Chat.
+ */
+function StreamReactionChips({ messageId, reactions, viewer, onChip, overVideo }: {
+  messageId: string;
+  /** Drawn over the picture: chips keep their dark glass and white count in every theme. */
+  overVideo?: boolean;
+  reactions?: Record<string, string[]>;
+  viewer?: string;
+  onChip: (emoji: string) => void;
+}) {
+  useReactionHost(messageId);
+  const entries = Object.entries(reactions ?? {}).filter(([, a]) => a?.length);
+  if (!entries.length) return null;
+  return (
+    <div className="mt-1 flex flex-wrap gap-1">
+      {entries.map(([emoji, addrs]) => {
+        const mine = !!viewer && addrs.some((a) => a.toLowerCase() === viewer);
+        return (
+          <button
+            key={emoji}
+            type="button"
+            data-chat-reaction-chip
+            data-keep-dark={overVideo ? '' : undefined}
+            onClick={() => onChip(emoji)}
+            className={cn(
+              'inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] leading-none text-white',
+              // bg-black/20: light tone keeps the count dark (bg-black/30 up is read as a photo overlay there and forced white).
+              mine ? 'bg-sky-400/25 ring-1 ring-sky-400/60' : 'bg-black/20 ring-1 ring-white/10',
+            )}
+          >
+            <ReactionGlyph messageId={messageId} emoji={emoji} addresses={addrs} me={viewer} className="h-3.5 m-0" />
+            {addrs.length > 1 && <RollingCount value={addrs.length} className="tabular-nums" />}
+          </button>
+        );
+      })}
     </div>
   );
 }

@@ -25,6 +25,8 @@ import { ChatMessage, Message } from './ChatMessage';
 import { TranslatableText, SharedTranslationContext } from '../TranslatableText';
 import { ChatInput, type ChatInputSendArgs } from './ChatInput';
 import { CreateTopicRoomModal } from './CreateTopicRoomModal';
+import { usePublicChatDelete } from './PublicChatDeleteDialog';
+import { useHiddenLines } from '@/lib/public-chat-hidden';
 import { RoomSettingsModal } from './RoomSettingsModal';
 import { useLiveChatRooms, useLiveChatMessages, useLiveChatRoomDetails, useLiveChatPresence, type SupabaseLiveChatMessage } from '@/hooks/use-livechat';
 import { getMediaUrl, banLiveChatUser, unbanLiveChatUser, uploadChatImage, uploadLiveChatVoice, pinLiveChatMessage, unpinLiveChatMessage, type LiveChatRoom } from '@/lib/api/dehub';
@@ -244,6 +246,9 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
   useAssistantReplyEngine(apiMessages);
   const localAssistantReplies = useAssistantReplies();
 
+  // Lines you deleted for yourself only (lib/public-chat-hidden).
+  const hiddenLines = useHiddenLines(walletAddress);
+
   // The room's lines with buy alerts and local assistant replies folded in
   const filteredMessages = useMemo(() => {
     // Buy alerts sit beside the history that is loaded, never further back:
@@ -275,10 +280,10 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
       replyTo: r.replyToName ? { id: '', content: '', senderName: r.replyToName } : undefined,
     }));
 
-    return [...messages, ...buyAlertMessages, ...(hasNewer ? [] : localAssistantMessages)].sort(
-      (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
-    );
-  }, [messages, buyAlerts, localAssistantReplies, hasNewer]);
+    return [...messages, ...buyAlertMessages, ...(hasNewer ? [] : localAssistantMessages)]
+      .filter((m) => !hiddenLines.has(m.id))
+      .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+  }, [messages, buyAlerts, localAssistantReplies, hasNewer, hiddenLines]);
 
   // ─── Where you left off ───────────────────────────────────────────────────
   // Signed in, the room opens on the first line you haven't seen (saved on
@@ -665,9 +670,19 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
    * is what lets anyone clear their own line here, and it tells the room
    * straight away instead of waiting on a refetch.
    */
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
+  const { requestDelete, dialog: deleteDialog } = usePublicChatDelete({
+    account: walletAddress,
+    canDeleteAny: isModerator,
+    deleteForEveryone: deleteMessage,
+  });
+  // Asks "for everyone" or "for me", like DMs and community chats.
   const handleDeleteMessage = useCallback((messageId: string) => {
-    void deleteMessage(messageId);
-  }, [deleteMessage]);
+    const line = messagesRef.current.find((m) => m.id === messageId);
+    const mine = !!line && !!walletAddress && line.userId?.toLowerCase() === walletAddress.toLowerCase();
+    requestDelete(messageId, mine);
+  }, [requestDelete, walletAddress]);
 
   const handleEditMessage = useCallback((messageId: string, content: string) => editMessage(messageId, content), [editMessage]);
 
@@ -758,10 +773,11 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
       />
       )
       );
-      if (unreadAnchor?.id !== message.id || readDecidedRoom.current !== selectedRoomId) return row;
       return (
-        <Fragment key={`unread-${message.id}`}>
-          <UnreadMarker count={unreadAnchor.count} />
+        <Fragment key={message.clientKey ?? message.id}>
+          {unreadAnchor?.id === message.id && readDecidedRoom.current === selectedRoomId && (
+            <UnreadMarker count={unreadAnchor.count} />
+          )}
           {row}
         </Fragment>
       );
@@ -1050,6 +1066,7 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
       </div>
 
       {/* Modals */}
+      {deleteDialog}
       <CreateTopicRoomModal
         open={createRoomOpen}
         onOpenChange={setCreateRoomOpen}

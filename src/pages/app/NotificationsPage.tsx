@@ -40,6 +40,7 @@ import Bell from "@/components/ui/cut-icons/alerts";
 import Repeat2 from "@/components/ui/cut-icons/repost";
 import XIcon from "@/components/ui/cut-icons/close";
 import Send from "@/components/ui/cut-icons/send";
+import Gift from "@/components/ui/cut-icons/gifts";
 
 import { AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
@@ -305,7 +306,7 @@ const filterTypeMap: Record<NotificationTypeFilter, string[] | null> = {
   reposts: ['repost', 'quote', 'remix'],
   features: ['feature_request_like', 'feature_request_comment', 'feature_request_reply', 'feature_request_mention', 'feature_request_activity', 'feature_request_new', 'feature_request_comment_like', 'feature_request_status'],
   communities: ['community_chat', 'community_mention', 'community_here', 'community_join'],
-  stores: ['store_order', 'fraction_offer', 'fraction_offer_accepted', 'fraction_offer_rejected', 'fraction_purchased', 'fraction_sold', 'fraction_delivered', 'fraction_settled', 'username_offer', 'username_offer_accepted', 'username_offer_declined'],
+  stores: ['store_order', 'fraction_offer', 'fraction_offer_accepted', 'fraction_offer_rejected', 'fraction_purchased', 'fraction_gift', 'fraction_sold', 'fraction_delivered', 'fraction_settled', 'username_offer', 'username_offer_accepted', 'username_offer_declined'],
   subscriptions: ['subscription', 'ppv_purchase'],
   tips: ['tip', 'bounty_available', 'bounty_claimed', 'work_application', 'work_submission'],
   livestreams: ['livestream_start', 'stage_live', 'stage_reminder'],
@@ -325,7 +326,7 @@ const API_BACKED_TYPES = new Set([
   'repost', 'quote',
   'tip', 'bounty_available', 'bounty_claimed',
   'subscription', 'ppv_purchase',
-  'fraction_offer', 'fraction_offer_accepted', 'fraction_offer_rejected', 'fraction_purchased',
+  'fraction_offer', 'fraction_offer_accepted', 'fraction_offer_rejected', 'fraction_purchased', 'fraction_gift',
   'username_offer', 'username_offer_accepted', 'username_offer_declined',
   'livestream_start', 'signal_flare', 'video_milestone',
   'coauthor_invite', 'coauthor_accepted',
@@ -486,6 +487,8 @@ function getNotificationIcon(type: string, reaction?: PostReaction) {
     case 'fraction_offer_rejected':
     case 'fraction_settled':
       return <Store className="w-4 h-4 text-white/70" />;
+    case 'fraction_gift':
+      return <Gift className="w-4 h-4 text-white/70" />;
     // Its own glyph rather than the marketplace one: what is being bid for
     // here is the reader's own name, not a thing on a shelf.
     case 'username_offer':
@@ -780,7 +783,7 @@ function getNotificationContent(
   }
   // Fraction rows written before the API learned to describe them carry the
   // placeholder "You have a new notification", so treat that as no content.
-  const fractionTypes = ['fraction_offer', 'fraction_offer_accepted', 'fraction_offer_rejected', 'fraction_purchased'];
+  const fractionTypes = ['fraction_offer', 'fraction_offer_accepted', 'fraction_offer_rejected', 'fraction_purchased', 'fraction_gift'];
   if (fractionTypes.includes(notification.type as string)) {
     const apiContent = (notification as any).content;
     const usableContent = apiContent && apiContent !== 'You have a new notification' ? apiContent : null;
@@ -792,6 +795,8 @@ function getNotificationContent(
         return tr('notifications.custom.fractionOfferAccepted', { name: actorName });
       case 'fraction_offer_rejected':
         return tr('notifications.custom.fractionOfferRejected', { name: actorName });
+      case 'fraction_gift':
+        return tr('notifications.custom.fractionGift', { name: actorName });
       default:
         return tr('notifications.custom.fractionPurchased', { name: actorName });
     }
@@ -880,6 +885,7 @@ function getNotificationContent(
       // Where the reader was named. Every mention used to say "in a comment",
       // including the ones in a post or a live chat.
       const where = notification.metadata?.mentionContext;
+      if (where === 'bio') return tr('notifications.custom.bioMention', { name: actorName });
       if (where === 'live_chat') return tr('notifications.custom.liveChatMention', { name: actorName });
       if (where === 'public_chat') return tr('notifications.custom.publicChatMention', { name: actorName });
       if (where === 'post' || (!where && !notification.commentId)) return tr('notifications.custom.postMention', { name: actorName });
@@ -1042,6 +1048,12 @@ function getNavigationLink(notification: DeHubNotification): string | null {
       return `/app/post/${notification.tokenId}${query ? `?${query}` : ''}`;
     }
     if (where === 'public_chat') return `/app/messages?chat=public${query ? `&${query}` : ''}`;
+    // A bio tag opens the profile whose bio names the reader ("Remove me" is in its menu).
+    if (where === 'bio') {
+      return notification.actorAddress
+        ? profilePath(notification.actorAddress)
+        : notification.actorUsername ? profilePath(notification.actorUsername) : null;
+    }
   }
 
   switch (notification.type) {
@@ -1067,6 +1079,7 @@ function getNavigationLink(notification: DeHubNotification): string | null {
     case 'fraction_offer_accepted':
     case 'fraction_offer_rejected':
     case 'fraction_purchased':
+    case 'fraction_gift':
       return notification.tokenId ? `/app/post/${notification.tokenId}` : null;
     // Answering an offer and paying for an accepted one happen on the same
     // tab, so all three rows lead to it.
@@ -1605,7 +1618,7 @@ export const NotificationItem = memo(function NotificationItem({
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <p data-feed-text className={`text-[14.5px] leading-[1.38] ${(notification.read || isClosing) ? 'text-white/75' : 'text-white'}`}>
+        <p data-feed-text data-read={notification.read || isClosing ? "" : undefined} className="text-[14.5px] leading-[1.38]">
           {notificationContentWithActorBadge(
             getNotificationContent(notification, bundle, t, () => setShowActorsDrawer(true), canonicalActors),
             notification,
@@ -1801,7 +1814,7 @@ export const NotificationItem = memo(function NotificationItem({
         if (!open) { drawerJustClosed.current = true; setTimeout(() => { drawerJustClosed.current = false; }, 300); }
         setShowActorsDrawer(open);
       }}>
-        <DrawerContent column hideHandle={false} handleClassName="lg:hidden" data-notifications-page className="bg-black/60 backdrop-blur-[24px] border-white/10 max-h-[70dvh]">
+        <DrawerContent column hideHandle={false} handleClassName="lg:hidden" data-notifications-page data-notification-surface className="border-white/10 max-h-[70dvh]">
           <DrawerHeader className="text-center pb-2">
             <DrawerTitle className="text-white text-base">
               {(notification.type as string) === 'like' ? _copy("copy.0cd09d44006a", { defaultValue: "Reacted by" }) : (notification.type as string) === 'repost' ? _copy("copy.5b79c5daab9d", { defaultValue: "Reposted by" }) : (notification.type as string) === 'comment' ? _copy("copy.03a8c852177a", { defaultValue: "Commented by" }) : _copy("copy.6b0cc904d081", { defaultValue: "Users" })}
@@ -1840,7 +1853,7 @@ export const NotificationItem = memo(function NotificationItem({
         if (!open) { drawerJustClosed.current = true; setTimeout(() => { drawerJustClosed.current = false; }, 300); }
         setShowPostsDrawer(open);
       }}>
-        <DrawerContent column hideHandle={false} handleClassName="lg:hidden" data-notifications-page className="bg-black/60 backdrop-blur-[24px] border-white/10 max-h-[80dvh]">
+        <DrawerContent column hideHandle={false} handleClassName="lg:hidden" data-notifications-page data-notification-surface className="border-white/10 max-h-[80dvh]">
           <DrawerHeader className="text-center pb-2">
             <DrawerTitle className="text-white text-base">
               {notification.type === 'like' ? _copy("copy.376bde01356c", { defaultValue: "Reacted posts" }) : notification.type === 'comment' ? _copy("copy.25eee375e3f4", { defaultValue: "Commented posts" }) : (notification.type as string) === 'repost' ? _copy("copy.1318b0271dac", { defaultValue: "Reposted posts" }) : _copy("copy.a80811cf6889", { defaultValue: "Posts" })}
@@ -1882,7 +1895,7 @@ export function FilteredNotificationsSection() {
   );
 
   return (
-    <div data-filtered-notifications data-notifications-page className="mt-4 overflow-hidden rounded-2xl border border-white/5 bg-zinc-900">
+    <div data-filtered-notifications data-notifications-page data-notification-surface className="mt-4 overflow-hidden rounded-2xl border border-white/5">
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
@@ -2595,7 +2608,8 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
       <SheetContent
         side="bottom"
         data-notifications-page
-        className="bg-black/60 backdrop-blur-[24px] backdrop-saturate-[180%] border-t border-white/10 rounded-t-3xl max-h-[85vh] overflow-y-auto"
+        data-notification-surface
+        className="border-t border-white/10 rounded-t-3xl max-h-[85vh] overflow-y-auto"
       >
         <SheetHeader className="pb-4">
           <SheetTitle className="text-white text-lg font-bold flex items-center gap-2">
@@ -2612,7 +2626,7 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
       <DrawerTrigger asChild>
         {settingsTrigger}
       </DrawerTrigger>
-      <DrawerContent ref={settingsSheetRef} glass hideHandle={false} scrollable data-notifications-page className="max-h-[85dvh]" aria-describedby={undefined}>
+      <DrawerContent ref={settingsSheetRef} glass hideHandle={false} scrollable data-notifications-page data-notification-surface className="max-h-[85dvh]" aria-describedby={undefined}>
         <div className="px-4 pt-1 pb-[calc(1.5rem_+_env(safe-area-inset-bottom,0px))]">
           <DrawerTitle className="text-white text-lg font-bold flex items-center gap-2 pb-4">
             {settingsTitle}

@@ -4214,7 +4214,7 @@
       "pageViewsTerm": "Lapu skatījumi",
       "pageViews": "— pieprasījumi, ko Cloudflare klasificē kā lapu ielādes, nevis attēlus, skriptus vai API izsaukumus.",
       "botsTerm": "Boti ir ieskaitīti",
-      "bots": "— tie ir neapstrādāti skaitījumi tīkla malā, tāpēc tajos ir arī rāpuļprogrammas, pieejamības uzraugi un skriptēti klienti. Tos varat redzēt paši pārlūku sadalījumā augstāk, kur ieraksti kā “Curl” un “Nezināms” ir automatizēta datplūsma, nevis cilvēki. Botu izfiltrēšanai nepieciešams maksas Cloudflare plāns, kāda mums nav, un klusa aplēses atņemšana padarītu skaitļus mazāk pārbaudāmus, nevis vairāk.",
+      "bots": "— tie ir neapstrādāti skaitījumi tīkla malā, tāpēc tajos ir arī rāpuļprogrammas, pieejamības uzraugi un skriptēti klienti. Tos varat redzēt paši pārlūku sadalījumā augstāk, kur ieraksti kā “Curl” un “Nezināms” ir automatizēta datplūsma, nevis cilvēki. Botus kļūst arvien grūtāk atšķirt no īstiem apmeklētājiem, un drīz šajā statistikā tos vairs nevarēs atšķirt, tāpēc nav jēgas mēģināt tos izfiltrēt.",
       "totalTerm": "Diapazona kopsummas",
       "total": "— lapu skatījumi un pieprasījumi tiek saskaitīti visā diapazonā. Apmeklētāju skaits apzināti netiek saskaitīts “kopējā apmeklētāju skaitā”, jo kāds, kas šeit bija pirmdien un otrdien, tiktu ieskaitīts divreiz.",
       "peakTerm": "Noslogotākā stunda / diena",

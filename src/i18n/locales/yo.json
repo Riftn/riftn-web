@@ -4215,7 +4215,7 @@
       "pageViewsTerm": "Ìwòye ojú-ìwé",
       "pageViews": "— àwọn ìbéèrè tí Cloudflare pín gẹ́gẹ́ bí ìkójọ ojú-ìwé, kì í ṣe àwòrán, script tàbí ìpè API.",
       "botsTerm": "A ti ka àwọn bot mọ́ ọn",
-      "bots": "— ìwọ̀nyí jẹ́ ìṣirò àìtọ́jú ní etí ìsopọ̀, nítorí náà àwọn crawler, olùṣàkíyèsí iṣẹ́ àti àwọn oníbàárà tí a kọ pẹ̀lú script wà nínú wọn. O lè rí wọn fúnra rẹ nínú ìpínyà aṣàwákiri lókè, níbi tí àwọn àkọsílẹ̀ bíi \"Curl\" àti \"Àìmọ̀\" jẹ́ ìrìnàjò aládàáṣiṣẹ́ kì í ṣe ènìyàn. Sísẹ́ àwọn bot nílò ètò Cloudflare tí a ń san owó fún tí a kò ní, kí a sì yọ ìdíwọ̀n kúrò ní ìdákẹ́jẹ́ yóò mú kí àwọn nọ́mbà má ṣe é ṣàyẹ̀wò dáadáa, kì í ṣe kí ó rọrùn sí i.",
+      "bots": "— ìwọ̀nyí jẹ́ ìṣirò àìtọ́jú ní etí ìsopọ̀, nítorí náà àwọn crawler, olùṣàkíyèsí iṣẹ́ àti àwọn oníbàárà tí a kọ pẹ̀lú script wà nínú wọn. O lè rí wọn fúnra rẹ nínú ìpínyà aṣàwákiri lókè, níbi tí àwọn àkọsílẹ̀ bíi \"Curl\" àti \"Àìmọ̀\" jẹ́ ìrìnàjò aládàáṣiṣẹ́ kì í ṣe ènìyàn. Ó túbọ̀ ń ṣòro láti dá àwọn bot yà sọ́tọ̀ kúrò lára àwọn àlejò ènìyàn. Láìpẹ́, a kò ní lè dá wọn mọ̀ nínú àwọn ìṣirò wọ̀nyí, nítorí náà kò wúlò láti gbìyànjú láti yọ àwọn bot kúrò.",
       "totalTerm": "Àpapọ̀ àkókò",
       "total": "— ìwòye ojú-ìwé àti ìbéèrè ń kóra jọ ní gbogbo àkókò náà. A kò ka àwọn àlejò papọ̀ sí \"àpapọ̀ àlejò\" ní mọ̀ọ́mọ̀, nítorí ẹni tí ó wá ní Ajé àti Ìṣẹ́gun yóò jẹ́ kíkà lẹ́ẹ̀mejì.",
       "peakTerm": "Wákàtí / ọjọ́ tí ó kún jùlọ",

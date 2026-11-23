@@ -6,6 +6,11 @@ export function applyDateLocale(language: string): void {
   setDefaultOptions({ locale: locales[language as keyof typeof locales] || enUS });
 }
 
+/** Use the viewer's local clock, with midnight displayed as 00:00. */
+export function formatMessageTime(date: Date, locale?: string): string {
+  return date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+}
+
 export function formatRelativeTime(input: string | number | Date | null | undefined, language: string, style: 'long' | 'short' | 'narrow' = 'long'): string {
   const value = input == null ? NaN : new Date(input).getTime();
   const elapsed = Number.isFinite(value) ? Math.max(0, Date.now() - value) : 0;

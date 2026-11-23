@@ -52,6 +52,8 @@ function mapNFTToVideoItem(nft: DeHubNFT): VideoItem {
     comicBorder: nft.comicBorder,
     hideAssetCards: nft.hideAssetCards,
     hiddenLinkPreviews: nft.hiddenLinkPreviews,
+    imageTags: nft.imageTags,
+    hasQuiz: nft.hasQuiz,
     spoilerText: nft.spoilerText,
     quotePolicy: nft.quotePolicy,
     duetOf: duetOfPost(nft as any),
@@ -115,6 +117,8 @@ function mapNFTToImagePost(nft: DeHubNFT): ImagePost {
     comicBorder: nft.comicBorder,
     hideAssetCards: nft.hideAssetCards,
     hiddenLinkPreviews: nft.hiddenLinkPreviews,
+    imageTags: nft.imageTags,
+    hasQuiz: nft.hasQuiz,
     spoilerText: nft.spoilerText,
     quotePolicy: nft.quotePolicy,
     visibility: nft.visibility,
@@ -175,6 +179,8 @@ function mapNFTToTextPost(nft: DeHubNFT): TextPost {
     comicBorder: nft.comicBorder,
     hideAssetCards: nft.hideAssetCards,
     hiddenLinkPreviews: nft.hiddenLinkPreviews,
+    imageTags: nft.imageTags,
+    hasQuiz: nft.hasQuiz,
     spoilerText: nft.spoilerText,
     quotePolicy: nft.quotePolicy,
     visibility: nft.visibility,
@@ -497,7 +503,7 @@ export function useBookmarkPost(tokenId: string | number) {
 
   /**
    * @param onSaved Fired once the server confirms a *save* (never an un-save) —
-   *   used to open the "add to folder" drawer, matching mobile's FeedCard flow.
+   *   used to offer folder selection after saving.
    */
   const toggleBookmark = (onSaved?: () => void) => {
     if (!isAuthenticated) {

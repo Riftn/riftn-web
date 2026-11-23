@@ -19,6 +19,7 @@
 import { useCallback, useRef, useSyncExternalStore, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from 'react';
 import type { PostVisibility, QuotePolicy } from '@/lib/api/dehub/types';
 import type { PostReaction } from '@/lib/reactions';
+import { cdnImageSource } from '@/lib/media-url';
 
 /** What a card can do better than the menu on its own: open its comments in place, its own modals. */
 export interface PostMenuHostActions {
@@ -58,6 +59,18 @@ export interface PostMenuTarget {
    * picker (set from where the right-click landed, not by the card).
    */
   look?: PostLook;
+  /**
+   * The post's video file, for Copy video. Open posts only: a paid, locked or
+   * live one leaves it out, so its file never lands on anyone's clipboard.
+   */
+  videoUrl?: string | null;
+  /** The picture or video under the pointer (set from where the right-click landed). */
+  media?: PostMenuMedia;
+}
+
+export interface PostMenuMedia {
+  url: string;
+  kind: 'image' | 'gif' | 'video';
 }
 
 export interface PostLook {
@@ -84,10 +97,64 @@ function lookAt(target: Element | null): PostLook | undefined {
   return undefined;
 }
 
-function withLook(target: PostMenuTarget | null, event: ReactMouseEvent): PostMenuTarget | null {
+/** Smaller than this is an avatar, an emoji or a badge, not the post's media. */
+const MIN_MEDIA_PX = 72;
+
+/** Blurred is a paid or locked post's teaser: the real picture under it stays put. */
+function blurredWithin(el: Element, root: Element) {
+  for (let node: Element | null = el; node && node !== root.parentElement; node = node.parentElement) {
+    const filter = getComputedStyle(node).filter;
+    if (filter && filter !== 'none' && filter.includes('blur')) return true;
+  }
+  return false;
+}
+
+function under(el: Element, x: number, y: number) {
+  const r = el.getBoundingClientRect();
+  return r.width >= MIN_MEDIA_PX && r.height >= MIN_MEDIA_PX && x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+}
+
+const isGif = (url: string) => /\.gif(?:$|[?#])/i.test(url);
+const webUrl = (url: string | undefined | null) => (url && /^https?:\/\//.test(url) ? url : null);
+
+/**
+ * The picture or video the pointer is on, inside this post. Overlays (a play
+ * button, a caption, the sound chip) sit on top of the media, so this looks
+ * outward from what was clicked for the nearest picture or video that covers
+ * the point. A video post's poster counts as the video.
+ */
+export function mediaAt(target: Element | null, root: Element | null, x: number, y: number, videoUrl?: string | null): PostMenuMedia | undefined {
+  if (!target || !root || typeof window === 'undefined') return undefined;
+  for (let node: Element | null = target; node && root.contains(node); node = node.parentElement) {
+    const found = [node, ...Array.from(node.querySelectorAll('img, video'))]
+      .filter((el) => (el instanceof HTMLImageElement || el instanceof HTMLVideoElement) && under(el, x, y));
+    if (!found.length) continue;
+    const el = found.find((m) => m instanceof HTMLVideoElement) ?? found[found.length - 1];
+    if (el.closest('[data-no-copy-media]') || blurredWithin(el, root)) return undefined;
+    const video = webUrl(videoUrl);
+    // A playlist is not a video anyone can paste and watch.
+    if (video && /\.m3u8(?:$|[?#])/i.test(video)) return undefined;
+    if (video) return { url: video, kind: 'video' };
+    if (el instanceof HTMLVideoElement) return undefined;
+    const img = el as HTMLImageElement;
+    const src = webUrl(cdnImageSource(img.currentSrc || img.src));
+    if (!src) return undefined;
+    return { url: src, kind: isGif(src) ? 'gif' : 'image' };
+  }
+  return undefined;
+}
+
+interface Hit { el: Element | null; root: Element | null; x: number; y: number }
+
+const hitOf = (event: ReactMouseEvent | ReactPointerEvent): Hit => ({
+  el: event.target as Element | null, root: event.currentTarget as Element | null, x: event.clientX, y: event.clientY,
+});
+
+function withLook(target: PostMenuTarget | null, hit: Hit): PostMenuTarget | null {
   if (!target) return null;
-  const look = lookAt(event.target as Element | null);
-  return look ? { ...target, look } : target;
+  const look = lookAt(hit.el);
+  const media = mediaAt(hit.el, hit.root, hit.x, hit.y, target.videoUrl);
+  return look || media ? { ...target, ...(look ? { look } : {}), ...(media ? { media } : {}) } : target;
 }
 
 export interface PostMenuOpen {
@@ -203,7 +270,7 @@ export function usePostMenuContext(build: () => PostMenuTarget | null) {
   ref.current = build;
   return useCallback((event: ReactMouseEvent) => {
     if (!shouldOpen(event, false)) return;
-    const target = withLook(ref.current(), event);
+    const target = withLook(ref.current(), hitOf(event));
     if (!target) return;
     event.preventDefault();
     event.stopPropagation();
@@ -227,8 +294,8 @@ const cancelHold = () => { clearTimeout(hold.timer); hold.timer = undefined; hol
  * owner's own tiles: background picker, drag to reorder).
  */
 export function postTileMenuProps(build: () => PostMenuTarget | null, { touch = true }: { touch?: boolean } = {}) {
-  const open = (point: { x: number; y: number }, event?: ReactMouseEvent) => {
-    const target = event ? withLook(build(), event) : build();
+  const open = (point: { x: number; y: number }, hit: Hit) => {
+    const target = withLook(build(), hit);
     if (!target) return false;
     openPostMenu(point, target);
     return true;
@@ -237,7 +304,7 @@ export function postTileMenuProps(build: () => PostMenuTarget | null, { touch = 
     onContextMenu: (event: ReactMouseEvent) => {
       if (Date.now() - hold.fired < 1500) { event.preventDefault(); return; }
       if (!shouldOpen(event, touch)) return;
-      if (!open({ x: event.clientX, y: event.clientY }, event)) return;
+      if (!open({ x: event.clientX, y: event.clientY }, hitOf(event))) return;
       event.preventDefault();
       event.stopPropagation();
       cancelHold();
@@ -247,10 +314,11 @@ export function postTileMenuProps(build: () => PostMenuTarget | null, { touch = 
         cancelHold();
         if (event.pointerType !== 'touch' || !event.isPrimary) return;
         const point = { x: event.clientX, y: event.clientY };
+        const hit = hitOf(event);
         hold.x = point.x; hold.y = point.y; hold.id = event.pointerId;
         hold.timer = setTimeout(() => {
           hold.timer = undefined;
-          if (open(point)) {
+          if (open(point, hit)) {
             hold.fired = Date.now();
             try { navigator.vibrate?.(8); } catch { /* not on iOS */ }
           }

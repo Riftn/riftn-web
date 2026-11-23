@@ -312,8 +312,7 @@ export default function ProfilePage() {
   const appliedDefaultTabFor = useRef<string | null>(null);
   const profileKey = data.apiProfile?.walletAddress || null;
 
-  // Grid or list on the All tab: the owner's saved default, unless this
-  // visitor flipped the toggle on this profile during this browser tab.
+  // All, Images and Videos share this reader's saved layout for the profile.
   // The reader can also pick grid or list for every profile they open
   // (their own customs.profileViewOthers); "owner" keeps each owner's pick.
   const { data: readerProfile } = useDeHubProfile({
@@ -327,6 +326,7 @@ export default function ProfilePage() {
       parseProfileViewReaderPref((readerProfile?.customs as Record<string, unknown> | undefined)?.[PROFILE_VIEW_READER_KEY]),
       !!data.isViewingOwnProfile,
     ),
+    data.currentWalletAddress,
   );
 
   // Text-post backdrop the owner picked (customs.postBg). A save shows at once
@@ -966,6 +966,7 @@ return () => rail.removeEventListener('wheel', onWheel);
             onFiltersReset={data.resetContentFilters}
             filtersOpen={data.contentFiltersOpen}
             onFiltersOpenChange={data.setContentFiltersOpen}
+            showViewToggle={activeTab === 'home' || activeTab === 'images' || activeTab === 'videos'}
             showPostType={data.showPostTypeFilter}
             resultCount={
               activeTab === 'posts' || activeTab === 'articles' ? data.PROFILE_POSTS.length

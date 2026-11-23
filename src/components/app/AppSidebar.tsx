@@ -2,7 +2,7 @@ import { useSurfaceDraft } from '@/hooks/use-surface-draft';
 import React, { Suspense, lazy, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { flushSync } from 'react-dom';
-import { PenSquare, LogIn, CornerDownLeft } from "lucide-react";
+import { PenSquare, LogIn, CornerDownLeft, Eye, EyeOff } from "lucide-react";
 import LogOut from "@/components/ui/cut-icons/sign-out";
 
 import Search from "@/components/ui/cut-icons/search";
@@ -16,10 +16,12 @@ import { useKidsModeLock } from '@/hooks/use-kids-mode';
 import { MobileHeader } from './navigation/MobileHeader';
 import { DesktopSidebar } from './navigation/DesktopSidebar';
 import { groupMenuItems } from './navigation/menu-groups';
+import { useMenuGroupMoves } from '@/lib/menu-group-moves';
 import { useMenuLayout } from '@/lib/menu-layout';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { buildAvatarUrl } from '@/lib/media-url';
 import { useSelfBadge } from '@/hooks/use-self-badge-balance';
+import { HIDDEN_BALANCE, setBalanceHidden, useBalanceHidden } from '@/lib/balance-privacy';
 import { BadgedName } from '@/components/app/BadgedName';
 import { useUnreadNotificationCount } from '@/hooks/use-notifications';
 import { useCustomUnreadCount } from '@/hooks/use-custom-notifications';
@@ -74,6 +76,7 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
   const { isAuthenticated, disconnect, user, walletAddress } = useAuth();
   // Read-only: SelfBadgeSync and the header already own these fetches.
   const dhbBalance = useSelfBadge().balance ?? 0;
+  const balanceHidden = useBalanceHidden();
   const { data: unreadCount } = useUnreadNotificationCount();
   const { data: customUnread } = useCustomUnreadCount();
   const notificationCount = (unreadCount?.total ?? 0) + (customUnread ?? 0);
@@ -99,7 +102,8 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
     () => filterNavItems(NAV_ITEMS, '', t, canManageAgents(walletAddress)),
     [t, isKidsMode, walletAddress],
   );
-  const menuGroups = useMemo(() => groupMenuItems(allNavItems), [allNavItems]);
+  const menuGroupMoves = useMenuGroupMoves();
+  const menuGroups = useMemo(() => groupMenuItems(allNavItems, menuGroupMoves), [allNavItems, menuGroupMoves]);
   const menuLayout = useMenuLayout();
   const [menuTab, setMenuTab] = useState(0);
   // Tabs layout: search is a button on the tab row until tapped, then that
@@ -223,17 +227,29 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
             ) : user.username && <p className="truncate text-[13px] text-zinc-400">@{user.username}</p>}
           </div>
           {Math.floor(dhbBalance) > 0 && (
-            <button
-              type="button"
-              onClick={() => { closeMenu(); navigate('/app/wallet'); }}
-              aria-label={`${t('nav.wallet')} ${Math.floor(dhbBalance).toLocaleString()}`}
-              data-menu-chip className="flex h-9 flex-shrink-0 items-center gap-1.5 rounded-xl border border-white/15 bg-white/[0.06] px-3 text-[13px] font-semibold text-white tabular-nums"
-            >
-              <DhbCoin className="h-4 w-4 align-middle" />
-              {/* Compact from 10k up, so the chip never pushes into the
-                  Followers / Following line beside it (Requests eaf824e2). */}
-              {Math.floor(dhbBalance) >= 10_000 ? compactCount(Math.floor(dhbBalance)) : Math.floor(dhbBalance).toLocaleString()}
-            </button>
+            <div data-menu-chip className="flex h-9 flex-shrink-0 items-center rounded-xl border border-white/15 bg-white/[0.06] text-[13px] font-semibold text-white tabular-nums">
+              <button
+                type="button"
+                onClick={() => { closeMenu(); navigate('/app/wallet'); }}
+                aria-label={balanceHidden ? t('nav.wallet') : `${t('nav.wallet')} ${Math.floor(dhbBalance).toLocaleString()}`}
+                className="flex h-full items-center gap-1.5 pl-3 pr-1.5"
+              >
+                <DhbCoin className="h-4 w-4 align-middle" />
+                {/* Compact from 10k up, so the chip never pushes into the
+                    Followers / Following line beside it (Requests eaf824e2). */}
+                {balanceHidden ? HIDDEN_BALANCE : Math.floor(dhbBalance) >= 10_000 ? compactCount(Math.floor(dhbBalance)) : Math.floor(dhbBalance).toLocaleString()}
+              </button>
+              {/* Eye: hide or show the number on this device (Requests 4c8cc200). */}
+              <button
+                type="button"
+                onClick={() => setBalanceHidden(!balanceHidden)}
+                aria-label={balanceHidden ? t('wallet.showBalance', 'Show balance') : t('wallet.hideBalance', 'Hide balance')}
+                aria-pressed={balanceHidden}
+                className="flex h-full items-center pl-1 pr-2.5 text-zinc-400 hover:text-white"
+              >
+                {balanceHidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
           )}
           {/* Every other account saved on this device, one tap away. */}
           <Suspense fallback={null}>
@@ -278,7 +294,7 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
           aria-label={t('sidebar.searchMenu')}
           data-menu-search
           data-search-surface
-          className="w-full h-[42px] pl-10 pr-9 rounded-xl bg-white/5 border border-white/10 text-[15px] text-white placeholder:text-zinc-500 outline-none focus:border-white/30 transition-colors"
+          className="w-full h-[42px] pl-10 pr-9 rounded-xl bg-white/5 border border-white/10 text-[16px] text-white placeholder:text-zinc-500 outline-none focus:border-white/30 transition-colors"
         />
         {(menuQuery || (tabsHeader && searchOpen)) && (
           <button

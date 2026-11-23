@@ -13,7 +13,7 @@
  */
 import { apiCall, authedUpload } from './core';
 
-export type StoryAudience = 'everyone' | 'followers';
+export type StoryAudience = 'everyone' | 'followers' | 'selected' | 'except';
 export const STORY_LIFETIMES = [6, 12, 24] as const;
 export type StoryLifetime = (typeof STORY_LIFETIMES)[number];
 
@@ -65,6 +65,8 @@ export interface StoryItem {
   expiresAt: string;
   viewed: boolean;
   liked: boolean;
+  /** Public comments (older servers leave it out). */
+  commentCount?: number;
   /** Owner only. */
   viewCount?: number;
   likeCount?: number;
@@ -88,7 +90,7 @@ export interface StoryViewer extends StoryAuthor {
   viewedAt: string;
 }
 
-export function getStoryShelf(liveHosts: string, signedIn: boolean): Promise<{ shelf: ShelfEntry[]; signedIn: boolean; liveHosts?: string[]; supportsCustomLifetime?: boolean }> {
+export function getStoryShelf(liveHosts: string, signedIn: boolean): Promise<{ shelf: ShelfEntry[]; signedIn: boolean; liveHosts?: string[]; supportsCustomLifetime?: boolean; supportsPhotoDuration?: boolean; supportsCustomAudience?: boolean }> {
   return apiCall('/api/stories/shelf', { params: { liveHosts: liveHosts || undefined }, requiresAuth: signedIn });
 }
 
@@ -110,7 +112,9 @@ export function getStoryArchive(cursor?: string): Promise<{ items: StoryItem[]; 
 
 export interface CreateStoryFields {
   audience: StoryAudience;
+  audienceAddresses?: string[];
   expiresInHours?: StoryLifetime;
+  photoDurationSeconds?: number;
   allowReplies?: boolean;
   muted?: boolean;
   caption?: string;
@@ -132,6 +136,9 @@ export function createStory(
   const form = new FormData();
   form.append('type', fields.draftVideoId ? 'video' : 'photo');
   form.append('audience', fields.audience);
+  const customAudience = fields.audience === 'selected' || fields.audience === 'except';
+  if (customAudience) form.append('audienceAddresses', JSON.stringify(fields.audienceAddresses ?? []));
+  if (fields.photoDurationSeconds != null) form.append('photoDurationSeconds', String(fields.photoDurationSeconds));
   if (fields.expiresInHours != null) form.append('expiresInHours', String(fields.expiresInHours));
   form.append('allowReplies', String(fields.allowReplies !== false));
   form.append('muted', String(!!fields.muted));
@@ -146,7 +153,7 @@ export function createStory(
   }
   if (files.photo) form.append('file', files.photo, 'moment.jpg');
   if (files.overlay) form.append('overlay', files.overlay, 'layer.png');
-  return authedUpload<StoryItem>('/api/stories', form, { onProgress: options.onProgress, signal: options.signal, timeoutMs: 3 * 60 * 1000 });
+  return authedUpload<StoryItem>(customAudience ? '/api/stories/custom-audience' : '/api/stories', form, { onProgress: options.onProgress, signal: options.signal, timeoutMs: 3 * 60 * 1000 });
 }
 
 export function deleteStory(id: string): Promise<{ ok: boolean }> {
@@ -175,4 +182,24 @@ export function getStoryViewers(id: string, cursor?: string): Promise<{ viewCoun
 
 export function reportStory(id: string, reason: string, additionalInfo?: string): Promise<{ ok: boolean }> {
   return apiCall(`/api/stories/${encodeURIComponent(id)}/report`, { method: 'POST', body: { reason, additionalInfo }, requiresAuth: true });
+}
+
+export interface StoryComment {
+  id: string;
+  text: string;
+  createdAt: string;
+  author: StoryAuthor;
+  canDelete: boolean;
+}
+
+export function getStoryComments(id: string, cursor?: string, signedIn = false): Promise<{ commentCount: number; allowComments: boolean; comments: StoryComment[]; next: string | null }> {
+  return apiCall(`/api/stories/${encodeURIComponent(id)}/comments`, { params: { cursor }, requiresAuth: signedIn });
+}
+
+export function addStoryComment(id: string, text: string): Promise<StoryComment> {
+  return apiCall(`/api/stories/${encodeURIComponent(id)}/comments`, { method: 'POST', body: { text }, requiresAuth: true });
+}
+
+export function deleteStoryComment(id: string, commentId: string): Promise<{ ok: boolean }> {
+  return apiCall(`/api/stories/${encodeURIComponent(id)}/comments/${encodeURIComponent(commentId)}`, { method: 'DELETE', requiresAuth: true });
 }

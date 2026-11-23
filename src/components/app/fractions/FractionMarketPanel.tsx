@@ -163,6 +163,7 @@ export function FractionMarketPanel({ tokenId, chainId = 8453, post }: FractionM
                   const isMine =
                     walletAddress?.toLowerCase() === listing.seller_address.toLowerCase();
                   const available = listing.quantity - listing.filled_quantity;
+                  const free = Number(listing.price_per_fraction) === 0;
                   return (
                     <div
                       key={listing.id}
@@ -182,8 +183,14 @@ export function FractionMarketPanel({ tokenId, chainId = 8453, post }: FractionM
                         <div className="min-w-0">
                           <p className="text-white font-medium">{t('fractions.fractionCount', { count: available })}</p>
                           <p className="text-xs text-white/60">
-                            {listing.price_per_fraction} <DhbCoin /> {t('fractions.eachDot')}{' '}
-                            {t('fractions.pctOfPost', { pct: ((available / TOTAL_FRACTIONS) * 100).toFixed(1) })}
+                            {free ? (
+                              t('fractions.freeShare', { pct: ((available / TOTAL_FRACTIONS) * 100).toFixed(1) })
+                            ) : (
+                              <>
+                                {listing.price_per_fraction} <DhbCoin /> {t('fractions.eachDot')}{' '}
+                                {t('fractions.pctOfPost', { pct: ((available / TOTAL_FRACTIONS) * 100).toFixed(1) })}
+                              </>
+                            )}
                           </p>
                           {isMine && (
                             <p className="text-[11px] text-emerald-300/80 mt-0.5">
@@ -193,10 +200,14 @@ export function FractionMarketPanel({ tokenId, chainId = 8453, post }: FractionM
                         </div>
                         <div className="text-right shrink-0">
                           <p className="text-white font-bold">
-                            {(available * listing.price_per_fraction).toLocaleString(undefined, {
-                              maximumFractionDigits: 2,
-                            })}{' '}
-                            <DhbCoin />
+                            {free ? t('fractions.freeBadge') : (
+                              <>
+                                {(available * listing.price_per_fraction).toLocaleString(undefined, {
+                                  maximumFractionDigits: 2,
+                                })}{' '}
+                                <DhbCoin />
+                              </>
+                            )}
                           </p>
                           {isMine ? (
                             <Button
@@ -214,7 +225,7 @@ export function FractionMarketPanel({ tokenId, chainId = 8453, post }: FractionM
                               className="bg-white/10 hover:bg-white/20 text-white text-xs mt-1 h-7 px-3"
                               onClick={() => setBuyListing(listing)}
                             >
-                              {t('fractions.buy')}
+                              {free ? t('fractions.claim') : t('fractions.buy')}
                             </Button>
                           )}
                         </div>
@@ -415,10 +426,14 @@ function BuyerRow({ trade, me }: { trade: FractionTrade; me?: string | null }) {
         </p>
       </div>
       <div className="text-right shrink-0">
-        <p className="text-white font-semibold text-sm flex items-center gap-1 justify-end">
-          <img src={dehubCoin} alt={tokenLabel()} className="w-3.5 h-3.5" />
-          {(trade.quantity * trade.price_per_fraction).toLocaleString(undefined, { maximumFractionDigits: 2 })}
-        </p>
+        {trade.price_per_fraction > 0 ? (
+          <p className="text-white font-semibold text-sm flex items-center gap-1 justify-end">
+            <img src={dehubCoin} alt={tokenLabel()} className="w-3.5 h-3.5" />
+            {(trade.quantity * trade.price_per_fraction).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+          </p>
+        ) : (
+          <p className="text-white font-semibold text-sm">{t('fractions.freeBadge')}</p>
+        )}
         <p className={settled ? 'text-[10px] text-emerald-300/80' : trade.status === 'overdue' ? 'text-[10px] text-red-300/80' : 'text-[10px] text-amber-300/80'}>
           {settled ? t('fractions.statusSettled') : trade.status === 'overdue' ? t('fractions.statusOverdue', 'Late') : t('fractions.statusInProgress', 'In progress')}
         </p>

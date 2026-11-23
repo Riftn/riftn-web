@@ -239,6 +239,7 @@ export function ProfileTabContent({
   setCreatePlanModalOpen,
   setEditingPlan,
 }: ProfileTabContentProps) {
+  const viewMode = useProfileViewMode();
   const { t: _copy } = _useCopy();
   const navigate = useNavigate();
 
@@ -338,7 +339,7 @@ export function ProfileTabContent({
           isContentFiltered
             ? <ProfileEmptyState iconSrc={imageFrame3dIcon} iconAlt={_copy("copy.be7e2f201293", { defaultValue: "Images" })} {...NO_MATCHES_COPY} />
             : <ProfileEmptyState iconSrc={imageFrame3dIcon} iconAlt={_copy("copy.be7e2f201293", { defaultValue: "Images" })} title={_copy("copy.0318e75932f9", { defaultValue: "No images yet" })} subtitle={_copy("copy.a3d5fe6a4d9f", { defaultValue: "Image posts will appear here" })} />
-        ) : PROFILE_IMAGES.length >= 4 ? (
+        ) : viewMode === 'grid' ? (
           <ProfileImageGrid images={PROFILE_IMAGES} />
         ) : (
           <div className="space-y-3">
@@ -357,6 +358,8 @@ export function ProfileTabContent({
           isContentFiltered
             ? <ProfileEmptyState iconSrc={filmstrip3dIcon} iconAlt={_copy("copy.c9a9639463c2", { defaultValue: "Videos" })} {...NO_MATCHES_COPY} />
             : <ProfileEmptyState iconSrc={filmstrip3dIcon} iconAlt={_copy("copy.c9a9639463c2", { defaultValue: "Videos" })} title={_copy("copy.7b1fd32345ce", { defaultValue: "No videos yet" })} subtitle={_copy("copy.e4cea00e921f", { defaultValue: "Video posts will appear here" })} />
+        ) : viewMode === 'grid' ? (
+          <ProfileMixedGrid entries={ALL_PROFILE_VIDEOS.map(data => ({ key: data.id, type: 'video', data }))} />
         ) : (
           <div className="space-y-3">
             {ALL_PROFILE_VIDEOS.map((video, index) => (

@@ -308,3 +308,41 @@ export async function claimUsername(input: {
   });
   return res.result;
 }
+
+/** Swapping usernames between two accounts you own (riftn-backend src/username-market/username-swap). */
+export interface UsernameSwap {
+  id: string;
+  fromAddress: string;
+  fromUsername: string;
+  toAddress: string;
+  toUsername: string;
+  status: 'pending' | 'done' | 'declined' | 'cancelled';
+  expiresAt: string;
+}
+
+export async function getUsernameSwaps(): Promise<{ incoming: UsernameSwap[]; outgoing: UsernameSwap[] }> {
+  const res = await apiCall<Envelope<{ incoming: UsernameSwap[]; outgoing: UsernameSwap[] }>>('/api/username_market/swaps', { requiresAuth: true });
+  return res.result ?? { incoming: [], outgoing: [] };
+}
+
+/** Ask the account wearing `username` (also yours) to swap names with this one. */
+export async function requestUsernameSwap(username: string): Promise<UsernameSwap> {
+  const res = await apiCall<Envelope<UsernameSwap> & { error?: string }>('/api/username_market/swaps', {
+    method: 'POST', body: { username: username.replace(/^@/, '').trim() }, requiresAuth: true,
+  });
+  if (!res?.status) throw new Error(res?.error || 'Could not start the swap');
+  return res.result;
+}
+
+/** From the asked account: both names change places now. */
+export async function acceptUsernameSwap(id: string): Promise<{ fromUsername: string; toUsername: string }> {
+  const res = await apiCall<Envelope<{ fromUsername: string; toUsername: string }> & { error?: string }>(
+    `/api/username_market/swaps/${encodeURIComponent(id)}/accept`, { method: 'POST', requiresAuth: true },
+  );
+  if (!res?.status) throw new Error(res?.error || 'Could not swap the usernames');
+  return res.result;
+}
+
+export async function cancelUsernameSwap(id: string): Promise<void> {
+  await apiCall<Envelope<unknown>>(`/api/username_market/swaps/${encodeURIComponent(id)}`, { method: 'DELETE', requiresAuth: true });
+}

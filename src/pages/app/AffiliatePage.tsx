@@ -234,7 +234,7 @@ export default function AffiliatePage() {
 
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h1 className="text-2xl md:text-4xl font-bold text-white">{_copy("copy.37bc605898f7", { defaultValue: "Earn " })}{AFFILIATE_L1_COMMISSION_PCT}{_copy("copy.077cc6af06f4", { defaultValue: "% from everyone you invite — and " })}{AFFILIATE_L2_COMMISSION_PCT}{_copy("copy.ffaa95c939fc", { defaultValue: "% from everyone " })}<em>{_copy("copy.151e58a83130", { defaultValue: "they" })}</em>{_copy("copy.d82b694585c4", { defaultValue: " invite." })}</h1>
+              <h1 className="text-2xl md:text-4xl font-bold text-white">{_copy("affiliate.headline", { defaultValue: "Earn {{l1}}% from everyone you invite, and {{l2}}% from everyone they invite.", l1: AFFILIATE_L1_COMMISSION_PCT, l2: AFFILIATE_L2_COMMISSION_PCT })}</h1>
               <p className="mt-2 text-sm md:text-base text-white/60 max-w-3xl">{_copy("copy.5d677d55b064", { defaultValue: "Every time someone uses any Riftn revenue-generating feature, you earn residually and perpetually." })}</p>
             </div>
           </div>
@@ -439,8 +439,8 @@ export default function AffiliatePage() {
             <CardContent className="p-5 md:p-6 grid grid-cols-1 md:grid-cols-4 gap-4">
               <Step n={1} title={_copy("copy.486b75f1e0e1", { defaultValue: "Share your link" })} body={_copy("copy.54f921da537d", { defaultValue: "Drop your invite link into Discord, X, YouTube, your stream, anywhere." })} />
               <Step n={2} title={_copy("copy.65683c287b13", { defaultValue: "They join Riftn" })} body={_copy("copy.44255c58528d", { defaultValue: "Anyone who lands via your link is permanently attributed to you (first-touch wins, 90-day cookie)." })} />
-              <Step n={3} title={_copy("copy.7e44b080227f", { defaultValue: "Earn {{value1}}% direct", value1: AFFILIATE_L1_COMMISSION_PCT })} body={`You receive ${AFFILIATE_L1_COMMISSION_PCT}% of every dollar of revenue your invites ever generate on Riftn.`} />
-              <Step n={4} title={_copy("copy.2ed16d4204db", { defaultValue: "Earn {{value1}}% secondary", value1: AFFILIATE_L2_COMMISSION_PCT })} body={`When your invites invite their friends, you also earn ${AFFILIATE_L2_COMMISSION_PCT}% of their revenue. Recurring, lifetime.`} />
+              <Step n={3} title={_copy("copy.7e44b080227f", { defaultValue: "Earn {{value1}}% direct", value1: AFFILIATE_L1_COMMISSION_PCT })} body={_copy("affiliate.stepDirectBody", { defaultValue: "You receive {{pct}}% of every dollar of revenue your invites ever generate on Riftn.", pct: AFFILIATE_L1_COMMISSION_PCT })} />
+              <Step n={4} title={_copy("copy.2ed16d4204db", { defaultValue: "Earn {{value1}}% secondary", value1: AFFILIATE_L2_COMMISSION_PCT })} body={_copy("affiliate.stepSecondaryBody", { defaultValue: "When your invites invite their friends, you also earn {{pct}}% of their revenue. Recurring, lifetime.", pct: AFFILIATE_L2_COMMISSION_PCT })} />
             </CardContent>
           </Card>
 

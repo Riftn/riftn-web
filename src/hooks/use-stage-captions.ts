@@ -456,12 +456,10 @@ export function useStageCaptionPublisher(options: CaptionPublisherOptions): Capt
     const handleResults = (msg: any) => {
       const transcript: string = msg?.channel?.alternatives?.[0]?.transcript ?? '';
       const text = transcript.trim();
-      if (!text) return;
-
-      if (msg.is_final) {
-        finalisedText = finalisedText ? `${finalisedText} ${text}` : text;
-      }
-      const display = msg.is_final ? finalisedText : (finalisedText ? `${finalisedText} ${text}` : text);
+      // The pause can arrive after the last finalized words in a separate result.
+      if (!text && !(msg.speech_final && finalisedText)) return;
+      const display = finalisedText && text ? `${finalisedText} ${text}` : finalisedText || text;
+      if (msg.is_final) finalisedText = display;
 
       if (msg.speech_final) {
         emitLine(display, true);

@@ -8,6 +8,8 @@
  * over the clip.
  */
 
+import { captionFontStyle, type CaptionFont } from "./caption-fonts";
+
 export const OUT_W = 1080;
 export const OUT_H = 1920;
 
@@ -20,16 +22,17 @@ export interface TextLayer {
   y: number;
   /** Font size as a fraction of the stage width. */
   size: number;
+  font?: CaptionFont;
   color: string;
   /** Rounded box behind the words. */
   box: boolean;
+  /** Clockwise degrees around the centre. */
+  rotation?: number;
   /** Mentions: whose profile the words open. */
   address?: string;
 }
 
 export const TEXT_COLORS = ['#ffffff', '#000000', '#ff5c7a', '#ffb34d', '#ffe14d', '#5ce08a', '#4dc3ff', '#a391fc'];
-
-const FONT = '700 {size}px Inter, "SF Pro Display", system-ui, -apple-system, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
 
 function boxColor(color: string): string {
   return color.toLowerCase() === '#ffffff' ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.92)';
@@ -38,7 +41,8 @@ function boxColor(color: string): string {
 /** Where a text layer's lines sit, in output pixels. Shared by drawing and mention tap targets. */
 export function measureText(ctx: CanvasRenderingContext2D, layer: TextLayer) {
   const px = Math.round(layer.size * OUT_W);
-  ctx.font = FONT.replace('{size}', String(px));
+  const { fontFamily, fontStyle, fontWeight } = captionFontStyle(layer.font);
+  ctx.font = `${fontStyle} ${fontWeight} ${px}px ${fontFamily}`;
   const lines = layer.text.split('\n');
   const lineH = px * 1.18;
   const padX = px * 0.32;
@@ -50,25 +54,29 @@ export function measureText(ctx: CanvasRenderingContext2D, layer: TextLayer) {
 
 export function drawTextLayer(ctx: CanvasRenderingContext2D, layer: TextLayer) {
   if (!layer.text.trim()) return;
+  ctx.save();
   const m = measureText(ctx, layer);
+  ctx.translate(m.cx, m.cy);
+  ctx.rotate((layer.rotation ?? 0) * Math.PI / 180);
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'center';
-  const top = m.cy - m.h / 2;
+  const top = -m.h / 2;
   m.lines.forEach((line, i) => {
     const y = top + m.px * 0.1 + m.lineH * (i + 0.5);
     if (layer.box) {
       const w = m.widths[i] + m.padX * 2;
       ctx.fillStyle = boxColor(layer.color);
-      roundRect(ctx, m.cx - w / 2, y - m.lineH / 2, w, m.lineH, m.px * 0.28);
+      roundRect(ctx, -w / 2, y - m.lineH / 2, w, m.lineH, m.px * 0.28);
       ctx.fill();
     } else {
       ctx.shadowColor = 'rgba(0,0,0,0.45)';
       ctx.shadowBlur = m.px * 0.35;
     }
     ctx.fillStyle = layer.box && layer.color.toLowerCase() === '#ffffff' ? '#ffffff' : layer.color;
-    ctx.fillText(line, m.cx, y);
+    ctx.fillText(line, 0, y);
     ctx.shadowBlur = 0;
   });
+  ctx.restore();
 }
 
 function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
@@ -101,7 +109,36 @@ export function mentionBoxes(layers: TextLayer[]): { address: string; x: number;
 }
 
 /** Draw a picture to fill the frame, or, when it is much wider, whole over a blurred copy of itself. */
-function drawMedia(ctx: CanvasRenderingContext2D, source: CanvasImageSource, sw: number, sh: number) {
+/** Colour looks for photo moments (canvas + CSS filter strings). */
+export const PHOTO_LOOKS = {
+  none: 'none',
+  warm: 'sepia(0.25) saturate(1.3) hue-rotate(-8deg)',
+  cool: 'saturate(1.1) hue-rotate(14deg) brightness(1.05)',
+  vivid: 'saturate(1.6) contrast(1.1)',
+  fade: 'contrast(0.85) brightness(1.1) saturate(0.8)',
+  mono: 'grayscale(1)',
+  noir: 'grayscale(1) contrast(1.4) brightness(0.95)',
+  retro: 'sepia(0.6) contrast(1.05) saturate(1.1)',
+} as const;
+export type PhotoLook = keyof typeof PHOTO_LOOKS;
+
+/** What fills the frame around a wide photo. */
+export const PHOTO_BACKDROPS = {
+  blur: null,
+  black: ['#000000', '#000000'],
+  dusk: ['#a391fc', '#f39bff'],
+  sunset: ['#ff6fb1', '#ffb36b'],
+  ocean: ['#7fe3e0', '#3a7bd5'],
+  forest: ['#1f4037', '#99f2c8'],
+} as const;
+export type PhotoBackdrop = keyof typeof PHOTO_BACKDROPS;
+
+export function backdropCss(backdrop: PhotoBackdrop): string | null {
+  const stops = PHOTO_BACKDROPS[backdrop];
+  return stops ? `linear-gradient(160deg, ${stops[0]}, ${stops[1]})` : null;
+}
+
+function drawMedia(ctx: CanvasRenderingContext2D, source: CanvasImageSource, sw: number, sh: number, look: PhotoLook = 'none', backdrop: PhotoBackdrop = 'blur') {
   const frame = OUT_W / OUT_H;
   const ratio = sw / sh;
   const cover = () => {
@@ -110,18 +147,36 @@ function drawMedia(ctx: CanvasRenderingContext2D, source: CanvasImageSource, sw:
     const h = sh * scale;
     ctx.drawImage(source, (OUT_W - w) / 2, (OUT_H - h) / 2, w, h);
   };
+  const lookFilter = PHOTO_LOOKS[look] ?? 'none';
   if (ratio <= 0.75) {
+    ctx.save();
+    ctx.filter = lookFilter;
     cover();
+    ctx.restore();
+    ctx.filter = 'none';
     return;
   }
-  ctx.save();
-  ctx.filter = 'blur(40px) brightness(0.6)';
-  cover();
-  ctx.restore();
-  ctx.filter = 'none';
+  const stops = PHOTO_BACKDROPS[backdrop];
+  if (stops) {
+    const g = ctx.createLinearGradient(0, 0, OUT_W * 0.35, OUT_H);
+    g.addColorStop(0, stops[0]);
+    g.addColorStop(1, stops[1]);
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, OUT_W, OUT_H);
+  } else {
+    ctx.save();
+    ctx.filter = 'blur(40px) brightness(0.6)';
+    cover();
+    ctx.restore();
+    ctx.filter = 'none';
+  }
   const w = OUT_W;
   const h = OUT_W / ratio;
+  ctx.save();
+  ctx.filter = lookFilter;
   ctx.drawImage(source, 0, (OUT_H - h) / 2, w, h);
+  ctx.restore();
+  ctx.filter = 'none';
   void frame;
 }
 
@@ -132,14 +187,14 @@ function toBlob(canvas: HTMLCanvasElement, type: string, quality?: number): Prom
 }
 
 /** A photo moment: the photo, the drawing and the words, flattened into one JPEG. */
-export async function composePhoto(image: HTMLImageElement, drawing: HTMLCanvasElement | null, layers: TextLayer[]): Promise<Blob> {
+export async function composePhoto(image: HTMLImageElement, drawing: HTMLCanvasElement | null, layers: TextLayer[], look: PhotoLook = 'none', backdrop: PhotoBackdrop = 'blur'): Promise<Blob> {
   const canvas = document.createElement('canvas');
   canvas.width = OUT_W;
   canvas.height = OUT_H;
   const ctx = canvas.getContext('2d')!;
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, OUT_W, OUT_H);
-  drawMedia(ctx, image, image.naturalWidth, image.naturalHeight);
+  drawMedia(ctx, image, image.naturalWidth, image.naturalHeight, look, backdrop);
   if (drawing) ctx.drawImage(drawing, 0, 0, OUT_W, OUT_H);
   layers.forEach(l => drawTextLayer(ctx, l));
   return toBlob(canvas, 'image/jpeg', 0.9);

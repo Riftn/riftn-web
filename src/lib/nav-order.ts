@@ -23,13 +23,14 @@
 
 import { useSyncExternalStore } from 'react';
 
-export type NavOrderSurface = 'menu' | 'rail' | 'bar';
+export type NavOrderSurface = 'menu' | 'rail' | 'bar' | 'home';
 
 /** Keys in the account's preference blob. Same names in dehub-mobile. */
 export const NAV_ORDER_PREF_KEYS: Record<NavOrderSurface, string> = {
   menu: 'menuOrder',
   rail: 'railOrder',
   bar: 'barOrder',
+  home: 'homeShortcuts',
 };
 
 const STORAGE_PREFIX = 'dehub.navOrder.';

@@ -115,6 +115,7 @@ import { SwipeableCarousel } from '@/components/app/SwipeableCarousel';
 import { MobileWhoToFollowCarousel } from '@/components/app/mobile';
 import { NewMembersCarousel } from '@/components/app/NewMembersCarousel';
 import { LeaderboardCarousel } from '@/components/app/feeds/LeaderboardCarousel';
+import { HomeShortcuts } from '../navigation/HomeShortcuts';
 import { StoryShelf } from '@/components/app/stories/StoryShelf';
 import { PromptFlowModalLazy as PromptFlowModal } from '@/components/app/feeds/PromptFlowModalLazy';
 
@@ -482,6 +483,8 @@ function nftToFeedItem(pinnedPost: any): FeedItemType {
         comicBorder: pinnedPost.comicBorder,
         hideAssetCards: pinnedPost.hideAssetCards,
         hiddenLinkPreviews: pinnedPost.hiddenLinkPreviews,
+        imageTags: pinnedPost.imageTags,
+        hasQuiz: pinnedPost.hasQuiz,
         spoilerText: pinnedPost.spoilerText,
         quotePolicy: pinnedPost.quotePolicy,
         visibility: pinnedPost.visibility,
@@ -524,6 +527,8 @@ function nftToFeedItem(pinnedPost: any): FeedItemType {
         comicBorder: pinnedPost.comicBorder,
         hideAssetCards: pinnedPost.hideAssetCards,
         hiddenLinkPreviews: pinnedPost.hiddenLinkPreviews,
+        imageTags: pinnedPost.imageTags,
+        hasQuiz: pinnedPost.hasQuiz,
         spoilerText: pinnedPost.spoilerText,
         quotePolicy: pinnedPost.quotePolicy,
         visibility: pinnedPost.visibility,
@@ -571,6 +576,8 @@ function nftToFeedItem(pinnedPost: any): FeedItemType {
         comicBorder: pinnedPost.comicBorder,
         hideAssetCards: pinnedPost.hideAssetCards,
         hiddenLinkPreviews: pinnedPost.hiddenLinkPreviews,
+        imageTags: pinnedPost.imageTags,
+        hasQuiz: pinnedPost.hasQuiz,
         spoilerText: pinnedPost.spoilerText,
         quotePolicy: pinnedPost.quotePolicy,
         visibility: pinnedPost.visibility,
@@ -1988,7 +1995,7 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
         if (posts === LIVE_INSERT_AFTER && liveNowStreams.length) inserts.push(
           <div key="live-now" className="space-y-2">
             <div className="flex items-center gap-2 px-1">
-              <span data-live-pulse className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+              {liveNowStreams.some(stream => stream.isLive) && <span data-live-pulse className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />}
               <h3 className="text-white font-semibold text-sm">{_copy("copy.e4629246c285", { defaultValue: "Livestreams" })}</h3>
             </div>
             <SwipeableCarousel>
@@ -2203,14 +2210,14 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
       })()}
 
 
+      <HomeShortcuts />
+      {!showFilterLoader && <StoryShelf />}
       {showFilterLoader ? (
         <FeedFilterLoader />
       ) : (isLoadingState || isAutoRetrying) ? (
         <FeedCardSkeletonList count={6} columns={colCount} />
       ) : (
         <>
-      {/* The Glass Shelf: your day, everyone live, and people's 24-hour moments */}
-      <StoryShelf />
 
           {/* Follow groups. Only in Following mode, and only once there is a
               group to pick — an empty row would be a permanent nudge to use a

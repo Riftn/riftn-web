@@ -443,3 +443,30 @@ html[data-arrival-glass] .signin-handoff-veil { background: rgba(6, 7, 9, 0.72);
 .look-previews-paused *,
 .look-previews-paused *::before,
 .look-previews-paused *::after { animation-play-state: paused !important; }
+
+/* Light themes: the sign-in page is light there, and a near-black veil swept
+   over it like a dark wave. A pale veil instead, and none of the rift. */
+html:is([data-theme='light'], [data-system-tone='light']) .signin-rift__veil {
+  background: rgba(247, 248, 250, 0.96);
+}
+html:is([data-theme='light'], [data-system-tone='light']) .signin-rift__stage {
+  visibility: hidden;
+}
+@media (min-width: 768px) {
+  html:is([data-theme='light'], [data-system-tone='light']) .signin-handoff-veil {
+    background: rgba(247, 248, 250, 0.96);
+  }
+}
+
+/* Phones: the picture stays whole until it sits on the page's own, which
+   shows from then (SignInHandoff), and only then lets go. */
+@media (max-width: 767px) {
+  .signin-rift[data-phase="flying"] .signin-rift__frame,
+  .signin-rift[data-concept][data-revealed][data-phase="flying"] .signin-rift__frame {
+    transition:
+      transform 520ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      border-radius 520ms ease,
+      opacity 120ms ease 540ms,
+      box-shadow 300ms ease;
+  }
+}

@@ -13,6 +13,8 @@
  * every page has a home).
  */
 import type { NavItem } from '@/types/app.types';
+import type { MenuGroupMoves } from '@/lib/menu-group-moves';
+import { navItemId } from './nav-item-id';
 
 export type MenuGroupId = 'main' | 'create' | 'discover' | 'money' | 'riftn';
 
@@ -38,18 +40,37 @@ export interface MenuGroup extends MenuGroupDef {
   items: NavItem[];
 }
 
-/** Sort the visible rows into the groups, in each group's default order. */
-export function groupMenuItems(items: readonly NavItem[]): MenuGroup[] {
+/** The group a page sits in by default, if any. */
+export function defaultMenuGroupOf(item: NavItem): MenuGroupId | null {
+  return MENU_GROUPS.find((def) => def.labels.includes(item.label))?.id ?? null;
+}
+
+/**
+ * Sort the visible rows into the groups, in each group's default order. Pages
+ * the person moved to another group (lib/menu-group-moves) go to the end of
+ * that group instead; the dragged menu order then places them within it.
+ */
+export function groupMenuItems(items: readonly NavItem[], moves: MenuGroupMoves = {}): MenuGroup[] {
   const byLabel = new Map(items.map((item) => [item.label, item]));
+  const movedTo = (item: NavItem) => moves[navItemId(item)];
   const placed = new Set<string>(MENU_UNGROUPED);
   const groups = MENU_GROUPS.map((def) => {
     const groupItems: NavItem[] = [];
     for (const label of def.labels) {
       const item = byLabel.get(label);
-      if (item) { groupItems.push(item); placed.add(label); }
+      if (!item) continue;
+      const target = movedTo(item);
+      if (target && target !== def.id) continue;
+      groupItems.push(item); placed.add(label);
     }
     return { ...def, items: groupItems };
   });
+  for (const item of items) {
+    if (placed.has(item.label)) continue;
+    const target = movedTo(item);
+    const group = target ? groups.find((g) => g.id === target) : undefined;
+    if (group) { group.items.push(item); placed.add(item.label); }
+  }
   const leftovers = items.filter((item) => !placed.has(item.label));
   if (leftovers.length) groups[groups.length - 1].items.push(...leftovers);
   // A group with nothing in it (Kids Mode keeps only a few pages) is dropped.

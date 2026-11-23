@@ -35,8 +35,9 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { DhbAmount } from '@/components/app/DhbAmount';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getNFTInfo, DeHubNFT, updateTokenVisibility, TokenVisibility } from '@/lib/api/dehub';
+import { DeHubNFT, updateTokenVisibility, TokenVisibility } from '@/lib/api/dehub';
 import { findCachedFeedPost } from '@/hooks/use-unified-feed';
+import { loadPostData } from '@/lib/post-warm';
 import { useMintExistingPost } from '@/hooks/use-mint-existing-post';
 import { MintChainSheet } from '@/components/app/mint/MintChainSheet';
 import { buildAvatarUrl } from '@/lib/media-url';
@@ -113,7 +114,8 @@ export default function PostInfoPage() {
     error 
   } = useQuery({
     queryKey: ['nft-info', postId],
-    queryFn: () => getNFTInfo(postId!),
+    // Joins the request the tap that opened this page already started.
+    queryFn: () => loadPostData(postId!),
     enabled: !!postId,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 30 * 60 * 1000, // 30 minutes in cache
@@ -919,7 +921,7 @@ export default function PostInfoPage() {
           currentSpoilerText={nftInfo.spoilerText}
           currentQuotePolicy={nftInfo.quotePolicy}
           currentReplyPolicy={nftInfo.replyPolicy}
-          currentVisibility={(nftInfo as any).visibility}
+          currentVisibility={(nftInfo as any).justMe ? 'self' : (nftInfo as any).visibility}
           currentForKids={nftInfo.forKids}
           currentShopLinks={(nftInfo as any).shopLinks}
           onSuccess={(edited) => {

@@ -29,7 +29,7 @@ describe('bookmark folder drawer regression contract', () => {
     expect(drawer).toContain('role="status"');
     expect(drawer).toContain("suppressToast: true");
     expect(drawer).not.toContain("import { toast } from 'sonner'");
-    expect(drawer).toContain('defaultValue: "Saved to {{value1}}", value1: created.name');
+    expect(drawer).toMatch(/await addToFolderAsync\(\{ folderId: created\._id,[^;]+;\s*onOpenChange\(false\)/);
     expect(drawer).toContain("tone: 'success'");
     expect(foldersHook).toContain('if (!suppressToast)');
   });

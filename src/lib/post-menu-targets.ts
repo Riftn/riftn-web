@@ -4,6 +4,7 @@
  */
 import type { ImagePost, ShortVideo, TextPost, VideoItem } from '@/types/feed.types';
 import type { PostMenuTarget } from './post-menu';
+import { videoNeedsAccess } from '@/lib/api/dehub/video-access';
 
 const signedSlug = (p: { status?: string; newPostId?: number }) => (p.status === 'signed' ? p.newPostId ?? null : null);
 
@@ -61,6 +62,7 @@ export function videoMenuTarget(video: VideoItem): PostMenuTarget {
     myReaction: video.myReaction,
     isReposted: video.isReposted,
     noTip: !!video.creatorPaymentsDisabled,
+    videoUrl: video.isAudio || video.isLivePost || videoNeedsAccess(video) ? null : video.videoUrl,
   };
 }
 
@@ -80,5 +82,6 @@ export function shortMenuTarget(short: ShortVideo): PostMenuTarget {
     myReaction: short.myReaction,
     isReposted: s.isReposted,
     noTip: !!s.creatorPaymentsDisabled,
+    videoUrl: short.gated ? null : short.videoUrl,
   };
 }

@@ -1,0 +1,117 @@
+/* Requests board: where a request is (Asked > In progress > Shipped) and the
+   owners' progress note. One accent per theme (--tint-accent); System and
+   Minimal use white, light themes ink. Status reads from words, not hues. */
+.rq {
+  --rq-accent: color-mix(in srgb, var(--tint-accent, #fff) 55%, #fff);
+  --rq-ink: rgb(255 255 255 / 0.92);
+  --rq-muted: rgb(255 255 255 / 0.68);
+  --rq-faint: rgb(255 255 255 / 0.5);
+  --rq-line: rgb(255 255 255 / 0.16);
+  --rq-travel: cubic-bezier(0.45, 0, 0.1, 1);
+  --rq-arrive: cubic-bezier(0.25, 0.8, 0.25, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+html[data-theme='system'] .rq,
+html[data-theme='minimal'] .rq,
+html[data-theme='cosmic'] .rq {
+  --rq-accent: #fff;
+}
+html[data-system-tone='light'] .rq,
+html[data-theme='light'] .rq {
+  --rq-accent: #111114;
+  --rq-ink: #111114;
+  --rq-muted: rgb(11 11 13 / 0.76);
+  --rq-faint: rgb(11 11 13 / 0.6);
+  --rq-line: rgb(11 11 13 / 0.14);
+}
+
+.rq-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+.rq-note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--rq-muted);
+  overflow-wrap: anywhere;
+}
+
+.rq-flat-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--rq-ink);
+  white-space: nowrap;
+}
+.rq-dot { width: 6px; height: 6px; border-radius: 999px; background: var(--rq-muted); flex: none; }
+
+/* Track */
+.rq-track { display: flex; align-items: center; flex-wrap: wrap; row-gap: 6px; }
+.rq-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--rq-faint);
+  white-space: nowrap;
+}
+.rq-step-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  border: 1px solid var(--rq-faint);
+  flex: none;
+}
+.rq-step.rq-done { color: var(--rq-muted); }
+.rq-step.rq-done .rq-step-dot { background: var(--rq-muted); border-color: var(--rq-muted); }
+.rq-step.rq-now { color: var(--rq-ink); font-weight: 600; }
+.rq-step.rq-now .rq-step-dot { width: 8px; height: 8px; background: var(--rq-accent); border-color: var(--rq-accent); }
+
+.rq-seg {
+  position: relative;
+  width: 20px;
+  height: 1px;
+  margin: 0 8px;
+  background: var(--rq-line);
+  overflow: hidden;
+  flex: none;
+}
+.rq-seg::after { content: ''; position: absolute; inset: 0; }
+.rq-seg-done::after { background: var(--rq-muted); }
+
+/* Motion: the line fills from Asked to now, the current dot arrives, then it
+   breathes and a soft light runs on toward Shipped while work goes on. */
+@media (prefers-reduced-motion: no-preference) {
+  .rq-track .rq-seg-done::after { transform: scaleX(0); transform-origin: left center; }
+  .rq-track .rq-now .rq-step-dot { transform: scale(0.4); opacity: 0.3; }
+  .rq-track .rq-now { color: var(--rq-faint); }
+
+  .rq-track[data-in] .rq-seg-done::after { animation: rq-fill 520ms var(--rq-travel) 80ms forwards; }
+  .rq-track[data-in] .rq-now { animation: rq-ink 320ms var(--rq-arrive) 380ms both; }
+  .rq-track[data-in] .rq-now .rq-step-dot {
+    animation:
+      rq-arrive 320ms var(--rq-arrive) 420ms forwards,
+      rq-breathe 2400ms ease-in-out 1200ms infinite;
+  }
+  .rq-track[data-in] .rq-seg-next::after {
+    background: linear-gradient(90deg, transparent, var(--rq-accent), transparent);
+    transform: translateX(-100%);
+    animation: rq-run 2400ms var(--rq-travel) 1200ms infinite;
+  }
+}
+
+@keyframes rq-ink { from { color: var(--rq-faint); } to { color: var(--rq-ink); } }
+@keyframes rq-fill { to { transform: scaleX(1); } }
+@keyframes rq-arrive { from { transform: scale(0.4); opacity: 0.3; } to { transform: scale(1); opacity: 1; } }
+@keyframes rq-breathe {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.8); opacity: 0.55; }
+}
+@keyframes rq-run {
+  0% { transform: translateX(-100%); }
+  60%, 100% { transform: translateX(100%); }
+}

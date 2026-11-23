@@ -36,7 +36,7 @@ import { useRowLongPress } from '@/hooks/use-row-long-press';
 import { MessageRequestsHeader, MessageRequestsRow } from '@/components/app/chat/MessageRequestBar';
 import { MessagesNavGlyph } from '@/components/app/navigation/MessagesNavGlyph';
 import '@/styles/messages-cards.css';
-import { useChatCards } from '@/lib/chat-cards';
+import { useFeedSeparator } from '@/lib/feed-separator';
 
 import { VerifiedBadge } from '@/components/app/VerifiedBadge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -80,6 +80,7 @@ import dehubLogo from '@/assets/dehub-logo.png';
 import { SEOHead } from '@/components/SEOHead';
 import { blockUser } from '@/lib/api/dehub/blocks';
 import { toast } from 'sonner';
+import { NotesSheetHost, openNotesSheet } from '@/components/app/chat/NotesRow';
 import { LiveRipple } from '@/components/app/LiveRipple';
 import { NewGroupChannelSheet, type NewChatKind } from '@/components/app/chat/NewGroupChannelSheet';
 import { GroupChatRow } from '@/components/app/chat/GroupChatRow';
@@ -545,8 +546,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // Groups / Requests (/ Archived) tabs: in the header pill on computers, in
   // a row at the top of the list on phones.
   const cards = !fullscreen;
-  // Settings → Appearance → Chats as cards, off: the same page as a plain list.
-  const plainList = !useChatCards() && cards;
+  const plainList = useFeedSeparator() === 'line' && cards;
   const deskCards = cards && !phonePill;
   const clearHistory = useClearChatHistory();
   const [showArchived, setShowArchived] = useState(false);
@@ -564,20 +564,15 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   }, [selectedConversation, showPublicChat, selectedRoom]);
   const [clearTarget, setClearTarget] = useState<DeHubConversation | null>(null);
   const lastActivity = (c: DeHubConversation) => c.lastMessage?.createdAt || c.updatedAt;
-  const archivedConversations = richList
-    ? visibleConversations.filter(c => isArchived(chatPrefs.get(c.id), lastActivity(c)))
-    : [];
+  const archivedConversations = visibleConversations.filter(c => isArchived(chatPrefs.get(c.id), lastActivity(c)));
   const pinnedAt = (c: DeHubConversation) => {
     const at = chatPrefs.get(c.id)?.pinnedAt;
     return at ? new Date(at).getTime() : 0;
   };
-  const listedConversations = !richList
-    ? visibleConversations
-    : showArchived
-      ? archivedConversations
-      : visibleConversations
-          .filter(c => !isArchived(chatPrefs.get(c.id), lastActivity(c)))
-          .sort((a, b) => pinnedAt(b) - pinnedAt(a));
+  const otherConversations = visibleConversations.filter(c => !isArchived(chatPrefs.get(c.id), lastActivity(c)));
+  const phoneSearch = phonePill && !!searchQuery.trim();
+  const listedConversations = phoneSearch ? visibleConversations : showArchived ? archivedConversations
+    : richList ? otherConversations.sort((a, b) => pinnedAt(b) - pinnedAt(a)) : otherConversations;
   // Group, channel and community chats share the same settings, keyed by
   // community id: archived ones move under Archived chats, pinned ones go first.
   const roomPref = (c: { id: string }) => chatPrefs.get(roomChatId(c.id));
@@ -585,12 +580,10 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     const at = roomPref(c)?.pinnedAt;
     return at ? new Date(at).getTime() : 0;
   };
-  const archivedRooms = richList ? groupChats.filter(c => isArchived(roomPref(c))) : [];
-  const listedRooms = !richList
-    ? groupChats
-    : showArchived
-      ? archivedRooms
-      : groupChats.filter(c => !isArchived(roomPref(c))).sort((a, b) => roomPinnedAt(b) - roomPinnedAt(a));
+  const archivedRooms = groupChats.filter(c => isArchived(roomPref(c)));
+  const otherRooms = groupChats.filter(c => !isArchived(roomPref(c)));
+  const listedRooms = phoneSearch ? groupChats : showArchived ? archivedRooms
+    : richList ? otherRooms.sort((a, b) => roomPinnedAt(b) - roomPinnedAt(a)) : otherRooms;
   // "Add to tab" in a chat's menu.
   const tabMenuFor = (chatId: string): Pick<ChatOptionsHandlers, 'tabs' | 'onToggleTab' | 'onNewTabWith'> => (guest ? {} : {
     tabs: chatTabs.tabs.filter(x => !x.builtin).map(x => ({ id: x.id, name: x.name, emoji: x.emoji, has: x.chats.includes(chatId) })),
@@ -658,6 +651,9 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
       onToggleEncryption: conv.isGroup
         ? undefined
         : () => updateChatPref(conv.id, { encrypted: !chatPrefs.get(conv.id)?.encryptedAt }),
+      onToggleTranslateOut: conv.isGroup || !/^[0-9a-f]{24}$/i.test(conv.id)
+        ? undefined
+        : () => updateChatPref(conv.id, { translateOut: !chatPrefs.get(conv.id)?.translateOutAt }),
       onBlock: () => handleBlockConversationUser(conv),
       onClearHistory: () => setClearTarget(conv),
       onDelete: () => handleDeleteConversation(conv),
@@ -689,7 +685,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     e.preventDefault();
     holdToPick(id);
   };
-  // The phone list does not pin, archive or show mutes, but a chat you marked
+  // The phone list does not pin or show mutes, but a chat you marked
   // unread (here or on another device) still shows its marker.
   const unreadOnly = (p: ChatPref | undefined): ChatPref | undefined =>
     p?.markedUnread ? { ...p, pinnedAt: null, mutedUntil: null } : undefined;
@@ -707,6 +703,18 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const bulkAllUnread = bulkCount > 0
     && bulkChats.every(c => c.unreadCount > 0 || !!chatPrefs.get(c.id)?.markedUnread)
     && bulkRooms.every(c => !!roomPref(c)?.markedUnread);
+  const bulkAllArchived = bulkChats.every(c => isArchived(chatPrefs.get(c.id), lastActivity(c)))
+    && bulkRooms.every(c => isArchived(roomPref(c)));
+  const archiveWallet = useRef(walletAddress);
+  archiveWallet.current = walletAddress;
+  const bulkToggleArchive = async () => {
+    const ids = [...bulkChats.map(c => c.id), ...bulkRooms.map(c => roomChatId(c.id))];
+    setBulkIds(null);
+    for (const id of ids) {
+      if (archiveWallet.current !== walletAddress) break;
+      await updateChatPref(id, { archived: !bulkAllArchived });
+    }
+  };
   const bulkToggleUnread = () => {
     const unread = !bulkAllUnread;
     for (const c of bulkChats) updateChatPref(c.id, { unread });
@@ -1184,6 +1192,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
         conversations={conversations ?? []}
         myAddress={walletAddress}
         onPick={pickFromDrawer}
+        onNote={() => { setShowNewMessageDrawer(false); openNotesSheet(); }}
         onGroup={() => { setShowNewMessageDrawer(false); setNewChatKind('group'); }}
         onChannel={() => { setShowNewMessageDrawer(false); setNewChatKind('channel'); }}
       />
@@ -1330,9 +1339,9 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
       }}
       className={deskCards ? 'px-0 pb-0 pt-0' : phonePill ? 'pl-3 pr-1 pb-0 pt-0' : undefined}
       bare={phonePill}
-      trailing={deskCards && (archivedCount > 0 || showArchived) ? (
+      trailing={(deskCards || phonePill) && (archivedCount > 0 || showArchived) ? (
         <button type="button" role="tab" data-chat-tab="archived" data-msg-cards-archived aria-selected={showArchived}
-          onClick={() => { setShowRequests(false); setShowArchived(!showArchived); }}>
+          onClick={() => { setShowRequests(false); setActiveTab('all'); setShowArchived(!showArchived); }}>
           <Archive className="h-3.5 w-3.5" />
           <span className="whitespace-nowrap">{_copy('chatMenu.archived', { defaultValue: 'Archived' })}</span>
           {archivedCount > 0 && <span data-chat-tab-unread data-quiet>{formatCount(archivedCount)}</span>}
@@ -1864,6 +1873,8 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
               chatIds={bulkChats.map(c => c.id)}
               allUnread={bulkAllUnread}
               onToggleUnread={bulkToggleUnread}
+              allArchived={bulkAllArchived}
+              onToggleArchive={phonePill && !guest && !inRequests && !bulkChats.some(c => c.isRequest) ? bulkToggleArchive : undefined}
               onDelete={bulkDelete}
               onReply={bulkReply}
               onCancel={() => setBulkIds(null)}
@@ -1905,9 +1916,18 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
         open={showMessageSelector}
         onOpenChange={setShowMessageSelector}
         onSelectDM={() => setShowNewConversation(true)}
+        onSelectNote={openNotesSheet}
         onSelectGroup={() => setNewChatKind('group')}
         onSelectChannel={() => setNewChatKind('channel')}
       />
+
+      {!guest && walletAddress && (
+        <NotesSheetHost onMessage={(author, reply) => {
+          // A reply to a note is sent as soon as the chat with them is ready.
+          if (reply) pendingAutoSendRef.current = { peerAddress: author.address.toLowerCase(), body: reply };
+          handleSelectSearchUser({ ...author, _id: author.address } as unknown as DeHubUser);
+        }} />
+      )}
 
       <NewGroupChannelSheet
         kind={newChatKind ?? 'group'}

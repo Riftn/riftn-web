@@ -13,7 +13,7 @@ import { MarketingWorkspace } from '@/components/app/creator/MarketingWorkspace'
 import { useMarketingHandoff } from '@/hooks/use-marketing-handoff';
 import { ModelMarquee } from '@/components/app/creator/ModelMarquee';
 import dehubIcon from '@/assets/dehub-logo-compact.png';
-import { ArrowUpRight, Bot, ChevronDown, Clapperboard, Film, ImageIcon, Mic2, PanelsTopLeft, PenTool, Wand2, Workflow } from "lucide-react";
+import { ArrowUpRight, Bot, ChevronDown, ChevronRight, Clapperboard, Compass, Film, ImageIcon, Mic2, PanelsTopLeft, PenTool, Smartphone, Tag, Wand2, Workflow } from "lucide-react";
 import Blocks from "@/components/ui/cut-icons/apps";
 import Megaphone from "@/components/ui/cut-icons/advertising";
 import Music2 from "@/components/ui/cut-icons/music";
@@ -51,6 +51,10 @@ interface Tool {
 }
 
 const navItems = ['Explore', 'Image', 'Video', 'Audio', 'Studio', 'Marketing', 'Agents', 'Apps'] as const;
+/** One glyph per menu row, like a native app menu. */
+const MENU_ICONS: Record<typeof navItems[number], React.ComponentType<{ className?: string }>> = {
+  Explore: Compass, Image: ImageIcon, Video: Film, Audio: Music2, Studio: Clapperboard, Marketing: Megaphone, Agents: Bot, Apps: Blocks,
+};
 const categories = ['All', 'Image', 'Video', 'Audio', 'Studio', 'Agents'] as const;
 
 /*
@@ -221,7 +225,7 @@ function CreatorLogoMenu({ active, onPick, onPricing, onEditor, onHome }: {
     document.addEventListener('keydown', esc);
     return () => { document.removeEventListener('pointerdown', away); document.removeEventListener('keydown', esc); };
   }, [open]);
-  const row = 'flex w-full items-center justify-between rounded-[10px] px-2.5 py-2 text-left text-[14px] font-semibold transition-colors';
+  const row = 'flex w-full items-center gap-3 rounded-[12px] px-3 py-2.5 text-left text-[14px] font-medium transition-colors';
   const pick = (fn: () => void) => () => { setOpen(false); fn(); };
   return (
     <div ref={rootRef} className="relative shrink-0">
@@ -246,22 +250,38 @@ function CreatorLogoMenu({ active, onPick, onPricing, onEditor, onHome }: {
         <ChevronDown className={cn('h-3.5 w-3.5 text-white/60 transition-transform', open && 'rotate-180')} />
       </button>
       {open && (
-        <div role="menu" className="absolute left-0 top-full z-[80] mt-2 w-60 rounded-[18px] border border-white/10 bg-[#0e0f11]/[0.98] p-2 text-white shadow-[0_30px_60px_rgba(0,0,0,0.6)]">
-          {navItems.map((item, index) => (
-            <div key={item}>
-              {index === 4 && <div className="mx-1 my-1.5 border-t border-white/[0.08]" />}
-              <button type="button" role="menuitem" onClick={pick(() => onPick(item))} className={cn(row, active === item ? 'bg-white/[0.08] text-white' : 'text-white/80 hover:bg-white/[0.05]')}>
-                {t(NAV_KEYS[item])}
-              </button>
-            </div>
-          ))}
-          <div className="mx-1 my-1.5 border-t border-white/[0.08]" />
-          <button type="button" role="menuitem" onClick={pick(onPricing)} className={cn(row, 'text-white/80 hover:bg-white/[0.05]')}>
-            {t('creator.pricing')}
-            <span className="rounded px-1.5 py-0.5 text-[9px] font-black leading-none text-white" style={{ backgroundColor: hot }}>{t('creator.thirtyOff')}</span>
+        <div role="menu" data-creator-logo-menu className="absolute left-0 top-full z-[80] mt-2 w-[272px] rounded-[20px] border border-white/10 bg-[#121316]/[0.98] p-1.5 text-white shadow-[0_24px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+          {navItems.map((item, index) => {
+            const Icon = MENU_ICONS[item];
+            const on = active === item;
+            return (
+              <div key={item}>
+                {index === 4 && <div className="mx-3 my-1.5 h-px bg-white/[0.08]" />}
+                <button type="button" role="menuitem" aria-current={on ? 'page' : undefined} onClick={pick(() => onPick(item))} className={cn(row, on ? 'bg-white/[0.09] text-white' : 'text-white/85 hover:bg-white/[0.05]')}>
+                  <span aria-hidden="true" className="flex shrink-0"><Icon className="h-[18px] w-[18px] opacity-90" /></span>
+                  <span className="min-w-0 flex-1 truncate">{t(NAV_KEYS[item])}</span>
+                  <ChevronRight className="h-4 w-4 shrink-0 opacity-40" aria-hidden="true" />
+                </button>
+              </div>
+            );
+          })}
+          <div className="mx-3 my-1.5 h-px bg-white/[0.08]" />
+          <button type="button" role="menuitem" data-menu-hot onClick={pick(onPricing)} className={cn(row, 'text-white hover:brightness-110')} style={{ backgroundColor: `${hot}1f` }}>
+            <Tag className="h-[18px] w-[18px] shrink-0" style={{ color: hot }} aria-hidden="true" />
+            <span className="min-w-0 flex-1 truncate">{t('creator.pricing')}</span>
+            <span className="shrink-0 rounded-full px-2 py-1 text-[10px] font-bold leading-none" style={{ backgroundColor: `${hot}33`, color: hot }}>{t('creator.thirtyOff')}</span>
+            <ChevronRight className="h-4 w-4 shrink-0 opacity-40" aria-hidden="true" />
           </button>
-          <button type="button" role="menuitem" onClick={pick(onEditor)} className={cn(row, 'text-white/80 hover:bg-white/[0.05]')}>{t('creator.editor')}</button>
-          <button type="button" role="menuitem" onClick={pick(onHome)} className={cn(row, 'text-white/80 hover:bg-white/[0.05]')}>{t('creator.openApp')}</button>
+          <button type="button" role="menuitem" onClick={pick(onEditor)} className={cn(row, 'text-white/85 hover:bg-white/[0.05]')}>
+            <PenTool className="h-[18px] w-[18px] shrink-0 opacity-90" aria-hidden="true" />
+            <span className="min-w-0 flex-1 truncate">{t('creator.editor')}</span>
+            <ChevronRight className="h-4 w-4 shrink-0 opacity-40" aria-hidden="true" />
+          </button>
+          <button type="button" role="menuitem" onClick={pick(onHome)} className={cn(row, 'text-white/85 hover:bg-white/[0.05]')}>
+            <Smartphone className="h-[18px] w-[18px] shrink-0 opacity-90" aria-hidden="true" />
+            <span className="min-w-0 flex-1 truncate">{t('creator.openApp')}</span>
+            <ArrowUpRight className="h-4 w-4 shrink-0 opacity-50" aria-hidden="true" />
+          </button>
         </div>
       )}
     </div>

@@ -32,6 +32,22 @@ export function parseDurationToSeconds(duration: string): number {
   return parts[0] || 0;
 }
 
+/** Cover mature media before any viewer player, poster or preloader receives it. */
+export function asViewerSlide(short: ShortVideo): ShortVideo {
+  if (short.contentRating !== 'mature' || short.reelPost?.kind === 'mature') return short;
+  return {
+    ...short,
+    reelPost: { kind: 'mature' },
+    thumbnail: '',
+    videoUrl: '',
+    hlsUrl: undefined,
+    storyboard: undefined,
+    imageUrls: undefined,
+    soundtrackUrl: undefined,
+    duetOf: undefined,
+  };
+}
+
 // Map video NFT to ShortVideo format
 export function mapToShortVideo(nft: any, index: number): ShortVideo & { durationSeconds: number; uploadedAgo: string } {
   const id = String(nft.tokenId || nft.id || nft.token_id);

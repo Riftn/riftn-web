@@ -1,6 +1,6 @@
 /**
  * Settings → Appearance → Sign-in screen: how the Riftn logo and headline look
- * on the sign-in sheet. On a phone the cards are a side-swipe carousel, and a
+ * on the sign-in sheet. The cards are a side-scroll carousel, and a
  * card builds and plays its look only once it is swiped into view. Kept on
  * this device (lib/login-look), so it still applies once signed out.
  */
@@ -36,6 +36,7 @@ function LoginLookCard({ look, active, label }: { look: LoginLook; active: boole
       onClick={() => setLoginLook(look)}
       className={cn(
         LOOK_CARD_CLASS,
+        'sm:w-[27%]',
         'group flex min-w-0 flex-col gap-2 rounded-2xl p-1.5 text-left transition-colors',
         active ? 'bg-white/10 ring-2 ring-white' : 'ring-1 ring-white/10 hover:bg-white/5',
         !inView && 'look-previews-paused',
@@ -68,7 +69,6 @@ export function LoginLookSetting() {
       <LookCarousel
         label={t('settings.loginLook.title', 'Sign-in screen')}
         activeIndex={Math.max(0, LOGIN_LOOKS.indexOf(current))}
-        desktopCols="sm:grid-cols-4"
       >
         {LOGIN_LOOKS.map((look) => {
           const [key, fallback] = LABELS[look];

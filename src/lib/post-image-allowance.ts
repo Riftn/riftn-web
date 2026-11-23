@@ -1,3 +1,4 @@
+import type { DeHubUser } from '@/lib/api/dehub/types';
 import { BADGE_ORDER, getBadgeName, parseBadgeLock } from '@/lib/staking-badges';
 
 export const MAX_IMAGE_UPLOAD_BYTES = 42_069_000;
@@ -40,18 +41,35 @@ const MEDIA_GB_BY_BADGE_INDEX = [
 
 export const BASE_POST_IMAGE_BYTES = 1024 ** 3;
 
-export function getPostImageBytesForBadge(
+function mediaAllowanceForBadge(
   badgeBalance: number | string | null | undefined,
   username?: string | null,
   badgeLock?: unknown,
-): number {
+) {
   const badge = getBadgeName(badgeBalance, username, {
     lock: parseBadgeLock(badgeLock),
   });
   const badgeIndex = badge ? BADGE_ORDER.indexOf(badge) : -1;
   const gb = badgeIndex >= 0 ? MEDIA_GB_BY_BADGE_INDEX[badgeIndex] : undefined;
 
-  return gb ? gb * 1024 ** 3 : BASE_POST_IMAGE_BYTES;
+  return { tier: badge, bytes: gb ? gb * 1024 ** 3 : BASE_POST_IMAGE_BYTES };
+}
+
+/** Match the quota service's earned balance and full-rights grants while its read is pending. */
+export function getPostMediaAllowanceForAccount(
+  user: Pick<DeHubUser, 'badgeBalance' | 'ownBadgeBalance' | 'badgeLock' | 'username'> | null | undefined,
+) {
+  const name = user?.username?.trim().replace(/^@/, '').toLowerCase();
+  const grant = name === 'maldoteth' || name === 'mal' ? name : undefined;
+  return mediaAllowanceForBadge(user?.ownBadgeBalance ?? user?.badgeBalance, grant, user?.badgeLock);
+}
+
+export function getPostImageBytesForBadge(
+  badgeBalance: number | string | null | undefined,
+  username?: string | null,
+  badgeLock?: unknown,
+): number {
+  return mediaAllowanceForBadge(badgeBalance, username, badgeLock).bytes;
 }
 
 export function getPostImageLimitForBadge(

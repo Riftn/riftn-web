@@ -264,6 +264,111 @@ function preloadWalletChunkPlugin() {
 }
 
 /**
+ * A post link needs three sets of code before its post is on screen: the app,
+ * the post page, and for a live the player and its chat. Each used to be asked
+ * for only once the one before it had arrived and run, so they came down one
+ * after another: the post page ~0.8 s after the app, the player after that.
+ *
+ * This hands the first inline script of index.html the file lists, so on a
+ * post link it can ask for the post page at once, and for the player the
+ * moment the post's own answer says it is a live. The lists replace the
+ * "__POST_LINK_CODE__" marker in that script:
+ *
+ *   r  the post page and everything it imports
+ *   l  the live player and live chat, less what the post page already has
+ *
+ * Nothing here is executed early, and nothing is fetched that the page would
+ * not fetch anyway a moment later.
+ */
+function postLinkCodePlugin() {
+  const MARKER = '"__POST_LINK_CODE__"';
+  return {
+    name: 'post-link-code',
+    apply: 'build' as const,
+    transformIndexHtml: {
+      order: 'post' as const,
+      handler(html: string, ctx: { bundle?: Record<string, any> }) {
+        const bundle = ctx.bundle;
+        if (!bundle) return html;
+        if (!html.includes(MARKER)) {
+          console.warn('[post-link-code] marker not found in index.html: post links load their code in turn again');
+          return html;
+        }
+
+        // The chunk a source file was built into. A file other code imports
+        // statically too (the live player is one) has no chunk named for it
+        // as an entry, so fall back to whichever chunk holds the module.
+        const chunkOf = (suffix: string): string | undefined => {
+          let holder: string | undefined;
+          for (const [fileName, chunk] of Object.entries(bundle)) {
+            if (chunk.type !== 'chunk') continue;
+            const facade = chunk.facadeModuleId?.replace(/\\/g, '/');
+            if (facade?.endsWith(suffix)) return fileName;
+            if (!holder && (chunk.moduleIds as string[] | undefined)?.some((id) => id.replace(/\\/g, '/').endsWith(suffix))) {
+              holder = fileName;
+            }
+          }
+          return holder;
+        };
+        /** A chunk, what it imports, and the stylesheets those carry. */
+        const closure = (roots: Array<string | undefined>, skip: Set<string>): string[] => {
+          const seen = new Set<string>();
+          const out: string[] = [];
+          const visit = (fileName: string) => {
+            if (seen.has(fileName)) return;
+            seen.add(fileName);
+            const chunk = bundle[fileName];
+            if (!chunk || chunk.type !== 'chunk') return;
+            if (!skip.has(fileName)) out.push(fileName);
+            for (const css of chunk.viteMetadata?.importedCss ?? []) {
+              if (!seen.has(css) && !skip.has(css)) out.push(css);
+              seen.add(css);
+            }
+            for (const imp of chunk.imports as string[]) visit(imp);
+          };
+          for (const root of roots) if (root) visit(root);
+          return out;
+        };
+
+        // What index.html already asks for: the app's own chunks and
+        // stylesheet, and the wallet closure.
+        const linked = new Set<string>();
+        for (const tag of html.matchAll(/<(?:link|script)\b[^>]*>/g)) {
+          const asset = tag[0].match(/\b(?:href|src)="\/(assets\/[^"]+)"/);
+          if (asset) linked.add(asset[1]);
+        }
+
+        const postPage = chunkOf('pages/app/SinglePostPage.tsx');
+        const player = chunkOf('components/app/cards/LiveStreamCard.tsx');
+        const chat = chunkOf('components/app/cards/LivePostChat.tsx');
+        if (!postPage || !player || !chat) {
+          console.warn(
+            `[post-link-code] chunk not found (post page ${postPage}, player ${player}, chat ${chat}): ` +
+              'post links load their code in turn again',
+          );
+          return html;
+        }
+        const route = closure([postPage], linked);
+        const live = closure([player, chat], new Set([...linked, ...route]));
+
+        const kb = (files: string[]) =>
+          Math.round(
+            files.reduce((sum, f) => {
+              const item = bundle[f];
+              return sum + (item?.code?.length ?? item?.source?.length ?? 0);
+            }, 0) / 1024,
+          );
+        console.log(
+          `[post-link-code] post page ${route.length} files ${kb(route)} KB, ` +
+            `live player and chat ${live.length} files ${kb(live)} KB`,
+        );
+        return html.replace(MARKER, () => JSON.stringify({ r: route, l: live }));
+      },
+    },
+  };
+}
+
+/**
  * Prerender the signed-out welcome panel into index.html.
  *
  * The panel is the home page's LCP element and used to be painted only once the
@@ -384,6 +489,7 @@ export default defineConfig(({ mode }) => ({
     blogManifestPlugin(),
     buildVersionPlugin(),
     preloadWalletChunkPlugin(),
+    postLinkCodePlugin(),
     prerenderHomeIntroPlugin(),
     startEntryAfterFirstPaintPlugin(),
     warGameCorsPlugin(),

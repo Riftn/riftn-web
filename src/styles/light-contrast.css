@@ -145,3 +145,79 @@ html[data-theme='system'][data-system-tone='light']:not(#_):not(#_):not(#_):not(
 html[data-system-tone='light']:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-profile-list-view] [data-feed-item] {
   border-radius: 0.75rem !important;
 }
+
+/* Icons that stayed white (or page-coloured) inside a button the light pass
+   had already turned pale: they take the button's own ink. */
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_)
+  [data-theme-button]:is([data-button-variant='default'], [data-button-variant='glass'], [data-button-variant='secondary'], [data-button-variant='outline']):not([data-keep-dark]):not([data-keep-white]):not([data-on-media]):not([data-on-media] *) > svg:not([class*='text-']) {
+  color: inherit !important;
+}
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_) [data-theme-control-label] svg.text-background {
+  color: #0b0b0d !important;
+}
+/* Docs and Support tiles: the brand gradient is dark grey on light, so its icon is white. */
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_)
+  .docs-root [class*='bg-gradient-to-']:is([class*='from-royal-blue'], [class*='from-sky-blue'], [class*='from-middle-blue']) > svg {
+  color: #fff !important;
+}
+
+/* Minimal Light: standalone pages (premium, creator flow, admin manual) paint
+   their own near-black shell with fixed hex classes. Their text was already
+   turned to ink, so the page read as dark on black. Same paper as the rest
+   (System Light does this in system-light.css). */
+html[data-theme='light'] #root:not(#_):not(#_):not(#_) :is([class*='bg-[#090a0b]'], [class*='bg-[#08080b]'], [class*='bg-[#111214]'], [class*='bg-[#0a0a0a]'], [class*='bg-[#0a0a0b]']):not([data-media-full]):not([data-media-full] *):not([data-keep-dark]):not([data-keep-dark] *) {
+  background-color: var(--paper) !important;
+  color: var(--ink) !important;
+}
+
+/* Minimal Light: /creator kept its near-black page while half of its text had
+   already been turned to ink (dark grey on black), and the hero title stayed
+   white on a pale picture. One paper page with ink text, as on System Light. */
+html[data-theme='light']:not(#_):not(#_) [data-creator-page] {
+  background-color: var(--paper) !important;
+}
+html[data-theme='light']:not(#_):not(#_) [data-creator-page] .text-white:not([data-keep-dark]):not([data-keep-dark] *):not([data-on-media]):not([data-on-media] *):not([data-media-full] *) {
+  color: var(--ink) !important;
+}
+
+/* Minimal Light, Pricing: the plan cards are washed pale there, so their
+   "included" lines (white/75) and the white logo had nothing to sit on. */
+html[data-theme='light']:not(#_):not(#_):not(#_) [data-pricing-page] [class*='text-white/']:not([data-keep-dark]):not([data-keep-dark] *) {
+  color: var(--ink-muted, #444) !important;
+}
+
+/* The flat white Riftn wordmark on the standalone pages (pricing, DePIN, prize
+   draws, stream, app): those pages turn to paper on light, so the mark is ink. */
+html:is([data-theme='light'], [data-system-tone='light']) [data-glass-page] img[src*='riftn-wordmark-flat-white']:not([data-keep-dark]):not([data-keep-dark] *) {
+  filter: invert(1);
+}
+
+/* Star field and its dark floor wash (install page, 404): drawn for a black
+   room, on paper they are a grey smudge behind ink text. */
+html:is([data-theme='light'], [data-system-tone='light']) [data-dark-backdrop] {
+  visibility: hidden;
+}
+/* Minimal Light: the white-glass buttons on those pages keep an edge. */
+html[data-theme='light']:not(#_):not(#_) [data-glass-page] :is(button, a)[class*='bg-white/10']:not([data-keep-dark]):not([data-keep-dark] *) {
+  background-color: rgb(17 17 20 / 0.05) !important;
+  border-color: rgb(17 17 20 / 0.18) !important;
+}
+
+/* Minimal Light, phone top bar: the white Riftn mark sat on paper. Its paper
+   rule keyed on the old alt text and stopped matching when the alt changed. */
+html[data-theme='light'] :is([data-mobile-header], [data-island-logo]) img[src*='dehub-logo-compact'] {
+  filter: invert(1) hue-rotate(180deg) brightness(0.9);
+}
+
+/* Pricing billing switch: the picked chip's glass lift is drawn for a black
+   page; on light it is a heavy grey smear under the chip. */
+html:is([data-theme='light'], [data-system-tone='light']) [data-pricing-page] button.text-black[style*='box-shadow'] {
+  box-shadow: 0 0 0 1px rgb(17 17 20 / 0.12), 0 2px 8px rgb(17 17 20 / 0.1) !important;
+}
+
+/* Settings > profile picture: the camera chip sits on the photo, so it stays a
+   dark chip with a white camera whatever the photo or theme. */
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_) [data-setting-anchor='profile-picture'] button[data-on-media] {
+  background-color: rgb(24 24 27 / 0.82) !important;
+  border-color: rgb(255 255 255 / 0.2) !important;
+}

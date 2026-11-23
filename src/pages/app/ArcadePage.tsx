@@ -17,7 +17,7 @@ import { useTranslation as _useCopy } from 'react-i18next';
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Swords } from "lucide-react";
+import { Hourglass, Swords } from "lucide-react";
 import Upload from "@/components/ui/cut-icons/upload";
 
 import Play from "@/components/ui/cut-icons/play";
@@ -30,11 +30,24 @@ import { ArcadeSubmissionForm } from '@/components/app/arcade/ArcadeSubmissionFo
 import { useAuth } from '@/contexts/AuthContext';
 import { ARCADE_GAMES, type ArcadeGame } from '@/config/arcade-games';
 
+/** Turn-based games played with friends (riftn-backend src/games). */
+const FRIEND_GAMES = [
+  {
+    href: '/arcade/okey',
+    art: '/og/arcade-okey.jpg',
+    titleKey: 'games.okey.title',
+    title: 'Okey 101',
+    blurbKey: 'games.okey.cardBlurb',
+    blurb: 'Four seats for friends, bots fill the rest. Open tables or lock one with a password.',
+  },
+] as const;
+
 /** The games that are a competition, in registry order. */
 const RANKED_GAMES = ARCADE_GAMES.filter((game) => game.leaderboard);
 
 function GameCard({ game }: { game: ArcadeGame }) {
   const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
   // Reduced motion gets the clip's poster as a plain image, never the loop.
   const reduceMotion = useReducedMotion();
   return (
@@ -103,6 +116,14 @@ function GameCard({ game }: { game: ArcadeGame }) {
             >
               <Swords className="h-3.5 w-3.5" />{_copy("copy.339071395687", { defaultValue: "Wager" })}</Link>
           ) : null}
+          {game.slowHref ? (
+            <Link
+              to={game.slowHref}
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-zinc-800 px-4 py-2 text-xs font-semibold text-zinc-200 transition-colors hover:bg-zinc-700"
+            >
+              <Hourglass className="h-3.5 w-3.5" />{t('games.chess.slowButton', { defaultValue: 'Days per move, vs a friend' })}
+            </Link>
+          ) : null}
         </div>
       </div>
     </div>
@@ -170,6 +191,32 @@ export default function ArcadePage() {
             each capture about 200px across, which is too small to read as a
             game rather than a thumbnail. A short second row is the cheaper
             trade. */}
+        {/* Games with friends: turn based, played against people (or bots),
+            with a push when it is your turn. Not iframe builds, so they sit
+            outside ARCADE_GAMES. */}
+        <section className="mb-3">
+          <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">{t('games.withFriends', { defaultValue: 'Play with friends' })}</h2>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            {FRIEND_GAMES.map((game) => (
+              <Link
+                key={game.href}
+                to={game.href}
+                data-feed-item
+                data-arcade-card
+                className="group flex flex-col overflow-hidden rounded-2xl bg-zinc-900 ring-1 ring-white/[0.06] transition-colors hover:ring-white/[0.14]"
+              >
+                <div className="relative aspect-[1200/630] overflow-hidden bg-black">
+                  <img src={game.art} alt="" width={1200} height={630} loading="eager" decoding="async" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+                </div>
+                <div className="flex flex-col gap-1 p-4">
+                  <p className="text-sm font-semibold text-white">{t(game.titleKey, { defaultValue: game.title })}</p>
+                  <p className="text-xs leading-relaxed text-zinc-400">{t(game.blurbKey, { defaultValue: game.blurb })}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
           {ARCADE_GAMES.map((game) => (
             <GameCard key={game.slug} game={game} />

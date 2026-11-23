@@ -442,6 +442,8 @@ export function mapNFTToLiveStream(nft: DeHubNFT, index: number): LiveStream {
     comicBorder: nft.comicBorder,
     hideAssetCards: nft.hideAssetCards,
     hiddenLinkPreviews: nft.hiddenLinkPreviews,
+    imageTags: nft.imageTags,
+    hasQuiz: nft.hasQuiz,
     spoilerText: nft.spoilerText,
     quotePolicy: nft.quotePolicy,
     visibility: nft.visibility,
@@ -576,6 +578,17 @@ export function useDeHubImages(options: Omit<UseDeHubFeedOptions, 'postType'> = 
 }
 
 /** Default params — Home, Live tab, and prefetch must match so React Query dedupes to one cache entry. */
+/**
+ * On air first (newest start first), then replays (newest end first). The
+ * list also carries recent recordings, so sorting on start time alone put a
+ * replay that started an hour ago above a stream that has been live for two.
+ */
+export function sortLiveThenReplays<T extends { status?: string; startedAt?: string; endedAt?: string; createdAt?: string }>(rows: T[]): T[] {
+  const onAir = (row: T) => (isStreamLive(row) ? 0 : 1);
+  const at = (row: T) => Date.parse((onAir(row) === 0 ? row.startedAt : row.endedAt || row.startedAt) || row.createdAt || '') || 0;
+  return [...rows].sort((a, b) => onAir(a) - onAir(b) || at(b) - at(a));
+}
+
 export const DEFAULT_DEHUB_LIVE_QUERY_OPTIONS = {
   unit: 200,
   sortMode: 'recent' as const,
@@ -606,10 +619,7 @@ export function useDeHubLive(options: { unit?: number; sortMode?: 'viewers' | 'r
         const streams = Array.isArray(response) ? response : (response.result || []);
 
         return {
-          data: merged.sortMode === 'recent' ? [...streams].sort((a, b) =>
-            (Date.parse(b.startedAt || b.createdAt || '') || 0) -
-            (Date.parse(a.startedAt || a.createdAt || '') || 0)
-          ) : streams,
+          data: merged.sortMode === 'recent' ? sortLiveThenReplays(streams) : streams,
           page: pageParam,
           has_more: streams.length >= merged.unit,
           total: streams.length,

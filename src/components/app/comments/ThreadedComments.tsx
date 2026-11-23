@@ -19,11 +19,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation as useI18n } from 'react-i18next';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Loader2, Square } from "lucide-react";
+import { Languages, Loader2, Square } from "lucide-react";
 import X from "@/components/ui/cut-icons/close";
 import Paperclip from '@/components/ui/cut-icons/attach';
 import Mic from "@/components/ui/cut-icons/mic";
 
+import { TRANSLATE_TO_KEY, translateTarget, useComposeTranslate } from '@/hooks/use-compose-translate';
+import { SUPPORTED_LANGUAGES } from '@/i18n';
 import { Textarea } from '@/components/ui/textarea';
 import {
   AlertDialog,
@@ -145,6 +147,7 @@ export interface ThreadedCommentsMedia {
 }
 export interface ThreadedCommentsProps<C extends ThreadedComment> {
   draftScope: string;
+  translateDraft?: boolean;
   threads: CommentThread<C>[] | undefined;
   isLoading: boolean;
   isError: boolean;
@@ -181,6 +184,7 @@ const NOOP = () => {};
 
 export function ThreadedComments<C extends ThreadedComment>({
   draftScope,
+  translateDraft = false,
   threads,
   isLoading,
   isError,
@@ -200,13 +204,22 @@ export function ThreadedComments<C extends ThreadedComment>({
   loadLikers,
   listMaxHeightClass = 'max-h-96',
 }: ThreadedCommentsProps<C>) {
-  const { t } = useI18n();
+  const { t, i18n } = useI18n();
   const navigate = useNavigate();
   const { isAuthenticated, openLoginModal, walletAddress } = useAuth();
   const viewer = walletAddress?.toLowerCase() ?? null;
   const entityAuthor = entityAuthorAddress.toLowerCase();
 
   const [text, setText] = useDraftState(`${draftScope}:text`, '');
+  const [chosenTarget, setChosenTarget] = useState<string | null>(null);
+  const targetLang = chosenTarget ?? translateTarget(i18n.language?.split('-')[0] || 'en');
+  const translator = useComposeTranslate(text, translated => {
+    if (translated.length > 500) {
+      toast.error(t('articles.bodyTooLong', { count: translated.length - 500 }));
+      return;
+    }
+    setText(current => current === text ? translated : current);
+  });
   const [replyTo, setReplyTo] = useDraftState<C | null>(`${draftScope}:reply`, null);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [pendingDelete, setPendingDelete] = useState<C | null>(null);
@@ -412,7 +425,7 @@ export function ThreadedComments<C extends ThreadedComment>({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isAuthenticated) { openLoginModal(); return; }
-    if (!text.trim() && !attachment) return;
+    if (translator.busy || (!text.trim() && !attachment)) return;
     const parent = replyTo;
     const sent = attachment;
     onSubmit({
@@ -431,7 +444,7 @@ export function ThreadedComments<C extends ThreadedComment>({
   };
 
   const totalComments = countThreadComments(threads);
-  const canSend = (!!text.trim() || !!attachment) && !submitting && !uploading && !recording;
+  const canSend = (!!text.trim() || !!attachment) && !submitting && !uploading && !recording && !translator.busy;
 
   const rowFor = (comment: C, extra: { isReply?: boolean; threadLineAbove?: boolean; threadLineBelow?: boolean }) => {
     const row = shaped.get(comment.id);
@@ -691,10 +704,37 @@ export function ThreadedComments<C extends ThreadedComment>({
             </button>
             </div>
           </div>
+          {translateDraft && isAuthenticated && !!text.trim() && (
+            <div className="mt-1 flex items-center gap-2 text-xs text-zinc-400">
+              <button
+                type="button"
+                disabled={submitting || translator.busy}
+                onClick={() => { void translator.translate(targetLang); }}
+                className="inline-flex min-h-8 items-center gap-1.5 hover:text-white disabled:opacity-50"
+              >
+                {translator.busy ? <Loader2 className="size-4 animate-spin" /> : <Languages className="size-4" />}
+                {t('comments.translate')}
+              </button>
+              <select
+                aria-label={t('copy.a4fe65264ef7', 'Language')}
+                className="max-w-36 rounded-md bg-zinc-900 px-1 py-1"
+                value={targetLang}
+                disabled={submitting || translator.busy}
+                onChange={event => {
+                  const code = event.target.value;
+                  setChosenTarget(code);
+                  try { localStorage.setItem(TRANSLATE_TO_KEY, code); } catch { /* The selection still works for this draft. */ }
+                }}
+              >
+                {SUPPORTED_LANGUAGES.map(language => <option key={language.code} value={language.code}>{language.nativeName}</option>)}
+              </select>
+            </div>
+          )}
           <UserMentionDropdown
             query={mention.query}
             isOpen={mention.isOpen}
             position={mention.position}
+            armed={mention.armed}
             selectedIndex={mention.selectedIndex}
             onSelectedIndexChange={mention.setSelectedIndex}
             onSelect={mention.handleSelect}

@@ -36,7 +36,7 @@ import Languages from "@/components/ui/cut-icons/language";
 import X from "@/components/ui/cut-icons/close";
 import Download from "@/components/ui/cut-icons/download";
 import { toast } from 'sonner';
-import { downloadMedia, messageImageDownloadName } from '@/lib/download-media';
+import { downloadMedia, imageDownloadName, messageImageDownloadName } from '@/lib/download-media';
 import ChevronRight from "@/components/ui/cut-icons/next";
 
 import useEmblaCarousel from 'embla-carousel-react';
@@ -91,7 +91,7 @@ export interface FullscreenImageViewerProps {
   /** Engagement data + handlers; when set with `postId`, renders the bottom action bar. */
   actions?: FullscreenViewerActions;
   soundtrackControl?: ReactNode;
-  /** Show a Download button for the image on screen (chat attachments). */
+  /** Show a Download button for the image on screen. */
   downloadable?: boolean;
   /** The post's author and caption, shown over the photo on phones and tablets. */
   author?: FullscreenPostAuthor;
@@ -153,20 +153,20 @@ export function FullscreenImageViewer({
   
   const [isDownloading, setIsDownloading] = useState(false);
   const handleDownload = useCallback(async () => {
-    const source = images[currentIndex];
-    if (!source || isDownloading) return;
+    const source = cdnImageSource(images[currentIndex]);
+    if (!downloadable || !source || isDownloading) return;
     setIsDownloading(true);
-    const toastId = 'chat-image-download';
+    const toastId = postId ? `image-download-${postId}` : 'chat-image-download';
     toast.loading(_copy("copy.757726036c1c", { defaultValue: "Preparing download..." }), { id: toastId });
     try {
-      await downloadMedia(source, messageImageDownloadName(source));
+      await downloadMedia(source, postId ? imageDownloadName(source, postId, currentIndex) : messageImageDownloadName(source));
       toast.success(_copy("copy.efece5dd1933", { defaultValue: "Download started" }), { id: toastId });
     } catch {
       toast.error(_copy("copy.d2bde7afd757", { defaultValue: "Download failed. Please try again." }), { id: toastId });
     } finally {
       setIsDownloading(false);
     }
-  }, [images, currentIndex, isDownloading, _copy]);
+  }, [images, currentIndex, isDownloading, downloadable, postId, _copy]);
 
   const handleCloseTranslation = useCallback(() => {
     setShowTranslationSheet(false);

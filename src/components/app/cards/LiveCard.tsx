@@ -223,7 +223,12 @@ export function LiveCard({ stream }: LiveCardProps) {
         ) : (
           /* Ended live (or a live post missing its cover): show the cover image
              if there is one, otherwise a staticy TV screen — never an empty box. */
-          <LiveEndedMedia thumbnail={stream.thumbnail} />
+          <LiveEndedMedia
+            thumbnail={stream.thumbnail}
+            label={stream.replayUrl
+              ? (stream.replayTruncated ? _copy("copy.7874ebc95c83", { defaultValue: "PARTIAL REPLAY" }) : _copy("copy.92d23f5381ea", { defaultValue: "REPLAY" }))
+              : undefined}
+          />
         )}
         </GatedMedia>
       </div>
