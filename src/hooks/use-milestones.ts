@@ -23,19 +23,25 @@ export interface Milestones {
   earned: number;
   total: number;
   /**
-   * The owner keeps the museum to themselves. Other viewers then get no
-   * badges; the owner still gets everything, with this set.
+   * The museum is off (the default until the owner switches it on). Other
+   * viewers then get no badges; the owner still gets everything, with this
+   * set, so Settings can show it while the profile shows nothing.
    */
   hidden?: boolean;
   updatedAt: string;
 }
 
-/** Profile setting in `customs`: `public` (also when absent) or `hidden`. */
+/** Profile setting in `customs`: `public`, or `hidden` (also when absent). */
 export const BADGE_MUSEUM_VISIBILITY_KEY = 'badgeMuseumVisibility';
 
-/** Whether other people see this account's Badge Museum. On unless switched off. */
+/** Whether the Badge Museum is on this account's profile. Off until switched on. */
 export function badgeMuseumIsShown(customs: Record<string, unknown> | null | undefined): boolean {
-  return customs?.[BADGE_MUSEUM_VISIBILITY_KEY] !== 'hidden';
+  return customs?.[BADGE_MUSEUM_VISIBILITY_KEY] === 'public';
+}
+
+/** Earned badges, rarest first. */
+export function earnedByRarity(milestones: Milestone[]): Milestone[] {
+  return milestones.filter((m) => m.earned).sort((a, b) => b.rarity - a.rarity);
 }
 
 /**

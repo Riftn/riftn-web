@@ -66,7 +66,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { readPublicTimeZone } from '@/hooks/use-profile-local-time';
-import { BADGE_MUSEUM_VISIBILITY_KEY, badgeMuseumIsShown } from '@/hooks/use-milestones';
+import { BadgeMuseumSetting } from '@/components/app/settings/BadgeMuseumSetting';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { LiquidGlassBubble2 } from '@/components/ui/liquid-glass-bubble-2';
@@ -592,7 +592,6 @@ function ProfileSettings() {
   const [username, setUsername] = useSurfaceDraft("pages/app/SettingsPage.tsx:username", '');
   const [bio, setBio] = useSurfaceDraft("pages/app/SettingsPage.tsx:bio", '');
   const [publicTimeZone, setPublicTimeZone] = useState('');
-  const [showBadgeMuseum, setShowBadgeMuseum] = useState(true);
   const deviceTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const [twitterLink, setTwitterLink] = useSurfaceDraft("pages/app/SettingsPage.tsx:twitterLink", '');
   const [discordLink, setDiscordLink] = useSurfaceDraft("pages/app/SettingsPage.tsx:discordLink", '');
@@ -628,7 +627,6 @@ function ProfileSettings() {
     username: '',
     bio: '',
     publicTimeZone: '',
-    showBadgeMuseum: true,
     twitterLink: '',
     discordLink: '',
     instagramLink: '',
@@ -682,7 +680,6 @@ function ProfileSettings() {
 
     const customs = userData.customs as Record<string, string> | undefined;
     const loadedTimeZone = readPublicTimeZone(customs?.publicTimeZone);
-    const loadedShowBadgeMuseum = badgeMuseumIsShown(customs);
     const raw = userData as Record<string, unknown>;
     // Check both top-level API fields and customs object (API may return either)
     const loadedTwitter = (raw.twitterLink as string) || customs?.twitterLink || '';
@@ -697,7 +694,6 @@ function ProfileSettings() {
     setUsername.initialize(loadedUsername);
     setBio.initialize(loadedBio);
     setPublicTimeZone(loadedTimeZone);
-    setShowBadgeMuseum(loadedShowBadgeMuseum);
     setTwitterLink.initialize(loadedTwitter);
     setDiscordLink.initialize(loadedDiscord);
     setInstagramLink.initialize(loadedInstagram);
@@ -711,7 +707,6 @@ function ProfileSettings() {
       username: loadedUsername,
       bio: loadedBio,
       publicTimeZone: loadedTimeZone,
-      showBadgeMuseum: loadedShowBadgeMuseum,
       twitterLink: loadedTwitter,
       discordLink: loadedDiscord,
       instagramLink: loadedInstagram,
@@ -773,7 +768,6 @@ function ProfileSettings() {
     username !== originalValues.username ||
     bio !== originalValues.bio ||
     publicTimeZone !== originalValues.publicTimeZone ||
-    showBadgeMuseum !== originalValues.showBadgeMuseum ||
     twitterLink !== originalValues.twitterLink ||
     discordLink !== originalValues.discordLink ||
     instagramLink !== originalValues.instagramLink ||
@@ -847,8 +841,6 @@ function ProfileSettings() {
       // so both need the counts that were just saved.
       if (variables.customs) {
         queryClient.invalidateQueries({ queryKey: ['dehub-profile'] });
-        // The Badge Museum answer carries whether it is hidden from others.
-        queryClient.invalidateQueries({ queryKey: ['profile-milestones'] });
       }
 
       // Capture blob URLs before clearing file state
@@ -897,7 +889,6 @@ function ProfileSettings() {
           username: userData.username || '',
           bio: userData.aboutMe || userData.bio || '',
           publicTimeZone: readPublicTimeZone(refreshedCustoms?.publicTimeZone),
-          showBadgeMuseum: badgeMuseumIsShown(refreshedCustoms),
           twitterLink: (refreshedRaw.twitterLink as string) || refreshedCustoms?.twitterLink || '',
           discordLink: (refreshedRaw.discordLink as string) || refreshedCustoms?.discordLink || '',
           instagramLink: (refreshedRaw.instagramLink as string) || refreshedCustoms?.instagramLink || '',
@@ -907,7 +898,6 @@ function ProfileSettings() {
           facebookLink: (refreshedRaw.facebookLink as string) || refreshedCustoms?.facebookLink || '',
         };
         setOriginalValues(newOriginals);
-        setShowBadgeMuseum(newOriginals.showBadgeMuseum);
         setTwitterLink(newOriginals.twitterLink);
         setDiscordLink(newOriginals.discordLink);
         setInstagramLink(newOriginals.instagramLink);
@@ -1030,9 +1020,7 @@ function ProfileSettings() {
     // would be refused by the guard in updateProfile while editing their bio.
     if (username && usernameChanged) data.username = username;
     if (bio) data.aboutMe = bio;
-    const timeZoneChanged = publicTimeZone !== originalValues.publicTimeZone;
-    const badgeMuseumChanged = showBadgeMuseum !== originalValues.showBadgeMuseum;
-    if (timeZoneChanged || badgeMuseumChanged) {
+    if (publicTimeZone !== originalValues.publicTimeZone) {
       // The server replaces the whole blob, so carry every other saved
       // setting (account type, follow visibility, ...) along with this one.
       const kept: Record<string, string | number | boolean> = {};
@@ -1043,11 +1031,7 @@ function ProfileSettings() {
       for (const [key, value] of Object.entries(stored)) {
         if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') kept[key] = value;
       }
-      data.customs = {
-        ...kept,
-        ...(timeZoneChanged ? { publicTimeZone: publicTimeZone || false } : {}),
-        ...(badgeMuseumChanged ? { [BADGE_MUSEUM_VISIBILITY_KEY]: showBadgeMuseum ? 'public' : 'hidden' } : {}),
-      };
+      data.customs = { ...kept, publicTimeZone: publicTimeZone || false };
     }
     // Always send social links (even empty strings) so they persist correctly
     data.twitterLink = twitterLink;
@@ -1258,23 +1242,9 @@ function ProfileSettings() {
         />
       </div>
 
-      {/* Badge Museum: the badge panel on the profile and the badges by the
-          name. Off, only you see them. */}
-      <div data-setting-anchor="badge-museum" className="flex items-center justify-between gap-4">
-        <div>
-          <label htmlFor="settings-badge-museum" className={SETTINGS_LABEL_CLASS}>
-            {t('badgeMuseum.showSetting', 'Show Badge Museum on my profile')}
-          </label>
-          <p className="text-sm text-zinc-400">
-            {t('badgeMuseum.showSettingHint', 'Off, other people won\'t see your badges. You still see them.')}
-          </p>
-        </div>
-        <Switch
-          id="settings-badge-museum"
-          checked={showBadgeMuseum}
-          onCheckedChange={setShowBadgeMuseum}
-        />
-      </div>
+      {/* Badge Museum: off by default, so this is its home until it is
+          switched on for the profile. Saves on its own. */}
+      <BadgeMuseumSetting />
 
       {/* Personal, Creator or Business: a category under the name, a Contact button */}
       <AccountTypeSetting />
