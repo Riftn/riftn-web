@@ -20,7 +20,7 @@ import type { TFunction } from 'i18next';
 import { Button } from '@/components/ui/button';
 import { Loader2, ArrowUpRight, ArrowDownLeft, Clock, AlertTriangle } from 'lucide-react';
 import { useOpenTrades, type FractionTrade } from '@/hooks/use-fraction-marketplace';
-import { useSettleTrade } from '@/hooks/use-fraction-checkout';
+import { useSettleTrade, isFreeClaim } from '@/hooks/use-fraction-checkout';
 import { useAuth } from '@/contexts/AuthContext';
 import { truncateAddress } from '@/lib/api/token-holders';
 import { getChainConfig } from '@/lib/contracts/dhb-token';
@@ -47,6 +47,9 @@ function TradeRow({
   onAction,
   pending,
   direction,
+  secondaryLabel,
+  onSecondary,
+  secondaryPending,
 }: {
   trade: FractionTrade;
   action: boolean;
@@ -54,6 +57,10 @@ function TradeRow({
   onAction?: () => void;
   pending?: boolean;
   direction: 'in' | 'out';
+  /** A second, quieter button (Decline on a free claim). */
+  secondaryLabel?: string;
+  onSecondary?: () => void;
+  secondaryPending?: boolean;
 }) {
   const { t } = useTranslation();
   const { text, overdue } = deadlineLabel(trade.settle_by, t);
@@ -92,14 +99,30 @@ function TradeRow({
           <p className="text-white font-medium text-sm">
             {t('fractions.fractionCount', { count: trade.quantity })}
           </p>
-          <p className="text-xs text-white/50 flex items-center gap-1">
-            <img src={dehubCoin} alt={tokenLabel()} className="w-3 h-3" />
-            {(trade.quantity * trade.price_per_fraction).toLocaleString(undefined, {
-              maximumFractionDigits: 2,
-            })}
-          </p>
+          {isFreeClaim(trade) ? (
+            <p className="text-xs text-white/50">{t('fractions.freeClaim')}</p>
+          ) : (
+            <p className="text-xs text-white/50 flex items-center gap-1">
+              <img src={dehubCoin} alt={tokenLabel()} className="w-3 h-3" />
+              {(trade.quantity * trade.price_per_fraction).toLocaleString(undefined, {
+                maximumFractionDigits: 2,
+              })}
+            </p>
+          )}
         </div>
         {action ? (
+          <div className="flex items-center gap-1.5 shrink-0">
+          {secondaryLabel && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={onSecondary}
+              disabled={pending || secondaryPending}
+              className="text-white/60 hover:text-white text-xs h-8 px-2.5"
+            >
+              {secondaryPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : secondaryLabel}
+            </Button>
+          )}
           <Button
             size="sm"
             onClick={onAction}
@@ -108,6 +131,7 @@ function TradeRow({
           >
             {pending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : actionLabel}
           </Button>
+          </div>
         ) : (
           <span className="text-[11px] text-white/40 shrink-0">{actionLabel}</span>
         )}
@@ -126,7 +150,7 @@ export function SettlementRail({ tokenId, className }: SettlementRailProps) {
   const { t } = useTranslation();
   const { walletAddress } = useAuth();
   const { data, isLoading } = useOpenTrades(walletAddress);
-  const { deliver, pay } = useSettleTrade();
+  const { deliver, pay, decline } = useSettleTrade();
 
   if (!walletAddress || isLoading || !data) return null;
 
@@ -154,9 +178,12 @@ export function SettlementRail({ tokenId, className }: SettlementRailProps) {
           trade={trade}
           direction="out"
           action
-          actionLabel={t('fractions.sendFractions')}
+          actionLabel={isFreeClaim(trade) ? t('fractions.approveClaim') : t('fractions.sendFractions')}
           pending={deliver.isPending && deliver.variables?.id === trade.id}
           onAction={() => deliver.mutate(trade)}
+          secondaryLabel={isFreeClaim(trade) ? t('fractions.declineClaim') : undefined}
+          onSecondary={() => decline.mutate(trade)}
+          secondaryPending={decline.isPending && decline.variables?.id === trade.id}
         />
       ))}
 
@@ -187,7 +214,9 @@ export function SettlementRail({ tokenId, className }: SettlementRailProps) {
           direction={trade.status === 'awaiting_delivery' ? 'in' : 'out'}
           action={false}
           actionLabel={
-            t(trade.status === 'awaiting_delivery' ? 'fractions.waitingOnSeller' : 'fractions.waitingOnBuyer')
+            isFreeClaim(trade)
+              ? t('fractions.waitingOnOwner')
+              : t(trade.status === 'awaiting_delivery' ? 'fractions.waitingOnSeller' : 'fractions.waitingOnBuyer')
           }
         />
       ))}

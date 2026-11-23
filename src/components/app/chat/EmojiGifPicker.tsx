@@ -114,9 +114,10 @@ export function EmojiGifPicker({ onEmojiSelect, onGifSelect, triggerClassName, i
     debouncedSearch(value);
   };
 
-  const handleEmojiClick = (emoji: string, { keepOpen }: { keepOpen: boolean }) => {
+  // Emoji go into a message being written, so the picker stays open for
+  // several picks; tapping outside or the smiley again closes it.
+  const handleEmojiClick = (emoji: string) => {
     onEmojiSelect(emoji);
-    if (!keepOpen) setOpen(false);
   };
 
   const handleGifClick = (gifUrl: string) => {

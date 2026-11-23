@@ -5,7 +5,7 @@
  * `src/cdn/cdn.service.ts`. The backend is the real gate — it re-validates every
  * upload and stores objects with `Content-Disposition: attachment` — so this copy
  * exists purely to keep the file picker honest and to fail fast with a readable
- * message instead of a 415 after a 50 MB upload. Keep the two in step: an
+ * message instead of a 415 after a 200 MB upload. Keep the two in step: an
  * extension added here but not there is rejected on upload.
  */
 import { translateCopy as _translateCopy } from '@/i18n/copy';
@@ -24,7 +24,7 @@ export const ALLOWED_ATTACHMENT_EXTENSIONS = [
 export const ATTACHMENT_ACCEPT = ALLOWED_ATTACHMENT_EXTENSIONS.join(',');
 
 /** Matches the backend's DM_FILE_MAX_SIZE. */
-export const MAX_ATTACHMENT_SIZE = 50 * 1024 * 1024;
+export const MAX_ATTACHMENT_SIZE = 200 * 1024 * 1024;
 
 /** A document attached to a message, as returned by the API. */
 export interface PostAttachment {
@@ -116,7 +116,7 @@ export interface AttachmentValidationResult {
 
 /**
  * Validate a picked file against the same rules the backend applies, so the
- * composer can refuse it before an upload starts rather than after 50 MB has
+ * composer can refuse it before an upload starts rather than after 200 MB has
  * gone over the wire.
  */
 export function validateAttachment(file: File): AttachmentValidationResult {

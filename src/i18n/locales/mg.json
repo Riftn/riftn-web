@@ -4237,7 +4237,7 @@
       "pageViewsTerm": "Fijerena pejy",
       "pageViews": "— fangatahana izay sokajian'ny Cloudflare ho fampidirana pejy, fa tsy sary, script na antso API.",
       "botsTerm": "Tafiditra ny bot",
-      "bots": "— isa manta eo amin'ny sisiny ireo, ka tafiditra ao ny crawler, ny mpanara-maso fiasana ary ny mpanjifa script. Hitanao izany ao amin'ny fizarana mpitety etsy ambony, izay misy fidirana toy ny \"Curl\" sy \"Tsy fantatra\" izay fifamoivoizana mandeha ho azy fa tsy olona. Ny fanavahana ny bot dia mitaky drafitra Cloudflare andoavam-bola izay tsy ananantsika, ary ny fanesorana tombantombana mangina dia hanao ny isa ho sarotra hamarinina kokoa fa tsy mora kokoa.",
+      "bots": "— isa manta eo amin'ny sisiny ireo, ka tafiditra ao ny crawler, ny mpanara-maso fiasana ary ny mpanjifa script. Hitanao izany ao amin'ny fizarana mpitety etsy ambony, izay misy fidirana toy ny \"Curl\" sy \"Tsy fantatra\" izay fifamoivoizana mandeha ho azy fa tsy olona. Mihasarotra ny manavaka ny bot amin’ny olona mitsidika, ary tsy ho azo avahana amin’ireto antontan’isa ireto izy ireo tsy ho ela, ka tsy misy ilàna ny manandrana manivana azy ireo.",
       "totalTerm": "Totalin'ny elanelana",
       "total": "— mitambatra manerana ny elanelana ny fijerena pejy sy ny fangatahana. Tsy atambatra ho \"totalin'ny mpitsidika\" ny isan'ny mpitsidika satria olona iray tonga ny alatsinainy sy talata dia hisaina indroa.",
       "peakTerm": "Ora / andro be mpitsidika indrindra",

@@ -91,7 +91,7 @@ function show(goToSettings: () => void, pushState: WebPushState): void {
     description: (
       <span className="flex flex-col gap-3">
         <span>{bodyFor(pushState)}</span>
-        <span className="flex flex-row gap-2">
+        <span className="flex flex-col gap-2">
           <button
             type="button"
             className={BUTTON_CLASSES}

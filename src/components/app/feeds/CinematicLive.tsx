@@ -102,7 +102,11 @@ function StreamTile({ stream, onClick }: { stream: LiveStream; onClick: () => vo
             </span>
           </>
         )}
-        {stream.isLive && <LiveBadge className="absolute left-1.5 top-1.5" />}
+        {stream.isLive ? (
+          <LiveBadge className="absolute left-1.5 top-1.5" />
+        ) : stream.replayUrl ? (
+          <span className="absolute left-1.5 top-1.5 rounded-[5px] bg-black/65 px-1.5 py-px text-[10px] font-bold uppercase tracking-wide text-white">{_copy("copy.92d23f5381ea", { defaultValue: "REPLAY" })}</span>
+        ) : null}
         {stream.watching ? (
           <span className="absolute bottom-1.5 right-1.5 flex items-center gap-1 rounded-[5px] bg-black/60 px-1.5 py-0.5 text-[10px] text-white">
             <Eye className="h-2.5 w-2.5" /> {stream.watching}

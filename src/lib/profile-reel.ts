@@ -13,7 +13,7 @@
  */
 
 import type { ShortVideo, ReelPost } from '@/types/feed.types';
-import { mapToShortVideo } from '@/lib/short-video';
+import { asViewerSlide, mapToShortVideo } from '@/lib/short-video';
 import { buildFeedImageUrls } from '@/lib/media-url';
 import { isBrainrotPlayable } from '@/lib/brainrot-feed';
 
@@ -55,6 +55,7 @@ export function toReelShort(row: Row, index: number, bgId?: string | null): Shor
   const text = String(row.description || '').replace(/\[soundtrack:[^\]]*\]/g, '').trim();
   const title = String(row.name || row.title || '').trim();
 
+  if (base.contentRating === 'mature') return asViewerSlide(base);
   if (isReelVideo(row)) {
     if (isBrainrotPlayable(row)) return base;
     const reelPost: ReelPost = { kind: 'locked', cover: base.thumbnail || undefined };

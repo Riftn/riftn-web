@@ -16,7 +16,8 @@
 import { lazy, memo, Suspense, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Lock } from 'lucide-react';
+import { EyeOff, Lock } from 'lucide-react';
+import { useKidsModeLock } from '@/hooks/use-kids-mode';
 import type { ShortVideo } from '@/types/feed.types';
 import { PostBgLayer, postBgHostProps } from '@/components/app/profile/PostBackground';
 import { postBgFromToken } from '@/lib/post-backgrounds';
@@ -25,6 +26,7 @@ import { cn } from '@/lib/utils';
 import { createLinkScanRegex, renderTextWithLinks, splitLeadingUrlBoundary } from '@/components/app/TranslatableText';
 import { PollCard } from './PollCard';
 import { VIEWER_CONTROL, VIEWER_PILL } from '@/lib/viewer-chrome';
+import { warmPostData } from '@/lib/post-warm';
 
 const ShortsPhotoPager = lazy(() => import('./ShortsPhotoPager').then((m) => ({ default: m.ShortsPhotoPager })));
 const ComicDeck = lazy(() => import('@/components/app/comic/ComicDeck').then((m) => ({ default: m.ComicDeck })));
@@ -173,7 +175,7 @@ function ArticleSlide({ short }: { short: ShortVideo }) {
       <p className="mt-3 line-clamp-4 text-[15px] leading-relaxed text-white/75">{readable(post.text || '')}</p>
       <button
         type="button"
-        onClick={() => { closeBrainrotFeed(); navigate(`/app/post/${short.articleSlug || short.id}`, { state: { fromFeed: true } }); }}
+        onClick={() => { warmPostData(short.id); closeBrainrotFeed(); navigate(`/app/post/${short.articleSlug || short.id}`, { state: { fromFeed: true } }); }}
         className={cn(VIEWER_PILL, 'mt-5 self-start')}
       >
         {t('reel.readArticle', 'Read article')}
@@ -182,23 +184,27 @@ function ArticleSlide({ short }: { short: ShortVideo }) {
   );
 }
 
-function LockedSlide({ short }: { short: ShortVideo }) {
+function RestrictedSlide({ short }: { short: ShortVideo }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const mature = short.reelPost?.kind === 'mature';
+  const kidsMode = useKidsModeLock();
   const cover = short.reelPost?.cover;
+  const StatusIcon = mature ? EyeOff : Lock;
   return (
-    <div data-reel-locked className="absolute inset-0 flex items-center justify-center overflow-hidden bg-zinc-950 text-white">
+    <div data-reel-locked={mature ? undefined : true} data-reel-mature={mature || undefined} className="absolute inset-0 flex items-center justify-center overflow-hidden bg-zinc-950 text-white">
       {cover && <img src={cover} alt="" className="absolute inset-0 h-full w-full scale-110 object-cover opacity-60 blur-2xl" />}
       <div className="relative flex flex-col items-center gap-3 px-8 text-center">
-        <span className={cn(VIEWER_CONTROL, 'h-14 w-14 rounded-2xl')}><Lock className="h-6 w-6" /></span>
-        <p className="text-base font-semibold">{t('profile.lockedPost', 'Locked post')}</p>
-        <button
+        <span className={cn(VIEWER_CONTROL, 'h-14 w-14 rounded-2xl')}><StatusIcon className="h-6 w-6" /></span>
+        <p className="text-base font-semibold">{mature ? t('copy.9b8b53102e77', 'Mature content') : t('profile.lockedPost', 'Locked post')}</p>
+        {mature && <p>{t('copy.5ca2fd8dd3f8', 'The creator marked this post as adult or graphic.')}</p>}
+        {(!mature || !kidsMode) && <button
           type="button"
-          onClick={() => { closeBrainrotFeed(); navigate(`/app/post/${short.articleSlug || short.id}`, { state: { fromFeed: true } }); }}
+          onClick={() => { warmPostData(short.id); closeBrainrotFeed(); navigate(`/app/post/${short.articleSlug || short.id}`, { state: { fromFeed: true } }); }}
           className={cn(VIEWER_PILL, 'mt-1')}
         >
-          {t('reel.openToUnlock', 'Open to unlock')}
-        </button>
+          {mature ? t('reel.openPost', 'Open post') : t('reel.openToUnlock', 'Open to unlock')}
+        </button>}
       </div>
     </div>
   );
@@ -209,7 +215,7 @@ export const PostSwipeSlide = memo(function PostSwipeSlide({ short, isActive }: 
   if (!post) return null;
   if (post.kind === 'text') return <TextPoster short={short} />;
   if (post.kind === 'article') return <ArticleSlide short={short} />;
-  if (post.kind === 'locked') return <LockedSlide short={short} />;
+  if (post.kind === 'locked' || post.kind === 'mature') return <RestrictedSlide short={short} />;
   const images = post.images || [];
   if (post.kind === 'comic') {
     return (

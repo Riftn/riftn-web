@@ -12,12 +12,39 @@
          way, instead of after it has arrived and drawn the page (that wait was
          ~4 s on desktop, ~6 s on a mid phone). src/lib/post-prefetch.ts picks
          the answer up. Mirrors apiCall's headers; an expired sign-in is left to
-         the app, which refreshes it first. -->
+         the app, which refreshes it first.
+
+         It asks for the post page's code now too, and for the live player's
+         the moment the answer says the post is a live. Those used to wait their
+         turn: the post page was asked for once the app had run, the player
+         once the post page had. The file lists are written in at build
+         (postLinkCodePlugin, vite.config.ts); a dev server leaves the marker
+         as it is and nothing extra is asked for. -->
     <script>
       (function () {
         try {
           var m = location.pathname.match(/^\/(?:app\/)?(?:post|video|posts)\/(\d+)(?:\/b(?:\/[^/]+)?)?\/?$/);
-          if (!m || !window.fetch) return;
+          if (!m) return;
+          var code = "__POST_LINK_CODE__";
+          var conn = navigator.connection;
+          if (typeof code !== 'object' || (conn && conn.saveData)) code = null;
+          // Fetched and compiled only: nothing runs early.
+          var want = function (files) {
+            for (var i = 0; i < files.length; i++) {
+              var href = '/' + files[i], css = /\.css$/.test(href);
+              // Already asked for (the app got to it first, and writes whole
+              // addresses): nothing to add.
+              if (document.querySelector('link[href="' + href + '"],link[href="' + location.origin + href + '"]')) continue;
+              var l = document.createElement('link');
+              l.rel = css ? 'preload' : 'modulepreload';
+              if (css) l.as = 'style';
+              l.crossOrigin = '';
+              l.href = href;
+              document.head.appendChild(l);
+            }
+          };
+          if (code) want(code.r);
+          if (!window.fetch) return;
           var ls = window.localStorage, h = { Accept: 'application/json' };
           var tok = ls.getItem('dehub_token');
           if (tok) {
@@ -32,6 +59,14 @@
             signedIn: !!tok,
             p: fetch('https://api.dehub.io/api/nft_info/' + m[1], { headers: h, cache: 'no-store' })
               .then(function (r) { return r.ok ? r.json() : null; })
+              .then(function (j) {
+                try {
+                  var n = j && (j.result || j);
+                  // Same test as the post page's getContentType.
+                  if (code && n && (n.postType === 'live' || n.isLive !== undefined)) want(code.l);
+                } catch (e) {}
+                return j;
+              })
               .catch(function () { return null; })
           };
         } catch (e) {}
@@ -64,6 +99,8 @@
           d.dataset.systemTone = tone;
           // Post separator: thin lines instead of cards (src/lib/feed-separator.ts).
           if (localStorage.getItem('dehub.feedSeparator') === 'line') d.dataset.feedSep = 'line';
+          // Own-line bubbles in General Chat (src/lib/chat-own-bubble.ts).
+          if (localStorage.getItem('riftn.chat.ownBubble') === 'true') d.dataset.chatOwnBubble = '';
           d.dataset.shortsEnabled = localStorage.getItem('shorts-enabled') === 'false' ? 'false' : 'true';
           d.dataset.sidebarCollapsed = localStorage.getItem('sidebar-collapsed') === 'true' ? 'true' : 'false';
 
@@ -157,6 +194,9 @@
           // LCP element — paints with the first frame instead of after the
           // bundle. Hide it exactly when HomeIntro itself would return null.
           if (location.pathname !== '/' || introDismissed || introSignedIn) d.dataset.homeIntro = 'off';
+          // The Moments row's seat (src/lib/story-shelf-seat.ts): held unless
+          // Home had no row last visit, so the posts do not drop when it lands.
+          if (!/^\/(app)?\/?$/.test(location.pathname) || localStorage.getItem('dehub.shelfShown') === '0') d.dataset.bootShelf = 'off';
 
           if (location.pathname === '/' && window.innerWidth > 767) {
             var skip = localStorage.getItem('dehub.introFrostSeen') === '1' || introDismissed || introSignedIn;
@@ -571,6 +611,8 @@
       .bskel-tabs span { width: 16px; height: 16px; }
       html[data-shorts-enabled="false"] .bskel-shorts { display: none; }
       .bskel-island { display: none; }
+      .bskel-shelf { display: none; gap: 8px; overflow: hidden; padding: 2px 0; margin: 0 0 10px; }
+      .bskel-shelf > div { flex: none; width: 86px; height: 118px; border-radius: 16px; }
       .bskel-card { height: 300px; margin: 0 8px 12px; border-radius: 16px;
                     background: var(--bskel, rgba(255,255,255,.06));
                     border: 1px solid var(--bskel-b, rgba(255,255,255,.08)); }
@@ -601,6 +643,7 @@
         @keyframes bskel-pulse { 50% { opacity: .5; } }
       }
       @media (max-width: 1023px) {
+        html:not([data-boot-shelf="off"]):not([data-boot-chat]) .bskel-shelf { display: flex; }
         html[data-theme="immersive"] .bskel-main { padding-top: 0; }
         html[data-theme="immersive"] .bskel-tabs { display: none; }
         html[data-theme="immersive"] .bskel-island { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 6px); left: 50%; transform: translateX(-50%); width: 148px; height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; border: 1px solid rgba(255,255,255,.12); border-radius: 16px; background: rgba(16,16,18,.9); z-index: 120; }
@@ -683,6 +726,7 @@
         </div>
         <div class="bskel-card" data-home-intro-slot></div>
         <div class="bskel-feed">
+          <div class="bskel-shelf" aria-hidden="true"><div class="bskel-wash"></div><div class="bskel-wash"></div><div class="bskel-wash"></div><div class="bskel-wash"></div><div class="bskel-wash"></div></div>
           <div class="bskel-feed-card" data-feed-item>
             <div class="bskel-header"><div class="bskel-wash bskel-avatar"></div><div class="bskel-identity"><div class="bskel-wash"></div><div class="bskel-wash"></div></div><div class="bskel-wash bskel-menu"></div></div>
             <div class="bskel-wash bskel-media"></div>

@@ -1,3 +1,4 @@
+import { formatMessageTime } from '@/i18n/date-locale';
 import { useTranslation as _useCopy } from 'react-i18next';
 /**
  * AssistantReplyCard
@@ -24,8 +25,6 @@ interface AssistantReplyCardProps {
   replyToName?: string;
 }
 
-const formatTime = (date: Date) =>
-  date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
 const formatDate = (date: Date) => {
   const dd = String(date.getDate()).padStart(2, '0');
@@ -68,7 +67,7 @@ export function AssistantReplyCard({ content, timestamp, replyToName }: Assistan
           </p>
           <div className="flex items-center gap-1.5 mt-0.5">
             <span className="text-zinc-500 text-[10px] whitespace-nowrap">
-              {formatDate(timestamp)} {formatTime(timestamp)}
+              {formatDate(timestamp)} {formatMessageTime(timestamp)}
             </span>
           </div>
         </div>

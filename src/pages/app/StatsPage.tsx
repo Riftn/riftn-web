@@ -1209,7 +1209,7 @@ export default function StatsPage() {
                   <span className="text-zinc-300">{t('stats.definitions.botsTerm', 'Bots are included')}</span>{' '}
                   {t(
                     'stats.definitions.bots',
-                    '— these are raw edge counts, so crawlers, uptime monitors and scripted clients are in them. You can see them yourself in the browser breakdown above, where entries like “Curl” and “Unknown” are automated traffic rather than people. Filtering bots out needs a paid Cloudflare tier we do not run, and quietly subtracting an estimate would make the numbers less checkable, not more.',
+                    '— these are raw edge counts, so crawlers, uptime monitors and scripted clients are in them. You can see them yourself in the browser breakdown above, where entries like “Curl” and “Unknown” are automated traffic rather than people. Bots are getting harder to distinguish from human visitors and will soon be indistinguishable in these stats, so there’s little point in trying to filter them out.',
                   )}
                 </li>
                 <li>

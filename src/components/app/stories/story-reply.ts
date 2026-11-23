@@ -22,7 +22,7 @@ export async function sendStoryReply(item: StoryItem, text: string, label: strin
   const conv = await emitCreateAndStart(userId);
   if (!conv?._id) throw new Error('Could not open the conversation');
   if (conv.dmFee?.required && !conv.dmFee.hasFreeAccess && conv.dmFee.fee > 0) return 'paid-chat';
-  const link = `${window.location.origin}/app/moment/${item.id}`;
+  const link = `${window.location.origin}/app/moment/${item.id}?reply=1`;
   const wire = await prepareOutgoing(to, `${label}: ${text}\n${link}`);
   await emitSendMessage({ dmId: conv._id, content: wire.content, type: 'msg' });
   return 'sent';

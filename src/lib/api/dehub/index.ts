@@ -38,3 +38,5 @@ export * from './solana';
 export * from './superpowers';
 export * from './moderation';
 export * from './support';
+export * from './quiz';
+export * from './photo-tags';

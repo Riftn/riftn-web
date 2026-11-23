@@ -68,6 +68,8 @@ export interface AuthContextType {
    */
   connectWithPasskey: (mode: 'signin' | 'signup') => Promise<boolean>;
   connectWithWallet: (wallet: WalletProvider) => Promise<boolean>;
+  /** Give up on a wallet sign-in that is still waiting on the wallet, and let the wallet go. */
+  cancelWalletLogin: () => Promise<void>;
   /**
    * Final step of the smart-wallet login: called by the login modal once the
    * wallet key is available (created, imported, or unlocked). Activates the
@@ -125,7 +127,7 @@ export interface AuthContextType {
   setWagmiAuthIntent: (value: boolean, wallet?: string | null) => void;
   // Login modal state lives in LoginSheetContext (useLoginSheet below).
   openLoginModal: (options?: {
-    intent?: 'login' | 'add-profile';
+    intent?: 'login' | 'signup' | 'add-profile';
     /** A saved profile being signed back into, which the allowance already counts. */
     forProfileId?: string;
     /**
@@ -160,7 +162,7 @@ export interface LoginSheetState {
    * already signed in — retitles it, so the sheet doesn't read as "you were
    * logged out" to somebody who wasn't.
    */
-  loginIntent: 'login' | 'add-profile';
+  loginIntent: 'login' | 'signup' | 'add-profile';
 }
 
 /**

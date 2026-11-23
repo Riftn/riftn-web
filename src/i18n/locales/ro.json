@@ -4198,7 +4198,7 @@
       "pageViewsTerm": "Afișări de pagină",
       "pageViews": "— cereri pe care Cloudflare le clasifică drept încărcări de pagină, nu imagini, scripturi sau apeluri API.",
       "botsTerm": "Boții sunt incluși",
-      "bots": "— acestea sunt numărători brute la margine, deci includ crawlere, monitoare de disponibilitate și clienți automatizați. Le vezi singur în defalcarea pe browsere de mai sus, unde intrări precum „Curl” și „Necunoscut” sunt trafic automat, nu oameni. Filtrarea boților cere un plan Cloudflare cu plată pe care nu îl avem, iar scăderea tacită a unei estimări ar face cifrele mai greu de verificat, nu mai ușor.",
+      "bots": "— acestea sunt numărători brute la margine, deci includ crawlere, monitoare de disponibilitate și clienți automatizați. Le vezi singur în defalcarea pe browsere de mai sus, unde intrări precum „Curl” și „Necunoscut” sunt trafic automat, nu oameni. Boții sunt tot mai greu de deosebit de vizitatorii umani și în curând vor fi imposibil de diferențiat în aceste statistici, așa că nu are rost să încercăm să îi filtrăm.",
       "totalTerm": "Totaluri pe interval",
       "total": "— afișările de pagină și cererile se adună pe tot intervalul. Vizitatorii nu se adună intenționat într-un „total vizitatori”, pentru că cineva care a fost aici luni și marți ar fi numărat de două ori.",
       "peakTerm": "Cea mai aglomerată oră / zi",

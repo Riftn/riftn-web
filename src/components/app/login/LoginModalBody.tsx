@@ -94,6 +94,7 @@ const AppleIcon = () => (
 );
 
 interface LoginModalBodyProps {
+  signingUp?: boolean;
   /** Whether the sheet is open — the field reset hangs off this. */
   open: boolean;
   step: LoginStep;
@@ -119,7 +120,7 @@ export function LoginModalBody(props: LoginModalBodyProps) {
   );
 }
 
-function LoginModalBodyInner({ open, step, setStep, layout = 'default' }: LoginModalBodyProps) {
+function LoginModalBodyInner({ open, step, setStep, layout = 'default', signingUp = false }: LoginModalBodyProps) {
   const {
     connectWithProvider, connectWithEmail, cancelEmailMagicLink, verifyEmailOtp, connectWithSMS, verifyPhoneOtp,
     connectWithTelegram, connectWithPasskey, connectWithWallet, completeSmartWalletLogin, setWagmiAuthIntent, isConnecting,
@@ -739,31 +740,31 @@ function LoginModalBodyInner({ open, step, setStep, layout = 'default' }: LoginM
         {t('loginModal.passkeyIntro', 'Your fingerprint or face is your account. Nothing to remember, nothing to type.')}
       </p>}
       <Button
-        onClick={() => handlePasskey('signin')}
+        onClick={() => handlePasskey(signingUp ? 'signup' : 'signin')}
         disabled={isConnecting}
         className="w-full h-12 bg-white text-black hover:bg-white/90 rounded-xl flex items-center justify-center gap-3"
       >
-        {activeProvider === 'passkey-signin' ? (
+        {activeProvider === (signingUp ? 'passkey-signup' : 'passkey-signin') ? (
           <Loader2 className="w-5 h-5 animate-spin" />
         ) : (
           <Fingerprint className="w-5 h-5" />
         )}
-        <span>{t('loginModal.passkeySignIn', 'Sign in with Bio')}</span>
+        <span>{signingUp ? t('loginModal.passkeyCreate', 'Create a new account') : t('loginModal.passkeySignIn', 'Sign in with Bio')}</span>
       </Button>
       <Button
-        onClick={() => handlePasskey('signup')}
+        onClick={() => handlePasskey(signingUp ? 'signin' : 'signup')}
         disabled={isConnecting}
         variant="outline"
-        className={passkeyUnknown
+        className={!signingUp && passkeyUnknown
           ? 'w-full h-12 bg-white text-black hover:bg-white/90 rounded-xl flex items-center justify-center gap-3 border-transparent'
           : 'w-full h-12 bg-transparent hover:bg-white/5 text-white rounded-xl flex items-center justify-center gap-3 border-white/10'}
       >
-        {activeProvider === 'passkey-signup' ? (
+        {activeProvider === (signingUp ? 'passkey-signin' : 'passkey-signup') ? (
           <Loader2 className="w-5 h-5 animate-spin" />
         ) : (
           <Fingerprint className="w-5 h-5" />
         )}
-        <span>{t('loginModal.passkeyCreate', 'Create a new account')}</span>
+        <span>{signingUp ? t('loginModal.passkeySignIn', 'Sign in with Bio') : t('loginModal.passkeyCreate', 'Create a new account')}</span>
       </Button>
       {passkeyError && (
         <p className="text-red-400 text-sm">{passkeyError}</p>

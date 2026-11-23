@@ -2,7 +2,7 @@ import { useTranslation as _useCopy } from 'react-i18next';
 import { SEOHead } from '@/components/SEOHead';
 import { PricingSection } from '@/components/pricing/PricingSection';
 import { Link } from 'react-router-dom';
-import dehubLogo from '@/assets/dehub-logo-white.png';
+import riftnWordmark from '@/assets/riftn-wordmark-flat-white.png';
 import { getAiPlanOffer, type AiPlanTier } from '@/lib/ai-plan-offers';
 
 const monthlyTokens = (tier: AiPlanTier, billing: 'annual' | 'monthly') =>
@@ -102,10 +102,10 @@ export default function PricingPage() {
           ],
         }}
       />
-      <div data-glass-page className="min-h-[100dvh] bg-black text-white">
+      <div data-glass-page data-pricing-page className="min-h-[100dvh] bg-black text-white">
         <header className="flex items-center justify-between px-4 py-4 sm:px-8">
           <Link to="/" className="flex items-center gap-2">
-            <img src={dehubLogo} alt={_copy("copy.3bb419b67da4", { defaultValue: "Riftn logo white" })} className="h-6 w-auto" />
+            <img src={riftnWordmark} alt={_copy("copy.3bb419b67da4", { defaultValue: "Riftn logo white" })} className="h-6 w-auto" />
           </Link>
           <h1 className="sr-only">{_copy("copy.aa0ccc121485", { defaultValue: "Riftn Pricing — Choose Your Creator Plan" })}</h1>
           <Link

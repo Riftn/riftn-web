@@ -8,6 +8,7 @@
    :not(#_) here outrank all of them. */
 
 [data-notifications-page] {
+  --nf-surface: #18181b;
   --nf-accent: #ffffff;
   --nf-accent-ink: #000000;
   --nf-badge: #1c1c1e;
@@ -15,7 +16,7 @@
   --nf-ring: #000000;
   --nf-hover: rgba(255, 255, 255, 0.03);
   --nf-line: rgba(255, 255, 255, 0.2);
-  --nf-mute: rgba(255, 255, 255, 0.5);
+  --nf-mute: rgba(255, 255, 255, 0.68);
   --nf-ink: rgba(255, 255, 255, 0.92);
   --nf-field: rgba(255, 255, 255, 0.06);
 }
@@ -27,6 +28,7 @@ html:not([data-theme="system"]):not([data-theme="light"]):not([data-theme="minim
 }
 html[data-theme="light"] [data-notifications-page],
 html[data-system-tone="light"] [data-notifications-page] {
+  --nf-surface: #f7f7f8;
   --nf-accent: #0b0b0d;
   --nf-accent-ink: #ffffff;
   --nf-badge: #f1f1f3;
@@ -34,9 +36,27 @@ html[data-system-tone="light"] [data-notifications-page] {
   --nf-ring: #ffffff;
   --nf-hover: rgba(11, 11, 13, 0.03);
   --nf-line: rgba(11, 11, 13, 0.18);
-  --nf-mute: rgba(11, 11, 13, 0.5);
+  --nf-mute: rgba(11, 11, 13, 0.68);
   --nf-ink: rgba(11, 11, 13, 0.92);
   --nf-field: rgba(11, 11, 13, 0.05);
+}
+
+/* Keep portaled drawers and nested panels on the same tone as their text. */
+html [data-notifications-page][data-notification-surface]:not(#_):not(#_) {
+  background: var(--nf-surface) !important;
+  color: var(--nf-ink) !important;
+}
+
+html [data-feed-text]:not(#_):not(#_) {
+  color: var(--nf-ink) !important;
+}
+
+html [data-feed-text][data-read]:not(#_):not(#_) {
+  color: var(--nf-mute) !important;
+}
+
+html [data-notifications-page] :is(.text-white\/50, [data-notification-search-empty]):not(#_):not(#_) {
+  color: var(--nf-mute) !important;
 }
 
 html [data-notification-row][data-feed-row]:not(#_):not(#_),
@@ -79,6 +99,7 @@ html [data-feed-pill="primary"]:not(#_) {
 html [data-feed-pill="ghost"]:not(#_) {
   background: transparent !important;
   border-color: var(--nf-line) !important;
+  color: var(--nf-ink) !important;
 }
 
 /* The list itself is not a box: no zinc slab on any theme. Canvas themes keep

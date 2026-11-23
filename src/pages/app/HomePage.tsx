@@ -69,7 +69,6 @@ import { FeedBodySkeleton } from '@/components/app/PageSkeletons';
 import { closeCommentsSplit } from '@/lib/comments-split';
 import { FeedSearchBar } from '@/components/app/navigation/FeedSearchBar';
 import { FeedSearchLens, useFeedSearchLens } from '@/components/app/navigation/FeedSearchLens';
-import { FeedSearchResults } from '@/components/app/feeds/FeedSearchResults';
 import { activeFeedSearchQuery, closeFeedSearch, getFeedSearchState, isFeedSearchTab, openFeedSearch, useFeedSearch } from '@/lib/feed-search';
 
 const loadVideosFeed = () => import('@/components/app/feeds/VideosFeed').then(m => ({ default: m.VideosFeed }));
@@ -95,6 +94,9 @@ function warmFeedOnIntent(tab: string, ready: boolean) {
 // React.memo skips re-render when props are unchanged, so heavy feeds
 // (infinite scroll lists, media cards, etc.) stay frozen during drag.
 const MemoHomeFeed    = memo(HomeFeed);
+// Search results (and their music shelves) only show once someone types, so
+// they load then rather than at startup.
+const FeedSearchResults = lazy(() => import('@/components/app/feeds/FeedSearchResults').then((m) => ({ default: m.FeedSearchResults })));
 const MemoVideosFeed  = memo(lazy(loadVideosFeed));
 const MemoTextFeed    = memo(lazy(loadTextFeed));
 const MemoImagesFeed  = memo(lazy(loadImagesFeed));
@@ -1171,7 +1173,7 @@ export default function HomePage() {
                   ? handleNavBack
                   : () => window.dispatchEvent(new CustomEvent('home-tab-reclick', { detail: activeTab }))}
                 className={cn(
-                  "relative flex items-center justify-center px-3 h-[35px] rounded-xl transition-colors overflow-hidden",
+                  "relative flex items-center justify-center px-3 h-[35px] lg:h-9 rounded-xl transition-colors overflow-hidden",
                   hasActiveFilters
                     ? "text-white"
                     // Hover only where a real pointer hovers: phones keep
@@ -1333,7 +1335,9 @@ export default function HomePage() {
             under its search results and the panel still opens. */}
         {searchQuery && deferredTab === 'home' && (
           <div className="px-2 sm:px-3">
-            <FeedSearchResults tab="home" query={searchQuery} />
+            <Suspense fallback={<FeedBodySkeleton />}>
+              <FeedSearchResults tab="home" query={searchQuery} />
+            </Suspense>
           </div>
         )}
         {/* Every tab but home is a lazy chunk (see the imports): the Suspense

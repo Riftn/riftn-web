@@ -11,16 +11,20 @@
 
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { openPostInfo } from '@/lib/preload-post-page';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { Palette, Pin, Share, Type, UserCheck } from 'lucide-react';
+import { EyeOff, Palette, Pin, Share, Type, UserCheck } from 'lucide-react';
+import { copyMedia } from '@/lib/copy-media';
 import { MessageMenu, type MessageMenuAction } from '@/components/app/chat/MessageMenu';
 import Flag from '@/components/ui/cut-icons/report';
 import Ban from '@/components/ui/cut-icons/blocked';
 import VolumeX from '@/components/ui/cut-icons/mute';
 import UserPlus from '@/components/ui/cut-icons/add-account';
 import Link2 from '@/components/ui/cut-icons/link';
+import ImagesIcon from '@/components/ui/cut-icons/images';
+import VideoIcon from '@/components/ui/cut-icons/video';
 import MessageSquare from '@/components/ui/cut-icons/messages';
 import Repeat2 from '@/components/ui/cut-icons/repost';
 import Quote from '@/components/ui/cut-icons/quote';
@@ -40,6 +44,7 @@ import { useBookmarkPost } from '@/hooks/use-bookmarks';
 import { useTogglePin, useIsPostPinned } from '@/hooks/use-pins';
 import { useFollow } from '@/hooks/use-follow';
 import { useMuteAuthor } from '@/hooks/use-mute-author';
+import { useNotInterested } from '@/hooks/use-not-interested';
 import { useBlockAuthor } from '@/hooks/use-block-author';
 import { useSuperpowers } from '@/hooks/use-superpowers';
 import { usePostLinkCopyCount, useTrackPostLinkCopy } from '@/hooks/use-link-copy-count';
@@ -135,6 +140,7 @@ function PostMenuBody({ open, target, sheet, setSheet }: {
   }, [showing, signedIn, isOwn, target.authorId, followOverride, serverFollowing]);
   const following = followOverride ?? serverFollowing;
   const { muteAuthor } = useMuteAuthor();
+  const notInterested = useNotInterested();
   const { blockAuthor } = useBlockAuthor();
   const { data: powers } = useSuperpowers(showing && signedIn);
   const canGiftBoost = !isOwn && !!powers?.powers.some((p) => p.key === 'deep_current' && p.unlocked && p.available);
@@ -215,6 +221,20 @@ function PostMenuBody({ open, target, sheet, setSheet }: {
     }
   }, [t]);
 
+  // Copy image / GIF / video: whatever was under the pointer. A picture goes on
+  // the clipboard as a picture; a video can't sit on any clipboard, so its
+  // file link goes on and the toast says so.
+  const copyPostMedia = useCallback(() => {
+    const media = target.media;
+    if (!media) return;
+    void copyMedia(media.url, media.kind).then(
+      (result) => toast.success(result === 'image'
+        ? (media.kind === 'gif' ? t('chatHold.gifCopied', 'GIF copied') : t('chatHold.imageCopied', 'Image copied'))
+        : media.kind === 'video' ? t('postOptions.videoLinkCopied', 'Video link copied') : t('chatHold.mediaLinkCopied', 'Link copied')),
+      () => toast.error(t('chatHold.copyFailed', "Couldn't copy")),
+    );
+  }, [target.media, t]);
+
   const words = (target.text || '').trim();
   const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
 
@@ -255,8 +275,14 @@ function PostMenuBody({ open, target, sheet, setSheet }: {
       icon: <Palette />, onSelect: () => openPostLook(target.look!),
     });
 
+    const media = target.media;
+    add(!!media && {
+      key: 'copy-media',
+      label: media.kind === 'video' ? t('postOptions.copyVideo', 'Copy video') : media.kind === 'gif' ? t('postOptions.copyGif', 'Copy GIF') : t('postOptions.copyImage', 'Copy image'),
+      icon: media.kind === 'video' ? <VideoIcon /> : <ImagesIcon />, hint: 'P', divided: true, onSelect: copyPostMedia,
+    });
     add({
-      key: 'copy-link', label: t('postOptions.copyLink', 'Copy link'), icon: <Link2 />, hint: 'L', divided: true,
+      key: 'copy-link', label: t('postOptions.copyLink', 'Copy link'), icon: <Link2 />, hint: 'L', divided: !media,
       onSelect: () => { void copy(link, t('postOptions.postUrlCopied', 'Post link copied')).then((ok) => { if (ok) trackLinkCopy(target.id, walletAddress, linkCopyCount); }); },
     });
     add(!!words && { key: 'copy-text', label: t('comments.copyText', 'Copy text'), icon: <Type />, hint: 'X', onSelect: () => { void copy(words, t('common.copied', 'Copied')); } });
@@ -266,7 +292,7 @@ function PostMenuBody({ open, target, sheet, setSheet }: {
     });
     add(!!target.actions?.askAI && { key: 'ai', label: t('postOptions.aiOverview', 'AI overview'), icon: <AssistantNavIcon />, onSelect: () => target.actions!.askAI!() });
     add(!!target.actions?.seeEngagements && { key: 'engagements', label: t('copy.f5ab429b0727', 'See Engagements'), icon: <Stats />, onSelect: () => target.actions!.seeEngagements!() });
-    add({ key: 'info', label: t('postInfo.title', 'Post Info'), icon: <Info />, hint: 'I', onSelect: () => navigate(`/app/post/${target.id}/info`) });
+    add({ key: 'info', label: t('postInfo.title', 'Post Info'), icon: <Info />, hint: 'I', onSelect: () => openPostInfo(navigate, target.id) });
 
     // SuperPowers: a gift on somebody else's post, a boost on your own.
     if (canGiftBoost && tokenId > 0) {
@@ -292,8 +318,12 @@ function PostMenuBody({ open, target, sheet, setSheet }: {
         key: 'unfollow', label: t('profileOptions.unfollow', 'Unfollow'), icon: <UserCheck />, divided: true,
         onSelect: () => { if (needLogin()) return; void toggleFollow(true, { name: authorName || name }); },
       });
+      add(tokenId > 0 && {
+        key: 'not-interested', label: t('postOptions.notInterested', 'Not interested'), icon: <EyeOff />, divided: following === null,
+        onSelect: () => { if (needLogin()) return; void notInterested(tokenId); },
+      });
       add({
-        key: 'mute', label: t('postOptions.muteCreator', 'Mute creator'), icon: <VolumeX />, divided: following === null,
+        key: 'mute', label: t('postOptions.muteCreator', 'Mute creator'), icon: <VolumeX />, divided: following === null && !(tokenId > 0),
         onSelect: () => { if (needLogin()) return; muteAuthor(target.authorId!, authorName); },
       });
       add({
@@ -312,7 +342,7 @@ function PostMenuBody({ open, target, sheet, setSheet }: {
     }
     return list;
   }, [phone, target, tokenId, isPublic, isOwn, reposted, isBookmarked, isPinned, words, canShare, canGiftBoost, following, authorLabel, authorName, linkCopyCount, walletAddress,
-    t, navigate, sendInDm, repost, quote, needLogin, setSheet, toggleBookmark, togglePin, copy, trackLinkCopy, toggleFollow, muteAuthor, blockAuthor]);
+    t, navigate, sendInDm, repost, quote, needLogin, setSheet, toggleBookmark, togglePin, copy, copyPostMedia, trackLinkCopy, toggleFollow, muteAuthor, blockAuthor, notInterested]);
 
   const header = authorLabel ? (
     <p className="truncate text-[12px] font-semibold opacity-60">{authorLabel}</p>

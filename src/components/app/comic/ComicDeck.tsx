@@ -26,6 +26,7 @@ export interface ComicDeckProps {
   title?: string;
   /** Feed: a tap on the card opens the post. Leave out on the post page. */
   onOpen?: () => void;
+  onIndexChange?: (index: number) => void;
   /** Post page: the hand of pages and the full read. */
   full?: boolean;
   aboveFold?: boolean;
@@ -46,10 +47,11 @@ function prefersReducedMotion() {
 
 const pad2 = (n: number) => String(n).padStart(2, '0');
 
-export const ComicDeck = memo(function ComicDeck({ images, captions, descriptions, title, onOpen, full = false, aboveFold = false, border }: ComicDeckProps) {
+export const ComicDeck = memo(function ComicDeck({ images, captions, descriptions, title, onOpen, onIndexChange, full = false, aboveFold = false, border }: ComicDeckProps) {
   const { t } = useTranslation();
   const total = images.length;
   const [index, setIndex] = useState(0);
+  useEffect(() => { onIndexChange?.(index); }, [index, onIndexChange]);
   const [flipped, setFlipped] = useState(false);
   const [reading, setReading] = useState(false);
   const stackRef = useRef<HTMLDivElement>(null);

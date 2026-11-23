@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { format } from 'date-fns';
-import { applyDateLocale, formatRelativeTime } from './date-locale';
+import { applyDateLocale, formatMessageTime, formatRelativeTime } from './date-locale';
 
 afterEach(() => applyDateLocale('en'));
 describe('selected-language dates', () => {
@@ -24,4 +24,13 @@ describe('selected-language dates', () => {
     expect(formatRelativeTime(null, 'fr')).toBe('maintenant');
     expect(formatRelativeTime(Date.now() - 120000, 'ar')).toMatch(/[\u0600-\u06ff]/);
   });
+});
+
+describe('message clock', () => {
+  it.each([[0, 0, '00:00'], [1, 34, '01:34'], [13, 34, '13:34'], [23, 59, '23:59']])(
+    'uses a 24-hour clock even in en-US for %i:%i',
+    (hour, minute, expected) => {
+      expect(formatMessageTime(new Date(2026, 0, 1, hour, minute), 'en-US')).toBe(expected);
+    }
+  );
 });

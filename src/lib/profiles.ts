@@ -87,6 +87,8 @@ export interface StoredProfile {
    * they read as "no badge" until their next snapshot fills it in.
    */
   badgeBalance?: number | null;
+  badgeLock?: { tier: string; requirement: number } | null;
+  hideBadgeAndBalance?: boolean;
   source: ConnectionSource | null;
   addedAt: number;
   lastActiveAt: number;
@@ -115,6 +117,8 @@ function writeStore(profiles: StoredProfile[]): void {
 }
 
 interface CachedUser {
+  id?: string | number;
+  _id?: string;
   displayName?: string;
   display_name?: string;
   username?: string;
@@ -122,6 +126,15 @@ interface CachedUser {
   avatarUrl?: string;
   avatar_url?: string;
   badgeBalance?: number | string;
+  badgeLock?: StoredProfile['badgeLock'];
+  hideBadgeAndBalance?: boolean;
+}
+
+function profileName(value: unknown, user: CachedUser | null): string | null {
+  if (typeof value !== 'string') return null;
+  const label = value.trim();
+  if (!label || /^0x[\da-f]{6,}$/i.test(label) || label === String(user?.id ?? user?._id ?? '')) return null;
+  return label;
 }
 
 /** Who the live localStorage keys belong to right now, or null signed-out. */
@@ -283,12 +296,17 @@ function wipeSupabaseStorageKeys(): void {
  * The Supabase session from the client's own storage entry. Read directly
  * rather than via getSession() so pagehide can snapshot synchronously.
  */
-function readSupabaseSession(): StoredProfileSession['supabase'] {
+function readSupabaseSession(ownerUid: string | null): StoredProfileSession['supabase'] {
   try {
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (!key || !/^sb-.+-auth-token$/.test(key)) continue;
       const parsed = JSON.parse(localStorage.getItem(key) ?? '');
+      // A sign-in lands its Google session before the outgoing account's
+      // keys are cleared; filing that under the outgoing account made
+      // switching back to it fail ("Could not switch account").
+      const sessionUid = parsed?.user?.id ?? null;
+      if (sessionUid && ownerUid && sessionUid !== ownerUid) continue;
       if (parsed?.access_token && parsed?.refresh_token) {
         return { access_token: parsed.access_token, refresh_token: parsed.refresh_token };
       }
@@ -353,17 +371,19 @@ function snapshotSession(adopt: boolean): boolean {
     id: identity.id,
     uid: identity.uid,
     address: identity.address,
-    name: user?.displayName || user?.display_name || user?.username || null,
-    username: user?.username ?? null,
-    avatarPath: user?.avatarImageUrl || user?.avatarUrl || user?.avatar_url || null,
+    name: profileName(user?.displayName || user?.display_name, user) ?? profileName(existing?.name, user),
+    username: profileName(user?.username, user) ?? profileName(existing?.username, user),
+    avatarPath: user?.avatarImageUrl || user?.avatarUrl || user?.avatar_url || existing?.avatarPath || null,
     badgeBalance: parseBadgeBalance(user?.badgeBalance) ?? existing?.badgeBalance ?? null,
+    badgeLock: user?.badgeLock,
+    hideBadgeAndBalance: user?.hideBadgeAndBalance ?? existing?.hideBadgeAndBalance,
     source,
     addedAt: existing?.addedAt ?? now,
     lastActiveAt: now,
     session: {
       tokens,
       wagmiKeys: readWagmiKeys(),
-      supabase: readSupabaseSession(),
+      supabase: readSupabaseSession(identity.uid) ?? existing?.session?.supabase,
     },
   };
 

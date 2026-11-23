@@ -4202,7 +4202,7 @@
       "pageViewsTerm": "Sidvisningar",
       "pageViews": "— förfrågningar som Cloudflare klassar som sidladdningar, inte bilder, skript eller API-anrop.",
       "botsTerm": "Bottar räknas in",
-      "bots": "— det här är råa räkningar vid kanten, så sökrobotar, drifttidsövervakare och skriptade klienter finns med. Du ser dem själv i webbläsarfördelningen ovan, där poster som ”Curl” och ”Okänd” är automatiserad trafik och inte människor. Att filtrera bort bottar kräver en betald Cloudflare-plan som vi inte har, och att tyst dra bort en uppskattning skulle göra siffrorna mindre kontrollerbara, inte mer.",
+      "bots": "— det här är råa räkningar vid kanten, så sökrobotar, drifttidsövervakare och skriptade klienter finns med. Du ser dem själv i webbläsarfördelningen ovan, där poster som ”Curl” och ”Okänd” är automatiserad trafik och inte människor. Det blir allt svårare att skilja bottar från verkliga besökare och snart går de inte att skilja åt i den här statistiken, så det är ingen idé att försöka filtrera bort dem.",
       "totalTerm": "Summor för intervallet",
       "total": "— sidvisningar och förfrågningar summeras över intervallet. Besökarantal summeras medvetet inte till ett ”totalt antal besökare”, eftersom någon som var här på måndag och tisdag skulle räknas två gånger.",
       "peakTerm": "Mest trafikerad timme / dag",

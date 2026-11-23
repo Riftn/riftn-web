@@ -4245,7 +4245,7 @@
       "pageViewsTerm": "P'anqa qhawariykuna",
       "pageViews": "— Cloudflare p'anqa qhawariy hina churasqan mañakuykuna, mana rikchakuna, script-kuna icha API waqyaykuna hinachu.",
       "botsTerm": "Botskuna yaykusqan kachkan",
-      "bots": "— kaykunaqa ch'usaq 'edge' yupaykunam, chayrayku crawlers, uptime monitors, script kliente-kunapas kaypi kanku. Kikiykipa rikuyta atinki hawapi kaq browser t'aqasqapi, maypichus \"Curl\" hina \"Unknown\" hina qillqasqakunaqa mana runakunachu, ashka kachkan kikinmanta puriq tráficom. Bots-kunata anchhuchinapaqqa Cloudflare-pa pagasqa nivelninta munachikun, mana llamk'achisqaykutachu; huk yupayta pakaymanta hurquyqa yupaykunata aswan mana qhawarina hinam saqinman, mana aswan allintachu.",
+      "bots": "— kaykunaqa ch'usaq 'edge' yupaykunam, chayrayku crawlers, uptime monitors, script kliente-kunapas kaypi kanku. Kikiykipa rikuyta atinki hawapi kaq browser t'aqasqapi, maypichus \"Curl\" hina \"Unknown\" hina qillqasqakunaqa mana runakunachu, ashka kachkan kikinmanta puriq tráficom. Bots-kunata runa watukuqkunamanta rakiyqa aswan sasaña kachkan. Pisi tiempomanta kay yupaykunapi mana rakiyta atisunñachu, chayrayku paykunata anchhuchiyta munayqa mana imapaqpas allinchu.",
       "totalTerm": "Pachapa llapan yupaynin",
       "total": "— p'anqa qhawariykuna, mañakuykunapas pacha ukhupi huñusqa yupakunku. Watukuqkuna yupaykunataq mana huñunchu 'llapan watukuqkuna' hina, imaraykuchus lunes, martes p'unchawpi kaq runaqa iskay kutita yupasqa kanman.",
       "peakTerm": "Aswan llamk'aysapa ura / punchaw",

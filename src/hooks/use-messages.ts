@@ -58,6 +58,7 @@ import {
 import type { QueryClient } from '@tanstack/react-query';
 import { isEncryptedContent } from '@/lib/dm-e2ee/crypto';
 import { decryptFromPeer, decryptMessageInPlace, hasIdentityFor, loadIdentity, onIdentityChange, prepareOutgoing } from '@/lib/dm-e2ee/keys';
+import { translateOutgoing } from '@/lib/dm-translate-out';
 import { openMediaPlaintext } from '@/lib/dm-e2ee/media-message';
 import { messageHistoryItems, mergeMessageHead, needsMessageHistoryRecovery, nextMessagePage, markRecentlySent, isRecentlySent, type MessageHistory } from '@/lib/dm-head';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
@@ -663,6 +664,7 @@ export function useMessages(conversationId: string | null) {
                     content,
                     isEdited: true,
                     editedAt: data.editedAt,
+                    ...(data.original !== undefined ? { original: data.original } : {}),
                     ...(isEncryptedContent(data.content) ? { encrypted: true, undecryptable } : {}),
                   }
                 : m
@@ -1122,7 +1124,15 @@ export function useSendMessage(conversationId: string) {
         return sent;
       }
 
-      const wire = await prepareOutgoing(peerAddress, content);
+      // "Send in their language": translated before it is sealed, so the
+      // line they get (and their push) is in their language. Plain text in a
+      // real one-to-one chat only; anything else goes as typed.
+      const translated = msgType === 'msg' && !isVirtual && !forwardedFrom
+        ? await translateOutgoing(resolvedId, content)
+        : null;
+      const wire = translated
+        ? { content: translated.content, encrypted: false }
+        : await prepareOutgoing(peerAddress, content);
 
       /*
        * Confirm the socket is up BEFORE emitting. socket.io's emit does not
@@ -1146,12 +1156,14 @@ export function useSendMessage(conversationId: string) {
         voiceDuration,
         forwardedFrom,
         ...(whenOnline ? { whenOnline: true } : {}),
+        ...(translated ? { original: translated.original, translatedTo: translated.lang } : {}),
       };
       const sent = await emitSendMessage(payload);
       return {
         ...sent,
         conversation: resolvedId,
-        content,
+        content: translated ? translated.content : content,
+        ...(translated ? { original: { content: translated.original, lang: translated.lang } } : {}),
         encrypted: wire.encrypted,
         author: 'me',
         isRead: false,

@@ -3,22 +3,24 @@
  *
  * "Your day" first (tap + to share a moment, or watch your own), then
  * everyone live right now as tiles (it replaces the Live now row), then
- * people's moments: something new has a ring in the theme's colour, watched
- * ones go grey and move to the end. A tile opens the full-screen viewer.
+ * people's moments, with viewed ones at the end. A tile opens the full-screen viewer.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import Add from '@/components/ui/cut-icons/add';
 import Refresh from '@/components/ui/cut-icons/refresh';
+import { useBadgeBalance, useBadgeVisual } from '@/hooks/use-badge-balance';
 import { useAuth } from '@/contexts/AuthContext';
-import { useLiveNowItems, pictureOf, faceUrlOf, type LiveNowItem } from '@/components/app/feeds/LiveNowBar';
+import { useLiveNowItems, faceUrlOf, type LiveNowItem } from '@/components/app/feeds/LiveNowBar';
+import { useStoriesEnabled } from '@/hooks/use-stories-enabled';
 import { useStoryShelf } from '@/hooks/use-story-shelf';
 import { useMatureContent } from '@/hooks/use-mature-content';
 import { useKidsModeLock } from '@/hooks/use-kids-mode';
 import { useStoriesStore } from '@/store/storiesStore';
-import { buildAvatarUrl, buildAvatarCdnFallbackUrl } from '@/lib/media-url';
+import { buildAvatarUrl, buildAvatarCdnFallbackUrl, deviceWidth } from '@/lib/media-url';
 import type { ShelfEntry } from '@/lib/api/dehub/stories';
-import { ageLabel, coverOf, nameOf, playable } from './story-utils';
+import { ageLabel, coverOf, handleOf, nameOf, playable } from './story-utils';
+import { rememberShelfSeat } from '@/lib/story-shelf-seat';
 import '@/styles/stories.css';
 
 const bg = (url?: string | null) => (url ? { backgroundImage: `url("${url.replace(/"/g, '%22')}")` } : undefined);
@@ -30,7 +32,8 @@ export function StoryShelf() {
   const kidsMode = useKidsModeLock();
   const canSeeMature = isAuthenticated && showMatureContent && !kidsMode;
   const liveHosts = [...new Set(live.map(item => (item.wallet || '').toLowerCase()).filter(Boolean))].sort().slice(0, 100).join(',');
-  const { data } = useStoryShelf(liveHosts, canSeeMature);
+  const { storiesEnabled } = useStoriesEnabled();
+  const { data, isLoading } = useStoryShelf(liveHosts, canSeeMature, storiesEnabled || !!liveHosts);
   const eligibleLive = live.filter(item => data?.liveHosts?.includes((item.wallet || '').toLowerCase()));
   const openViewer = useStoriesStore(s => s.openViewer);
   const openCreator = useStoriesStore(s => s.openCreator);
@@ -49,12 +52,19 @@ export function StoryShelf() {
   // Fetch the viewer's code while the shelf is on screen, so the first tap opens at once.
   const hasMoments = watchable.length > 0;
   useEffect(() => {
-    if (!hasMoments) return;
+    if (!storiesEnabled || !hasMoments) return;
     const id = window.setTimeout(() => void import('./StoriesHost'), 1500);
     return () => window.clearTimeout(id);
-  }, [hasMoments]);
+  }, [storiesEnabled, hasMoments]);
 
-  if (!isAuthenticated && others.length === 0 && eligibleLive.length === 0) return null;
+  // While the first load is out the row keeps its seat with loading tiles,
+  // signed in or not, so the feed under it never jumps down when it lands.
+  const hidden = (!storiesEnabled || (!isAuthenticated && others.length === 0 && !isLoading)) && eligibleLive.length === 0;
+  // The loading skeletons read this to hold the row's seat on the next visit.
+  useEffect(() => {
+    if (!isLoading) rememberShelfSeat(!hidden);
+  }, [isLoading, hidden]);
+  if (hidden) return null;
 
   const openEntry = (entry: ShelfEntry, el: HTMLElement) => {
     const index = watchable.findIndex(e => e.author.address === entry.author.address);
@@ -65,7 +75,7 @@ export function StoryShelf() {
 
   return (
     <div data-stories data-story-shelf data-no-swipe role="list">
-      {isAuthenticated && (
+      {storiesEnabled && isAuthenticated && (
         <MeTile
           address={walletAddress ?? ''}
           avatar={user?.avatarImageUrl ?? own?.author.avatarImageUrl ?? null}
@@ -79,10 +89,25 @@ export function StoryShelf() {
       {eligibleLive.map(item => (
         <LiveTile key={`${item.kind}-${item.id}`} item={item} onOpen={() => openLive(item)} />
       ))}
-      {others.map(entry => (
+      {storiesEnabled && isLoading && [0, 1, 2, 3].map(index => (
+        <div key={index} data-story-tile aria-hidden="true" className="!bg-foreground/[0.04]">
+          <span data-st-avatar className="!border-0 !bg-foreground/10" />
+          <span className="absolute bottom-2 left-2 h-2 w-10 rounded bg-foreground/10" />
+        </div>
+      ))}
+      {storiesEnabled && others.map(entry => (
         <PersonTile key={entry.author.address} entry={entry} onOpen={el => openEntry(entry, el)} />
       ))}
     </div>
+  );
+}
+
+function ShelfAvatar({ src }: { src?: string | null }) {
+  const [brokenSrc, setBrokenSrc] = useState<string | null>(null);
+  return src && brokenSrc !== src ? (
+    <img data-st-avatar src={src} alt="" onError={() => setBrokenSrc(src)} />
+  ) : (
+    <span data-st-avatar aria-hidden="true" />
   );
 }
 
@@ -96,10 +121,11 @@ function MeTile({ address, avatar, entry, processing, pending, onAdd, onOpen }: 
   onOpen: (el: HTMLElement) => void;
 }) {
   const { t } = useTranslation();
-  const face = avatar ? buildAvatarUrl(address, avatar) : buildAvatarCdnFallbackUrl(address, undefined);
-  const cover = pending?.preview || (entry ? coverOf(entry) : null);
-  const empty = !cover;
+  const face = avatar ? buildAvatarUrl(address, avatar, deviceWidth(68)) : buildAvatarCdnFallbackUrl(address, undefined);
+  const cover = pending ? pending.preview : entry && coverOf(entry);
+  const empty = !pending && !entry;
   const busy = pending && pending.state !== 'failed';
+  const fill = busy ? `${Math.max(6, pending.state === 'processing' ? 100 : pending.progress)}%` : undefined;
 
   return (
     <button
@@ -107,21 +133,19 @@ function MeTile({ address, avatar, entry, processing, pending, onAdd, onOpen }: 
       role="listitem"
       data-story-tile
       data-kind="me"
-      data-empty={empty ? 'true' : 'false'}
       aria-label={t('stories.yourDay', { defaultValue: 'Your day' })}
       onClick={e => (entry && !pending ? onOpen(e.currentTarget) : !busy ? (pending?.retry ? pending.retry() : onAdd()) : undefined)}
     >
-      <span data-st-bg data-blur style={bg(face)} />
-      {!empty && <span data-st-shade />}
-      {!empty && pending?.state !== 'failed' && <img data-st-avatar src={face} alt="" />}
-      {busy && <span data-st-fill style={{ height: `${Math.max(6, pending!.state === 'processing' ? 100 : pending!.progress)}%` }} />}
+      <span data-st-bg style={bg(cover)} />
+      <span data-st-shade />
+      {pending?.state !== 'failed' && <ShelfAvatar src={face} />}
+      {fill && <span data-st-fill style={{ '--st-upload-progress': fill } as CSSProperties} />}
       {empty ? (
-        <span data-st-glass data-st-plus><Add className="w-5 h-5" /></span>
+        <span data-st-plus-corner><Add className="w-3.5 h-3.5" /></span>
       ) : pending?.state === 'failed' ? (
-        <span data-st-glass data-st-plus><Refresh className="w-5 h-5" /></span>
+        <span data-st-glass data-st-retry><Refresh className="w-5 h-5" /></span>
       ) : (
         <span
-          data-st-glass
           data-st-plus-corner
           role="button"
           aria-label={t('stories.addMoment', { defaultValue: 'Add a moment' })}
@@ -141,27 +165,47 @@ function MeTile({ address, avatar, entry, processing, pending, onAdd, onOpen }: 
   );
 }
 
+function TileIdentity({ address, username, displayName, live }: {
+  address: string;
+  username: string | null;
+  displayName?: string | null;
+  live?: LiveNowItem;
+}) {
+  const account = useBadgeBalance(address, live?.badgeBalance);
+  const badge = useBadgeVisual({
+    badgeBalance: live?.badgeBalance ?? account.badgeBalance,
+    badgeLock: live?.badgeLock ?? account.badgeLock,
+    username: username ?? account.username,
+    lookupId: address,
+  });
+  const label = displayName?.trim() || account.displayName?.trim() || handleOf({ address, username });
+  return (
+    <span data-st-label>
+      <span data-st-name>{label}</span>
+      {badge.url && !live?.hideBadgeAndBalance && !account.hideBadgeAndBalance && (
+        <img data-st-badge src={badge.url} alt={badge.name ?? ''} />
+      )}
+    </span>
+  );
+}
+
 function LiveTile({ item, onOpen }: { item: LiveNowItem; onOpen: () => void }) {
   const { t } = useTranslation();
-  const [faceBroken, setFaceBroken] = useState(false);
   const face = faceUrlOf(item);
   return (
     <button type="button" role="listitem" data-story-tile data-kind="live" onClick={onOpen} aria-label={item.title}>
-      <span data-st-bg style={bg(pictureOf(item))} />
+      <span data-st-bg style={bg(item.cover)} />
       <span data-st-shade />
-      <span data-st-live><i />{t('stages.liveBadge', { defaultValue: 'LIVE' })}</span>
-      <span data-st-who>
-        {face && !faceBroken ? <img src={face} alt="" onError={() => setFaceBroken(true)} /> : <span data-st-face />}
-        <span>{item.displayName || item.username || item.wallet.slice(0, 6)}</span>
-      </span>
+      <span data-st-live>{t('stages.liveBadge', { defaultValue: 'LIVE' })}</span>
+      <ShelfAvatar src={face} />
+      <TileIdentity address={item.wallet} username={item.username} displayName={item.displayName} live={item} />
     </button>
   );
 }
 
 function PersonTile({ entry, onOpen }: { entry: ShelfEntry; onOpen: (el: HTMLElement) => void }) {
   const a = entry.author;
-  const [faceBroken, setFaceBroken] = useState(false);
-  const face = a.avatarImageUrl ? buildAvatarUrl(a.address, a.avatarImageUrl) : buildAvatarCdnFallbackUrl(a.address, undefined);
+  const face = a.avatarImageUrl ? buildAvatarUrl(a.address, a.avatarImageUrl, deviceWidth(68)) : buildAvatarCdnFallbackUrl(a.address, undefined);
   const latest = entry.items[entry.items.length - 1];
   return (
     <button
@@ -173,12 +217,11 @@ function PersonTile({ entry, onOpen }: { entry: ShelfEntry; onOpen: (el: HTMLEle
       onClick={e => onOpen(e.currentTarget)}
       aria-label={nameOf(a)}
     >
-      <span data-st-bg data-blur style={bg(faceBroken ? null : face)} />
+      <span data-st-bg style={bg(coverOf(entry))} />
       <span data-st-shade />
-      <span data-st-ring />
-      <span data-st-time>{ageLabel(latest?.createdAt)}</span>
-      {face && !faceBroken ? <img data-st-avatar src={face} alt="" onError={() => setFaceBroken(true)} /> : <span data-st-avatar />}
-      <span data-st-label className="px-2 truncate">{a.username ? `@${a.username}` : nameOf(a)}</span>
+      {latest?.createdAt && <span data-st-time>{ageLabel(latest.createdAt)}</span>}
+      <ShelfAvatar src={face} />
+      <TileIdentity address={a.address} username={a.username} displayName={a.displayName} />
     </button>
   );
 }

@@ -18,7 +18,7 @@ import type { MutableRefObject } from 'react';
 import { useFormDraft } from '@/hooks/use-form-draft';
 import { useTranslation as useI18n } from 'react-i18next';
 import { useFeedSwallowClip } from '@/hooks/use-feed-swallow-clip';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTabIndicator } from '@/hooks/use-tab-indicator';
 import { GlassIndicator } from '@/components/app/feeds/GlassIndicator';
@@ -37,6 +37,8 @@ import Plus from "@/components/ui/cut-icons/add";
 import X from "@/components/ui/cut-icons/close";
 import FullscreenIcon from "@/components/ui/cut-icons/fullscreen";
 import { ImageMarkupDialog } from '@/components/app/features/ImageMarkupDialog';
+import { HoldToTalkButton } from '@/components/app/features/HoldToTalkButton';
+import { RequestStatusRow } from '@/components/app/features/RequestStatusRow';
 
 import featuresLightbulb from '@/assets/features-lightbulb.png';
 import { TranslatableText, SharedTranslationProvider, useSharedTranslationControl } from '@/components/app/TranslatableText';
@@ -69,7 +71,6 @@ import {
   useFeatureDeviceInfoIds,
   isFeatureStatusEditor,
   CATEGORY_LABELS,
-  STATUS_LABELS,
   type FeatureCategory,
   type FeatureSort,
   type FeatureStatus,
@@ -126,20 +127,6 @@ const SORTS: { id: FeatureSort; labelKey: string }[] = [
   { id: 'most_voted', labelKey: 'features.mostVoted' },
   { id: 'newest', labelKey: 'features.newest' },
 ];
-
-// Statuses worth surfacing on an open request. `open` is the default and adds
-// no information, and shipped/completed live on their own tab with their own
-// badge — so both are deliberately absent here and render nothing.
-//
-// Hues match mobile's STATUS_COLORS (dehub-mobile/hooks/useFeatureRequests.ts)
-// so the same request reads the same on both clients: amber = under review,
-// blue = planned, violet = in progress, red = declined.
-const STATUS_BADGE_STYLES: Partial<Record<FeatureStatus, string>> = {
-  under_review: 'bg-amber-400/15 text-amber-300/90 border-amber-300/25',
-  planned: 'bg-blue-400/15 text-blue-300/90 border-blue-300/25',
-  in_progress: 'bg-violet-400/15 text-violet-300/90 border-violet-300/25',
-  declined: 'bg-red-400/15 text-red-300/90 border-red-300/25',
-};
 
 /**
  * A request's attachments. One fills the card the way a single attachment
@@ -258,21 +245,6 @@ function FeatureAttachments({ feature }: { feature: FeatureRequest }) {
         </div>
       ))}
     </div>
-  );
-}
-
-function StatusBadge({ status }: { status: FeatureStatus }) {
-  const style = STATUS_BADGE_STYLES[status];
-  if (!style) return null;
-  return (
-    <span
-      className={cn(
-        'text-[10px] font-medium px-2 py-0.5 rounded-lg border backdrop-blur-xl whitespace-nowrap',
-        style
-      )}
-    >
-      {STATUS_LABELS[status]}
-    </span>
   );
 }
 
@@ -673,23 +645,22 @@ function FeatureCard({
             {/* Attached media — one full-width, several as a grid */}
             <FeatureAttachments feature={feature} />
 
-        {/* Category + status badges - liquid glass style */}
-        <div className="flex items-center gap-2 flex-wrap">
+        {/* Category, status and the owners' progress note. */}
+        <RequestStatusRow
+          status={feature.status}
+          note={feature.status_note?.trim() || ''}
+          earlyAccessUntil={feature.early_access_until}
+          isPoster={!!isAuthor}
+          categoryChip={
           <span className="text-zinc-300 text-[10px] font-medium px-2 py-0.5 rounded-lg bg-gradient-to-br from-white/15 via-white/8 to-white/3 backdrop-blur-xl border border-white/20 shadow-[0_2px_8px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.3)]">
             {CATEGORY_LABELS[feature.category]}
           </span>
-          <StatusBadge status={feature.status} />
-          {/* A short tag on a live request, e.g. "Future review" on Queued. */}
-          {feature.status !== 'declined' && feature.status_note?.trim() && (
-            <span className="text-[10px] font-medium px-2 py-0.5 rounded-lg border backdrop-blur-xl whitespace-nowrap bg-amber-400/15 text-amber-300/90 border-amber-300/25">
-              {feature.status_note.trim()}
-            </span>
-          )}
-        </div>
+          }
+        />
         {/* The owners' reason for ruling it out. */}
         {notFeasibleReason && (
           <p className="text-zinc-400 text-xs leading-relaxed">
-            <span className="text-zinc-300 font-medium">{_copy("copy.ad389aa4c08e", { defaultValue: "Why:" })}</span>{' '}{notFeasibleReason}
+            <span className="text-zinc-300 font-medium">{_copy("copy.ad389aa4c08e", { defaultValue: "Why:" })}</span>{' '}<TranslatableText publicContent text={notFeasibleReason} as="span" hideControls />
           </p>
         )}
 
@@ -757,6 +728,22 @@ function FeatureCard({
 // ──────────────────────────────────────────────────
 // Submit Feature Drawer
 // ──────────────────────────────────────────────────
+function RequestLoadError({ retry }: { retry: () => void }) {
+  const { t } = useI18n();
+  return (
+    <div data-page-bento className="bg-zinc-900 rounded-2xl p-8 text-center">
+      <h3 className="text-white font-semibold mb-1">{t('features.loadFailed', "Couldn't load requests")}</h3>
+      <Button
+        onClick={retry}
+        variant="glass"
+        className="rounded-xl font-semibold mt-3"
+      >
+        {t('common.retry', 'Retry')}
+      </Button>
+    </div>
+  );
+}
+
 function PromptComposer({ initialCategory, focusRequest, onPosted }: { initialCategory?: FeatureCategory; focusRequest: number; onPosted: () => void }) {
   const { t } = useI18n();
   const { isAuthenticated, openLoginModal } = useAuth();
@@ -811,6 +798,19 @@ function PromptComposer({ initialCategory, focusRequest, onPosted }: { initialCa
     URL.revokeObjectURL(attachments[index].preview);
     setAttachments(prev => prev.filter((_, i) => i !== index));
     setError('');
+  };
+  const addSpoken = (spoken: string) => {
+    setDescription(previous => {
+      if (previous.length >= FEATURE_PROMPT_MAX_LENGTH) return previous;
+      const spacer = previous && !/\s$/.test(previous) ? ' ' : '';
+      return (previous + spacer + spoken).slice(0, FEATURE_PROMPT_MAX_LENGTH);
+    });
+    requestAnimationFrame(() => {
+      const box = promptRef.current;
+      if (!box) return;
+      box.focus({ preventScroll: true });
+      box.setSelectionRange(box.value.length, box.value.length);
+    });
   };
   const handleSubmit = () => {
     if (!description.trim() || submitMutation.isPending) return;
@@ -876,6 +876,9 @@ function PromptComposer({ initialCategory, focusRequest, onPosted }: { initialCa
           <Button type="button" variant="ghost" size="sm" className="rounded-lg px-2" disabled={submitMutation.isPending || attachments.length >= MAX_FEATURE_ATTACHMENTS} onClick={() => fileInputRef.current?.click()}>
             <ImagePlus className="w-4 h-4" />{t('features.promptAttach', 'Attach images')}
           </Button>
+          <HoldToTalkButton disabled={submitMutation.isPending || description.length >= FEATURE_PROMPT_MAX_LENGTH}
+            beforeStart={() => { if (isAuthenticated) return false; openLoginModal(); return true; }}
+            onText={addSpoken} />
           <span className="hidden sm:inline text-[11px] text-zinc-500">{t('features.promptDrop', 'Paste or drop images here')}</span>
           <Button type="button" variant="glass" className="rounded-xl ml-auto" disabled={!description.trim() || submitMutation.isPending} onClick={handleSubmit}>
             {submitMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
@@ -1003,8 +1006,13 @@ function InfiniteScrollSentinel({ onIntersect, isFetching }: { onIntersect: () =
 export default function FeaturesPage() {
   const { t: _copy } = _useCopy();
   const { t } = useI18n();
-  const { isAuthenticated, openLoginModal } = useAuth();
+  const { isAuthenticated, openLoginModal, walletAddress } = useAuth();
+  const wallet = isAuthenticated ? walletAddress?.toLowerCase() : undefined;
+  const [mineOnly, setMineOnly] = useState(false);
+  const authorWallet = mineOnly ? wallet : undefined;
   const [searchParams, setSearchParams] = useSearchParams();
+  const { pathname, hash, state } = useLocation();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<PageTab>('requests');
   const [sort, setSort] = useState<FeatureSort>('newest');
   const [category, setCategory] = useState<CategoryChip>('all');
@@ -1038,9 +1046,26 @@ export default function FeaturesPage() {
   const [composerFocus, setComposerFocus] = useState(0);
   const [initialCategory, setInitialCategory] = useState<FeatureCategory | undefined>(undefined);
 
-  // Handle deep-link from "Report a Bug" buttons: open the bug-fix category
-  // and pre-populate the submit drawer with the bug_fix category.
+  const handleSubmitClick = useCallback(() => {
+    if (!isAuthenticated) {
+      openLoginModal();
+      return;
+    }
+    setActiveTab('requests');
+    setCategory((current) => (current === NOT_FEASIBLE ? 'all' : current));
+    setComposerFocus(value => value + 1);
+  }, [isAuthenticated, openLoginModal]);
+
+  // Consume create links once so returning to this board keeps the user's place.
   useEffect(() => {
+    if (searchParams.get('compose') === 'request') {
+      handleSubmitClick();
+      const next = new URLSearchParams(searchParams);
+      next.delete('compose');
+      if (next.has('tab')) next.set('tab', 'requests');
+      navigate({ pathname, search: next.toString(), hash }, { replace: true, state });
+      return;
+    }
     const report = searchParams.get('report');
     if (report === 'bug') {
       setActiveTab('requests');
@@ -1061,15 +1086,15 @@ export default function FeaturesPage() {
     if (requestedTab === 'requests' || requestedTab === 'shipping' || requestedTab === 'shipped') {
       setActiveTab(requestedTab);
     }
-  }, [searchParams, setSearchParams]);
+  }, [searchParams, setSearchParams, handleSubmitClick, navigate, pathname, hash, state]);
 
-  const { data: featuresData, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useFeatureRequests(sort, listCategory, search);
+  const { data: featuresData, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useFeatureRequests(sort, listCategory, search, authorWallet);
   const allFeatures = useMemo(() => featuresData?.pages.flat() ?? [], [featuresData]);
-  const { data: shippedFeatures, isLoading: isLoadingShipped } = useShippedFeatures();
-  const { data: inProgressFeatures, isLoading: isLoadingInProgress } = useInProgressFeatures();
-  const { data: notFeasibleFeatures, isLoading: isLoadingNotFeasible } = useNotFeasibleFeatures();
+  const { data: shippedFeatures, isLoading: isLoadingShipped, isError: isErrorShipped, refetch: refetchShipped } = useShippedFeatures(authorWallet);
+  const { data: inProgressFeatures, isLoading: isLoadingInProgress, isError: isErrorInProgress, refetch: refetchInProgress } = useInProgressFeatures(authorWallet);
+  const { data: notFeasibleFeatures, isLoading: isLoadingNotFeasible, isError: isErrorNotFeasible, refetch: refetchNotFeasible } = useNotFeasibleFeatures(authorWallet);
 
-  // A notification about one request pins it above the board. The list query
+  // A notification pins the linked request in its status section. The list query
   // could never be relied on to hold it — it may be shipped, declined, outside
   // the active category, or pages down the infinite scroll — so it is fetched
   // by id and rendered on its own, then removed from whichever list would
@@ -1077,12 +1102,24 @@ export default function FeaturesPage() {
   // Notifications link ?request=<id>; the share buttons on web and in the app
   // hand out ?feature=<id>. Either one pins the card.
   const focusedRequestId = searchParams.get('request') ?? searchParams.get('feature');
-  const { data: focusedRequest } = useFeatureRequest(focusedRequestId);
+  const { data: focusedRequest } = useFeatureRequest(authorWallet ? undefined : focusedRequestId);
   const focusedCommentId = searchParams.get('comment');
   // A comment link implies the thread should be open, whether or not the row
   // that wrote the URL also said so.
   const focusedCommentsOpen = searchParams.get('comments') === '1' || !!focusedCommentId;
-  const focusedId = focusedRequest?.id ?? null;
+  const focusedStatus = focusedRequest?.status;
+  const focusedTab: PageTab = focusedStatus === 'in_progress'
+    ? 'shipping'
+    : focusedStatus === 'completed' || focusedStatus === 'shipped' ? 'shipped' : 'requests';
+  const focusedNotFeasible = focusedStatus === 'declined';
+  useEffect(() => {
+    if (!focusedRequestId || !focusedStatus) return;
+    setActiveTab(focusedTab);
+    setCategory(focusedNotFeasible ? NOT_FEASIBLE : 'all');
+  }, [focusedRequestId, focusedStatus, focusedTab, focusedNotFeasible]);
+
+  const showFocusedRequest = activeTab === focusedTab && showNotFeasible === focusedNotFeasible;
+  const focusedId = showFocusedRequest ? focusedRequest?.id ?? null : null;
   const withoutFocused = useCallback(
     <T extends { id: string }>(rows: T[] | undefined): T[] =>
       focusedId ? (rows ?? []).filter((row) => row.id !== focusedId) : (rows ?? []),
@@ -1105,7 +1142,7 @@ export default function FeaturesPage() {
     },
     [listCategory, search],
   );
-  const isFiltering = search.trim().length > 0 || listCategory !== 'all';
+  const isFiltering = !!authorWallet || search.trim().length > 0 || listCategory !== 'all';
   const visibleInProgress = useMemo(
     () => withoutFocused(inProgressFeatures).filter(matchesFilters),
     [inProgressFeatures, withoutFocused, matchesFilters],
@@ -1131,7 +1168,7 @@ export default function FeaturesPage() {
   // ~20k nodes and froze the tab switch, so it reveals a page at a time like the
   // Prompts list does.
   const [shippedLimit, setShippedLimit] = useState(SHIPPED_PAGE_SIZE);
-  useEffect(() => setShippedLimit(SHIPPED_PAGE_SIZE), [category, search]);
+  useEffect(() => setShippedLimit(SHIPPED_PAGE_SIZE), [category, search, authorWallet]);
   const shippedDeepLink = searchParams.get('feature');
   useEffect(() => {
     if (!shippedDeepLink) return;
@@ -1174,19 +1211,9 @@ export default function FeaturesPage() {
     [isAuthenticated, openLoginModal, voteMutation]
   );
 
-  const handleSubmitClick = () => {
-    if (!isAuthenticated) {
-      openLoginModal();
-      return;
-    }
-    setActiveTab('requests');
-    setCategory((current) => (current === NOT_FEASIBLE ? 'all' : current));
-    setComposerFocus(value => value + 1);
-  };
-
   // `open` is counted server-side with the same status filter the list uses, so
   // the tab badge always matches the rows below it.
-  const { data: counts } = useFeatureCounts();
+  const { data: counts } = useFeatureCounts(authorWallet);
 
   const remainingCount = counts?.open ?? features.length;
   const shippedCount = shippedFeatures?.length ?? 0;
@@ -1222,23 +1249,31 @@ export default function FeaturesPage() {
             onClick={handleSubmitClick}
             aria-label={t('features.promptNew', 'New prompt')}
             variant="glass"
-            className="rounded-xl font-semibold text-sm"
-            size="sm"
+            className="h-9 w-9 shrink-0 rounded-xl"
+            size="icon"
           >
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('features.promptNew', 'New prompt')}</span>
+            <Plus className="h-4 w-4" aria-hidden="true" />
           </Button>
         </div>
 
         {/* Search */}
-        <div className="relative mb-3">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-          <Input
-            placeholder={t('features.promptSearch', 'Search prompts…')}
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            className="pl-10 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 rounded-xl"
-          />
+        <div className="mb-3 flex items-center gap-2">
+          <div className="relative min-w-0 flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+            <Input
+              placeholder={t('features.promptSearch', 'Search prompts…')}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="pl-10 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 rounded-xl"
+            />
+          </div>
+          {wallet && (
+            <Button type="button" variant="glass" aria-pressed={mineOnly}
+              onClick={() => setMineOnly(previous => !previous)}
+              className={cn("max-w-[48%] rounded-xl", mineOnly && "bg-white/20 border-white/30")}>
+              <span className="truncate">{t('features.myRequests', 'My Requests')}</span>
+            </Button>
+          )}
         </div>
 
         {/* Page Tabs: Requests / Shipping / Shipped */}
@@ -1394,8 +1429,8 @@ export default function FeaturesPage() {
         <PromptComposer initialCategory={initialCategory} focusRequest={composerFocus} onPosted={() => { setCategory('all'); setSearchInput(''); setSort('newest'); }} />
         {!isFiltering && <TopBuildersCard compact />}
       </div>
-      {/* The request a notification pointed at, above whichever tab is open. */}
-      {focusedRequest && (
+      {/* Keep the linked request and its comment in the matching status section. */}
+      {focusedRequest && showFocusedRequest && (
         <div className="mb-3">
           <SharedTranslationProvider key={focusedRequest.id}>
             <FeatureCard
@@ -1415,6 +1450,8 @@ export default function FeaturesPage() {
         <>
           {isLoadingNotFeasible ? (
             <FeatureSkeletons />
+          ) : isErrorNotFeasible ? (
+            <RequestLoadError retry={() => refetchNotFeasible()} />
           ) : visibleNotFeasible.length > 0 ? (
             <div className="space-y-3">
               {visibleNotFeasible.map((feature) => (
@@ -1447,16 +1484,7 @@ export default function FeaturesPage() {
           {isLoading ? (
             <FeatureSkeletons />
           ) : isError ? (
-            <div data-page-bento className="bg-zinc-900 rounded-2xl p-8 text-center">
-              <h3 className="text-white font-semibold mb-1">{t('features.loadFailed', "Couldn't load requests")}</h3>
-              <Button
-                onClick={() => refetch()}
-                variant="glass"
-                className="rounded-xl font-semibold mt-3"
-              >
-                {t('common.retry', 'Retry')}
-              </Button>
-            </div>
+            <RequestLoadError retry={() => refetch()} />
           ) : features.length > 0 ? (
             <div className="space-y-3">
               {features.map((feature) => (
@@ -1482,8 +1510,8 @@ export default function FeaturesPage() {
               <div className="w-16 h-16 flex items-center justify-center mx-auto mb-4">
                 <BrandIcon src={featuresLightbulb} alt={_copy("copy.c46c50e9cf58", { defaultValue: "No features yet" })} className="w-16 h-16 object-contain opacity-40" />
               </div>
-              <h3 className="text-white font-semibold mb-1">{t('features.noRequestsYet')}</h3>
-              <p className="text-zinc-500 text-sm mb-4">{t('features.beFirstIdea')}</p>
+              <h3 className="text-white font-semibold mb-1">{isFiltering ? t('filters.noMatches') : t('features.noRequestsYet')}</h3>
+              {!isFiltering && <p className="text-zinc-500 text-sm mb-4">{t('features.beFirstIdea')}</p>}
               <Button
                 onClick={handleSubmitClick}
                 variant="glass"
@@ -1502,6 +1530,8 @@ export default function FeaturesPage() {
         <>
           {isLoadingInProgress ? (
             <FeatureSkeletons />
+          ) : isErrorInProgress ? (
+            <RequestLoadError retry={() => refetchInProgress()} />
           ) : visibleInProgress.length > 0 ? (
             <div className="space-y-3">
               {visibleInProgress.map((feature) => (
@@ -1535,6 +1565,8 @@ export default function FeaturesPage() {
         <>
           {isLoadingShipped ? (
             <FeatureSkeletons />
+          ) : isErrorShipped ? (
+            <RequestLoadError retry={() => refetchShipped()} />
           ) : visibleShipped.length > 0 ? (
             <div className="space-y-3">
               {renderedShipped.map((feature) => (
@@ -1548,10 +1580,9 @@ export default function FeaturesPage() {
                 </SharedTranslationProvider>
               ))}
               {renderedShipped.length < visibleShipped.length && (
-                <InfiniteScrollSentinel
-                  onIntersect={showMoreShipped}
-                  isFetching={false}
-                />
+                <Button type="button" variant="outline" className="w-full" onClick={showMoreShipped}>
+                  {t('common.loadMore')}
+                </Button>
               )}
             </div>
           ) : (

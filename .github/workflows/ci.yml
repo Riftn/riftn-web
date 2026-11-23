@@ -16,6 +16,40 @@ env:
   PNPM_VERSION: '9.15.9'
 
 jobs:
+  migration-versions:
+    name: Migration history and event admission
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: event-test
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: localhost
+      PGUSER: postgres
+      PGPASSWORD: event-test
+    steps:
+      - uses: actions/checkout@v4
+      - run: node scripts/check-migration-versions.mjs
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 3.2.0
+      - name: Apply the migration with the Supabase ledger
+        run: |
+          psql -X -v ON_ERROR_STOP=1 -f tests/sql/event-audit-bootstrap.sql
+          sed -n '/^CREATE OR REPLACE FUNCTION public.holder_gate_hex_to_numeric/,/^\$\$;/p' supabase/migrations/20261102020000_community_holder_gate.sql | psql -X -v ON_ERROR_STOP=1
+          fixture="$RUNNER_TEMP/event-ledger"
+          mkdir -p "$fixture/supabase/migrations"
+          for file in supabase/migrations/*.sql; do
+            echo 'SELECT 1;' > "$fixture/$file"
+          done
+          cp supabase/migrations/20261121120000_event_chat_and_receipts.sql "$fixture/supabase/migrations/"
+          supabase db push --workdir "$fixture" --db-url "postgres://postgres:event-test@localhost:5432/postgres" --yes
+          psql -X -v ON_ERROR_STOP=1 -f tests/sql/event-audit.sql
+
   account-mcp:
     name: Account MCP permissions and Creator jobs
     runs-on: ubuntu-latest

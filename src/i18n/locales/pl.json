@@ -4217,7 +4217,7 @@
       "pageViewsTerm": "Odsłony",
       "pageViews": "— żądania, które Cloudflare klasyfikuje jako wczytania strony, a nie obrazy, skrypty czy wywołania API.",
       "botsTerm": "Boty są wliczone",
-      "bots": "— to surowe liczniki z edge, więc mieszczą się w nich roboty indeksujące, monitory dostępności i klienci skryptowe. Widać je w rozbiciu na przeglądarki powyżej, gdzie pozycje takie jak „Curl\" i „Nieznane\" to ruch automatyczny, a nie ludzie. Odfiltrowanie botów wymaga płatnego planu Cloudflare, którego nie mamy, a ciche odejmowanie szacunku uczyniłoby liczby mniej sprawdzalnymi, nie bardziej.",
+      "bots": "— to surowe liczniki z edge, więc mieszczą się w nich roboty indeksujące, monitory dostępności i klienci skryptowe. Widać je w rozbiciu na przeglądarki powyżej, gdzie pozycje takie jak „Curl\" i „Nieznane\" to ruch automatyczny, a nie ludzie. Boty coraz trudniej odróżnić od osób odwiedzających stronę, a wkrótce w tych statystykach nie będzie można ich rozróżnić, więc próby filtrowania botów nie mają sensu.",
       "totalTerm": "Sumy zakresu",
       "total": "— odsłony i żądania sumują się w całym zakresie. Liczb odwiedzających celowo nie sumujemy w „łączną liczbę odwiedzających\", bo ktoś obecny w poniedziałek i wtorek zostałby policzony dwa razy.",
       "peakTerm": "Najbardziej ruchliwa godzina / dzień",

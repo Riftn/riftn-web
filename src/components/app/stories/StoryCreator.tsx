@@ -12,14 +12,15 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { AtSign, Pencil, RefreshCw, Type, Undo2, Users, Globe2, Volume2, VolumeX, Scissors } from 'lucide-react';
+import { AtSign, Sticker, Wand2, Timer, Pencil, RefreshCw, RotateCw, Type, Undo2, Users, Globe2, Volume2, VolumeX, Scissors } from 'lucide-react';
+import Back from '@/components/ui/cut-icons/back';
 import Close from '@/components/ui/cut-icons/close';
 import Images from '@/components/ui/cut-icons/images';
 import Music from '@/components/ui/cut-icons/music';
 import Check from '@/components/ui/cut-icons/check';
 import { SoundPicker } from '@/features/post/components/SoundPicker';
 import type { AttachedSound } from '@/features/post/hooks/usePostSound';
-import { soundWindow } from '@/lib/sound-window';
+import { bindSoundWindow, soundWindow } from '@/lib/sound-window';
 import { searchUsersForDM } from '@/lib/api/dehub/dm';
 import type { DeHubUser } from '@/lib/api/dehub';
 import { getStoryShelf, STORY_LIFETIMES, type StoryAudience, type StoryLifetime, type StorySong } from '@/lib/api/dehub/stories';
@@ -27,24 +28,37 @@ import { getMediaUrl } from '@/lib/api/dehub/core';
 import { useRefreshStoryShelf } from '@/hooks/use-story-shelf';
 import { useQuery } from '@tanstack/react-query';
 import type { StoryRemixSource } from '@/store/storiesStore';
-import { composeOverlay, composePhoto, grabFrame, mentionBoxes, OUT_H, OUT_W, TEXT_COLORS, type TextLayer } from './story-compose';
+import { backdropCss, composeOverlay, composePhoto, grabFrame, mentionBoxes, OUT_H, OUT_W, PHOTO_BACKDROPS, PHOTO_LOOKS, TEXT_COLORS, type PhotoBackdrop, type PhotoLook, type TextLayer } from './story-compose';
+import { CAPTION_FONTS, captionFonts, captionFontStyle, type CaptionFont } from "./caption-fonts";
 import { shareMoment } from './story-upload';
 import '@/styles/stories.css';
 
 const MAX_VIDEO_S = 60;
 const AUDIENCE_KEY = 'riftn.stories.audience';
+/** The saved Close friends list (people picked once, reused for "Only selected people"). */
+const CLOSE_FRIENDS_KEY = 'riftn.stories.closeFriends';
+function readCloseFriends(): DeHubUser[] {
+  try {
+    const list = JSON.parse(localStorage.getItem(CLOSE_FRIENDS_KEY) || '[]');
+    return Array.isArray(list) ? list.filter((u: DeHubUser) => u && typeof u.address === 'string').slice(0, 50) : [];
+  } catch { return []; }
+}
 
 type Media = { kind: 'photo' | 'video'; url: string; blob: Blob; duration?: number };
-type Tool = null | 'text' | 'draw' | 'mention' | 'trim' | 'lifetime';
+type Tool = null | 'text' | 'draw' | 'mention' | 'trim' | 'timer' | 'lifetime' | 'audience' | 'sticker' | 'effects';
+
+/** Stickers are big glyph layers: emoji keep their own colours, the shapes take the text colour. */
+const STICKER_EMOJI = ['🔥', '😂', '😍', '🥳', '👀', '💯', '🎉', '❤️', '✨', '👏', '🙌', '😎', '🤯', '🫶', '🙏', '💀', '🚀', '⚡', '🌙', '☀️'];
+const STICKER_SHAPES = ['→', '←', '↑', '↓', '↗', '↘', '➜', '○', '✓', '✗', '★', '♥', '!', '?'];
 
 const uid = () => Math.random().toString(36).slice(2, 9);
 
 export function StoryCreator({ onClose, remixSource }: { onClose: () => void; remixSource?: StoryRemixSource }) {
   const { t } = useTranslation();
   const refreshShelf = useRefreshStoryShelf();
-  const { data: customLifetime = false } = useQuery({
-    queryKey: ['story-custom-lifetime'],
-    queryFn: async () => (await getStoryShelf('', false)).supportsCustomLifetime === true,
+  const { data: storyCapabilities } = useQuery({
+    queryKey: ['story-posting-capabilities'],
+    queryFn: async () => getStoryShelf('', false).then(({ supportsCustomAudience, supportsCustomLifetime, supportsPhotoDuration }) => ({ supportsCustomAudience, supportsCustomLifetime, supportsPhotoDuration })),
     staleTime: 60_000,
     retry: false,
   });
@@ -64,7 +78,7 @@ export function StoryCreator({ onClose, remixSource }: { onClose: () => void; re
           media={media}
           remixSourceId={remixSource?.id}
           remixLabel={remixLabel}
-          customLifetime={customLifetime}
+          customLifetime={!!storyCapabilities?.supportsCustomLifetime} customAudience={!!storyCapabilities?.supportsCustomAudience} customPhotoDuration={!!storyCapabilities?.supportsPhotoDuration}
           onBack={() => { URL.revokeObjectURL(media.url); setMedia(null); }}
           onClose={onClose}
           onShared={() => refreshShelf()}
@@ -206,7 +220,7 @@ function Capture({ onPicked, onClose, remixLabel }: { onPicked: (m: Media) => vo
         )}
       </div>
       <div data-sc-top>
-        <button type="button" data-sc-btn data-st-dark-glass onClick={onClose} aria-label={t('common.close', { defaultValue: 'Close' })}><Close className="w-5 h-5" /></button>
+        <button type="button" data-sc-btn data-sc-close onClick={onClose} aria-label={t('common.close', { defaultValue: 'Close' })}><Close className="w-5 h-5" /></button>
         {remixLabel && <span data-sc-chip data-st-dark-glass className="min-w-0"><span className="truncate">{remixLabel}</span></span>}
         <span className="flex-1" />
         {camera === 'on' && (
@@ -260,7 +274,7 @@ function useStageBox(ref: React.RefObject<HTMLDivElement>) {
   return box;
 }
 
-function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, customLifetime }: {
+function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, customLifetime, customAudience, customPhotoDuration }: {
   media: Media;
   onBack: () => void;
   onClose: () => void;
@@ -268,6 +282,8 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
   remixSourceId?: string;
   remixLabel?: string;
   customLifetime: boolean;
+  customAudience: boolean;
+  customPhotoDuration: boolean;
 }) {
   const { t } = useTranslation();
   const areaRef = useRef<HTMLDivElement>(null);
@@ -283,10 +299,21 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
   const [song, setSong] = useState<AttachedSound | null>(null);
   const [soundOpen, setSoundOpen] = useState(false);
   const [muted, setMuted] = useState(false);
+  const [photoSeconds, setPhotoSeconds] = useState(5);
+  const [look, setLook] = useState<PhotoLook>('none');
+  const [backdrop, setBackdrop] = useState<PhotoBackdrop>('blur');
   const [trim, setTrim] = useState<[number, number]>([0, Math.min(MAX_VIDEO_S, media.duration || MAX_VIDEO_S)]);
   const [audience, setAudience] = useState<StoryAudience>(() => {
     try { return localStorage.getItem(AUDIENCE_KEY) === 'followers' ? 'followers' : 'everyone'; } catch { return 'everyone'; }
   });
+  const [audiencePeople, setAudiencePeople] = useState<DeHubUser[]>([]);
+  const restrictPeople = audience === 'selected' || audience === 'except';
+  const audienceLabels = {
+    everyone: t('stories.everyone', { defaultValue: 'Everyone' }),
+    followers: t('stories.followersOnly', { defaultValue: 'Followers' }),
+    selected: t('stories.selectedPeople', { defaultValue: 'Only selected people' }),
+    except: t('stories.hideFromPeople', { defaultValue: 'Hide from selected people' }),
+  };
   const [lifetime, setLifetime] = useState<StoryLifetime>(24);
   const lifetimeLabel = t('stories.lifetime', { defaultValue: 'Story duration' });
   const [busy, setBusy] = useState(false);
@@ -345,6 +372,11 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
     setEditing(layer.id);
     setTool('text');
   };
+  const addSticker = (glyph: string) => {
+    const layer: TextLayer = { id: uid(), kind: 'text', text: glyph, x: 0.5, y: 0.45, size: 0.16, color: TEXT_COLORS[0], box: false };
+    setLayers(l => [...l, layer]);
+    setTool(null);
+  };
   const patch = (id: string, p: Partial<TextLayer>) => setLayers(l => l.map(x => (x.id === id ? { ...x, ...p } : x)));
   const finishText = () => {
     setLayers(l => l.filter(x => x.text.trim()));
@@ -382,8 +414,8 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
   const [query, setQuery] = useState('');
   const [people, setPeople] = useState<DeHubUser[]>([]);
   useEffect(() => {
-    if (tool !== 'mention') return;
-    const q = query.trim();
+    if (tool !== 'mention' && tool !== 'audience') return;
+    const q = query.trim().replace(/^@/, '');
     if (q.length < 2) { setPeople([]); return; }
     const id = window.setTimeout(() => {
       searchUsersForDM(q, 0, 8).then(r => setPeople(r.items)).catch(() => setPeople([]));
@@ -401,16 +433,19 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
 
   // ── Song ──────────────────────────────────────────────────────────
   const songAudio = useRef<HTMLAudioElement | null>(null);
-  useEffect(() => {
+  const selectSong = (next: AttachedSound | null) => {
     songAudio.current?.pause();
-    if (!song) return;
-    const a = new Audio(song.url.split('#')[0]);
-    a.loop = true;
-    a.currentTime = soundWindow(song.url)?.start ?? 0;
-    a.play().catch(() => {});
-    songAudio.current = a;
-    return () => a.pause();
-  }, [song]);
+    setSong(next);
+    if (!next) return;
+    // Keep playback inside the selection tap for iOS Safari.
+    const audio = songAudio.current ?? new Audio();
+    songAudio.current = audio;
+    bindSoundWindow(audio);
+    audio.src = next.url;
+    audio.loop = true;
+    void audio.play().catch(() => {});
+  };
+  useEffect(() => () => songAudio.current?.pause(), []);
 
   // ── Video preview loop inside the trim ───────────────────────────
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -426,10 +461,10 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
 
   // ── Share ─────────────────────────────────────────────────────────
   const share = useCallback(async () => {
-    if (busy) return;
+    if (busy || (restrictPeople && !audiencePeople.length)) return;
     setBusy(true);
     try {
-      try { localStorage.setItem(AUDIENCE_KEY, audience); } catch { /* private mode */ }
+      try { if (!restrictPeople) localStorage.setItem(AUDIENCE_KEY, audience); } catch { /* private mode */ }
       const visible = layers.filter(l => l.text.trim());
       const mentions = mentionBoxes(visible);
       let songField: StorySong | null = null;
@@ -447,20 +482,19 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
           };
         }
       }
-      const fields = { audience, expiresInHours: customLifetime ? lifetime : undefined, mentions, song: songField, muted: media.kind === 'video' ? muted : false, remixSourceId };
+      const fields = { audience, audienceAddresses: restrictPeople ? audiencePeople.map(user => user.address!) : undefined, expiresInHours: customLifetime ? lifetime : undefined, mentions, song: songField, muted: media.kind === 'video' ? muted : false, remixSourceId };
       if (media.kind === 'photo') {
         const img = imgRef.current!;
         if (!img.complete) await new Promise(r => { img.onload = r; });
-        const blob = await composePhoto(img, drew ? drawRef.current : null, visible);
-        shareMoment({ kind: 'photo', file: blob, preview: URL.createObjectURL(blob), fields }, onShared);
+        const blob = await composePhoto(img, drew ? drawRef.current : null, visible, look, backdrop);
+        shareMoment({ kind: 'photo', file: blob, preview: URL.createObjectURL(blob), fields: { ...fields, photoDurationSeconds: customPhotoDuration ? photoSeconds : undefined } }, onShared);
       } else {
         const overlay = await composeOverlay(drawRef.current, drew, visible);
-        const poster = await videoPoster(videoRef.current);
         shareMoment({
           kind: 'video',
           file: media.blob,
           overlay,
-          preview: poster || '',
+          preview: '',
           fields: { ...fields, trimStart: trim[0], trimEnd: trim[1] },
         }, onShared);
       }
@@ -470,7 +504,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
       toast.error(t('stories.couldNotPrepare', { defaultValue: "Couldn't get your moment ready. Try again." }));
       setBusy(false);
     }
-  }, [busy, audience, customLifetime, lifetime, layers, song, media, muted, drew, trim, remixSourceId, onShared, onClose, t]);
+  }, [busy, audience, audiencePeople, restrictPeople, customLifetime, lifetime, layers, song, media, muted, drew, trim, photoSeconds, customPhotoDuration, remixSourceId, onShared, onClose, t]);
 
   const isVideo = media.kind === 'video';
   const duration = media.duration || MAX_VIDEO_S;
@@ -488,7 +522,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
           {isVideo ? (
             <video ref={videoRef} src={media.url} autoPlay loop playsInline muted={muted || !!song} className="absolute inset-0 w-full h-full object-cover" />
           ) : (
-            <PhotoPreview imgRef={imgRef} url={media.url} />
+            <PhotoPreview imgRef={imgRef} url={media.url} look={look} backdrop={backdrop} />
           )}
           <canvas
             ref={drawRef}
@@ -507,6 +541,8 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
               style={{
                 left: `${l.x * 100}%`,
                 top: `${l.y * 100}%`,
+                transform: `translate(-50%, -50%) rotate(${l.rotation ?? 0}deg)`,
+                ...captionFontStyle(l.font),
                 fontSize: fontPx(l),
                 color: l.box && l.color.toLowerCase() !== '#ffffff' ? l.color : l.box ? '#fff' : l.color,
                 textShadow: l.box ? undefined : '0 2px 14px rgba(0,0,0,.45)',
@@ -524,20 +560,32 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
             <div data-sv-song data-st-dark-glass style={{ top: 72 }}>
               <Music className="w-4 h-4" />
               <span>{song.title}{song.creator ? ` · ${song.creator}` : ''}</span>
-              <button type="button" className="ml-1 opacity-80" onClick={() => setSong(null)} aria-label={t('stories.removeSong', { defaultValue: 'Remove song' })}><Close className="w-3.5 h-3.5" /></button>
+              <button type="button" className="ml-1 opacity-80" onClick={() => selectSong(null)} aria-label={t('stories.removeSong', { defaultValue: 'Remove song' })}><Close className="w-3.5 h-3.5" /></button>
             </div>
           )}
         </div>
       </div>
 
       <div data-sc-top>
-        <button type="button" data-sc-btn data-st-dark-glass onClick={onBack} aria-label={t('common.back', { defaultValue: 'Back' })}><Close className="w-5 h-5" /></button>
+        <button type="button" data-sc-btn data-st-dark-glass onClick={onBack} aria-label={t('common.back', { defaultValue: 'Back' })}><Back className="w-5 h-5" /></button>
+        <button type="button" data-sc-btn data-sc-close onClick={() => { URL.revokeObjectURL(media.url); onClose(); }} aria-label={t('common.close', { defaultValue: 'Close' })}><Close className="w-5 h-5" /></button>
         {remixLabel && <span data-sc-chip data-st-dark-glass className="min-w-0"><span className="truncate">{remixLabel}</span></span>}
         <span className="flex-1" />
       </div>
 
       <div data-sc-tools>
+        {!isVideo && customPhotoDuration && (
+          <button type="button" data-sc-btn data-st-dark-glass data-on={tool === 'timer' ? 'true' : 'false'}
+            onClick={() => setTool(tl => tl === 'timer' ? null : 'timer')}
+            aria-label={t('liveStudio.fields.duration', { defaultValue: 'Seconds on screen' })}>
+            <Timer className="w-5 h-5" />
+          </button>
+        )}
         <button type="button" data-sc-btn data-st-dark-glass data-on={tool === 'text' ? 'true' : 'false'} onClick={addText} aria-label={t('stories.text', { defaultValue: 'Text' })}><Type className="w-5 h-5" /></button>
+        {!isVideo && (
+          <button type="button" data-sc-btn data-st-dark-glass data-on={tool === 'effects' || look !== 'none' ? 'true' : 'false'} onClick={() => setTool(tl => (tl === 'effects' ? null : 'effects'))} aria-label={t('stories.effects', { defaultValue: 'Effects' })}><Wand2 className="w-5 h-5" /></button>
+        )}
+        <button type="button" data-sc-btn data-st-dark-glass data-on={tool === 'sticker' ? 'true' : 'false'} onClick={() => setTool(tl => (tl === 'sticker' ? null : 'sticker'))} aria-label={t('stories.stickers', { defaultValue: 'Stickers' })}><Sticker className="w-5 h-5" /></button>
         <button type="button" data-sc-btn data-st-dark-glass data-on={tool === 'draw' ? 'true' : 'false'} onClick={() => setTool(tl => (tl === 'draw' ? null : 'draw'))} aria-label={t('stories.draw', { defaultValue: 'Draw' })}><Pencil className="w-5 h-5" /></button>
         <button type="button" data-sc-btn data-st-dark-glass data-on={song ? 'true' : 'false'} onClick={() => setSoundOpen(true)} aria-label={t('stories.song', { defaultValue: 'Song' })}><Music className="w-5 h-5" /></button>
         <button type="button" data-sc-btn data-st-dark-glass data-on={tool === 'mention' ? 'true' : 'false'} onClick={() => setTool(tl => (tl === 'mention' ? null : 'mention'))} aria-label={t('stories.mention', { defaultValue: 'Mention someone' })}><AtSign className="w-5 h-5" /></button>
@@ -557,19 +605,72 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
             type="button"
             data-sc-chip
             data-st-dark-glass
-            onClick={() => setAudience(a => (a === 'everyone' ? 'followers' : 'everyone'))}
+            onClick={() => { setQuery(''); setPeople([]); setTool('audience'); }}
           >
             {audience === 'everyone' ? <Globe2 className="w-4 h-4" /> : <Users className="w-4 h-4" />}
-            {audience === 'everyone' ? t('stories.everyone', { defaultValue: 'Everyone' }) : t('stories.followersOnly', { defaultValue: 'Followers' })}
+            {audienceLabels[audience]}
           </button>
           {customLifetime ? (
             <button type="button" data-sc-chip data-st-dark-glass onClick={() => setTool('lifetime')} aria-label={`${lifetimeLabel}, ${lifetime}h`}>
               {lifetime}h
             </button>
           ) : <span data-sc-chip data-st-dark-glass>24h</span>}
-          <button type="button" data-sc-share onClick={share} disabled={busy}>
+          <button type="button" data-sc-share onClick={share} disabled={busy || (restrictPeople && !audiencePeople.length)}>
             {t('stories.share', { defaultValue: 'Share' })}
           </button>
+        </div>
+      )}
+
+      {tool === 'audience' && (
+        <div data-sc-panel data-sc-text-panel className="max-h-[70dvh] overflow-y-auto">
+          <div className="mb-2 flex items-center justify-between">
+            <strong>{t('settings.privacy', { defaultValue: 'Privacy' })}</strong>
+            <button type="button" data-sc-chip data-st-dark-glass onClick={() => { setQuery(''); setTool(null); }}>
+              {t('common.done', { defaultValue: 'Done' })}
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {(Object.keys(audienceLabels) as StoryAudience[]).filter(mode => customAudience || mode === 'everyone' || mode === 'followers').map(mode => (
+              <button key={mode} type="button" data-sc-chip data-st-dark-glass aria-pressed={audience === mode}
+                onClick={() => { if (audience !== mode) setAudiencePeople([]); setAudience(mode); }}>
+                {audience === mode && <Check className="size-4" />}{audienceLabels[mode]}
+              </button>
+            ))}
+          </div>
+          {customAudience && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              <button type="button" data-sc-chip data-st-dark-glass data-sc-close-friends
+                disabled={!readCloseFriends().length}
+                onClick={() => { setAudience('selected'); setAudiencePeople(readCloseFriends()); }}>
+                {t('stories.closeFriends', { defaultValue: 'Close friends' })} ({readCloseFriends().length})
+              </button>
+              {audience === 'selected' && audiencePeople.length > 0 && (
+                <button type="button" data-sc-chip data-st-dark-glass
+                  onClick={() => {
+                    try { localStorage.setItem(CLOSE_FRIENDS_KEY, JSON.stringify(audiencePeople.map(u => ({ address: u.address, username: u.username, displayName: u.displayName })))); } catch { /* private mode */ }
+                    toast.success(t('stories.closeFriendsSaved', { defaultValue: 'Saved as your Close friends' }));
+                  }}>
+                  {t('stories.saveCloseFriends', { defaultValue: 'Save as Close friends' })}
+                </button>
+              )}
+            </div>
+          )}
+          {restrictPeople && (
+            <>
+              <input value={query} onChange={e => setQuery(e.target.value)} placeholder={t('common.search', { defaultValue: 'Search' })}
+                aria-label={t('common.search', { defaultValue: 'Search' })} className="my-2 w-full rounded-full bg-white/10 px-4 py-2" />
+              {audiencePeople.map(user => (
+                <button key={user.address} type="button" data-sc-chip data-st-dark-glass
+                  onClick={() => setAudiencePeople(current => current.filter(item => item.address !== user.address))}>@{user.username} ×</button>
+              ))}
+              {people.filter(user => user.address && user.username && !audiencePeople.some(item => item.address === user.address)).map(user => (
+                <button type="button" key={user.address} className="block py-2" disabled={audiencePeople.length >= 50}
+                  onClick={() => { setAudiencePeople(current => [...current, user]); setQuery(''); setPeople([]); }}>
+                  {user.displayName} @{user.username}
+                </button>
+              ))}
+            </>
+          )}
         </div>
       )}
 
@@ -595,6 +696,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
         <div data-sc-panel data-sc-text-panel onPointerDown={e => e.stopPropagation()}>
           <textarea
             autoFocus
+            style={captionFontStyle(editingLayer.font)}
             value={editingLayer.text}
             maxLength={200}
             rows={2}
@@ -607,11 +709,29 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
               <button key={c} type="button" style={{ background: c }} data-on={editingLayer.color === c ? 'true' : 'false'} onClick={() => patch(editingLayer.id, { color: c })} aria-label={c} />
             ))}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <button type="button" data-sc-chip data-st-dark-glass data-on={editingLayer.box ? 'true' : 'false'} onClick={() => patch(editingLayer.id, { box: !editingLayer.box })}>
               {editingLayer.box ? t('stories.boxOn', { defaultValue: 'Box on' }) : t('stories.boxOff', { defaultValue: 'Box off' })}
             </button>
-            <input type="range" min={0.045} max={0.14} step={0.005} value={editingLayer.size} onChange={e => patch(editingLayer.id, { size: Number(e.target.value) })} className="flex-1" aria-label={t('stories.size', { defaultValue: 'Size' })} />
+            <button type="button" data-sc-chip data-st-dark-glass
+              aria-label={`${t('dmVideo.rotate', { defaultValue: 'Rotate' })} · ${editingLayer.rotation ?? 0}°`}
+              onClick={() => patch(editingLayer.id, { rotation: ((editingLayer.rotation ?? 0) + 45) % 360 })}>
+              <RotateCw className="w-4 h-4" />{editingLayer.rotation ?? 0}°
+            </button>
+            <select
+              data-sc-caption-font
+              aria-label={t('stories.captionFont', { defaultValue: 'Caption font' })}
+              className="rounded-lg bg-zinc-800 px-2 py-1.5 text-sm text-white"
+              value={editingLayer.font ?? 'classic'}
+              onChange={event => patch(editingLayer.id, { font: event.target.value as CaptionFont })}
+            >
+              {captionFonts.map(id => (
+                <option key={id} value={id} style={captionFontStyle(id)}>
+                  {t(`stories.captionStyles.${id}`, { defaultValue: CAPTION_FONTS[id].label })}
+                </option>
+              ))}
+            </select>
+            <input type="range" min={0.045} max={0.14} step={0.005} value={editingLayer.size} onChange={e => patch(editingLayer.id, { size: Number(e.target.value) })} className="flex-1" aria-label={t('articles.textSize', { defaultValue: 'Text size' })} />
             <button type="button" data-sc-btn data-st-dark-glass onClick={finishText} aria-label={t('common.done', { defaultValue: 'Done' })}><Check className="w-5 h-5" /></button>
           </div>
         </div>
@@ -626,6 +746,53 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
           </div>
           <button type="button" data-sc-btn data-st-dark-glass onClick={undoDraw} aria-label={t('common.undo', { defaultValue: 'Undo' })}><Undo2 className="w-5 h-5" /></button>
           <button type="button" data-sc-btn data-st-dark-glass onClick={() => setTool(null)} aria-label={t('common.done', { defaultValue: 'Done' })}><Check className="w-5 h-5" /></button>
+        </div>
+      )}
+
+      {tool === 'effects' && !isVideo && (
+        <div data-sc-panel data-st-dark-glass data-sc-effects onPointerDown={e => e.stopPropagation()}>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-white text-sm font-semibold">{t('stories.effects', { defaultValue: 'Effects' })}</span>
+            <button type="button" data-sc-btn data-st-dark-glass onClick={() => setTool(null)} aria-label={t('common.done', { defaultValue: 'Done' })}><Check className="w-5 h-5" /></button>
+          </div>
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            {(Object.keys(PHOTO_LOOKS) as PhotoLook[]).map(key => (
+              <button key={key} type="button" data-sc-chip data-st-dark-glass aria-pressed={look === key} onClick={() => setLook(key)}>
+                {look === key && <Check className="size-4" />}{t(`stories.looks.${key}`, { defaultValue: key === 'none' ? 'Original' : key[0].toUpperCase() + key.slice(1) })}
+              </button>
+            ))}
+          </div>
+          <span className="block text-white/60 text-xs mb-1">{t('stories.backdrop', { defaultValue: 'Background (shows around wide photos)' })}</span>
+          <div className="flex gap-2 overflow-x-auto">
+            {(Object.keys(PHOTO_BACKDROPS) as PhotoBackdrop[]).map(key => (
+              <button key={key} type="button" aria-pressed={backdrop === key} onClick={() => setBackdrop(key)}
+                aria-label={t(`stories.backdrops.${key}`, { defaultValue: key })}
+                className="size-10 shrink-0 rounded-full border-2"
+                style={{ borderColor: backdrop === key ? '#fff' : 'rgba(255,255,255,.25)', background: backdropCss(key) ?? 'rgba(255,255,255,.15)' }}>
+                {key === 'blur' && <span className="text-[10px] text-white">{t('stories.backdrops.blur', { defaultValue: 'Blur' })}</span>}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {tool === 'sticker' && (
+        <div data-sc-panel data-st-dark-glass data-sc-stickers onPointerDown={e => e.stopPropagation()}>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-white text-sm font-semibold">{t('stories.stickers', { defaultValue: 'Stickers' })}</span>
+            <button type="button" data-sc-btn data-st-dark-glass onClick={() => setTool(null)} aria-label={t('common.close', { defaultValue: 'Close' })}><Close className="size-[18px]" /></button>
+          </div>
+          <div className="grid grid-cols-7 gap-1 mb-2">
+            {STICKER_EMOJI.map(g => (
+              <button key={g} type="button" className="h-11 rounded-xl text-[26px] leading-none hover:bg-white/10" onClick={() => addSticker(g)} aria-label={g}>{g}</button>
+            ))}
+          </div>
+          <span className="block text-white/60 text-xs mb-1">{t('stories.shapes', { defaultValue: 'Arrows and shapes. Tap one after adding it to change its colour, size or angle.' })}</span>
+          <div className="grid grid-cols-7 gap-1">
+            {STICKER_SHAPES.map(g => (
+              <button key={g} type="button" className="h-11 rounded-xl text-[24px] leading-none font-bold text-white hover:bg-white/10" onClick={() => addSticker(g)} aria-label={g}>{g}</button>
+            ))}
+          </div>
         </div>
       )}
 
@@ -647,6 +814,19 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
               </span>
             </button>
           ))}
+        </div>
+      )}
+
+      {tool === 'timer' && !isVideo && (
+        <div data-sc-panel data-st-dark-glass onPointerDown={e => e.stopPropagation()}>
+          <label className="block text-sm font-semibold">
+            {t('liveStudio.fields.duration', { defaultValue: 'Seconds on screen' })} · {photoSeconds}s
+            <input type="range" min={1} max={60} step={1} value={photoSeconds} className="my-3 w-full"
+              onChange={e => setPhotoSeconds(e.target.valueAsNumber)} />
+          </label>
+          <button type="button" data-sc-chip data-st-dark-glass onClick={() => setTool(null)}>
+            <Check className="w-4 h-4" />{t('common.done', { defaultValue: 'Done' })}
+          </button>
         </div>
       )}
 
@@ -672,20 +852,24 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
         <SoundPicker
           isOpen={soundOpen}
           onClose={() => setSoundOpen(false)}
-          onSelect={s => setSong(s)}
+          aboveMomentEditor
+          onSelect={selectSong}
           currentSound={song}
-          clipSeconds={isVideo ? Math.round(trim[1] - trim[0]) : 15}
+          clipSeconds={isVideo ? Math.round(trim[1] - trim[0]) : photoSeconds}
         />
       )}
     </>
   );
 }
 
-function PhotoPreview({ imgRef, url }: { imgRef: React.RefObject<HTMLImageElement>; url: string }) {
+function PhotoPreview({ imgRef, url, look = 'none', backdrop = 'blur' }: { imgRef: React.RefObject<HTMLImageElement>; url: string; look?: PhotoLook; backdrop?: PhotoBackdrop }) {
   const [wide, setWide] = useState(false);
+  const fill = backdropCss(backdrop);
   return (
     <>
-      {wide && <img src={url} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ filter: 'blur(40px) brightness(0.6)', transform: 'scale(1.2)' }} />}
+      {wide && (fill
+        ? <div className="absolute inset-0" style={{ background: fill }} />
+        : <img src={url} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ filter: 'blur(40px) brightness(0.6)', transform: 'scale(1.2)' }} />)}
       <img
         ref={imgRef}
         data-sc-media
@@ -693,29 +877,11 @@ function PhotoPreview({ imgRef, url }: { imgRef: React.RefObject<HTMLImageElemen
         alt=""
         draggable={false}
         className="absolute inset-0 w-full h-full"
-        style={{ objectFit: wide ? 'contain' : 'cover' }}
+        style={{ objectFit: wide ? 'contain' : 'cover', filter: PHOTO_LOOKS[look] === 'none' ? undefined : PHOTO_LOOKS[look] }}
         onLoad={e => setWide(e.currentTarget.naturalWidth / e.currentTarget.naturalHeight > 0.75)}
       />
     </>
   );
-}
-
-/** A still of the clip for your tile while it uploads. */
-async function videoPoster(video: HTMLVideoElement | null): Promise<string | null> {
-  if (!video || !video.videoWidth) return null;
-  try {
-    const c = document.createElement('canvas');
-    c.width = 270;
-    c.height = 480;
-    const ctx = c.getContext('2d')!;
-    const scale = Math.max(c.width / video.videoWidth, c.height / video.videoHeight);
-    const w = video.videoWidth * scale;
-    const h = video.videoHeight * scale;
-    ctx.drawImage(video, (c.width - w) / 2, (c.height - h) / 2, w, h);
-    return c.toDataURL('image/jpeg', 0.8);
-  } catch {
-    return null;
-  }
 }
 
 export default StoryCreator;

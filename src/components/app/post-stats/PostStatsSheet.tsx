@@ -9,6 +9,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+import { openPostInfo } from '@/lib/preload-post-page';
 import { useTranslation } from 'react-i18next';
 import { Loader2 } from 'lucide-react';
 import Eye from '@/components/ui/cut-icons/visibility';
@@ -149,7 +150,7 @@ export function PostStatsSheet({ open, onOpenChange, tokenId }: PostStatsSheetPr
                 type="button"
                 onClick={() => {
                   onOpenChange(false);
-                  navigate(`/app/post/${tokenId}/info`);
+                  openPostInfo(navigate, tokenId);
                 }}
                 className="h-11 rounded-xl bg-white text-black font-semibold text-sm"
               >

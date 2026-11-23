@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useCrossPostAccountCount } from './CrossPostPicker';
-import { Eye, Loader2, SpellCheck, Palette, ChevronLeft, Type, Hash, BarChart2, MonitorPlay, Cable, AlertTriangle, ScreenShare } from "lucide-react";
+import { Eye, Loader2, SpellCheck, Palette, ChevronLeft, Type, Hash, BarChart2, MonitorPlay, Cable, AlertTriangle, ScreenShare, GraduationCap, UserRound } from "lucide-react";
 import BookOpen from "@/components/ui/cut-icons/docs";
 import Check from "@/components/ui/cut-icons/check";
 import More from "@/components/ui/cut-icons/more";
@@ -86,6 +86,13 @@ interface PostActionBarProps {
   onSoundMixChange?: (mix: SoundMix) => void;
   onTogglePoll?: () => void;
   hasPoll?: boolean;
+  /** Add or take off a quiz (Create Post > Quiz). */
+  onToggleQuiz?: () => void;
+  hasQuiz?: boolean;
+  /** Open the photo tagger; only offered with photos attached. */
+  onTagPeople?: () => void;
+  /** People tagged so far, shown beside the row. */
+  tagCount?: number;
   /** Turn Comic mode on or off (photos post as collector cards). */
   onToggleComic?: () => void;
   isComic?: boolean;
@@ -134,6 +141,10 @@ export function PostActionBar({
   onClearSound,
   onSoundMixChange,
   onTogglePoll,
+  onToggleQuiz,
+  hasQuiz,
+  onTagPeople,
+  tagCount = 0,
   onToggleContentWarning,
   hasContentWarning,
   hasPoll,
@@ -627,14 +638,14 @@ export function PostActionBar({
           triggerClassName="h-auto w-auto p-2 rounded-xl text-white backdrop-blur-none hover:bg-white/10 [&_svg]:size-5"
         />
 
-        {(!isLive && (onTogglePoll || onToggleComic || onToggleContentWarning || extraTool)) && (
+        {(!isLive && (onTogglePoll || onToggleQuiz || onTagPeople || onToggleComic || onToggleContentWarning || extraTool)) && (
           <button
             type="button"
             onClick={() => setPostOptionsOpen(true)}
             aria-label={t('upload.postOptions', { defaultValue: 'Post options' })}
             aria-haspopup="dialog"
             aria-expanded={postOptionsOpen}
-            className={cn('relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white transition-colors hover:bg-white/10', (hasPoll || isComic || hasContentWarning || (extraTool && crossPostCount > 0)) && 'bg-white/20')}
+            className={cn('relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white transition-colors hover:bg-white/10', (hasPoll || hasQuiz || tagCount > 0 || isComic || hasContentWarning || (extraTool && crossPostCount > 0)) && 'bg-white/20')}
           >
             <More className="h-5 w-5" />
             {extraTool && crossPostCount > 0 && (
@@ -656,6 +667,25 @@ export function PostActionBar({
                 >
                   <BarChart2 className="h-5 w-5" />
                   {hasPoll ? _copy('copy.03ed4421a6d5', { defaultValue: 'Remove poll' }) : _copy('copy.1dd3d9f671d4', { defaultValue: 'Add poll' })}
+                </button>
+              )}
+              {!isLive && !isComic && onToggleQuiz && (
+                <button type="button" aria-pressed={!!hasQuiz}
+                  onClick={() => { setPostOptionsOpen(false); onToggleQuiz(); }}
+                  className={cn('flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm text-white hover:bg-white/10', hasQuiz && 'bg-white/15')}
+                >
+                  <GraduationCap className="h-5 w-5" />
+                  {hasQuiz ? t('quiz.remove', { defaultValue: 'Remove quiz' }) : t('quiz.add', { defaultValue: 'Add quiz' })}
+                </button>
+              )}
+              {!isLive && onTagPeople && (
+                <button type="button"
+                  onClick={() => { setPostOptionsOpen(false); onTagPeople(); }}
+                  className={cn('flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm text-white hover:bg-white/10', tagCount > 0 && 'bg-white/15')}
+                >
+                  <UserRound className="h-5 w-5" />
+                  <span className="flex-1">{t('photoTags.title', { defaultValue: 'Tag people' })}</span>
+                  {tagCount > 0 && <span className="text-xs text-white/60">{formatCount(tagCount)}</span>}
                 </button>
               )}
               {!isLive && !hasVideo && !hasPoll && onToggleComic && (

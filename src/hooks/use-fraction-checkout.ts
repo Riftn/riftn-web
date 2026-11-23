@@ -52,6 +52,8 @@ export interface FractionQuote {
   tokenAddress: string;
   collectionAddress: string;
   settleWindowHours: number;
+  /** A price-0 giveaway: claim instead of paying. */
+  free?: boolean;
   /** DHB is ERC20Pausable; a transfer would revert while this is true. */
   paymentsFrozen: boolean;
 }
@@ -213,7 +215,29 @@ export function useFractionPurchase() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  return { getQuote, buy };
+  /**
+   * Claim from a free (price 0) listing. Nothing is paid: the server reserves
+   * the fractions and the owner is asked to approve by sending them.
+   */
+  const claim = useMutation({
+    mutationFn: (params: { listingId: string; quantity: number }) =>
+      callFraction<{ success: boolean; trade: FractionTrade }>(
+        { action: 'claim', listingId: params.listingId, quantity: params.quantity },
+        walletAddress,
+      ),
+    onSuccess: (data) => {
+      invalidateFractionQueries(queryClient, data.trade?.token_id);
+      toast.success(_copy('fractions.claimSent'));
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return { getQuote, buy, claim };
+}
+
+/** A claim on a free listing: nothing was paid, the owner approves or declines. */
+export function isFreeClaim(trade: Pick<FractionTrade, 'price_per_fraction' | 'total_dhb' | 'tx_hash'>): boolean {
+  return Number(trade.price_per_fraction) === 0 && Number(trade.total_dhb) === 0 && !trade.tx_hash;
 }
 
 /**
@@ -251,7 +275,8 @@ export function useSettleTrade() {
     },
     onSuccess: (data) => {
       invalidateFractionQueries(queryClient, data.trade?.token_id);
-      toast.success(_copy("copy.2579be0056a3", { defaultValue: "Delivered — the trade is settled" }));
+      if (data.trade && isFreeClaim(data.trade)) toast.success(_copy('fractions.claimApproved'));
+      else toast.success(_copy("copy.2579be0056a3", { defaultValue: "Delivered — the trade is settled" }));
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -284,7 +309,21 @@ export function useSettleTrade() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  return { deliver, pay };
+  /** Owner side of a free claim: say no, and the fractions go back on the listing. */
+  const decline = useMutation({
+    mutationFn: (trade: FractionTrade) =>
+      callFraction<{ success: boolean; trade: FractionTrade }>(
+        { action: 'decline-claim', tradeId: trade.id },
+        walletAddress,
+      ).then((res) => ({ ...res, tokenId: trade.token_id })),
+    onSuccess: (data) => {
+      invalidateFractionQueries(queryClient, data.tokenId);
+      toast.success(_copy('fractions.claimDeclined'));
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return { deliver, pay, decline };
 }
 
 /**

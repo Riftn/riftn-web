@@ -4198,7 +4198,7 @@
       "pageViewsTerm": "Page views",
       "pageViews": "— requests wey Cloudflare classify as page loads, no be images, scripts or API calls.",
       "botsTerm": "Bots dey inside",
-      "bots": "— dis one na raw edge counts, so crawlers, uptime monitors and scripted clients dey inside am. You fit see am yourself for di browser breakdown wey dey up top, where entries like \"Curl\" and \"Unknown\" na automated traffic instead of people. To filter bots out need paid Cloudflare tier wey we no dey run, and if we quietly subtract estimate, e go make di numbers harder to check, no be easier.",
+      "bots": "— dis one na raw edge counts, so crawlers, uptime monitors and scripted clients dey inside am. You fit see am yourself for di browser breakdown wey dey up top, where entries like \"Curl\" and \"Unknown\" na automated traffic instead of people. E dey harder to tell bots from real visitors, and soon we no go fit tell dem apart for these stats, so e no get use to try filter dem comot.",
       "totalTerm": "Range totals",
       "total": "— page views and requests dey add up across di range. Visitor counts no dey sum join for one headline \"total visitors\" on purpose, because person wey dey here Monday and Tuesday go count twice.",
       "peakTerm": "Busiest hour / day",

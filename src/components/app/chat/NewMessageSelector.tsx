@@ -1,14 +1,15 @@
 /**
  * NewMessageSelector
  * ==================
- * What the + in Messages opens: a direct message, a new group, or a new
- * channel.
+ * What the + in Messages opens: your note, a direct message, a new group,
+ * or a new channel.
  */
 
 import { useTranslation } from 'react-i18next';
 import MessageCircle from '@/components/ui/cut-icons/message-envelope';
 import Users from '@/components/ui/cut-icons/communities';
 import Megaphone from '@/components/ui/cut-icons/advertising';
+import Quote from '@/components/ui/cut-icons/quote';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 
@@ -16,13 +17,21 @@ interface NewMessageSelectorProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSelectDM: () => void;
+  onSelectNote?: () => void;
   onSelectGroup?: () => void;
   onSelectChannel?: () => void;
 }
 
-export function NewMessageSelector({ open, onOpenChange, onSelectDM, onSelectGroup, onSelectChannel }: NewMessageSelectorProps) {
+export function NewMessageSelector({ open, onOpenChange, onSelectDM, onSelectNote, onSelectGroup, onSelectChannel }: NewMessageSelectorProps) {
   const { t } = useTranslation();
   const options = [
+    onSelectNote && {
+      key: 'note',
+      icon: Quote,
+      title: t('notes.yourNote', { defaultValue: 'Your note' }),
+      detail: t('notes.optionDetail', { defaultValue: 'A short line, song or GIF for 24 hours' }),
+      onSelect: onSelectNote,
+    },
     {
       key: 'dm',
       icon: MessageCircle,

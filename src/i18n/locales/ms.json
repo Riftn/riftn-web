@@ -4471,7 +4471,7 @@
       "pageViewsTerm": "Paparan halaman",
       "pageViews": "— permintaan yang Cloudflare kelaskan sebagai muatan halaman, bukan imej, skrip atau panggilan API.",
       "botsTerm": "Bot turut dikira",
-      "bots": "— ini kiraan mentah di pinggir rangkaian, jadi perangkak, pemantau masa aktif dan klien berskrip turut termasuk. Anda boleh melihatnya sendiri dalam pecahan pelayar di atas, di mana entri seperti \"Curl\" dan \"Tidak diketahui\" ialah trafik automatik, bukan orang. Menapis bot memerlukan pelan Cloudflare berbayar yang kami tidak guna, dan menolak anggaran secara senyap hanya menjadikan angka lebih sukar disemak.",
+      "bots": "— ini kiraan mentah di pinggir rangkaian, jadi perangkak, pemantau masa aktif dan klien berskrip turut termasuk. Anda boleh melihatnya sendiri dalam pecahan pelayar di atas, di mana entri seperti \"Curl\" dan \"Tidak diketahui\" ialah trafik automatik, bukan orang. Bot semakin sukar dibezakan daripada pelawat manusia dan tidak lama lagi kedua-duanya tidak dapat dibezakan dalam statistik ini, jadi tiada gunanya cuba menapis bot.",
       "totalTerm": "Jumlah julat",
       "total": "— paparan halaman dan permintaan dijumlahkan sepanjang julat. Kiraan pelawat sengaja tidak dijumlahkan menjadi \"jumlah pelawat\", kerana orang yang hadir pada Isnin dan Selasa akan dikira dua kali.",
       "peakTerm": "Jam / hari paling sibuk",

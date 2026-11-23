@@ -74,6 +74,7 @@ export function FeatureRequestComments({
 
   return (
     <ThreadedComments<FeatureRequestComment>
+      translateDraft
       draftScope={`thread:featureRequestId:${featureRequestId}`}
       threads={threads}
       isLoading={isLoading}

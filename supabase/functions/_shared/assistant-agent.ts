@@ -74,6 +74,10 @@ export interface ToolTraceEntry {
   ms: number;
 }
 
+export function completionHitTokenLimit(completion: { choices?: Array<{ finish_reason?: string | null }> } | null): boolean {
+  return completion?.choices?.[0]?.finish_reason === 'length';
+}
+
 export interface AgentResult {
   text: string;
   trace: ToolTraceEntry[];
@@ -118,6 +122,8 @@ export interface AgentOptions {
   perplexityKey?: string;
   /** The signed-in creator's wallet: rounds run on their own chat key when they saved one. */
   ownKeyWallet?: string | null;
+  /** Public support replies must be complete before they are posted to the board. */
+  requireCompleteReply?: boolean;
   maxRounds?: number;
   maxTokens?: number;
   /** Abort the whole loop after this long. Chat needs a tighter budget. */
@@ -250,6 +256,7 @@ export async function executeWebSearch(query: string, perplexityKey?: string): P
 export async function runAgentLoop(opts: AgentOptions): Promise<AgentResult> {
   const {
     messages,
+    requireCompleteReply = false,
     systemPrompt,
     surface,
     userToken,
@@ -336,6 +343,12 @@ export async function runAgentLoop(opts: AgentOptions): Promise<AgentResult> {
       clearTimeout(timer);
     }
 
+    // A provider can return fluent but unfinished text, or an incomplete tool
+    // call, when it uses its last token. Finish from the existing context.
+    if (requireCompleteReply && completionHitTokenLimit(data)) {
+      console.warn('[Board] Provider reached its output limit; requesting a shorter answer');
+      break;
+    }
     const choice = data?.choices?.[0]?.message;
     if (!choice) throw new Error('Gateway returned no message');
 
@@ -386,7 +399,7 @@ export async function runAgentLoop(opts: AgentOptions): Promise<AgentResult> {
     convo.push(...results);
   }
 
-  // Only reachable when the deadline cut the loop short mid-tool-call. Spend a
+  // The deadline or the provider output limit ended the loop. Spend a
   // few seconds turning whatever was gathered into an answer rather than
   // throwing away the work.
   //
@@ -405,7 +418,9 @@ export async function runAgentLoop(opts: AgentOptions): Promise<AgentResult> {
           ...convo,
           {
             role: 'user',
-            content: 'Answer now using only what you have already looked up. Do not request more data.',
+            content: requireCompleteReply
+              ? 'Answer the original request now in one complete sentence using the facts already available.'
+              : 'Answer now using only what you have already looked up. Do not request more data.',
           },
         ],
         max_completion_tokens: maxTokens,
@@ -416,6 +431,9 @@ export async function runAgentLoop(opts: AgentOptions): Promise<AgentResult> {
     );
     if (!finalRes.ok) throw new Error(`Gateway ${finalRes.status} on final turn`);
     const finalData = await finalRes.json();
+    if (requireCompleteReply && completionHitTokenLimit(finalData)) {
+      throw new Error('Provider truncated the final board reply');
+    }
 
     return {
       text: (finalData?.choices?.[0]?.message?.content || '').trim(),

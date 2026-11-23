@@ -68,6 +68,8 @@ import { copyableMediaUrl } from '@/lib/copy-media';
 import { LiveChatOnlineCount } from '@/components/app/chat/LiveChatOnlineCount';
 import { ChatTextSizeButton } from '@/components/app/chat/ChatTextSizeButton';
 import { ASSISTANT_PROFILE_PATH, profilePath } from '@/lib/profile-path';
+import { usePublicChatDelete } from '@/components/app/chat/PublicChatDeleteDialog';
+import { useHiddenLines } from '@/lib/public-chat-hidden';
 
 /**
  * A text message in the side panel, with the same cards every other chat
@@ -206,8 +208,11 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
   const startEdit = (id: string, caret: number | null = null) => { setEditCaret(caret); setEditingId(id); };
   const stopEdit = useCallback(() => setEditingId(null), []);
 
-  const translateSignal = 0;
-  const originalSignal = 0;
+  // Translate from a line's menu translates the whole side chat, the same as
+  // Translate in the full chat (which also translates every line above).
+  const [translateSignal, setTranslateSignal] = useState(0);
+  const [originalSignal, setOriginalSignal] = useState(0);
+  const [sideTranslated, setSideTranslated] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   usePublicChatReading(isActive, scrollContainerRef);
@@ -261,6 +266,14 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
   useAssistantReplyEngine(messages);
   const localAssistantReplies = useAssistantReplies();
 
+  // Lines you deleted for yourself only; "Delete" asks for everyone or for me.
+  const hiddenLines = useHiddenLines(walletAddress);
+  const { requestDelete, dialog: deleteDialog } = usePublicChatDelete({
+    account: walletAddress,
+    canDeleteAny: false,
+    deleteForEveryone: deleteMessage,
+  });
+
   // Merge livechat messages + buy alerts + any local fallback replies
   type MergedItem =
     | { type: 'message'; data: typeof messages[0] }
@@ -268,7 +281,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
     | { type: 'assistant'; data: AssistantReply };
   const mergedItems: MergedItem[] = useMemo(() => {
     const items: MergedItem[] = [
-      ...messages.map((m) => ({ type: 'message' as const, data: m })),
+      ...messages.filter((m) => !hiddenLines.has(m.id)).map((m) => ({ type: 'message' as const, data: m })),
       // Buy alerts sit beside the history that is loaded, never further back.
       ...(buyBotHidden ? [] : buyAlerts
         .filter((a) => !messages.length || a.created_at >= messages[0].created_at)
@@ -279,7 +292,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
       it.type === 'assistant' ? it.data.timestamp.getTime() : new Date(it.data.created_at).getTime();
     items.sort((a, b) => tsOf(a) - tsOf(b));
     return items;
-  }, [messages, buyAlerts, localAssistantReplies, buyBotHidden]);
+  }, [messages, buyAlerts, localAssistantReplies, buyBotHidden, hiddenLines]);
 
   // The rail is only 400px tall. Mount recent rows first so old link previews,
   // badges and media do not compete with the feed at startup.
@@ -485,10 +498,15 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
       key: 'copy', icon: menuIcons.copy, label: _copy('msgMenu.copyText', { defaultValue: 'Copy Text' }), hint: 'C',
       onSelect: () => { void navigator.clipboard?.writeText(menuMsg.content).then(() => toast.success(_copy('chatHold.copied', { defaultValue: 'Copied' })), () => undefined); },
     });
+    if (menuMsg.content?.trim() && (!menuMsg.message_type || menuMsg.message_type === 'text')) menuActions.push(
+      sideTranslated
+        ? { key: 'original', icon: menuIcons.translate, label: _copy('chatHold.showOriginal', { defaultValue: 'Original' }), onSelect: () => { setSideTranslated(false); setOriginalSignal((n) => n + 1); } }
+        : { key: 'translate', icon: menuIcons.translate, label: _copy('chatHold.translate', { defaultValue: 'Translate' }), hint: 'T', onSelect: () => { setSideTranslated(true); setTranslateSignal((n) => n + 1); } },
+    );
     const sideMediaUrl = menuMsg.message_type === 'image' ? copyableMediaUrl(getMediaUrl(menuMsg.image_url) || menuMsg.image_url)
       : menuMsg.message_type === 'gif' ? copyableMediaUrl(menuMsg.image_url || menuMsg.content) : null;
     if (sideMediaUrl) menuActions.push({ key: 'copy-media', icon: menuIcons.copyMedia, label: _copy('msgMenu.copyMedia', { defaultValue: 'Copy Media' }), onSelect: () => copyMediaWithToast(sideMediaUrl, menuMsg.message_type === 'gif' ? 'gif' : 'image', _copy) });
-    if (own) menuActions.push({ key: 'delete', divided: true, destructive: true, icon: menuIcons.delete, label: _copy('copy.e2d0a54968ea', { defaultValue: 'Delete' }), onSelect: () => void deleteMessage(menuMsg.id) });
+    if (own) menuActions.push({ key: 'delete', divided: true, destructive: true, icon: menuIcons.delete, label: _copy('copy.e2d0a54968ea', { defaultValue: 'Delete' }), onSelect: () => requestDelete(menuMsg.id, true) });
   }
   const lineMenu = menuPoint.mounted && menuMsg ? (
     <MessageMenu
@@ -508,6 +526,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
   return (
     <div data-sidebar-chat className="flex flex-col h-full pl-px">
       {lineMenu}
+      {deleteDialog}
       <SharedTranslationContext.Provider value={{ translateSignal, originalSignal, requestTranslate: () => {}, requestOriginal: () => {} }}>
       <div className="relative flex-1">
         <div
@@ -809,12 +828,13 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
             query={mention.query}
             isOpen={mention.isOpen}
             position={mention.position}
+            armed={mention.armed}
             selectedIndex={mention.selectedIndex}
             onSelectedIndexChange={mention.setSelectedIndex}
             onSelect={mention.handleSelect}
             onClose={mention.handleClose}
           />
-          <div data-live-chat-toolbar className="flex items-center justify-end gap-2 pt-1">
+          <div data-live-chat-toolbar className="flex flex-wrap items-center justify-end gap-2 pt-1">
             {roomId && (
               <div className="mr-auto flex items-center gap-3">
                 <LiveChatOnlineCount count={onlineCount} />
@@ -833,34 +853,36 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
                 </button>
               </div>
             )}
-            <Button type="button" data-chat-composer-action variant="ghost" size="icon" disabled={uploadingImage || isSending} aria-label={_copy("copy.21298c62c8e5", { defaultValue: "Attach a file" })} title={_copy("copy.21298c62c8e5", { defaultValue: "Attach a file" })} onClick={() => {
-              if (!isAuthenticated) { openLoginModal(); return; }
-              imageInputRef.current?.click();
-            }} className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-700">
-              <Attach className="h-5 w-5" />
-            </Button>
-            <VoiceRecorder
-              onRecordingComplete={handleVoiceRecordingComplete}
-              disabled={isSending || uploadingImage}
-            />
-            <EmojiGifPicker
-              onEmojiSelect={handleEmojiSelect}
-              onGifSelect={handleGifSelect}
-            />
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleSend}
-              data-chat-composer-action
-              disabled={(!newMessage.trim() && !imageFile) || isSending || uploadingImage}
-              className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-700"
-            >
-              {isSending || uploadingImage ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <Send className="w-5 h-5" />
-              )}
-            </Button>
+            <div className="flex max-w-full flex-wrap items-center justify-end gap-2 [&>button]:shrink-0 [&>button]:rounded-lg">
+              <Button type="button" data-chat-composer-action variant="ghost" size="icon" disabled={uploadingImage || isSending} aria-label={_copy("copy.21298c62c8e5", { defaultValue: "Attach a file" })} title={_copy("copy.21298c62c8e5", { defaultValue: "Attach a file" })} onClick={() => {
+                if (!isAuthenticated) { openLoginModal(); return; }
+                imageInputRef.current?.click();
+              }} className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-700">
+                <Attach className="h-5 w-5" />
+              </Button>
+              <VoiceRecorder
+                onRecordingComplete={handleVoiceRecordingComplete}
+                disabled={isSending || uploadingImage}
+              />
+              <EmojiGifPicker
+                onEmojiSelect={handleEmojiSelect}
+                onGifSelect={handleGifSelect}
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleSend}
+                data-chat-composer-action
+                disabled={(!newMessage.trim() && !imageFile) || isSending || uploadingImage}
+                className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-700"
+              >
+                {isSending || uploadingImage ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Send className="w-5 h-5" />
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       </div>

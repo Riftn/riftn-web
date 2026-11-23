@@ -9,6 +9,7 @@ import { useDeHubProfile } from '@/hooks/use-dehub-profile';
 import { parseDefaultProfileTab } from '@/components/app/profile/ProfileConstants';
 import { getAiScrapingPreference, mergeAiScrapingPreference, type AiScrapingPreference } from '@/lib/ai-scraping';
 import { getShowOnline, mergeShowOnline } from '@/lib/online-presence';
+import { getShowLastSeen, mergeShowLastSeen } from '@/lib/last-seen';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
 import { PROFILE_VIEW_DEFAULT_KEY, PROFILE_VIEW_READER_KEY, clearProfileViewFlip, parseProfileViewDefault, parseProfileViewReaderPref, type ProfileViewMode, type ProfileViewReaderPref } from '@/lib/profile-view-mode';
 
@@ -100,6 +101,7 @@ export function usePrivacySettings() {
   const hideBadgeAndBalance = profile?.hideBadgeAndBalance === true;
   const aiScraping = getAiScrapingPreference(customs);
   const showOnline = getShowOnline(customs);
+  const showLastSeen = getShowLastSeen(customs);
 
   const updateMutation = useMutation({
     mutationFn: async (updates: {
@@ -113,6 +115,7 @@ export function usePrivacySettings() {
       hide_badge_and_balance?: boolean;
       ai_scraping?: AiScrapingPreference;
       show_online?: boolean;
+      show_last_seen?: boolean;
       show_dislikes?: boolean;
       show_followers_list?: boolean;
       show_following_list?: boolean;
@@ -204,6 +207,9 @@ export function usePrivacySettings() {
       if (updates.show_online !== undefined) {
         mergedCustoms = mergeShowOnline(mergedCustoms ?? (customs as Record<string, string>), updates.show_online);
       }
+      if (updates.show_last_seen !== undefined) {
+        mergedCustoms = mergeShowLastSeen(mergedCustoms ?? (customs as Record<string, string>), updates.show_last_seen);
+      }
       if (mergedCustoms) {
         profileUpdate.customs = mergedCustoms;
       }
@@ -234,6 +240,7 @@ export function usePrivacySettings() {
     hide_badge_and_balance?: boolean;
     ai_scraping?: AiScrapingPreference;
     show_online?: boolean;
+    show_last_seen?: boolean;
     show_dislikes?: boolean;
     show_followers_list?: boolean;
     show_following_list?: boolean;
@@ -252,6 +259,7 @@ export function usePrivacySettings() {
     hideBadgeAndBalance,
     aiScraping,
     showOnline,
+    showLastSeen,
     showDislikes: dislikesArePublic(customs as Record<string, unknown> | undefined),
     showFollowersList,
     showFollowingList,

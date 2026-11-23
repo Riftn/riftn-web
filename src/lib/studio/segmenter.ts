@@ -56,7 +56,8 @@ export interface PersonSegmenter {
   close: () => void;
 }
 
-async function resolveFileset() {
+/** The WASM runtime for this browser (SIMD when it can), from our own origin. Shared with ./face-filters. */
+export async function resolveFileset() {
   const simd = await FilesetResolver.isSimdSupported().catch(() => false);
   return simd
     ? { wasmLoaderPath: simdLoaderUrl, wasmBinaryPath: simdBinaryUrl }

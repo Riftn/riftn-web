@@ -58,7 +58,7 @@ const SegmentMarkerDrawer = lazy(() =>
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useQueryClient } from '@tanstack/react-query';
 import MoreVertical from '@/components/ui/cut-icons/morevertical';
-import { ListPlus, Clock, Zap, Ticket, Star, Loader2, Code } from "lucide-react";
+import { ListPlus, Clock, Zap, Ticket, Star, Code } from "lucide-react";
 import { copyPostEmbedCode } from '@/lib/post-embed-code';
 import { soundFromPost } from '@/lib/soundtrack';
 import { useOptionalGlobalDropZone } from '@/hooks/use-global-drop-zone';
@@ -106,6 +106,7 @@ import { ActionBar } from './ActionBar';
 import { useLiveReaction } from '@/hooks/use-live-reaction';
 import { ShopBoardLazy } from '../live/ShopBoardLazy';
 import { PollCard } from './PollCard';
+import { QuizCard } from '@/components/app/quiz/QuizCard';
 import { PostMetadata } from './PostMetadata';
 import { PPVDrawerContent } from './LazyPPVDrawerContent';
 import { LiquidGlassBubble } from '@/components/ui/liquid-glass-bubble';
@@ -117,6 +118,8 @@ import { FeedLinkPreviews } from '@/components/app/cards/FeedLinkPreviews';
 import { AssetRefCards, useAssetRefsInText } from '@/components/app/cards/AssetRefCards';
 import { useTranslation as useI18n } from 'react-i18next';
 const TranscodeRetry = lazy(() => import('./TranscodeRetry').then(m => ({ default: m.TranscodeRetry })));
+// Only a creator's own unfinished upload shows it: kept off the first-paint path.
+const TranscodingBadge = lazy(() => import('@/components/app/video/TranscodingBadge').then(m => ({ default: m.TranscodingBadge })));
 import { PostAIChatLazy } from './PostAIChatLazy';
 import { ReportModal } from '../modals/ReportModal';
 import { DeletePostModal } from '../modals/DeletePostModal';
@@ -135,7 +138,7 @@ const BoostModal = lazy(() =>
 );
 import { applyOptimisticEdit } from '@/lib/optimistic-edit';
 import { QuotePostModalLazy } from '../modals/QuotePostModalLazy';
-import { TipModal } from '../modals/TipModal';
+import { TipModalLazy as TipModal } from '../modals/TipModalLazy';
 import { CommentsWrapper } from './CommentsWrapper';
 import { LiveEndedMedia } from './LiveEndedMedia';
 // Lazy: only a live post ever renders it, and a static import would put the
@@ -1023,6 +1026,8 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
   const scrubbingRef = useRef(false);
   /** Mirrors scrubbingRef for render: the storyboard tile shows while it is true. */
   const [scrubbing, setScrubbing] = useState(false);
+  /** Where a mouse rests over the timeline, 0-1: the scene there shows above it, as while dragging. */
+  const [hoverFraction, setHoverFraction] = useState<number | null>(null);
   const isHoveringRef = useRef(false);
   
   // View tracking - fires view after watching threshold
@@ -1281,7 +1286,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
   /** Imperative attach for paths that can beat the render that sets src. */
   const attachPostMedia = (vid: HTMLVideoElement) => {
     if (!videoSourceOf(vid) && playableVideoUrl) {
-      setVideoSource(vid, { src: playableVideoUrl, hls: ladderUrl, startLow: ladderStartsLow });
+      setVideoSource(vid, { src: playableVideoUrl, hls: ladderUrl, startLow: ladderStartsLow, aspect: video.storedAspect });
     }
   };
   const downloadVideo = useVideoDownload();
@@ -1809,6 +1814,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
     src: mediaAttached && !isVideoNotReady ? playableVideoUrl : undefined,
     hlsSrc: ladderUrl,
     startLow: ladderStartsLow,
+    aspect: video.storedAspect,
     poster: thumbnail || undefined,
     muted: isMuted,
     loop: !!(video.isAd || isLooping),
@@ -2433,6 +2439,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
     myReaction: video.myReaction,
     isReposted: video.isReposted,
     noTip: !!video.creatorPaymentsDisabled,
+    videoUrl: requiresVideoAccess || video.isAudio || video.isLivePost ? null : video.videoUrl,
     actions: {
       comments: () => {
         if (onOpenComments) { onOpenComments(); return; }
@@ -2888,15 +2895,14 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
             ) : (transcodingStatus === 'pending' || transcodingStatus === 'on') ? (
               /* Still transcoding — same optimistic videoUrl, but recoverable
                  once the job finishes, unlike the 'failed' branch above. */
-              <div className="absolute inset-0 overflow-hidden bg-black">
+              <div data-keep-dark className="absolute inset-0 overflow-hidden bg-black">
                 {thumbnail && (
                   <img src={thumbnail} srcSet={cdnImageSrcSet(thumbnail, [320, 480, 640, 960, 1280])} sizes="(min-width: 1024px) 600px, 100vw" decoding="async" alt="" className="w-full h-full object-cover opacity-50" loading={aboveFold ? 'eager' : 'lazy'} />
                 )}
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/40">
-                  <Loader2 className="w-7 h-7 text-white animate-spin" />
-                  <span className="text-white/80 text-xs font-medium tracking-wide drop-shadow">
-                    {t('videoPlayer.processing')}
-                  </span>
+                  <Suspense fallback={<span className="text-white/80 text-xs">{t('videoPlayer.transcoding')}</span>}>
+                    <TranscodingBadge tokenId={video.id} isOwner={isOwnPost} />
+                  </Suspense>
                 </div>
               </div>
             ) : video.videoUrl && !(video.isLivePost && video.isLiveNow) ? (
@@ -3188,9 +3194,11 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
 
             <StoryboardPreview
               storyboard={isContentGated ? undefined : video.storyboard}
-              fraction={currentTime / (duration || 1)}
+              fraction={!scrubbing && hoverFraction !== null ? hoverFraction : currentTime / (duration || 1)}
               duration={duration}
-              visible={scrubbing}
+              visible={scrubbing || hoverFraction !== null}
+              // A mouse over the bar with no sheet yet still gets the time.
+              timeWithoutSheet={hoverFraction !== null}
               // Fetch the sheet as soon as the video plays. Waiting for the
               // controls meant a phone's line scrubber, which shows them only
               // when the scrub starts, began the download mid-gesture and a
@@ -3343,6 +3351,10 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
                   if (controlsTimerRef.current) clearTimeout(controlsTimerRef.current);
                 }}
                 onPointerMove={(event) => {
+                  if (event.pointerType === 'mouse' && duration > 0) {
+                    const rect = event.currentTarget.getBoundingClientRect();
+                    if (rect.width > 0) setHoverFraction(Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width)));
+                  }
                   if (bareControls) return;
                   const start = hiddenScrubStart.current;
                   if (!start) return;
@@ -3356,6 +3368,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
                     setCurrentTime(time);
                   }
                 }}
+                onPointerLeave={(event) => { if (event.pointerType === 'mouse') setHoverFraction(null); }}
                 onPointerUp={bareControls ? undefined : finishScrubbing}
                 onPointerCancel={bareControls ? undefined : finishScrubbing}
                 onLostPointerCapture={bareControls ? undefined : finishScrubbing}
@@ -3606,6 +3619,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
               </div>
             )}
             {parseInt(video.id, 10) > 0 && <PollCard tokenId={parseInt(video.id, 10)} />}
+            {video.hasQuiz && parseInt(video.id, 10) > 0 && <QuizCard tokenId={parseInt(video.id, 10)} />}
             {/* The creator's Shop board. Inline rather than over the player:
                 this card runs an immersive mode that reflows the video, and an
                 absolutely-positioned board would have to track it. Live keeps
@@ -3936,7 +3950,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
             currentSpoilerText={video.spoilerText}
             currentQuotePolicy={video.quotePolicy}
             currentReplyPolicy={video.replyPolicy}
-            currentVisibility={(video as any).visibility}
+            currentVisibility={(video as any).justMe ? 'self' : (video as any).visibility}
             currentForKids={video.forKids}
             currentShopLinks={video.shopLinks}
             onSuccess={(edited) => {

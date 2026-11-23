@@ -50,6 +50,8 @@ export interface FeatureRequest {
   shipped_url?: string | null;
   /** Short tag shown next to the status, e.g. "Future review". */
   status_note?: string | null;
+  /** Shipped with a head start for its poster until this time (lib/early-access). */
+  early_access_until?: string | null;
   vote_count: number;
   like_count: number;
   dislike_count: number;
@@ -191,14 +193,15 @@ function categoryFilterValues(category: FeatureCategory): string[] {
 }
 
 
-export function useFeatureRequests(sort: FeatureSort, category: FeatureCategory | 'all', search: string) {
+export function useFeatureRequests(sort: FeatureSort, category: FeatureCategory | 'all', search: string, authorWallet?: string) {
   return useInfiniteQuery({
-    queryKey: ['feature-requests', sort, category, search],
+    queryKey: ['feature-requests', sort, category, search, authorWallet],
     queryFn: async ({ pageParam = 0 }) => {
       let query = supabase
         .from('feature_requests')
         .select('*');
 
+      if (authorWallet) query = query.ilike('author_wallet_address', authorWallet);
       if (category !== 'all') {
         query = query.in('category', categoryFilterValues(category));
       }
@@ -271,17 +274,17 @@ export function useFeatureRequest(id: string | null) {
 // `total` is every idea ever submitted (the header line); `open` is what the
 // Requests tab actually lists, counted with the same status filter the list
 // uses so the badge can't drift from the rows below it.
-export function useFeatureCounts() {
+export function useFeatureCounts(authorWallet?: string) {
   return useQuery({
-    queryKey: ['feature-requests-total-count'],
+    queryKey: ['feature-requests-total-count', authorWallet],
     queryFn: async () => {
+      const count = () => {
+        const query = supabase.from('feature_requests').select('*', { count: 'exact', head: true });
+        return authorWallet ? query.ilike('author_wallet_address', authorWallet) : query;
+      };
       const [totalRes, openRes] = await Promise.all([
-        supabase.from('feature_requests').select('*', { count: 'exact', head: true }),
-        supabase
-          .from('feature_requests')
-          .select('*', { count: 'exact', head: true })
-          .not('status', 'in', '("completed","shipped","declined","in_progress")'),
-
+        count(),
+        count().not('status', 'in', '("completed","shipped","declined","in_progress")'),
       ]);
       if (totalRes.error) throw totalRes.error;
       if (openRes.error) throw openRes.error;
@@ -292,23 +295,33 @@ export function useFeatureCounts() {
   });
 }
 
-export function useShippedFeatures() {
-  return useQuery({
-    queryKey: ['feature-requests-shipped'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('feature_requests')
-        .select('*')
-        .in('status', ['completed', 'shipped'])
-        .order('updated_at', { ascending: false });
+async function fetchStatusRows(statuses: FeatureStatus[], authorWallet?: string): Promise<FeatureRequest[]> {
+  const rows: FeatureRequest[] = [];
+  const pageSize = 500;
+  // The REST API caps each response. Apply status and author on every page.
+  for (let offset = 0; ; offset += pageSize) {
+    let query = supabase.from('feature_requests').select('*').in('status', statuses);
+    if (authorWallet) query = query.ilike('author_wallet_address', authorWallet);
+    const { data, error } = await query.order('updated_at', { ascending: false })
+      .order('id', { ascending: false }).range(offset, offset + pageSize - 1);
+    if (error) throw error;
+    const page = (data ?? []) as FeatureRequest[];
+    rows.push(...page);
+    if (page.length < pageSize) return normalizeRows(rows);
+  }
+}
 
-      if (error) throw error;
-      const result = normalizeRows((data || []) as FeatureRequest[]);
-      setSessionCache(SHIPPED_CACHE_KEY, result);
+export function useShippedFeatures(authorWallet?: string) {
+  return useQuery({
+    queryKey: ['feature-requests-shipped', authorWallet],
+    queryFn: async () => {
+      const result = await fetchStatusRows(['completed', 'shipped'], authorWallet);
+      if (!authorWallet) setSessionCache(SHIPPED_CACHE_KEY, result);
       return result;
     },
-    initialData: () => getSessionCache<FeatureRequest[]>(SHIPPED_CACHE_KEY),
+    initialData: () => authorWallet ? undefined : getSessionCache<FeatureRequest[]>(SHIPPED_CACHE_KEY),
     initialDataUpdatedAt: () => {
+      if (authorWallet) return undefined;
       try {
         const raw = sessionStorage.getItem(SHIPPED_CACHE_KEY);
         if (raw) return JSON.parse(raw).ts;
@@ -320,24 +333,17 @@ export function useShippedFeatures() {
   });
 }
 
-// "Shipping" tab — work that's actively being built (status `in_progress`).
-export function useInProgressFeatures() {
+export function useInProgressFeatures(authorWallet?: string) {
   return useQuery({
-    queryKey: ['feature-requests-in-progress'],
+    queryKey: ['feature-requests-in-progress', authorWallet],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('feature_requests')
-        .select('*')
-        .eq('status', 'in_progress')
-        .order('updated_at', { ascending: false });
-
-      if (error) throw error;
-      const result = normalizeRows((data || []) as FeatureRequest[]);
-      setSessionCache(IN_PROGRESS_CACHE_KEY, result);
+      const result = await fetchStatusRows(['in_progress'], authorWallet);
+      if (!authorWallet) setSessionCache(IN_PROGRESS_CACHE_KEY, result);
       return result;
     },
-    initialData: () => getSessionCache<FeatureRequest[]>(IN_PROGRESS_CACHE_KEY),
+    initialData: () => authorWallet ? undefined : getSessionCache<FeatureRequest[]>(IN_PROGRESS_CACHE_KEY),
     initialDataUpdatedAt: () => {
+      if (authorWallet) return undefined;
       try {
         const raw = sessionStorage.getItem(IN_PROGRESS_CACHE_KEY);
         if (raw) return JSON.parse(raw).ts;
@@ -352,18 +358,10 @@ export function useInProgressFeatures() {
 // "Not feasible" — requests the board owners have ruled out (status
 // `declined`), with their optional reason in status_note. Few rows, so one
 // query and newest decisions first.
-export function useNotFeasibleFeatures() {
+export function useNotFeasibleFeatures(authorWallet?: string) {
   return useQuery({
-    queryKey: ['feature-requests-not-feasible'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('feature_requests')
-        .select('*')
-        .eq('status', 'declined')
-        .order('updated_at', { ascending: false });
-      if (error) throw error;
-      return normalizeRows((data || []) as FeatureRequest[]);
-    },
+    queryKey: ['feature-requests-not-feasible', authorWallet],
+    queryFn: () => fetchStatusRows(['declined'], authorWallet),
     staleTime: 60_000,
     gcTime: 5 * 60_000,
   });

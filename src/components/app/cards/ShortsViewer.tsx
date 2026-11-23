@@ -17,6 +17,7 @@ import {
 } from '@/lib/media-session';
 import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { openPostInfo } from '@/lib/preload-post-page';
 import { ChevronUp, ChevronDown, UserCheck, Loader2, Globe, RotateCcw } from "lucide-react";
 import Minimize from "@/components/ui/cut-icons/exit-fullscreen";
 import Volume2 from "@/components/ui/cut-icons/volume";
@@ -93,7 +94,7 @@ import { StitchAttribution } from './StitchAttribution';
 import { useFollowOverrides, toggleFollowFor } from '@/hooks/use-follow';
 import { toast } from 'sonner';
 import { CommentsSection } from './CommentsSection';
-import { TipModal } from '../modals/TipModal';
+import { TipModalLazy as TipModal } from '../modals/TipModalLazy';
 import { ReportModal } from '../modals/ReportModal';
 import { DeletePostModal } from '../modals/DeletePostModal';
 import { usePostTipCount } from '@/hooks/use-post-tip-count';
@@ -107,7 +108,10 @@ import Captions from "@/components/ui/cut-icons/captions";
 import { cn } from '@/lib/utils';
 import type { ShortVideo } from '@/types/feed.types';
 import { useQueryClient } from '@tanstack/react-query';
+import { asViewerSlide } from '@/lib/short-video';
 import { VideoSlide } from './VideoSlide';
+import { postTileMenuProps } from '@/lib/post-menu';
+import { shortMenuTarget } from '@/lib/post-menu-targets';
 import { LiveSwipeSlide } from './LiveSwipeSlide';
 import { PostSwipeSlide } from './PostSwipeSlide';
 import { pauseMediaIn, resumeMedia } from '@/lib/pause-media-in';
@@ -414,7 +418,8 @@ const CORNER_CONTROL =
  */
 const followAnswers = new Map<string, boolean>();
 
-export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMore, isLoadingMore, reuseInitialVideo = false }: ShortsViewerProps) {
+export function ShortsViewer({ shorts: entries, initialIndex, onClose, onLoadMore, hasMore, isLoadingMore, reuseInitialVideo = false }: ShortsViewerProps) {
+  const shorts = useMemo(() => entries.map(asViewerSlide), [entries]);
   const { t: _copy } = _useCopy();
   const { t } = useI18n();
   const { theme } = useAppTheme();
@@ -588,6 +593,20 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
     fullscreenTargetRef.current = node;
     setVideoContainer(node);
   }, []);
+  // The player clips its slides, but a clipped box can still be scrolled by
+  // code: a chat scrolling to its newest line, or focus moving into the slide
+  // parked below. Scrolled, it showed the next short, paused, while the one
+  // playing sat out of sight. It never scrolls, so put it straight back.
+  useEffect(() => {
+    if (!videoContainer) return;
+    const pin = () => {
+      if (videoContainer.scrollTop) videoContainer.scrollTop = 0;
+      if (videoContainer.scrollLeft) videoContainer.scrollLeft = 0;
+    };
+    pin();
+    videoContainer.addEventListener('scroll', pin, { passive: true });
+    return () => videoContainer.removeEventListener('scroll', pin);
+  }, [videoContainer]);
   const noVideoRef = useRef<HTMLVideoElement>(null);
   const { isFullscreen, toggleFullscreen } = useVideoFullscreen(noVideoRef, fullscreenTargetRef, {
     // Unlike a slide, this container has no transformed ancestor — the
@@ -2198,7 +2217,12 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                     transition={isMobile ? SMOOTH_TRANSITION : PAGE_SPRING}
                     style={{ zIndex: isActive ? 2 : 1 }}
                   >
-                    <motion.div className="absolute inset-0" style={{ y: dragOffset }}>
+                    <motion.div
+                      className="absolute inset-0"
+                      style={{ y: dragOffset }}
+                      // Right-click a short: the post menu, with Copy video.
+                      {...(short.live || short.reelPost ? {} : postTileMenuProps(() => shortMenuTarget(short), { touch: false }))}
+                    >
                     {short.live ? (
                       <LiveSwipeSlide stream={short.live} isActive={isActive} onClose={onClose} />
                     ) : short.reelPost ? (
@@ -2560,6 +2584,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                         tokenId={currentShort.id}
                         onClose={() => setShowComments(false)}
                         initialTab={commentsInitialTab}
+                        placeholder={t('comments.shortsPlaceholder', 'Say something...')}
                         embedded
                       />
                     </div>
@@ -2663,6 +2688,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                       tokenId={currentShort.id}
                       onClose={() => setShowComments(false)}
                       initialTab={commentsInitialTab}
+                        placeholder={t('comments.shortsPlaceholder', 'Say something...')}
                     />
                   ) : (
                     <div className="flex h-full items-start justify-center pt-8">
@@ -2695,7 +2721,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                   <Bookmark className={cn("w-4 h-4", isBookmarked ? "fill-yellow-500 text-yellow-500" : "text-white/60")} />
                 </motion.button>
                 <button
-                  onClick={() => { navigate(`/app/post/${currentShort.id}/info`); onClose(); }}
+                  onClick={() => { openPostInfo(navigate, currentShort.id); onClose(); }}
                   className="w-8 h-8 bg-white/[0.08] hover:bg-white/15 rounded-lg flex items-center justify-center transition-colors"
                   aria-label={_copy("copy.8ec595494efe", { defaultValue: "Post info" })}
                 >
@@ -2765,6 +2791,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                   tokenId={currentShort.id}
                   onClose={() => {}}
                   initialTab={commentsInitialTab}
+                        placeholder={t('comments.shortsPlaceholder', 'Say something...')}
               embedded
                 />
               </div>

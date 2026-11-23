@@ -4232,7 +4232,7 @@
       "pageViewsTerm": "Sahifa ko'rishlari",
       "pageViews": "— Cloudflare rasm, skript yoki API chaqiruvi emas, sahifa yuklanishi deb tasniflagan so'rovlar.",
       "botsTerm": "Botlar ham hisobga olingan",
-      "bots": "— bular chekkadagi xom hisoblar, shuning uchun ularda krawlerlar, ishlash monitorlari va skriptli mijozlar ham bor. Ularni yuqoridagi brauzerlar taqsimotida o'zingiz ko'rasiz: «Curl» va «Noma'lum» kabi yozuvlar odam emas, avtomatik trafik. Botlarni filtrlash uchun bizda yo'q pullik Cloudflare tarifi kerak, taxminni jimgina ayirish esa raqamlarni kamroq tekshiriladigan qiladi, ko'proq emas.",
+      "bots": "— bular chekkadagi xom hisoblar, shuning uchun ularda krawlerlar, ishlash monitorlari va skriptli mijozlar ham bor. Ularni yuqoridagi brauzerlar taqsimotida o'zingiz ko'rasiz: «Curl» va «Noma'lum» kabi yozuvlar odam emas, avtomatik trafik. Botlarni haqiqiy tashrifchilardan ajratish tobora qiyinlashmoqda va tez orada bu statistikada ularni ajratib bo‘lmaydi, shuning uchun botlarni filtrlashga urinishdan foyda yo‘q.",
       "totalTerm": "Oraliq jamlari",
       "total": "— sahifa ko'rishlari va so'rovlar oraliq bo'ylab qo'shiladi. Tashrif buyuruvchilar soni ataylab «jami tashrif buyuruvchilar»ga qo'shilmaydi, chunki dushanba va seshanba kelgan odam ikki marta sanalardi.",
       "peakTerm": "Eng band soat / kun",

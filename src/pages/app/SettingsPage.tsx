@@ -44,6 +44,7 @@ import Gift from "@/components/ui/cut-icons/gifts";
 import Ban from "@/components/ui/cut-icons/blocked";
 import Megaphone from "@/components/ui/cut-icons/advertising";
 import Radio from "@/components/ui/cut-icons/live";
+import LastSeenIcon from "@/components/ui/cut-icons/history";
 import Trash2 from "@/components/ui/cut-icons/delete";
 import Pause from "@/components/ui/cut-icons/pause";
 
@@ -101,6 +102,7 @@ import { getBlockListPaginated, unblockUser as apiUnblockUser, type BlockedUser,
 import { isReservedUsername } from '@/lib/reserved-usernames';
 import { buildAvatarUrl, buildCoverUrl, bumpProfileImageVersion, deviceWidth } from '@/lib/media-url';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import { useStoriesEnabled } from '@/hooks/use-stories-enabled';
 import { useAuth as useAuthContext } from '@/contexts/AuthContext';
 import { useMatureContent } from '@/hooks/use-mature-content';
 import { useKidsMode } from '@/hooks/use-kids-mode';
@@ -159,11 +161,11 @@ import { PostLandingSetting } from '@/components/app/settings/PostLandingSetting
 import { FeedSeparatorSetting } from '@/components/app/settings/FeedSeparatorSetting';
 import { ShareIconSetting } from '@/components/app/settings/ShareIconSetting';
 import { ChatTextSizeSetting } from '@/components/app/settings/ChatTextSizeSetting';
+import { ChatOwnBubbleSetting, MessagesPillsSetting } from '@/components/app/settings/ChatOwnBubbleSetting';
 import { LoginLookSetting } from '@/components/app/settings/LoginLookSetting';
 import { ArrivalLookSetting } from '@/components/app/settings/ArrivalLookSetting';
 import { ChatDeleteChoiceSetting } from '@/components/app/settings/ChatDeleteChoiceSetting';
 import { ChatReactionStyleSetting } from '@/components/app/settings/ChatReactionStyleSetting';
-import { ChatCardsSetting } from '@/components/app/settings/ChatCardsSetting';
 import { PublicChatAlertsSetting } from '@/components/app/settings/PublicChatAlertsSetting';
 import { WalletMenuContent } from '@/components/app/CoinBalanceMenu';
 import { useDhbHoldings } from '@/hooks/use-dhb-holdings';
@@ -292,6 +294,7 @@ import { ThemePreviewCard } from '@/components/app/settings/ThemePreviewCard';
 import { KeywordFiltersSection } from '@/components/app/settings/KeywordFiltersSection';
 import { AccountAllowReactions } from '@/components/app/remix/AllowReactionsSwitch';
 import { NotificationFiltersSetting } from '@/components/app/settings/NotificationFiltersSetting';
+import { AccountTypeSetting } from '@/components/app/settings/AccountTypeSetting';
 import { ProfileFieldsSetting } from '@/components/app/settings/ProfileFieldsSetting';
 import { FediverseHandleSetting } from '@/components/app/settings/FediverseHandleSetting';
 import { SignedFollowsSetting } from '@/components/app/settings/SignedFollowsSetting';
@@ -643,7 +646,6 @@ function ProfileSettings() {
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
   const debouncedUsername = useDebouncedValue(username, 300);
   const avatarInputRef = useRef<HTMLInputElement>(null);
-  const coverInputRef = useRef<HTMLInputElement>(null);
   
   // Load profile data via react-query so cached tab returns render instantly
   const { data: profileData, error: profileError } = useQuery({
@@ -864,7 +866,6 @@ function ProfileSettings() {
 
       // Reset file inputs so re-selecting the same file triggers onChange
       if (avatarInputRef.current) avatarInputRef.current.value = '';
-      if (coverInputRef.current) coverInputRef.current.value = '';
 
       await refreshUser();
       // Re-apply optimistic avatar/cover to AuthContext user (sidebar, navbar, etc.)
@@ -955,19 +956,6 @@ function ProfileSettings() {
     }
   };
   
-  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 10 * 1024 * 1024) {
-        toast.error(t('settings.imageTooLarge10'));
-        return;
-      }
-      setCoverFile(file);
-      setRemoveCover(false);
-      setCoverPreview(prev => swapBlobPreview(prev, file));
-    }
-  };
-  
   // Right-click / hold menu and Ctrl/Cmd+V paste on the banner and picture.
   // Same as picking a file: shown at once, saved with Save.
   const setPickedCover = (file: File) => {
@@ -1032,7 +1020,17 @@ function ProfileSettings() {
     if (username && usernameChanged) data.username = username;
     if (bio) data.aboutMe = bio;
     if (publicTimeZone !== originalValues.publicTimeZone) {
-      data.customs = { publicTimeZone: publicTimeZone || false };
+      // The server replaces the whole blob, so carry every other saved
+      // setting (account type, follow visibility, ...) along with this one.
+      const kept: Record<string, string | number | boolean> = {};
+      const stored = {
+        ...((profileData?.customs as Record<string, unknown> | undefined) ?? {}),
+        ...((authUser?.customs as Record<string, unknown> | undefined) ?? {}),
+      };
+      for (const [key, value] of Object.entries(stored)) {
+        if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') kept[key] = value;
+      }
+      data.customs = { ...kept, publicTimeZone: publicTimeZone || false };
     }
     // Always send social links (even empty strings) so they persist correctly
     data.twitterLink = twitterLink;
@@ -1108,7 +1106,7 @@ function ProfileSettings() {
         <button
           type="button"
           data-on-media
-          onClick={() => coverInputRef.current?.click()}
+          onClick={coverMenu.openPicker}
           aria-label={t('settings.clickCameraUpload')}
           className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors hover:bg-black/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
         >
@@ -1116,13 +1114,6 @@ function ProfileSettings() {
             <Camera className="size-5 text-white" />
           </span>
         </button>
-        <input
-          ref={coverInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handleCoverChange}
-        />
         {coverMenu.menu}
       </div>
 
@@ -1142,6 +1133,8 @@ function ProfileSettings() {
             type="button"
             onClick={() => avatarInputRef.current?.click()}
             aria-label={t('settings.clickCameraUpload')}
+            data-keep-dark
+            data-on-media
             className="absolute bottom-0 right-0 flex size-8 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-800 transition-colors hover:bg-zinc-700"
           >
             <Camera className="w-4 h-4 text-white" />
@@ -1247,6 +1240,9 @@ function ProfileSettings() {
           onCheckedChange={enabled => setPublicTimeZone(enabled ? deviceTimeZone || '' : '')}
         />
       </div>
+
+      {/* Personal, Creator or Business: a category under the name, a Contact button */}
+      <AccountTypeSetting />
 
       {/* Fediverse — the @username@riftn.com address Mastodon can follow */}
       <FediverseHandleSetting />
@@ -1820,8 +1816,7 @@ function QuietHoursSection() {
 function PrivacySettings() {
   const { t: _copy } = _useCopy();
   const { t } = useTranslation();
-  const { showFollowersList, showFollowingList, hideFollowerCounts, isPrivate, hideBadgeAndBalance, defaultPostVisibility, aiScraping, showOnline, showDislikes, showLikes, updateSettings, isUpdating, isLoading } = usePrivacySettings();
-  const { whoCanMessage, doNotDisturb, isUpdating: isDmUpdating, updateWhoCanMessage, updateDoNotDisturb } = useDmSettings();
+  const { showFollowersList, showFollowingList, hideFollowerCounts, isPrivate, hideBadgeAndBalance, defaultPostVisibility, aiScraping, showOnline, showLastSeen, showDislikes, showLikes, updateSettings, isUpdating, isLoading } = usePrivacySettings();
   const { option: walletUnlockInterval, setOption: setWalletUnlockInterval } = useWalletUnlockInterval();
   const [isUpdatingVisibility, setIsUpdatingVisibility] = useState(false);
   const { user } = useAuthContext();
@@ -1997,6 +1992,15 @@ function PrivacySettings() {
             disabled={isUpdating || isLoading}
           />
           <SettingToggle
+            icon={LastSeenIcon}
+            anchor="show-last-seen"
+            title={t('settings.showLastSeen')}
+            description={t('settings.showLastSeenDesc')}
+            defaultChecked={showLastSeen}
+            onCheckedChange={(checked) => updateSettings({ show_last_seen: checked })}
+            disabled={isUpdating || isLoading}
+          />
+          <SettingToggle
             icon={ThumbsUp}
             anchor="show-likes"
             title={t('settings.showLikes')}
@@ -2113,47 +2117,8 @@ function PrivacySettings() {
         </div>
       </div>
 
-      {/* Messaging */}
-      <div>
-        <h3 className="font-medium text-zinc-400 text-sm mb-4">{t('settings.messages', 'Messages')}</h3>
-        <div className="space-y-4">
-          {/* Who Can Message */}
-          <SettingsRow
-            icon={<MessageCircle />}
-            title={t('settings.whoCanMessage', 'Who can message you')}
-            description={t('settings.whoCanMessageDesc', 'Control who can send you direct messages')}
-            action={<SettingDrawerSelect
-              value={whoCanMessage}
-              onValueChange={(value) => updateWhoCanMessage(value as WhoCanMessage)}
-              disabled={isDmUpdating}
-              title={t('settings.whoCanMessage', 'Who can message you')}
-              options={DM_ACCESS_OPTIONS(t)}
-            />}
-          />
-
-          {/* Message Fee */}
-          <SettingsRow
-            icon={<img src={dehubCoin} alt="" />}
-            title={t('settings.messageFee', 'Message fee')}
-            description={t('settings.messageFeeDesc')}
-            action={<MessageFeeControl />}
-          />
-
-          {/* Do Not Disturb */}
-          <SettingToggle
-            icon={Ban}
-            anchor="do-not-disturb"
-            title={t('settings.doNotDisturb', 'Do not disturb')}
-            description={t('settings.doNotDisturbDesc', 'Mute all message notifications')}
-            defaultChecked={doNotDisturb}
-            onCheckedChange={(checked) => updateDoNotDisturb(checked)}
-            disabled={isDmUpdating}
-          />
-        </div>
-      </div>
-
-      {/* Free DM Access List */}
-      <FreeAccessListSection />
+      {/* Message settings (who can message, fee, do not disturb, free access)
+          live only on the Messages tab. */}
 
       {/* Account Security */}
       <div>
@@ -2844,7 +2809,8 @@ function AppearanceSettings({ theme, themeChoice, setTheme }: { theme: string; t
           <FeedTogglesSetting />
           <PostLandingSetting />
           <ChatTextSizeSetting />
-          <ChatCardsSetting />
+          <ChatOwnBubbleSetting />
+          <MessagesPillsSetting />
           <ChatDeleteChoiceSetting />
           <ChatReactionStyleSetting />
           <SettingsRow
@@ -2995,6 +2961,7 @@ function LanguageSelector() {
 }
 
 function ContentSettings() {
+  const { storiesEnabled, canChange, setStoriesEnabled } = useStoriesEnabled();
   const { t } = useTranslation();
   const { chainId, setChainId, saving } = usePostingChain();
 
@@ -3043,6 +3010,15 @@ function ContentSettings() {
       <div>
         <h3 className="font-medium text-zinc-400 text-sm mb-4">{t('settings.playback', 'Playback')}</h3>
         <div className="space-y-4">
+          <SettingToggle
+            icon={Eye}
+            anchor="show-stories"
+            title={t('settings.showStories', 'Show Stories on Home')}
+            description={t('settings.showStoriesDesc', 'Live broadcasts stay visible when Stories are off.')}
+            defaultChecked={storiesEnabled}
+            onCheckedChange={setStoriesEnabled}
+            disabled={!canChange}
+          />
           <HideWatchedToggle />
           <SkipSegmentsToggle />
           <VideoGlitchToggle />

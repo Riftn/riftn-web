@@ -17,8 +17,10 @@ import {
   REWARD_TEXT_MAX,
   type LiveReward,
   type PointsBalance,
+  type PointsGiving,
 } from '@/lib/api/dehub/live-rewards';
 import { PointsIcon } from './PointsIcon';
+import { GivePointsSheet } from './GivePointsSheet';
 
 import { formatCount } from '@/lib/format-count';
 interface Props {
@@ -28,9 +30,12 @@ interface Props {
   balance: PointsBalance;
   rewards: LiveReward[];
   loadingRewards?: boolean;
+  /** When the creator lets viewers give each other points. */
+  giving?: PointsGiving;
 }
 
-export function RewardsSheet({ open, onOpenChange, streamId, balance, rewards, loadingRewards }: Props) {
+export function RewardsSheet({ open, onOpenChange, streamId, balance, rewards, loadingRewards, giving }: Props) {
+  const [giveOpen, setGiveOpen] = useState(false);
   const { t, i18n } = useTranslation();
   const qc = useQueryClient();
   const [picked, setPicked] = useState<string | null>(null);
@@ -62,6 +67,7 @@ export function RewardsSheet({ open, onOpenChange, streamId, balance, rewards, l
   const ready = !!reward && canAfford(reward) && (!reward.needsText || !!text.trim()) && !redeem.isPending;
 
   return (
+    <>
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent column glass className="max-h-[85dvh] px-4 pb-8" data-live-rewards-sheet>
         <DrawerHeader className="mb-3 border-b border-white/10 px-0">
@@ -155,9 +161,35 @@ export function RewardsSheet({ open, onOpenChange, streamId, balance, rewards, l
             </button>
           )}
 
+          {giving?.enabled && (
+            <button
+              type="button"
+              data-kit-button="secondary"
+              data-give-points-open
+              onClick={() => {
+                onOpenChange(false);
+                setGiveOpen(true);
+              }}
+              className="flex w-full items-center justify-center gap-2"
+            >
+              <PointsIcon className="h-4 w-4" />
+              {t('livePoints.give.open')}
+            </button>
+          )}
+
           <p className="text-xs leading-relaxed text-zinc-500">{t('livePoints.howToEarn')}</p>
         </div>
       </DrawerContent>
     </Drawer>
+    {giving?.enabled && (
+      <GivePointsSheet
+        open={giveOpen}
+        onOpenChange={setGiveOpen}
+        streamId={streamId}
+        balance={balance.balance}
+        dailyCap={giving.dailyCap}
+      />
+    )}
+    </>
   );
 }

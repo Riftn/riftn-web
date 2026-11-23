@@ -13,7 +13,8 @@ import { tokenLabel } from '@/lib/token-label';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, Tag, ImageIcon, HandCoins, ChevronDown } from "lucide-react";
+import { Loader2, Tag, ImageIcon, HandCoins } from "lucide-react";
+import Send from "@/components/ui/cut-icons/send";
 import Wallet from "@/components/ui/cut-icons/wallet";
 
 import X from "@/components/ui/cut-icons/close";
@@ -31,6 +32,7 @@ import {
   TOTAL_FRACTIONS,
 } from '@/hooks/use-fraction-marketplace';
 import { SellFractionsDrawer } from './SellFractionsDrawer';
+import { SendFractionsDrawer } from './SendFractionsDrawer';
 import { SettlementRail } from './SettlementRail';
 import { toast } from 'sonner';
 import dehubCoin from '@/assets/dehub-coin.png';
@@ -38,10 +40,12 @@ import dehubCoin from '@/assets/dehub-coin.png';
 function PositionCard({
   position,
   onSell,
+  onSend,
   onOpen,
 }: {
   position: PortfolioPosition;
   onSell: () => void;
+  onSend: () => void;
   onOpen: () => void;
 }) {
   const { t } = useTranslation();
@@ -72,14 +76,23 @@ function PositionCard({
           <p className="text-xs text-zinc-400">{t('fractions.pctOfPost', { pct: position.percentage.toFixed(1) })}</p>
         </div>
       </button>
-      <div className="px-3 pb-3">
+      <div className="px-3 pb-3 flex gap-2">
         <Button
           size="sm"
           onClick={onSell}
-          className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs h-8"
+          className="flex-1 min-w-0 px-2 bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs h-8"
         >
-          <Tag className="w-3.5 h-3.5 mr-1.5" />
-          {t('fractions.sell')}
+          <Tag className="w-3.5 h-3.5 mr-1.5 shrink-0" />
+          <span className="truncate">{t('fractions.sell')}</span>
+        </Button>
+        <Button
+          size="sm"
+          onClick={onSend}
+          data-send-fraction
+          className="flex-1 min-w-0 px-2 bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs h-8"
+        >
+          <Send className="w-3.5 h-3.5 mr-1.5 shrink-0" />
+          <span className="truncate">{t('fractions.giftSend', 'Send')}</span>
         </Button>
       </div>
     </div>
@@ -91,7 +104,7 @@ export function PortfolioTab() {
   const { walletAddress, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [selling, setSelling] = useState<PortfolioPosition | null>(null);
-  const [showDeleted, setShowDeleted] = useState(false);
+  const [sending, setSending] = useState<PortfolioPosition | null>(null);
 
   const {
     data: allPositions = [],
@@ -105,10 +118,9 @@ export function PortfolioTab() {
   const cancelListing = useCancelListing();
   const cancelOffer = useCancelOffer();
 
-  // Fractions of a deleted post still exist on-chain and can still be sold, so
-  // they stay reachable, folded away under their own toggle.
+  // Fractions of a deleted post stay on-chain, but the post is gone, so the
+  // portfolio leaves them out entirely.
   const positions = livePositions(allPositions);
-  const deletedPositions = allPositions.filter(p => p.postDeleted);
   const activeListings = listings.filter(l => l.status === 'active');
   const totalHeld = positions.reduce((sum, p) => sum + p.balance, 0);
 
@@ -134,6 +146,20 @@ export function PortfolioTab() {
           }}
           open
           onOpenChange={(v) => { if (!v) setSelling(null); }}
+        />
+      )}
+
+      {sending && (
+        <SendFractionsDrawer
+          tokenId={sending.tokenId}
+          chainId={sending.chainId}
+          post={{
+            title: sending.title || undefined,
+            imageUrl: sending.imageUrl || undefined,
+            type: sending.postType || undefined,
+          }}
+          open
+          onOpenChange={(v) => { if (!v) setSending(null); }}
         />
       )}
 
@@ -163,7 +189,7 @@ export function PortfolioTab() {
               primaryAction={{ label: t('common.retry'), onClick: () => void refetchPositions(), loading: positionsFetching }}
             />
           </div>
-        ) : allPositions.length === 0 ? (
+        ) : positions.length === 0 ? (
           <div className="text-center py-12 rounded-xl border border-white/10 bg-white/5">
             <ImageIcon className="w-8 h-8 text-white/15 mx-auto mb-2" />
             <p className="text-white/40 text-sm">{t('fractions.noneHeldYet')}</p>
@@ -180,34 +206,10 @@ export function PortfolioTab() {
                     key={`${position.chainId}-${position.tokenId}`}
                     position={position}
                     onSell={() => setSelling(position)}
+                    onSend={() => setSending(position)}
                     onOpen={() => navigate(`/app/post/${position.tokenId}/info`)}
                   />
                 ))}
-              </div>
-            )}
-            {deletedPositions.length > 0 && (
-              <div className="space-y-3">
-                <button
-                  type="button"
-                  onClick={() => setShowDeleted(v => !v)}
-                  aria-expanded={showDeleted}
-                  className="flex items-center gap-1 text-xs text-white/40 hover:text-white/60 transition-colors"
-                >
-                  {t('fractions.deletedPosts', { count: deletedPositions.length })}
-                  <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showDeleted ? 'rotate-180' : ''}`} />
-                </button>
-                {showDeleted && (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                    {deletedPositions.map((position) => (
-                      <PositionCard
-                        key={`${position.chainId}-${position.tokenId}`}
-                        position={position}
-                        onSell={() => setSelling(position)}
-                        onOpen={() => setSelling(position)}
-                      />
-                    ))}
-                  </div>
-                )}
               </div>
             )}
           </>

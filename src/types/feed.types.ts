@@ -58,6 +58,10 @@ export interface BaseFeedItem {
   hideAssetCards?: boolean;
   /** Links in the text whose preview card the poster closed, so no surface draws one. */
   hiddenLinkPreviews?: string[];
+  /** People tagged on the photos. */
+  imageTags?: { address?: string; username: string; i: number; x: number; y: number }[];
+  /** A quiz hangs off this post (GET /quiz/:tokenId). */
+  hasQuiz?: boolean;
   /** Content warning: the post opens collapsed behind this one line. */
   spoilerText?: string;
   /** Who may quote it; absent means anyone. */
@@ -508,7 +512,7 @@ export interface LiveStream extends BaseFeedItem {
  * Drawn by PostSwipeSlide instead of a video player.
  */
 export interface ReelPost {
-  kind: 'text' | 'photo' | 'comic' | 'article' | 'locked';
+  kind: 'text' | 'photo' | 'comic' | 'article' | 'locked' | 'mature';
   text?: string;
   title?: string;
   images?: string[];

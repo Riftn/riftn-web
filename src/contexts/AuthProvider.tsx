@@ -289,6 +289,8 @@ function normalizeUser(userData: Partial<DeHubUser> | null | undefined, fallback
     createdAt: safe.createdAt,
     lastLoginTimestamp: safe.lastLoginTimestamp,
     badgeBalance,
+    badgeLock: safe.badgeLock,
+    hideBadgeAndBalance: safe.hideBadgeAndBalance,
     // Governance votes count only this, so a lent badge can be told apart.
     ownBadgeBalance: typeof safe.ownBadgeBalance === 'number' ? safe.ownBadgeBalance : undefined,
     balanceData: safe.balanceData,
@@ -445,7 +447,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(isSocialLoginResumeExpected);
   // Why the sheet is open — plain sign-in, or adding/switching a profile from
   // Settings while already signed in. Only changes the sheet's title.
-  const [loginIntent, setLoginIntent] = useState<'login' | 'add-profile'>('login');
+  const [loginIntent, setLoginIntent] = useState<'login' | 'signup' | 'add-profile'>('login');
   const [walletPhase, setWalletPhase] = useState<WalletPhase>('none');
   // Signing can fail concurrently in several mounted surfaces (the DM thread,
   // fee gate and encryption bootstrap all do work on entry). Treat their
@@ -639,7 +641,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const openLoginModal = useCallback((options?: {
-    intent?: 'login' | 'add-profile';
+    intent?: 'login' | 'signup' | 'add-profile';
     /**
      * The saved profile this sign-in is meant to restore, when there is one.
      * An account already on the device is not a new one, so it is not held
@@ -699,7 +701,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Whatever they tapped carries on once they are signed in.
       armAfterSignIn({ run: options?.then, path: options?.path, fromAddress: sheetOpenedWithAddressRef.current });
     }
-    setLoginIntent(options?.intent === 'add-profile' ? 'add-profile' : 'login');
+    setLoginIntent(options?.intent ?? 'login');
     setIsLoginModalOpen(true);
   }, []);
 
@@ -2191,6 +2193,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       addProfilePrevIdRef.current = null;
       displacedAnAccountRef.current = false;
       adoptCurrentProfile();
+      if (!authResponse.result?.isNewAccount) void refreshUser(authAddress);
     } else {
       snapshotCurrentSession();
     }
@@ -2292,6 +2295,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       addProfilePrevIdRef.current = null;
       displacedAnAccountRef.current = false;
       adoptCurrentProfile();
+      if (!authResponse.result?.isNewAccount) void refreshUser(address);
     } else {
       snapshotCurrentSession();
     }
@@ -3263,6 +3267,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // The way out of a wallet that never answers. Safari in particular can sit
+  // on the signature (the wallet app never opens, or the request is lost on the
+  // way), and the sheet was dimmed with nothing to tap until a 5-minute
+  // deadline. This lets go of the attempt and the attached wallet, so the
+  // sheet goes back to the sign-in options. A signature that still arrives
+  // later simply finishes signing in.
+  const cancelWalletLogin = async () => {
+    setWagmiAuthIntent(false);
+    wagmiAuthInProgressRef.current = false;
+    setIsConnecting(false);
+    clearWagmiStorage();
+    try {
+      await wagmiDisconnectAsync();
+    } catch { /* already gone */ }
+  };
+
   const disconnect = async (options?: { forgetProfile?: boolean }) => {
     // An account page left open behind a sign-out goes home quietly rather
     // than asking them to sign straight back in.
@@ -3419,13 +3439,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // than logging anybody out). It only ever calls through after mount.
   switchToProfileRef.current = switchToProfile;
 
-  const refreshUser = async () => {
-    if (!walletAddress) return;
+  const refreshUser = async (address = walletAddress) => {
+    if (!address) return;
+    const profileId = currentProfileId();
     try {
-      const userData = await getAccountInfo(walletAddress);
-      const normalizedUser = normalizeUser(userData, walletAddress);
+      const userData = await getAccountInfo(address);
+      if (currentProfileId() !== profileId || localStorage.getItem('dehub_wallet')?.toLowerCase() !== address.toLowerCase()) return;
+      const normalizedUser = normalizeUser({ ...userData, hideBadgeAndBalance: userData.hideBadgeAndBalance === true }, address);
       setUser(normalizedUser);
       localStorage.setItem('dehub_user', JSON.stringify(normalizedUser));
+      snapshotCurrentSession();
     } catch (error) {
       console.error('Failed to refresh user data:', error);
     }
@@ -3435,7 +3458,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(prev => {
       if (!prev) return prev;
       const patched = { ...prev, ...patch };
-      localStorage.setItem('dehub_user', JSON.stringify(patched));
+      const serialized = JSON.stringify(patched);
+      localStorage.setItem('dehub_user', serialized);
+      queueMicrotask(() => {
+        if (localStorage.getItem('dehub_user') === serialized) snapshotCurrentSession();
+      });
       return patched;
     });
   };
@@ -3494,6 +3521,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     connectWithTelegram,
     connectWithPasskey,
     connectWithWallet,
+    cancelWalletLogin,
     completeSmartWalletLogin,
     exportPrivateKey,
     exportPrivateKeyWithBiometrics,

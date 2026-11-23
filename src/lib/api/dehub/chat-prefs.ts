@@ -22,6 +22,8 @@ export interface ChatPref {
   listedAt?: string | null;
   /** DMs: your messages in this chat are end-to-end encrypted since then. */
   encryptedAt?: string | null;
+  /** DMs: your messages here go out in the other person's language since then. */
+  translateOutAt?: string | null;
   /** Reactions to your lines you haven't seen; cleared when you open the chat. */
   reactions?: ChatReactionSummary | null;
 }
@@ -46,6 +48,8 @@ export interface ChatPrefPatch {
   listed?: boolean;
   /** DMs: end-to-end encrypt your messages in this chat. Off by default. */
   encrypted?: boolean;
+  /** DMs: send your messages in the other person's language. Off by default. */
+  translateOut?: boolean;
   /** You opened the chat: clear its waiting reactions. */
   seenReactions?: true;
 }

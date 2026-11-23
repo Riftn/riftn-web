@@ -86,13 +86,13 @@ import {
   whepEndpointFor,
   edgeWhepEndpointFor,
   fetchTurnServers,
-  isAacCopyUrl,
   isBigEventPlayback,
   BIG_EVENT_HLS_CONFIG,
 } from '@/lib/live-ingest';
 import type { WhepState, WhepSubscription } from '@/lib/livepeer/whep';
 import { nativeLiveEdge, watchLiveProgress } from '@/lib/live/stall-watchdog';
-import { forgetWhepSilent, hasRealPicture, rememberWhepSilent, whepRecentlySilent } from '@/lib/live/whep-memory';
+import { NO_RELAY_CANDIDATE, firstWhepRoute, forgetWhepRouteBlocked, forgetWhepSilent, hasRealPicture, rememberWhepRouteBlocked, rememberWhepSilent, whepRecentlySilent, whepRouteBlocked, type WhepRoute } from '@/lib/live/whep-memory';
+import { dropWarmLiveHls, LIVE_HLS_CONFIG, playsNativeHls, SLOW_KEYFRAME_SEC, takeWarmLiveHls, warmLiveHls } from '@/lib/live/hls-standby';
 import { peekLiveSession, takeLiveSession } from '@/lib/live-handoff';
 import { useStreamActions, useStreamActivities } from '@/hooks/use-livestream';
 import { useBlockAuthor } from '@/hooks/use-block-author';
@@ -116,6 +116,7 @@ const GiftSubsDrawer = lazy(() => import('@/components/app/live/GiftSubsDrawer')
 const TipPayWith = lazy(() => import('@/components/app/tips/TipPayWith'));
 // The creator's overlay; lazy, most streams have none.
 const LiveOverlayLayer = lazy(() => import('@/components/app/live/overlay/LiveOverlayLayer'));
+const StreamPetCorner = lazy(() => import('@/components/app/pet/StreamPetCorner'));
 const HypeTrainBar = lazy(() => import('@/components/app/live/overlay/hype-train').then((m) => ({ default: m.HypeTrainBar })));
 const CoStreamViewerLayer = lazy(() => import('@/components/app/live/costream/CoStreamViewerLayer'));
 const ReplayOverlayLayer = lazy(() => import('@/components/app/live/overlay/ReplayOverlayLayer'));
@@ -158,9 +159,16 @@ const logger = createLogger('LiveStreamCard');
  * The nasty case is not an error — it is a session that connects cleanly and
  * plays nothing, which has no event to listen for.
  */
-// A working WebRTC session shows its first frame in about a second; waiting
-// 6s (twice, with the edge retry) put ~12s in front of every HLS fallback.
-const WHEP_START_TIMEOUT_MS = 3500;
+// Each stage has its own clock. One clock from the start ran through the
+// offer's own wait, so a slow network was given up on as its answer landed,
+// and the relay retry was abandoned before it could have connected: two full
+// waits in front of every HLS fallback and neither could succeed.
+/** The answer to the offer. Past this the ingest host is not reachable from here. */
+const WHEP_ANSWER_TIMEOUT_MS = 3500;
+/** After the answer a media route is found in well under a second where one exists. */
+const WHEP_CONNECT_TIMEOUT_MS = 2000;
+/** Connected: the first picture waits on the broadcast's next keyframe. */
+const WHEP_FRAME_TIMEOUT_MS = 2500;
 
 /** What the player overlay says while playback is struggling; worded at render. */
 type PlaybackError = 'reconnecting' | 'alternateSource' | 'connecting' | 'unavailable' | 'playFailed';
@@ -310,7 +318,7 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
   // A handed-over session is already delivering frames, which answers the
   // Android worry below — keep it rather than dropping to HLS.
   const [transport, setTransport] = useState<'whep' | 'hls'>(
-    !bigEvent && (handoff || (!preferAndroidHls() && !whepRecentlySilent(whepPlaybackId))) && typeof RTCPeerConnection !== 'undefined' && !!whepPlaybackId ? 'whep' : 'hls'
+    !bigEvent && (handoff || (!preferAndroidHls() && !whepRecentlySilent(whepPlaybackId) && firstWhepRoute(whepSource?.provider === 'mediamtx') !== null)) && typeof RTCPeerConnection !== 'undefined' && !!whepPlaybackId ? 'whep' : 'hls'
   );
   // A source swap pauses the element; keep the viewer's intent through fallback.
   const playbackRequestedRef = useRef(true);
@@ -556,6 +564,8 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
   const hlsRef = useRef<Hls | null>(null);
   /** One WebRTC attempt per card: once it fails, HLS keeps the element. */
   const whepFailedRef = useRef(false);
+  /** The WebRTC route the picture on screen came by, for the network memory. */
+  const whepRouteRef = useRef<WhepRoute>('direct');
   const videoId = `live-${stream.id}`;
 
   const queryClient = useQueryClient();
@@ -586,8 +596,8 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
   // A handed-over session also overrides the Android HLS preference, since it
   // is already delivering frames.
   useEffect(() => {
-    if (!bigEvent && whepPlaybackId && (handoff || (!preferAndroidHls() && !whepRecentlySilent(whepPlaybackId))) && !whepFailedRef.current) setTransport('whep');
-  }, [whepPlaybackId, handoff, bigEvent]);
+    if (!bigEvent && whepPlaybackId && (handoff || (!preferAndroidHls() && !whepRecentlySilent(whepPlaybackId) && firstWhepRoute(whepSource?.provider === 'mediamtx') !== null)) && !whepFailedRef.current) setTransport('whep');
+  }, [whepPlaybackId, whepSource?.provider, handoff, bigEvent]);
 
   // Fetch DHB balance when gift drawer opens
   useEffect(() => {
@@ -614,8 +624,9 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
   }, [showGiftDrawer, walletAddress, giftBalanceVersion]);
 
   /**
-   * WebRTC first (about a second behind), HLS second (10-20 seconds). A
-   * failure or a silent connect falls back to the ladder below.
+   * WebRTC first (about a second behind), HLS second (a few seconds). HLS is
+   * made ready in the background the moment WebRTC starts, so whichever way
+   * WebRTC fails, the picture comes from something already loaded.
    */
   useEffect(() => {
     if (transport !== 'whep' || streamEnded || !whepPlaybackId) return;
@@ -631,35 +642,54 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
       // Latched: without it the promote-on-live effect below would flip the
       // transport straight back and the two would trade the element forever.
       whepFailedRef.current = true;
-      // Answered but never sent a picture: next open goes straight to HLS.
-      if (reason === 'no frames') rememberWhepSilent(whepPlaybackId);
+      // The stream itself cannot be shown over WebRTC in time (silent, refused
+      // by the server, or keyframes far apart): next open goes straight to HLS.
+      if (reason === 'no frames' || reason === 'refused' || reason === 'slow keyframes') rememberWhepSilent(whepPlaybackId);
       setTransport('hls');
     };
 
     // A session that negotiates but never delivers media is the worst case:
-    // no error to catch and nothing on screen. Give it a few seconds, then go.
+    // no error to catch and nothing on screen. Each stage gets its own wait.
     let timer: ReturnType<typeof setTimeout> | undefined;
-    const armStartTimer = () => {
+    const arm = (ms: number, reason: string) => {
       clearTimeout(timer);
       timer = setTimeout(() => {
-        if (!cancelled && !hasRealPicture(video)) void failOver('no frames');
-      }, WHEP_START_TIMEOUT_MS);
+        if (!cancelled && !hasRealPicture(video)) void failOver(reason);
+      }, ms);
     };
 
-    // A self-hosted stream gets one more chance before HLS: signaling via
-    // the api.dehub.io edge with TURN carrying the media — the route for
-    // networks that cannot reach the ingest host at all, where the HLS
-    // "fallback" below is on the same unreachable host and saves nothing.
-    // Livepeer streams skip straight to the ladder as before.
-    let triedEdge = false;
+    const selfHosted = whepSource?.provider === 'mediamtx';
+    let route: WhepRoute = 'direct';
+    let attempts = 0;
+    let triedRelay = false;
     let connected = false;
+    /** The direct attempt never connected, so a relay that does says why. */
+    let directDead = false;
+
+    // A self-hosted stream has a second WebRTC route before HLS: signaling
+    // via the api.dehub.io edge with TURN carrying the media. It is for a
+    // network that cannot reach the ingest host at all, where the HLS
+    // "fallback" below is on the same unreachable host and saves nothing,
+    // and for a picture that froze mid-watch. Livepeer streams skip straight
+    // to the ladder as before.
     const failOver = async (reason: string) => {
       if (cancelled) return;
-      // The edge route is for networks that can't reach the ingest host. A
-      // session that connected and still sent nothing is the stream itself,
-      // and a second wait over TURN only delays HLS.
-      if (!triedEdge && whepSource?.provider === 'mediamtx' && !(reason === 'no frames' && connected)) {
-        triedEdge = true;
+      // Whatever this attempt still has on the way is no longer wanted.
+      attempts += 1;
+      // Answered, and still no way through for the media: that is this
+      // network, not this stream. The next live opens on the route after.
+      const blocked = reason === 'no media route' || (route === 'relay' && (reason === 'no answer' || reason === NO_RELAY_CANDIDATE));
+      if (selfHosted && blocked) rememberWhepRouteBlocked(route);
+      if (route === 'direct' && !connected) directDead = true;
+      // The host answered, so HLS will too: show that picture now rather
+      // than sit through a second connect. A session that connected and sent
+      // nothing is the stream itself, and the relay would only repeat it.
+      // The same goes for a stream the server refused, or one HLS will show
+      // sooner: neither is the network's doing.
+      const streamsOwn = reason === 'refused' || reason === 'not on air' || reason === 'slow keyframes';
+      const relayNext = !triedRelay && selfHosted && !streamsOwn && reason !== 'no media route' && !(reason === 'no frames' && connected) && !whepRouteBlocked('relay');
+      if (relayNext) {
+        triedRelay = true;
         const relay = await fetchTurnServers();
         if (relay.length) {
           logger.info('WHEP direct failed; retrying via the signaling edge', {
@@ -669,38 +699,49 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
           const old = session;
           session = null;
           void old?.stop();
-          if (!cancelled) await start(edgeWhepEndpointFor, relay);
+          if (!cancelled) await start('relay', relay);
           return;
         }
       }
       fallBack(reason);
     };
 
-    const start = async (
-      endpointFor: typeof whepEndpointFor,
-      iceServers?: RTCIceServer[],
-    ) => {
+    const start = async (which: WhepRoute, iceServers?: RTCIceServer[]) => {
+      const attempt = ++attempts;
+      route = which;
+      whepRouteRef.current = which;
+      if (which === 'relay') triedRelay = true;
+      connected = false;
       setIsBuffering(playbackRequestedRef.current);
-      armStartTimer();
+      arm(WHEP_ANSWER_TIMEOUT_MS, 'no answer');
       const onStateChange = (state: WhepState, detail?: string) => {
-        if (cancelled) return;
-        if (state === 'playing') { connected = true; setError(null); }
+        if (cancelled || attempt !== attempts) return;
+        if (state === 'playing') {
+          connected = true;
+          setError(null);
+          // The relay carried what the direct route could not: start the
+          // next live on it instead of waiting the direct one out again.
+          if (which === 'relay' && directDead && selfHosted) rememberWhepRouteBlocked('direct');
+          if (!hasRealPicture(video)) arm(WHEP_FRAME_TIMEOUT_MS, 'no frames');
+        }
         else if (state === 'reconnecting') setError('reconnecting');
         else if (state === 'failed') void failOver(detail || 'connection failed');
       };
       try {
         // The feed card's session, still running: adopt it instead of
         // negotiating a second one, so the picture never drops.
-        const handed = endpointFor === whepEndpointFor ? takeLiveSession(whepPlaybackId) : null;
+        const handed = which === 'direct' ? takeLiveSession(whepPlaybackId) : null;
+        let opened: WhepSubscription;
         if (handed) {
           handed.setStateListener(onStateChange);
-          session = handed;
+          opened = handed;
+          connected = true;
         } else {
           const { subscribeToWhep } = await import('@/lib/livepeer/whep');
-          if (cancelled) return;
-          session = await subscribeToWhep({
+          if (cancelled || attempt !== attempts) return;
+          opened = await subscribeToWhep({
             playbackId: whepPlaybackId,
-            endpoint: endpointFor({
+            endpoint: (which === 'relay' ? edgeWhepEndpointFor : whepEndpointFor)({
               provider: whepSource?.provider,
               playbackId: whepPlaybackId,
             }),
@@ -708,11 +749,18 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
             onStateChange,
           });
         }
-        if (cancelled) {
-          await session.stop();
+        // Given up on while its answer was on the way: hang it up, or it
+        // would take the element back from whatever replaced it.
+        if (cancelled || attempt !== attempts) {
+          await opened.stop();
           return;
         }
-        video.srcObject = session.stream;
+        session = opened;
+        video.srcObject = opened.stream;
+        if (!hasRealPicture(video)) {
+          if (connected) arm(WHEP_FRAME_TIMEOUT_MS, 'no frames');
+          else arm(WHEP_CONNECT_TIMEOUT_MS, 'no media route');
+        }
         if (playbackRequestedRef.current && visualActivity.isLivePlaybackAllowed()) {
           await video.play().catch(() => setIsBuffering(false));
         }
@@ -722,11 +770,47 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
           setIsPlaying(false);
         }, undefined, undefined, () => video, true);
       } catch (e) {
-        void failOver((e as Error)?.message || 'subscribe failed');
+        if (attempt !== attempts) return;
+        // Answered with a refusal: no other route changes that. A 404 is a
+        // stream between two broadcasts, which says nothing about the next
+        // one, so only the other refusals are remembered.
+        if ((e as Error)?.name === 'WhepRefusedError') {
+          void failOver((e as { status?: number }).status === 404 ? 'not on air' : 'refused');
+        } else void failOver((e as Error)?.message || 'subscribe failed');
       }
     };
 
-    void start(whepEndpointFor);
+    // A network already seen to drop direct media starts on the relay. A
+    // session handed over by the feed card is direct and already running.
+    const open = async () => {
+      if (firstWhepRoute(selfHosted) === 'relay' && !peekLiveSession(whepPlaybackId)) {
+        const relay = await fetchTurnServers();
+        if (cancelled) return;
+        if (relay.length) await start('relay', relay);
+        else fallBack('relay unavailable');
+        return;
+      }
+      await start('direct');
+    };
+
+    // HLS, loaded in the background while WebRTC tries. Its first playlist
+    // also says how far apart this stream's keyframes are: WebRTC can only
+    // start on one, so when they are seconds apart HLS shows a picture first.
+    // Not for a session handed over by the feed card: its picture is up.
+    const standbyUrl = urlsToTry[0];
+    if (!peekLiveSession(whepPlaybackId) && !playsNativeHls(video, standbyUrl)) {
+      warmLiveHls(standbyUrl, LIVE_HLS_CONFIG, (segmentSeconds) => {
+        if (cancelled || segmentSeconds < SLOW_KEYFRAME_SEC || hasRealPicture(video)) return;
+        void failOver('slow keyframes');
+      });
+    }
+    const onPicture = () => {
+      if (video.srcObject && hasRealPicture(video)) dropWarmLiveHls(standbyUrl);
+    };
+    video.addEventListener('resize', onPicture);
+    video.addEventListener('loadeddata', onPicture);
+
+    void open();
 
     // A session can stay "connected" while the picture stops (common on
     // iPhones switching networks). Once frames have flowed, a still picture
@@ -741,6 +825,8 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
       cancelled = true;
       clearTimeout(timer);
       stopWatch();
+      video.removeEventListener('resize', onPicture);
+      video.removeEventListener('loadeddata', onPicture);
       videoPlaybackManager.unregister(videoId);
       releaseAfterPictureInPicture(video, () => {
         void session?.stop();
@@ -749,6 +835,9 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
         if (video.srcObject) video.srcObject = null;
       });
     };
+    // urlsToTry is read for the standby only; a new list for the same stream
+    // must not restart a WebRTC session that is playing.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transport, whepPlaybackId, whepSource?.provider, streamEnded, videoId, stream.id, setPlaybackWanted]);
 
   useEffect(() => {
@@ -775,8 +864,7 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
     // and skips its download. Not for a self-hosted ladder carrying Opus,
     // which a positive native probe does not promise to play — the server's
     // AAC copy, which is what such a browser is handed, is fine.
-    const selfHosted = liveSourceFromHlsUrl(currentUrl())?.provider === 'mediamtx';
-    if ((!selfHosted || isAacCopyUrl(currentUrl())) && video.canPlayType('application/vnd.apple.mpegurl')) {
+    if (playsNativeHls(video, currentUrl())) {
       // Native playback has none of hls.js's built-in resilience, so re-create
       // the essentials here: multi-CDN failover through urlsToTry, bounded
       // reconnect attempts for live streams, and the error overlay.
@@ -873,13 +961,18 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
       retryTimeouts.add(id);
     };
     (async () => {
-    const { default: Hls } = await import('hls.js');
+    // Made ready while WebRTC was trying: playlists and the first piece of
+    // video are already here, so attaching the element is all that is left.
+    const warmed = await (takeWarmLiveHls(currentUrl()) ?? null);
+    if (disposed) {
+      warmed?.hls.destroy();
+      return;
+    }
+    const { default: Hls } = warmed ? { default: warmed.Hls } : await import('hls.js');
     if (disposed) return;
     if (Hls.isSupported()) {
-      const hls = new Hls({
-        enableWorker: true,
-        lowLatencyMode: true,
-        backBufferLength: 60,
+      const hls = warmed?.hls ?? new Hls({
+        ...LIVE_HLS_CONFIG,
         ...(bigEvent ? BIG_EVENT_HLS_CONFIG : {}),
       });
 
@@ -889,7 +982,7 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
         hls.loadSource(streamUrl);
       };
 
-      tryLoad();
+      if (!warmed) tryLoad();
       hls.attachMedia(video);
       resumePlayback();
 
@@ -1632,7 +1725,7 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
               onPlaying={(e) => {
                 if (!visualActivity.isLivePlaybackAllowed() && !isVideoInPictureInPicture(e.currentTarget)) { e.currentTarget.pause(); return; }
                 setIsPlaying(true); setIsBuffering(false); setError(null);
-                if (e.currentTarget.srcObject && hasRealPicture(e.currentTarget)) forgetWhepSilent(whepPlaybackId);
+                if (e.currentTarget.srcObject && hasRealPicture(e.currentTarget)) { forgetWhepSilent(whepPlaybackId); forgetWhepRouteBlocked(whepRouteRef.current); }
               }}
               onWaiting={(e) => { if (!e.currentTarget.paused) setIsBuffering(true); }}
               onPause={() => { setIsPlaying(false); setIsBuffering(false); }}
@@ -1758,6 +1851,23 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
             <HypeTrainBar
               streamId={stream.streamId}
               className={cn('absolute left-1/2 z-20 w-[min(92%,26rem)] -translate-x-1/2', immersive ? 'top-[max(3.25rem,calc(env(safe-area-inset-top)+3.25rem))]' : 'top-3')}
+            />
+          </Suspense>
+        )}
+        {/* The creator's stream pet, bottom-right above the room, for everyone
+            watching. A tap opens its card, where viewers can buy it a snack
+            with their channel points. */}
+        {stream.streamId && stream.isLive && !streamEnded && (
+          <Suspense fallback={null}>
+            <StreamPetCorner
+              streamId={stream.streamId}
+              own={isOwnStream}
+              signedIn={!!isAuthenticated}
+              className={cn(
+                'absolute right-3 z-20 transition-opacity duration-300',
+                immersive ? 'bottom-[calc(45%+0.75rem)]' : 'bottom-16',
+                chromeHidden && 'invisible pointer-events-none opacity-0',
+              )}
             />
           </Suspense>
         )}

@@ -36,6 +36,7 @@ import {
   writePublicChatPerHour,
 } from '@/lib/public-chat-alerts';
 import { NAV_ORDER_PREF_KEYS, sanitiseNavOrder, useNavOrder, writeNavOrder, type NavOrderSurface } from '@/lib/nav-order';
+import { MENU_GROUP_MOVES_PREF_KEY, sanitiseMenuGroupMoves, useMenuGroupMoves, writeMenuGroupMoves } from '@/lib/menu-group-moves';
 
 // Renamed when the old pinned speeds were cleared (video-preferences
 // RATE_SCOPE 3), so the account copy of that map cannot bring them back.
@@ -143,10 +144,21 @@ function useNavOrderSync(surface: NavOrderSurface) {
   useSyncedPreference(NAV_ORDER_PREF_KEYS[surface], order, apply, []);
 }
 
+/** Menu tiles moved to another group; written by MobileMenuGrid, inbound only here. */
+function useMenuGroupMovesSync() {
+  const moves = useMenuGroupMoves();
+  const apply = useCallback((value: unknown) => {
+    writeMenuGroupMoves(sanitiseMenuGroupMoves(value));
+  }, []);
+  useSyncedPreference(MENU_GROUP_MOVES_PREF_KEY, moves, apply, {});
+}
+
 export function ViewingPreferencesSync() {
+  useMenuGroupMovesSync();
   useNavOrderSync('menu');
   useNavOrderSync('rail');
   useNavOrderSync('bar');
+  useNavOrderSync('home');
   useFollowGroupSync();
   useAdLoadSync();
   useFeedVideoShapeSync();

@@ -44,6 +44,7 @@ import { useLayoutEffect, useEffect, useState, useRef, useCallback, useMemo, use
 import { lazyWithRetry } from '@/lib/lazy-with-retry';
 import { useOpenedOnce } from '@/hooks/use-opened-once';
 import { takePrefetchedPost } from '@/lib/post-prefetch';
+import { loadPostData } from '@/lib/post-warm';
 import { Clock, Code } from "lucide-react";
 import { copyPostEmbedCode } from '@/lib/post-embed-code';
 import Sparkles from "@/components/ui/cut-icons/assistant";
@@ -63,6 +64,7 @@ import dehubCoin from '@/assets/dehub-coin.png';
 import { getNFTInfo, getLiveStream, resolveArticleSlug, type DeHubNFT } from '@/lib/api/dehub';
 import { parseSoundtrackTag, findCachedFeedPost } from '@/hooks/use-unified-feed';
 import { PollCard } from '@/components/app/cards/PollCard';
+import { QuizCard } from '@/components/app/quiz/QuizCard';
 import { useStreamLiveStatus } from '@/hooks/use-stream-live-status';
 
 import { buildAvatarUrl, extractAvatarPath, buildImageUrl, buildFeedImageUrls, buildVideoUrl, buildHlsUrl } from '@/lib/media-url';
@@ -92,6 +94,7 @@ import { useFeedSwallowClip } from '@/hooks/use-feed-swallow-clip';
 import { FeedSwallowMotion } from '@/components/app/feeds/FeedSwallowMotion';
 import type { VideoItem, ImagePost, TextPost, LiveStream } from '@/types/feed.types';
 import { hlsUrlFor, liveProviderOf, noteLatencyMode } from '@/lib/live-ingest';
+import { warmLiveStandbyFor } from '@/lib/live/hls-standby';
 import { FocusCommentProvider, NoFocusComment } from '@/lib/focus-comment';
 import { bringIntoView } from '@/lib/focus-scroll';
 import { canonicalUrl } from '@/lib/seo/route-meta';
@@ -175,6 +178,37 @@ const LivePostChat = lazyWithRetry(() =>
 );
 
 /**
+ * A link straight to a live. index.html asked for the post while the app was
+ * still loading, so the answer is often here before the page has drawn
+ * anything. The moment it says "live", fetch the player and its chat, and
+ * open the connection to the stream's host, instead of waiting for the page
+ * to render its way down to each of them in turn (measured: the chat's code
+ * was only asked for 1.2 s after the player's).
+ */
+function preloadLiveFromPrefetch() {
+  try {
+    const pre = (window as Window & { __postPrefetch?: { p?: Promise<unknown> } }).__postPrefetch;
+    void pre?.p
+      ?.then((data) => {
+        const nft = data && typeof data === 'object' && 'result' in data ? (data as { result: unknown }).result : data;
+        if (!nft || typeof nft !== 'object' || getContentType(nft as DeHubNFT) !== 'live') return;
+        void LiveStreamCard.preload().catch(() => undefined);
+        void LivePostChat.preload().catch(() => undefined);
+        // Building the address is what opens the connection (see hlsUrlFor).
+        const stream = (nft as { stream?: Parameters<typeof hlsUrlFor>[0] }).stream;
+        if (stream?.playbackId) hlsUrlFor(stream);
+        // And the stream itself starts loading now, not once the page has
+        // rendered its way down to the player.
+        warmLiveStandbyFor(toLiveStream(nft as DeHubNFT));
+      })
+      .catch(() => undefined);
+  } catch {
+    /* A head start only. */
+  }
+}
+if (typeof window !== 'undefined') preloadLiveFromPrefetch();
+
+/**
  * Detect content type from API response
  */
 function getContentType(post: DeHubNFT): 'video' | 'image' | 'post' | 'live' {
@@ -245,6 +279,8 @@ function toVideoItem(nft: DeHubNFT): VideoItem {
     comicBorder: nft.comicBorder,
     hideAssetCards: nft.hideAssetCards,
     hiddenLinkPreviews: nft.hiddenLinkPreviews,
+    imageTags: nft.imageTags,
+    hasQuiz: nft.hasQuiz,
     spoilerText: nft.spoilerText,
     quotePolicy: nft.quotePolicy,
     visibility: nft.visibility,
@@ -344,6 +380,8 @@ function toImagePost(nft: DeHubNFT): ImagePost {
     comicBorder: nft.comicBorder,
     hideAssetCards: nft.hideAssetCards,
     hiddenLinkPreviews: nft.hiddenLinkPreviews,
+    imageTags: nft.imageTags,
+    hasQuiz: nft.hasQuiz,
     spoilerText: nft.spoilerText,
     quotePolicy: nft.quotePolicy,
     visibility: nft.visibility,
@@ -434,6 +472,8 @@ function toTextPost(nft: DeHubNFT): TextPost {
     comicBorder: nft.comicBorder,
     hideAssetCards: nft.hideAssetCards,
     hiddenLinkPreviews: nft.hiddenLinkPreviews,
+    imageTags: nft.imageTags,
+    hasQuiz: nft.hasQuiz,
     spoilerText: nft.spoilerText,
     quotePolicy: nft.quotePolicy,
     visibility: nft.visibility,
@@ -560,6 +600,8 @@ function toLiveStream(nft: DeHubNFT): LiveStream {
     comicBorder: nft.comicBorder,
     hideAssetCards: nft.hideAssetCards,
     hiddenLinkPreviews: nft.hiddenLinkPreviews,
+    imageTags: nft.imageTags,
+    hasQuiz: nft.hasQuiz,
     spoilerText: nft.spoilerText,
     quotePolicy: nft.quotePolicy,
     visibility: nft.visibility,
@@ -1093,7 +1135,7 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
       const isStreamId = /^[a-f\d]{24}$/i.test(id!) && !/^\d+$/.test(id!);
       const loadPost = async (nftId: string): Promise<DeHubNFT> => {
         // A post link asked for this during page load (index.html).
-        const nft = (await takePrefetchedPost(nftId)) ?? await getNFTInfo(nftId);
+        const nft = (await takePrefetchedPost(nftId)) ?? await loadPostData(nftId);
         const normalizedNft = {
           ...nft,
           createdAt: nft.createdAt || nft.created_at || (nft as any).mintedAt || (nft as any).minted_at || (nft as any).updatedAt || (nft as any).updated_at || '',
@@ -1639,6 +1681,7 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
         >
           {renderContent()}
           {contentType === 'image' && parseInt(id, 10) > 0 && <div className="px-3"><PollCard tokenId={parseInt(id, 10)} /></div>}
+          {contentType === 'image' && parseInt(id, 10) > 0 && <div className="px-3"><QuizCard tokenId={parseInt(id, 10)} /></div>}
         </PostStagePhone>
         {commentsSplitSheet}
       </div>
@@ -1832,7 +1875,7 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
           currentSpoilerText={videoData.spoilerText}
           currentQuotePolicy={videoData.quotePolicy}
           currentReplyPolicy={videoData.replyPolicy}
-          currentVisibility={(videoData as any).visibility}
+          currentVisibility={(videoData as any).justMe ? 'self' : (videoData as any).visibility}
           currentShopLinks={videoData.shopLinks}
           onSuccess={(edited) => {
             applyOptimisticEdit(queryClient, id || '', edited);
@@ -1913,6 +1956,7 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
           <ImmersiveVideoHeader onBack={goBack} />
           {renderContent()}
           {post && id && parseInt(id, 10) > 0 && <div className="px-3"><PollCard tokenId={parseInt(id, 10)} /></div>}
+          {post && id && parseInt(id, 10) > 0 && <div className="px-3"><QuizCard tokenId={parseInt(id, 10)} /></div>}
         </div>
         <div className="px-2 sm:px-3">{pageComments}</div>
         {showRelated && id && <div className="px-2 sm:px-3"><NoFocusComment><RelatedImagesFeed currentPostId={id} /></NoFocusComment></div>}
@@ -1946,6 +1990,7 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
             {renderContent()}
             {/* A video card draws its own poll; a photo card leaves it to the page. */}
             {!isTextPost && contentType !== 'video' && id && parseInt(id, 10) > 0 && <PollCard tokenId={parseInt(id, 10)} />}
+          {!isTextPost && contentType !== 'video' && id && parseInt(id, 10) > 0 && <QuizCard tokenId={parseInt(id, 10)} />}
             {/* Desktop: comments open inside the post's bento, attached to it like on the feed. */}
             {!isMobileView && !isLivePost && !commentsSplit && pageComments}
           </div>

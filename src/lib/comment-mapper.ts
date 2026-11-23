@@ -71,6 +71,8 @@ export interface Comment {
    * the paid Comment Anchor and the tipped comments below it.
    */
   isPinned?: boolean;
+  /** The post's creator hid this reply (only sent to its writer and the creator). */
+  hiddenByCreator?: boolean;
   /** The author's place for this part of their own thread (Reorder). */
   threadPos?: number;
   /** The post's creator has replied somewhere in this comment's thread. */
@@ -179,6 +181,7 @@ export function mapApiComment(apiComment: ApiCommentResponse): Comment {
     // reach draws the badge below the one they earned.
     badgeLock: hideBadge ? null : parseBadgeLock(apiComment.user?.badgeLock),
     isPinned: apiComment.isPinned === true,
+    hiddenByCreator: apiComment.hiddenByCreator === true,
     threadPos: typeof apiComment.threadPos === 'number' ? apiComment.threadPos : undefined,
     creatorReplied: apiComment.creatorReplied === true,
     anchoredUntil: apiComment.anchoredUntil ? new Date(apiComment.anchoredUntil) : undefined,

@@ -81,7 +81,7 @@ export function useStageChat(
       if (error) {
         if (isMissingTable(error)) {
           console.error(
-            '[StageChat] stage_chat_messages is missing — run supabase/migrations/20260820120000_stage_chat_messages.sql',
+            '[StageChat] stage_chat_messages is missing — run supabase/migrations/20260820120001_stage_chat_messages.sql',
           );
           return { messages: [], unavailable: true };
         }

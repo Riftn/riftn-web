@@ -304,7 +304,7 @@ export function EventDetailDrawer({ event, open, onOpenChange }: EventDetailDraw
                       <Button
                         size="sm"
                         onClick={payGateFee}
-                        disabled={isPaying || checkingPayment}
+                        disabled={isPaying || checkingPayment || Boolean(isPrivateBlocked && walletAddress)}
                         className="rounded-xl gap-1.5"
                       >
                         {isPaying ? (
@@ -449,7 +449,7 @@ export function EventDetailDrawer({ event, open, onOpenChange }: EventDetailDraw
               {/* Inline Chat — hidden behind gate or private block */}
               {showChat && canInteract && (
                 <div className="border border-white/[0.08] rounded-xl overflow-hidden">
-                  <EventChat eventId={event.id} />
+                  <EventChat eventId={event.id} restricted={isPrivate || hasGateFee} />
                 </div>
               )}
 

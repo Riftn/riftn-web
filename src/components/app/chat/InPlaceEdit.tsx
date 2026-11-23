@@ -49,6 +49,7 @@ interface InPlaceEditFieldProps {
   onSave: (text: string) => Promise<unknown> | unknown;
   /** The field closes. */
   onDone: () => void;
+  keepOpenOnTouchBlur?: boolean;
   maxLength?: number;
   /** Type size and colour, matching the line it replaces. */
   className?: string;
@@ -60,7 +61,7 @@ interface InPlaceEditFieldProps {
  * the field (click away, Enter, Esc) finishes. Emptied out, the saved words
  * come back.
  */
-export function InPlaceEditField({ draftKey, text, caret = null, onSave, onDone, maxLength, className }: InPlaceEditFieldProps) {
+export function InPlaceEditField({ draftKey, text, caret = null, onSave, onDone, keepOpenOnTouchBlur = false, maxLength, className }: InPlaceEditFieldProps) {
   const { t } = useTranslation();
   const [draft, setDraft] = useDraftState(draftKey, text);
   const draftRef = useRef(draft);
@@ -105,6 +106,18 @@ export function InPlaceEditField({ draftKey, text, caret = null, onSave, onDone,
     void save();
   }, [save, setDraft]);
 
+  const touchEdit = keepOpenOnTouchBlur && window.matchMedia?.('(pointer: coarse)').matches;
+  useEffect(() => {
+    if (!touchEdit) return;
+    // Mobile keyboards can move focus without a tap outside the editor.
+    // A completed tap also distinguishes leaving the editor from scrolling.
+    const outside = (event: MouseEvent) => {
+      if (event.target instanceof Node && !fieldRef.current?.contains(event.target)) finish();
+    };
+    document.addEventListener('click', outside, true);
+    return () => document.removeEventListener('click', outside, true);
+  }, [touchEdit, finish]);
+
   // Save a moment after the last keystroke.
   useEffect(() => {
     if (!draft.trim() || draft.trim() === lastSaved.current.trim()) return;
@@ -138,7 +151,7 @@ export function InPlaceEditField({ draftKey, text, caret = null, onSave, onDone,
       value={draft}
       maxLength={maxLength}
       onChange={(e) => setDraft(e.target.value)}
-      onBlur={finish}
+      onBlur={touchEdit ? undefined : finish}
       onClick={(e) => e.stopPropagation()}
       onDoubleClick={(e) => e.stopPropagation()}
       onContextMenu={(e) => e.stopPropagation()}
@@ -151,11 +164,14 @@ export function InPlaceEditField({ draftKey, text, caret = null, onSave, onDone,
         e.stopPropagation();
         // An IME confirms its candidate with Enter; that keystroke is the
         // composition ending, not the edit being finished.
+        if (touchEdit && e.key === 'Tab') finish();
         if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing && e.keyCode !== 229) {
           e.preventDefault();
+          if (touchEdit) finish();
           e.currentTarget.blur();
         } else if (e.key === 'Escape') {
           e.preventDefault();
+          if (touchEdit) finish();
           e.currentTarget.blur();
         }
       }}

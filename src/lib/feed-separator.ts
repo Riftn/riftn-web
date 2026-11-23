@@ -20,7 +20,9 @@ const STORAGE_KEY = 'dehub.feedSeparator';
 
 function read(): FeedSeparator {
   try {
-    return window.localStorage.getItem(STORAGE_KEY) === 'line' ? 'line' : 'bento';
+    const stored = window.localStorage.getItem(STORAGE_KEY);
+    if (isFeedSeparator(stored)) return stored;
+    return window.localStorage.getItem('riftn.chat.cards') === 'false' ? 'line' : 'bento';
   } catch {
     return 'bento';
   }
@@ -60,7 +62,7 @@ export function setFeedSeparator(value: FeedSeparator): void {
 function subscribe(listener: () => void) {
   listeners.add(listener);
   const onStorage = (e: StorageEvent) => {
-    if (e.key !== STORAGE_KEY) return;
+    if (e.key !== null && e.key !== STORAGE_KEY && e.key !== 'riftn.chat.cards') return;
     current = read();
     mirror(current);
     listener();

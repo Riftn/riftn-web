@@ -14,11 +14,11 @@ import { isFeedSeparator, setFeedSeparator, useFeedSeparator } from '@/lib/feed-
 export function FeedSeparatorSetting() {
   const { t } = useTranslation();
   const value = useFeedSeparator();
-  const title = t('settings.feedSeparator', 'Post separator');
+  const title = `${t('settings.feedSeparatorBento', 'Bento cards')} / ${t('settings.feedSeparatorLine', 'Thin line')}`;
 
   const options = [
-    { value: 'bento', label: t('settings.feedSeparatorBento', 'Bento cards'), description: t('settings.feedSeparatorBentoDesc', 'Each post sits in its own rounded card') },
-    { value: 'line', label: t('settings.feedSeparatorLine', 'Thin line'), description: t('settings.feedSeparatorLineDesc', 'No cards. A thin line between posts and a little more room for each post') },
+    { value: 'bento', label: t('settings.feedSeparatorBento', 'Bento cards') },
+    { value: 'line', label: t('settings.feedSeparatorLine', 'Thin line') },
   ];
 
   return (
@@ -26,7 +26,7 @@ export function FeedSeparatorSetting() {
       icon={<Minus />}
       anchor="feed-separator"
       title={title}
-      description={t('settings.feedSeparatorDesc', 'Cards around each post, or a thin line between them')}
+      description={`${t('nav.home', 'Home')} · ${t('settings.messages', 'Messages')}`}
       action={
         <SettingDrawerSelect
           value={value}

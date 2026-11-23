@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { ThreadedComments, type ThreadedCommentsProps } from '@/components/app/comments/ThreadedComments';
 import type { ThreadedComment } from '@/lib/comment-threads';
 
 vi.mock('react-router-dom', () => ({ useNavigate: () => vi.fn() }));
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ i18n: { language: 'es' }, t: (key: string) => key }) }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ isAuthenticated: true, walletAddress: '0xviewer', openLoginModal: vi.fn() }) }));
 vi.mock('@/hooks/use-draft-state', async () => {
   const { useState } = await import('react');
@@ -33,7 +33,10 @@ vi.mock('@/components/app/chat/EmojiGifPicker', () => ({ EmojiGifPicker: () => n
 vi.mock('@/components/app/audio/VoiceStripPlayer', () => ({ VoiceStripPlayer: () => null }));
 vi.mock('@/lib/comment-threads', () => ({ countThreadComments: (threads: any[] | undefined) => threads?.reduce((sum, thread) => sum + 1 + thread.replies.length, 0) ?? 0 }));
 
-afterEach(cleanup);
+const { invoke } = vi.hoisted(() => ({ invoke: vi.fn() }));
+vi.mock('@/integrations/supabase/client', () => ({ supabase: { functions: { invoke } } }));
+vi.mock('@/i18n', () => ({ SUPPORTED_LANGUAGES: [{ code: 'es', nativeName: 'Español' }, { code: 'fr', nativeName: 'Français' }] }));
+afterEach(() => { cleanup(); localStorage.removeItem('riftn.chat.translateTo'); invoke.mockReset(); });
 const base: ThreadedCommentsProps<ThreadedComment> = {
   draftScope: 'test', threads: undefined, isLoading: false, isError: true, isFetching: false,
   onRetry: vi.fn(), entityAuthorAddress: '0xauthor', busy: false, submitting: false,
@@ -69,5 +72,35 @@ describe('discussion read failures', () => {
     expect(screen.getByText('Previously loaded comment')).toBeVisible();
     expect(screen.getByRole('alert')).toHaveTextContent('comments.loadFailed');
     expect(screen.queryByText('No comments yet')).toBeNull();
+  });
+});
+
+describe('request comment translation', () => {
+  it('uses the chosen language and puts the result in the editable draft without sending', async () => {
+    invoke.mockResolvedValue({ data: { translatedText: 'Bonjour' } });
+    render(<ThreadedComments {...base} translateDraft />);
+    const field = screen.getByRole('textbox');
+    fireEvent.change(field, { target: { value: 'Hello' } });
+    const language = screen.getByRole('combobox');
+    expect(language).toHaveValue('es');
+    fireEvent.change(language, { target: { value: 'fr' } });
+    fireEvent.click(screen.getByRole('button', { name: 'comments.translate' }));
+    await waitFor(() => expect(field).toHaveValue('Bonjour'));
+    expect(invoke).toHaveBeenCalledWith('translate-text', { body: { text: 'Hello', targetLang: 'fr' } });
+    expect(localStorage.getItem('riftn.chat.translateTo')).toBe('fr');
+    expect(base.onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('retains newer typing when a translation returns late', async () => {
+    let finish!: (response: unknown) => void;
+    invoke.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+    render(<ThreadedComments {...base} translateDraft />);
+    const field = screen.getByRole('textbox');
+    fireEvent.change(field, { target: { value: 'Hello' } });
+    fireEvent.click(screen.getByRole('button', { name: 'comments.translate' }));
+    fireEvent.change(field, { target: { value: 'Hello again' } });
+    await act(async () => finish({ data: { translatedText: 'Hola' } }));
+    expect(field).toHaveValue('Hello again');
+    expect(base.onSubmit).not.toHaveBeenCalled();
   });
 });

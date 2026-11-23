@@ -28,7 +28,7 @@ import Mic from "@/components/ui/cut-icons/mic";
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { SEOHead } from '@/components/SEOHead';
-import dehubLogo from '@/assets/dehub-logo-white.png';
+import riftnWordmark from '@/assets/riftn-wordmark-flat-white.png';
 
 const pageDescription = () =>
   _translateCopy("copy.4883563fdbe1", { defaultValue: "Riftn prize draws hand out tokens, hardware and NFT prizes to the community. Entries are earned by taking part, and every winner is drawn on-chain." });
@@ -194,7 +194,7 @@ export default function RafflePage() {
             className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8"
           >
             <Link to="/" aria-label={_copy("copy.73d01ae84196", { defaultValue: "Riftn home" })} className="shrink-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70">
-              <img src={dehubLogo} alt="Riftn" className="h-7 w-auto" />
+              <img src={riftnWordmark} alt="Riftn" className="h-7 w-auto" />
             </Link>
 
             <div className="hidden items-center gap-7 text-sm font-medium text-zinc-400 md:flex">
@@ -408,7 +408,7 @@ export default function RafflePage() {
 
         <footer className="border-t border-white/10 bg-zinc-950">
           <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-8 text-sm text-zinc-500 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
-            <img src={dehubLogo} alt="Riftn" className="h-6 w-auto self-start opacity-80" loading="lazy" />
+            <img src={riftnWordmark} alt="Riftn" className="h-6 w-auto self-start opacity-80" loading="lazy" />
             <p className="max-w-2xl md:text-right">{_copy("copy.cbbe14a2e25e", { defaultValue: "Prize draws are promotional and open to Riftn account holders aged 18 or over, void where local law prohibits them. Riftn staff, contractors and their households are not eligible. Prizes are not exchangeable for cash unless stated, and each draw’s own announcement carries its full terms." })}</p>
           </div>
         </footer>

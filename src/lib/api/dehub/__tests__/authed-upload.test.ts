@@ -122,6 +122,21 @@ describe('authedUpload', () => {
     vi.restoreAllMocks();
   });
 
+  it('sends a full-size encrypted DM document and rejects an extra byte before opening XHR', async () => {
+    withValidSession();
+    const form = new FormData();
+    const file = new File([], 'file.bin', { type: 'application/octet-stream' });
+    const wireLimit = 200 * 1024 * 1024 + 20 + 3200 * 16;
+    Object.defineProperty(file, 'size', { value: wireLimit, configurable: true });
+    form.append('file', file);
+    form.append('encryptedKind', 'file');
+    MockXhr.queue.push({ status: 200, body: '{}' });
+    await authedUpload('/api/dm/upload', form);
+    Object.defineProperty(file, 'size', { value: wireLimit + 1 });
+    await expect(authedUpload('/api/dm/upload', form)).rejects.toMatchObject({ status: 413 });
+    expect(MockXhr.sent).toHaveLength(1);
+  });
+
   it('sends the bearer token and returns the parsed body', async () => {
     withValidSession();
     MockXhr.queue.push({ status: 200, body: JSON.stringify({ createdTokenId: 7 }) });

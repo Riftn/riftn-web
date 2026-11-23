@@ -161,6 +161,11 @@ export interface DmMessage {
   paymentTxHash: string | null;
   /** Sent "when they're next online". The sender's bubble shows an hourglass until it is read. */
   whenOnline?: boolean;
+  /**
+   * Sent with "Send in their language": `content` is the line in the
+   * recipient's language and this is what the sender typed.
+   */
+  original?: { content: string; lang: string } | null;
   tipAmount: number | null;
   tipSymbol: string | null;
   /** Only set when msgType === 'poll'; votes are read from the poll itself. */
@@ -1142,7 +1147,12 @@ export async function getFreeDmAccessList(): Promise<FreeAccessUser[]> {
   }
 }
 
-/** The recipient has watched a view-once attachment; the server removes it for both. */
-export async function markDmMessageViewed(messageId: string): Promise<void> {
-  await apiCall<unknown>(`/api/dm/message/${encodeURIComponent(messageId)}/viewed`, { method: 'POST', requiresAuth: true });
+/**
+ * The recipient has watched a view-once attachment (the server removes it for
+ * both), or opened an on-open one (its countdown starts; `expiresAt` says when
+ * it goes).
+ */
+export async function markDmMessageViewed(messageId: string): Promise<{ status?: string; expiresAt?: string }> {
+  const res = await apiCall<{ status?: string; expiresAt?: string }>(`/api/dm/message/${encodeURIComponent(messageId)}/viewed`, { method: 'POST', requiresAuth: true });
+  return (res && typeof res === 'object') ? res : {};
 }

@@ -1,6 +1,7 @@
 import { useTranslation as _useCopy } from 'react-i18next';
 import { ElectricLogo } from './ElectricLogo';
 import { FeedRefreshLogo } from './FeedRefreshLogo';
+import { useKeyboardSafeSheet } from '@/hooks/use-keyboard-open';
 import { useGlobalDropZone } from '@/hooks/use-global-drop-zone';
 import { openNotificationsDrawer, warmNotificationsDrawer } from '../NotificationsDrawer';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -75,6 +76,7 @@ interface MobileHeaderProps {
 }
 
 export function MobileHeader({ isOpen, onOpenChange, children }: MobileHeaderProps) {
+  const { style: keyboardStyle } = useKeyboardSafeSheet(isOpen);
   const { t: _copy } = _useCopy();
   const { t } = useTranslation();
   const { openPostModal } = useGlobalDropZone();
@@ -176,7 +178,7 @@ export function MobileHeader({ isOpen, onOpenChange, children }: MobileHeaderPro
           so we keep the normal menu/avatar here to preserve the "you never left the feed" feel. */}
       <div className="flex items-center">
         {isAuthenticated ? (
-          <Drawer open={isOpen} onOpenChange={onOpenChange}>
+          <Drawer open={isOpen} onOpenChange={onOpenChange} repositionInputs={false}>
 
             <DrawerTrigger asChild>
               {user ? (
@@ -212,7 +214,7 @@ export function MobileHeader({ isOpen, onOpenChange, children }: MobileHeaderPro
                 the bottom of what is actually on screen. On iOS Safari that
                 pushed the top of the menu — the search field — off the top of
                 the screen, with no way to scroll it back into view. */}
-            <DrawerContent glass className="max-h-[85dvh]" aria-describedby={undefined}>
+            <DrawerContent glass className="max-h-[85dvh]" style={keyboardStyle ?? undefined} aria-describedby={undefined}>
               <DrawerTitle className="sr-only">{t('sidebar.searchMenu')}</DrawerTitle>
               {/* Column, not a scroller: the menu pins its profile + search to
                   the top and its account actions to the bottom, and scrolls
@@ -223,7 +225,7 @@ export function MobileHeader({ isOpen, onOpenChange, children }: MobileHeaderPro
             </DrawerContent>
           </Drawer>
         ) : (
-          <MobileAccountButton action="signup" onClick={() => openLoginModal()} onPointerDown={warmSheetForLogin} />
+          <MobileAccountButton action="signup" onClick={() => openLoginModal({ intent: 'signup' })} onPointerDown={warmSheetForLogin} />
         )}
       </div>
 
@@ -277,7 +279,7 @@ export function MobileHeader({ isOpen, onOpenChange, children }: MobileHeaderPro
             </AvatarFallback>
           </Avatar>
         ) : null}
-        onAvatarClick={() => (isAuthenticated ? onOpenChange(true) : openLoginModal())}
+        onAvatarClick={() => (isAuthenticated ? onOpenChange(true) : openLoginModal({ intent: 'signup' }))}
         onCreatePost={() => (isAuthenticated ? openPostModal() : openLoginModal())}
         logoSrc={dehubMark}
         unread={isAuthenticated ? totalNotifUnread : 0}

@@ -14,7 +14,7 @@
  */
 export interface MidSessionUnlockInput {
   /** What the login sheet was opened for. */
-  intent: 'login' | 'add-profile';
+  intent: 'login' | 'signup' | 'add-profile';
   /** The address this browser is currently signed in as, if any. */
   sessionAddress: string | null;
   /** A Riftn session that is live right now — user, token, and not expired. */
@@ -34,7 +34,7 @@ export function isMidSessionUnlock({
 }: MidSessionUnlockInput): boolean {
   // Adding a profile starts from a live session on purpose, and the wallet
   // being unlocked is the NEW account's. It has to sign in.
-  if (intent === 'add-profile') return false;
+  if (intent !== 'login') return false;
   if (!hasLiveSession || !sessionAddress) return false;
 
   // A session signs as its Safe when Pimlico is up and as the owner EOA when

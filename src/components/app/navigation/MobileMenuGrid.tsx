@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { House } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { LucideIcon } from 'lucide-react';
@@ -14,9 +16,12 @@ import type { NavItem } from '@/types/app.types';
 import { NAV_LABEL_KEYS } from './SidebarNavItem';
 import { NAV_ITEMS } from '@/constants/app.constants';
 import { applyNavOrder } from '@/lib/nav-order';
-import { useNavOrderEditor } from '@/hooks/use-nav-order';
+import { useHomeShortcuts, useNavOrderEditor } from '@/hooks/use-nav-order';
 import { useDragReorder } from '@/hooks/use-drag-reorder';
 import { navItemId } from './nav-item-id';
+import { defaultMenuGroupOf } from './menu-groups';
+import { useUserPreferences } from '@/contexts/UserPreferencesContext';
+import { MENU_GROUP_MOVES_PREF_KEY, isMenuGroupId, readMenuGroupMoves, useMenuGroupMoves, writeMenuGroupMoves } from '@/lib/menu-group-moves';
 
 const DEFAULT_MENU_IDS = NAV_ITEMS.map(navItemId);
 
@@ -136,9 +141,11 @@ interface MobileMenuGridProps {
   columns?: 3 | 4;
   /** The "hold and drag" line under the grid; one per menu, not per group. */
   showHint?: boolean;
+  /** Part of a grouped menu: tiles can be dropped on another group. */
+  moveHint?: boolean;
 }
 
-export function MobileMenuGrid({ items, searching = false, currentPath, notificationCount, messageCount, onNavigate, columns = 4, showHint = true }: MobileMenuGridProps) {
+export function MobileMenuGrid({ items, searching = false, currentPath, notificationCount, messageCount, onNavigate, columns = 4, showHint = true, moveHint = false }: MobileMenuGridProps) {
   const big = columns === 3;
   const { t } = useTranslation();
   const onHome = isHomePath(currentPath);
@@ -153,7 +160,34 @@ export function MobileMenuGrid({ items, searching = false, currentPath, notifica
   const byId = useMemo(() => new Map(ordered.map((item) => [navItemId(item), item])), [ordered]);
   const ids = useMemo(() => ordered.map(navItemId), [ordered]);
   const onCommit = useCallback((next: string[]) => save(next), [save]);
-  const { order, draggingId, animateNextChange, itemProps } = useDragReorder({ ids, onCommit, disabled: searching });
+  const { pins, toggle } = useHomeShortcuts();
+  const prefs = useUserPreferences();
+  const homeTarget = useRef<HTMLDivElement>(null);
+  const onDropOutside = (id: string, x: number, y: number) => {
+    // Dropped on another group's tab, section header or folder: move it there.
+    const target = (typeof document.elementsFromPoint === 'function' ? document.elementsFromPoint(x, y) : [])
+      .map((el) => (el as HTMLElement).closest?.('[data-menu-drop-group]') as HTMLElement | null)
+      .find(Boolean);
+    const groupId = target?.dataset.menuDropGroup;
+    if (groupId && isMenuGroupId(groupId)) {
+      const item = byId.get(id);
+      if (!item || !items.some((i) => navItemId(i) === id)) return false;
+      const moves = { ...readMenuGroupMoves() };
+      const home = defaultMenuGroupOf(item);
+      const current = moves[id] ?? home;
+      if (current === groupId) return false;
+      if (home === groupId) delete moves[id];
+      else moves[id] = groupId;
+      writeMenuGroupMoves(moves);
+      prefs?.setPref(MENU_GROUP_MOVES_PREF_KEY, readMenuGroupMoves());
+      return true;
+    }
+    const rect = homeTarget.current?.getBoundingClientRect();
+    if (!rect || x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) return false;
+    toggle(id);
+    return true;
+  };
+  const { order, draggingId, animateNextChange, itemProps } = useDragReorder({ ids, onCommit, onDropOutside, disabled: searching });
   const onReset = useCallback(() => { animateNextChange(); reset(); }, [animateNextChange, reset]);
 
   const isActive = (item: NavItem) =>
@@ -226,6 +260,18 @@ export function MobileMenuGrid({ items, searching = false, currentPath, notifica
   // The person's own order (default: the rail's), one continuous grid.
   return (
     <>
+      {draggingId && createPortal(
+        <div ref={homeTarget} data-home-shortcut-drop role="status" className="pointer-events-none fixed inset-x-0 top-0 z-[10000] flex h-[14dvh] items-end justify-center pb-2">
+          <span className="flex items-center gap-2 rounded-full bg-background px-4 py-2 text-sm font-semibold text-foreground shadow-lg">
+            <House className="size-4" />{t(pins.includes(draggingId) ? 'communities.unpin' : 'communities.pin')} · {t('nav.home')}
+          </span>
+        </div>, document.body)}
+      {draggingId && moveHint && createPortal(
+        <div role="status" className="pointer-events-none fixed inset-x-0 bottom-0 z-[10000] flex justify-center pb-[calc(env(safe-area-inset-bottom)+16px)]">
+          <span className="rounded-full bg-background px-4 py-2 text-[13px] font-semibold text-foreground shadow-lg">
+            {t('nav.moveGroupHint', { defaultValue: 'Drop on another tab to move it there' })}
+          </span>
+        </div>, document.body)}
       <nav className={cn('grid gap-2', big ? 'grid-cols-3' : 'grid-cols-4')} data-menu-reorder={draggingId ? 'dragging' : 'idle'}>
         {order.map((id) => byId.get(id)).filter((item): item is NavItem => !!item).map(renderNavTile)}
       </nav>
@@ -251,10 +297,19 @@ const liftedClass = 'bg-white/[0.16] border-white/30 shadow-[0_12px_28px_rgba(0,
  */
 export function MenuReorderHint() {
   const { t } = useTranslation();
-  const { customised, reset } = useNavOrderEditor('menu', DEFAULT_MENU_IDS);
+  const { customised: reordered, reset: resetOrder } = useNavOrderEditor('menu', DEFAULT_MENU_IDS);
+  const moves = useMenuGroupMoves();
+  const prefs = useUserPreferences();
+  const moved = Object.keys(moves).length > 0;
+  const customised = reordered || moved;
+  // Reset puts every tile back in its own group and order.
+  const reset = () => {
+    resetOrder();
+    if (moved) { writeMenuGroupMoves({}); prefs?.setPref(MENU_GROUP_MOVES_PREF_KEY, {}); }
+  };
   return (
     <p data-menu-reorder-hint className="mt-3 flex items-center justify-center gap-1 px-2 text-center text-[13px] leading-[1.35] text-zinc-500">
-      <span>{t('nav.reorderHint', { defaultValue: 'Hold and drag any icon to rearrange' })}</span>
+      <span>{t('nav.reorderHintGroups', { defaultValue: 'Hold and drag any icon to rearrange, or onto another tab to move it' })}</span>
       {customised && (
         <button type="button" onClick={reset} className="-my-3 flex-none px-2 py-3 font-semibold text-zinc-300 underline-offset-2 hover:underline">
           {t('nav.reorderReset', { defaultValue: 'Reset' })}

@@ -4214,7 +4214,7 @@
       "pageViewsTerm": "Puslapių peržiūros",
       "pageViews": "— užklausos, kurias Cloudflare priskiria puslapių įkėlimams, o ne paveikslėliams, scenarijams ar API iškvietimams.",
       "botsTerm": "Botai įskaičiuoti",
-      "bots": "— tai neapdoroti skaičiavimai tinklo pakraštyje, tad į juos patenka ir naršyklės robotai, veikimo stebėtojai bei scenarijais valdomi klientai. Juos galite pamatyti patys naršyklių suvestinėje aukščiau, kur įrašai kaip „Curl“ ir „Nežinoma“ yra automatinis srautas, o ne žmonės. Botams atfiltruoti reikia mokamo Cloudflare plano, kurio neturime, o tyliai atimti spėjimą reikštų padaryti skaičius mažiau patikrinamus, o ne labiau.",
+      "bots": "— tai neapdoroti skaičiavimai tinklo pakraštyje, tad į juos patenka ir naršyklės robotai, veikimo stebėtojai bei scenarijais valdomi klientai. Juos galite pamatyti patys naršyklių suvestinėje aukščiau, kur įrašai kaip „Curl“ ir „Nežinoma“ yra automatinis srautas, o ne žmonės. Botus vis sunkiau atskirti nuo tikrų lankytojų ir netrukus šioje statistikoje jų atskirti nebebus įmanoma, todėl bandyti juos filtruoti nėra prasmės.",
       "totalTerm": "Intervalo sumos",
       "total": "— puslapių peržiūros ir užklausos sumuojamos per visą intervalą. Lankytojų skaičiai sąmoningai nesumuojami į „bendrą lankytojų skaičių“, nes tas, kuris čia buvo pirmadienį ir antradienį, būtų suskaičiuotas du kartus.",
       "peakTerm": "Judriausia valanda / diena",

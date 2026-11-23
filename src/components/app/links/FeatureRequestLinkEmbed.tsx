@@ -14,18 +14,11 @@ import FeatureRequests from '@/components/ui/cut-icons/feature-requests';
 import { useFeatureRequest, STATUS_LABELS, type FeatureStatus } from '@/hooks/use-feature-requests';
 import { featureAttachments } from '@/lib/feature-attachments';
 import { storageImage, buildAvatarUrl } from '@/lib/media-url';
-import { cn } from '@/lib/utils';
 
 import { formatCount } from '@/lib/format-count';
-// Same hues as the board's own status badge (FeaturesPage STATUS_BADGE_STYLES).
-const STATUS_STYLES: Partial<Record<FeatureStatus, string>> = {
-  under_review: 'bg-amber-400/15 text-amber-300/90 border-amber-300/25',
-  planned: 'bg-blue-400/15 text-blue-300/90 border-blue-300/25',
-  in_progress: 'bg-violet-400/15 text-violet-300/90 border-violet-300/25',
-  completed: 'bg-emerald-400/15 text-emerald-300/90 border-emerald-300/25',
-  shipped: 'bg-emerald-400/15 text-emerald-300/90 border-emerald-300/25',
-  declined: 'bg-red-400/15 text-red-300/90 border-red-300/25',
-};
+// Statuses worth naming on a link card; open adds nothing. Plain words, no
+// status hues (same as the board's Asked > In progress > Shipped track).
+const SHOWN_STATUSES: FeatureStatus[] = ['under_review', 'planned', 'in_progress', 'completed', 'shipped', 'declined'];
 
 interface FeatureRequestLinkEmbedProps {
   featureRequestId: string;
@@ -42,7 +35,7 @@ export function FeatureRequestLinkEmbed({ featureRequestId, path, fallback = nul
   if (!feature) return <>{fallback}</>;
 
   const image = featureAttachments(feature).find((url) => !/\.(mp4|webm|mov)(\?|$)/i.test(url)) ?? null;
-  const statusStyle = STATUS_STYLES[feature.status];
+  const showStatus = SHOWN_STATUSES.includes(feature.status);
   const author = feature.author_username ? `@${feature.author_username}` : null;
   const avatar = feature.author_avatar ? buildAvatarUrl(feature.author_wallet_address, feature.author_avatar) : null;
 
@@ -63,9 +56,10 @@ export function FeatureRequestLinkEmbed({ featureRequestId, path, fallback = nul
           <div className="mb-1.5 flex items-center gap-1.5 text-[11px] text-zinc-400">
             <FeatureRequests className="h-3.5 w-3.5 shrink-0" />
             <span className="font-medium">{t('nav.featureRequests', 'Requests')}</span>
-            {statusStyle && (
-              <span className={cn('ml-0.5 rounded-md border px-1.5 py-px text-[10px] font-medium', statusStyle)}>
-                {STATUS_LABELS[feature.status]}
+            {showStatus && (
+              <span className="flex items-center gap-1.5 font-medium text-zinc-300">
+                <span aria-hidden>·</span>
+                {feature.status === 'in_progress' ? t('features.track.inProgress', 'In progress') : STATUS_LABELS[feature.status]}
               </span>
             )}
           </div>

@@ -95,7 +95,7 @@ export function EmojiPanel({ onSelect, selected, className, autoFocus = true }: 
   const [query, setQuery] = useSurfaceDraft("components/app/emoji/EmojiPanel.tsx:query", '');
   const [tone, setTone] = useState<SkinTone>(() => readSkinTone());
   const [toneOpen, setToneOpen] = useState(false);
-  const [recents, setRecents] = useState<string[]>(() => readRecents());
+  const [recents] = useState<string[]>(() => readRecents());
   const [active, setActive] = useState<SectionKey>('dehub');
   const [hovered, setHovered] = useState<EmojiEntry | null>(null);
   const [animate, setAnimate] = useState(false);
@@ -194,7 +194,9 @@ export function EmojiPanel({ onSelect, selected, className, autoFocus = true }: 
 
   const choose = useCallback(
     (e: EmojiEntry, keepOpen: boolean) => {
-      setRecents(pushRecent(e.char));
+      // Saved now, shown from the next open: the Recent row keeps its order
+      // while the panel is open, so repeat taps land on the same emoji.
+      pushRecent(e.char);
       onSelect(withTone(e, tone, maxV), { keepOpen });
     },
     [onSelect, tone, maxV],

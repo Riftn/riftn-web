@@ -94,6 +94,10 @@ export interface PostFormState {
   tokenAmount: string;
   liveMode: LiveMode;
   poll: PollData | null;
+  /** Create Post > Quiz (riftn-backend src/quiz). */
+  quiz: import('@/lib/api/dehub').QuizDraft | null;
+  /** People tagged on the photos. */
+  photoTags: import('@/lib/api/dehub').PhotoTag[];
   /** The content warning being written; null when the post has none. */
   contentWarning: string | null;
   /** The poster closed the market card, so the post carries none. */
@@ -120,7 +124,7 @@ export interface PostFormState {
 }
 
 export interface PostFormActions {
-  setText: (text: string) => void;
+  setText: React.Dispatch<React.SetStateAction<string>>;
   setMedia: React.Dispatch<React.SetStateAction<MediaFile[]>>;
   setIsSubscribersOnly: (value: boolean) => void;
   setIsPPV: (value: boolean) => void;
@@ -137,6 +141,8 @@ export interface PostFormActions {
   setTokenAmount: (value: string) => void;
   setLiveMode: (value: LiveMode) => void;
   setPoll: import('@/hooks/use-draft-state').DraftSetter<PollData | null>;
+  setQuiz: (quiz: import('@/lib/api/dehub').QuizDraft | null) => void;
+  setPhotoTags: (tags: import('@/lib/api/dehub').PhotoTag[]) => void;
   setContentWarning: (value: string | null) => void;
   setComicBorder: (border: ComicBorder | null) => void;
   setHideAssetCards: (value: boolean) => void;

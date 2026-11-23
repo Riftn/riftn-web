@@ -4146,6 +4146,7 @@ export type Database = {
           image_urls: string[] | null
           like_count: number
           shipped_url: string | null
+          early_access_until: string | null
           status_note: string | null
           status: string
           title: string
@@ -4167,6 +4168,7 @@ export type Database = {
           image_urls?: string[] | null
           like_count?: number
           shipped_url?: string | null
+          early_access_until?: string | null
           status_note?: string | null
           status?: string
           title: string
@@ -4188,6 +4190,7 @@ export type Database = {
           image_urls?: string[] | null
           like_count?: number
           shipped_url?: string | null
+          early_access_until?: string | null
           status_note?: string | null
           status?: string
           title?: string
@@ -7469,6 +7472,7 @@ export type Database = {
           preferences: Json
           reaction_tip_seen: boolean
           shorts_enabled: boolean
+          stories_enabled: boolean
           updated_at: string
           video_dub_tip_seen: boolean
           wallet_address: string
@@ -7478,6 +7482,7 @@ export type Database = {
           preferences?: Json
           reaction_tip_seen?: boolean
           shorts_enabled?: boolean
+          stories_enabled?: boolean
           updated_at?: string
           video_dub_tip_seen?: boolean
           wallet_address: string
@@ -7487,6 +7492,7 @@ export type Database = {
           preferences?: Json
           reaction_tip_seen?: boolean
           shorts_enabled?: boolean
+          stories_enabled?: boolean
           updated_at?: string
           video_dub_tip_seen?: boolean
           wallet_address?: string

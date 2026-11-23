@@ -9,6 +9,7 @@ import { usePostSound, type AttachedSound } from './hooks/usePostSound';
 import { buildSoundtrackTag } from '@/lib/soundtrack';
 import type { PollData, LiveStreamHandoff } from './types';
 import { PostContentArea } from './components/PostContentArea';
+import { PostDictationButton } from './components/PostDictationButton';
 import { PostAccessToggles } from './components/PostAccessToggles';
 import { PostActionBar } from './components/PostActionBar';
 import { ArticleComposer } from './components/ArticleComposer';
@@ -28,6 +29,7 @@ import { useBannedAccount } from '@/hooks/use-banned-account';
 import { QuotedPostEmbed } from '@/components/app/cards/QuotedPostEmbed';
 import type { DeHubNFT } from '@/lib/api/dehub/types';
 import { toast } from 'sonner';
+import { PhotoTagger } from '@/components/app/photo-tags/PhotoTagger';
 
 const PostPreviewSheet = lazy(() => import('./components/PostPreviewSheet').then((m) => ({ default: m.PostPreviewSheet })));
 
@@ -80,6 +82,7 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
   const { state, actions, computed, refs } = usePostForm(finishPost, setLiveStream, draftScope, quotedPost, onPosted, isOpen);
   const { attachedSound, selectSound, clearSound } = usePostSound();
   const [categoryDrawerOpen, setCategoryDrawerOpen] = useState(false);
+  const [taggerOpen, setTaggerOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [soundPickerOpen, setSoundPickerOpen] = useState(false);
   const [planDrawerOpen, setPlanDrawerOpen] = useState(false);
@@ -311,6 +314,14 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
       <PostContentArea
         text={state.text}
         maxChars={postTextLimit(computed.postQuota)}
+        dictation={isOpen && authUser && !state.isPosting && !state.isRecording && !state.isCameraModalOpen && !state.liveMode && (
+          <PostDictationButton
+            key={JSON.stringify([draftScope, openedDraftRef.current?.id])}
+            setText={actions.setText}
+            maxChars={postTextLimit(computed.postQuota)}
+            atLimit={state.text.length >= postTextLimit(computed.postQuota)}
+          />
+        )}
         setText={actions.setText}
         editorRef={refs.editorRef}
         media={state.media}
@@ -384,6 +395,8 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
         onOpenCategories={() => setCategoryDrawerOpen(true)}
         poll={state.poll}
         onPollChange={actions.setPoll}
+        quiz={state.quiz}
+        onQuizChange={actions.setQuiz}
         onMediaFullscreenChange={setMediaFullscreenOpen}
         draftVideo={state.draftVideo}
         hideScheduleAndDrafts={isQuoting}
@@ -522,11 +535,24 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
         onCloseModal={closeKeepingDraft}
         onTogglePoll={handleTogglePoll}
         hasPoll={!!state.poll}
+        onToggleQuiz={isQuoting ? undefined : () => actions.setQuiz(state.quiz ? null : { topic: '', questions: [], pointsPerQuestion: 10 })}
+        hasQuiz={!!state.quiz}
+        onTagPeople={computed.hasImage && !comicMode ? () => setTaggerOpen(true) : undefined}
+        tagCount={state.photoTags.length}
         onToggleComic={isQuoting ? undefined : () => (comicMode ? exitComicMode() : selectComicMode())}
         isComic={comicMode}
         onToggleContentWarning={() => actions.setContentWarning(state.contentWarning === null ? '' : null)}
         hasContentWarning={state.contentWarning !== null}
       />
+      {taggerOpen && (
+        <PhotoTagger
+          open={taggerOpen}
+          onOpenChange={setTaggerOpen}
+          images={state.media.filter((m) => m.type === 'image').map((m) => m.preview)}
+          value={state.photoTags}
+          onDone={(tags) => actions.setPhotoTags(tags)}
+        />
+      )}
       {previewOpen && (
       <Suspense fallback={null}>
       <PostPreviewSheet

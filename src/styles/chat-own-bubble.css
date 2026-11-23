@@ -1,0 +1,27 @@
+/* Settings → Appearance → "Bubbles for my messages in Public Chat"
+   (lib/chat-own-bubble). Off by default: only with <html data-chat-own-bubble>
+   do your own lines in the public chats (live chat page, side chat) sit on a
+   filled bubble, the way private chats show them. */
+html[data-chat-own-bubble] [data-chat-own] {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+html[data-chat-own-bubble] [data-chat-own]:hover {
+  background: rgba(255, 255, 255, 0.11);
+}
+html[data-chat-own-bubble] [data-message-id][data-chat-own] {
+  border-radius: 14px;
+}
+/* Back-to-back lines of yours in the side chat: two bubbles, not one overlap. */
+html[data-chat-own-bubble] [data-message-id][data-chat-own][data-chat-continued] {
+  margin-top: 2px;
+}
+html[data-chat-own-bubble][data-theme="light"] [data-chat-own],
+html[data-chat-own-bubble][data-system-tone="light"] [data-chat-own] {
+  background: rgba(9, 9, 11, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(9, 9, 11, 0.06);
+}
+html[data-chat-own-bubble][data-theme="light"] [data-chat-own]:hover,
+html[data-chat-own-bubble][data-system-tone="light"] [data-chat-own]:hover {
+  background: rgba(9, 9, 11, 0.07);
+}
