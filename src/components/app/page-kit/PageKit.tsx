@@ -507,6 +507,14 @@ export function PageTabs<T extends string>({
 }
 
 /**
+ * Where page content is cut as it scrolls up: the island on desktop, or the
+ * pill that PageIsland draws instead below 1024px. Matching only the island
+ * left every page uncut on phones and tablets, so cards and avatars slid up
+ * past the pill into the top of the screen.
+ */
+const KIT_TOP_CUT = '[data-kit-island-outer] > [data-page-bento], [data-kit-pill-outer] > [data-kit-pill]';
+
+/**
  * The content column under the island. Swallows scrolled content at the
  * island's top edge on the glass themes, like the home feed under its pill.
  */
@@ -526,7 +534,7 @@ export function PageBody({
   frameClip?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  useFeedSwallowClip(ref, '[data-kit-island-outer] > [data-page-bento]', [], { allThemes: true, frameOnly: frameClip });
+  useFeedSwallowClip(ref, KIT_TOP_CUT, [], { allThemes: true, frameOnly: frameClip });
   return (
     <div data-feed-swallow-bounds className="w-full">
     <div ref={ref} data-kit-body className={cn('w-full pb-28 pt-3', measure && 'max-w-2xl', className)}>
