@@ -8,14 +8,42 @@ HTTPS callbacks and the MCP resource bound to `https://riftn.com/mcp`.
 
 | Scope | Account controls |
 | --- | --- |
-| `dehub:read` | Connected identity, MCP drafts, own posts, scheduled posts, post analytics, audience activity, polls, followers/following, notifications, bookmarks, generation status, private Creator library and your agents' new member welcomes |
-| `dehub:profile` | Username, display name, bio, avatar, banner and profile privacy |
-| `dehub:social` | Save or delete MCP drafts, publish and schedule posts, publish ordinary quotes, edit or delete owned posts, manage their visibility, media, polls and covers, comment/reply, react, follow/unfollow, bookmark, mark notifications read and switch your agents to welcome new members |
+| `dehub:read` | Connected identity, signed-in feed and post access, MCP drafts, own posts, scheduled posts, analytics, polls, followers and incoming requests, notifications, bookmarks, co-authors, generation status, private Creator library and agent welcome history |
+| `dehub:profile` | Username, display name, bio, avatar, banner, custom profile fields and profile privacy |
+| `dehub:social` | Draft and publish posts, quotes, comments and replies, edit or delete owned content, manage scheduling, post media, polls and co-authors, react and repost, decide follow requests, manage bookmark folders, mark notifications read and configure agent welcomes |
 | `dehub:generate` | Images, video, audio and 3D through the existing Creator endpoints |
+| `dehub:agents` | List owned agents and act as one on tools with `as_agent` |
+| `dehub:moderation` | Read and manage the connected account's blocks and mutes. The account must approve this permission on its connection. |
 
-`dehub_features` describes supported chat controls and links to app surfaces for
-encrypted messages, timeline editing, live capture, wallet signatures and agent
-tasks. These features retain their existing app authentication and signing flow.
+`dehub_features` lists the registered chat tools and links to the corresponding
+Riftn pages for workflows completed in the app.
+
+## Web-to-ChatGPT coverage audit
+
+The live `riftn.com/mcp` discovery call advertised 51 tools on 22 November 2026.
+The DeHub Account integration available in the audit chat exposed 25. The
+connector code in this change registers 77. These counts describe three
+different catalogues. A successful server discovery call cannot verify what a
+published ChatGPT listing exposes to a fresh account.
+
+| Riftn workflow | Directly available from the connector | Incomplete or completed on Riftn |
+| --- | --- | --- |
+| Feed and discovery | Public posts and profiles, signed-in feeds, following feed, post details with viewer access, public playlists, watch history | Web search filters, stories, video and music playback, clearing watch history |
+| Publishing and conversations | Posts, quotes, schedules, connector drafts, visibility, polls, text comments and replies, comment edits and deletion, reactions, reposting, co-author invitations, analytics | Web and mobile draft sync, article editing, comment media and thread management, imports, minting |
+| Social, notifications and safety | Follow and unfollow people and hashtags, individual and bulk decisions on follow requests, follower lists, notification filtering, unread counts and mark-as-read, blocks and mutes | Notification preferences, reports and other safety filters |
+| Bookmarks and playlists | Saved posts, folder management, single or bulk saving to a folder, removing from a folder, public playlist browsing | Default bookmark toggle and bulk moves or removals |
+| Profile and account | Profile identity, core fields and custom fields, avatar and banner, selected privacy controls | Profile ordering, sessions, 2FA, data export and account deletion |
+| Creator Studio | Model discovery, quotes, generation, job status and library reads including favorites and hidden assets | Browser editing and capture, asset management, other Creator tools and workflows |
+| Agents | Owned agent listing, supported actions as an owned agent and welcome controls | Agent creation, task management and other automation settings |
+| Communities, events and governance | App links | Membership, group and channel management, RSVPs, proposals and votes |
+| Live, TV, calls, messaging and arcade | App links | Live participation and broadcasting, encrypted messaging, media playback and gameplay |
+| Wallet, marketplace and work | App links | Transfers, signatures, swaps, bridges, staking, minting, purchases, bounty escrow and disputes |
+| Builder, ads and affiliate | App links | Building and publishing mini-apps, campaigns and referrals |
+
+The browser or wallet still owns device permissions, encrypted message keys and
+blockchain signing. App links carry no connector credentials. The read and write
+tools use Riftn's existing account checks, so a connected user receives only the
+access their Riftn account has.
 
 ## Connection lifecycle
 
@@ -84,10 +112,27 @@ are versioned in `wrangler.jsonc`; no Supabase schema migration or paid deployme
 chat is needed. The previous public `/functions/v1/mcp` connector and key-based
 `dehub-mcp/k/...` agent connectors remain compatible with existing clients.
 
-An existing published ChatGPT app must be updated in its developer configuration
-to use `https://riftn.com/mcp`, OAuth discovery and a fresh tool scan. Shipping the
-server alone does not change the tool catalogue already registered with ChatGPT.
-Custom OAuth connectors can use the new endpoint immediately after deployment.
+The Connect to ChatGPT button on `/connect` and `/connect/chatgpt` opens the listing
+configured in `src/components/ConnectChatGPTLink.tsx`. Before launching account
+linking, verify that this listing uses `https://riftn.com/mcp` with OAuth discovery
+and a fresh tool scan. If the listing needs to be replaced, update the button
+with the new listing link after publication.
+
+After deploying the Worker, rescan the endpoint in the ChatGPT developer
+configuration and verify the expected public and OAuth tools appear in the
+published catalogue. The discovery count above applies to the full Worker,
+including tools that may be held for listing review.
+
+Smoke-test the published listing from a ChatGPT account with no existing Riftn
+connection. Choose Connect, sign in to Riftn, review the requested permissions
+and choose Allow connection. Verify the linked identity, open the following
+feed, read unread notification totals, and create and remove a test bookmark
+folder. Verify that a connection without `dehub:moderation` is asked to approve
+that scope before viewing blocked or muted accounts. Revoke the connection from
+`/connect/chatgpt` and confirm an account read requires a new connection.
+A catalogue scan and a public tool call only verify public access.
+
+Custom OAuth connectors can use the endpoint after deployment.
 
 CI runs the authentication, authorization, ownership and retry tests in
 `server/account-mcp.test.mjs`, the Worker bundle validation and the app typechecks.
