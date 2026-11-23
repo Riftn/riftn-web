@@ -80,8 +80,7 @@ import dehubLogo from '@/assets/dehub-logo.png';
 import { SEOHead } from '@/components/SEOHead';
 import { blockUser } from '@/lib/api/dehub/blocks';
 import { toast } from 'sonner';
-import { GroupChatNotesRow, NoteFaceRing, NoteTag, NotesSheetHost, openNotesSheet, useGroupNotes, useNotesByAuthor } from '@/components/app/chat/NotesRow';
-import type { NoteEntry } from '@/lib/api/dehub/notes';
+import { NotesSheetHost, openNotesSheet } from '@/components/app/chat/NotesRow';
 import { LiveRipple } from '@/components/app/LiveRipple';
 import { NewGroupChannelSheet, type NewChatKind } from '@/components/app/chat/NewGroupChannelSheet';
 import { GroupChatRow } from '@/components/app/chat/GroupChatRow';
@@ -141,7 +140,6 @@ export function ConversationItem({
   onLongPress,
   compactTime = false,
   reactions,
-  note,
 }: {
   conversation: DeHubConversation;
   onClick: (e: React.MouseEvent) => void;
@@ -159,8 +157,6 @@ export function ConversationItem({
   compactTime?: boolean;
   /** Reactions to your messages here that you haven't seen yet. */
   reactions?: ChatReactionSummary | null;
-  /** Their note (last 24 hours): a tag on the preview line and a ring on the face. */
-  note?: NoteEntry | null;
 }) {
   const { t: _copy } = _useCopy();
   const hold = useRowLongPress(onLongPress);
@@ -244,7 +240,6 @@ export function ConversationItem({
           </AvatarFallback>
         </Avatar>
       </LiveRipple>
-      {note && <NoteFaceRing note={note.note} />}
       </span>
 
       <div className="flex-1 min-w-0">
@@ -287,7 +282,7 @@ export function ConversationItem({
           <p data-reaction-alert-line className="text-sm truncate text-white font-bold">{reactionLine}</p>
         ) : (
           <p className={`text-sm truncate text-white ${conversation.unreadCount > 0 ? 'font-bold' : 'font-normal'}`}>
-            {note && <NoteTag entry={note} />}
+            
             {conversation.lastMessage?.encMedia
               ? encryptedMediaLabel(conversation.lastMessage.encMedia, _copy) :
              conversation.lastMessage?.type === 'image' ? _copy("copy.1b13ff986443", { defaultValue: "📷 Photo" }) :
@@ -632,8 +627,6 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // Newest line + unread number for each group row, and General Chat's newest line.
   const roomSummaries = useRoomChatSummaries(groupChats.map(c => c.id), isAuthenticated ? walletAddress : null);
   // Notes ride in the chat cards: a person's in their chat, members' in a group's.
-  const notesByAuthor = useNotesByAuthor();
-  const groupNotes = useGroupNotes(isAuthenticated ? groupChats.map(c => c.id) : [], isAuthenticated ? walletAddress : null);
   const publicLastLine = usePublicChatLastLine(isAuthenticated);
   const publicPreview = publicLastLine ? roomPreviewLine(publicLastLine, walletAddress || '', (key, options) => _copy(key, options)) : '';
   // Computer tabs: Unread keeps chats with something new (or marked unread),
@@ -1704,7 +1697,6 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                   summary={roomSummaries[chat.id]}
                   me={walletAddress || ''}
                   reactions={selectedRoom?.id === chat.id ? null : roomPref(chat)?.reactions}
-                  notes={groupNotes[chat.id]}
                   selected={fullscreen && selectedRoom?.id === chat.id}
                   onClick={() => {
                     if (picking) { toggleBulk(roomChatId(chat.id)); return; }
@@ -1792,7 +1784,6 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                   onLongPress={richList ? undefined : () => holdToPick(conv.id)}
                   compactTime={cards}
                   reactions={selectedConversation?.id === conv.id ? null : chatPrefs.get(conv.id)?.reactions}
-                  note={notesByAuthor.get((conv.otherUser || conv.participants?.[0])?.address?.toLowerCase() || '')}
                 />
               );
               return richList ? (
