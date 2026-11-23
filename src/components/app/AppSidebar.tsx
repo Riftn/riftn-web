@@ -16,6 +16,7 @@ import { useKidsModeLock } from '@/hooks/use-kids-mode';
 import { MobileHeader } from './navigation/MobileHeader';
 import { DesktopSidebar } from './navigation/DesktopSidebar';
 import { groupMenuItems } from './navigation/menu-groups';
+import { useMenuGroupMoves } from '@/lib/menu-group-moves';
 import { useMenuLayout } from '@/lib/menu-layout';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { buildAvatarUrl } from '@/lib/media-url';
@@ -36,8 +37,17 @@ import { useSearchHistory } from '@/hooks/use-search-history';
 // Lazy for the same reason: @/lib/profiles reaches the wallet vault, and a
 // static import from this eager component would put the wallet stack in the
 // entry bundle.
-const SidebarProfileSwitcher = React.lazy(() =>
-  import('./navigation/SidebarProfileSwitcher').then(m => ({ default: m.SidebarProfileSwitcher }))
+const compactFormat = new Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 });
+function compactCount(n: number): string {
+  return compactFormat.format(n);
+}
+
+const loadAccountSwitcher = () => import('./navigation/MenuAccountSwitcher');
+const MenuAccountSwitcher = React.lazy(() =>
+  loadAccountSwitcher().then(m => ({ default: m.MenuAccountSwitcher }))
+);
+const FollowersListDrawer = React.lazy(() =>
+  import('./profile/FollowersListDrawer').then((m) => ({ default: m.FollowersListDrawer })),
 );
 const PostModal = React.lazy(() =>
   import('@/features/post/PostModal').then(m => ({ default: m.PostModal }))
@@ -90,7 +100,8 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
     () => filterNavItems(NAV_ITEMS, '', t, canManageAgents(walletAddress)),
     [t, isKidsMode, walletAddress],
   );
-  const menuGroups = useMemo(() => groupMenuItems(allNavItems), [allNavItems]);
+  const menuGroupMoves = useMenuGroupMoves();
+  const menuGroups = useMemo(() => groupMenuItems(allNavItems, menuGroupMoves), [allNavItems, menuGroupMoves]);
   const menuLayout = useMenuLayout();
   const [menuTab, setMenuTab] = useState(0);
   // Tabs layout: search is a button on the tab row until tapped, then that
@@ -106,7 +117,7 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
   // Fetch the menu's tiles once the page is idle, so the first open is instant.
   useEffect(() => {
     const idle = (window as any).requestIdleCallback as ((cb: () => void) => number) | undefined;
-    const id = idle ? idle(() => { void loadMenuLayout(); }) : window.setTimeout(() => { void loadMenuLayout(); }, 2000);
+    const id = idle ? idle(() => { void loadMenuLayout(); void loadAccountSwitcher(); }) : window.setTimeout(() => { void loadMenuLayout(); void loadAccountSwitcher(); }, 2000);
     return () => {
       const cancel = (window as any).cancelIdleCallback as ((id: number) => void) | undefined;
       if (idle && cancel) cancel(id); else window.clearTimeout(id);
@@ -147,6 +158,24 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
     if (isPostModalOpen) setPostModalMounted(true);
   }, [isPostModalOpen]);
 
+  // Follower and following numbers under your name in the phone menu, like
+  // the app's menu header. Falls back to the @handle when the counts are not
+  // on the signed-in user yet.
+  const countOf = (n: unknown, alt: unknown): number | null =>
+    typeof n === 'number' ? n : Array.isArray(n) ? n.length : typeof alt === 'number' ? alt : null;
+  const menuFollowers = user ? countOf(user.followers, user.follower_count) : null;
+  const menuFollowing = user ? countOf(user.followings, user.following_count) : null;
+  // Tapping a count closes the menu and opens that list, as on the profile.
+  const [followList, setFollowList] = useState<'followers' | 'following' | null>(null);
+  const [followListMounted, setFollowListMounted] = useState(false);
+  const openFollowList = (type: 'followers' | 'following') => {
+    closeMenu();
+    setFollowListMounted(true);
+    setFollowList(type);
+  };
+  const lastFollowListType = useRef<'followers' | 'following'>('followers');
+  if (followList) lastFollowListType.current = followList;
+
   const mobileNavContent = (
     <>
       {/* Pinned top: identity + menu search */}
@@ -180,19 +209,38 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
                 {user.displayName || user.username}
               </BadgedName>
             </p>
-            {user.username && <p className="truncate text-[13px] text-zinc-400">@{user.username}</p>}
+            {menuFollowers != null || menuFollowing != null ? (
+              <p data-testid="menu-follow-counts" className="flex min-w-0 flex-wrap items-center gap-x-3 text-[13px] font-semibold text-zinc-400 tabular-nums">
+                <button type="button" data-testid="menu-followers" onClick={() => openFollowList('followers')} className="flex min-w-0 items-center gap-1 py-1 -my-1 text-left">
+                  <span className="flex-shrink-0 font-bold text-zinc-200">{compactCount(menuFollowers ?? 0)}</span>
+                  <span className="min-w-0 truncate">{t('profile.followers')}</span>
+                </button>
+                {/* No dot between: on a narrow phone Following drops to its own
+                    line instead of running under the balance chip. */}
+                <button type="button" data-testid="menu-following" onClick={() => openFollowList('following')} className="flex min-w-0 items-center gap-1 py-1 -my-1 text-left">
+                  <span className="flex-shrink-0 font-bold text-zinc-200">{compactCount(menuFollowing ?? 0)}</span>
+                  <span className="min-w-0 truncate">{t('profile.following')}</span>
+                </button>
+              </p>
+            ) : user.username && <p className="truncate text-[13px] text-zinc-400">@{user.username}</p>}
           </div>
           {Math.floor(dhbBalance) > 0 && (
             <button
               type="button"
               onClick={() => { closeMenu(); navigate('/app/wallet'); }}
-              aria-label={t('nav.wallet')}
+              aria-label={`${t('nav.wallet')} ${Math.floor(dhbBalance).toLocaleString()}`}
               data-menu-chip className="flex h-9 flex-shrink-0 items-center gap-1.5 rounded-xl border border-white/15 bg-white/[0.06] px-3 text-[13px] font-semibold text-white tabular-nums"
             >
               <DhbCoin className="h-4 w-4 align-middle" />
-              {Math.floor(dhbBalance).toLocaleString()}
+              {/* Compact from 10k up, so the chip never pushes into the
+                  Followers / Following line beside it (Requests eaf824e2). */}
+              {Math.floor(dhbBalance) >= 10_000 ? compactCount(Math.floor(dhbBalance)) : Math.floor(dhbBalance).toLocaleString()}
             </button>
           )}
+          {/* Every other account saved on this device, one tap away. */}
+          <Suspense fallback={null}>
+            <MenuAccountSwitcher onNavigate={closeMenu} />
+          </Suspense>
         </div>
       )}
 
@@ -232,7 +280,7 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
           aria-label={t('sidebar.searchMenu')}
           data-menu-search
           data-search-surface
-          className="w-full h-[42px] pl-10 pr-9 rounded-xl bg-white/5 border border-white/10 text-[15px] text-white placeholder:text-zinc-500 outline-none focus:border-white/30 transition-colors"
+          className="w-full h-[42px] pl-10 pr-9 rounded-xl bg-white/5 border border-white/10 text-[16px] text-white placeholder:text-zinc-500 outline-none focus:border-white/30 transition-colors"
         />
         {(menuQuery || (tabsHeader && searchOpen)) && (
           <button
@@ -293,12 +341,6 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
       {/* Pinned bottom: account actions - only shown when authenticated */}
       {isAuthenticated && (
         <div data-vaul-no-drag data-menu-footer className="shrink-0 -mx-4 space-y-1 border-t border-white/10 px-4 pt-2">
-          {/* Every other account saved on this device, one tap away. Settings
-              → Profile used to be the only surface for this, which made
-              multi-account invisible unless you already knew it existed. */}
-          <Suspense fallback={null}>
-            <SidebarProfileSwitcher onNavigate={closeMenu} />
-          </Suspense>
           <div className="-mx-1.5 flex items-center justify-between">
             {/* forgetProfile: logging out revokes this session's tokens
                 server-side, so its stored snapshot is dead the moment this
@@ -343,6 +385,17 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
           mounts it at that moment, exactly where the CSS would have revealed
           it. Same gate the right rail uses. */}
       {isDesktop && <DesktopSidebar onPostClick={openPostModal} />}
+
+      {followListMounted && (user?.address || walletAddress) && (
+        <Suspense fallback={null}>
+          <FollowersListDrawer
+            open={followList != null}
+            onOpenChange={(open) => { if (!open) setFollowList(null); }}
+            profileAddress={user?.address || walletAddress || ''}
+            listType={lastFollowListType.current}
+          />
+        </Suspense>
+      )}
 
       {/* Post Modal */}
       {postModalMounted && (

@@ -23,6 +23,7 @@ import { useTokenPrices } from '@/hooks/use-token-prices';
 import { cn } from '@/lib/utils';
 import dehubCoin from '@/assets/dehub-coin.png';
 
+import { formatCount } from '@/lib/format-count';
 // Takes the translator rather than calling the hook: this is a plain helper,
 // not a component.
 function relativeTime(iso: string, t: TFunction): string {
@@ -71,10 +72,14 @@ function TradeRow({ trade, onOpen }: { trade: FractionTrade; onOpen: () => void 
           </p>
         </div>
         <div className="text-right shrink-0">
-          <p className="text-white font-semibold text-sm flex items-center gap-1 justify-end">
-            <img src={dehubCoin} alt={tokenLabel()} className="w-3.5 h-3.5" />
-            {total.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-          </p>
+          {total > 0 ? (
+            <p className="text-white font-semibold text-sm flex items-center gap-1 justify-end">
+              <img src={dehubCoin} alt={tokenLabel()} className="w-3.5 h-3.5" />
+              {total.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+            </p>
+          ) : (
+            <p className="text-white font-semibold text-sm">{t('fractions.freeBadge')}</p>
+          )}
           <p className={cn('text-[10px]', status.className)}>{t(status.key)}</p>
         </div>
       </div>
@@ -96,7 +101,10 @@ export function ActivityTab() {
     const settled = trades.filter(trade => trade.status === 'settled');
     if (!settled.length) return null;
     const volume = settled.reduce((sum, trade) => sum + trade.quantity * trade.price_per_fraction, 0);
-    const fractions = settled.reduce((sum, trade) => sum + trade.quantity, 0);
+    // Free giveaways are trades too, but they are not a price anyone paid.
+    const fractions = settled
+      .filter(trade => trade.price_per_fraction > 0)
+      .reduce((sum, trade) => sum + trade.quantity, 0);
     return {
       count: settled.length,
       volume,
@@ -110,7 +118,7 @@ export function ActivityTab() {
         <div className="grid grid-cols-3 gap-2">
           <div className="rounded-xl border border-white/10 bg-white/5 p-3">
             <p className="text-[10px] text-white/40 uppercase tracking-wide">{t('fractions.trades')}</p>
-            <p className="text-white font-semibold">{summary.count}</p>
+            <p className="text-white font-semibold">{formatCount(summary.count)}</p>
           </div>
           <div className="rounded-xl border border-white/10 bg-white/5 p-3">
             <p className="text-[10px] text-white/40 uppercase tracking-wide">{t('fractions.volume')}</p>

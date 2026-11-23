@@ -36,13 +36,14 @@ import Languages from "@/components/ui/cut-icons/language";
 import X from "@/components/ui/cut-icons/close";
 import Download from "@/components/ui/cut-icons/download";
 import { toast } from 'sonner';
-import { downloadMedia, messageImageDownloadName } from '@/lib/download-media';
+import { downloadMedia, imageDownloadName, messageImageDownloadName } from '@/lib/download-media';
 import ChevronRight from "@/components/ui/cut-icons/next";
 
 import useEmblaCarousel from 'embla-carousel-react';
 import { ImageTranslationSheet } from './ImageTranslationSheet';
 import { ActionBar } from './ActionBar';
 import { PostUtilityButtons } from './PostUtilityButtons';
+import { FullscreenPostDetails, type FullscreenPostAuthor } from './FullscreenPostDetails';
 import { useImageTranslation } from '@/hooks/use-image-translation';
 import { cdnImageSource } from '@/lib/media-url';
 import { HandoffImage } from './HandoffImage';
@@ -90,8 +91,10 @@ export interface FullscreenImageViewerProps {
   /** Engagement data + handlers; when set with `postId`, renders the bottom action bar. */
   actions?: FullscreenViewerActions;
   soundtrackControl?: ReactNode;
-  /** Show a Download button for the image on screen (chat attachments). */
+  /** Show a Download button for the image on screen. */
   downloadable?: boolean;
+  /** The post's author and caption, shown over the photo on phones and tablets. */
+  author?: FullscreenPostAuthor;
 }
 
 const SWIPE_DOWN_THRESHOLD = 100;
@@ -105,6 +108,7 @@ export function FullscreenImageViewer({
   actions,
   soundtrackControl,
   downloadable,
+  author,
 }: FullscreenImageViewerProps) {
   const { t: _copy } = _useCopy();
   // Phones: one tap shows/hides the buttons, double tap zooms. Desktop keeps
@@ -149,20 +153,20 @@ export function FullscreenImageViewer({
   
   const [isDownloading, setIsDownloading] = useState(false);
   const handleDownload = useCallback(async () => {
-    const source = images[currentIndex];
-    if (!source || isDownloading) return;
+    const source = cdnImageSource(images[currentIndex]);
+    if (!downloadable || !source || isDownloading) return;
     setIsDownloading(true);
-    const toastId = 'chat-image-download';
+    const toastId = postId ? `image-download-${postId}` : 'chat-image-download';
     toast.loading(_copy("copy.757726036c1c", { defaultValue: "Preparing download..." }), { id: toastId });
     try {
-      await downloadMedia(source, messageImageDownloadName(source));
+      await downloadMedia(source, postId ? imageDownloadName(source, postId, currentIndex) : messageImageDownloadName(source));
       toast.success(_copy("copy.efece5dd1933", { defaultValue: "Download started" }), { id: toastId });
     } catch {
       toast.error(_copy("copy.d2bde7afd757", { defaultValue: "Download failed. Please try again." }), { id: toastId });
     } finally {
       setIsDownloading(false);
     }
-  }, [images, currentIndex, isDownloading, _copy]);
+  }, [images, currentIndex, isDownloading, downloadable, postId, _copy]);
 
   const handleCloseTranslation = useCallback(() => {
     setShowTranslationSheet(false);
@@ -288,6 +292,8 @@ export function FullscreenImageViewer({
 
   const hasMultiple = images.length > 1;
   const showActionBar = !!(postId && actions);
+  // Phones and tablets: author, Follow and caption over the photo, above the bar.
+  const showDetails = showActionBar && !!author;
 
   // Calculate opacity based on drag offset
   const bgOpacity = Math.max(0.3, 1 - dragOffset / 300);
@@ -443,7 +449,7 @@ export function FullscreenImageViewer({
 
           {/* Dot indicators — lifted above the action bar when it is present */}
           {hasMultiple && !zoomed && (
-            <div className={`${chrome} absolute ${showActionBar ? 'bottom-20' : 'bottom-6'} left-1/2 -translate-x-1/2 flex gap-2`}>
+            <div className={`${chrome} absolute ${showActionBar ? 'bottom-20' : 'bottom-6'} left-1/2 -translate-x-1/2 ${showDetails ? 'hidden lg:flex' : 'flex'} gap-2`}>
               {images.map((_, idx) => (
                 <button
                   key={idx}
@@ -474,8 +480,24 @@ export function FullscreenImageViewer({
             <div
               data-keep-dark
               onClick={(e) => e.stopPropagation()}
-              className={`absolute bottom-0 inset-x-0 z-10 px-2 pt-10 pb-[max(0.5rem,env(safe-area-inset-bottom))] bg-gradient-to-t from-black/85 via-black/45 to-transparent ${chrome}`}
+              className={`absolute bottom-0 inset-x-0 z-10 px-2 ${showDetails ? 'pt-16 lg:pt-10' : 'pt-10'} pb-[max(0.5rem,env(safe-area-inset-bottom))] bg-gradient-to-t from-black/85 via-black/45 to-transparent ${chrome}`}
             >
+              {showDetails && hasMultiple && !zoomed && (
+                <div className="mb-3 flex justify-center gap-2 lg:hidden">
+                  {images.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        emblaApi?.scrollTo(idx);
+                      }}
+                      className={`h-2 rounded-full transition-all ${idx === currentIndex ? 'w-3 bg-white' : 'w-2 bg-white/50'}`}
+                      aria-label={_copy("copy.9f40fece26d6", { defaultValue: "Go to image {{value1}}", value1: idx + 1 })}
+                    />
+                  ))}
+                </div>
+              )}
+              {showDetails && author && <FullscreenPostDetails author={author} onLeave={onClose} />}
               <ActionBar
                 postId={postId}
                 className="p-1"

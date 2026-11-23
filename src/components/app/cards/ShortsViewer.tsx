@@ -17,6 +17,7 @@ import {
 } from '@/lib/media-session';
 import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { openPostInfo } from '@/lib/preload-post-page';
 import { ChevronUp, ChevronDown, UserCheck, Loader2, Globe, RotateCcw } from "lucide-react";
 import Minimize from "@/components/ui/cut-icons/exit-fullscreen";
 import Volume2 from "@/components/ui/cut-icons/volume";
@@ -46,6 +47,7 @@ import Pause from "@/components/ui/cut-icons/pause";
 import MessageSquare from "@/components/ui/cut-icons/messages";
 import Bookmark from "@/components/ui/cut-icons/save";
 import Share2 from "@/components/ui/cut-icons/feedshare";
+import PostShareIcon from "@/components/ui/cut-icons/postshare";
 import Send from "@/components/ui/cut-icons/send";
 import Gem from "@/components/ui/cut-icons/diamond";
 import Gift from "@/components/ui/cut-icons/gifts";
@@ -92,7 +94,7 @@ import { StitchAttribution } from './StitchAttribution';
 import { useFollowOverrides, toggleFollowFor } from '@/hooks/use-follow';
 import { toast } from 'sonner';
 import { CommentsSection } from './CommentsSection';
-import { TipModal } from '../modals/TipModal';
+import { TipModalLazy as TipModal } from '../modals/TipModalLazy';
 import { ReportModal } from '../modals/ReportModal';
 import { DeletePostModal } from '../modals/DeletePostModal';
 import { usePostTipCount } from '@/hooks/use-post-tip-count';
@@ -106,6 +108,7 @@ import Captions from "@/components/ui/cut-icons/captions";
 import { cn } from '@/lib/utils';
 import type { ShortVideo } from '@/types/feed.types';
 import { useQueryClient } from '@tanstack/react-query';
+import { asViewerSlide } from '@/lib/short-video';
 import { VideoSlide } from './VideoSlide';
 import { LiveSwipeSlide } from './LiveSwipeSlide';
 import { PostSwipeSlide } from './PostSwipeSlide';
@@ -119,6 +122,7 @@ import { videoPlaybackManager } from '@/lib/video-playback-manager';
 import { createWheelPager } from '@/lib/wheel-pager';
 import { commitsDismiss } from '@/lib/video-hold-gestures';
 import { useAnyOverlayOpen } from '@/lib/overlay-open';
+import { watchShortsEngagement, type ShortsEngagement } from '@/lib/shorts-engaged';
 import { UserMentionDropdown } from '@/components/app/mentions';
 import { usePostLinkCopyCount, useLinkCopyFloor, useTrackPostLinkCopy } from '@/hooks/use-link-copy-count';
 import { viewerShareUrl } from '@/lib/share-url';
@@ -130,6 +134,7 @@ import {
   type DoubleTapLikeEventDetail,
   type OpenReactionsEventDetail,
 } from '@/lib/tap-reactions';
+import { profilePath } from '@/lib/profile-path';
 
 interface ShortsViewerProps {
   shorts: ShortVideo[];
@@ -403,7 +408,16 @@ const BoostModal = lazy(() =>
 const CORNER_CONTROL =
   `absolute top-3 z-10 ${VIEWER_CONTROL} transition-opacity duration-300`;
 
-export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMore, isLoadingMore, reuseInitialVideo = false }: ShortsViewerProps) {
+/**
+ * Follow answers outlive one viewer, "not following" included: reopening the
+ * reel or swiping back to a creator does not ask again, so the follow button
+ * no longer blinks a loading box on every slide. A follow or unfollow made
+ * since is in the follow overrides, which win over this.
+ */
+const followAnswers = new Map<string, boolean>();
+
+export function ShortsViewer({ shorts: entries, initialIndex, onClose, onLoadMore, hasMore, isLoadingMore, reuseInitialVideo = false }: ShortsViewerProps) {
+  const shorts = useMemo(() => entries.map(asViewerSlide), [entries]);
   const { t: _copy } = _useCopy();
   const { t } = useI18n();
   const { theme } = useAppTheme();
@@ -577,6 +591,20 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
     fullscreenTargetRef.current = node;
     setVideoContainer(node);
   }, []);
+  // The player clips its slides, but a clipped box can still be scrolled by
+  // code: a chat scrolling to its newest line, or focus moving into the slide
+  // parked below. Scrolled, it showed the next short, paused, while the one
+  // playing sat out of sight. It never scrolls, so put it straight back.
+  useEffect(() => {
+    if (!videoContainer) return;
+    const pin = () => {
+      if (videoContainer.scrollTop) videoContainer.scrollTop = 0;
+      if (videoContainer.scrollLeft) videoContainer.scrollLeft = 0;
+    };
+    pin();
+    videoContainer.addEventListener('scroll', pin, { passive: true });
+    return () => videoContainer.removeEventListener('scroll', pin);
+  }, [videoContainer]);
   const noVideoRef = useRef<HTMLVideoElement>(null);
   const { isFullscreen, toggleFullscreen } = useVideoFullscreen(noVideoRef, fullscreenTargetRef, {
     // Unlike a slide, this container has no transformed ancestor — the
@@ -784,7 +812,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
     const username = currentShort?.creatorUsername || currentShort?.username;
     if (username) {
       onClose();
-      navigate(`/${username}`);
+      navigate(profilePath(username));
     }
   }, [currentShort?.creatorUsername, currentShort?.username, navigate, onClose]);
   
@@ -863,31 +891,29 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
   useEffect(() => {
     const creatorAddress = currentShort?.creatorId;
     if (!creatorAddress || !isAuthenticated || followedCreators.has(creatorAddress)) return;
-    
+    const cacheKey = creatorAddress.toLowerCase();
+    const known = followAnswers.get(cacheKey);
+    if (known !== undefined) {
+      if (known) setFollowedCreators(prev => new Set(prev).add(creatorAddress));
+      return;
+    }
+
     setFollowCheckingCreators(prev => new Set(prev).add(creatorAddress));
     let cancelled = false;
-    checkIsFollowing(creatorAddress).then(result => {
-      if (!cancelled) {
-        if (result) {
-          setFollowedCreators(prev => new Set(prev).add(creatorAddress));
-        }
-        setFollowCheckingCreators(prev => {
-          const next = new Set(prev);
-          next.delete(creatorAddress);
-          return next;
-        });
-      }
-    }).catch(() => {
-      if (!cancelled) {
-        setFollowCheckingCreators(prev => {
-          const next = new Set(prev);
-          next.delete(creatorAddress);
-          return next;
-        });
-      }
+    const done = () => setFollowCheckingCreators(prev => {
+      if (!prev.has(creatorAddress)) return prev;
+      const next = new Set(prev);
+      next.delete(creatorAddress);
+      return next;
     });
-    
-    return () => { cancelled = true; };
+    checkIsFollowing(creatorAddress).then(result => {
+      followAnswers.set(cacheKey, !!result);
+      if (!cancelled && result) setFollowedCreators(prev => new Set(prev).add(creatorAddress));
+    }).catch(() => {}).finally(() => { if (!cancelled) done(); });
+
+    // Swiping on before the answer used to leave this creator marked as
+    // checking for good: a "Loading…" box on every later visit.
+    return () => { cancelled = true; done(); };
   }, [currentShort?.creatorId, isAuthenticated]);
 
   /**
@@ -1112,8 +1138,28 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
   // or the menu is open over the video: moving on under it would lose the place.
   const shortEndedBlockedRef = useRef(false);
   shortEndedBlockedRef.current = shareSheetOpen || showComments;
+  // Typing a comment or reading the thread beside the video (the desktop
+  // panel is always open, so `showComments` never covers it): the post plays
+  // again instead of paging on, and the next end checks again, so the viewer
+  // carries on by itself once they are done.
+  const engagementRef = useRef<ShortsEngagement | null>(null);
+  useEffect(() => {
+    const root = containerRef.current;
+    if (!root) return;
+    const watch = watchShortsEngagement(root);
+    engagementRef.current = watch;
+    return () => { watch.dispose(); engagementRef.current = null; };
+  }, []);
   const handleShortEnded = useCallback(() => {
     if (shortEndedBlockedRef.current || getVideoPreferences().isLooping) return;
+    if (engagementRef.current?.isEngaged()) {
+      const player = containerRef.current?.querySelector<HTMLVideoElement>(`[data-shorts-slide="${currentIndexRef.current}"] video`);
+      if (player) {
+        player.currentTime = 0;
+        player.play().catch(() => {});
+      }
+      return;
+    }
     goToNextRef.current();
   }, []);
   // Where the wheel can go right now, so a push past either end rubber bands.
@@ -1863,7 +1909,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                     className="flex min-w-10 items-center justify-center gap-1"
                     aria-label={_copy("copy.29887a5ff984", { defaultValue: "Share" })}
                   >
-                    <Share2 className="w-5 h-5 text-white drop-shadow-lg" />
+                    <PostShareIcon className="w-5 h-5 text-white drop-shadow-lg" />
                     <span className="text-xs font-medium text-white/70 [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)]">{formatCount(displayShareCount)}</span>
                   </button>
 
@@ -2396,7 +2442,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                     className="flex items-center gap-1"
                     aria-label={_copy("copy.29887a5ff984", { defaultValue: "Share" })}
                   >
-                    <Share2 className="w-5 h-5 text-white drop-shadow-lg" />
+                    <PostShareIcon className="w-5 h-5 text-white drop-shadow-lg" />
                     <span className="text-xs font-medium text-white/70 [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)]">{formatCount(displayShareCount)}</span>
                   </button>
 
@@ -2531,6 +2577,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                         tokenId={currentShort.id}
                         onClose={() => setShowComments(false)}
                         initialTab={commentsInitialTab}
+                        placeholder={t('comments.shortsPlaceholder', 'Say something...')}
                         embedded
                       />
                     </div>
@@ -2634,6 +2681,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                       tokenId={currentShort.id}
                       onClose={() => setShowComments(false)}
                       initialTab={commentsInitialTab}
+                        placeholder={t('comments.shortsPlaceholder', 'Say something...')}
                     />
                   ) : (
                     <div className="flex h-full items-start justify-center pt-8">
@@ -2666,7 +2714,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                   <Bookmark className={cn("w-4 h-4", isBookmarked ? "fill-yellow-500 text-yellow-500" : "text-white/60")} />
                 </motion.button>
                 <button
-                  onClick={() => { navigate(`/app/post/${currentShort.id}/info`); onClose(); }}
+                  onClick={() => { openPostInfo(navigate, currentShort.id); onClose(); }}
                   className="w-8 h-8 bg-white/[0.08] hover:bg-white/15 rounded-lg flex items-center justify-center transition-colors"
                   aria-label={_copy("copy.8ec595494efe", { defaultValue: "Post info" })}
                 >
@@ -2698,17 +2746,25 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
               <DuetCredit duetOf={currentShort.duetOf} className="mb-1.5" />
               <ShortCaption key={currentShort.id} short={currentShort} variant="stacked" />
               <StitchAttribution key={`stitch-${currentShort.id}`} tokenId={currentShort.id} onNavigate={onClose} className="mt-2" />
-              {currentShort.creatorId && followCheckingCreators.has(currentShort.creatorId) ? (
-                <div className="w-full mt-3 bg-white/10 backdrop-blur-sm text-white/40 text-xs lg:text-sm font-semibold px-4 py-2 rounded-xl border border-white/10 text-center animate-pulse">{_copy("copy.ba3bbbe10d8b", { defaultValue: "Loading…" })}</div>
-              ) : (
-                <button
-                  onClick={handleFollow}
-                  disabled={isCreatorFollowed(currentShort.creatorId)}
-                  className="w-full mt-3 bg-white/10 backdrop-blur-sm text-white text-xs lg:text-sm font-semibold px-4 py-2 rounded-xl border border-white/20 hover:bg-white/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isCreatorFollowed(currentShort.creatorId) ? _copy("copy.ec7a1a6ce401", { defaultValue: "Following ✓" }) : _copy("copy.641d1ef657bd", { defaultValue: "Follow" })}
-                </button>
-              )}
+              {/* No follow button on your own post. While the answer is out the
+                  button keeps its place unseen and fades in, instead of a
+                  pulsing loading box that blinked on every slide. */}
+              {!isOwnShort && (() => {
+                const checking = !!currentShort.creatorId && followCheckingCreators.has(currentShort.creatorId);
+                return (
+                  <button
+                    onClick={handleFollow}
+                    disabled={checking || isCreatorFollowed(currentShort.creatorId)}
+                    aria-hidden={checking || undefined}
+                    className={cn(
+                      'w-full mt-3 bg-white/10 backdrop-blur-sm text-white text-xs lg:text-sm font-semibold px-4 py-2 rounded-xl border border-white/20 hover:bg-white/20 transition-[opacity,background-color] duration-200 disabled:cursor-not-allowed',
+                      checking ? 'opacity-0' : isCreatorFollowed(currentShort.creatorId) ? 'opacity-50' : 'opacity-100',
+                    )}
+                  >
+                    {isCreatorFollowed(currentShort.creatorId) ? _copy("copy.ec7a1a6ce401", { defaultValue: "Following ✓" }) : _copy("copy.641d1ef657bd", { defaultValue: "Follow" })}
+                  </button>
+                );
+              })()}
             </div>
 
             {/* Desktop: Inline comments */}
@@ -2728,6 +2784,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                   tokenId={currentShort.id}
                   onClose={() => {}}
                   initialTab={commentsInitialTab}
+                        placeholder={t('comments.shortsPlaceholder', 'Say something...')}
               embedded
                 />
               </div>

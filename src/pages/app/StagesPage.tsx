@@ -53,6 +53,7 @@ import { supabase } from '@/integrations/supabase/client';
 import stagesMicIcon from '@/assets/icons/stages-mic-icon.webp';
 import type { AudioSpace } from '@/types/audio-spaces.types';
 
+import { formatCount } from '@/lib/format-count';
 type StagesTab = 'live' | 'upcoming' | 'recorded' | 'hosting';
 
 type StagesTabDef = { icon: typeof Radio; labelKey: string; value: StagesTab };
@@ -275,7 +276,7 @@ function LiveStageCard({
           <div className="flex items-center gap-1.5">
             <div className="flex items-center gap-1 text-zinc-400 text-xs">
               {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Users className="w-3.5 h-3.5" />}
-              <span>{totalListeners}</span>
+              <span>{formatCount(totalListeners)}</span>
             </div>
             {/* The whole card is a <button>, so the share chip is a <span> —
                 same constraint as StageHostLink — and stops propagation so

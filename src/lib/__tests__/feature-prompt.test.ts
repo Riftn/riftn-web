@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { featurePromptFields } from '../feature-prompt';
+import { featurePromptFields, isRequestBoardCommand } from '../feature-prompt';
 
 describe('prompt request compatibility', () => {
   it('posts without a separate title and preserves the entire prompt', () => {
@@ -17,5 +17,11 @@ describe('prompt request compatibility', () => {
     expect(featurePromptFields('  Upload freezes  ', ' Upload bug ', ' Android 15 ')).toEqual({
       title: 'Upload bug', description: 'Upload freezes\n\nDevice & OS: Android 15',
     });
+  });
+
+  it('routes a board request mentioning video generation to chat', () => {
+    expect(isRequestBoardCommand('Add a request to generate longer videos')).toBe(true);
+    expect(isRequestBoardCommand('Post this bug to the Requests board')).toBe(true);
+    expect(isRequestBoardCommand('Generate a video for my last request')).toBe(false);
   });
 });

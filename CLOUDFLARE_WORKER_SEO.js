@@ -3,7 +3,8 @@ import { localizePublicChrome, localizeStructuredData } from './server/public-pa
 import { handleWorkReceipt } from './server/work-receipts.ts';
 import { handleEditorPresence } from './server/editor-presence.ts';
 import { stageShareImageUrl } from './server/stage-share-card.js';
-import { applyPostShareImage, applyProfileShareImage, postShareImageUrl } from './server/post-share-card.js';
+import { entityShareImageUrl } from './server/entity-share-card.js';
+import { applyPostShareImage, applyProfileShareImage, postShareImageUrl, profileShareImageUrl } from './server/post-share-card.js';
 import { liveShareCopy } from './server/live-share-copy.js';
 import { handleFinanceRequest } from './server/finance-stats.js';
 import { handleCreatorMotionSource } from './server/creator-motion-source.js';
@@ -184,6 +185,7 @@ const OG_CARD_ROUTES = new Set([
   'arcade', 'arcade/kings-gambit', 'arcade/claude-of-duty', 'arcade/jungle-trail',
   'arcade/street-slayer',
   'arcade/trenchstar', 'arcade/love-lock-bridge',
+  'arcade/correspondence-chess', 'arcade/okey',
   'apps', 'apps/dev',
   // App surfaces that had no card of their own and unfurled as the homepage.
   // `superpowers` art was rendered when the page shipped and was never added
@@ -1428,6 +1430,24 @@ const MARKETING_PAGES = {
 <p>Walk with WASD or the arrow keys and drag to look. On a phone, hold the on-screen arrows or tap the paving to walk.</p>
 <p><a href="${APP_URL}/arcade/love-lock-bridge">Walk the bridge</a>.</p>`,
   },
+  'arcade/correspondence-chess': {
+    title: 'Correspondence Chess With Friends | Riftn Arcade',
+    description: 'Challenge a friend to chess on Riftn and take up to a week per move. You get a notification when it is your turn. Free, in your browser and the Riftn app.',
+    heading: 'Correspondence Chess: Play A Friend At Your Own Pace',
+    ...arcadeGameLd('/og/arcade-correspondence-chess.jpg'),
+    bodyHtml: `<p>Chess the slow way. Challenge a friend by username, or post an open challenge anyone can take, and pick 1, 2, 3, 5 or 7 days per move.</p>
+<p>The board waits for you. When your opponent moves you get a notification, and a reminder when a move is close to running out. Offer a draw, resign, or share the game link so others can follow along.</p>
+<p><a href="${APP_URL}/arcade/correspondence-chess">Start a game</a> or <a href="${APP_URL}/arcade">see the whole arcade</a>.</p>`,
+  },
+  'arcade/okey': {
+    title: 'Okey 101 With Friends | Riftn Arcade',
+    description: 'Play Okey 101 with friends on Riftn. Open a table, lock it with a password, and bots fill any empty seat. Free, in your browser and the Riftn app.',
+    heading: 'Okey 101: Four Seats, Friends Or Bots',
+    ...arcadeGameLd('/og/arcade-okey.jpg'),
+    bodyHtml: `<p>The classic tile game for four. Open a table and share the invite, lock it with a password for friends only, or start straight away and let bots take the empty seats. Anyone who joins later takes over a bot's seat.</p>
+<p>Open with runs and sets worth 101 points or five pairs, add to any group on the table, and throw your last tile to win the round. The lowest total wins. Just for fun, no money involved.</p>
+<p><a href="${APP_URL}/arcade/okey">Find a table</a> or <a href="${APP_URL}/arcade">see the whole arcade</a>.</p>`,
+  },
   'arcade/street-slayer': {
     title: 'Street Slayer | Riftn Arcade',
     description: "Play Street Slayer on Riftn, a side-scrolling beat 'em up down a neon-lit street, with three fighters and a boss. Free, in your browser, no install.",
@@ -2037,6 +2057,23 @@ async function supabaseLookup(query) {
   const rows = await supabaseRows(query);
   if (rows === null) return undefined;
   return rows[0] || null;
+}
+
+/** A STABLE PostgREST function's JSON result over GET, or null. Never throws. */
+async function supabaseRpc(name, params) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 6000);
+  try {
+    const res = await fetch(`${SUPABASE_REST_BASE}/rpc/${name}?${new URLSearchParams(params)}`, {
+      signal: controller.signal,
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}`, Accept: 'application/json' },
+    });
+    return res.ok ? await res.json() : null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 /** First row of a PostgREST select, or null. Never throws. */
@@ -3172,6 +3209,7 @@ function shareCardImage(url) {
   // Already a 1200x630 card: one of ours, or one this function made.
   if (url.startsWith(`${APP_URL}/og/`) || url === SHARE_IMAGE) return url;
   if (url.startsWith(`${APP_URL}/_og/stage/`)) return url;
+  if (/^https:\/\/riftn\.com\/_og\/(?:event|community|clip|dex|costream)\/v\d+\//.test(url)) return url;
   if (url.startsWith(`${IMAGE_TRANSFORM_BASE}fit=`)) return url;
   // Undo an earlier transform (the fn's avatar crop, repairProxiedImages'
   // scale-down) so the card is cut from the original.
@@ -3555,6 +3593,151 @@ function eventOrganizerLd(event) {
   return wallet ? { '@type': 'Person', name: `${wallet.slice(0, 6)}...${wallet.slice(-4)}` } : ORG_JSONLD;
 }
 
+/**
+ * A community invite link, /communities/join/<code>. The page itself shows the
+ * community to anyone holding the link (community_preview_invite is granted to
+ * anon), so the unfurl shows the same: its banner or picture, name and size.
+ * Never indexed: an invite code is a key, not a page.
+ */
+function buildCommunityInviteHtml(code, invite) {
+  const canonicalUrl = `${APP_URL}/communities/join/${encodeURIComponent(code)}`;
+  const name = invite.name || 'a community';
+  const members = Number(invite.member_count) || 0;
+  const title = `Join ${name} on Riftn`;
+  const description = truncate(
+    `${invite.description ? `${invite.description} ` : ''}You have been invited to join ${name}${members ? `, ${members.toLocaleString('en-US')} ${members === 1 ? 'member' : 'members'}` : ''}.`,
+    200,
+  );
+  return entityHtml({
+    canonicalUrl,
+    title,
+    description,
+    image: absolutize(invite.banner_url) || absolutize(invite.avatar_url) || (invite.slug ? entityShareImageUrl('community', invite.slug) : shareImage('communities')),
+    noindex: true,
+    heading: title,
+    breadcrumb: `<a href="${APP_URL}">Riftn</a> › <a href="${APP_URL}/communities">Communities</a>`,
+    bodyHtml: `<p>${escHtml(description)}</p>${invite.slug ? `<p><a href="${APP_URL}/communities/${escHtml(invite.slug)}">${escHtml(name)}</a></p>` : ''}`,
+    jsonLd: { '@context': 'https://schema.org', '@type': 'WebPage', name: title, description, url: canonicalUrl },
+  });
+}
+
+/**
+ * A copied chat message link (lib/chat-message-link): /app/messages with
+ * `msg=<id>`, either `chat=public` (Public Chat, readable by anyone) or
+ * `conversation=<id>` (a DM or group). A Public Chat line unfurls as who said
+ * what, with the sender's card; a private chat says only that it is one, since
+ * the link reaches people who are not in it. Never indexed.
+ */
+const CHAT_LINK_ID = /^[A-Za-z0-9_-]{1,80}$/;
+
+export function chatMessageLinkOf(url) {
+  const path = url.pathname.replace(/\/+$/, '');
+  if (path !== '/app/messages' && path !== '/chat') return null;
+  const msg = url.searchParams.get('msg');
+  if (!msg || !CHAT_LINK_ID.test(msg)) return null;
+  const conversation = url.searchParams.get('conversation');
+  if (conversation && CHAT_LINK_ID.test(conversation)) return { kind: 'dm', msg, conversation };
+  if (url.searchParams.get('chat') === 'public') {
+    const room = url.searchParams.get('room');
+    return { kind: 'public', msg, room: room && CHAT_LINK_ID.test(room) ? room : null };
+  }
+  return null;
+}
+
+async function fetchPublicChatLine(room, msg) {
+  try {
+    // Read as a guest, which sees the newest stretch of the room (`around`
+    // is for signed-in readers only): a recent line gets its own card, an
+    // older one the room's.
+    const qs = new URLSearchParams({ roomId: room || 'global', limit: '100' });
+    const res = await fetch(`${DEHUB_API}/livechat/messages?${qs}`, {
+      headers: { Accept: 'application/json' },
+      cf: { cacheTtl: 300, cacheEverything: true },
+      signal: AbortSignal.timeout(2500),
+    });
+    if (!res.ok) return undefined;
+    const body = await res.json();
+    const list = Array.isArray(body?.messages) ? body.messages : Array.isArray(body?.result?.messages) ? body.result.messages : [];
+    return list.find((m) => m && m.id === msg) || null;
+  } catch {
+    return undefined;
+  }
+}
+
+function chatLineSummary(line) {
+  const text = String(line?.content || '').replace(/\s+/g, ' ').trim();
+  if (text) return text;
+  switch (line?.messageType) {
+    case 'image': return 'Sent a photo';
+    case 'gif': return 'Sent a GIF';
+    case 'audio': return 'Sent a voice note';
+    default: return 'Sent a message';
+  }
+}
+
+export function buildChatMessageLinkHtml(link, line) {
+  const qs = link.kind === 'dm'
+    ? `conversation=${encodeURIComponent(link.conversation)}&msg=${encodeURIComponent(link.msg)}`
+    : `chat=public${link.room ? `&room=${encodeURIComponent(link.room)}` : ''}&msg=${encodeURIComponent(link.msg)}`;
+  const canonicalUrl = `${APP_URL}/app/messages?${qs}`;
+  const breadcrumb = `<a href="${APP_URL}">Riftn</a> › <a href="${APP_URL}/chat">Chat</a>`;
+  if (link.kind === 'dm') {
+    const title = 'A message in a private chat on Riftn';
+    const description = 'Open it on Riftn to read it. Only people in this chat can see it.';
+    return entityHtml({
+      canonicalUrl, title, description, image: shareImage('chat'), noindex: true,
+      heading: title, breadcrumb, bodyHtml: `<p>${escHtml(description)}</p>`,
+      jsonLd: { '@context': 'https://schema.org', '@type': 'WebPage', name: title, description, url: canonicalUrl },
+    });
+  }
+  const handle = String(line?.sender?.username || '').trim();
+  const name = String(line?.sender?.displayName || '').trim() || (handle ? `@${handle}` : '');
+  const said = line ? truncate(chatLineSummary(line), 180) : '';
+  const title = name ? `${name} in Riftn Public Chat` : 'A message in Riftn Public Chat';
+  const description = said
+    ? `${handle ? `@${handle}: ` : ''}“${said}”`
+    : 'Join the conversation in Riftn Public Chat, open to everyone.';
+  const image = handle && /^[A-Za-z0-9_][A-Za-z0-9_.-]{0,63}$/.test(handle) ? profileShareImageUrl(handle) : shareImage('chat');
+  return entityHtml({
+    canonicalUrl, title, description, image, noindex: true,
+    heading: title, breadcrumb, bodyHtml: `<p>${escHtml(description)}</p>`,
+    jsonLd: {
+      '@context': 'https://schema.org', '@type': 'DiscussionForumPosting',
+      headline: title, text: said || description, url: canonicalUrl,
+      ...(line?.createdAt ? { datePublished: line.createdAt } : {}),
+      ...(handle ? { author: { '@type': 'Person', name: `@${handle}`, url: `${APP_URL}/${encodeURIComponent(handle)}` } } : {}),
+    },
+  });
+}
+
+/** One picture from the Creator gallery, /creator/gallery/<id>: the picture is the card. */
+function buildCreatorGalleryHtml(item) {
+  const canonicalUrl = `${APP_URL}/creator/gallery/${item.id}`;
+  const name = item.title || 'Creator image';
+  const description = truncate(`${name}, made with Riftn Creator. See it full size, react and comment, or make your own.`, 200);
+  const image = absolutize(item.image_url);
+  return entityHtml({
+    canonicalUrl,
+    title: `${name} | Riftn Creator`,
+    description,
+    image: image || shareImage('creator'),
+    heading: name,
+    breadcrumb: `<a href="${APP_URL}">Riftn</a> › <a href="${APP_URL}/creator">Creator</a>`,
+    bodyHtml: `<p>${escHtml(description)}</p>`,
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'ImageObject',
+      name,
+      description,
+      url: canonicalUrl,
+      ...(image ? { contentUrl: image } : {}),
+      ...(item.width ? { width: item.width } : {}),
+      ...(item.height ? { height: item.height } : {}),
+      ...(item.created_at ? { uploadDate: item.created_at } : {}),
+    },
+  });
+}
+
 function buildEventHtml(event) {
   const canonicalUrl = `${APP_URL}/app/events/${event.event_number}`;
   const name = event.title || 'Event';
@@ -3571,7 +3754,7 @@ function buildEventHtml(event) {
     canonicalUrl,
     title,
     description,
-    image,
+    image: image || (event.is_private ? '' : entityShareImageUrl('event', event.event_number)),
     ogType: 'article',
     // A private event is shareable by whoever holds the link, not crawlable.
     noindex: !!event.is_private || entityLooksThin({ name: event.title, description: event.description, image }),
@@ -3636,7 +3819,7 @@ function buildDexPoolHtml(pool) {
     canonicalUrl,
     title,
     description,
-    image: pool.image_url,
+    image: pool.image_url || entityShareImageUrl('dex', `${pool.chain}~${pool.token_address}`),
     heading: `${pair} · ${chain}`,
     breadcrumb: `<a href="${APP_URL}">Riftn</a> › <a href="${APP_URL}/dex">DEX</a>`,
     bodyHtml: `<p>${escHtml(description)}</p>
@@ -3797,7 +3980,7 @@ function buildClipHtml(clip) {
     canonicalUrl,
     title: `${name}: Clip on Riftn`,
     description,
-    image: clip.card_url || clip.poster_url || '',
+    image: clip.card_url || clip.poster_url || entityShareImageUrl('clip', clip.short_id),
     ogType: 'video.other',
     extraHead,
     heading: name,
@@ -3907,7 +4090,53 @@ function buildCoStreamHtml(room) {
     canonicalUrl,
     title,
     description,
-    image: SHARE_IMAGE,
+    image: entityShareImageUrl('costream', room.id),
+    noindex: true,
+    heading: title,
+    breadcrumb: `<a href="${APP_URL}">Riftn</a>`,
+    bodyHtml: `<p>${escHtml(description)}</p>`,
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: title,
+      description,
+      url: canonicalUrl,
+      isPartOf: { '@type': 'WebSite', name: 'Riftn', url: APP_URL },
+    },
+  });
+}
+
+/** A moment (24-hour story): the poster as the card, never indexed. */
+const MOMENT_PATH = /^\/moment\/([a-f\d]{24})\/?$/i;
+
+async function fetchMoment(id) {
+  try {
+    const res = await fetch(`${DEHUB_API}/stories/${encodeURIComponent(id)}`, { signal: AbortSignal.timeout(6000) });
+    if (res.status === 404 || res.status === 403) return null;
+    if (!res.ok) return undefined;
+    const data = await res.json();
+    return data && data.item ? data : null;
+  } catch {
+    return undefined;
+  }
+}
+
+function buildMomentHtml(id, moment) {
+  const canonicalUrl = `${APP_URL}/moment/${id}`;
+  const author = moment.author || {};
+  const item = moment.item || {};
+  const who = author.username ? `@${String(author.username).replace(/^@/, '')}` : (author.displayName || 'Someone');
+  const ended = !!item.expired;
+  const title = ended ? `${who}'s moment has ended` : `${who}'s moment on Riftn`;
+  const description = ended
+    ? 'Moments stay up for 24 hours. See what they are sharing now on Riftn.'
+    : truncate(item.caption || `A moment from ${who}, up for 24 hours on Riftn.`, 200);
+  const poster = !ended && /^https:\/\//.test(String(item.posterUrl || '')) ? item.posterUrl : SHARE_IMAGE;
+  return entityHtml({
+    canonicalUrl,
+    title,
+    description,
+    image: poster,
     noindex: true,
     heading: title,
     breadcrumb: `<a href="${APP_URL}">Riftn</a>`,
@@ -5231,6 +5460,8 @@ function shouldServeSSR(pathname) {
   // ROUTE_SEGMENT, so without this rule the share link unfurls as the SPA
   // shell — the flow renderer below would never run.
   if (/^\/creator\/flow\/[a-z0-9]{6,32}\/?$/.test(pathname)) return true;
+  // One Creator gallery picture, /creator/gallery/<uuid>.
+  if (/^\/creator\/gallery\/[0-9a-fA-F-]{36}\/?$/.test(pathname)) return true;
   // One creator pack and one community DEX pool. Same story: `packs` and
   // `dex` are reserved ROUTE_SEGMENTs, so both renderers below sat unreached
   // and crawlers got the noindexed SPA shell.
@@ -5271,6 +5502,8 @@ function shouldServeSSR(pathname) {
   // A posted live clip. `clip` is a reserved ROUTE_SEGMENT, so without this
   // the profile fall-through rejects it and the SPA shell goes out instead.
   if (LIVE_CLIP_PATH.test(pathname)) return true;
+  // A moment link: `moment` is a reserved segment, so it needs its own yes here.
+  if (MOMENT_PATH.test(pathname)) return true;
   // A video's duets list: its own title and card, not the post page's.
   if (DUETS_PATH.test(pathname)) return true;
   // Same for its reactions list.
@@ -7182,7 +7415,7 @@ async function handleRequest(request, env, ctx) {
   // Share-card sources for the image transform (see shareCardImage). Ahead of
   // the `/_` static-asset skip below, which would hand these to ASSETS.
   // Older installed apps and already-shared URLs continue to receive the current card.
-  const textPostCard = pathname.match(/^\/_og\/post\/v(?:1|2|3|4|5|6|7)\/([1-9]\d{0,14})\.png$/);
+  const textPostCard = pathname.match(/^\/_og\/post\/v(?:1|2|3|4|5|6|7|8)\/([1-9]\d{0,14})\.png$/);
   if (textPostCard) {
     const { handlePostShareImage } = await import('./server/post-share-image.js');
     return handlePostShareImage(request, env, ctx, textPostCard[1], fetchPostRecord, {
@@ -7190,15 +7423,24 @@ async function handleRequest(request, env, ctx) {
       price: fetchShareBadgePrice,
     });
   }
-  const profileCard = pathname.match(/^\/_og\/profile\/v(?:1|2|3)\/([A-Za-z0-9_][A-Za-z0-9_.-]{0,63})\.png$/);
+  const profileCard = pathname.match(/^\/_og\/profile\/v(?:1|2|3|4)\/([A-Za-z0-9_][A-Za-z0-9_.-]{0,63})\.png$/);
   if (profileCard) {
     const { handleProfileShareImage } = await import('./server/post-share-image.js');
     return handleProfileShareImage(request, env, ctx, profileCard[1], fetchAccountInfo);
   }
-  const stageCard = pathname.match(/^\/_og\/stage\/v[1-6]\/([0-9a-fA-F-]{16,64})\.png$/);
+  const stageCard = pathname.match(/^\/_og\/stage\/v[1-7]\/([0-9a-fA-F-]{16,64})\.png$/);
   if (stageCard) {
     const { handleStageShareImage } = await import('./server/stage-share-image.js');
     return handleStageShareImage(request, env, ctx, stageCard[1], supabaseLookup);
+  }
+  // Monolith cards for events, communities, clips, DEX tokens and co-stream
+  // invites that have no picture of their own (server/entity-share-card.js).
+  const entityCard = pathname.match(/^\/_og\/(event|community|clip|dex|costream)\/v1\/([A-Za-z0-9_~%-]{1,120})\.png$/);
+  if (entityCard) {
+    const { handleEntityShareImage } = await import('./server/entity-share-image.js');
+    let id = entityCard[2];
+    try { id = decodeURIComponent(id); } catch { /* keep raw; the query check rejects it */ }
+    return handleEntityShareImage(request, env, ctx, entityCard[1], id, supabaseLookup);
   }
   if (pathname.startsWith(OG_SOURCE_PREFIX)) return ogSourceResponse(request, env, pathname);
 
@@ -7245,6 +7487,21 @@ async function handleRequest(request, env, ctx) {
   // that Google needs in order to *see* the noindex, freezing the clones in the
   // index; and `follow` keeps internal link equity flowing to /docs.
   // Static assets already returned above, so they never reach this branch.
+  // A copied chat message link, as a link previewer sees it.
+  const chatLink = chatMessageLinkOf(url);
+  if (chatLink && url.searchParams.get(APP_ESCAPE_PARAM) !== '1' && isCrawlerUa(request.headers.get('User-Agent') || '')) {
+    const line = chatLink.kind === 'public' ? await fetchPublicChatLine(chatLink.room, chatLink.msg) : null;
+    return guard(new Response(buildChatMessageLinkHtml(chatLink, line), {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=3600',
+        'Vary': 'User-Agent',
+        'X-Robots-Tag': 'noindex, follow',
+      },
+    }));
+  }
+
   if (!shouldServeSSR(pathname)) {
     return noindexShell(await guardNext());
   }
@@ -7648,6 +7905,14 @@ async function handleRequest(request, env, ctx) {
     return entityMiss(event);
   }
 
+  // A moment (24-hour story): who shared it and its poster.
+  const momentMatch = cleanPath.match(MOMENT_PATH);
+  if (momentMatch) {
+    const moment = await fetchMoment(momentMatch[1]);
+    if (moment) return guard(new Response(buildMomentHtml(momentMatch[1], moment), { status: 200, headers: { ...blogHeaders, 'X-Robots-Tag': 'noindex, follow' } }));
+    return entityMiss(moment);
+  }
+
   // A posted live clip: its title, share card and og:video. Only posted rows
   // are readable with the anon key, so a draft or a dismissed highlight is a 404.
   const liveClipMatch = cleanPath.match(LIVE_CLIP_PATH);
@@ -7671,6 +7936,28 @@ async function handleRequest(request, env, ctx) {
     const post = await fetchPostRecord(reactionsMatch[1]);
     if (post && post.postType !== 'live') return guard(new Response(buildReactionsHtml(post, reactionsMatch[1]), { status: 200, headers: blogHeaders }));
     return entityNotFound();
+  }
+
+  // Community invite links (/communities/join/<code>, and the /app twin the
+  // share button copies). Without this they went to the fn as a community
+  // called "join" and unfurled as the homepage.
+  const inviteMatch = cleanPath.match(/^\/(?:app\/)?communities\/join\/([A-Za-z0-9_-]{4,64})$/);
+  if (inviteMatch) {
+    const invite = await supabaseRpc('community_preview_invite', { _code: inviteMatch[1] });
+    if (invite && invite.name) {
+      return guard(new Response(buildCommunityInviteHtml(inviteMatch[1], invite), {
+        status: 200,
+        headers: { ...blogHeaders, 'X-Robots-Tag': 'noindex, follow' },
+      }));
+    }
+    return entityMiss(invite === null ? undefined : null);
+  }
+
+  const galleryMatch = cleanPath.match(/^\/creator\/gallery\/([0-9a-fA-F-]{36})$/);
+  if (galleryMatch) {
+    const item = await supabaseRow(`rpc/creator_gallery_read?p_id=${galleryMatch[1]}&p_limit=1`);
+    if (item) return guard(new Response(buildCreatorGalleryHtml(item), { status: 200, headers: blogHeaders }));
+    return entityMiss(item);
   }
 
   // Stage invite links: /stages/<n> is the short share form
@@ -8118,6 +8405,12 @@ async function handleRequest(request, env, ctx) {
       html = rewriteJsonLd(html, (ld) => profilePageLd(ld, proxiedHandle, verifiedLinks));
     } else if (proxiedCommunity) {
       html = cardProxiedImage(rewriteJsonLd(html, communityPageLd));
+      // No avatar or banner: the community's own Monolith card, not the brand one.
+      const ownSlug = (ssrPath.match(/^\/app\/communities\/([^/?#]+)/) || [])[1];
+      if (ownSlug && /^[a-z0-9][a-z0-9_-]{0,63}$/i.test(ownSlug)) {
+        const card = entityShareImageUrl('community', ownSlug);
+        html = html.replace(/(<meta (?:property="og:image(?::secure_url)?"|name="twitter:image") content=")https:\/\/riftn\.com\/og\/riftn-share\.png(")/g, (_, a, b) => `${a}${card}${b}`);
+      }
     }
 
 

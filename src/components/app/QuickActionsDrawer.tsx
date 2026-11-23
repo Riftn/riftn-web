@@ -67,7 +67,7 @@ export default function QuickActionsDrawer({ context, initialReport, onClose }: 
         <button className={row} onClick={() => setView('report')}><Bug size={20} />{t('settings.reportBug')}</button>
         <button className={row} onClick={() => window.location.reload()}><RefreshCw size={20} />{t('quickActions.refresh')}</button>
         <button className={row} onClick={() => setView('profiles')}><Users size={20} />{t('sidebar.switchAccount')}</button>
-        <button className={row} disabled={!isAuthenticated || busy} onClick={async () => { setBusy(true); try { await disconnect(); onClose(); } catch { setError(true); setBusy(false); } }}><LogOut size={20} />{t('quickActions.logout')}</button>
+        <button className={row} disabled={!isAuthenticated || busy} onClick={async () => { setBusy(true); try { await disconnect({ forgetProfile: true }); onClose(); } catch { setError(true); setBusy(false); } }}><LogOut size={20} />{t('quickActions.logout')}</button>
       </div>}
       {view === 'profiles' && <div className="max-h-[65dvh] overflow-y-auto"><ProfilesSection onSelect={onClose} /></div>}
       {view === 'report' && <div className="space-y-3 overflow-y-auto">

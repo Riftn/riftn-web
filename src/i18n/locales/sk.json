@@ -1,4 +1,5 @@
 {
+  "dmVideo": {"edit": "Upraviť video", "hiddenTag": "Skryté", "tapToEdit": "Ťuknutím upravíte", "cover": "Obálka", "trim": "Orezať", "mirror": "Zrkadliť", "rotate": "Otočiť", "hide": "Skryť", "timer": "Časovač", "sheetTitleAny": "Upraviť pred odoslaním", "close": "Zavrieť", "replace": "Nahradiť", "hiddenUntilTap": "Skryté, kým na to neklepnú", "pause": "Pozastaviť", "play": "Prehrať video", "mute": "Stlmiť", "unmute": "Zrušiť stlmenie", "scrub": "Posúvať sa videom", "addMore": "Pridať fotky alebo videá", "trimAria": "Potiahnutím koncov orezáte", "coverAria": "Klepnite na snímku a nastavte ju ako obálku", "coverHint": "Klepnite na snímku a nastavte ju ako obálku", "coverOwn": "Váš obrázok", "coverAuto": "Automaticky", "uploadCover": "Nahrať obrázok obálky", "mirrored": "Zrkadlené", "original": "Pôvodné", "rotate90": "Otočiť o 90°", "showNormally": "Zobraziť normálne", "showNormallyBody": "Uvidia to hneď", "hideUntilTap": "Skryť, kým na to neklepnú", "hideUntilTapBody": "Rozmazané, kým na to neklepnú", "hidePrice": "Skryť za cenu", "hidePriceBody": "Rozmazané, kým vám nezaplatia", "priceUnavailable": "Nie v tomto chate", "timerOff": "Vypnuté", "timerOffBody": "Zostáva to v chate.", "timerViewBody": "Zmizne to pre oboch, akonáhle si to pozrú.", "confirm": "Potvrdiť", "lockedFor": "Odomknúť za {{value1}} DHB", "lockedForUsd": "Odomknúť za {{value1}}", "editItem": "Upraviť položku {{value1}}", "kept": "{{time}} ponechané", "timerTimeBody": "Zmizne to pre oboch {{value1}} po odoslaní."},
   "postBg": {
     "addMedia": "Pridať obrázok, GIF alebo video",
     "changeMedia": "Zmeniť obrázok, GIF alebo video",
@@ -290,8 +291,10 @@
       "pronouns": "Zámená",
       "location": "Lokalita",
       "custom": "Vlastné",
-      "customOption": "Vlastný štítok"
-    }
+      "customOption": "Vlastný štítok",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Sledovať #{{tag}}",
@@ -2260,7 +2263,7 @@
     "promptDevice": "Zariadenie a operačný systém (pre chyby)",
     "deviceInfoNoErrors": "Žiadny",
     "promptFilters": "Filtrovať podľa kategórie",
-    "promptMediaError": "Vyberte obrázky alebo videa do 50 MB každé.",
+    "promptMediaError": "Vyberte obrázky alebo videa do 200 MB každé.",
     "promptMediaLimit": "Až {{max}} príloh.",
     "removePromptAttachment": "Odstrániť {{name}}",
     "promptAttachment": "Príloha {{number}}",
@@ -4312,7 +4315,7 @@
       "pageViewsTerm": "Zobrazenia stránok",
       "pageViews": "— požiadavky, ktoré Cloudflare klasifikuje ako načítania stránky, nie obrázky, skripty či volania API.",
       "botsTerm": "Boti sú započítaní",
-      "bots": "— sú to surové počty na okraji siete, takže sú v nich aj prehľadávače, monitory dostupnosti a skriptované klienty. Vidíš ich sám v rozdelení podľa prehliadačov vyššie, kde položky ako „Curl“ a „Neznáme“ sú automatická prevádzka, nie ľudia. Filtrovanie botov vyžaduje platený plán Cloudflare, ktorý nemáme, a tiché odpočítanie odhadu by čísla urobilo menej overiteľnými, nie viac.",
+      "bots": "— sú to surové počty na okraji siete, takže sú v nich aj prehľadávače, monitory dostupnosti a skriptované klienty. Vidíš ich sám v rozdelení podľa prehliadačov vyššie, kde položky ako „Curl“ a „Neznáme“ sú automatická prevádzka, nie ľudia. Boty je čoraz ťažšie odlíšiť od ľudských návštevníkov a čoskoro ich v týchto štatistikách nebude možné rozlíšiť, takže nemá zmysel pokúšať sa ich odfiltrovať.",
       "totalTerm": "Súčty rozsahu",
       "total": "— zobrazenia stránok a požiadavky sa v rozsahu sčítavajú. Počty návštevníkov zámerne nesčítavame do „celkového počtu návštevníkov“, lebo kto tu bol v pondelok aj v utorok, by sa počítal dvakrát.",
       "peakTerm": "Najrušnejšia hodina / deň",
@@ -21017,5 +21020,27 @@
     "remember": "Zapamätať si moju voľbu",
     "rememberHint": "Kedykoľvek to zmeníte v Nastaveniach",
     "failed": "Správu sa nepodarilo vymazať"
+  },
+  "profileAskAi": {
+    "row": "Opýtať sa AI",
+    "rowSub": "Sledovať, lajknúť všetko, byť v obraze",
+    "back": "Späť",
+    "title": "Opýtať sa AI na {{handle}}",
+    "sub": "Asistent to urobí, vy potvrdíte",
+    "followLikeAll": "Sledovať a lajknúť všetko",
+    "followLikeAllSub": "Začne sledovať {{handle}}, reaguje na každý príspevok",
+    "likeAll": "Lajknúť všetky príspevky",
+    "likeAllSub": "Preskočí tie, na ktoré ste už reagovali",
+    "catchUp": "Zhrň mi novinky",
+    "catchUpSub": "Čo {{handle}} v poslednom čase zverejnil, stručne",
+    "message": "Napísať správu",
+    "messageSub": "Pripraví koncept, odošlete ho vy",
+    "placeholder": "Opýtajte sa čokoľvek o {{handle}}…",
+    "send": "Odoslať",
+    "promptFollowLikeAll": "Začni sledovať {{handle}} a zareaguj na všetky príspevky",
+    "promptLikeAll": "Zareaguj na všetky príspevky od {{handle}}",
+    "promptCatchUp": "Zhrň mi, čo {{handle}} v poslednom čase zverejnil",
+    "promptMessage": "Pomôž mi napísať správu pre {{handle}}",
+    "promptAbout": "O {{handle}}: {{question}}"
   }
 }

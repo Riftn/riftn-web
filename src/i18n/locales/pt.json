@@ -1,4 +1,5 @@
 {
+  "dmVideo": {"edit": "Editar vídeo", "hiddenTag": "Oculto", "tapToEdit": "Toque para editar", "cover": "Capa", "trim": "Cortar", "mirror": "Espelhar", "rotate": "Girar", "hide": "Ocultar", "timer": "Temporizador", "sheetTitleAny": "Editar antes de enviar", "close": "Fechar", "replace": "Substituir", "hiddenUntilTap": "Oculto até que toquem nele", "pause": "Pausar", "play": "Reproduzir vídeo", "mute": "Silenciar", "unmute": "Ativar som", "scrub": "Percorrer o vídeo", "addMore": "Adicionar fotos ou vídeos", "trimAria": "Arraste as extremidades para cortar", "coverAria": "Toque em um quadro para definir a capa", "coverHint": "Toque em um quadro para definir a capa", "coverOwn": "Sua foto", "coverAuto": "Automático", "uploadCover": "Carregar uma foto de capa", "mirrored": "Espelhado", "original": "Original", "rotate90": "Girar 90°", "showNormally": "Mostrar normalmente", "showNormallyBody": "Eles veem imediatamente", "hideUntilTap": "Ocultar até que toquem", "hideUntilTapBody": "Desfocado até que toquem nele", "hidePrice": "Ocultar atrás de um preço", "hidePriceBody": "Desfocado até que paguem você", "priceUnavailable": "Não neste chat", "timerOff": "Desativado", "timerOffBody": "Fica no chat.", "timerViewBody": "Desaparece para ambos assim que visualizarem.", "confirm": "Confirmar", "lockedFor": "Desbloquear por {{value1}} DHB", "lockedForUsd": "Desbloquear por {{value1}}", "editItem": "Editar item {{value1}}", "kept": "{{time}} mantido", "timerTimeBody": "Desaparece para ambos {{value1}} após o envio."},
   "postBg": {
     "addMedia": "Adicionar imagem, GIF ou vídeo",
     "changeMedia": "Trocar imagem, GIF ou vídeo",
@@ -308,8 +309,10 @@
       "pronouns": "Pronomes",
       "location": "Localização",
       "custom": "Personalizado",
-      "customOption": "Etiqueta personalizada"
-    }
+      "customOption": "Etiqueta personalizada",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Seguir #{{tag}}",
@@ -363,6 +366,7 @@
     "failed": "Não foi salvo. Tente de novo."
   },
   "postVisibility": {
+    "self": "Só eu",
     "label": "Quem pode ver isto",
     "public": "Todos",
     "followers": "Só seguidores",
@@ -716,6 +720,7 @@
     "heading": "Curtas do Riftn"
   },
   "settings": {
+    "loginLook": {"title": "Tela de login", "desc": "Como o logo e o slogan da Riftn se movem na tela de login neste dispositivo.", "tube": "TV de tubo", "vhs": "Fita VHS", "led": "Painel de LED", "holo": "Holograma", "neon": "Neon", "3d": "3D", "flat": "Plano"}, "arrivalLook": {"title": "Depois de entrar", "desc": "O que aparece enquanto sua conta carrega, antes de sua foto chegar à página. Neste dispositivo.", "trace": "Traço", "tune": "Sintonizar", "rift": "Fenda", "deck": "Baralho", "glass": "Gota de vidro"},
     "postLanding": "Depois de publicar",
     "postLandingDesc": "Como sua nova publicação aparece no seu feed",
     "postLandingGhost": "Espaço fantasma",
@@ -1428,6 +1433,8 @@
     "tokensUnit": "tokens"
   },
   "postOptions": {
+    "notInterestedDone": "Entendido. Você verá menos posts como este.",
+    "notInterested": "Não tenho interesse",
     "liveAlertsOn": "Agora você segue {{name}}. Você receberá uma notificação quando a transmissão ao vivo começar.",
     "liveAlertsAlreadyOn": "Você segue {{name}}, então receberá uma notificação quando a transmissão ao vivo começar.",
     "embed": "Incorporar",
@@ -2026,6 +2033,7 @@
     "tipTokens": "{{amount}} tokens",
     "tokenAmount": "{{amount}} tokens",
     "custom": {
+      "bioMention": "{{name}} marcou você na bio",
       "featureCommentLikeNamed": "{{name}} curtiu seu comentário em “{{title}}”",
       "featureCommentLike": "{{name}} curtiu seu comentário em um pedido",
       "governanceCommentLikeNamed": "{{name}} curtiu seu comentário em proposta “{{title}}”",
@@ -2229,7 +2237,7 @@
     "deviceInfoErrors": "Erros recentes",
     "deviceInfoNoErrors": "Nenhum",
     "promptFilters": "Filtrar por categoria",
-    "promptMediaError": "Escolha imagens ou vídeos com menos de 50 MB cada.",
+    "promptMediaError": "Escolha imagens ou vídeos com menos de 200 MB cada.",
     "promptMediaLimit": "Até {{max}} anexos.",
     "removePromptAttachment": "Remover {{name}}",
     "promptAttachment": "Anexo {{number}}",
@@ -3451,6 +3459,8 @@
     "copyFailed": "Não foi possível copiar"
   },
   "profileOptions": {
+    "bioTagRemoved": "Você não está mais marcado nesta bio",
+    "removeBioTag": "Remover-me da bio",
     "copyRssFeed": "Copiar link do feed RSS",
     "rssFeedCopied": "Link do feed RSS copiado",
     "copyProfileUrl": "Copiar URL do perfil",
@@ -4226,7 +4236,7 @@
       "pageViewsTerm": "Páginas vistas",
       "pageViews": "— pedidos que a Cloudflare classifica como carregamentos de página, e não imagens, scripts ou chamadas de API.",
       "botsTerm": "Os bots estão incluídos",
-      "bots": "— são contagens brutas da edge, por isso incluem rastreadores, monitores de disponibilidade e clientes automatizados. Pode vê-los na divisão por navegador acima, onde entradas como «Curl» e «Desconhecido» são tráfego automatizado e não pessoas. Filtrar bots exige um plano pago da Cloudflare que não temos, e subtrair uma estimativa em silêncio tornaria os números menos verificáveis, não mais.",
+      "bots": "— são contagens brutas da edge, por isso incluem rastreadores, monitores de disponibilidade e clientes automatizados. Pode vê-los na divisão por navegador acima, onde entradas como «Curl» e «Desconhecido» são tráfego automatizado e não pessoas. Os bots são cada vez mais difíceis de distinguir dos visitantes humanos e em breve serão indistinguíveis nestas estatísticas, pelo que não vale a pena tentar filtrá-los.",
       "totalTerm": "Totais do intervalo",
       "total": "— páginas vistas e pedidos somam-se ao longo do intervalo. As contagens de visitantes deliberadamente não são somadas num «total de visitantes», porque alguém que esteve aqui na segunda e na terça seria contado duas vezes.",
       "peakTerm": "Hora / dia mais movimentado",
@@ -6985,6 +6995,7 @@
     "allChains": "Todas as redes"
   },
   "usernames": {
+    "swap": {"start": "Iniciar troca", "placeholder": "@sua_outra_conta", "sent": "Enviado. Mude para @{{name}} e aceite.", "waiting": "Aguardando @{{to}} aceitar. Mude para essa conta para terminar.", "done": "Trocado. Agora você é @{{name}}.", "decline": "Recusar", "accept": "Trocar agora", "incoming": "@{{from}} quer trocar: esta conta vira @{{from}} e aquela vira @{{to}}.", "body": "Tem duas contas? Troque os nomes de usuário em um passo. Comece aqui, mude para a outra conta e aceite. Nenhum nome fica livre para outra pessoa.", "title": "Trocar com sua outra conta"},
     "seoTitle": "Nome de utilizador Marketplace | Riftn",
     "seoDescription": "Compre e venda nomes de utilizador Riftn com a tokens. Pesquise identificadores curtos, numéricos e originais para venda ou liste os seus próprios, a transferência acontece on-chain no momento em que o pagamento é liberado.",
     "title": "Usuários",
@@ -20859,5 +20870,27 @@
     "remember": "Lembrar minha escolha",
     "rememberHint": "Altere quando quiser em Configurações",
     "failed": "Não foi possível apagar a mensagem"
+  },
+  "profileAskAi": {
+    "row": "Perguntar à IA",
+    "rowSub": "Seguir, curtir tudo, se atualizar",
+    "back": "Voltar",
+    "title": "Perguntar à IA sobre {{handle}}",
+    "sub": "O Assistente faz, você confirma",
+    "followLikeAll": "Seguir e curtir tudo",
+    "followLikeAllSub": "Segue {{handle}} e reage a cada publicação",
+    "likeAll": "Curtir todas as publicações",
+    "likeAllSub": "Pula as que você já reagiu",
+    "catchUp": "Me atualize",
+    "catchUpSub": "O que {{handle}} publicou recentemente, em resumo",
+    "message": "Escrever uma mensagem",
+    "messageSub": "Cria um rascunho, você envia",
+    "placeholder": "Pergunte qualquer coisa sobre {{handle}}…",
+    "send": "Enviar",
+    "promptFollowLikeAll": "Siga {{handle}} e reaja a todas as publicações",
+    "promptLikeAll": "Reaja a todas as publicações de {{handle}}",
+    "promptCatchUp": "Me atualize sobre o que {{handle}} publicou recentemente",
+    "promptMessage": "Me ajude a escrever uma mensagem para {{handle}}",
+    "promptAbout": "Sobre {{handle}}: {{question}}"
   }
 }

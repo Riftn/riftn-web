@@ -1101,11 +1101,7 @@ export function PostMediaPreview({
                         >
                           <span data-keep-dark className="dh-edit-glass flex h-8 items-center gap-1.5 rounded-full px-3.5 text-xs font-semibold text-white">
                             <Pencil className="h-3.5 w-3.5" />
-                            {m.trimStart !== undefined && m.trimEnd !== undefined
-                              ? `${Math.floor((m.trimEnd - m.trimStart) / 60)}:${String(Math.floor((m.trimEnd - m.trimStart) % 60)).padStart(2, '0')}`
-                              : (m.videoEdits || m.destructSeconds || m.description || m.isMusicVideo)
-                                ? _copy("post.media.edited", { defaultValue: "Edited" })
-                                : _copy("post.media.edit", { defaultValue: "Edit" })}
+                            {_copy("post.media.editVideo", { defaultValue: "Edit video" })}
                           </span>
                         </button>
                       )}

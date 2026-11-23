@@ -1,4 +1,5 @@
 {
+  "dmVideo": {"edit": "編輯影片", "hiddenTag": "隱藏", "tapToEdit": "點擊以編輯", "cover": "封面", "trim": "裁剪", "mirror": "鏡像", "rotate": "旋轉", "hide": "隱藏", "timer": "計時器", "sheetTitleAny": "傳送前編輯", "close": "關閉", "replace": "取代", "hiddenUntilTap": "點擊前隱藏", "pause": "暫停", "play": "播放影片", "mute": "靜音", "unmute": "取消靜音", "scrub": "拖動影片進度條", "addMore": "加入相片或影片", "trimAria": "拖動兩端以裁剪", "coverAria": "點擊影格以設定封面", "coverHint": "點擊影格以設定封面", "coverOwn": "你的相片", "coverAuto": "自動", "uploadCover": "上傳封面圖片", "mirrored": "已鏡像", "original": "原始", "rotate90": "旋轉 90°", "showNormally": "正常顯示", "showNormallyBody": "立即顯示", "hideUntilTap": "點擊前隱藏", "hideUntilTapBody": "點擊前模糊顯示", "hidePrice": "隱藏於價格後", "hidePriceBody": "付款前模糊顯示", "priceUnavailable": "不在本對話中", "timerOff": "關閉", "timerOffBody": "佢會留喺對話入面。", "timerViewBody": "佢哋睇完之後，對你哋雙方嚟講都會消失。", "confirm": "確認", "lockedFor": "解鎖 {{value1}} DHB", "lockedForUsd": "解鎖 {{value1}}", "editItem": "編輯項目 {{value1}}", "kept": "{{time}} 已保留", "timerTimeBody": "你發送之後 {{value1}}，對你哋雙方嚟講都會消失。"},
   "postBg": {
     "addMedia": "加圖片、GIF 或者影片",
     "changeMedia": "換圖片、GIF 或者影片",
@@ -296,9 +297,11 @@
       "pronouns": "代詞",
       "location": "位置",
       "custom": "習俗",
-      "customOption": "自訂標籤"
+      "customOption": "自訂標籤",
+      "cashapp": "Cash App"
     },
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "追蹤 #{{tag}}",
@@ -705,6 +708,7 @@
     "heading": "Riftn 短片"
   },
   "settings": {
+    "loginLook": {"title": "登入畫面", "desc": "呢部裝置登入畫面入面 Riftn 標誌同標語點樣郁。", "tube": "映像管電視", "vhs": "VHS 錄影帶", "led": "LED 牆", "holo": "全息投影", "neon": "霓虹", "3d": "3D", "flat": "扁平"}, "arrivalLook": {"title": "登入之後", "desc": "帳戶載入緊、頭像落到頁面之前播嘅效果。只限呢部裝置。", "trace": "描邊", "tune": "調台", "rift": "裂縫", "deck": "一副牌", "glass": "玻璃水滴"},
     "postLanding": "發佈之後",
     "postLandingDesc": "新帖子喺動態入面出現嘅方式",
     "postLandingGhost": "幽靈空位",
@@ -2210,7 +2214,7 @@
     "promptDevice": "裝置同操作系統（針對錯誤）",
     "deviceInfoNoErrors": "無",
     "promptFilters": "篩選分類",
-    "promptMediaError": "揀每張50MB 以下嘅圖片或者影片。",
+    "promptMediaError": "揀每張200MB 以下嘅圖片或者影片。",
     "promptMediaLimit": "最多 {{max}} 附件。",
     "removePromptAttachment": "移除 {{name}}",
     "promptAttachment": "附件 {{number}}",
@@ -4211,7 +4215,7 @@
       "pageViewsTerm": "頁面瀏覽量",
       "pageViews": "——Cloudflare 判定為頁面載入嘅請求，唔係圖片、腳本或者 API 呼叫。",
       "botsTerm": "包括機器人",
-      "bots": "——呢啲係邊緣節點嘅原始計數，所以爬蟲、可用性監察同腳本客戶端都計埋。你可以喺上面嘅瀏覽器分佈自己睇，「Curl」同「未知」呢類項目係自動流量，唔係真人。要過濾機器人就要用我哋冇訂閱嘅 Cloudflare 收費方案，而靜靜雞減走一個估算只會令數字更難核實，唔會更容易。",
+      "bots": "——呢啲係邊緣節點嘅原始計數，所以爬蟲、可用性監察同腳本客戶端都計埋。你可以喺上面嘅瀏覽器分佈自己睇，「Curl」同「未知」呢類項目係自動流量，唔係真人。機械人同真人訪客越嚟越難分辨，好快喺呢啲統計入面就分唔到，所以嘗試過濾走機械人都冇用。",
       "totalTerm": "範圍合計",
       "total": "——頁面瀏覽量同請求數會喺範圍內累加。訪客數特登唔會加埋成為「訪客總數」，因為星期一同星期二都嚟過嘅人會計兩次。",
       "peakTerm": "最繁忙嘅小時／日子",
@@ -20855,5 +20859,27 @@
     "remember": "記住我嘅選擇",
     "rememberHint": "隨時可以喺設定更改",
     "failed": "刪除唔到訊息"
+  },
+  "profileAskAi": {
+    "row": "問AI",
+    "rowSub": "追蹤、全部讚好、睇吓近況",
+    "back": "返回",
+    "title": "問AI關於{{handle}}",
+    "sub": "助手幫你做，你確認",
+    "followLikeAll": "追蹤兼全部讚好",
+    "followLikeAllSub": "追蹤{{handle}}，回應每一個帖",
+    "likeAll": "讚好佢所有帖文",
+    "likeAllSub": "跳過你已經回應過嘅",
+    "catchUp": "同我講吓近況",
+    "catchUpSub": "{{handle}}最近post咗乜，簡單講",
+    "message": "寫訊息俾佢",
+    "messageSub": "幫你擬好訊息，你自己發送",
+    "placeholder": "問任何關於{{handle}}嘅嘢…",
+    "send": "發送",
+    "promptFollowLikeAll": "追蹤{{handle}}，再回應佢所有帖文",
+    "promptLikeAll": "回應{{handle}}所有帖文",
+    "promptCatchUp": "同我講吓{{handle}}最近post咗啲乜",
+    "promptMessage": "幫我寫個訊息俾{{handle}}",
+    "promptAbout": "關於{{handle}}：{{question}}"
   }
 }

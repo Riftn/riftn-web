@@ -76,6 +76,32 @@ export function useStreamChatJoins(streamId?: string, offline = false) {
     });
     // Gifted subscriptions: one line per checkout, however many it bought.
     const giftSubs = offline ? null : watchLiveRoomEvents(streamId, (event) => {
+      // A viewer spending channel points: one line, the reward and what they typed.
+      if (event.type === 'reward') {
+        push({
+          id: `reward:${event.id}`,
+          type: 'reward', address: event.user.address || '',
+          username: event.user.displayName || event.user.username,
+          avatarUrl: event.user.avatarImageUrl || undefined,
+          rewardTitle: event.title,
+          message: event.text || undefined,
+          timestamp: new Date().toISOString(),
+        });
+        return;
+      }
+      // One viewer giving another channel points.
+      if (event.type === 'pointsGift') {
+        push({
+          id: `pointsGift:${event.id}`,
+          type: 'pointsGift', address: event.user.address || '',
+          username: event.user.displayName || event.user.username,
+          avatarUrl: event.user.avatarImageUrl || undefined,
+          pointsAmount: event.amount,
+          recipientName: event.to.displayName || event.to.username || (event.to.address ? `${event.to.address.slice(0, 6)}…` : ''),
+          timestamp: new Date().toISOString(),
+        });
+        return;
+      }
       if (event.type !== 'giftSub') return;
       push({
         id: `giftSub:${streamId}:${++sequence}`,

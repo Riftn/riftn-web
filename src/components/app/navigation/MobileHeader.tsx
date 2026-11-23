@@ -1,6 +1,7 @@
 import { useTranslation as _useCopy } from 'react-i18next';
 import { ElectricLogo } from './ElectricLogo';
 import { FeedRefreshLogo } from './FeedRefreshLogo';
+import { useKeyboardSafeSheet } from '@/hooks/use-keyboard-open';
 import { useGlobalDropZone } from '@/hooks/use-global-drop-zone';
 import { openNotificationsDrawer, warmNotificationsDrawer } from '../NotificationsDrawer';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -31,6 +32,7 @@ import { warmLoginSheet } from '@/components/app/LoginModal';
 import dehubMark from '@/assets/dehub-logo-compact.png';
 import { scrollDocumentToSmooth } from '@/lib/document-scroll';
 import { FeedIslandCapsule } from './FeedIslandCapsule';
+import { MobileAccountButton } from './MobileAccountButton';
 import { usePostFeedLook } from '@/lib/post-feed-look';
 
 const HeaderLogo = memo(function HeaderLogo({ onClick, onPointerDown, isAuthenticated }: {
@@ -74,6 +76,7 @@ interface MobileHeaderProps {
 }
 
 export function MobileHeader({ isOpen, onOpenChange, children }: MobileHeaderProps) {
+  const { style: keyboardStyle } = useKeyboardSafeSheet(isOpen);
   const { t: _copy } = _useCopy();
   const { t } = useTranslation();
   const { openPostModal } = useGlobalDropZone();
@@ -166,8 +169,8 @@ export function MobileHeader({ isOpen, onOpenChange, children }: MobileHeaderPro
 
   return (
     <>
-    <header ref={headerRef} data-mobile-header data-clear-top-bar={theme === 'system' ? undefined : ''} className={`${showBar && !islandBar ? '' : 'hidden '}lg:hidden fixed top-0 left-0 right-0 ${anyOverlayOpen ? 'z-[40]' : 'z-[60]'} px-[var(--top-bar-edge,16px)] h-11 flex items-center justify-between pointer-events-auto transition-transform duration-300 ease-in-out ${(!navVisible && !isOpen && !anyOverlayOpen) ? '-translate-y-full' : 'translate-y-0'} ${isOpen ? 'bg-transparent' : 'bg-black'}`}
-      style={theme === 'system' && !isOpen && !anyOverlayOpen ? { transform: 'translateY(var(--system-feed-header-offset, 0px))' } : undefined}
+    <header ref={headerRef} data-mobile-header data-clear-top-bar={theme === 'system' ? undefined : ''} className={`${showBar && !islandBar ? '' : 'hidden '}lg:hidden fixed top-0 left-0 right-0 ${anyOverlayOpen ? 'z-[40]' : 'z-[60]'} px-[var(--top-bar-edge,16px)] h-11 flex items-center justify-between pointer-events-auto transition-transform duration-300 ease-in-out ${(isAuthenticated && !navVisible && !isOpen && !anyOverlayOpen) ? '-translate-y-full' : 'translate-y-0'} ${isOpen ? 'bg-transparent' : 'bg-black'}`}
+      style={isAuthenticated && theme === 'system' && !isOpen && !anyOverlayOpen ? { transform: 'translateY(var(--system-feed-header-offset, 0px))' } : undefined}
     >
       {/* Profile — left slot.
           Direct post-page URL access: back button replaces the menu/settings toggle.
@@ -175,7 +178,7 @@ export function MobileHeader({ isOpen, onOpenChange, children }: MobileHeaderPro
           so we keep the normal menu/avatar here to preserve the "you never left the feed" feel. */}
       <div className="flex items-center">
         {isAuthenticated ? (
-          <Drawer open={isOpen} onOpenChange={onOpenChange}>
+          <Drawer open={isOpen} onOpenChange={onOpenChange} repositionInputs={false}>
 
             <DrawerTrigger asChild>
               {user ? (
@@ -211,7 +214,7 @@ export function MobileHeader({ isOpen, onOpenChange, children }: MobileHeaderPro
                 the bottom of what is actually on screen. On iOS Safari that
                 pushed the top of the menu — the search field — off the top of
                 the screen, with no way to scroll it back into view. */}
-            <DrawerContent glass className="max-h-[85dvh]" aria-describedby={undefined}>
+            <DrawerContent glass className="max-h-[85dvh]" style={keyboardStyle ?? undefined} aria-describedby={undefined}>
               <DrawerTitle className="sr-only">{t('sidebar.searchMenu')}</DrawerTitle>
               {/* Column, not a scroller: the menu pins its profile + search to
                   the top and its account actions to the bottom, and scrolls
@@ -221,7 +224,9 @@ export function MobileHeader({ isOpen, onOpenChange, children }: MobileHeaderPro
               </div>
             </DrawerContent>
           </Drawer>
-        ) : null}
+        ) : (
+          <MobileAccountButton action="signup" onClick={() => openLoginModal({ intent: 'signup' })} onPointerDown={warmSheetForLogin} />
+        )}
       </div>
 
       {/* dehub mark — centred on the bar itself, not between the side slots, so
@@ -250,13 +255,16 @@ export function MobileHeader({ isOpen, onOpenChange, children }: MobileHeaderPro
             </span>
           </button>
         )}
+        {!isAuthenticated && (
+          <MobileAccountButton action="signin" onClick={() => openLoginModal()} onPointerDown={warmSheetForLogin} />
+        )}
       </div>
     </header>
     {islandBar && showBar && (
       <FeedIslandCapsule
         isAuthenticated={isAuthenticated}
         onLogoPointerDown={warmSheetForLogin}
-        visible={navVisible && !isOpen && !anyOverlayOpen && !isPostPage}
+        visible={(!isAuthenticated || navVisible) && !isOpen && !anyOverlayOpen && !isPostPage}
         avatar={isAuthenticated && user ? (
           <Avatar className="w-[28px] h-[28px] rounded-lg">
             {user.avatarImageUrl && user.address && (
@@ -271,7 +279,7 @@ export function MobileHeader({ isOpen, onOpenChange, children }: MobileHeaderPro
             </AvatarFallback>
           </Avatar>
         ) : null}
-        onAvatarClick={() => (isAuthenticated ? onOpenChange(true) : openLoginModal())}
+        onAvatarClick={() => (isAuthenticated ? onOpenChange(true) : openLoginModal({ intent: 'signup' }))}
         onCreatePost={() => (isAuthenticated ? openPostModal() : openLoginModal())}
         logoSrc={dehubMark}
         unread={isAuthenticated ? totalNotifUnread : 0}

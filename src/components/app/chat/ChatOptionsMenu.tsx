@@ -1,6 +1,6 @@
 import type { ComponentType, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check, FolderPlus, Plus, Archive, ArchiveRestore, Bell, BellOff, CheckCircle2, Eraser, EyeOff, Hand, Lock, LockOpen, MessageCircle, MessageCircleDashed, Pin, PinOff, PictureInPicture2, Trash2 } from 'lucide-react';
+import { Check, FolderPlus, Plus, Archive, ArchiveRestore, Bell, BellOff, CheckCircle2, Eraser, EyeOff, Hand, Languages, Lock, LockOpen, MessageCircle, MessageCircleDashed, Pin, PinOff, PictureInPicture2, Trash2 } from 'lucide-react';
 import * as Ctx from '@/components/ui/context-menu';
 import * as Drop from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
@@ -11,7 +11,7 @@ import { isMuted } from '@/hooks/use-chat-prefs';
  * One chat's options, in the same order whether you right-click it in the
  * chat list or press the three dots at the top of an open chat:
  * Select (right-click only), Open in new window, Archive, Pin, Mute (for how long), Mark as unread,
- * Encrypt chat (DMs), Block, Clear history, Delete chat.
+ * Encrypt chat (DMs), Send in their language (DMs), Block, Clear history, Delete chat.
  */
 
 export interface ChatOptionsHandlers {
@@ -31,6 +31,8 @@ export interface ChatOptionsHandlers {
   onHideFromList?: () => void;
   /** DMs only: turn end-to-end encryption on or off for this chat. */
   onToggleEncryption?: () => void;
+  /** DMs only: send your messages in the other person's language, or stop. */
+  onToggleTranslateOut?: () => void;
   /** Start picking several chats at once (right-click menu only). */
   onSelectMany?: () => void;
   /** The person's own Chat tabs, and whether this chat is in each. */
@@ -159,6 +161,12 @@ function ChatOptionItems({ kit, h }: { kit: Kit; h: ChatOptionsHandlers }) {
         <Item className={ROW} onSelect={h.onToggleEncryption}>
           {h.pref?.encryptedAt ? <LockOpen /> : <Lock />}
           {h.pref?.encryptedAt ? t('chatMenu.encryptOff', 'Turn off encryption') : t('chatMenu.encrypt', 'Encrypt chat')}
+        </Item>
+      )}
+      {h.onToggleTranslateOut && !h.pref?.encryptedAt && (
+        <Item className={ROW} onSelect={h.onToggleTranslateOut}>
+          <Languages />
+          {h.pref?.translateOutAt ? t('chatMenu.translateOutOff', 'Send as I type') : t('chatMenu.translateOut', 'Send in their language')}
         </Item>
       )}
       {h.onHideFromList && (

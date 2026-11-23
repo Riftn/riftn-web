@@ -1,4 +1,5 @@
 {
+  "dmVideo": {"edit": "Wideony redaktirle", "hiddenTag": "Gizlin", "tapToEdit": "Redaktirlemek üçin basyň", "trim": "Kesmek", "mirror": "Aýna", "rotate": "Öwüriň", "hide": "Gizle", "timer": "Sagat", "sheetTitleAny": "Ibermezden ozal redaktirle", "replace": "Çalyş", "hiddenUntilTap": "Üstüne basylýança gizlin", "pause": "Pauza", "play": "Wideo oýnat", "mute": "Sesini öçür", "unmute": "Sesini aç", "scrub": "Wideo boýunça öňe-yza geçiň", "addMore": "Suratlary ýa-da wideolary goşuň", "trimAria": "Kesmek üçin uçlary süýşüriň", "coverAria": "Daşlygy bellemek üçin çarçuwa basyň", "coverHint": "Daşlygy bellemek üçin çarçuwa basyň", "coverOwn": "Suratyňyz", "coverAuto": "Awto", "uploadCover": "Mugap suratyny ýükle", "original": "Original", "rotate90": "90° döwreňde döwretmek", "showNormally": "Show normally", "showNormallyBody": "Olarak görürler, anında bilerler.", "hideUntilTap": "Basylýança gizle", "hideUntilTapBody": "Basylýança bulanyk görkezilýär", "hidePrice": "Bahanyň arkasyna gizlenmek", "hidePriceBody": "Olar saňa töleg edýänçä bulanyk", "priceUnavailable": "Bu söhbetde däl", "timerOff": "Çyk", "timerOffBody": "Ol çatda galýar.", "timerViewBody": "Olar ony görenden soň, ikisiňiz üçin hem ýok bolýar.", "confirm": "Tassykla", "lockedFor": "{{value1}} DHB üçin açyň", "lockedForUsd": "{{value1}} üçin gulpuny aç", "editItem": "Elementi redaktirle {{value1}}", "kept": "{{time}} saklandy", "timerTimeBody": "Ibereniňizden soň {{value1}} ikisiňiz üçin hem ýok bolýar."},
   "postBg": {
     "addMedia": "Surat, GIF ýa-da wideo goş",
     "changeMedia": "Suraty, GIF-i ýa-da wideony üýtget",
@@ -297,8 +298,10 @@
       "pronouns": "Çykyşlar",
       "location": "Ýer",
       "custom": "Adat",
-      "customOption": "Özgür etiket"
-    }
+      "customOption": "Özgür etiket",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} yzarla",
@@ -2210,7 +2213,7 @@
     "promptDevice": "Cihaz & OS (buglar ýçin)",
     "deviceInfoNoErrors": "Hiç biri",
     "promptFilters": "Kategoriyaga göre filtrele",
-    "promptMediaError": "Her birini 20MB-dan kichik resimler yada video sec",
+    "promptMediaError": "Her birini 200MB-dan kichik resimler yada video sec",
     "promptMediaLimit": "En az {{max}} yukarı",
     "removePromptAttachment": "Yukarıdan sil {{name}}",
     "promptAttachment": "Yukarı {{number}}",
@@ -4211,7 +4214,7 @@
       "pageViewsTerm": "Sahypa görnüşleri",
       "pageViews": "— Cloudflare-yň surat, skript ýa-da API çagyryşlary däl-de, sahypa ýüklenmesi hökmünde toparlaşdyrýan haýyşlary.",
       "botsTerm": "Botlar goşulan",
-      "bots": "— bular çig ýerli hasaplar, şonuň üçin gözlegçiler (crawler), işjeňlik gözegçileri we skript ulanyjylary hem şolaryň içinde. Ýokardaky brauzer bölünişiginde “Curl” we “Näbelli” ýaly ýazgylaryň adamlar däl-de, awtomatiki traffik bolýandygyny özüňiz görüp bilersiňiz. Botlary aýyrmak biziň ulanmaýan tölegli Cloudflare derejesini talap edýär, we bahany ümsüm çykaryp aýyrmak sanlary has anyk däl-de, has az barlanylýan eder.",
+      "bots": "— bular çig ýerli hasaplar, şonuň üçin gözlegçiler (crawler), işjeňlik gözegçileri we skript ulanyjylary hem şolaryň içinde. Ýokardaky brauzer bölünişiginde “Curl” we “Näbelli” ýaly ýazgylaryň adamlar däl-de, awtomatiki traffik bolýandygyny özüňiz görüp bilersiňiz. Botlary adam myhmanlardan tapawutlandyrmak barha kynlaşýar we ýakyn wagtda bu statistikada olary tapawutlandyryp bolmaz, şonuň üçin botlary süzmäge synanyşmagyň peýdasy ýok.",
       "totalTerm": "Aralyk jemleri",
       "total": "— sahypa görnüşleri we haýyşlar aralykda jemlenýär. Myhman sanlary bilkastlaýyn “jemi myhmanlar” diýen bir sözbaşa jemlenmeýär, sebäbi duşenbe we sişenbe gelen biri iki gezek hasaplanardy.",
       "peakTerm": "Iň işjeň sagat / gün",
@@ -20855,5 +20858,27 @@
     "remember": "Saýlawymy ýatda sakla",
     "rememberHint": "Ony islendik wagt Sazlamalarda üýtgediň",
     "failed": "Habary pozup bolmady"
+  },
+  "profileAskAi": {
+    "row": "Emeli aňdan sora",
+    "rowSub": "Yzarla, hemmesini halla, täzeliklerden habarly bol",
+    "back": "Yza",
+    "title": "{{handle}} barada emeli aňdan sora",
+    "sub": "Kömekçi ýerine ýetirýär, sen tassyklaýarsyň",
+    "followLikeAll": "Yzarla we hemmesini halla",
+    "followLikeAllSub": "{{handle}} yzarlaýar, her ýazga reaksiýa bildirýär",
+    "likeAll": "Ähli ýazgylaryny halla",
+    "likeAllSub": "Eýýäm reaksiýa bildirenleriňi geçýär",
+    "catchUp": "Täzelikleri aýt",
+    "catchUpSub": "{{handle}} soňky döwürde näme paýlaşdy, gysgaça",
+    "message": "Hat ýaz",
+    "messageSub": "Hatyň taslamasyny ýazýar, sen iberýärsiň",
+    "placeholder": "{{handle}} barada islän zadyňy sora…",
+    "send": "Iber",
+    "promptFollowLikeAll": "{{handle}} yzarla we onuň ähli ýazgylaryna reaksiýa bildir",
+    "promptLikeAll": "{{handle}} ähli ýazgylaryna reaksiýa bildir",
+    "promptCatchUp": "{{handle}} soňky döwürde näme paýlaşandygyny aýt",
+    "promptMessage": "{{handle}} üçin hat ýazmaga kömek et",
+    "promptAbout": "{{handle}} barada: {{question}}"
   }
 }

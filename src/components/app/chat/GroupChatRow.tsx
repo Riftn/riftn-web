@@ -21,6 +21,7 @@ import { formatTimeAgo } from '@/lib/feed-utils';
 import { roomPreviewLine } from '@/lib/room-chat-read';
 import type { RoomSummary } from '@/hooks/use-room-chat-summaries';
 
+import { formatCount } from '@/lib/format-count';
 export function GroupChatRow({ community, onClick, pref, reactions, selected, selecting = false, checked = false, onLongPress, summary, me = '' }: {
   community: Community;
   /** Newest line and unread number (hooks/use-room-chat-summaries). */
@@ -43,7 +44,7 @@ export function GroupChatRow({ community, onClick, pref, reactions, selected, se
   const kind = communityKindOf(community);
   const KindIcon = kind === 'channel' ? Megaphone : Users;
   const price = entryPriceOf(community);
-  const members = { count: community.member_count ?? 0, formattedCount: (community.member_count ?? 0).toLocaleString() };
+  const members = { count: community.member_count ?? 0, formattedCount: formatCount(community.member_count ?? 0) };
   const subtitle = kind === 'channel'
     ? t('communities.newChat.channelRow', { defaultValue: 'Channel · {{formattedCount}} members', ...members })
     : kind === 'group'
@@ -96,7 +97,7 @@ export function GroupChatRow({ community, onClick, pref, reactions, selected, se
           {pref?.markedUnread && !reactions && !(unread > 0) && (
             <span data-count-badge data-chat-row-marked-unread aria-label="Unread" className={`${pref?.pinnedAt || isMuted(pref) || lastAt ? 'ml-1' : 'ml-auto'} h-2.5 w-2.5 shrink-0 rounded-[3px] bg-white`} />
           )}
-          <ReactionAlertBadge reactions={reactions} className={pref?.pinnedAt || isMuted(pref) || lastAt ? 'ml-1' : 'ml-auto'} />
+          <ReactionAlertBadge reactions={reactions} rowKey={`room:${community.id}`} className={pref?.pinnedAt || isMuted(pref) || lastAt ? 'ml-1' : 'ml-auto'} />
           {unread > 0 && <UnreadCountChip count={unread} className="ml-1" />}
         </span>
         {reactions ? (

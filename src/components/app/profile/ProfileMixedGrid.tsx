@@ -18,6 +18,7 @@
 import { memo, useCallback, useEffect, useMemo, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from 'react';
 import { useDragReorder } from '@/hooks/use-drag-reorder';
 import { warmPostPage } from '@/lib/preload-post-page';
+import { warmPostData } from '@/lib/post-warm';
 import { cdnImage, deviceWidth } from '@/lib/media-url';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -42,6 +43,7 @@ import { postTileMenuProps, type PostMenuTarget } from '@/lib/post-menu';
 import { imagePostMenuTarget, textPostMenuTarget, videoMenuTarget } from '@/lib/post-menu-targets';
 import './profile-mixed-grid.css';
 
+import { formatCount } from '@/lib/format-count';
 /** One cell's worth of content. Optimistic posts arrive in the same shape. */
 export interface MixedGridEntry {
   key: string;
@@ -214,6 +216,7 @@ export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries, onMove
   const openPost = (id: string, slug?: string, entry?: MixedGridEntry) => {
     if (entry && openReel(entry, id)) return;
     noteProfileFeedOpen(profileFeed, id);
+    warmPostData(id);
     navigate(`/app/post/${slug || id}`, { state: { fromFeed: true } });
   };
 
@@ -298,7 +301,7 @@ export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries, onMove
                     {!!video.duration && video.duration !== '0:00' && <span className="pmg-dur">{video.duration}</span>}
                   </>
                 )}
-                {!!video.views && video.views !== '0' && <span className="pmg-views">{video.views}</span>}
+                {!!video.views && video.views !== '0' && <span className="pmg-views">{formatCount(video.views)}</span>}
                 {locked && <span className="pmg-lock"><Lock /></span>}
                 {!isLive && pinChip}
                 {grip(entry)}
@@ -311,6 +314,7 @@ export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries, onMove
           const openThis = () => {
             if (openReel(entry, post.id)) return;
             noteProfileFeedOpen(profileFeed, post.id);
+            warmPostData(post.id);
             navigate(post.articleSlug ? `/app/post/${post.articleSlug}` : post.newPostId ? `/newpost/${post.newPostId}` : `/app/post/${post.id}`, { state: { fromFeed: true } });
           };
 

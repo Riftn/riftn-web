@@ -11,10 +11,11 @@
 
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { openPostInfo } from '@/lib/preload-post-page';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { Palette, Pin, Share, Type, UserCheck } from 'lucide-react';
+import { EyeOff, Palette, Pin, Share, Type, UserCheck } from 'lucide-react';
 import { MessageMenu, type MessageMenuAction } from '@/components/app/chat/MessageMenu';
 import Flag from '@/components/ui/cut-icons/report';
 import Ban from '@/components/ui/cut-icons/blocked';
@@ -35,10 +36,12 @@ import Stats from '@/components/ui/cut-icons/stats';
 import Superpowers from '@/components/ui/cut-icons/superpowers';
 import AssistantNavIcon from '@/components/ui/AssistantNavIcon';
 import { useAuth } from '@/contexts/AuthContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useBookmarkPost } from '@/hooks/use-bookmarks';
 import { useTogglePin, useIsPostPinned } from '@/hooks/use-pins';
 import { useFollow } from '@/hooks/use-follow';
 import { useMuteAuthor } from '@/hooks/use-mute-author';
+import { useNotInterested } from '@/hooks/use-not-interested';
 import { useBlockAuthor } from '@/hooks/use-block-author';
 import { useSuperpowers } from '@/hooks/use-superpowers';
 import { usePostLinkCopyCount, useTrackPostLinkCopy } from '@/hooks/use-link-copy-count';
@@ -61,6 +64,8 @@ const EMOJI_BY_REACTION = Object.fromEntries(REACTION_LIST.map((r) => [r.key, r.
 const REACTION_BY_EMOJI = Object.fromEntries(REACTION_LIST.map((r) => [r.emoji, r.key])) as Record<string, PostReaction>;
 const QUICK = REACTION_LIST.map((r) => r.emoji);
 const MENU_WIDTH = 304;
+/** Rows a phone leaves out because the post's action bar already has them. */
+const ON_ACTION_BAR = new Set(['comment', 'repost', 'quote', 'tip', 'bookmark', 'info']);
 
 type Sheet = null | 'dm' | 'quote' | 'tip' | 'report' | 'boost';
 
@@ -132,6 +137,7 @@ function PostMenuBody({ open, target, sheet, setSheet }: {
   }, [showing, signedIn, isOwn, target.authorId, followOverride, serverFollowing]);
   const following = followOverride ?? serverFollowing;
   const { muteAuthor } = useMuteAuthor();
+  const notInterested = useNotInterested();
   const { blockAuthor } = useBlockAuthor();
   const { data: powers } = useSuperpowers(showing && signedIn);
   const canGiftBoost = !isOwn && !!powers?.powers.some((p) => p.key === 'deep_current' && p.unlocked && p.available);
@@ -215,9 +221,14 @@ function PostMenuBody({ open, target, sheet, setSheet }: {
   const words = (target.text || '').trim();
   const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
 
+  // On a phone the post's action bar sits right under it, so the menu leaves
+  // out what that bar already does (Requests 7399dd7d). Desktop keeps them:
+  // their letter shortcuts live in this menu.
+  const phone = useIsMobile();
+
   const actions = useMemo<MessageMenuAction[]>(() => {
     const list: MessageMenuAction[] = [];
-    const add = (a: MessageMenuAction | false | null | undefined) => { if (a) list.push(a); };
+    const add = (a: MessageMenuAction | false | null | undefined) => { if (a && !(phone && ON_ACTION_BAR.has(a.key))) list.push(a); };
     const link = viewerShareUrl(shareLink(target, tokenId));
 
     add({
@@ -258,7 +269,7 @@ function PostMenuBody({ open, target, sheet, setSheet }: {
     });
     add(!!target.actions?.askAI && { key: 'ai', label: t('postOptions.aiOverview', 'AI overview'), icon: <AssistantNavIcon />, onSelect: () => target.actions!.askAI!() });
     add(!!target.actions?.seeEngagements && { key: 'engagements', label: t('copy.f5ab429b0727', 'See Engagements'), icon: <Stats />, onSelect: () => target.actions!.seeEngagements!() });
-    add({ key: 'info', label: t('postInfo.title', 'Post Info'), icon: <Info />, hint: 'I', onSelect: () => navigate(`/app/post/${target.id}/info`) });
+    add({ key: 'info', label: t('postInfo.title', 'Post Info'), icon: <Info />, hint: 'I', onSelect: () => openPostInfo(navigate, target.id) });
 
     // SuperPowers: a gift on somebody else's post, a boost on your own.
     if (canGiftBoost && tokenId > 0) {
@@ -284,8 +295,12 @@ function PostMenuBody({ open, target, sheet, setSheet }: {
         key: 'unfollow', label: t('profileOptions.unfollow', 'Unfollow'), icon: <UserCheck />, divided: true,
         onSelect: () => { if (needLogin()) return; void toggleFollow(true, { name: authorName || name }); },
       });
+      add(tokenId > 0 && {
+        key: 'not-interested', label: t('postOptions.notInterested', 'Not interested'), icon: <EyeOff />, divided: following === null,
+        onSelect: () => { if (needLogin()) return; void notInterested(tokenId); },
+      });
       add({
-        key: 'mute', label: t('postOptions.muteCreator', 'Mute creator'), icon: <VolumeX />, divided: following === null,
+        key: 'mute', label: t('postOptions.muteCreator', 'Mute creator'), icon: <VolumeX />, divided: following === null && !(tokenId > 0),
         onSelect: () => { if (needLogin()) return; muteAuthor(target.authorId!, authorName); },
       });
       add({
@@ -303,8 +318,8 @@ function PostMenuBody({ open, target, sheet, setSheet }: {
       add(!!target.actions?.delete && { key: 'delete', label: t('postOptions.deletePost', 'Delete post'), icon: <Trash2 />, destructive: true, divided: !target.actions?.edit, onSelect: () => target.actions!.delete!() });
     }
     return list;
-  }, [target, tokenId, isPublic, isOwn, reposted, isBookmarked, isPinned, words, canShare, canGiftBoost, following, authorLabel, authorName, linkCopyCount, walletAddress,
-    t, navigate, sendInDm, repost, quote, needLogin, setSheet, toggleBookmark, togglePin, copy, trackLinkCopy, toggleFollow, muteAuthor, blockAuthor]);
+  }, [phone, target, tokenId, isPublic, isOwn, reposted, isBookmarked, isPinned, words, canShare, canGiftBoost, following, authorLabel, authorName, linkCopyCount, walletAddress,
+    t, navigate, sendInDm, repost, quote, needLogin, setSheet, toggleBookmark, togglePin, copy, trackLinkCopy, toggleFollow, muteAuthor, blockAuthor, notInterested]);
 
   const header = authorLabel ? (
     <p className="truncate text-[12px] font-semibold opacity-60">{authorLabel}</p>

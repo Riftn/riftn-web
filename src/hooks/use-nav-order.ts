@@ -38,3 +38,16 @@ export function useNavOrderEditor(surface: NavOrderSurface, defaultIds: string[]
 
   return { order, customised: order.length > 0, save, reset };
 }
+
+/** Home pins are a subset of menu ids. Unlike a reordering, removal must stick. */
+export function useHomeShortcuts() {
+  const pins = useNavOrder('home');
+  const prefs = useUserPreferences();
+  const toggle = useCallback((id: string) => {
+    const previous = readNavOrder('home');
+    const next = previous.includes(id) ? previous.filter(pin => pin !== id) : [...previous, id];
+    writeNavOrder('home', next);
+    prefs?.setPref(NAV_ORDER_PREF_KEYS.home, next);
+  }, [prefs]);
+  return { pins, toggle };
+}

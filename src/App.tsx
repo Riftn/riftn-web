@@ -22,6 +22,7 @@ import { ConnectLinkedWalletModal } from "@/components/app/wallet-setup/ConnectL
 import { SelfBadgeSync } from "@/components/app/SelfBadgeSync";
 import { DefaultChainSync } from "@/components/app/DefaultChainSync";
 import { BadgeShowcaseHost } from "@/components/app/badge-showcase/BadgeShowcaseHost";
+import { CoAuthorSheetHost } from "@/components/app/co-authors/CoAuthorSheetHost";
 import { ViewingPreferencesSync } from "@/components/app/ViewingPreferencesSync";
 import { AccountLanguageSync } from "@/components/app/AccountLanguageSync";
 import { FeedDefaultsSync } from "@/components/app/FeedDefaultsSync";
@@ -29,6 +30,7 @@ import { useAuth, useLoginSheet } from "@/contexts/AuthContext";
 import { useNotificationClickRouting } from "@/hooks/use-notification-click-routing";
 import { useNotificationRealtime } from "@/hooks/use-notification-realtime";
 import { usePageViewAddress, PageViewTracker } from "@/hooks/use-page-view-tracking";
+import { ChatLinkCatcher } from "@/components/app/chat/ChatLinkCatcher";
 import { prefetchUnifiedFeed } from "@/hooks/use-unified-feed";
 import { restoreQueryCache, startQueryPersist } from "@/lib/query-persist";
 import { setBackgroundPaused, scheduleBackgroundResume } from "@/lib/background-gate";
@@ -54,9 +56,11 @@ import { CONSOLIDATED_GUIDES } from "@/lib/blog-redirects.js";
 const DexPage = React.lazy(() => import("@/pages/app/DexPage"));
 // DM unread total for the nav badges; keeps the messaging stack out of the boot file.
 const DmUnreadBridge = lazyWithRetry(() => import("@/components/app/chat/DmUnreadBridge"));
+const DmMessageBanner = lazyWithRetry(() => import("@/components/app/chat/DmMessageBanner"));
 const DesktopWordmarkPreview = React.lazy(() => import("@/pages/DesktopWordmarkPreview"));
 const DexPoolPage = React.lazy(() => import("@/pages/app/DexPoolPage"));
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { loadPostPage } from "@/lib/preload-post-page";
 import { SurfaceTransition } from "@/components/transitions/SurfaceTransition";
 
 // Update notices can load after the app paints; their watcher starts on mount.
@@ -204,9 +208,15 @@ const NotFound = React.lazy(() => import("./pages/NotFound"));
 // route below), so clicking on and off a blog post never remounts the panels.
 const DocsSurface = React.lazy(() => import("./pages/DocsSurface"));
 const ProfilePage = React.lazy(() => import("./pages/app/ProfilePage"));
-const PostInfoPage = React.lazy(() => import("./pages/app/PostInfoPage"));
+const PostInfoPage = React.lazy(() => import("@/lib/preload-post-page").then(module => module.loadPostInfoPage()));
+const StoryPermalinkPage = React.lazy(() => import("./pages/app/StoryPermalinkPage"));
 const PostReactionsPage = React.lazy(() => import("./pages/app/PostReactionsPage"));
-const SinglePostPage = React.lazy(() => import('@/lib/preload-post-page').then(module => module.loadPostPage()));
+// lazyWithRetry, so that once the page's code is in hand (main.tsx waits a
+// moment for it on a post link) the post is part of the first render instead
+// of a second pass behind a loading state.
+const SinglePostPage = lazyWithRetry(loadPostPage);
+// Resolve the post page's code without rendering it.
+export const preloadPostPage = (): Promise<unknown> => SinglePostPage.preload();
 const NewPostPage = React.lazy(() => import("./pages/app/NewPostPage"));
 const UploadPage = React.lazy(() => import("./pages/app/UploadPage"));
 const YoutubeMigratePage = React.lazy(() => import("./pages/app/YoutubeMigratePage"));
@@ -272,6 +282,9 @@ const AdminManualPage = React.lazy(() => import("./pages/AdminManualPage"));
 // theme launchers', so the iframe plumbing never rides along in a page bundle.
 const ArcadeGamePage = React.lazy(() => import("./pages/ArcadeGamePage"));
 const ArcadeChessOnlinePage = React.lazy(() => import("./pages/ArcadeChessOnlinePage"));
+// Games with friends: correspondence chess and Okey 101 (riftn-backend src/games).
+const ArcadeCorrespondenceChessPage = React.lazy(() => import("./pages/ArcadeCorrespondenceChessPage"));
+const ArcadeOkeyPage = React.lazy(() => import("./pages/ArcadeOkeyPage"));
 // Mini app player: standalone like the arcade player, because the app owns the
 // viewport and dehub draws only its own header above it.
 const MiniAppPage = React.lazy(() => import("./pages/MiniAppPage"));
@@ -554,6 +567,7 @@ function AppContent() {
       <QuickActionsHost />
       <PostMenuGate />
       <BadgeShowcaseHost />
+      <CoAuthorSheetHost />
       <ViewingPreferencesSync />
       <AccountLanguageSync />
       <FeedDefaultsSync />
@@ -563,6 +577,8 @@ function AppContent() {
       <SignInHandoff />
       <AfterSignIn />
       {isAuthenticated && <Suspense fallback={null}><DmUnreadBridge /></Suspense>}
+      {/* Phones: a DM that arrives elsewhere drops in at the top, pull down to reply. */}
+      {isAuthenticated && <Suspense fallback={null}><DmMessageBanner /></Suspense>}
       <Suspense fallback={<PageLoader />}>
         <SurfaceTransition>
           {(loc) => (
@@ -725,6 +741,8 @@ function AppContent() {
               against it — but it lives out here rather than in the layout
               because the game owns the viewport. The /arcade grid itself DOES
               sit in the layout (see the cached pages below). */}
+          <Route path="/arcade/correspondence-chess" element={<Suspense fallback={<PageLoader />}><ArcadeCorrespondenceChessPage /></Suspense>} />
+          <Route path="/arcade/okey" element={<Suspense fallback={<PageLoader />}><ArcadeOkeyPage /></Suspense>} />
           <Route path="/arcade/:slug" element={<Suspense fallback={<PageLoader />}><ArcadeGamePage /></Suspense>} />
 
           {/* Online chess: the King's Gambit lobby and live board. Standalone
@@ -857,6 +875,7 @@ function AppContent() {
               <Route path="post/:postId" element={<Suspense fallback={<PageLoader />}><SinglePostPage /></Suspense>} />
               <Route path="video/:tokenId" element={<Suspense fallback={<PageLoader />}><SinglePostPage /></Suspense>} />
               <Route path="newpost/:n" element={<Suspense fallback={<PageLoader />}><NewPostPage /></Suspense>} />
+              <Route path="moment/:id" element={<Suspense fallback={<PageLoader />}><StoryPermalinkPage /></Suspense>} />
               <Route path="post/:postId/info" element={<Suspense fallback={<PageLoader />}><PostInfoPage /></Suspense>} />
               <Route path="post/:postId/duets" element={<Suspense fallback={<PageLoader />}><DuetsPage /></Suspense>} />
               <Route path="post/:postId/reactions" element={<Suspense fallback={<PageLoader />}><PostReactionsPage /></Suspense>} />
@@ -933,6 +952,7 @@ function AppContent() {
             <Route path="/governance/:proposalId" element={<Suspense fallback={<PageLoader />}><GovernanceProposalPage /></Suspense>} />
             <Route path="/packs" element={<Suspense fallback={<PageLoader />}><PacksPage /></Suspense>} />
             <Route path="/packs/:slug" element={<Suspense fallback={<PageLoader />}><PackPage /></Suspense>} />
+            <Route path="/moment/:id" element={<Suspense fallback={<PageLoader />}><StoryPermalinkPage /></Suspense>} />
             <Route path="/post/:postId" element={<Suspense fallback={<PageLoader />}><SinglePostPage /></Suspense>} />
             <Route path="/post/:postId/info" element={<Suspense fallback={<PageLoader />}><PostInfoPage /></Suspense>} />
             <Route path="/post/:postId/reactions" element={<Suspense fallback={<PageLoader />}><PostReactionsPage /></Suspense>} />
@@ -1090,6 +1110,7 @@ const App = () => (
           {/* Above <Routes>: /r/:code never reaches AppContent, and it is a
               new visitor's first touch. */}
           <PageViewTracker />
+          <ChatLinkCatcher />
           <Routes>
             <Route path="/maintenance" element={<Suspense fallback={null}><MaintenancePage /></Suspense>} />
             {/*

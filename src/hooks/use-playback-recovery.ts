@@ -3,7 +3,7 @@ import { attachPlaybackRecovery } from '@/lib/browser-playback-recovery';
 import type { PlaybackPhase } from '@/lib/playback-recovery';
 
 export function usePlaybackRecovery(ref: RefObject<HTMLVideoElement | null>, source: string | undefined, active: boolean, options: {
-  allowed: () => boolean; postId: string; component: string;
+  allowed: () => boolean; postId: string; component: string; muteForAutoplay?: () => boolean;
 }) {
   const latest = useRef(options);
   latest.current = options;
@@ -21,6 +21,7 @@ export function usePlaybackRecovery(ref: RefObject<HTMLVideoElement | null>, sou
     if (video && source) held.current = { video, source, detach: attachPlaybackRecovery(video, {
       ...latest.current, changed: setPhase,
       allowed: () => ref.current === video && latest.current.allowed(),
+      muteForAutoplay: () => latest.current.muteForAutoplay?.() ?? false,
     }) };
   });
   useLayoutEffect(() => () => { held.current?.detach(); held.current = undefined; }, []);

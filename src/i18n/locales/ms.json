@@ -1,4 +1,5 @@
 {
+  "dmVideo": {"edit": "Edit video", "hiddenTag": "Tersembunyi", "tapToEdit": "Ketik untuk edit", "cover": "Kulit", "trim": "Potong", "mirror": "Cermin", "rotate": "Putar", "hide": "Sembunyi", "timer": "Pemasa", "sheetTitleAny": "Edit sebelum menghantar", "close": "Tutup", "replace": "Ganti", "hiddenUntilTap": "Disembunyikan sehingga mereka mengetuknya", "pause": "Jeda", "play": "Mainkan video", "mute": "Nyahaktifkan bunyi", "unmute": "Aktifkan bunyi", "scrub": "Tatal video", "addMore": "Tambah foto atau video", "trimAria": "Seret hujung untuk memotong", "coverAria": "Ketuk bingkai untuk menetapkan kulit", "coverHint": "Ketuk bingkai untuk menetapkan kulit", "coverOwn": "Gambar anda", "coverAuto": "Auto", "uploadCover": "Muat naik gambar kulit", "mirrored": "Dicerminkan", "original": "Asal", "rotate90": "Putar 90°", "showNormally": "Tunjuk seperti biasa", "showNormallyBody": "Mereka melihatnya serta-merta", "hideUntilTap": "Sembunyi sehingga diketuk", "hideUntilTapBody": "Dikaburkan sehingga mereka mengetuknya", "hidePrice": "Sembunyi di sebalik harga", "hidePriceBody": "Dikaburkan sehingga mereka membayar anda", "priceUnavailable": "Tiada dalam sembang ini", "timerOff": "Mati", "timerOffBody": "Ia kekal dalam sembang.", "timerViewBody": "Hilang untuk anda berdua sebaik sahaja mereka melihatnya.", "confirm": "Sahkan", "lockedFor": "Buka kunci untuk {{value1}} DHB", "lockedForUsd": "Buka kunci untuk {{value1}}", "editItem": "Edit item {{value1}}", "kept": "{{time}} disimpan", "timerTimeBody": "Hilang untuk anda berdua {{value1}} selepas anda menghantarnya."},
   "postBg": {
     "addMedia": "Tambah gambar, GIF atau video",
     "changeMedia": "Tukar gambar, GIF atau video",
@@ -297,8 +298,10 @@
       "pronouns": "Kata ganti nama",
       "location": "Lokasi",
       "custom": "Tersuai",
-      "customOption": "Label tersuai"
-    }
+      "customOption": "Label tersuai",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Ikuti #{{tag}}",
@@ -705,6 +708,7 @@
     "heading": "Riftn Shorts"
   },
   "settings": {
+    "loginLook": {"title": "Skrin log masuk", "desc": "Cara logo dan slogan Riftn bergerak pada skrin log masuk di peranti ini.", "tube": "TV tiub", "vhs": "Pita VHS", "led": "Dinding LED", "holo": "Hologram", "neon": "Neon", "3d": "3D", "flat": "Rata"}, "arrivalLook": {"title": "Selepas log masuk", "desc": "Apa yang dimainkan semasa akaun anda dimuatkan, sebelum gambar anda tiba di halaman. Pada peranti ini.", "trace": "Jejak", "tune": "Tala siaran", "rift": "Rekahan", "deck": "Dek kad", "glass": "Titisan kaca"},
     "postLanding": "Selepas menyiarkan",
     "postLandingDesc": "Cara siaran baharu anda muncul dalam suapan",
     "postLandingGhost": "Slot bayang",
@@ -2466,7 +2470,7 @@
     "promptDevice": "Peranti & OS (untuk pepijat)",
     "deviceInfoNoErrors": "Tiada",
     "promptFilters": "Tapis mengikut kategori",
-    "promptMediaError": "Pilih imej atau video di bawah 50MB setiap satu.",
+    "promptMediaError": "Pilih imej atau video di bawah 200MB setiap satu.",
     "promptMediaLimit": "Sehingga {{max}} lampiran.",
     "removePromptAttachment": "Buang {{name}}",
     "promptAttachment": "Lampiran {{number}}",
@@ -4467,7 +4471,7 @@
       "pageViewsTerm": "Paparan halaman",
       "pageViews": "— permintaan yang Cloudflare kelaskan sebagai muatan halaman, bukan imej, skrip atau panggilan API.",
       "botsTerm": "Bot turut dikira",
-      "bots": "— ini kiraan mentah di pinggir rangkaian, jadi perangkak, pemantau masa aktif dan klien berskrip turut termasuk. Anda boleh melihatnya sendiri dalam pecahan pelayar di atas, di mana entri seperti \"Curl\" dan \"Tidak diketahui\" ialah trafik automatik, bukan orang. Menapis bot memerlukan pelan Cloudflare berbayar yang kami tidak guna, dan menolak anggaran secara senyap hanya menjadikan angka lebih sukar disemak.",
+      "bots": "— ini kiraan mentah di pinggir rangkaian, jadi perangkak, pemantau masa aktif dan klien berskrip turut termasuk. Anda boleh melihatnya sendiri dalam pecahan pelayar di atas, di mana entri seperti \"Curl\" dan \"Tidak diketahui\" ialah trafik automatik, bukan orang. Bot semakin sukar dibezakan daripada pelawat manusia dan tidak lama lagi kedua-duanya tidak dapat dibezakan dalam statistik ini, jadi tiada gunanya cuba menapis bot.",
       "totalTerm": "Jumlah julat",
       "total": "— paparan halaman dan permintaan dijumlahkan sepanjang julat. Kiraan pelawat sengaja tidak dijumlahkan menjadi \"jumlah pelawat\", kerana orang yang hadir pada Isnin dan Selasa akan dikira dua kali.",
       "peakTerm": "Jam / hari paling sibuk",
@@ -21111,5 +21115,27 @@
     "remember": "Ingat pilihan saya",
     "rememberHint": "Ubah bila-bila masa dalam Tetapan",
     "failed": "Tidak dapat memadam mesej"
+  },
+  "profileAskAi": {
+    "row": "Tanya AI",
+    "rowSub": "Ikut, suka semua, ketahui berita terkini",
+    "back": "Kembali",
+    "title": "Tanya AI tentang {{handle}}",
+    "sub": "Pembantu buatkan, anda sahkan",
+    "followLikeAll": "Ikut dan suka semua",
+    "followLikeAllSub": "Mengikut {{handle}}, beri reaksi pada setiap hantaran",
+    "likeAll": "Suka semua hantarannya",
+    "likeAllSub": "Melangkau yang anda sudah beri reaksi",
+    "catchUp": "Kemas kini saya",
+    "catchUpSub": "Apa yang {{handle}} hantar baru-baru ini, secara ringkas",
+    "message": "Tulis mesej kepadanya",
+    "messageSub": "Merangka mesej, anda yang hantar",
+    "placeholder": "Tanya apa sahaja tentang {{handle}}…",
+    "send": "Hantar",
+    "promptFollowLikeAll": "Ikut {{handle}} dan beri reaksi pada semua hantarannya",
+    "promptLikeAll": "Beri reaksi pada semua hantaran {{handle}}",
+    "promptCatchUp": "Kemas kini saya tentang apa yang {{handle}} hantar baru-baru ini",
+    "promptMessage": "Bantu saya tulis mesej kepada {{handle}}",
+    "promptAbout": "Tentang {{handle}}: {{question}}"
   }
 }

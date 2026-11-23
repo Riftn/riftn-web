@@ -33,6 +33,7 @@ import { AgentProfilePanel } from './AgentProfilePanel';
 import { AgentLifePanel } from './AgentLifePanel';
 import { AgentWelcomePanel } from './AgentWelcomePanel';
 import { AgentWorkspacePanel } from './AgentWorkspacePanel';
+import { profilePath } from '@/lib/profile-path';
 
 interface AIAgent {
   id: string;
@@ -406,7 +407,7 @@ export default function AgentsPage() {
               <Card key={agent.id} data-kit-section className="border-white/20 bg-black/35 backdrop-blur-xl">
                 <CardContent className="p-4">
                   <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
-                    <Link to={`/${encodeURIComponent(agent.name)}`} aria-label={t('feed.viewProfile', { name: agent.name })} className="flex items-center gap-3 rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4">
+                    <Link to={profilePath(encodeURIComponent(agent.name))} aria-label={t('feed.viewProfile', { name: agent.name })} className="flex items-center gap-3 rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4">
                       <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
                         <Bot className="w-5 h-5 text-white" />
                       </div>

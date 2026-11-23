@@ -4,6 +4,7 @@ import { parseDehubLink } from '../dehub-links';
 import { fetchPredictionPreview, forgetPredictionPreview, parsePredictionLink, type PredictionPreview } from '../predictions';
 import { fetchRichPreview, forgetRichPreview, parseRichLink, extractShareUrls, type RichDetails } from '../rich-links';
 import { fetchSpotifyOembed, parseSpotifyLink } from '../spotify';
+import { completeYouTubePreview, isBareYouTubePreview, parseYouTubeVideoId } from '../youtube-preview';
 
 export interface LinkPreviewData {
   url: string;
@@ -124,10 +125,22 @@ async function loadLinkPreview(url: string): Promise<LinkPreviewData | null> {
   const rich = parseRichLink(url);
   if (rich) return fetchRichPreview(rich);
   const cached = previewCache.get(url);
-  if (cached) return cached;
+  // A refresh stores the plain crawl; a bare YouTube one still needs filling in.
+  if (cached && !(parseYouTubeVideoId(url) && isBareYouTubePreview(cached))) return cached;
   const spotify = parseSpotifyLink(url);
   if (spotify) return loadSpotifyPreview(url, spotify);
+  const youTube = parseYouTubeVideoId(url);
+  if (youTube) return loadYouTubePreview(url, youTube);
   return crawlLinkPreview(url, false);
+}
+
+/** YouTube links: our crawler first, YouTube's oEmbed when it reads only the shell page. */
+async function loadYouTubePreview(url: string, id: string): Promise<LinkPreviewData | null> {
+  const crawled = await crawlLinkPreview(url, false);
+  if (crawled && !isBareYouTubePreview(crawled)) return crawled;
+  const preview = await completeYouTubePreview(url, id, crawled);
+  previewCache.set(url, preview);
+  return preview;
 }
 
 /**

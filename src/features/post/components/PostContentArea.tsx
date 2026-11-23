@@ -10,6 +10,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { PostMediaPreview } from './PostMediaPreview';
 import { LinkPreviews } from './LinkPreviews';
 import { PollEditor } from './PollEditor';
+import { QuizEditor } from './QuizEditor';
+import type { QuizDraft } from '@/lib/api/dehub';
 import type { MediaFile, AudioFile, LiveMode, PollData } from '../types';
 import type { FilterSettings, CropSettings } from '../types/filters';
 import type { DraftVideoSnapshot } from '../lib/draft-video';
@@ -87,6 +89,7 @@ interface PostContentAreaProps {
   hideScheduleAndDrafts?: boolean;
   /** Replaces the media preview (the Comic tab's page list). */
   mediaSlot?: React.ReactNode;
+  dictation?: React.ReactNode;
   // Recording props
   isRecording?: boolean;
   recordingTime?: number;
@@ -100,6 +103,9 @@ interface PostContentAreaProps {
   // Poll
   poll: PollData | null;
   onPollChange: (poll: PollData | null) => void;
+  /** Create Post > Quiz. */
+  quiz?: QuizDraft | null;
+  onQuizChange?: (quiz: QuizDraft | null) => void;
   onMediaFullscreenChange?: (open: boolean) => void;
   /** The attached video's early upload. */
   draftVideo?: DraftVideoSnapshot | null;
@@ -194,6 +200,7 @@ export function PostContentArea({
   canSaveDraft,
   hideScheduleAndDrafts = false,
   mediaSlot,
+  dictation,
   isRecording,
   recordingTime,
   onStopRecording,
@@ -203,6 +210,8 @@ export function PostContentArea({
   onOpenCategories,
   poll,
   onPollChange,
+  quiz,
+  onQuizChange,
   onMediaFullscreenChange,
   draftVideo,
 }: PostContentAreaProps) {
@@ -675,7 +684,7 @@ export function PostContentArea({
                   }
                 }
               }}
-              data-placeholder={(showTitle || hasVideo || hasAudio) ? "Description (optional)" : "What's happening?"}
+              data-placeholder={(showTitle || hasVideo || hasAudio) ? _copy('postComposer.descriptionOptional', { defaultValue: 'Description (optional)' }) : _copy('postComposer.whatsHappening', { defaultValue: "What's happening?" })}
               className="w-full bg-transparent text-white text-base sm:text-lg resize-none outline-none min-h-[72px] sm:min-h-[72px] empty:before:content-[attr(data-placeholder)] empty:before:text-white/50 sm:empty:before:text-white/70 empty:before:pointer-events-none empty:before:cursor-text focus:empty:before:content-['\200b'] caret-white block"
               style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', caretColor: 'white' }}
             />
@@ -756,6 +765,9 @@ export function PostContentArea({
             onRemove={() => onPollChange(null)}
           />
         )}
+        {quiz && onQuizChange && (
+          <QuizEditor quiz={quiz} onChange={onQuizChange} onRemove={() => onQuizChange(null)} />
+        )}
       </div>
 
       {/* Destinations + character count sit under the scrolling editor, not
@@ -784,7 +796,9 @@ export function PostContentArea({
             </button>
           )}
         </div>
-        <span className={cn("text-xs ml-auto", charCount >= maxChars ? "text-amber-400" : "text-white/60")}>
+        {dictation}
+        <span className={cn("text-xs", charCount >= maxChars ? "text-amber-400" : "text-white/60")}>
+          {/* exact-number: the writer needs the exact character limit */}
           {charCount.toLocaleString('en-US')}/{maxChars.toLocaleString('en-US')}
         </span>
       </div>
@@ -827,6 +841,7 @@ export function PostContentArea({
         query={mention.query}
         isOpen={mention.isOpen}
         position={mention.position}
+        armed={mention.armed}
         selectedIndex={mention.selectedIndex}
         onSelectedIndexChange={mention.setSelectedIndex}
         onSelect={mention.handleSelect}

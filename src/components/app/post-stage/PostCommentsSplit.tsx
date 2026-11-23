@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useCommentsPullDismiss } from '@/hooks/use-comments-pull-dismiss';
 import { useKeyboardOpen, useVisualViewportBox } from '@/hooks/use-keyboard-open';
 import { CommentsSplitContext, setCommentsSplitCloser } from '@/lib/comments-split';
-import { HOLD_EVENT } from '@/components/app/chat/ChatHoldSheet';
+import { HOLD_EVENT } from '@/components/app/chat/chat-hold-event';
 
 // Same tween as the Shorts comments sheet, so both open the same way.
 const SLIDE = { type: 'tween', duration: 0.35, ease: [0.32, 0.72, 0, 1] } as const;

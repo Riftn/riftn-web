@@ -24,6 +24,7 @@ export type ProfileFieldPresetId =
   | 'newsletter'
   | 'pronouns'
   | 'location'
+  | 'cashapp'
   | 'custom';
 
 export interface ProfileFieldPreset {
@@ -48,6 +49,8 @@ export const PROFILE_FIELD_PRESETS: readonly ProfileFieldPreset[] = [
   { id: 'newsletter', name: label('newsletter'), link: true },
   { id: 'pronouns', name: label('pronouns'), link: false },
   { id: 'location', name: label('location'), link: false },
+  // Stored as a cash.app link; typed as a $cashtag.
+  { id: 'cashapp', name: 'Cash App', link: true, aliases: ['cashapp', 'cashtag', 'cash tag', '$cashtag'] },
 ];
 
 const norm = (s: string) => s.trim().toLowerCase().replace(/\s+/g, ' ');
@@ -86,10 +89,39 @@ export function fieldLink(value: string | null | undefined): string | null {
 export function normalizeFieldValue(id: ProfileFieldPresetId, value: string): string {
   const v = value.trim();
   if (!v || !isLinkPreset(id)) return v;
+  if (id === 'cashapp') {
+    const tag = cashtagOf(v);
+    return tag ? `https://cash.app/$${tag}` : v;
+  }
   if (/^https:\/\//i.test(v)) return v;
   if (/^http:\/\//i.test(v)) return v.replace(/^http:\/\//i, 'https://');
   if (/^[^\s/]+\.[^\s]+$/.test(v)) return `https://${v}`;
   return v;
+}
+
+/**
+ * The cashtag in what someone typed: "$name", "name", "cash.app/$name" or
+ * the full link. Null when it isn't a valid cashtag (letters, numbers, _ or -,
+ * starting with a letter, up to 20).
+ */
+export function cashtagOf(value: string): string | null {
+  const v = value
+    .trim()
+    .replace(/^https?:\/\//i, '')
+    .replace(/^(www\.)?cash\.app\//i, '')
+    .replace(/\/+$/, '');
+  const m = /^\$?([A-Za-z][A-Za-z0-9_-]{0,19})$/.exec(v);
+  return m ? m[1] : null;
+}
+
+/** What the edit box shows for a saved field: links without https://, Cash App as $cashtag. */
+export function editableFieldValue(id: ProfileFieldPresetId, value: string | null | undefined): string {
+  const v = value || '';
+  if (id === 'cashapp') {
+    const tag = cashtagOf(v);
+    return tag ? `$${tag}` : v;
+  }
+  return isLinkPreset(id) ? v.replace(/^https:\/\//i, '') : v;
 }
 
 /** Address shown for a link: no scheme, no www, no trailing slash. */

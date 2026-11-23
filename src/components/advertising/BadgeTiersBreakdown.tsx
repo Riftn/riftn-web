@@ -6,6 +6,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { BadgeTier, CampaignCalculations, calculateTierBreakdowns } from './utils/badgeTiers';
 import { fill } from './utils/fill';
 
+import { formatCount as formatShortCount } from '@/lib/format-count';
 interface BadgeTiersBreakdownProps {
   selectedTiers: BadgeTier[];
   calculations: CampaignCalculations;
@@ -22,11 +23,7 @@ const BadgeTiersBreakdown = ({
   const { t } = useLanguage();
   const tierBreakdowns = calculateTierBreakdowns(budget, campaignDuration, selectedTiers);
 
-  const formatNumber = (num: number) => {
-    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
-    return Math.round(num).toLocaleString();
-  };
+  const formatNumber = (num: number) => formatShortCount(num);
 
   return (
     <Card>

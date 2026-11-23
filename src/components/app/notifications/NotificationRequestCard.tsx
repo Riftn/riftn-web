@@ -10,6 +10,7 @@
  */
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { TranslatableText } from '@/components/app/TranslatableText';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -30,6 +31,7 @@ import {
 } from '@/lib/notification-request';
 import type { DeHubNotification } from '@/lib/api/dehub/notifications';
 
+import { formatCount } from '@/lib/format-count';
 type Row = DeHubNotification & { _customReferenceId?: string; _customReferenceTitle?: string; _customCommentId?: string };
 
 const positive = (r: PostReaction | null) => {
@@ -166,7 +168,9 @@ export function NotificationRequestCard({ notification, onEngaged }: Props) {
     <div data-feed-comment className="mt-1.5">
       {text && (
         <p data-feed-comment-text className="text-[14.5px] leading-[1.42] whitespace-pre-wrap break-words [overflow-wrap:anywhere] line-clamp-[12]">
-          {text}
+          {/* Foreign text reads in your language (follows the auto-translate
+              setting), same as comments under a post. */}
+          <TranslatableText text={text} />
         </p>
       )}
 
@@ -206,7 +210,7 @@ export function NotificationRequestCard({ notification, onEngaged }: Props) {
               aria-label={t('messages.reply', { defaultValue: 'Reply' })}
             >
               <MessageSquare className="h-[17px] w-[17px] shrink-0" />
-              {replyCount > 0 && <span className="tabular-nums">{replyCount}</span>}
+              {replyCount > 0 && <span className="tabular-nums">{formatCount(replyCount)}</span>}
             </button>
           )}
           {isNew ? (
@@ -219,7 +223,7 @@ export function NotificationRequestCard({ notification, onEngaged }: Props) {
               aria-label={t('glossary.upvote', { defaultValue: 'Upvote' })}
             >
               <ArrowBigUp className={cn('h-[19px] w-[19px] shrink-0', upvoted && 'fill-current')} strokeWidth={1.8} />
-              {voteCount > 0 && <span className="tabular-nums">{voteCount}</span>}
+              {voteCount > 0 && <span className="tabular-nums">{formatCount(voteCount)}</span>}
             </button>
           ) : (
             !isOwn && (
@@ -232,7 +236,7 @@ export function NotificationRequestCard({ notification, onEngaged }: Props) {
                 aria-label={t('reactionInfo.labels.like', { defaultValue: 'Like' })}
               >
                 <ThumbsUp className={cn('h-[17px] w-[17px] shrink-0', liked && 'fill-current')} />
-                {likes > 0 && <span className="tabular-nums">{likes}</span>}
+                {likes > 0 && <span className="tabular-nums">{formatCount(likes)}</span>}
               </button>
             )
           )}

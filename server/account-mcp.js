@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { IMAGE_COST_USD, VIDEO_COST_USD, MODEL3D_COST_USD, TOOL_COST_USD, quotePriceDhb, dhbToUsd } from '../supabase/functions/_shared/ai-pricing.ts';
 import { CREATOR_FAL_VIDEO_MODELS } from '../supabase/functions/_shared/creator-fal-catalog.ts';

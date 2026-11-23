@@ -1,4 +1,5 @@
 import { translateCopy as _translateCopy } from '@/i18n/copy';
+import { useAssistantPrefs } from '@/hooks/use-assistant-prefs';
 import { useTranslation as _useCopy } from 'react-i18next';
 import { useAccountDraftKey, useDraftState } from '@/hooks/use-draft-state';
 import { withWalletHeader } from '@/lib/supabase-wallet-client';
@@ -75,6 +76,9 @@ import {
 } from '@/lib/ai-intent';
 import { SEOHead } from '@/components/SEOHead';
 import { MarkdownText } from '@/lib/markdown';
+import { AssistantActionCard } from '@/components/app/assistant/AssistantActionCard';
+import { assistantActionIds, withoutAssistantActionLinks } from '@/lib/assistant-action-links';
+import { isRequestBoardCommand } from '@/lib/feature-prompt';
 
 import { AI_ASSISTANT_STYLE_OPTIONS } from '@/constants/ai-styles.constants';
 import { VIDEO_MODELS, VIDEO_MODEL_OPTIONS, type VideoModelKey, type VideoModel } from '@/constants/video-models.constants';
@@ -82,7 +86,7 @@ import { IMAGE_MODELS, IMAGE_MODEL_OPTIONS, type ImageModelKey } from '@/constan
 import { VOICE_PREFERENCES, VOICE_PREFERENCE_OPTIONS, type VoicePreferenceKey } from '@/constants/voice-models.constants';
 import { ElevenLabsVoicePicker } from '@/components/app/shared/ElevenLabsVoicePicker';
 import { VoiceTrainingDrawer } from '@/components/app/shared/VoiceTrainingDrawer';
-import { CHAT_MODEL_OPTIONS, DEFAULT_CHAT_MODEL, type ChatModelKey } from '@/constants/chat-models.constants';
+import { CHAT_MODEL_OPTIONS, type ChatModelKey } from '@/constants/chat-models.constants';
 import { PostModal } from '@/features/post';
 import { getBadgeName } from '@/lib/staking-badges';
 import { VideoPaywallModal, type VideoGenerationOptions } from '@/components/app/video/VideoPaywallModal';
@@ -115,6 +119,7 @@ import { LiquidGlassBubble } from '@/components/ui/liquid-glass-bubble';
 import { LiquidGlassBubble2 } from '@/components/ui/liquid-glass-bubble-2';
 import { speechText } from '@/lib/speech-text';
 
+import { formatCount } from '@/lib/format-count';
 const imageGenLogger = createLogger('AssistantPage.imageGen');
 
 const DEHUB_BRAND_IMAGE_MODEL: ImageModelKey = 'gemini-3.1-flash-image';
@@ -452,10 +457,19 @@ function AssistantPageForAccount() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setInput]);
+  // A card the assistant offered somewhere else (a DM with
+  // @assistant, a shared link). Shown here so it can be confirmed.
+  const [linkedAction, setLinkedAction] = useState<string | null>(null);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('requestDraft') ?? params.get('action');
+    if (id && /^[a-f0-9]{24}$/i.test(id)) setLinkedAction(id.toLowerCase());
+  }, []);
   const [isImageLoading, setIsImageLoading] = useState(false);
   const [isVideoLoading, setIsVideoLoading] = useState(false);
   const [imageLoadStartTime, setImageLoadStartTime] = useState<number>(0);
-  const [selectedStyle, setSelectedStyle] = useState<string>('normal');
+  // Shared with the @assistant DM: one personality and chat model everywhere.
+  const { style: selectedStyle, setStyle: setSelectedStyle, model: selectedChatModel, setModel: setSelectedChatModel } = useAssistantPrefs();
   const [selectedVideoModel, setSelectedVideoModel] = useState<VideoModelKey>('kling-2.6-pro');
   const [selectedImageModel, setSelectedImageModel] = useState<ImageModelKey>('gemini-2.5-flash');
   // Which "what's on your mind" line greets this visit; a new one each time.
@@ -478,7 +492,6 @@ function AssistantPageForAccount() {
     try { return localStorage.getItem('dehub-custom-elevenlabs-key') || ''; } catch { return ''; }
   });
   const [apiKeyInput, setApiKeyInput] = useState('');
-  const [selectedChatModel, setSelectedChatModel] = useState<string>(DEFAULT_CHAT_MODEL);
   const [settingsSheetOpen, setSettingsSheetOpen] = useState(false);
   const [styleSheetOpen, setStyleSheetOpen] = useState(false);
   const [attachedImage, setAttachedImage] = useState<string | null>(null);
@@ -496,6 +509,8 @@ function AssistantPageForAccount() {
     model: ImageModelKey;
     sourceImage?: string;
   } | null>(null);
+  // Prompt handed over by a link (#preset=chat&send=1&prompt=…), sent once ready.
+  const [autoSendPrompt, setAutoSendPrompt] = useState<string | null>(null);
   // Riftn poster config drawer
   const [posterConfigOpen, setPosterConfigOpen] = useState(false);
   const [pendingPosterPrompt, setPendingPosterPrompt] = useState<string>('');
@@ -512,6 +527,17 @@ function AssistantPageForAccount() {
       // Optional ?prompt=... pre-fill from /creator composer
       const promptMatch = hash.match(/prompt=([^&]+)/i);
       const prefill = promptMatch ? decodeURIComponent(promptMatch[1]) : '';
+      // &send=1 (the profile menu's Ask AI): start a fresh chat and send the
+      // prompt straight away, so its confirm cards are the first thing seen.
+      if (prefill && /(?:^|[#&])send=1(?:&|$)/.test(hash)) {
+        if (typeof window !== 'undefined' && window.history.replaceState) {
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+        startNewConversation();
+        setMessages([]);
+        setAutoSendPrompt(prefill);
+        return;
+      }
       // Clear hash so re-navigation re-triggers cleanly
       if (typeof window !== 'undefined' && window.history.replaceState) {
         window.history.replaceState(null, '', window.location.pathname + window.location.search);
@@ -1638,14 +1664,15 @@ function AssistantPageForAccount() {
     };
   }, []);
 
-  const handleSend = async (overrideMessage?: string) => {
+  const handleSend = async (overrideMessage?: string, opts?: { noSkillMatch?: boolean }) => {
     const messageToSend = overrideMessage || input.trim();
     if (!messageToSend || isLoading || restoringConversation) return;
     pendingDraftCompletion.current = () => { if (!overrideMessage) setInput.complete(input, ""); };
 
     // ── Skill matching: slash command wins, otherwise auto-trigger ──
     const slash = extractSlashSkill(messageToSend, userSkills);
-    const matchedSkill: UserSkill | null = slash.skill ?? matchSkill(messageToSend, userSkills);
+    const boardCommand = !slash.skill && isRequestBoardCommand(messageToSend);
+    const matchedSkill: UserSkill | null = slash.skill ?? (opts?.noSkillMatch || boardCommand ? null : matchSkill(messageToSend, userSkills));
     const skillCleanedInput = slash.skill ? slash.cleaned : messageToSend;
     let skillSourceImage: string | null = null;
     if (matchedSkill) {
@@ -1662,7 +1689,7 @@ function AssistantPageForAccount() {
     }
 
     // ── Character mention matching ──
-    const charMatch = parseCharacterMentions(skillCleanedInput, userCharacters);
+    const charMatch = parseCharacterMentions(skillCleanedInput, boardCommand ? [] : userCharacters);
     let characterSourceImage: string | null = null;
     if (charMatch.hasMentions) {
       const primary = charMatch.characters[0].primary_image_url
@@ -1706,8 +1733,8 @@ function AssistantPageForAccount() {
 
     try {
       // Check if user wants to use the official logo in their image
-      const wantsDeHubBrand = matchedSkill?.slug === 'dehub-poster' || isDeHubBrandedImageRequest(messageToSend) || isDeHubBrandedImageRequest(currentInput);
-      const wantsLogo = wantsDeHubBrand || requiresLogoAsset(currentInput);
+      const wantsDeHubBrand = !boardCommand && (matchedSkill?.slug === 'dehub-poster' || isDeHubBrandedImageRequest(messageToSend) || isDeHubBrandedImageRequest(currentInput));
+      const wantsLogo = !boardCommand && (wantsDeHubBrand || requiresLogoAsset(currentInput));
       const isCreativeLogo = wantsLogo && isCreativeLogoRequest(currentInput);
       
       // If just asking "show me the logo" without creative context, display it directly
@@ -1736,12 +1763,12 @@ function AssistantPageForAccount() {
       }
 
       // Check request type — AI tools first, then video/image
-      const aiToolCategory = detectAiToolRequest(currentInput, !!currentAttachedImage);
-      const isVideoRequest = !aiToolCategory && requiresVideoGeneration(currentInput);
+      const aiToolCategory = boardCommand ? null : detectAiToolRequest(currentInput, !!currentAttachedImage);
+      const isVideoRequest = !boardCommand && !aiToolCategory && requiresVideoGeneration(currentInput);
       // `conversational` opts this surface into the looser phrasing ("show me",
       // "what does … look like"). It is safe here and not in the chat bubble
       // because the paywall below asks before anything is signed.
-      const isImageRequest = !aiToolCategory && (isCreativeLogo || matchedSkill?.kind === 'image' || charMatch.hasMentions || requiresImageGeneration(currentInput, !!currentAttachedImage, { conversational: true }));
+      const isImageRequest = !boardCommand && !aiToolCategory && (isCreativeLogo || matchedSkill?.kind === 'image' || charMatch.hasMentions || requiresImageGeneration(currentInput, !!currentAttachedImage, { conversational: true }));
       
       if (aiToolCategory) {
         // For music requests, show confirm dialog first
@@ -1979,6 +2006,15 @@ function AssistantPageForAccount() {
       setStreamingReply(false);
     }
   };
+  useEffect(() => {
+    if (!autoSendPrompt || !isAuthenticated || isLoading || restoringConversation) return;
+    const prompt = autoSendPrompt;
+    setAutoSendPrompt(null);
+    // A handed-over ask (e.g. "…posts by @riftn") must not trip a skill's auto-match.
+    void handleSend(prompt, { noSkillMatch: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoSendPrompt, isAuthenticated, isLoading, restoringConversation]);
+
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -2254,6 +2290,7 @@ function AssistantPageForAccount() {
           query={mention.query}
           isOpen={mention.isOpen}
           position={mention.position}
+          armed={mention.armed}
           selectedIndex={mention.selectedIndex}
           onSelectedIndexChange={mention.setSelectedIndex}
           onSelect={mention.handleSelect}
@@ -2481,7 +2518,7 @@ function AssistantPageForAccount() {
                 {t('support.title')}
                 {!!supportTickets?.openCount && (
                   <span className="ml-auto min-w-[18px] h-[18px] px-1 rounded-full bg-white text-black text-[10px] font-semibold flex items-center justify-center">
-                    {supportTickets.openCount}
+                    {formatCount(supportTickets.openCount)}
                   </span>
                 )}
               </DropdownMenuItem>
@@ -2839,6 +2876,7 @@ function AssistantPageForAccount() {
                     </h2>
                     <p className="mt-1.5 text-sm text-white/55">{voiceStatusLine.idle}</p>
                   </div>
+                  {linkedAction && <AssistantActionCard actionId={linkedAction} />}
                   <div className="w-full">{composer}</div>
                   <div className="grid w-full grid-cols-3 lg:grid-cols-6 gap-2 lg:gap-2.5">
                     {startTiles.map((tile) => (
@@ -2862,6 +2900,7 @@ function AssistantPageForAccount() {
             {/* Messages */}
             <ScrollArea className="flex-1 px-4 pb-24 sm:pb-0 [&>div>div]:!block [&_[data-radix-scroll-area-scrollbar]]:hidden scrollbar-hide [&_*]:scrollbar-hide" ref={scrollRef}>
               <div className="py-4 space-y-4">
+                {linkedAction && <AssistantActionCard actionId={linkedAction} />}
                 <AnimatePresence mode="popLayout">
                   {messages.map((message) => (
                     <motion.div
@@ -2884,7 +2923,10 @@ function AssistantPageForAccount() {
                         <div className="w-full min-w-0 flex-1 flex flex-col gap-2">
                           {message.content && (
                             <div className="rounded-2xl border border-white/[0.12] bg-white/[0.03] backdrop-blur-[24px] px-4 py-2.5 text-white">
-                              <MarkdownText content={message.content} className="text-sm" />
+                              <MarkdownText content={withoutAssistantActionLinks(message.content)} className="text-sm" />
+                              {assistantActionIds(message.content).map((id) => (
+                                <AssistantActionCard key={id} actionId={id} />
+                              ))}
                             </div>
                           )}
                           <GeneratedAudioPlayer audioUrl={message.audioUrl} />
@@ -3145,8 +3187,15 @@ function AssistantPageForAccount() {
                             </LiquidGlassBubble>
                           ) : (
                             /* Assistant message - no bubble */
-                            <div className="text-white">
-                              <MarkdownText content={message.content} className="text-sm" />
+                            <div className="text-white select-text">
+                              <MarkdownText content={withoutAssistantActionLinks(message.content)} className="text-sm" />
+                              {/* "React ❤️ to every post by @x", "follow @x": the reply's confirm card, under the text */}
+                              {!(streamingReply && message.id === messages[messages.length - 1]?.id) && assistantActionIds(message.content).map((id) => (
+                                <AssistantActionCard key={id} actionId={id} />
+                              ))}
+                              {message.content && !message.isError && message.id !== 'initial' && !(streamingReply && message.id === messages[messages.length - 1]?.id) && (
+                                <AssistantCopyButton text={message.content} label={t('comments.copyText')} copiedLabel={t('common.copied')} />
+                              )}
                               {/* Swap action card */}
                               {message.swapAction && (
                                 <SwapActionCard action={message.swapAction} autoQuote />
@@ -3547,4 +3596,36 @@ function AssistantPageForAccount() {
 export default function AssistantPage() {
   const account = useAccountDraftKey('assistant');
   return <AssistantPageForAccount key={account ?? 'guest'} />;
+}
+
+/** Copy button under an assistant text reply (Requests 1a783503). */
+function AssistantCopyButton({ text, label, copiedLabel }: { text: string; label: string; copiedLabel: string }) {
+  const [copied, setCopied] = useState(false);
+  const onCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const area = document.createElement('textarea');
+      area.value = text;
+      area.setAttribute('readonly', '');
+      area.style.position = 'fixed';
+      area.style.opacity = '0';
+      document.body.appendChild(area);
+      area.select();
+      try { document.execCommand('copy'); } finally { area.remove(); }
+    }
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1500);
+  };
+  return (
+    <button
+      type="button"
+      onClick={() => void onCopy()}
+      aria-label={label}
+      className="mt-1.5 inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs text-white/55 hover:text-white hover:bg-white/10 active:scale-95 transition-all"
+    >
+      {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+      <span>{copied ? copiedLabel : label}</span>
+    </button>
+  );
 }

@@ -230,6 +230,7 @@ vi.mock('@/contexts/StageContext', () => ({
 vi.mock('@/assets/dehub-coin.png', () => ({ default: '' }));
 vi.mock('@/assets/dehub-logo.png', () => ({ default: '' }));
 vi.mock('@/assets/dehub-logo-white.png', () => ({ default: '' }));
+vi.mock('@/assets/riftn-wordmark-flat-white.png', () => ({ default: '' }));
 vi.mock('@/assets/bnb-logo.png', () => ({ default: '' }));
 vi.mock('@/assets/governance-shield.png', () => ({ default: '' }));
 vi.mock('@/assets/trophy-icon.png', () => ({ default: '' }));

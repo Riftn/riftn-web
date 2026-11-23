@@ -1,4 +1,5 @@
 {
+  "dmVideo": {"edit": "Redigera video", "hiddenTag": "Dold", "tapToEdit": "Tappa för att redigera", "cover": "Omslag", "trim": "Trimma", "mirror": "Spegla", "rotate": "Rotera", "hide": "Dölj", "timer": "Timer", "sheetTitleAny": "Redigera innan du skickar", "close": "Stäng", "replace": "Ersätt", "hiddenUntilTap": "Dold tills de trycker på den", "pause": "Pausa", "play": "Spela upp video", "mute": "Tyst", "unmute": "Avtysta", "scrub": "Skrubba genom videon", "addMore": "Lägg till foton eller videor", "trimAria": "Dra i ändarna för att trimma", "coverAria": "Tryck på en bildruta för att välja omslag", "coverHint": "Tryck på en bildruta för att välja omslag", "coverOwn": "Ditt foto", "coverAuto": "Auto", "uploadCover": "Ladda upp en omslagsbild", "mirrored": "Spegvänd", "original": "Original", "rotate90": "Rotera 90°", "showNormally": "Visa normalt", "showNormallyBody": "De ser den direkt", "hideUntilTap": "Dölj tills den trycks på", "hideUntilTapBody": "Oskarp tills de trycker på den", "hidePrice": "Dölj bakom ett pris", "hidePriceBody": "Oskarp tills de betalar dig", "priceUnavailable": "Inte i den här chatten", "timerOff": "Av", "timerOffBody": "Den stannar i chatten.", "timerViewBody": "Borta för er båda när de har sett den.", "confirm": "Bekräfta", "lockedFor": "Lås upp för {{value1}} DHB", "lockedForUsd": "Lås upp för {{value1}}", "editItem": "Redigera objekt {{value1}}", "kept": "{{time}} behölls", "timerTimeBody": "Borta för er båda {{value1}} efter att du har skickat den."},
   "postBg": {
     "addMedia": "Lägg till en bild, GIF eller video",
     "changeMedia": "Byt bild, GIF eller video",
@@ -290,8 +291,10 @@
       "pronouns": "Pronomen",
       "location": "Plats",
       "custom": "Anpassad",
-      "customOption": "Anpassad etikett"
-    }
+      "customOption": "Anpassad etikett",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Följ #{{tag}}",
@@ -698,6 +701,7 @@
     "heading": "Shorts på Riftn"
   },
   "settings": {
+    "loginLook": {"title": "Inloggningsskärm", "desc": "Hur Riftn-logotypen och sloganen rör sig på inloggningsskärmen på den här enheten.", "tube": "Tjock-tv", "vhs": "VHS-band", "led": "LED-vägg", "holo": "Hologram", "neon": "Neon", "3d": "3D", "flat": "Platt"}, "arrivalLook": {"title": "Efter inloggning", "desc": "Det som spelas medan ditt konto laddas, innan din bild landar på sidan. På den här enheten.", "trace": "Spår", "tune": "Ställ in", "rift": "Spricka", "deck": "Kortlek", "glass": "Glasdroppe"},
     "postLanding": "Efter att du publicerat",
     "postLandingDesc": "Hur ditt nya inlägg dyker upp i flödet",
     "postLandingGhost": "Spökplats",
@@ -2203,7 +2207,7 @@
     "promptDevice": "Enhet och operativsystem (för buggar)",
     "deviceInfoNoErrors": "Ingen",
     "promptFilters": "Filtrera efter kategori",
-    "promptMediaError": "Välj bilder eller videor under 20 MB vardera.",
+    "promptMediaError": "Välj bilder eller videor under 200 MB vardera.",
     "promptMediaLimit": "Upp till {{max}} bilagor.",
     "removePromptAttachment": "Ta bort {{name}}",
     "promptAttachment": "Bilaga {{number}}",
@@ -4198,7 +4202,7 @@
       "pageViewsTerm": "Sidvisningar",
       "pageViews": "— förfrågningar som Cloudflare klassar som sidladdningar, inte bilder, skript eller API-anrop.",
       "botsTerm": "Bottar räknas in",
-      "bots": "— det här är råa räkningar vid kanten, så sökrobotar, drifttidsövervakare och skriptade klienter finns med. Du ser dem själv i webbläsarfördelningen ovan, där poster som ”Curl” och ”Okänd” är automatiserad trafik och inte människor. Att filtrera bort bottar kräver en betald Cloudflare-plan som vi inte har, och att tyst dra bort en uppskattning skulle göra siffrorna mindre kontrollerbara, inte mer.",
+      "bots": "— det här är råa räkningar vid kanten, så sökrobotar, drifttidsövervakare och skriptade klienter finns med. Du ser dem själv i webbläsarfördelningen ovan, där poster som ”Curl” och ”Okänd” är automatiserad trafik och inte människor. Det blir allt svårare att skilja bottar från verkliga besökare och snart går de inte att skilja åt i den här statistiken, så det är ingen idé att försöka filtrera bort dem.",
       "totalTerm": "Summor för intervallet",
       "total": "— sidvisningar och förfrågningar summeras över intervallet. Besökarantal summeras medvetet inte till ett ”totalt antal besökare”, eftersom någon som var här på måndag och tisdag skulle räknas två gånger.",
       "peakTerm": "Mest trafikerad timme / dag",
@@ -20858,5 +20862,27 @@
     "remember": "Kom ihåg mitt val",
     "rememberHint": "Ändra det när som helst i Inställningar",
     "failed": "Kunde inte radera meddelandet"
+  },
+  "profileAskAi": {
+    "row": "Fråga AI",
+    "rowSub": "Följ, gilla allt, kom ikapp",
+    "back": "Tillbaka",
+    "title": "Fråga AI om {{handle}}",
+    "sub": "Assistenten gör det, du bekräftar",
+    "followLikeAll": "Följ och gilla allt",
+    "followLikeAllSub": "Följer {{handle}}, reagerar på varje inlägg",
+    "likeAll": "Gilla alla inlägg",
+    "likeAllSub": "Hoppar över dem du redan reagerat på",
+    "catchUp": "Uppdatera mig",
+    "catchUpSub": "Vad {{handle}} har postat på sistone, i korthet",
+    "message": "Skriv ett meddelande",
+    "messageSub": "Skriver ett utkast, du skickar det",
+    "placeholder": "Fråga vad som helst om {{handle}}…",
+    "send": "Skicka",
+    "promptFollowLikeAll": "Följ {{handle}} och reagera på alla inlägg",
+    "promptLikeAll": "Reagera på alla inlägg av {{handle}}",
+    "promptCatchUp": "Uppdatera mig om vad {{handle}} har postat på sistone",
+    "promptMessage": "Hjälp mig skriva ett meddelande till {{handle}}",
+    "promptAbout": "Om {{handle}}: {{question}}"
   }
 }

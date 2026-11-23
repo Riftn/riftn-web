@@ -1,4 +1,5 @@
 {
+  "dmVideo": {"edit": "Manova video", "hiddenTag": "Nafototra", "tapToEdit": "Tsindrio hanovana", "cover": "Sarony", "trim": "Hetezo", "mirror": "Fitaratra", "rotate": "Ahodino", "hide": "Afeno", "timer": "Fanamariham-potoana", "sheetTitleAny": "Manova alohan'ny fandefasana", "close": "Akaro", "replace": "Soloina", "hiddenUntilTap": "Afenina mandra-kitikiny azy", "pause": "Atsaharo", "play": "Alefaso ny horonan-tsary", "mute": "Mitsahatra", "unmute": "Miverina amin'ny feo", "scrub": "Hetezo ny horonan-tsary", "addMore": "Manampy sary na horonan-tsary", "trimAria": "Tariho ny sisiny mba hanetezana azy", "coverAria": "Kitiho ny sary iray mba hanaovana azy ho sarony", "coverHint": "Kitiho ny sary iray mba hanaovana azy ho sarony", "coverOwn": "Sary anao", "coverAuto": "Ahoana", "uploadCover": "Ampidiro ny sary ho sarony", "mirrored": "Fitaratra", "original": "Tany am-boalohany", "rotate90": "Ahodino 90°", "showNormally": "Asehoy ara-dalàna", "showNormallyBody": "Hitany avy hatrany izany", "hideUntilTap": "Afeno mandra-kitika", "hideUntilTapBody": "Manjavozavo mandra-kitikiny azy", "hidePrice": "Afeno ao ambadiky ny vidiny", "hidePriceBody": "Manjavozavo mandra-pandoany vola anao", "priceUnavailable": "Tsy ato amin'ity chat ity", "timerOff": "Vonoina", "timerOffBody": "Mijanona ao anatin'ny chat izany.", "timerViewBody": "Lasa ho anareo roa rehefa avy hitan'izy ireo izany.", "confirm": "Hamafisina", "lockedFor": "Avela ho an'ny {{value1}} DHB", "lockedForUsd": "Hamohana amin'ny {{value1}}", "editItem": "Hanova ny zavatra {{value1}}", "kept": "{{time}} voatahiry", "timerTimeBody": "Lasa ho anareo roa {{value1}} aorian'ny fandefasanao azy."},
   "postBg": {
     "addMedia": "Ampio sary, GIF na horonan-tsary",
     "changeMedia": "Ovay ny sary, GIF na horonan-tsary",
@@ -296,9 +297,11 @@
       "pronouns": "Définition malgache",
       "location": "Toerana",
       "custom": "Safidy:",
-      "customOption": "Mari-tsoratra safidy"
+      "customOption": "Mari-tsoratra safidy",
+      "cashapp": "Cash App"
     },
-    "add": "Ampio saha"
+    "add": "Ampio saha",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Araho #{{tag}}",
@@ -2233,7 +2236,7 @@
     "promptDevice": "Fitaovana & OS (ho an'ny bugs)",
     "deviceInfoNoErrors": "Tsy misy",
     "promptFilters": "Sivitra avy amin'ny sokajy",
-    "promptMediaError": "Safidio sary na horonan-tsary eo ambanin'ny 50MB.",
+    "promptMediaError": "Safidio sary na horonan-tsary eo ambanin'ny 200MB.",
     "promptMediaLimit": "Hatramin'ny {{max}} attachments.",
     "removePromptAttachment": "Esorina {{name}}",
     "promptAttachment": "Fametahana {{number}}",
@@ -4234,7 +4237,7 @@
       "pageViewsTerm": "Fijerena pejy",
       "pageViews": "— fangatahana izay sokajian'ny Cloudflare ho fampidirana pejy, fa tsy sary, script na antso API.",
       "botsTerm": "Tafiditra ny bot",
-      "bots": "— isa manta eo amin'ny sisiny ireo, ka tafiditra ao ny crawler, ny mpanara-maso fiasana ary ny mpanjifa script. Hitanao izany ao amin'ny fizarana mpitety etsy ambony, izay misy fidirana toy ny \"Curl\" sy \"Tsy fantatra\" izay fifamoivoizana mandeha ho azy fa tsy olona. Ny fanavahana ny bot dia mitaky drafitra Cloudflare andoavam-bola izay tsy ananantsika, ary ny fanesorana tombantombana mangina dia hanao ny isa ho sarotra hamarinina kokoa fa tsy mora kokoa.",
+      "bots": "— isa manta eo amin'ny sisiny ireo, ka tafiditra ao ny crawler, ny mpanara-maso fiasana ary ny mpanjifa script. Hitanao izany ao amin'ny fizarana mpitety etsy ambony, izay misy fidirana toy ny \"Curl\" sy \"Tsy fantatra\" izay fifamoivoizana mandeha ho azy fa tsy olona. Mihasarotra ny manavaka ny bot amin’ny olona mitsidika, ary tsy ho azo avahana amin’ireto antontan’isa ireto izy ireo tsy ho ela, ka tsy misy ilàna ny manandrana manivana azy ireo.",
       "totalTerm": "Totalin'ny elanelana",
       "total": "— mitambatra manerana ny elanelana ny fijerena pejy sy ny fangatahana. Tsy atambatra ho \"totalin'ny mpitsidika\" ny isan'ny mpitsidika satria olona iray tonga ny alatsinainy sy talata dia hisaina indroa.",
       "peakTerm": "Ora / andro be mpitsidika indrindra",
@@ -20954,5 +20957,27 @@
     "remember": "Tadidio ny safidiko",
     "rememberHint": "Ovay amin'ny fotoana rehetra ao amin'ny Fikirana",
     "failed": "Tsy voafafa ny hafatra"
+  },
+  "profileAskAi": {
+    "row": "Anontanio ny AI",
+    "rowSub": "Araho, tiavo daholo, mahazoa vaovao",
+    "back": "Hiverina",
+    "title": "Anontanio ny AI momba an'i {{handle}}",
+    "sub": "Ny Mpanampy no manao, ianao no manamarina",
+    "followLikeAll": "Araho ary tiavo daholo",
+    "followLikeAllSub": "Manaraka an'i {{handle}}, mamaly ny lahatsoratra rehetra",
+    "likeAll": "Tiavo ny lahatsorany rehetra",
+    "likeAllSub": "Tsy raisina intsony izay efa novalianao",
+    "catchUp": "Omeo vaovao aho",
+    "catchUpSub": "Izay navoakan'i {{handle}} vao haingana, fohifohy",
+    "message": "Manorata hafatra ho azy",
+    "messageSub": "Manoratra drafitra hafatra, ianao no mandefa",
+    "placeholder": "Anontanio na inona na inona momba an'i {{handle}}…",
+    "send": "Alefa",
+    "promptFollowLikeAll": "Araho i {{handle}} ary valio ny lahatsorany rehetra",
+    "promptLikeAll": "Valio ny lahatsoratr'i {{handle}} rehetra",
+    "promptCatchUp": "Lazao ahy izay navoakan'i {{handle}} vao haingana",
+    "promptMessage": "Ampio aho hanoratra hafatra ho an'i {{handle}}",
+    "promptAbout": "Momba an'i {{handle}}: {{question}}"
   }
 }

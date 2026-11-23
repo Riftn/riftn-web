@@ -1,4 +1,9 @@
 import { SoundPicker, type SoundCandidate } from '@/features/post/components/SoundPicker';
+import { AssistantActionCard } from '@/components/app/assistant/AssistantActionCard';
+import type { AssistantAction } from '@/lib/api/dehub/assistant-actions';
+import { setCoAuthors, openCoAuthorSheet } from '@/lib/co-author-store';
+import { CoAuthorSheetHost } from '@/components/app/co-authors/CoAuthorSheetHost';
+import { CoAuthorInviteBanner } from '@/components/app/co-authors/CoAuthorInviteBanner';
 import { MessagesNavGlyph } from '@/components/app/navigation/MessagesNavGlyph';
 import { UnreadCountChip } from '@/components/app/chat/UnreadCountChip';
 import { SoundtrackControl } from '@/components/app/cards/SoundtrackControl';
@@ -34,6 +39,7 @@ import { DmLockedState, DmUndecryptableRun } from '@/components/app/chat/DmLocke
 import { DmSafetyBanner } from '@/components/app/chat/DmSafetyBanner';
 import { useTranslation as _useCopy } from 'react-i18next';
 import { lazy, Suspense, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
+import type { ChatReactionSummary } from '@/lib/api/dehub/chat-prefs';
 import { POST_LOOK_EVENT, type PostLook } from '@/lib/post-menu';
 import { PostMenuGate } from '@/components/app/post-menu/PostMenuGate';
 import { PostActionBar } from '@/features/post/components/PostActionBar';
@@ -116,6 +122,8 @@ import type { PollData } from '@/features/post/types';
 import { LiveClearedLayer } from '@/components/app/live/LiveClearedLayer';
 import { ImmersiveLiveChrome } from '@/components/app/live/ImmersiveLiveChrome';
 import { LivePostChat } from '@/components/app/cards/LivePostChat';
+import { RewardsSheet } from '@/components/app/live/points/RewardsSheet';
+import { RewardsPanel } from '@/components/app/live/studio/RewardsPanel';
 import type { LiveAudience } from '@/lib/api/dehub/livestream';
 import type { DeHubPoll, DmLock, DmLockStatus, DmMessage } from '@/lib/api/dehub';
 import { LockedMediaBubble, lockedMediaKey } from '@/components/app/chat/LockedMediaBubble';
@@ -136,6 +144,7 @@ import type { PostProcessingPhase } from '@/store/postProcessingStore';
 import { ProposalLinkEmbed } from '@/components/app/governance/ProposalLinkEmbed';
 import { DehubLinkEmbeds } from '@/components/app/cards/DehubLinkEmbedsLazy';
 import { UserMentionDropdown } from '@/components/app/mentions';
+import { useMention } from '@/hooks/use-mention';
 import { findDehubLinks } from '@/lib/dehub-links';
 import { ProposalOptions } from '@/components/app/governance/ProposalOptions';
 import { ProposalAnswersEditor } from '@/components/app/governance/ProposalAnswersEditor';
@@ -171,6 +180,7 @@ import { DeleteMessageDialog } from '@/components/app/chat/DeleteMessageDialog';
 import { ImageMarkupDialog } from '@/components/app/features/ImageMarkupDialog';
 import { ChatMessage as LiveChatLine, type Message as LiveChatLineMessage } from '@/components/app/chat/ChatMessage';
 import { UnreadMarker, UnreadJumpButton } from '@/components/app/chat/UnreadJump';
+import { countLinesBelow, glideToBottom } from '@/lib/chat-lines-below';
 import type { DeHubUser } from '@/lib/api/dehub';
 import { GithubLinkSetting } from '@/components/app/settings/GithubLinkSetting';
 import { SignedFollowsSetting } from '@/components/app/settings/SignedFollowsSetting';
@@ -181,6 +191,7 @@ import type { SuggestedAccount } from '@/lib/api/dehub';
 import { NAV_ITEMS } from '@/constants/app.constants';
 import { filterNavItems } from '@/components/app/navigation/nav-search';
 import { MobileMenuLayout, MenuTabs } from '@/components/app/navigation/MobileMenuLayout';
+import { MenuAccountSwitcher } from '@/components/app/navigation/MenuAccountSwitcher';
 import { groupMenuItems } from '@/components/app/navigation/menu-groups';
 import { normaliseMenuLayout, useMenuLayout, writeMenuLayout } from '@/lib/menu-layout';
 
@@ -318,6 +329,48 @@ function ComicGallery() {
  * Follow is tapped. Laid out bare, as the feed and Explore carry them, so each
  * theme's own card surface (or none, in System) is what shows.
  */
+/**
+ * Messages rows with reactions waiting: bare moving emojis (no pill) where
+ * the unread number sits. "Land a reaction" adds one so the arrival motion
+ * (Settings > Appearance > Reactions in chat) can be seen on the row.
+ */
+function ReactionRowsGallery() {
+  const now = new Date(Date.now() - 2 * 3600_000).toISOString();
+  const [extra, setExtra] = useState(0);
+  const people: Array<Partial<DeHubUser> & { address: string }> = [
+    { address: '0x7777777777777777777777777777777777777771', username: 'ellaverse', displayName: 'Ella Verse' },
+    { address: '0x7777777777777777777777777777777777777772', username: 'xluna', displayName: 'Luna' },
+    { address: '0x7777777777777777777777777777777777777773', username: 'deepwater', displayName: 'Deep Water' },
+  ];
+  const at = new Date().toISOString();
+  const sums: ChatReactionSummary[] = [
+    { total: 1 + extra, emojis: [{ emoji: '💯', count: 1 + extra }], last: { emoji: '💯', by: people[0].address, name: 'Ella Verse', messageId: 'g1', at } },
+    { total: 4, emojis: [{ emoji: '😂', count: 2 }, { emoji: '🔥', count: 1 }, { emoji: '👍', count: 1 }], last: { emoji: '😂', by: people[1].address, name: 'Luna', messageId: 'g2', at } },
+    { total: 3, emojis: [{ emoji: '🔥', count: 3 }], last: { emoji: '🔥', by: people[2].address, name: 'Deep Water', messageId: 'g3', at } },
+  ];
+  const rows = people.map((user, i) => ({
+    id: `gallery-react-${i}`,
+    participants: [user as DeHubUser],
+    otherUser: user as DeHubUser,
+    unreadCount: 0,
+    createdAt: now,
+    updatedAt: now,
+    lastMessage: { id: `gallery-react-msg-${i}`, conversationId: `gallery-react-${i}`, sender: user as DeHubUser, content: 'See you on the stream tonight', createdAt: now } as DeHubDMMessage,
+  }));
+  const noop = () => {};
+  return (
+    <section data-page-bento data-reaction-rows-gallery className="mb-5 max-w-md rounded-3xl border border-white/10 bg-white/[0.04]">
+      <div className="flex items-center justify-between px-4 pt-4">
+        <h2 className="text-sm font-semibold">Messages: new reactions</h2>
+        <button type="button" data-land-row-reaction onClick={() => setExtra((n) => n + 1)} className="rounded-lg border border-white/10 px-3 py-1.5 text-xs">Land a reaction</button>
+      </div>
+      {rows.map((c, i) => (
+        <ConversationItem key={c.id} conversation={c} onClick={noop} isSelected={false} onDelete={noop} onBlock={noop} reactions={sums[i]} />
+      ))}
+    </section>
+  );
+}
+
 /** Name badges in the Messages list: badge on the name's baseline, then the dot. */
 function NameBadgesGallery() {
   const now = new Date(Date.now() - 2 * 3600_000).toISOString();
@@ -376,10 +429,12 @@ function MessageMenuGallery() {
   const noop = () => {};
   // Delete opens the real choice: for me / for both (yours) or for me only (theirs).
   const [deleting, setDeleting] = useState<{ mine: boolean } | null>(null);
-  const live: LiveChatLineMessage[] = [
+  const [live, setLive] = useState<LiveChatLineMessage[]>(() => [
     { id: 'mm-live-1', userId: others[0], userName: 'Luna', userHandle: 'xluna', content: 'gm chat, who is watching the stream tonight?', timestamp: new Date(Date.now() - 6 * 60_000), type: 'text', reactions: { '👍': [others[1], others[2], me.address], '🚀': [others[1]] } },
     { id: 'mm-live-2', userId: me.address, userName: 'me', userHandle: 'me', content: 'count me in, 8pm UTC', timestamp: new Date(Date.now() - 4 * 60_000), type: 'text', reactions: { '❤️': [others[0], others[2]] } },
-  ];
+  ]);
+  // Edits land on the line, so the in-place edit can be tried here.
+  const editLive = (id: string, content: string) => { setLive((rows) => rows.map((r) => (r.id === id ? { ...r, content, isEdited: true } : r))); return Promise.resolve(true); };
   return (
     <section data-msg-menu-gallery className="mb-5 space-y-3">
       <h2 className="text-sm font-semibold">Message menu (right-click on a computer, hold on a phone)</h2>
@@ -414,7 +469,7 @@ function MessageMenuGallery() {
             onReact={noop}
             onRemoveReaction={noop}
             onReply={noop}
-            onEdit={noop}
+            onEdit={editLive}
             onDelete={noop}
             showActions
             onTogglePin={noop}
@@ -498,6 +553,28 @@ function FullScreenChatGallery() {
       <h2 className="text-sm font-semibold">Full-screen chat (/chat)</h2>
       <FullScreenChatShell inline chatOpen list={list} chat={chat} />
       <FullScreenChatShell inline chatOpen={false} list={list} chat={null} />
+      <h3 className="text-sm font-semibold">Send in their language (you type Turkish, they read English)</h3>
+      <div data-translate-out-gallery className="grid gap-3 sm:grid-cols-2">
+        {[
+          { label: 'You (Turkish)', rows: [
+            { m: { ...msg('to-a', false, 'Selam! Bu akşam yayına geliyor musun?', ago(6)), original: { content: 'Hey! Are you coming to the stream tonight?', lang: 'tr' } } as DmMessage, mine: false },
+            { m: { ...msg('to-b', true, 'Yes, I will be there at nine', ago(5)), original: { content: 'Evet, dokuzda orada olacağım', lang: 'en' } } as DmMessage, mine: true },
+          ] },
+          { label: 'Them (English)', rows: [
+            { m: { ...msg('to-c', true, 'Selam! Bu akşam yayına geliyor musun?', ago(6)), original: { content: 'Hey! Are you coming to the stream tonight?', lang: 'tr' } } as DmMessage, mine: true },
+            { m: { ...msg('to-d', false, 'Yes, I will be there at nine', ago(5)), original: { content: 'Evet, dokuzda orada olacağım', lang: 'en' } } as DmMessage, mine: false },
+          ] },
+        ].map(side => (
+          <div key={side.label} className="overflow-hidden rounded-2xl border border-white/10">
+            <div className="px-4 pt-3 text-xs text-zinc-400">{side.label}</div>
+            <div data-chat-wallpaper className="chat-text-zone px-4 pb-4">
+              {side.rows.map(({ m, mine }) => (
+                <DmMessageBubble key={m._id} message={m} isOwnMessage={mine} cozy={{ first: true, last: true }} currentUserAddress={me.address} />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
       <h3 className="text-sm font-semibold">Picking messages (Select, then click more)</h3>
       <div data-msg-select-gallery className="flex h-[30rem] flex-col overflow-hidden rounded-2xl border border-white/10">
         <div data-chat-wallpaper className="chat-text-zone min-h-0 flex-1 overflow-y-auto px-4 pb-4">
@@ -516,7 +593,7 @@ function FullScreenChatGallery() {
           <div key={count} className="flex flex-col items-center gap-3 text-xs text-zinc-400">
             <MessagesNavGlyph unread={count} className="h-6 w-6 text-white" />
             <UnreadCountChip count={count} />
-            <span>{count} unread</span>
+            <span>{formatCount(count)} unread</span>
           </div>
         ))}
       </div>
@@ -537,7 +614,34 @@ function FullScreenChatGallery() {
           </div>
         ))}
       </div>
+      <h3 className="text-sm font-semibold">Scroll up: the button counts every line below you</h3>
+      <LinesBelowDemo />
     </section>
+  );
+}
+
+/** A long chat (1,500 lines) wired to the real scroll-down count and glide. */
+function LinesBelowDemo() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [below, setBelow] = useState(0);
+  const ids = useMemo(() => Array.from({ length: 1500 }, (_, i) => `demo-${i}`), []);
+  const refresh = () => {
+    const el = ref.current;
+    if (el) setBelow(countLinesBelow(el, ids, (id) => el.querySelector(`[data-demo-line="${id}"]`)));
+  };
+  useEffect(() => {
+    const el = ref.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, []);
+  return (
+    <div data-lines-below-gallery className="relative h-[26rem] overflow-hidden rounded-2xl border border-white/10">
+      <div ref={ref} onScroll={refresh} data-chat-wallpaper className="chat-text-zone h-full overflow-y-auto px-4 py-2">
+        {ids.map((id, i) => (
+          <div key={id} data-demo-line={id} className="py-1 text-sm text-zinc-300">Line {i + 1}</div>
+        ))}
+      </div>
+      <UnreadJumpButton show={below > 0} up={false} count={below} onClick={() => ref.current && glideToBottom(ref.current)} className="absolute bottom-4 right-4 z-10" />
+    </div>
   );
 }
 
@@ -561,6 +665,29 @@ function FollowCardsGallery() {
             <FollowCoverCard key={user.address} user={user} phase={i === 3 ? 'following' : undefined} onOpen={noop} onFollow={noop} onDismiss={noop} />
           ))}
         </div>
+      </div>
+    </section>
+  );
+}
+
+/** The assistant's confirm cards: react to many posts, follow, chat reading, running and done. */
+function AssistantCardsGallery() {
+  const jules = { address: '0x1111111111111111111111111111111111111111', username: 'jules', displayName: 'Jules', avatar: null };
+  const base = { result: null, confirmBy: new Date(Date.now() + 15 * 60_000).toISOString() };
+  const cards: AssistantAction[] = [
+    { ...base, id: 'aaaaaaaaaaaaaaaaaaaaaaa1', kind: 'react', status: 'pending', preview: { choice: 'love', count: 118, alreadyReacted: 4, totalPosts: 122, author: jules } },
+    { ...base, id: 'aaaaaaaaaaaaaaaaaaaaaaa2', kind: 'react', status: 'running', preview: { choice: 'fitting', count: 118, author: jules }, result: { done: 46, total: 118 } },
+    { ...base, id: 'aaaaaaaaaaaaaaaaaaaaaaa3', kind: 'react', status: 'done', preview: { choice: 'fitting', count: 118, author: jules }, result: { done: 118, total: 118, added: 118, used: { love: 61, like: 40, lol: 17 } } },
+    { ...base, id: 'aaaaaaaaaaaaaaaaaaaaaaa4', kind: 'follow', status: 'pending', preview: { count: 2, people: [jules, { address: '0x2222222222222222222222222222222222222222', username: 'xluna', displayName: 'Luna', avatar: null }] } },
+    { ...base, id: 'aaaaaaaaaaaaaaaaaaaaaaa5', kind: 'chat_access', status: 'pending', preview: { allow: true } },
+  ];
+  return (
+    <section data-assistant-cards-gallery className="mb-5">
+      <h2 className="mb-3 text-sm font-semibold">Assistant cards</h2>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {cards.map((card) => (
+          <AssistantActionCard key={card.id} actionId={card.id} initial={card} />
+        ))}
       </div>
     </section>
   );
@@ -726,7 +853,7 @@ function ThreadedComposerGallery() {
   const labels = useMemo<ThreadedCommentsLabels>(() => ({
     addComment: 'Add a comment...', writeReply: 'Write a reply...', reply: 'Reply',
     replyingTo: (name) => `Replying to ${name}`, edited: 'edited', empty: 'No comments yet',
-    showMoreReplies: (count) => `Show ${count} more replies`,
+    showMoreReplies: (count) => `Show ${formatCount(count)} more replies`,
   }), []);
   const media = useMemo(() => ({ upload: () => Promise.reject(new Error('gallery')) }), []);
   const noop = () => Promise.resolve();
@@ -772,6 +899,13 @@ import { ComicPagesEditor } from '@/features/post/components/ComicPagesEditor';
 import { ComicBorderPicker } from '@/features/post/components/ComicBorderPicker';
 import { COMIC_BORDERS, type ComicBorder } from '@/lib/comic-borders';
 import { LoginLookSetting } from '@/components/app/settings/LoginLookSetting';
+import { ArrivalLookSetting } from '@/components/app/settings/ArrivalLookSetting';
+import { formatCount } from '@/lib/format-count';
+import { PetCard } from '@/components/app/pet/PetCard';
+import { PetSprite } from '@/components/app/pet/PetSprite';
+import StreamPetCorner from '@/components/app/pet/StreamPetCorner';
+import { PetPanel, PetHatch } from '@/components/app/live/studio/PetPanel';
+import type { StreamPet } from '@/lib/api/dehub/stream-pet';
 const BadgeShowcase = lazy(() => import('@/components/app/badge-showcase/BadgeShowcase'));
 
 // The standard public BIP-39 test vector: owns nothing, safe to show.
@@ -917,6 +1051,15 @@ function MenuReorderGallery() {
   const groups = useMemo(() => groupMenuItems(filterNavItems(NAV_ITEMS, '', t, false)), [t]);
   return (
     <section data-page-bento data-menu-reorder-gallery className="mb-5 max-w-md rounded-3xl border border-white/10 bg-zinc-950 p-4">
+      {/* The menu header: who is signed in, and the quick account switcher. */}
+      <div data-menu-header-gallery className="mb-3 flex items-center gap-3 px-1">
+        <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-zinc-700 text-sm font-medium text-white">M</div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[15px] font-semibold text-white">Mal</p>
+          <p className="truncate text-[13px] text-zinc-400">@maldoteth</p>
+        </div>
+        <MenuAccountSwitcher />
+      </div>
       <div className="mb-3 flex gap-1.5">
         {(['tabs', 'sections', 'folders'] as const).map((value) => (
           <button key={value} type="button" onClick={() => writeMenuLayout(value)} data-menu-layout-pick={value}
@@ -1489,11 +1632,30 @@ function ScheduledDmGallery() {
   ]);
   const [list, setList] = useState(false);
   const [draft, setDraft] = useState<{ text: string; clear: () => void } | null>(null);
+  // "When they're next online": sent lines in the thread. The hourglass stays
+  // beside the one tick until the message is read, then two ticks.
+  const me = { _id: 'me', address: '0x0000000000000000000000000000000000000001', username: 'me' };
+  const sent = (id: string, content: string, minsAgo: number, extra: Partial<DmMessage> = {}): DmMessage => ({
+    _id: id, conversation: 'gallery', sender: me as DmMessage['sender'], author: 'me', content, msgType: 'msg', mediaUrls: [],
+    voiceDuration: null, isRead: false, isEdited: false, editedAt: null, isForwarded: false, replyTo: null, paymentStatus: null,
+    paymentTxHash: null, tipAmount: null, tipSymbol: null, isDeleted: false, createdAt: new Date(Date.now() - minsAgo * 60_000).toISOString(),
+    updatedAt: new Date().toISOString(), ...extra,
+  } as DmMessage);
+  const [thread, setThread] = useState<DmMessage[]>(() => [
+    sent('w1', 'Sent normally', 42),
+    sent('w2', 'Sent for when they are next online, read', 30, { whenOnline: true, isRead: true }),
+    sent('w3', 'Sent for when they are next online, not read yet', 12, { whenOnline: true }),
+  ]);
   return (
     <section data-page-bento data-scheduled-dm-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
       <h2 className="mb-3 text-sm font-semibold">{t('dmSchedule.title', { defaultValue: 'Scheduled messages' })}</h2>
       <AuthContext.Provider value={GALLERY_AUTH}>
         <div className="mx-auto max-w-[640px] overflow-hidden rounded-2xl border border-white/10">
+          <div data-when-online-gallery data-chat-wallpaper className="chat-text-zone px-4 pb-2 pt-3">
+            {thread.map((m) => (
+              <DmMessageBubble key={m._id} message={m} isOwnMessage cozy={{ first: true, last: true }} currentUserAddress={me.address} />
+            ))}
+          </div>
           <ScheduledStrip items={items} onOpen={() => setList(true)} />
           <ChatInput
             onSendMessage={async () => true}
@@ -1510,6 +1672,11 @@ function ScheduledDmGallery() {
           onSchedule={(date) => {
             if (!date || !draft) return;
             setItems(prev => [...prev, row(String(Date.now()), draft.text, (date.getTime() - Date.now()) / 3_600_000)].sort((x, y) => x.sendAt.localeCompare(y.sendAt)));
+            draft.clear();
+          }}
+          onWhenOnline={() => {
+            if (!draft) return;
+            setThread(prev => [...prev, sent(String(Date.now()), draft.text, 0, { whenOnline: true })]);
             draft.clear();
           }}
           kind="message"
@@ -1738,6 +1905,30 @@ function ReactionsGallery() {
             />
           </div>
         ))}
+      </div>
+    </section>
+    </AuthContext.Provider>
+  );
+}
+
+/**
+ * The live viewer's Share button over a broadcast: it opens the post's share
+ * drawer (repost, quote, send in a message, copy link, and the device's own
+ * sheet as "Share link").
+ */
+function LiveShareGallery() {
+  const { t: _copy } = _useCopy();
+  return (
+    <AuthContext.Provider value={GALLERY_AUTH}>
+    <section data-page-bento data-live-share-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">LIVE · {_copy("copy.29887a5ff984", { defaultValue: "Share" })}</h2>
+      <div className="relative overflow-hidden rounded-2xl">
+        <img src={galleryCover} alt="" className="aspect-video w-full object-cover" />
+        <div className="absolute bottom-3 right-3" data-keep-dark>
+          <ActionBar compact postId="990020" tokenId={990020} likeCount={12} dislikeCount={0} commentCount={0}
+            reactionCounts={SAMPLE_REACTIONS} myReaction={null} tipCount={3} onTip={() => {}}
+            nativeShare={{ title: 'Live now' }} />
+        </div>
       </div>
     </section>
     </AuthContext.Provider>
@@ -2095,6 +2286,7 @@ export default function StateGalleryPage() {
         )}
         {params.get('sounds') === '1' && <SoundsGallery step={params.get('soundstep')} library={params.get('library')} />}
         {params.get('thread') === '1' && <AuthorThreadGallery />}
+        {params.get('coauthors') && <CoAuthorsGallery mode={params.get('coauthors')} />}
         {params.get('composer') === '1' && <ThreadedComposerGallery />}
         {params.get('notifs') === '1' && <NotificationRowsGallery />}
         {params.get('links') === '1' && <LinkCardsGallery mention={params.get('mention')} />}
@@ -2123,16 +2315,21 @@ export default function StateGalleryPage() {
         <ComicGallery />
         <UsernameReserveGallery />
 
+        <ReactionRowsGallery />
         <NameBadgesGallery />
         <FullScreenChatGallery />
         <MessageMenuGallery />
         <ChatReactionArrivalGallery />
         <FollowCardsGallery />
+        <AssistantCardsGallery />
 
         <StreamerArtworkGallery />
 
         <section data-page-bento data-login-look-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
           <LoginLookSetting />
+        </section>
+        <section data-page-bento data-arrival-look-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+          <ArrivalLookSetting />
         </section>
         <PinnedProfileGallery />
         <ProfileImageMenuGallery />
@@ -2149,6 +2346,8 @@ export default function StateGalleryPage() {
         <ProposalCardGallery />
         <AgentWelcomeGallery />
         <LiveViewerGallery />
+        <LivePointsGallery initiallyOpen={params.get('sheet') === 'rewards'} />
+        <StreamPetGallery />
         <HolderGroupGallery />
         <GroupsChannelsGallery />
         <NewMessageDrawerGallery />
@@ -2292,6 +2491,7 @@ export default function StateGalleryPage() {
         <MenuReorderGallery />
         <LiveAvatarsGallery />
         <ReactionsGallery />
+        <LiveShareGallery />
         <DislikesGallery />
         <MenusGallery />
 
@@ -2512,7 +2712,7 @@ function HolderGroupGallery() {
         <div className="grid gap-4 md:grid-cols-2">
           <div>
             <p className="text-white text-lg font-bold">{GALLERY_HOLDER_COMMUNITY.name}</p>
-            <p className="text-white text-sm">{GALLERY_HOLDER_COMMUNITY.member_count.toLocaleString()} members</p>
+            <p className="text-white text-sm">{formatCount(GALLERY_HOLDER_COMMUNITY.member_count)} members</p>
             <HolderGateChip gate={gate} />
             <div className="mt-4"><TopHolders community={GALLERY_HOLDER_COMMUNITY} /></div>
           </div>
@@ -2526,6 +2726,147 @@ function HolderGroupGallery() {
 }
 
 /** The phone live viewer's chrome over a stand-in picture, with a seeded Who's here. */
+const GALLERY_POINTS_VIEWER = '0x00000000000000000000000000000000000000b2';
+const GALLERY_POINTS_AUTH = {
+  isAuthenticated: true,
+  walletAddress: GALLERY_POINTS_VIEWER,
+  user: null,
+  openLoginModal: () => {},
+} as unknown as AuthContextType;
+const GALLERY_POINTS_BALANCE = { creator: '0x00000000000000000000000000000000000000a1', live: true, earned: 1640, spent: 400, balance: 1240 };
+const GALLERY_REWARDS = [
+  { id: 'g-hi', title: 'Say hi to me on stream', cost: 100, needsText: false, enabled: true },
+  { id: 'g-hydrate', title: 'Hydrate!', cost: 250, needsText: false, enabled: true },
+  { id: 'g-song', title: 'Pick the next song', cost: 500, needsText: true, enabled: true },
+  { id: 'g-voice', title: 'Do the voice for one minute', cost: 2500, needsText: false, enabled: true },
+];
+const GALLERY_REDEMPTIONS = [
+  { id: 'r1', rewardId: 'g-song', title: 'Pick the next song', cost: 500, text: 'Anything by Fred again..', status: 'pending', createdAt: new Date().toISOString(), viewer: { address: '0x00000000000000000000000000000000000000c3', username: 'nova', displayName: 'Nova' } },
+  { id: 'r2', rewardId: 'g-hydrate', title: 'Hydrate!', cost: 250, text: '', status: 'pending', createdAt: new Date().toISOString(), viewer: { address: '0x00000000000000000000000000000000000000c4', username: 'kai' } },
+  { id: 'r3', rewardId: 'g-hi', title: 'Say hi to me on stream', cost: 100, text: '', status: 'done', createdAt: new Date().toISOString(), viewer: { address: '0x00000000000000000000000000000000000000c5', username: 'mira' } },
+];
+
+/** Channel points: the button in both chats, the rewards sheet, and Live Studio's panel. */
+function LivePointsGallery({ initiallyOpen = false }: { initiallyOpen?: boolean }) {
+  const queryClient = useQueryClient();
+  const [open, setOpen] = useState(initiallyOpen);
+  useState(() => {
+    queryClient.setQueryData(['live-points', GALLERY_STREAM_ID], GALLERY_POINTS_BALANCE);
+    queryClient.setQueryData(['live-rewards', GALLERY_STREAM_ID], { creator: GALLERY_POINTS_BALANCE.creator, live: true, rewards: GALLERY_REWARDS, recentRedemptions: GALLERY_REDEMPTIONS.map(({ id, title }) => ({ id, title })) });
+    queryClient.setQueryData(['my-live-rewards'], GALLERY_REWARDS.slice(0, 3));
+    queryClient.setQueryData(['my-live-redemptions'], GALLERY_REDEMPTIONS);
+  });
+  return (
+    <section data-page-bento data-live-points-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Channel points</h2>
+      <AuthContext.Provider value={GALLERY_POINTS_AUTH}>
+        <div className="flex flex-wrap items-start justify-center gap-4">
+          <div
+            data-live-points-phone
+            className="relative flex h-[520px] w-[390px] max-w-full flex-col justify-end overflow-hidden rounded-[28px] px-3 pb-3"
+            style={{ background: 'radial-gradient(60% 30% at 50% 26%, rgba(255,170,90,.55), transparent 70%), radial-gradient(40% 25% at 85% 12%, rgba(80,120,255,.55), transparent 70%), linear-gradient(180deg, #2a1240 0%, #3b1d4f 40%, #120a1c 100%)' }}
+          >
+            <LivePostChat tokenId="0" streamId={GALLERY_STREAM_ID} overlay />
+          </div>
+          <div data-live-points-desktop className="w-[380px] max-w-full rounded-2xl border border-white/10 bg-black/40 p-4">
+            <LivePostChat tokenId="0" streamId={GALLERY_STREAM_ID} />
+          </div>
+        </div>
+        <button type="button" data-kit-button="quiet" data-open-rewards onClick={() => setOpen(true)} className="mt-4">
+          Open rewards sheet
+        </button>
+        <RewardsSheet open={open} onOpenChange={setOpen} streamId={GALLERY_STREAM_ID} balance={GALLERY_POINTS_BALANCE} rewards={GALLERY_REWARDS} />
+        <div data-live-points-studio className="mx-auto mt-4 max-w-xl">
+          <RewardsPanel />
+        </div>
+      </AuthContext.Provider>
+    </section>
+  );
+}
+
+const GALLERY_PET: StreamPet = {
+  owner: '0x00000000000000000000000000000000000000a1',
+  name: 'Mochi',
+  color: 'violet',
+  hatchedAt: '2026-11-01T12:00:00.000Z',
+  stage: 'teen',
+  stageIndex: 3,
+  food: 96,
+  streamFood: 88,
+  viewerFood: 8,
+  stageFood: 60,
+  nextStageFood: 240,
+  progress: 36 / 180,
+  mood: 'happy',
+  lastFedAt: new Date().toISOString(),
+  sleepsAt: new Date(Date.now() + 20 * 3_600_000).toISOString(),
+  streamingNow: true,
+  streamedMinutes: 440,
+  showOnProfile: true,
+  showOnStream: true,
+  feeding: { enabled: true, cost: 100 },
+};
+
+/** Stream pets: every stage and mood, the profile card, the stream corner, and Live Studio. */
+function StreamPetGallery() {
+  const queryClient = useQueryClient();
+  useState(() => {
+    queryClient.setQueryData(['stream-pet', GALLERY_STREAM_ID], GALLERY_PET);
+    queryClient.setQueryData(['live-points', GALLERY_STREAM_ID], GALLERY_POINTS_BALANCE);
+    queryClient.setQueryData(['my-stream-pet'], {
+      pet: { ...GALLERY_PET, streamingNow: false },
+      feeders: [
+        { address: '0x00000000000000000000000000000000000000c3', username: 'nova', displayName: 'Nova', snacks: 14 },
+        { address: '0x00000000000000000000000000000000000000c4', username: 'kai', snacks: 6 },
+      ],
+    });
+  });
+  const stages = ['egg', 'baby', 'kid', 'teen', 'grown', 'legend'] as const;
+  const colors = ['violet', 'pink', 'mint', 'sky', 'sun', 'coral'] as const;
+  return (
+    <section data-page-bento data-stream-pet-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Stream pet</h2>
+      <div data-stream-pet-stages className="flex flex-wrap items-end justify-center gap-3">
+        {stages.map((stage, i) => (
+          <div key={stage} className="flex flex-col items-center gap-1">
+            <PetSprite color={colors[i]} stage={stage} mood={stage === 'egg' ? 'egg' : 'happy'} size={84} />
+            <span className="text-[11px] text-white/60">{stage}</span>
+          </div>
+        ))}
+        {(['happy', 'hungry', 'asleep'] as const).map((mood) => (
+          <div key={mood} className="flex flex-col items-center gap-1">
+            <PetSprite color="mint" stage="grown" mood={mood} size={84} />
+            <span className="text-[11px] text-white/60">{mood}</span>
+          </div>
+        ))}
+      </div>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <div data-stream-pet-profile>
+          <PetCard pet={{ ...GALLERY_PET, streamingNow: false }} />
+        </div>
+        <div data-stream-pet-profile-asleep>
+          <PetCard pet={{ ...GALLERY_PET, name: 'Pip', color: 'coral', stage: 'kid', stageIndex: 2, food: 30, stageFood: 12, nextStageFood: 60, progress: 18 / 48, mood: 'asleep', streamingNow: false, sleepsAt: null }} own />
+        </div>
+      </div>
+      <AuthContext.Provider value={GALLERY_POINTS_AUTH}>
+        <div className="mt-4 flex flex-wrap items-start justify-center gap-4">
+          <div
+            data-stream-pet-phone
+            className="relative h-[520px] w-[390px] max-w-full overflow-hidden rounded-[28px]"
+            style={{ background: 'radial-gradient(60% 30% at 50% 26%, rgba(255,170,90,.55), transparent 70%), radial-gradient(40% 25% at 85% 12%, rgba(80,120,255,.55), transparent 70%), linear-gradient(180deg, #2a1240 0%, #3b1d4f 40%, #120a1c 100%)' }}
+          >
+            <StreamPetCorner streamId={GALLERY_STREAM_ID} signedIn initiallyOpen className="absolute bottom-6 right-3 z-20" />
+          </div>
+          <div data-stream-pet-studio className="w-[420px] max-w-full space-y-4">
+            <PetPanel />
+            <PetHatch onHatched={() => undefined} />
+          </div>
+        </div>
+      </AuthContext.Provider>
+    </section>
+  );
+}
+
 function LiveViewerGallery() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -2609,6 +2950,45 @@ const GALLERY_TEXT_POSTS: GalleryTextPost[] = [
   author: { id: 'gallery-profile', name: 'Marco V', handle: '@marco_v', verified: false },
   stats: { comments: 12 + i * 7, reposts: i, likes: 140 + i * 53, dislikes: 0 },
 }) as GalleryTextPost);
+
+/** Co-authored posts: both names on the header, the invite card, and the sheet (?coauthors=sheet opens it). */
+const GALLERY_CO_AUTHORS = [
+  { address: '0x7777777777777777777777777777777777777771', username: 'ellaverse', displayName: 'Ella Verse' },
+  { address: '0x7777777777777777777777777777777777777772', username: 'kai', displayName: 'Kai' },
+  { address: '0x7777777777777777777777777777777777777773', username: 'juno', displayName: 'Juno' },
+];
+function CoAuthorsGallery({ mode }: { mode: string | null }) {
+  const [ready] = useState(() => {
+    setCoAuthors('990101', { users: [GALLERY_CO_AUTHORS[0]] });
+    setCoAuthors('990102', { users: GALLERY_CO_AUTHORS });
+    setCoAuthors('990103', { users: [], invited: true });
+    return true;
+  });
+  useEffect(() => {
+    if (mode === 'sheet') openCoAuthorSheet('990101');
+  }, [mode]);
+  const posts = [
+    { ...GALLERY_TEXT_POSTS[0], id: '990101', content: 'Shot the whole city in the rain last night with @ellaverse. Our best twelve go up tomorrow.' },
+    { ...GALLERY_TEXT_POSTS[2], id: '990102', content: 'Four of us, one track, made in a weekend. Headphones on.' },
+  ] as GalleryTextPost[];
+  if (!ready) return null;
+  return (
+    <AuthContext.Provider value={GALLERY_AUTH}>
+    <section data-page-bento data-co-authors-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Co-authored posts</h2>
+      <div className="space-y-3">
+        {posts.map((post) => (
+          <div key={post.id} data-feed-item className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3">
+            <GalleryPostCard post={post} />
+          </div>
+        ))}
+      </div>
+      {mode === 'invite' && <CoAuthorInviteBanner tokenId="990103" creatorName="Marco V" />}
+      {mode === 'sheet' && <CoAuthorSheetHost />}
+    </section>
+    </AuthContext.Provider>
+  );
+}
 
 /** Content warning cover: the creator's own line, and the stock notice when a warning has none. */
 function ContentWarningGallery() {
@@ -3256,7 +3636,44 @@ function LinkCardsGallery({ mention }: { mention: string | null }) {
         onSelect={() => setOpen(false)}
         onClose={() => setOpen(false)}
       />
+      <MentionComposerDemo />
     </section>
+  );
+}
+
+/**
+ * A message box wired the way every composer is, so the whole @ flow (type,
+ * list opens, pick, text lands) can be tried and timed without an account.
+ */
+function MentionComposerDemo() {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  const [text, setText] = useState('');
+  const mention = useMention({ inputRef: ref, onMentionInsert: (_user, next) => setText(next) });
+  return (
+    <div className="mt-3 max-w-[340px]">
+      <textarea
+        ref={ref}
+        data-mention-composer
+        value={text}
+        rows={2}
+        placeholder="Type @ and a letter"
+        onChange={(e) => {
+          setText(e.target.value);
+          mention.handleInput(e.target.value, e.target.selectionStart);
+        }}
+        className="w-full resize-none rounded-xl border border-white/10 bg-transparent px-3 py-2 text-sm outline-none"
+      />
+      <UserMentionDropdown
+        query={mention.query}
+        isOpen={mention.isOpen}
+        position={mention.position}
+        armed={mention.armed}
+        selectedIndex={mention.selectedIndex}
+        onSelectedIndexChange={mention.setSelectedIndex}
+        onSelect={mention.handleSelect}
+        onClose={mention.handleClose}
+      />
+    </div>
   );
 }
 

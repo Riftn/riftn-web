@@ -1,4 +1,5 @@
 {
+  "dmVideo": {"edit": "Vîdyoyê biguherîne", "hiddenTag": "Veşartî", "tapToEdit": "Ji bo guherandinê bitikîne", "cover": "Berg", "trim": "Jêkirin", "mirror": "Neynik", "rotate": "Zivirandin", "hide": "Veşartin", "timer": "Demjimêr", "sheetTitleAny": "Berî şandinê biguherîne", "close": "Girtin", "replace": "Biguherîne", "hiddenUntilTap": "Heya lê nexin veşartî ye", "pause": "Rawestandin", "play": "Vîdyoyê bilîze", "mute": "Bêdeng bike", "unmute": "Dengê wê veke", "scrub": "Di nav vîdyoyê de bigere", "addMore": "Wêne an vîdyoyan lê zêde bike", "trimAria": "Ji bo jêkirinê dawiyan bikişîne", "coverAria": "Ji bo danîna bergê li çarçoveyekê bixe", "coverHint": "Ji bo danîna bergê li çarçoveyekê bixe", "coverOwn": "Wêneyê te", "coverAuto": "Xweber", "uploadCover": "Wêneyekî bergê bar bike", "mirrored": "Neynikkirî", "original": "Orjînal", "rotate90": "90 pileyî bizivirîne", "showNormally": "Bi awayekî normal nîşan bide", "showNormallyBody": "Ew tavilê dibînin", "hideUntilTap": "Heya lê neyê xistin veşêre", "hideUntilTapBody": "Heya lê nexin şêlû ye", "hidePrice": "Li pişt bihayekî veşêre", "hidePriceBody": "Heya drav nedin şêlû ye", "priceUnavailable": "Di vê chatê de nîne", "timerOff": "Girtî", "timerOffBody": "Di chatê de dimîne.", "timerViewBody": "Gava dîtin, ji bo her duyan jî winda dibe.", "confirm": "Piştrast bike", "lockedFor": "Ji bo {{value1}} DHB veke", "lockedForUsd": "Ji bo {{value1}} veke", "editItem": "Tiştê {{value1}} biguherîne", "kept": "{{time}} hat parastin", "timerTimeBody": "Piştî ku te şand, di nav {{value1}} de ji bo her duyan jî winda dibe."},
   "postBg": {
     "addMedia": "Wêne, GIF an vîdyoyek zêde bike",
     "changeMedia": "Wêne, GIF an vîdyoyê biguherîne",
@@ -293,12 +294,14 @@
       "pronouns": "Pronouns",
       "location": "Location",
       "custom": "Custom",
-      "customOption": "Custom label"
+      "customOption": "Custom label",
+      "cashapp": "Cash App"
     },
     "add": "Qadê zêde bike",
     "remove": "Qadê rake",
     "descriptionPresets": "Malperek, cînav an her tiştekî din zêde bike. Girêdan bi torên te yên civakî re xuya dibin.",
-    "needsLabel": "Navekî bide her qada taybet"
+    "needsLabel": "Navekî bide her qada taybet",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} bişopîne",
@@ -2210,7 +2213,7 @@
     "promptDevice": "Amûr û OS (ji bo xeletiyan)",
     "deviceInfoNoErrors": "Tune",
     "promptFilters": "Li gorî kategoriyê parzûn bike",
-    "promptMediaError": "Wêne an vîdyoyên ku her yek di bin 50MB de be hilbijêre.",
+    "promptMediaError": "Wêne an vîdyoyên ku her yek di bin 200MB de be hilbijêre.",
     "promptMediaLimit": "Heta {{max}} pêvek.",
     "removePromptAttachment": "{{name}} rake",
     "promptAttachment": "Pêvek {{number}}",
@@ -4211,7 +4214,7 @@
       "pageViewsTerm": "Dîtinên rûpelan",
       "pageViews": "— daxwazên ku Cloudflare wek barkirina rûpelan dabeş dike, ne wêne, skrîpt an bangên API.",
       "botsTerm": "Bot jî tê de ne",
-      "bots": "— ev hejmarên xav ên kêlekê ne, ji ber vê crawler, çavdêrên çalakbûnê (uptime) û klîentên bi skrîpt jî tê de ne. Tu dikarî wan bi xwe di dabeşkirina gerokan a li jor de bibînî, ku têketinên wek “Curl” û “Unknown” trafîka otomatîk in, ne mirov. Derxistina botan pêdivî bi asteke Cloudflare ya bi pere heye ku em bikar naynin, û bi bêdengî kêmkirina texmînekê dê kontrolkirina hejmaran dijwartir bike, ne hêsantir.",
+      "bots": "— ev hejmarên xav ên kêlekê ne, ji ber vê crawler, çavdêrên çalakbûnê (uptime) û klîentên bi skrîpt jî tê de ne. Tu dikarî wan bi xwe di dabeşkirina gerokan a li jor de bibînî, ku têketinên wek “Curl” û “Unknown” trafîka otomatîk in, ne mirov. Cudakirina botan ji ziyaretvanên mirov her ku diçe dijwartir dibe û di demeke nêz de wê di van amaran de neyê kirin, ji ber vê yekê hewldana derxistina botan bêfeyde ye.",
       "totalTerm": "Tevahiya navberê",
       "total": "— temaşekirina rûpelan û daxwaz li seranserê navberê tên kombûn. Jimarên serdankeran bi zanebûn nayên kombûn di sernaveke \"tevahiya serdankeran\" de, ji ber ku kesekî ku Duşem û Sêşem li vir bû dê du caran bihata jimartin.",
       "peakTerm": "Saet / roja herî mijûl",
@@ -20855,5 +20858,27 @@
     "remember": "Bijartina min bîne bîra xwe",
     "rememberHint": "Her dem di Mîhengan de biguherîne",
     "failed": "Peyam nehat jêbirin"
+  },
+  "profileAskAi": {
+    "row": "Ji AI bipirse",
+    "rowSub": "Bişopîne, hemûyan biecibîne, nûçeyan bigire",
+    "back": "Vegere",
+    "title": "Derbarê {{handle}} de ji AI bipirse",
+    "sub": "Arîkar dike, tu piştrast dikî",
+    "followLikeAll": "Bişopîne û hemûyan biecibîne",
+    "followLikeAllSub": "{{handle}} dişopîne, li her şandiyê bertek dide",
+    "likeAll": "Hemû şandiyên wî biecibîne",
+    "likeAllSub": "Yên ku te berê bertek dabûyê derbas dike",
+    "catchUp": "Min agahdar bike",
+    "catchUpSub": "{{handle}} di van demên dawî de çi parve kiriye, bi kurtî",
+    "message": "Peyamekê binivîse",
+    "messageSub": "Pêşnûmeya peyamê amade dike, tu dişînî",
+    "placeholder": "Derbarê {{handle}} de her tiştî bipirse…",
+    "send": "Bişîne",
+    "promptFollowLikeAll": "{{handle}} bişopîne û li hemû şandiyên wî bertek bide",
+    "promptLikeAll": "Li hemû şandiyên {{handle}} bertek bide",
+    "promptCatchUp": "Min agahdar bike ka {{handle}} di van demên dawî de çi parve kiriye",
+    "promptMessage": "Alîkariya min bike ku peyamekê ji {{handle}} re binivîsim",
+    "promptAbout": "Derbarê {{handle}} de: {{question}}"
   }
 }

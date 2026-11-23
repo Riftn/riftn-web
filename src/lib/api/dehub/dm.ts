@@ -159,6 +159,13 @@ export interface DmMessage {
   destruct?: DmDestruct | null;
   paymentStatus: null | 'pending' | 'confirmed';
   paymentTxHash: string | null;
+  /** Sent "when they're next online". The sender's bubble shows an hourglass until it is read. */
+  whenOnline?: boolean;
+  /**
+   * Sent with "Send in their language": `content` is the line in the
+   * recipient's language and this is what the sender typed.
+   */
+  original?: { content: string; lang: string } | null;
   tipAmount: number | null;
   tipSymbol: string | null;
   /** Only set when msgType === 'poll'; votes are read from the poll itself. */
@@ -370,6 +377,7 @@ function parseDmMessage(raw: any, myAddress: string): DmMessage {
     destruct: raw.destruct && typeof raw.destruct === 'object' && raw.destruct.mode ? raw.destruct : null,
     paymentStatus: raw.paymentStatus ?? null,
     paymentTxHash: raw.paymentTxHash ?? null,
+    ...(raw.whenOnline === true && { whenOnline: true }),
     tipAmount: raw.tipAmount ?? null,
     tipSymbol: raw.tipSymbol ?? null,
     poll: raw.poll && typeof raw.poll.tokenId === 'number' ? { tokenId: raw.poll.tokenId, question: raw.poll.question || '' } : null,
@@ -506,7 +514,7 @@ export async function getConversations(
   }
 }
 
-export async function getConversation(conversationId: string): Promise<DeHubConversation> {
+export async function getConversation(conversationId: string, myAddress: string): Promise<DeHubConversation> {
   if (conversationId.startsWith('new_')) {
     const address = conversationId.replace('new_', '');
     return {
@@ -522,7 +530,7 @@ export async function getConversation(conversationId: string): Promise<DeHubConv
   const response = await apiCall<{ result: DeHubConversation }>(`/api/dm/${conversationId}`, {
     requiresAuth: true,
   });
-  return response.result;
+  return mapApiConversationToDeHub(response.result, myAddress);
 }
 
 export async function createConversation(
@@ -1139,7 +1147,12 @@ export async function getFreeDmAccessList(): Promise<FreeAccessUser[]> {
   }
 }
 
-/** The recipient has watched a view-once attachment; the server removes it for both. */
-export async function markDmMessageViewed(messageId: string): Promise<void> {
-  await apiCall<unknown>(`/api/dm/message/${encodeURIComponent(messageId)}/viewed`, { method: 'POST', requiresAuth: true });
+/**
+ * The recipient has watched a view-once attachment (the server removes it for
+ * both), or opened an on-open one (its countdown starts; `expiresAt` says when
+ * it goes).
+ */
+export async function markDmMessageViewed(messageId: string): Promise<{ status?: string; expiresAt?: string }> {
+  const res = await apiCall<{ status?: string; expiresAt?: string }>(`/api/dm/message/${encodeURIComponent(messageId)}/viewed`, { method: 'POST', requiresAuth: true });
+  return (res && typeof res === 'object') ? res : {};
 }

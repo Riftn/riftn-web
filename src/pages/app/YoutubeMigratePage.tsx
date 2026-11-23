@@ -117,6 +117,7 @@ import {
   type MigrationPricing,
 } from '@/lib/api/dehub/youtube-migration';
 
+import { formatCount } from '@/lib/format-count';
 type Stage = 'loading' | 'idle' | 'fetching' | 'listing' | 'quoting' | 'paying' | 'processing' | 'done';
 
 /** Two attempts at a theme-token color (`border-primary`, then
@@ -832,7 +833,7 @@ export default function YoutubeMigratePage() {
                           {views && (
                             <span className="flex items-center gap-1">
                               <Eye className="h-3 w-3" />
-                              {views}
+                              {formatCount(views)}
                             </span>
                           )}
                           {views && published && <span>&middot;</span>}
@@ -1070,7 +1071,7 @@ export default function YoutubeMigratePage() {
                       <li key={videos} className="flex items-center justify-between gap-3 py-2">
                         <span className="flex items-baseline gap-2">
                           <span className="text-zinc-400 tabular-nums">
-                            {t('migrate.videosCount', { videos: videos.toLocaleString() })}
+                            {t('migrate.videosCount', { videos: formatCount(videos) })}
                           </span>
                           {saving > 0 && (
                             <span className="text-[11px] text-zinc-500 tabular-nums">−{saving}%</span>

@@ -4,8 +4,8 @@
    and <html data-system-tone="light"> switches the palette. Every Minimal Light
    rule also matches this tone (the :is(... [data-system-tone="light"]) selectors
    across the sheets), so pages that already read on paper read here too; this
-   file then puts System's look back on top: a white page instead of paper, no
-   bentos (posts run edge to edge between hairlines), frosted white glass on the
+   file then puts System's look back on top: a white page instead of paper,
+   post bentos outlined by a thin grey line, frosted white glass on the
    pills, bars, popups and drawers, and ink-black primary buttons.
 
    The :not(#_) runs are specificity, not logic: they outrank the System sheets
@@ -44,7 +44,7 @@ html[data-theme="system"][data-system-tone="light"]:not(#_) :is(body, #root, #ap
 html[data-theme="system"][data-system-tone="light"] body::after { display: none !important; }
 html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_) [data-vaul-drawer]:not([data-keep-dark]) { background-color: var(--float-glass) !important; backdrop-filter: blur(24px) saturate(180%) !important; color: var(--ink) !important; }
 
-html[data-theme="system"][data-system-tone="light"] { --sl-page: #ffffff; --sl-card: #f4f4f6; --sl-ink: #0b0b0d; --sl-ink-2: rgba(11,11,13,.76); --sl-line: rgba(11,11,13,.09); }
+html[data-theme="system"][data-system-tone="light"] { --sl-page: #ffffff; --sl-card: #f4f4f6; --sl-ink: #0b0b0d; --sl-ink-2: rgba(11,11,13,.76); --sl-line: rgba(11,11,13,.09); --sl-bento-line: rgba(11,11,13,.11); }
 html[data-theme="system"][data-system-tone="light"], html[data-theme="system"][data-system-tone="light"] body, html[data-theme="system"][data-system-tone="light"] #root,
 html[data-theme="system"][data-system-tone="light"] #app-root, html[data-theme="system"][data-system-tone="light"] #app-root > div:not([data-bottom-nav]),
 html[data-theme="system"][data-system-tone="light"] main, html[data-theme="system"][data-system-tone="light"] main > div { background-color: var(--sl-page) !important; color: var(--sl-ink) !important; }
@@ -110,8 +110,9 @@ html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(
 html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_) :is(.w-10.h-10.bg-zinc-800, .w-9.h-9.bg-zinc-800) { background-color: rgba(11,11,13,.05) !important; background-image: none !important; }
 html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_):not(#_) :is(input, textarea)::placeholder { color: rgba(11,11,13,.6) !important; -webkit-text-fill-color: rgba(11,11,13,.6) !important; }
 html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_):not(#_) input.bg-zinc-900 { background-color: rgba(11,11,13,.045) !important; }
-/* System rule: no bentos. Posts run edge to edge, split by hairlines. */
-html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_):not(#_) [data-feed-item] { background: transparent !important; border: 0 !important; border-bottom: 1px solid var(--sl-line) !important; border-radius: 0 !important; box-shadow: none !important; margin-left: 0 !important; margin-right: 0 !important; }
+/* Posts keep System's bento shape, outlined by a thin grey line (white on
+   white made the card edge disappear). */
+html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_):not(#_) [data-feed-item] { background: transparent !important; border: 1px solid var(--sl-bento-line) !important; border-radius: 16px !important; box-shadow: none !important; margin-left: 0 !important; margin-right: 0 !important; }
 html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_):not(#_) [data-feed-item]::before, html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_):not(#_) [data-feed-item]::after { display: none !important; }
 /* ---- Top bar v2: spacing, depth, segmented feel ---- */
 html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-feed-nav-outer] { background: transparent !important; padding: 6px 12px 10px !important; }
@@ -135,8 +136,8 @@ html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(
 html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-feed-nav] button:is([data-feed-tab-btn], .z-20 > button:first-child) { padding-top: 9px !important; padding-bottom: 9px !important; }
 html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-kit-pill] [data-explore-pill-search] input { height: 36px; }
 html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-feed-nav] button[data-active="true"] { color: #0b0b0d !important; }
-html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-feed-nav] .z-20 > button:first-child:not([data-feed-tab-btn]) { margin-right: 6px; }
-html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-feed-nav] .z-20 > button:first-child:not([data-feed-tab-btn])::after { content: ""; position: absolute; right: -3px; top: 25%; bottom: 25%; width: 1px; background: rgba(11,11,13,.10); }
+html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-feed-nav] .z-20 > button:first-child:not([data-feed-tab-btn]):not([data-kit-pill-lead]) { margin-right: 6px; }
+html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-feed-nav] .z-20 > button:first-child:not([data-feed-tab-btn]):not([data-kit-pill-lead])::after { content: ""; position: absolute; right: -3px; top: 25%; bottom: 25%; width: 1px; background: rgba(11,11,13,.10); }
 /* Logo row: a touch more air */
 html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_) header { background: #fff !important; }
 /* Bottom bar shares the same depth recipe, cast upward: the bar sits 8px
@@ -266,45 +267,43 @@ html[data-theme="system"][data-system-tone="light"] #root:not(#_):not(#_) [data-
    strength, so the glow is dialled down. */
 html[data-theme="system"][data-system-tone="light"] [data-explore-filter-glow] { --explore-glow-core: 28%; --explore-glow-edge: 8%; }
 
-/* ---- Phone feed: no bentos ----
-   The cards had no visible edge on white, so the inset read as wasted space.
-   Posts step out over the feed's 8px side padding: media runs edge to edge,
-   text sits 12px from the screen edge, and the hairline under each post spans
-   the screen. The Live now strip and Radio row follow suit. */
-@media (max-width: 639px) {
-  html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-feed-root] [data-feed-item] {
-    margin-left: -0.5rem !important;
-    margin-right: -0.5rem !important;
-    padding-left: 0.75rem !important;
-    padding-right: 0.75rem !important;
-  }
-  html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_) [data-feed-root] [data-feed-item] [data-media-full] {
-    margin-left: -0.75rem !important;
-    margin-right: -0.75rem !important;
-    width: calc(100% + 1.5rem) !important;
-    max-width: none !important;
-    border-radius: 0 !important;
-  }
-  html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_) [data-feed-root] [data-feed-item] [data-media-full] :is(img, video, [data-feed-image-frame], [data-image-slot]) {
-    border-radius: 0 !important;
-  }
-  html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_) [data-feed-root] [data-live-now-bar] {
-    margin-left: -0.5rem;
-    margin-right: -0.5rem;
-    width: calc(100% + 1rem);
-    border-radius: 0 !important;
-    border-left: 0 !important;
-    border-right: 0 !important;
-  }
-  html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_) [data-feed-root] [data-feed-radio] {
-    margin-left: -0.5rem;
-    margin-right: -0.5rem;
-    padding-left: 0.75rem !important;
-    padding-right: 0 !important;
-    background: transparent !important;
-    backdrop-filter: none !important;
-    border: 0 !important;
-    border-bottom: 1px solid var(--sl-line) !important;
-    border-radius: 0 !important;
-  }
+/* Creator: the parked composer pill (shown once the page scrolls) was forced
+   dark while the light pass turned its words dark too, so on light themes it
+   read as an empty black bar. Give it a solid light surface instead. */
+html:is([data-theme="light"], [data-system-tone="light"]):not(#_):not(#_):not(#_):not(#_):not(#_) [data-creator-compact] > div {
+  background: rgb(255 255 255 / 0.96) !important;
+  border-color: rgb(0 0 0 / 0.08) !important;
+  box-shadow: 0 12px 36px rgb(0 0 0 / 0.14) !important;
+  color: #242428;
+}
+
+/* Creator logo menu: the panel is drawn dark and the light pass painted its rows
+   white, so it read as white blocks in a black frame. One light panel instead. */
+html:is([data-theme="light"], [data-system-tone="light"]):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-creator-logo-menu] {
+  background: rgb(255 255 255 / 0.97) !important;
+  border-color: rgb(0 0 0 / 0.08) !important;
+  box-shadow: 0 24px 60px rgb(0 0 0 / 0.16) !important;
+  color: #1c1c21 !important;
+}
+html:is([data-theme="light"], [data-system-tone="light"]):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-creator-logo-menu] > div,
+html:is([data-theme="light"], [data-system-tone="light"]):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-creator-logo-menu] [role="menuitem"]:not([aria-current="page"]):not(:hover):not([data-menu-hot]) {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+html:is([data-theme="light"], [data-system-tone="light"]):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-creator-logo-menu] [role="menuitem"] { color: #1c1c21 !important; }
+html:is([data-theme="light"], [data-system-tone="light"]):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-creator-logo-menu] [role="menuitem"]:is([aria-current="page"], :hover):not([data-menu-hot]) { background: rgb(0 0 0 / 0.05) !important; }
+html:is([data-theme="light"], [data-system-tone="light"]):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-creator-logo-menu] [role="menuitem"][data-menu-hot] { background: rgb(255 44 145 / 0.10) !important; }
+html:is([data-theme="light"], [data-system-tone="light"]):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-creator-logo-menu] > div > div,
+html:is([data-theme="light"], [data-system-tone="light"]):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-creator-logo-menu] > div.h-px { background: rgb(0 0 0 / 0.08) !important; }
+
+/* New message banner (phones) is portalled outside #root, so the washes and
+   hairlines above don't reach it: same ink wash and hairline here. */
+html:is([data-theme="light"], [data-system-tone="light"]) [data-dm-banner] [class*="bg-white/"]:not(#_):not(#_) {
+  background-color: rgba(11, 11, 13, 0.045) !important;
+}
+html:is([data-theme="light"], [data-system-tone="light"]) [data-dm-banner] [class*="border-white/"]:not(#_):not(#_) {
+  border-color: rgba(11, 11, 13, 0.1) !important;
+}
+html:is([data-theme="light"], [data-system-tone="light"]) [data-dm-banner] [data-dm-grabber]:not(#_):not(#_):not(#_) {
+  background-color: rgba(11, 11, 13, 0.22) !important;
 }

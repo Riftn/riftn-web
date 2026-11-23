@@ -13,6 +13,7 @@
  */
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { TranslatableText } from '@/components/app/TranslatableText';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
@@ -27,6 +28,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { NOTIFICATION_COMMENT_ACTIONABLE as ACTIONABLE } from '@/lib/notification-comment';
 
+import { formatCount } from '@/lib/format-count';
 const TipModal = lazy(() => import('@/components/app/modals/TipModal').then((m) => ({ default: m.TipModal })));
 
 const CDN = 'https://dehubcdn.ams3.cdn.digitaloceanspaces.com/';
@@ -114,7 +116,9 @@ export function NotificationCommentCard({ notification, onEngaged }: Props) {
     <div data-feed-comment className="mt-1.5">
       {text && (
         <p data-feed-comment-text className="text-[14.5px] leading-[1.42] whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
-          {text}
+          {/* Foreign text reads in your language (follows the auto-translate
+              setting), same as comments under a post. */}
+          <TranslatableText text={text} />
         </p>
       )}
 
@@ -153,7 +157,7 @@ export function NotificationCommentCard({ notification, onEngaged }: Props) {
             aria-label={t('messages.reply', { defaultValue: 'Reply' })}
           >
             <MessageSquare className="h-[17px] w-[17px] shrink-0" />
-            {replies > 0 && <span className="tabular-nums">{replies}</span>}
+            {replies > 0 && <span className="tabular-nums">{formatCount(replies)}</span>}
           </button>
           <button
             type="button"
@@ -164,7 +168,7 @@ export function NotificationCommentCard({ notification, onEngaged }: Props) {
             aria-label={t('reactionInfo.labels.like', { defaultValue: 'Like' })}
           >
             <ThumbsUp className={cn('h-[17px] w-[17px] shrink-0', liked && 'fill-current')} />
-            {likes > 0 && <span className="tabular-nums">{likes}</span>}
+            {likes > 0 && <span className="tabular-nums">{formatCount(likes)}</span>}
           </button>
           <button
             type="button"

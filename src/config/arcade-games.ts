@@ -159,6 +159,11 @@ export interface ArcadeGame {
    * untouched.
    */
   onlineHref?: string;
+  /**
+   * The same game played by correspondence: days per move against a friend,
+   * with a push on your turn (riftn-backend src/games). Another quiet button.
+   */
+  slowHref?: string;
   /** Host the opt-in Riftn community-presence bridge for this globe. */
   socialPresence?: boolean;
   /**
@@ -452,6 +457,7 @@ export const ARCADE_GAMES: ArcadeGame[] = [
   },
   {
     slug: 'kings-gambit',
+    slowHref: '/arcade/correspondence-chess',
     get title() { return _translateCopy("copy.f0052e2e699b", { defaultValue: "King's Gambit" }); },
     get tagline() { return _translateCopy("copy.2493f427a7d1", { defaultValue: "Cinematic 3D chess. Three civilisations, one board." }); },
     get description() { return _translateCopy("copy.81631a8fce75", { defaultValue: "Chess with an army behind every piece. Three rigged civilisations march, strike and fall across a marble board in four battlegrounds, at three engine strengths." }); },

@@ -1052,10 +1052,38 @@ body:has([id^="w3a-"]) {
   inherits: false;
 }
 
-/* The same cost from Radix's `body { pointer-events: none }` while the login
-   sheet is up: holding #root at auto stops the inherited change at #root.
-   The sheet's backdrop covers the page, so nothing behind it is reachable. */
-html[data-login-sheet] #root {
+/* The same cost from Radix's `body { pointer-events: none }`, which every modal
+   sheet, dialog, menu and select sets while it is open. pointer-events is
+   inherited, so flipping it on <body> restyled every element in the app:
+   ~500ms on the Stages page, once on open and once on close. Holding #root at
+   auto stops the inherited change at #root.
+
+   What kept the page behind an open layer inert was that inheritance, so the
+   layers now do it themselves: sheets and dialogs already cover the page with
+   a backdrop, and the ones that have none get a clear one below. */
+#root {
+  pointer-events: auto;
+}
+
+/* Menus and selects have no backdrop. While one is open (Radix marks <body>),
+   a clear sheet behind it takes the press that dismisses it, so that press
+   cannot also land on the button underneath. It hangs off the popper wrapper,
+   which already carries the menu's own z-index, so it sits above exactly what
+   the menu sits above. */
+body[style*="pointer-events: none"] [data-radix-popper-content-wrapper]:has(> [data-modal-shield])::before {
+  content: "";
+  position: absolute;
+  inset: -200vmax;
+  z-index: -1;
+  pointer-events: auto;
+}
+
+/* The same for a modal sheet drawn without a backdrop. */
+[data-overlay-shield] {
+  display: none;
+}
+body[style*="pointer-events: none"] [data-overlay-shield] {
+  display: block;
   pointer-events: auto;
 }
 
@@ -1467,6 +1495,12 @@ html[data-theme='minimal'] :is([data-comment-tabs-pin], [data-comment-composer-p
   html:not([data-jungle-phase])[data-sticky-scroll-hidden='true']
     [data-feed-nav-outer][data-nav-hide-desktop]:not([data-nav-hide='off']) {
     transform: translateY(-100%);
+  }
+
+  /* Clear the bento shadow above the viewport in light tones. */
+  html:where([data-theme='light'], [data-theme='system'][data-system-tone='light']):not([data-jungle-phase])[data-sticky-scroll-hidden='true']
+    [data-feed-nav-outer][data-nav-hide-desktop]:not([data-nav-hide='off']) {
+    transform: translateY(calc(-100% - 3rem));
   }
 
   html:not([data-jungle-phase])[data-sticky-scroll-hidden='true']
@@ -6033,6 +6067,21 @@ specificity animation declarations above.
   .focus-target-flash { animation-duration: 1ms; }
 }
 
+/* A chat line opened from a copied message link: the same gold as a chat
+   search hit, held a few seconds and then faded, so the reader sees which
+   line the link meant. */
+@keyframes chat-link-highlight {
+  0%, 70% { background-color: rgba(255, 213, 74, 0.16); box-shadow: inset 3px 0 0 rgba(255, 213, 74, 0.9); }
+  100% { background-color: rgba(255, 213, 74, 0); box-shadow: inset 3px 0 0 rgba(255, 213, 74, 0); }
+}
+.chat-link-highlight {
+  animation: chat-link-highlight 4000ms ease-out both;
+  border-radius: 10px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .chat-link-highlight { animation-duration: 4000ms; animation-timing-function: steps(1, end); }
+}
+
 /* Artwork backing — light themes only
    ===================================
    The badge and medal artwork is drawn for a dark canvas: the silver and chrome
@@ -6919,9 +6968,9 @@ html:not([data-theme="light"], [data-theme="minimal"], [data-theme="osaka"], [da
 [data-video-edit-tile]:hover .dh-edit-glass { transform: scale(1.04); }
 [data-video-edit-tile]:focus-visible .dh-edit-glass { outline: 2px solid #fff; outline-offset: 2px; }
 
-/* Photo soundtrack (SoundtrackControl): a liquid glass capsule at rest that
-   opens into a wave along the photo's bottom edge while the song plays. The
-   bars pulse on a steady 118 BPM beat; the photo drifts slowly under them. */
+/* Photo soundtrack (SoundtrackControl): a liquid glass capsule at rest on the
+   photo; while the song plays a solid player bar docks under the photo so
+   nothing is drawn over the picture. The photo drifts slowly while it plays. */
 .dh-sound-glass {
   background: rgb(0 0 0 / 0.32);
   border: 1px solid rgb(255 255 255 / 0.22);
@@ -6929,23 +6978,9 @@ html:not([data-theme="light"], [data-theme="minimal"], [data-theme="osaka"], [da
   box-shadow: 0 6px 18px rgb(0 0 0 / 0.22), inset 0 1px 0 rgb(255 255 255 / 0.18);
 }
 .dh-sound-glass:hover { background: rgb(0 0 0 / 0.42); }
-.dh-soundwave-bar {
-  flex: 1;
-  height: 100%;
-  border-radius: 2px;
-  background: rgb(255 255 255 / 0.4);
-  transform: scaleY(0.15);
-  transition: background-color 0.3s, transform 0.4s;
-}
-.dh-soundwave-bar.is-played { background: rgb(255 255 255 / 0.95); }
-.is-playing > .dh-soundwave-bar { animation: dh-soundwave 0.508s ease-in-out infinite alternate; }
-@keyframes dh-soundwave {
-  from { transform: scaleY(calc(var(--h) * 0.35)); }
-  to { transform: scaleY(var(--h)); }
-}
-.dh-soundwave { animation: dh-soundwave-in 0.45s cubic-bezier(0.34, 1.3, 0.55, 1); }
-@keyframes dh-soundwave-in {
-  from { opacity: 0; transform: translateY(12px); }
+.dh-soundbar { animation: dh-soundbar-in 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+@keyframes dh-soundbar-in {
+  from { opacity: 0; transform: translateY(-6px); }
   to { opacity: 1; transform: none; }
 }
 .dh-sound-eq { display: inline-flex; align-items: flex-end; gap: 2px; height: 12px; flex: none; }
@@ -6965,8 +7000,7 @@ html:not([data-theme="light"], [data-theme="minimal"], [data-theme="osaka"], [da
   to { transform: scale(1.08) translate(-1.5%, 1%); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .is-playing > .dh-soundwave-bar, .dh-soundwave, .dh-sound-eq.is-playing i, [data-sound-playing] img { animation: none; }
-  .is-playing > .dh-soundwave-bar { transform: scaleY(var(--h)); }
+  .dh-soundbar, .dh-sound-eq.is-playing i, [data-sound-playing] img { animation: none; }
 }
 
 /* Clear both edges next to shorts, including the outer rows of desktop grids. */
@@ -7135,15 +7169,52 @@ html:is([data-theme="light"], [data-system-tone="light"]):not(#_):not(#_):not(#_
 html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-vaul-drawer][data-notifications-drawer][data-expanded] {
   padding-top: env(safe-area-inset-top, 0px);
 }
-/* The bell drawer's grab bar sits in the pill's top inset, and below the
-   status bar once the sheet fills the screen. */
-html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-notifications-drawer] [data-bell-handle] {
-  top: 3px;
-  transition: top 0.45s cubic-bezier(0.32, 0.72, 0, 1);
+[data-notification-catch-up],
+[data-notifications-drawer] {
+  --notification-drawer-text: #fafafa;
+  --notification-drawer-line: rgb(255 255 255 / 0.18);
+  --notification-drawer-hover: rgb(255 255 255 / 0.08);
+  --notification-drawer-muted: #dedee3;
+  color: var(--notification-drawer-text);
 }
-html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-notifications-drawer][data-expanded] [data-bell-handle] {
-  top: calc(env(safe-area-inset-top, 0px) + 3px);
+html:is([data-theme="light"], [data-system-tone="light"]) :is([data-notification-catch-up], [data-notifications-drawer]) {
+  --notification-drawer-text: var(--ink, #17171a);
+  --notification-drawer-line: rgb(20 20 24 / 0.18);
+  --notification-drawer-hover: rgb(20 20 24 / 0.06);
+  --notification-drawer-muted: #45454d;
 }
+html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-vaul-drawer][data-notification-catch-up-sheet] {
+  background-color: color-mix(in srgb, var(--float-glass) 65%, rgb(var(--glass-tint, 9 9 11))) !important;
+  background-image: none !important;
+  border-color: var(--notification-drawer-line) !important;
+  color: var(--notification-drawer-text) !important;
+}
+html:is([data-theme="light"], [data-system-tone="light"]):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-vaul-drawer][data-notification-catch-up-sheet] {
+  background-color: color-mix(in srgb, var(--float-glass) 65%, var(--paper, #f9f8f4)) !important;
+}
+.notification-drawer-action {
+  min-height: 44px;
+  border: 1px solid var(--notification-drawer-line);
+  background: transparent;
+  color: var(--notification-drawer-text);
+}
+.notification-drawer-action:hover:not(:disabled),
+button.notification-drawer-field:hover:not(:disabled) {
+  background: var(--notification-drawer-hover);
+}
+.notification-drawer-action:focus-visible,
+.notification-drawer-field:focus-visible {
+  outline: 2px solid var(--notification-drawer-text);
+  outline-offset: 2px;
+}
+.notification-drawer-field {
+  border-color: var(--notification-drawer-line);
+}
+.notification-drawer-field::placeholder,
+.notification-drawer-secondary {
+  color: var(--notification-drawer-muted);
+}
+
 /* The pill's sticky strip is the top of the sheet. Rows
    scrolling up past the pill blur out there instead of showing sharp in the
    gap above it and beside it, fading off just under the pill. Behind the
@@ -7402,3 +7473,48 @@ html[data-chat-fx="grow"][data-chat-fx-dir="close"]::view-transition-new(root) {
 @keyframes cx-arrive { from { opacity: .35; transform: scale(.96); filter: blur(2px); } }
 @keyframes cx-surface-open { from { background-color: var(--cx-bg); border-radius: 18px; } to { background-color: var(--cx-bg2); border-radius: 0; } }
 @keyframes cx-surface-close { from { background-color: var(--cx-bg2); border-radius: 0; } to { background-color: var(--cx-bg); border-radius: 18px; } }
+
+/* Menu account switcher: overlapping faces are cut apart by a ring in the
+   sheet's own tone, so light sheets get a light ring. */
+html[data-theme='light'] [data-menu-account-switcher] > span > span,
+html[data-theme='system'][data-system-tone='light'] [data-menu-account-switcher] > span > span {
+  --tw-ring-color: rgb(255 255 255 / 0.9);
+}
+
+/* Chat scroll-down capsule: glides in and out instead of popping. One soft
+   spring for show/hide, the count slot opens and closes by width, and the
+   press dip is on the inner button so it never fights the glide. */
+.chat-jump-glide {
+  opacity: 0;
+  transform: translate3d(0, 14px, 0) scale(0.86);
+  filter: blur(6px);
+  transition:
+    opacity 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 420ms cubic-bezier(0.34, 1.36, 0.64, 1),
+    filter 260ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, opacity;
+}
+.chat-jump-glide.is-shown {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+  filter: blur(0);
+}
+.chat-jump-press {
+  transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1), background-color 200ms ease;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 10px 24px -8px rgba(0, 0, 0, 0.45);
+}
+@media (hover: hover) {
+  .chat-jump-press:hover { transform: scale(1.05); }
+}
+.chat-jump-press:active { transform: scale(0.92); transition-duration: 90ms; }
+.chat-jump-count {
+  display: inline-block;
+  max-width: 0;
+  opacity: 0;
+  transition: max-width 320ms cubic-bezier(0.22, 1, 0.36, 1), opacity 200ms ease;
+}
+.chat-jump-count.is-on { max-width: 5rem; opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .chat-jump-glide, .chat-jump-press, .chat-jump-count { transition-duration: 1ms !important; }
+  .chat-jump-glide { filter: none; transform: none; }
+}

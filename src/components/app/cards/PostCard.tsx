@@ -72,7 +72,7 @@ const EditPostModal = lazy(() =>
 import { applyOptimisticEdit } from '@/lib/optimistic-edit';
 import { useMintExistingPost } from '@/hooks/use-mint-existing-post';
 import { QuotePostModalLazy } from '../modals/QuotePostModalLazy';
-import { TipModal } from '../modals/TipModal';
+import { TipModalLazy as TipModal } from '../modals/TipModalLazy';
 import { useFeedViewTracking } from '@/hooks/use-view-tracking';
 import { usePostTipCount } from '@/hooks/use-post-tip-count';
 import { useAuth } from '@/contexts/AuthContext';
@@ -83,6 +83,7 @@ import { cacheTextPostForNavigation } from '@/lib/post-cache';
 import { warmPostPage } from '@/lib/preload-post-page';
 import { useCreatePoll } from '@/hooks/use-polls';
 import { PollCard } from './PollCard';
+import { QuizCard } from '@/components/app/quiz/QuizCard';
 import { PostUtilityMenuItems } from './PostUtilityMenuItems';
 import { usePostMenuContext } from '@/lib/post-menu';
 import { useBlockAuthor } from '@/hooks/use-block-author';
@@ -518,6 +519,7 @@ const PostCardBody = memo(function PostCard({ post, threadSlot, onOpenComments }
           />
           <div className="mb-3">
             <StageCreatorRow
+              tokenId={postTokenId}
               name={post.author.name}
               avatar={post.author.avatarSeed}
               handle={post.author.handle}
@@ -529,6 +531,7 @@ const PostCardBody = memo(function PostCard({ post, threadSlot, onOpenComments }
         </>
       ) : (
       <CardHeader
+        tokenId={postTokenId}
         username={post.author.name}
         visibility={post.visibility}
         handle={post.author.handle}
@@ -572,6 +575,7 @@ const PostCardBody = memo(function PostCard({ post, threadSlot, onOpenComments }
                   on desktop — both surfaces read the same state, so the menu is
                   a reliable place to find them at every width. */}
               <PostUtilityMenuItems
+                onActionBar
                 onAskAI={() => { setShowOptionsDrawer(false); if (!walletAddress) { openLoginModal(); return; } setShowAIChat(true); }}
                 postId={post.id}
                 tokenId={postTokenId}
@@ -896,6 +900,7 @@ const PostCardBody = memo(function PostCard({ post, threadSlot, onOpenComments }
         />
 
         {!isLocked && !isSubGated && parseInt(post.id, 10) > 0 && <PollCard tokenId={parseInt(post.id, 10)} />}
+        {!isLocked && !isSubGated && post.hasQuiz && parseInt(post.id, 10) > 0 && <QuizCard tokenId={parseInt(post.id, 10)} />}
 
         {/* The creator's Shop board — affiliate links, opened in place. */}
         <ShopBoardLazy tokenId={post.id} links={post.shopLinks} listingCount={post.shopListingCount} variant="inline" />
@@ -1186,7 +1191,7 @@ const PostCardBody = memo(function PostCard({ post, threadSlot, onOpenComments }
             currentSpoilerText={post.spoilerText}
             currentQuotePolicy={post.quotePolicy}
             currentReplyPolicy={post.replyPolicy}
-            currentVisibility={(post as any).visibility}
+            currentVisibility={(post as any).justMe ? 'self' : (post as any).visibility}
             currentForKids={post.forKids}
             currentShopLinks={post.shopLinks}
             onSuccess={(edited) => {

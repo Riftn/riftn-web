@@ -46,6 +46,7 @@ import { FriendsAtEvent } from './FriendsAtEvent';
 import { EditEventDrawer } from './EditEventDrawer';
 import { ShareEntityDrawer } from '@/components/app/ShareEntityDrawer';
 import { dehubLinkFor } from '@/lib/dehub-links';
+import { profilePath } from '@/lib/profile-path';
 
 function CreatorInfo({ event }: { event: CommunityEvent }) {
   const { t: _copy } = _useCopy();
@@ -56,7 +57,7 @@ function CreatorInfo({ event }: { event: CommunityEvent }) {
 
   return (
     <button
-      onClick={() => navigate(`/${handle || event.creator_wallet_address}`)}
+      onClick={() => navigate(profilePath(handle || event.creator_wallet_address))}
       className="flex items-center gap-2 group"
     >
       <Avatar className="w-6 h-6">
@@ -303,7 +304,7 @@ export function EventDetailDrawer({ event, open, onOpenChange }: EventDetailDraw
                       <Button
                         size="sm"
                         onClick={payGateFee}
-                        disabled={isPaying || checkingPayment}
+                        disabled={isPaying || checkingPayment || Boolean(isPrivateBlocked && walletAddress)}
                         className="rounded-xl gap-1.5"
                       >
                         {isPaying ? (
@@ -448,7 +449,7 @@ export function EventDetailDrawer({ event, open, onOpenChange }: EventDetailDraw
               {/* Inline Chat — hidden behind gate or private block */}
               {showChat && canInteract && (
                 <div className="border border-white/[0.08] rounded-xl overflow-hidden">
-                  <EventChat eventId={event.id} />
+                  <EventChat eventId={event.id} restricted={isPrivate || hasGateFee} />
                 </div>
               )}
 

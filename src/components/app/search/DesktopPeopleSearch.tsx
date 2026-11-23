@@ -15,6 +15,7 @@ import type { DeHubUser } from '@/lib/api/dehub/types';
 import { buildAvatarUrl } from '@/lib/media-url';
 import { ASSISTANT_AVATAR, isAssistantAddress } from '@/lib/assistant';
 import { cn } from '@/lib/utils';
+import { profilePath } from '@/lib/profile-path';
 
 /** How many people the dropdown lists. */
 export const PEOPLE_DROPDOWN_LIMIT = 6;
@@ -116,7 +117,7 @@ export function DesktopPeopleSearch({ compact }: { compact?: boolean }) {
   };
 
   const openProfile = (p: PeopleMatch) => {
-    navigate(`/${p.username}`);
+    navigate(profilePath(p.username));
     reset(searchValue);
   };
 

@@ -37,12 +37,13 @@ function useCommunitySearch(query: string) {
     queryKey: ['communities', 'chat-search', q.toLowerCase()],
     queryFn: async () => {
       // Commas and brackets would break the filter; anything else is literal.
-      const term = q.replace(/[%_,()]/g, ' ').trim();
+      const term = q.replace(/^@/, '').replace(/[%_,()]/g, ' ').trim();
       if (!term) return [] as Community[];
       const { data, error } = await supabase
         .from('communities')
         .select('*')
-        .ilike('name', `%${term}%`)
+        // Name or @name (the slug in the group's link).
+        .or(`name.ilike.%${term}%,slug.ilike.%${term}%`)
         .order('member_count', { ascending: false })
         .limit(4);
       if (error) throw error;

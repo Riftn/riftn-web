@@ -35,6 +35,7 @@ export const STREAMER_CARD_GOALS: Record<StreamerBadgeId, { metric: StreamerCard
   cornerstone: { metric: 'streak', target: 26 },
   icon: { metric: 'level', target: 20 },
   veteran: { metric: 'hours', target: 250 },
+  millennium: { metric: 'hours', target: 1000 },
 };
 
 /** Where the owner stands on a card, or null when there is no running total to show. */

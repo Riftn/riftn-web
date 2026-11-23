@@ -32,6 +32,7 @@ export type NotificationType =
   | 'username_offer_accepted'
   | 'username_offer_declined'
   | 'fraction_purchased'
+  | 'fraction_gift'
   | 'video_milestone'
   | 'livestream_start'
   | 'signal_flare'
@@ -42,7 +43,9 @@ export type NotificationType =
   | 'badge_tier_down'
   | 'video_removal'
   | 'account_warning'
-  | 'system';
+  | 'system'
+  | 'coauthor_invite'
+  | 'coauthor_accepted';
 
 export type NotificationCategory =
   | 'engagement'

@@ -10,8 +10,8 @@
 /** Matches the cardinality bound on feature_requests.image_urls. */
 export const MAX_FEATURE_ATTACHMENTS = 6;
 
-/** Per-file ceiling. 50MB so a screen recording of a bug fits, not just a screenshot. */
-export const MAX_FEATURE_ATTACHMENT_BYTES = 50 * 1024 * 1024;
+/** Per-file ceiling. 200MB so a long screen recording of a bug fits, not just a screenshot. */
+export const MAX_FEATURE_ATTACHMENT_BYTES = 200 * 1024 * 1024;
 
 interface AttachmentSource {
   image_url?: string | null;

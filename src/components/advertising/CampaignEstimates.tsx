@@ -7,6 +7,7 @@ import Eye from "@/components/ui/cut-icons/visibility";
 import { useLanguage } from '@/contexts/LanguageContext';
 import { CampaignCalculations } from './utils/badgeTiers';
 
+import { formatCount as formatShortCount } from '@/lib/format-count';
 interface CampaignEstimatesProps {
   calculations: CampaignCalculations;
 }
@@ -14,11 +15,7 @@ interface CampaignEstimatesProps {
 const CampaignEstimates = ({ calculations }: CampaignEstimatesProps) => {
   const { t } = useLanguage();
 
-  const formatNumber = (num: number) => {
-    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
-    return Math.round(num).toLocaleString();
-  };
+  const formatNumber = (num: number) => formatShortCount(num);
 
   const reachPercentage = calculations.totalAudience > 0
     ? (calculations.estimatedReach / calculations.totalAudience * 100).toFixed(1)

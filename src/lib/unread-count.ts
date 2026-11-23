@@ -1,12 +1,7 @@
-/**
- * How an unread count is allowed to render.
- *
- * A "jump to latest" pill is a nudge, not a statistic — past a certain point
- * the exact figure tells the reader nothing they can act on, and a wrong figure
- * (a counter that ratcheted, a bad diff) turns into a very visible bug. Capping
- * the label keeps both cases legible.
- */
-export const UNREAD_DISPLAY_CAP = 99;
+import { formatCount } from '@/lib/format-count';
 
-export const formatUnreadCount = (count: number): string =>
-  count > UNREAD_DISPLAY_CAP ? `${UNREAD_DISPLAY_CAP}+` : String(count);
+/**
+ * How a chat's unread / "below you" count renders: the same short style as
+ * every other counter (999, 1.2K, 3.4M), never capped and never "1,200".
+ */
+export const formatUnreadCount = (count: number): string => formatCount(Math.max(0, Math.round(count)));

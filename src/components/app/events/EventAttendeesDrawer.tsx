@@ -18,6 +18,7 @@ import { useNavigate } from 'react-router-dom';
 import { formatTimeAgo } from '@/lib/feed-utils';
 import { getAccountSummaries } from '@/lib/api/dehub/users';
 import { BadgeIcon } from '@/components/app/BadgeIcon';
+import { profilePath } from '@/lib/profile-path';
 
 interface Attendee {
   id: string;
@@ -143,7 +144,7 @@ export function EventAttendeesDrawer({ eventId, type, open, onOpenChange }: Even
             return (
               <button
                 key={a.id}
-                onClick={() => { onOpenChange(false); navigate(`/${handle || a.wallet_address}`); }}
+                onClick={() => { onOpenChange(false); navigate(profilePath(handle || a.wallet_address)); }}
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[0.05] transition-colors"
               >
                 <Avatar className="w-9 h-9">

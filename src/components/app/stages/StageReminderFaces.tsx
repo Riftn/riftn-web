@@ -29,6 +29,7 @@ import { useTranslation as _useCopy } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { useStageReminderFaces } from '@/hooks/use-stage-reminders';
 import { StageAvatar } from './StageAvatar';
+import { profilePath } from '@/lib/profile-path';
 
 export function StageReminderFaces({
   spaceId,
@@ -64,7 +65,7 @@ export function StageReminderFaces({
             const openProfile = (e: { stopPropagation: () => void; preventDefault: () => void }) => {
               e.stopPropagation();
               e.preventDefault();
-              if (handle) navigate(`/${handle}`);
+              if (handle) navigate(profilePath(handle));
               else navigate(`/app/profile?id=${face.address}`);
             };
             return (

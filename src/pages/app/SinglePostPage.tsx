@@ -1,4 +1,5 @@
 import { useTranslation as _useCopy } from 'react-i18next';
+import { CoAuthorInviteBanner } from '@/components/app/co-authors/CoAuthorInviteBanner';
 import { useRouteContentReady } from '@/hooks/use-route-content-ready';
 import { bindRetainedComments } from '@/lib/retained-post-surface';
 import More from '@/components/ui/cut-icons/more';
@@ -34,8 +35,16 @@ import { SEOHead } from '@/components/SEOHead';
 import { Loader2 } from 'lucide-react';
 import { getAiScrapingPreference } from '@/lib/ai-scraping';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useLayoutEffect, useEffect, useState, useRef, useCallback, useMemo, Suspense } from 'react';
+import { CachedPageActiveContext } from '@/contexts/CachedPageActiveContext';
+import { useShortsEnabled } from '@/contexts/ShortsEnabledContext';
+import { closeBrainrotFeed, isBrainrotPlayable, openBrainrotFeed, useBrainrotSession } from '@/lib/brainrot-feed';
+import { videoItemToShort } from '@/lib/short-video';
+import { hasSharedVideoLanding, holdBackForViewer, takeSharedVideoLanding } from '@/lib/shared-video-landing';
+import { useLayoutEffect, useEffect, useState, useRef, useCallback, useMemo, useContext, Suspense, type ReactNode } from 'react';
 import { lazyWithRetry } from '@/lib/lazy-with-retry';
+import { useOpenedOnce } from '@/hooks/use-opened-once';
+import { takePrefetchedPost } from '@/lib/post-prefetch';
+import { loadPostData } from '@/lib/post-warm';
 import { Clock, Code } from "lucide-react";
 import { copyPostEmbedCode } from '@/lib/post-embed-code';
 import Sparkles from "@/components/ui/cut-icons/assistant";
@@ -55,6 +64,7 @@ import dehubCoin from '@/assets/dehub-coin.png';
 import { getNFTInfo, getLiveStream, resolveArticleSlug, type DeHubNFT } from '@/lib/api/dehub';
 import { parseSoundtrackTag, findCachedFeedPost } from '@/hooks/use-unified-feed';
 import { PollCard } from '@/components/app/cards/PollCard';
+import { QuizCard } from '@/components/app/quiz/QuizCard';
 import { useStreamLiveStatus } from '@/hooks/use-stream-live-status';
 
 import { buildAvatarUrl, extractAvatarPath, buildImageUrl, buildFeedImageUrls, buildVideoUrl, buildHlsUrl } from '@/lib/media-url';
@@ -66,18 +76,10 @@ import { CardHeader } from '@/components/app/cards/CardHeader';
 import { ImageCard } from '@/components/app/cards/ImageCard';
 import { PostCard } from '@/components/app/cards/PostCard';
 import { CommentsWrapper } from '@/components/app/cards/CommentsWrapper';
-import { AuthorThread } from '@/components/app/cards/AuthorThread';
-import { LiveStreamCard } from '@/components/app/cards/LiveStreamCard';
-import { RelatedVideosFeed } from '@/components/app/feeds/RelatedVideosFeed';
-import { RelatedImagesFeed } from '@/components/app/feeds/RelatedImagesFeed';
-import { RelatedPostsFeed } from '@/components/app/feeds/RelatedPostsFeed';
-import { StreamShopRail } from '@/components/app/live/StreamShop';
-import { StreamShopManager } from '@/components/app/live/StreamShopManager';
 import { PostAIChatLazy } from '@/components/app/cards/PostAIChatLazy';
 import { ReportModal } from '@/components/app/modals/ReportModal';
 import { PostUtilityMenuItems } from '@/components/app/cards/PostUtilityMenuItems';
 import { TipModal } from '@/components/app/modals/TipModal';
-import { EditPostModal } from '@/components/app/modals/EditPostModal';
 import { applyOptimisticEdit } from '@/lib/optimistic-edit';
 import { DeletePostModal } from '@/components/app/modals/DeletePostModal';
 import {
@@ -89,13 +91,14 @@ import {
 import { formatTimeAgo, formatDuration, formatViews } from '@/lib/feed-utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFeedSwallowClip } from '@/hooks/use-feed-swallow-clip';
+import { FeedSwallowMotion } from '@/components/app/feeds/FeedSwallowMotion';
 import type { VideoItem, ImagePost, TextPost, LiveStream } from '@/types/feed.types';
 import { hlsUrlFor, liveProviderOf, noteLatencyMode } from '@/lib/live-ingest';
+import { warmLiveStandbyFor } from '@/lib/live/hls-standby';
 import { FocusCommentProvider, NoFocusComment } from '@/lib/focus-comment';
 import { bringIntoView } from '@/lib/focus-scroll';
 import { canonicalUrl } from '@/lib/seo/route-meta';
 import { usePostStagePhone } from '@/hooks/use-post-stage-phone';
-import { StageRelated } from '@/components/app/post-stage/StageRelated';
 import { PostStagePhone } from '@/components/app/post-stage/PostStagePhone';
 import { setPostFeedLook } from '@/lib/post-feed-look';
 import { PostCommentsSplit } from '@/components/app/post-stage/PostCommentsSplit';
@@ -105,6 +108,64 @@ import { viewerShareUrl } from '@/lib/share-url';
 import { trackShare } from '@/lib/analytics';
 import { toStoryboard } from '@/lib/storyboard';
 import { storedVideoAspect } from '@/lib/video-aspect';
+import { profilePath } from '@/lib/profile-path';
+
+/*
+ * The post goes up first; everything below it waits its turn. These were
+ * static imports, so the page code could not run (and the post could not be
+ * asked for) until ~50 extra files had arrived: the whole live player and
+ * shop for a post that is not live, the edit sheet nobody has opened, the
+ * author's thread and the related rows that only mount after the post has
+ * painted. Each now loads on its own, behind the post.
+ */
+const LiveStreamCard = lazyWithRetry(() =>
+  import('@/components/app/cards/LiveStreamCard').then((m) => ({ default: m.LiveStreamCard })),
+);
+const StreamShopRail = lazyWithRetry(() =>
+  import('@/components/app/live/StreamShop').then((m) => ({ default: m.StreamShopRail })),
+);
+const StreamShopManager = lazyWithRetry(() =>
+  import('@/components/app/live/StreamShopManager').then((m) => ({ default: m.StreamShopManager })),
+);
+const LazyEditPostModal = lazyWithRetry(() =>
+  import('@/components/app/modals/EditPostModal').then((m) => ({ default: m.EditPostModal })),
+);
+const LazyAuthorThread = lazyWithRetry(() =>
+  import('@/components/app/cards/AuthorThread').then((m) => ({ default: m.AuthorThread })),
+);
+const LazyRelatedVideosFeed = lazyWithRetry(() =>
+  import('@/components/app/feeds/RelatedVideosFeed').then((m) => ({ default: m.RelatedVideosFeed })),
+);
+const LazyRelatedImagesFeed = lazyWithRetry(() =>
+  import('@/components/app/feeds/RelatedImagesFeed').then((m) => ({ default: m.RelatedImagesFeed })),
+);
+const LazyRelatedPostsFeed = lazyWithRetry(() =>
+  import('@/components/app/feeds/RelatedPostsFeed').then((m) => ({ default: m.RelatedPostsFeed })),
+);
+const LazyStageRelated = lazyWithRetry(() =>
+  import('@/components/app/post-stage/StageRelated').then((m) => ({ default: m.StageRelated })),
+);
+
+function AuthorThread(props: React.ComponentProps<typeof LazyAuthorThread>) {
+  return <Suspense fallback={null}><LazyAuthorThread {...props} /></Suspense>;
+}
+function RelatedVideosFeed(props: React.ComponentProps<typeof LazyRelatedVideosFeed>) {
+  return <Suspense fallback={null}><LazyRelatedVideosFeed {...props} /></Suspense>;
+}
+function RelatedImagesFeed(props: React.ComponentProps<typeof LazyRelatedImagesFeed>) {
+  return <Suspense fallback={null}><LazyRelatedImagesFeed {...props} /></Suspense>;
+}
+function RelatedPostsFeed(props: React.ComponentProps<typeof LazyRelatedPostsFeed>) {
+  return <Suspense fallback={null}><LazyRelatedPostsFeed {...props} /></Suspense>;
+}
+function StageRelated(props: React.ComponentProps<typeof LazyStageRelated>) {
+  return <Suspense fallback={null}><LazyStageRelated {...props} /></Suspense>;
+}
+/** Built the first time it opens, then kept so its closing animation plays. */
+function EditPostModal(props: React.ComponentProps<typeof LazyEditPostModal>) {
+  if (!useOpenedOnce(props.open)) return null;
+  return <Suspense fallback={null}><LazyEditPostModal {...props} /></Suspense>;
+}
 
 /*
  * Only a live post ever renders this, and a live post is a small minority of
@@ -115,6 +176,37 @@ import { storedVideoAspect } from '@/lib/video-aspect';
 const LivePostChat = lazyWithRetry(() =>
   import('@/components/app/cards/LivePostChat').then((m) => ({ default: m.LivePostChat })),
 );
+
+/**
+ * A link straight to a live. index.html asked for the post while the app was
+ * still loading, so the answer is often here before the page has drawn
+ * anything. The moment it says "live", fetch the player and its chat, and
+ * open the connection to the stream's host, instead of waiting for the page
+ * to render its way down to each of them in turn (measured: the chat's code
+ * was only asked for 1.2 s after the player's).
+ */
+function preloadLiveFromPrefetch() {
+  try {
+    const pre = (window as Window & { __postPrefetch?: { p?: Promise<unknown> } }).__postPrefetch;
+    void pre?.p
+      ?.then((data) => {
+        const nft = data && typeof data === 'object' && 'result' in data ? (data as { result: unknown }).result : data;
+        if (!nft || typeof nft !== 'object' || getContentType(nft as DeHubNFT) !== 'live') return;
+        void LiveStreamCard.preload().catch(() => undefined);
+        void LivePostChat.preload().catch(() => undefined);
+        // Building the address is what opens the connection (see hlsUrlFor).
+        const stream = (nft as { stream?: Parameters<typeof hlsUrlFor>[0] }).stream;
+        if (stream?.playbackId) hlsUrlFor(stream);
+        // And the stream itself starts loading now, not once the page has
+        // rendered its way down to the player.
+        warmLiveStandbyFor(toLiveStream(nft as DeHubNFT));
+      })
+      .catch(() => undefined);
+  } catch {
+    /* A head start only. */
+  }
+}
+if (typeof window !== 'undefined') preloadLiveFromPrefetch();
 
 /**
  * Detect content type from API response
@@ -187,6 +279,8 @@ function toVideoItem(nft: DeHubNFT): VideoItem {
     comicBorder: nft.comicBorder,
     hideAssetCards: nft.hideAssetCards,
     hiddenLinkPreviews: nft.hiddenLinkPreviews,
+    imageTags: nft.imageTags,
+    hasQuiz: nft.hasQuiz,
     spoilerText: nft.spoilerText,
     quotePolicy: nft.quotePolicy,
     visibility: nft.visibility,
@@ -286,6 +380,8 @@ function toImagePost(nft: DeHubNFT): ImagePost {
     comicBorder: nft.comicBorder,
     hideAssetCards: nft.hideAssetCards,
     hiddenLinkPreviews: nft.hiddenLinkPreviews,
+    imageTags: nft.imageTags,
+    hasQuiz: nft.hasQuiz,
     spoilerText: nft.spoilerText,
     quotePolicy: nft.quotePolicy,
     visibility: nft.visibility,
@@ -376,6 +472,8 @@ function toTextPost(nft: DeHubNFT): TextPost {
     comicBorder: nft.comicBorder,
     hideAssetCards: nft.hideAssetCards,
     hiddenLinkPreviews: nft.hiddenLinkPreviews,
+    imageTags: nft.imageTags,
+    hasQuiz: nft.hasQuiz,
     spoilerText: nft.spoilerText,
     quotePolicy: nft.quotePolicy,
     visibility: nft.visibility,
@@ -502,6 +600,8 @@ function toLiveStream(nft: DeHubNFT): LiveStream {
     comicBorder: nft.comicBorder,
     hideAssetCards: nft.hideAssetCards,
     hiddenLinkPreviews: nft.hiddenLinkPreviews,
+    imageTags: nft.imageTags,
+    hasQuiz: nft.hasQuiz,
     spoilerText: nft.spoilerText,
     quotePolicy: nft.quotePolicy,
     visibility: nft.visibility,
@@ -571,7 +671,7 @@ function LivePostWithStatus({ liveData, post, chatSlot, immersive }: { liveData:
     ...liveData,
     isLive: !hasStreamEnded((post as any).stream) && (liveData.isLive || !!isLiveFromSupabase),
   };
-  return <LiveStreamCard key={tokenId} stream={mergedStream} chatSlot={chatSlot} immersive={immersive} />;
+  return <Suspense fallback={<QuietPostLoading />}><LiveStreamCard key={tokenId} stream={mergedStream} chatSlot={chatSlot} immersive={immersive} /></Suspense>;
 }
 
 /**
@@ -655,7 +755,7 @@ function ImmersiveVideoHeader({
   const handleProfileClick = () => {
     if (creatorUsername) {
       const cleanUsername = creatorUsername.replace('@', '');
-      navigate(`/${cleanUsername}`);
+      navigate(profilePath(cleanUsername));
     } else if (creatorId) {
       navigate(`/app/profile?id=${creatorId}`);
     }
@@ -751,6 +851,8 @@ interface SinglePostPageProps {
    * URL the slug exists to avoid.
    */
   overrideId?: string;
+  /** The page the site opened on is being covered by the Shorts viewer (or not any more). */
+  onSharedHold?: (hold: boolean) => void;
 }
 
 /**
@@ -815,6 +917,21 @@ function commentFromSearch(search: string): string | undefined {
  * sources the page itself reads, resolved once here so the list and the
  * author thread can never disagree about which comment was linked.
  */
+/**
+ * A phone that opened the site on this post (lib/shared-video-landing): until
+ * the post is known to be a video, and while the Shorts viewer plays it on
+ * top, the page's own player stays paused so the two never play together.
+ */
+function SharedLandingHold({ enabled, children }: { enabled: boolean; children: (onHold: (hold: boolean) => void) => ReactNode }) {
+  const parentActive = useContext(CachedPageActiveContext);
+  const [hold, setHold] = useState(() => enabled && hasSharedVideoLanding());
+  return (
+    <CachedPageActiveContext.Provider value={parentActive && !hold}>
+      {children(setHold)}
+    </CachedPageActiveContext.Provider>
+  );
+}
+
 export default function SinglePostPage(props: SinglePostPageProps = {}) {
   useRouteContentReady();
   const { postId, tokenId, commentId } = useParams<{ postId?: string; tokenId?: string; commentId?: string }>();
@@ -844,13 +961,17 @@ export default function SinglePostPage(props: SinglePostPageProps = {}) {
   const overrideId = slug ? String(slugQuery.data!.tokenId) : props.overrideId;
   const id = overrideId || postId || tokenId;
   return (
-    <FocusCommentProvider tokenId={id} commentId={focusCommentId}>
-      <SinglePostPageContent {...props} overrideId={overrideId} />
-    </FocusCommentProvider>
+    <SharedLandingHold enabled={!props.inOverlay && !props.detailsOnly}>
+      {onSharedHold => (
+        <FocusCommentProvider tokenId={id} commentId={focusCommentId}>
+          <SinglePostPageContent {...props} overrideId={overrideId} onSharedHold={onSharedHold} />
+        </FocusCommentProvider>
+      )}
+    </SharedLandingHold>
   );
 }
 
-function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = false }: SinglePostPageProps = {}) {
+function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = false, onSharedHold }: SinglePostPageProps = {}) {
   const { postId, tokenId, commentId } = useParams<{ postId?: string; tokenId?: string; commentId?: string }>();
   const navigate = useNavigate();
   const { t } = useI18n();
@@ -1013,7 +1134,8 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
       // Stream ObjectIds cannot be parsed by the numeric NFT endpoint.
       const isStreamId = /^[a-f\d]{24}$/i.test(id!) && !/^\d+$/.test(id!);
       const loadPost = async (nftId: string): Promise<DeHubNFT> => {
-        const nft = await getNFTInfo(nftId);
+        // A post link asked for this during page load (index.html).
+        const nft = (await takePrefetchedPost(nftId)) ?? await loadPostData(nftId);
         const normalizedNft = {
           ...nft,
           createdAt: nft.createdAt || nft.created_at || (nft as any).mintedAt || (nft as any).minted_at || (nft as any).updatedAt || (nft as any).updated_at || '',
@@ -1025,6 +1147,11 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
         // after opening it. Counts still come from the response; only the
         // per-viewer flags are carried over.
         const merged = mergeViewerState(normalizedNft, shown);
+        // The comments under the post read the same record by ['nft-info'];
+        // without this they asked for it a second time once they mounted.
+        if (queryClient.getQueryData(['nft-info', nftId]) === undefined) {
+          queryClient.setQueryData<DeHubNFT>(['nft-info', nftId], normalizedNft);
+        }
 
         // Enrich quote post if quotedPost data is missing
         if (merged.isQuotePost && merged.quotedTokenId && !merged.quotedPost) {
@@ -1189,6 +1316,44 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
   const isImagePost = contentType === 'image';
   const isTextPost = contentType === 'post' || contentType === null;
 
+  // Opened from a shared link on a phone: a video plays in the Shorts viewer
+  // on top of this page, the same player a feed tap opens. Back or closing it
+  // shows this page; Back again goes to Home (lib/shared-video-landing).
+  const { shortsEnabled } = useShortsEnabled();
+  const brainrotSession = useBrainrotSession();
+  const sharedViewer = useRef<{ seen: boolean; release: () => void } | null>(null);
+  useEffect(() => {
+    if (!post || inOverlay || detailsOnly || sharedViewer.current) return;
+    if (!takeSharedVideoLanding()) {
+      onSharedHold?.(false);
+      return;
+    }
+    const video = isVideoPost ? toVideoItem(post) : null;
+    const phone = window.matchMedia('(max-width: 767px)').matches;
+    const playable = !!video && phone && shortsEnabled && !!video.videoUrl && !video.spoilerText
+      && post.status !== 'pending' && isBrainrotPlayable(post as Parameters<typeof isBrainrotPlayable>[0]);
+    if (!video || !playable) {
+      onSharedHold?.(false);
+      return;
+    }
+    openBrainrotFeed(video.id, videoItemToShort(video));
+    const viewer = { seen: false, release: () => {} };
+    viewer.release = holdBackForViewer(closeBrainrotFeed, () => !!sharedViewer.current);
+    sharedViewer.current = viewer;
+  }, [post, inOverlay, detailsOnly, isVideoPost, shortsEnabled, onSharedHold]);
+  useEffect(() => {
+    const viewer = sharedViewer.current;
+    if (!viewer) return;
+    if (brainrotSession) {
+      viewer.seen = true;
+      return;
+    }
+    if (!viewer.seen) return;
+    sharedViewer.current = null;
+    viewer.release();
+    onSharedHold?.(false);
+  }, [brainrotSession, onSharedHold]);
+
   // Deep link to a thread entry or comment: put it in view once it has
   // rendered, with no glow or wash, and hold it there while the post loads. The element
   // can lag the page by a fetch (the thread mounts with post data), so poll
@@ -1249,6 +1414,7 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
     return () => setPostFeedLook(false);
   }, [feedLookPhone]);
   const isImmersiveImage = !detailsOnly && isImagePost && isMobileView && !feedLookPhone;
+  const swallowLayers = !inOverlay && contentType !== 'live' && (feedLookPhone || !isMobileView);
   useEffect(() => {
     const mark = isFullBleedLive ? 'data-immersive-live-mode' : ((isVideoPost && !feedLookPhone) || isImmersiveImage) ? 'data-immersive-video-mode' : null;
     if (mark) markBody(mark, true);
@@ -1423,7 +1589,18 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
     repostCount: Number(post?.totalReposts || post?.reposts || 0) || 0,
   }), [goBack, registerPostOptions, postOptions, revealStageComments, splitComments, openPageComments, post?.quotes, post?.totalReposts, post?.reposts]);
 
-  const pageComments = post && id ? (
+  // The post goes up on its own first. The comments (list, composer, emoji and
+  // GIF pickers) were built in the same commit and roughly doubled the time to
+  // the first frame with the post in it; they now follow two frames later.
+  const [commentsReady, setCommentsReady] = useState(false);
+  useEffect(() => {
+    if (!post || commentsReady) return;
+    let second = 0;
+    const first = requestAnimationFrame(() => { second = requestAnimationFrame(() => setCommentsReady(true)); });
+    return () => { cancelAnimationFrame(first); cancelAnimationFrame(second); };
+  }, [post, commentsReady]);
+
+  const pageComments = post && id && commentsReady ? (
     <CommentsWrapper
       open={showPageComments}
       onOpenChange={setShowPageComments}
@@ -1504,6 +1681,7 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
         >
           {renderContent()}
           {contentType === 'image' && parseInt(id, 10) > 0 && <div className="px-3"><PollCard tokenId={parseInt(id, 10)} /></div>}
+          {contentType === 'image' && parseInt(id, 10) > 0 && <div className="px-3"><QuizCard tokenId={parseInt(id, 10)} /></div>}
         </PostStagePhone>
         {commentsSplitSheet}
       </div>
@@ -1614,6 +1792,7 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
               {/* Bookmark / pin / post info — the same three rows the feed
                   card's menu carries, which this page's menu was missing. */}
               <PostUtilityMenuItems
+                onActionBar
                 postId={id}
                 tokenId={id ? parseInt(id, 10) || undefined : undefined}
                 isOwnPost={!!(walletAddress && videoData.creatorId?.toLowerCase() === walletAddress.toLowerCase())}
@@ -1696,7 +1875,7 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
           currentSpoilerText={videoData.spoilerText}
           currentQuotePolicy={videoData.quotePolicy}
           currentReplyPolicy={videoData.replyPolicy}
-          currentVisibility={(videoData as any).visibility}
+          currentVisibility={(videoData as any).justMe ? 'self' : (videoData as any).visibility}
           currentShopLinks={videoData.shopLinks}
           onSuccess={(edited) => {
             applyOptimisticEdit(queryClient, id || '', edited);
@@ -1777,6 +1956,7 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
           <ImmersiveVideoHeader onBack={goBack} />
           {renderContent()}
           {post && id && parseInt(id, 10) > 0 && <div className="px-3"><PollCard tokenId={parseInt(id, 10)} /></div>}
+          {post && id && parseInt(id, 10) > 0 && <div className="px-3"><QuizCard tokenId={parseInt(id, 10)} /></div>}
         </div>
         <div className="px-2 sm:px-3">{pageComments}</div>
         {showRelated && id && <div className="px-2 sm:px-3"><NoFocusComment><RelatedImagesFeed currentPostId={id} /></NoFocusComment></div>}
@@ -1810,6 +1990,7 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
             {renderContent()}
             {/* A video card draws its own poll; a photo card leaves it to the page. */}
             {!isTextPost && contentType !== 'video' && id && parseInt(id, 10) > 0 && <PollCard tokenId={parseInt(id, 10)} />}
+          {!isTextPost && contentType !== 'video' && id && parseInt(id, 10) > 0 && <QuizCard tokenId={parseInt(id, 10)} />}
             {/* Desktop: comments open inside the post's bento, attached to it like on the feed. */}
             {!isMobileView && !isLivePost && !commentsSplit && pageComments}
           </div>
@@ -1825,8 +2006,8 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
               are not a customer of their own broadcast. */}
           {isLivePost && id && post && (
             walletAddress && post.minter?.toLowerCase() === walletAddress.toLowerCase()
-              ? <StreamShopManager tokenId={liveRoomTokenId} />
-              : <StreamShopRail tokenId={liveRoomTokenId} />
+              ? <Suspense fallback={null}><StreamShopManager tokenId={liveRoomTokenId} /></Suspense>
+              : <Suspense fallback={null}><StreamShopRail tokenId={liveRoomTokenId} /></Suspense>
           )}
           {/* The chat is no longer a panel down here. It hangs off the message
               button in the stream's own action bar (see `chatSlot` above), so a
@@ -1866,6 +2047,7 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
           scrolling content (not an outer margin) so the post scrolls up UNDER the
           sticky nav pill and is swallowed at its rounded top edge on the glass
           themes, exactly like the home feed. */}
+      <CoAuthorInviteBanner tokenId={post?.tokenId} creatorName={post?.minterDisplayName || post?.minterUsername} />
       {useStage && !detailsOnly ? (
         renderPostContent()
       ) : (
@@ -1875,7 +2057,13 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
         data-glass-page
         className={cn('flex flex-col', isLivePost && 'bg-black min-h-screen', isImmersiveImage && 'bg-black')}
       >
-        {renderPostContent()}
+        {/* The bento layouts get the swallow layers, so the cut under the nav
+            pill is a shift instead of clip-path: clip-path stops the post's
+            frosted bento (and the related cards) from blurring the theme
+            canvas, which then showed through sharp. Live and the full-bleed
+            viewers keep the plain root: their fixed layers must not sit
+            inside a shifted box. */}
+        {swallowLayers ? <FeedSwallowMotion className="flex flex-col">{renderPostContent()}</FeedSwallowMotion> : renderPostContent()}
       </div>
       )}
     </>

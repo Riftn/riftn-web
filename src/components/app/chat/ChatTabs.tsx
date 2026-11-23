@@ -8,6 +8,9 @@ import { CHAT_MENU_CONTENT } from '@/components/app/chat/ChatOptionsMenu';
 import { MAX_TAB_NAME } from '@/lib/api/dehub/chat-tabs';
 import '@/styles/chat-tabs.css';
 import type { ChatTabView } from '@/hooks/use-chat-tabs';
+// Settings → Appearance → "Pill tabs in Messages": loads the saved choice onto <html> before the tabs draw.
+import '@/lib/messages-pills';
+import '@/styles/messages-pills.css';
 
 /*
  * Tabs above the chat list on riftn.com/chat and /app/messages: All, Unread,
@@ -37,6 +40,8 @@ export interface ChatTabBarProps {
   className?: string;
   /** Pinned to the right end of the row (Archived on /app/messages). */
   trailing?: ReactNode;
+  /** Phones: only the chips. The tab menu button sits pinned beside the row instead. */
+  bare?: boolean;
 }
 
 export const CHAT_DRAG_TYPE = 'application/x-riftn-chat';
@@ -142,6 +147,7 @@ export function ChatTabBar(p: ChatTabBarProps) {
           </Ctx.ContextMenu>
         );
       })}
+      {!p.bare && (<>
       <button
         type="button"
         data-chat-tab-manage
@@ -154,6 +160,7 @@ export function ChatTabBar(p: ChatTabBarProps) {
       </button>
       {/* Fills the rest of the row so there's room to right-click. */}
       <div aria-hidden className="h-8 min-w-6 flex-1" />
+      </>)}
       {p.trailing}
     </div>
     </Ctx.ContextMenuTrigger>

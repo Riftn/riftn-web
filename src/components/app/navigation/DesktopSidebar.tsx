@@ -127,9 +127,8 @@ export function DesktopSidebar({ onPostClick }: DesktopSidebarProps) {
   const [renderCompactLogo, setRenderCompactLogo] = useState(isCollapsed);
   const logoRevealTimerRef = useRef<number | null>(null);
 
-  // Menu search. The field is not permanent chrome: it stays out of the way
-  // until the list is actually being scrolled — i.e. until the user is hunting
-  // rather than clicking something they can already see.
+  // Menu search. Always shown on the open rail; on the collapsed rail it stays
+  // out of the way until the list is scrolled.
   const [navQuery, setNavQuery] = useSurfaceDraft("components/app/navigation/DesktopSidebar.tsx:navQuery", '');
   const [navScrolled, setNavScrolled] = useState(false);
   const [navAtBottom, setNavAtBottom] = useState(false);
@@ -147,9 +146,13 @@ export function DesktopSidebar({ onPostClick }: DesktopSidebarProps) {
   // scrollTop 0, which would retract the field mid-keystroke and restore the
   // full list — and then scrollTop is still 0, so it would sit there flickering.
   // Once the field has content or focus it stays regardless of scroll.
-  const showSearch = (navScrolled && !navAtBottom) || searchFocused || (navQuery !== '' && queryOwner === 'top');
-  // Mirror of the top field, revealed once the list bottoms out.
-  const showBottomSearch = navAtBottom || bottomSearchFocused || (navQuery !== '' && queryOwner === 'bottom');
+  // Open rail: the field is always on top of the list. Hiding it until the
+  // list was scrolled meant people scrolled a long way and never found it
+  // (Requests f077714c). The collapsed rail keeps the scroll reveal.
+  const showSearch = !isCollapsed || (navScrolled && !navAtBottom) || searchFocused || (navQuery !== '' && queryOwner === 'top');
+  // Mirror of the top field, revealed once the list bottoms out. Only on the
+  // collapsed rail now: the open rail already shows the top field.
+  const showBottomSearch = (isCollapsed && navAtBottom) || bottomSearchFocused || (navQuery !== '' && queryOwner === 'bottom');
 
   // Measured in the list's own content coordinates (offsetLeft/offsetTop
   // against the scroll container), not in viewport coordinates. The indicator
@@ -628,7 +631,7 @@ export function DesktopSidebar({ onPostClick }: DesktopSidebarProps) {
                       data-search-surface
                       aria-label={t('sidebar.searchMenu')}
                       className={cn(
-                        "w-full h-[38px] pl-9 pr-8 rounded-xl text-[14px] outline-none transition-colors",
+                        "w-full h-[38px] pl-9 pr-8 rounded-xl text-[14px] [@media(any-pointer:coarse)]:text-[16px] outline-none transition-colors",
                         desktopNavTextColor,
                         isLightTheme
                           ? "bg-black/5 border border-black/10 placeholder:text-zinc-500 focus:border-black/25"
@@ -834,7 +837,7 @@ export function DesktopSidebar({ onPostClick }: DesktopSidebarProps) {
                 variant="desktop"
                 collapsed={true}
                 forceCollapsed={isCollapsed}
-                onClick={() => { void disconnect(); }}
+                onClick={() => { void disconnect({ forgetProfile: true }); }}
                 layoutId={isCollapsed ? 'sidebar-nav-collapsed' : 'sidebar-nav-expanded'}
               />
               {/* Only while the fade is actually over the list. Once the list
@@ -899,7 +902,7 @@ export function DesktopSidebar({ onPostClick }: DesktopSidebarProps) {
                       data-search-surface
                       aria-label={t('sidebar.searchMenu')}
                       className={cn(
-                        "w-full h-[38px] pl-9 pr-8 rounded-xl text-[14px] outline-none transition-colors",
+                        "w-full h-[38px] pl-9 pr-8 rounded-xl text-[14px] [@media(any-pointer:coarse)]:text-[16px] outline-none transition-colors",
                         desktopNavTextColor,
                         isLightTheme
                           ? "bg-black/5 border border-black/10 placeholder:text-zinc-500 focus:border-black/25"

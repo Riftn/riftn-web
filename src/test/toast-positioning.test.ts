@@ -7,11 +7,11 @@ import {
 } from '@/components/ui/toast-classes';
 
 describe('desktop toast positioning', () => {
-  it('keeps paired action labels on one line at equal widths', () => {
-    expect(BUTTON_CLASSES).toContain('flex-1');
+  it('keeps custom actions full width with space for wrapping labels', () => {
+    expect(BUTTON_CLASSES).toContain('w-full');
+    expect(BUTTON_CLASSES).toContain('min-h-10');
     expect(BUTTON_CLASSES).toContain('min-w-0');
-    expect(BUTTON_CLASSES).toContain('whitespace-nowrap');
-    expect(BUTTON_CLASSES).toContain('text-ellipsis');
+    expect(BUTTON_CLASSES).not.toContain('whitespace-nowrap');
   });
 
   it('keeps loading indicators and their status on one row', () => {

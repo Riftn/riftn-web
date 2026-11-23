@@ -1,7 +1,7 @@
 /**
- * Long form videos on wide screens (Settings → Appearance → Media).
+ * Long form media on wide screens (Settings → Appearance → Media).
  *
- * Desktop only. A video that is narrower than the column used to leave empty
+ * Desktop only. Covers videos and single photos. A video or photo that is narrower than the column used to leave empty
  * black or blank space beside it. Each choice fills that space:
  *
  * - ambient: the frame runs the full column width and the space beside the

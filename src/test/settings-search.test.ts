@@ -14,10 +14,12 @@
  * phrased the way a reader would actually type it.
  */
 
+import { createInstance } from 'i18next';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
+import tr from '@/i18n/locales/tr.json';
 import { SETTINGS_SEARCH_INDEX, searchSettings } from '@/lib/settings-search';
 
 /** Stand-in for i18next's `t` — returns the fallback, as English does. */
@@ -84,6 +86,14 @@ describe('searchSettings', () => {
     expect(top('avatar')?.anchor).toBe('profile-picture');
     expect(top('dnd')?.anchor).toBe('do-not-disturb');
     expect(top('banner')?.anchor).toBe('cover-image');
+  });
+
+  it('finds both badge controls using the Turkish prefix', async () => {
+    const i18n = createInstance();
+    await i18n.init({ lng: 'tr', resources: { tr: { translation: tr } } });
+    expect(searchSettings('roze', i18n.t).map(hit => hit.anchor)).toEqual(
+      expect.arrayContaining(['private-balance', 'badge-delegation']),
+    );
   });
 
   it('requires every word typed to match something', () => {

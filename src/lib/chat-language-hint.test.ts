@@ -25,6 +25,14 @@ describe('chat language hint', () => {
     }
   });
 
+  it('reads everyday Turkish chat, even without small words', () => {
+    expect(chatLineLanguage('selam nasılsın kanka')).toBe('tr');
+    expect(chatLineLanguage('Merhaba arkadaşlar bugün çok güzel bir gün')).toBe('tr');
+    expect(chatLineLanguage('teşekkür ederim abi')).toBe('tr');
+    expect(chatLineIsForeign('selam nasılsın kanka', 'en')).toBe(true);
+    expect(chatLineIsForeign('selam nasılsın kanka', 'tr')).toBe(false);
+  });
+
   it('flags lines in another language than the reader', () => {
     expect(chatLineIsForeign('bom dia galera', 'en-US')).toBe(true);
     expect(chatLineIsForeign('bom dia galera', 'pt-BR')).toBe(false);

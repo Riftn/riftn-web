@@ -29,6 +29,9 @@ import { mapUserToProfile } from '@/hooks/use-dehub-profile';
 import { toast } from 'sonner';
 import type { DeHubUser } from '@/lib/api/dehub/types';
 
+import { formatCount as formatShortCount } from '@/lib/format-count';
+import { profilePath } from '@/lib/profile-path';
+import { localTimeLine, useProfileLocalTime } from '@/hooks/use-profile-local-time';
 interface ProfileHoverCardProps {
   /** The wallet address / creator ID */
   creatorId?: string;
@@ -58,6 +61,8 @@ interface ProfileData {
   badgeBalance: number;
   isFollowing: boolean;
   isOwnProfile: boolean;
+  /** Set only when they switched on "show my local time". */
+  timeZone: string | null;
 }
 
 export function ProfileHoverCard({
@@ -76,6 +81,7 @@ export function ProfileHoverCard({
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const fetchedRef = useRef<string | null>(null);
+  const localTime = useProfileLocalTime(profile?.timeZone);
 
   // Shared cross-surface follow state (optimistic override wins over fetched value)
   const { isFollowing: followOverride, toggleFollow } = useFollow(profile?.address);
@@ -119,6 +125,7 @@ export function ProfileHoverCard({
         badgeBalance: user.badgeBalance ?? badgeBalance ?? 0,
         isFollowing: following,
         isOwnProfile: walletAddress?.toLowerCase() === address.toLowerCase(),
+        timeZone: typeof user.customs?.publicTimeZone === 'string' ? user.customs.publicTimeZone : null,
       });
       fetchedRef.current = userId;
 
@@ -160,17 +167,13 @@ export function ProfileHoverCard({
   const handleNavigate = useCallback(() => {
     const cleanUsername = (profile?.username || creatorUsername)?.replace('@', '');
     if (cleanUsername) {
-      navigate(`/${cleanUsername}`);
+      navigate(profilePath(cleanUsername));
     } else if (creatorId) {
       navigate(`/app/profile?id=${creatorId}`);
     }
   }, [profile, creatorUsername, creatorId, navigate]);
 
-  const formatCount = (n: number) => {
-    if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-    if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
-    return String(n);
-  };
+  const formatCount = (n: number) => formatShortCount(n);
 
   // Don't wrap if no user to show
   if (!userId) return <>{children}</>;
@@ -248,6 +251,12 @@ export function ProfileHoverCard({
             {profile.bio && (
               <p className="text-white/80 text-xs leading-relaxed mt-2 line-clamp-2">
                 {profile.bio}
+              </p>
+            )}
+
+            {localTime && (
+              <p className="text-white/60 text-xs mt-2 truncate" title={profile.timeZone ?? undefined}>
+                {localTimeLine(_copy as never, localTime, profile.timeZone)}
               </p>
             )}
 

@@ -1,4 +1,5 @@
 {
+  "dmVideo": {"edit": "Hlela ividiyo", "hiddenTag": "Kufihliwe", "tapToEdit": "Thepha ukuze uhlele", "cover": "Ikhava", "trim": "Sika", "mirror": "Isibuko", "rotate": "Phendula", "hide": "Fihla", "timer": "Isikhathi", "sheetTitleAny": "Hlela ngaphambi kokuthumela", "close": "Vala", "replace": "Faka esikhundleni", "hiddenUntilTap": "Ifihliwe kuze kube yilapho beyithinta", "pause": "Misa isikhashana", "play": "Dlala ividiyo", "mute": "Thulisa", "unmute": "Susa ukuthula", "scrub": "Skrola kuvidiyo", "addMore": "Engeza izithombe noma amavidiyo", "trimAria": "Hudula imiphetho ukuze usike", "coverAria": "Thinta ifreyimu ukuze usethe ikhava", "coverHint": "Thinta ifreyimu ukuze usethe ikhava", "coverOwn": "Isithombe sakho", "coverAuto": "Okuzenzakalelayo", "uploadCover": "Layisha isithombe sekhava", "mirrored": "Isibuko", "original": "Okokuqala", "rotate90": "Phendula ngo-90°", "showNormally": "Bonisa ngokujwayelekile", "showNormallyBody": "Bayibona ngokushesha", "hideUntilTap": "Fihla kuze kube yilapho ithintiwe", "hideUntilTapBody": "Ifiphele kuze kube yilapho beyithinta", "hidePrice": "Fihla ngemuva kwentengo", "hidePriceBody": "Ifiphele kuze kube yilapho bakukhokhela", "priceUnavailable": "Akukho kule ngxoxo", "timerOff": "Valiwe", "timerOffBody": "Ihlala engxoxweni.", "timerViewBody": "Iyanyamalala kini nobabili uma beyibonile.", "confirm": "Qinisekisa", "lockedFor": "Vula ukuze uthole {{value1}} DHB", "lockedForUsd": "Vula ukuze uthole {{value1}}", "editItem": "Hlela into {{value1}}", "kept": "{{time}} kugciniwe", "timerTimeBody": "Iyanyamalala kini nobabili {{value1}} ngemva kokuba uyithumile."},
   "postBg": {
     "addMedia": "Engeza isithombe, i-GIF noma ividiyo",
     "changeMedia": "Shintsha isithombe, i-GIF noma ividiyo",
@@ -297,8 +298,10 @@
       "pronouns": "Izinombolo zesithakazelo",
       "location": "Indawo",
       "custom": "Yesiko",
-      "customOption": "Ilebula lesiko"
-    }
+      "customOption": "Ilebula lesiko",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Landela i-#{{tag}}",
@@ -2211,7 +2214,7 @@
     "promptDevice": "Isixwayiso & OS (amaphutha)",
     "deviceInfoNoErrors": "Akukho",
     "promptFilters": "Sifuna ngesigaba",
-    "promptMediaError": "Khetha izithombe noma amavidiyo angaphansi kuka-50MB ngakunye.",
+    "promptMediaError": "Khetha izithombe noma amavidiyo angaphansi kuka-200MB ngakunye.",
     "promptMediaLimit": "Kuze kube ngu-{{max}} okwengezwe.",
     "removePromptAttachment": "Susa {{name}}",
     "promptAttachment": "Okwengezwe {{number}}",
@@ -4242,7 +4245,7 @@
       "pageViewsTerm": "Ukubukwa kwamakhasi",
       "pageViews": "— izicelo i-Cloudflare eziqoqa njengokulayishwa kwamakhasi, hhayi izithombe, imibhalo noma amakholi we-API.",
       "botsTerm": "Ama-bot afakiwe",
-      "bots": "— lezi yizibalo ezingahluziwe emaphethelweni, ngakho ama-crawler, abaqaphi bokusebenza namaklayenti anemibhalo akufakiwe. Ungazibona wena kubunjalo besiphequluli ngenhla, lapho okufakiwe okufana no-\"Curl\" no-\"Akwaziwa\" kuyithrafikhi ezenzakalelayo hhayi abantu. Ukuhlunga ama-bot kudinga uhlelo lwe-Cloudflare olukhokhelwayo esingenalo, futhi ukususa isilinganiso buthule kwenza izibalo zingahloleki kalula, hhayi kangcono.",
+      "bots": "— lezi yizibalo ezingahluziwe emaphethelweni, ngakho ama-crawler, abaqaphi bokusebenza namaklayenti anemibhalo akufakiwe. Ungazibona wena kubunjalo besiphequluli ngenhla, lapho okufakiwe okufana no-\"Curl\" no-\"Akwaziwa\" kuyithrafikhi ezenzakalelayo hhayi abantu. Kuya kuba nzima ukuhlukanisa ama-bot ezivakashini ezingabantu, futhi maduze ngeke akwazi ukuhlukaniswa kulezi zibalo, ngakho ukuzama ukuwahlunga akusizi.",
       "totalTerm": "Amasamba ebanga",
       "total": "— ukubukwa kwamakhasi nezicelo kuyahlanganiswa kulo lonke ibanga. Izibalo zezivakashi azihlanganiswa ngamabomu zibe \"yisamba sezivakashi\", ngoba umuntu obelapha ngoMsombuluko nangoLwesibili ubezobalwa kabili.",
       "peakTerm": "Ihora / usuku olumatasa kakhulu",
@@ -20886,5 +20889,27 @@
     "remember": "Khumbula ukukhetha kwami",
     "rememberHint": "Kushintshe noma nini Kuzilungiselelo",
     "failed": "Ayikwazanga ukususa umlayezo"
+  },
+  "profileAskAi": {
+    "row": "Buza i-AI",
+    "rowSub": "Landela, thanda konke, thola izindaba",
+    "back": "Emuva",
+    "title": "Buza i-AI ngo-{{handle}}",
+    "sub": "Umsizi uyakwenza, wena uyaqinisekisa",
+    "followLikeAll": "Landela futhi uthande konke",
+    "followLikeAllSub": "Ulandela u-{{handle}}, usabela kukho konke okuthunyelwe",
+    "likeAll": "Thanda konke okuthunyelwe kwabo",
+    "likeAllSub": "Weqa lokho osuvele usabele kukho",
+    "catchUp": "Ngitshele okusha",
+    "catchUpSub": "Lokho u-{{handle}} akuthumele muva nje, ngamafuphi",
+    "message": "Bhalela umlayezo",
+    "messageSub": "Ubhala okusalungiswa komlayezo, wena uyathumela",
+    "placeholder": "Buza noma yini ngo-{{handle}}…",
+    "send": "Thumela",
+    "promptFollowLikeAll": "Landela u-{{handle}} futhi usabele kukho konke okuthunyelwe kwabo",
+    "promptLikeAll": "Sabela kukho konke okuthunyelwe ngu-{{handle}}",
+    "promptCatchUp": "Ngitshele lokho u-{{handle}} akuthumele muva nje",
+    "promptMessage": "Ngisize ngibhalele u-{{handle}} umlayezo",
+    "promptAbout": "Ngo-{{handle}}: {{question}}"
   }
 }

@@ -29,6 +29,7 @@ import { AutoplayVideo } from '@/components/app/AutoplayVideo';
 import { BadgedName } from '@/components/app/BadgedName';
 import { cdnImage, deviceWidth, isMdUp } from '@/lib/media-url';
 
+import { formatCount } from '@/lib/format-count';
 /**
  * Tile is `w-[120px] md:w-[180px]` below. Both the poster and the raw-image
  * fallback are sized from it, so the reel stops pulling full-width feed
@@ -207,7 +208,7 @@ export function ShortsReel({ shorts, pool, onLoadMore, hasMore, isLoadingMore }:
                   </div>
                   <div className="flex items-center gap-1">
                     <ThumbsUp className="w-3 h-3 text-white" />
-                    <span className="text-white text-xs font-medium">{short.likes}</span>
+                    <span className="text-white text-xs font-medium">{formatCount(short.likes)}</span>
                   </div>
                 </div>
               </div>

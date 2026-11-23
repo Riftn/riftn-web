@@ -22,6 +22,7 @@ import {
   fieldLink,
   isLinkPreset,
   normalizeFieldValue,
+  editableFieldValue,
   presetById,
   presetOf,
   type ProfileFieldPresetId,
@@ -35,7 +36,7 @@ export const MAX_PROFILE_FIELDS = 4;
  * The kinds offered when adding or changing a field. Older saved fields of
  * another kind (Blog, Pronouns, …) still load and save as they are.
  */
-const PICKER_PRESETS: ProfileFieldPresetId[] = ['website', 'location', 'shop', 'custom'];
+const PICKER_PRESETS: ProfileFieldPresetId[] = ['website', 'location', 'shop', 'cashapp', 'custom'];
 
 export type FieldRow = { key: number; preset: ProfileFieldPresetId; name: string; value: string; verifiedAt?: string | null };
 
@@ -47,7 +48,7 @@ const rowOf = (field: ProfileField): FieldRow => {
     preset,
     name: preset === 'custom' ? field.name || '' : presetById(preset)!.name,
     // Shown without https://, which is put back on save.
-    value: isLinkPreset(preset) ? (field.value || '').replace(/^https:\/\//i, '') : field.value || '',
+    value: editableFieldValue(preset, field.value),
     verifiedAt: field.verifiedAt ?? null,
   };
 };
@@ -164,7 +165,7 @@ export function ProfileFieldsEditor({
 
   const remove = (key: number) => onChange((prev) => prev.filter((row) => row.key !== key));
 
-  const showHint = rows.some((r) => !r.verifiedAt && fieldLink(normalizeFieldValue(r.preset, r.value)));
+  const showHint = rows.some((r) => r.preset !== 'cashapp' && !r.verifiedAt && fieldLink(normalizeFieldValue(r.preset, r.value)));
   const snippet = `<a rel="me" href="https://riftn.com/${username}">Riftn</a>`;
 
   return (
@@ -248,6 +249,7 @@ export function ProfileFieldsEditor({
 }
 
 function placeholderFor(t: (k: string, d: string) => string, preset: ProfileFieldPresetId): string {
+  if (preset === 'cashapp') return t('profileFields.placeholderCashtag', '$cashtag');
   if (isLinkPreset(preset)) return t('profileFields.placeholderLink', 'yoursite.com');
   if (preset === 'pronouns') return t('profileFields.placeholderPronouns', 'they/them');
   if (preset === 'location') return t('profileFields.placeholderLocation', 'City, country');

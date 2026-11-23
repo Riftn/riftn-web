@@ -44,6 +44,7 @@ export const FractionListingCard = memo(function FractionListingCard({
   // Share of the whole upload this listing represents. It is the number that
   // makes a fraction price mean something — 50 of 1000 is 5% of the post.
   const sharePct = (available / TOTAL_FRACTIONS) * 100;
+  const free = Number(listing.price_per_fraction) === 0;
 
   return (
     <button
@@ -61,6 +62,11 @@ export const FractionListingCard = memo(function FractionListingCard({
         <span data-on-media className="absolute top-2 left-2 text-[10px] font-semibold bg-black/70 text-white/90 px-1.5 py-0.5 rounded backdrop-blur-sm">
           {available} / {TOTAL_FRACTIONS}
         </span>
+        {free && !isMine && (
+          <span data-on-media className="absolute top-2 right-2 text-[10px] font-semibold bg-emerald-500/90 text-white px-1.5 py-0.5 rounded">
+            {t('fractions.freeBadge')}
+          </span>
+        )}
         {isMine && (
           <span className="absolute top-2 right-2 text-[10px] font-semibold bg-white/90 text-black px-1.5 py-0.5 rounded">
             {t('fractions.yours')}
@@ -77,6 +83,13 @@ export const FractionListingCard = memo(function FractionListingCard({
           {listing.creator_username || truncateAddress(listing.seller_address)}
         </p>
 
+        {free ? (
+          <>
+            <p className="text-sm font-semibold text-white pt-0.5">{t('fractions.claim')}</p>
+            <p className="text-[10px] text-zinc-500">{t('fractions.freeShare', { pct: sharePct.toFixed(1) })}</p>
+          </>
+        ) : (
+          <>
         <p className="text-sm font-semibold text-white flex items-center gap-1 pt-0.5">
           <img src={dehubCoin} alt={tokenLabel()} className="w-4 h-4" />
           {listing.price_per_fraction.toLocaleString(undefined, { maximumFractionDigits: 4 })}
@@ -86,6 +99,8 @@ export const FractionListingCard = memo(function FractionListingCard({
           {totalDhb.toLocaleString(undefined, { maximumFractionDigits: 2 })} <DhbCoin /> {t('fractions.forShareOfPost', { pct: sharePct.toFixed(1) })}
           {dhbUsd > 0 && ` · $${(totalDhb * dhbUsd).toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
         </p>
+          </>
+        )}
 
         <SellerTrustBadge stats={stats} compact className="pt-0.5" />
       </div>

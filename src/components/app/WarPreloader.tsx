@@ -804,7 +804,7 @@ const TAIL_VERT = /* glsl */ `
   varying float v_t;
 
   void main() {
-    v_t = 1.0 - a_idx / float(${TAIL_POINTS});
+    v_t = 1.0 - a_idx / float(${TAIL_POINTS}); // exact-number
     gl_PointSize = (1.2 + v_t * v_t * 3.4) * u_dpr;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
   }

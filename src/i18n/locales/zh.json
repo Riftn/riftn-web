@@ -1,4 +1,5 @@
 {
+  "dmVideo": {"edit": "编辑视频", "hiddenTag": "隐藏", "tapToEdit": "点击以编辑", "cover": "封面", "trim": "修剪", "mirror": "镜像", "rotate": "旋转", "hide": "隐藏", "timer": "定时器", "sheetTitleAny": "发送前编辑", "close": "关闭", "replace": "替换", "hiddenUntilTap": "隐藏直到他们点击", "pause": "暂停", "play": "播放视频", "mute": "静音", "unmute": "取消静音", "scrub": "快进视频", "addMore": "添加照片或视频", "trimAria": "拖动两端修剪", "coverAria": "点击一帧设为封面", "coverHint": "点击一帧设为封面", "coverOwn": "你的图片", "coverAuto": "自动", "uploadCover": "上传封面图片", "mirrored": "镜像", "original": "原始", "rotate90": "顺时针旋转90°", "showNormally": "正常显示", "showNormallyBody": "他们会立即看到", "hideUntilTap": "隐藏直到被点击", "hideUntilTapBody": "直到他们点击才清晰", "hidePrice": "隐藏在价格后面", "hidePriceBody": "直到他们付款才清晰", "priceUnavailable": "不在此聊天中", "timerOff": "关闭", "timerOffBody": "它会留在聊天记录里。", "timerViewBody": "一旦他们看到了，你们两个就都完了。", "confirm": "确认", "lockedFor": "解锁需 {{value1}} DHB", "lockedForUsd": "解锁 {{value1}}", "editItem": "编辑项目 {{value1}}", "kept": "已保留 {{time}}", "timerTimeBody": "你们两个都完了 {{value1}} 在你发送之后。"},
   "postBg": {
     "addMedia": "添加图片、GIF 或视频",
     "changeMedia": "更换图片、GIF 或视频",
@@ -307,9 +308,11 @@
       "pronouns": "代词",
       "location": "地点",
       "custom": "自定义",
-      "customOption": "自定义标签"
+      "customOption": "自定义标签",
+      "cashapp": "Cash App"
     },
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "关注 #{{tag}}",
@@ -716,6 +719,7 @@
     "heading": "Riftn 短视频"
   },
   "settings": {
+    "loginLook": {"title": "登录界面", "desc": "此设备上登录界面中 Riftn 标志和标语的动态效果。", "tube": "显像管电视", "vhs": "VHS 录像带", "led": "LED 墙", "holo": "全息投影", "neon": "霓虹", "3d": "3D", "flat": "扁平"}, "arrivalLook": {"title": "登录之后", "desc": "账号加载时、头像落到页面之前播放的效果。仅此设备。", "trace": "描边", "tune": "调台", "rift": "裂隙", "deck": "卡牌", "glass": "玻璃水滴"},
     "postLanding": "发布之后",
     "postLandingDesc": "新帖子出现在动态中的方式",
     "postLandingGhost": "幽灵空位",
@@ -2229,7 +2233,7 @@
     "deviceInfoErrors": "近期错误",
     "deviceInfoNoErrors": "无",
     "promptFilters": "按类别筛选",
-    "promptMediaError": "选择每张50MB以下的图片或视频。",
+    "promptMediaError": "选择每张200MB以下的图片或视频。",
     "promptMediaLimit": "最多{{max}}个附件。",
     "removePromptAttachment": "移除{{name}}",
     "promptAttachment": "附件{{number}}",
@@ -4226,7 +4230,7 @@
       "pageViewsTerm": "页面浏览量",
       "pageViews": "——Cloudflare 判定为页面加载的请求，而非图片、脚本或 API 调用。",
       "botsTerm": "包含机器人",
-      "bots": "——这些是边缘节点的原始计数，因此包含爬虫、可用性监控和脚本客户端。你可以在上方的浏览器分布里自行查看，其中\"Curl\"和\"未知\"等条目是自动化流量而非真人。过滤机器人需要我们并未订阅的 Cloudflare 付费方案，而悄悄减去一个估算值只会让数字更难核实，而不是更容易。",
+      "bots": "——这些是边缘节点的原始计数，因此包含爬虫、可用性监控和脚本客户端。你可以在上方的浏览器分布里自行查看，其中\"Curl\"和\"未知\"等条目是自动化流量而非真人。机器人越来越难与真人访客区分，很快就无法在这些统计数据中将两者区分开来，因此尝试过滤机器人没有意义。",
       "totalTerm": "范围合计",
       "total": "——页面浏览量和请求数会在范围内累加。访客数刻意不汇总成\"访客总数\"，因为周一和周二都来过的人会被算两次。",
       "peakTerm": "最繁忙的小时/日期",
@@ -20859,5 +20863,27 @@
     "remember": "记住我的选择",
     "rememberHint": "可随时在设置中更改",
     "failed": "无法删除该消息"
+  },
+  "profileAskAi": {
+    "row": "问AI",
+    "rowSub": "关注、全部点赞、了解动态",
+    "back": "返回",
+    "title": "向AI询问{{handle}}",
+    "sub": "助手来做，你来确认",
+    "followLikeAll": "关注并全部点赞",
+    "followLikeAllSub": "关注{{handle}}，回应每一条帖子",
+    "likeAll": "给所有帖子点赞",
+    "likeAllSub": "跳过你已经回应过的",
+    "catchUp": "帮我了解动态",
+    "catchUpSub": "{{handle}}最近发了什么，简要说明",
+    "message": "给对方发消息",
+    "messageSub": "起草一条消息，由你发送",
+    "placeholder": "关于{{handle}}，随便问…",
+    "send": "发送",
+    "promptFollowLikeAll": "关注{{handle}}并回应其所有帖子",
+    "promptLikeAll": "回应{{handle}}的所有帖子",
+    "promptCatchUp": "告诉我{{handle}}最近发了什么",
+    "promptMessage": "帮我给{{handle}}写一条消息",
+    "promptAbout": "关于{{handle}}：{{question}}"
   }
 }

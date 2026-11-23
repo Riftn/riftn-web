@@ -22,15 +22,20 @@ import AssistantNavIcon from "@/components/ui/AssistantNavIcon";
 
 import Bookmark from "@/components/ui/cut-icons/save";
 import Refresh from "@/components/ui/cut-icons/refresh";
+import AddAccount from "@/components/ui/cut-icons/add-account";
 
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { openPostInfo } from '@/lib/preload-post-page';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useBookmarkPost } from '@/hooks/use-bookmarks';
 import { useTogglePin, useIsPostPinned } from '@/hooks/use-pins';
 import { previewedLinkUrl, refreshLinkPreview } from '@/lib/api/link-preview';
+import { AuthContext } from '@/contexts/AuthContext';
+import { openCoAuthorSheet, useCoAuthors } from '@/lib/co-author-store';
 
 interface PostUtilityMenuItemsProps {
   postId?: string;
@@ -52,6 +57,8 @@ interface PostUtilityMenuItemsProps {
   linkText?: string | null;
   /** Closes the host's menu, so the refreshed card is visible underneath. */
   onClose?: () => void;
+  /** The host card shows the post's action bar (bookmark, info) under the post. */
+  onActionBar?: boolean;
 }
 
 const ROW =
@@ -65,14 +72,25 @@ export function PostUtilityMenuItems({
   onAskAI,
   linkText,
   onClose,
+  onActionBar = false,
 }: PostUtilityMenuItemsProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  // On a phone the card's action bar already carries Bookmark and Post info
+  // right under the post, so the menu leaves them out (Requests 7399dd7d).
+  const skipBarItems = useIsMobile() && onActionBar;
   const { isBookmarked, isLoading: isBookmarkLoading, toggleBookmark } = useBookmarkPost(postId || '');
   const togglePinMutation = useTogglePin();
   const isPinned = useIsPostPinned(tokenId);
   const linkUrl = previewedLinkUrl(linkText);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const walletAddress = useContext(AuthContext)?.walletAddress;
+  const coAuthors = useCoAuthors(tokenId);
+  const me = walletAddress?.toLowerCase();
+  const isCoAuthor = !!me && coAuthors.users.some(u => u.address === me);
+  // The creator invites and manages; a co-author or an invited person answers
+  // or steps off. Everyone else has nothing to do here.
+  const showCoAuthors = !!tokenId && (isOwnPost || isCoAuthor || !!coAuthors.invited);
 
   const refreshLink = async () => {
     if (!linkUrl || isRefreshing) return;
@@ -92,7 +110,7 @@ export function PostUtilityMenuItems({
         </button>
       )}
 
-      <button
+      {!skipBarItems && <button
         onClick={() => toggleBookmark()}
         disabled={isBookmarkLoading}
         className={cn(ROW, 'disabled:opacity-50', isBookmarked ? 'text-yellow-500' : 'text-white')}
@@ -101,7 +119,7 @@ export function PostUtilityMenuItems({
         {isBookmarked
           ? t('postOptions.removeBookmark', 'Remove bookmark')
           : t('postOptions.bookmark', 'Bookmark')}
-      </button>
+      </button>}
 
       {isOwnPost && (
         <button
@@ -117,6 +135,21 @@ export function PostUtilityMenuItems({
         </button>
       )}
 
+      {showCoAuthors && (
+        <button
+          onClick={() => { onClose?.(); openCoAuthorSheet(tokenId!); }}
+          className={cn(ROW, 'text-white')}
+          data-co-author-row
+        >
+          <AddAccount className="w-5 h-5" />
+          {isOwnPost
+            ? (coAuthors.users.length ? t('coAuthors.manage', 'Co-authors') : t('coAuthors.invite', 'Invite a co-author'))
+            : coAuthors.invited
+              ? t('coAuthors.answerInvite', 'Co-author invite')
+              : t('coAuthors.manage', 'Co-authors')}
+        </button>
+      )}
+
       {linkUrl && (
         <button onClick={refreshLink} disabled={isRefreshing} className={cn(ROW, 'text-white disabled:opacity-50')}>
           <Refresh className={cn('w-5 h-5', isRefreshing && 'animate-spin')} />
@@ -124,15 +157,15 @@ export function PostUtilityMenuItems({
         </button>
       )}
 
-      <button
+      {!skipBarItems && <button
         onClick={() => {
           onBeforeNavigate?.();
-          if (postId) navigate(`/app/post/${postId}/info`);
+          if (postId) openPostInfo(navigate, postId);
         }}
         className={cn(ROW, 'text-white')}
       >
         <Info className="w-5 h-5" /> {t('postInfo.title', 'Post info')}
-      </button>
+      </button>}
     </>
   );
 }

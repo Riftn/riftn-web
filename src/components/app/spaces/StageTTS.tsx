@@ -60,15 +60,17 @@ export function StageTTS() {
       const params = new URLSearchParams({ page_size: '30', provider: 'google', language: i18n.resolvedLanguage || i18n.language || 'en-US' });
       if (query.trim()) params.set('search', query.trim());
 
-      const res = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-voices?${params}`,
-        {
-          headers: {
-            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-        }
-      );
+      const endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-voices`;
+      const headers = {
+        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      };
+      let res = await fetch(`${endpoint}?${params}`, { headers });
+      if (res.status >= 500) {
+        params.delete('provider');
+        params.delete('language');
+        res = await fetch(`${endpoint}?${params}`, { headers });
+      }
       if (!res.ok) throw new Error('Failed to fetch voices');
       const data = await res.json();
       setVoices(data.voices || []);

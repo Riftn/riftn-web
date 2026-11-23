@@ -1,5 +1,5 @@
 {
-  "version": "b7b6e30c29fe5f0a",
+  "version": "98d77d0b50012008",
   "routes": {
     "/": [
       "ar",
@@ -78,6 +78,13 @@
       "nl",
       "tr"
     ],
+    "/arcade/correspondence-chess": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
     "/arcade/gods-eye": [
       "ar",
       "es",
@@ -93,6 +100,13 @@
       "tr"
     ],
     "/arcade/kings-gambit": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/arcade/okey": [
       "ar",
       "es",
       "fr",
@@ -1023,6 +1037,13 @@
       "nl",
       "tr"
     ],
+    "/guides/how-to-stream-on-riftn": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
     "/guides/insights-for-creators-advanced-analytics-dashboard-development-begins": [
       "ar",
       "es",
@@ -1394,6 +1415,13 @@
       "nl",
       "tr"
     ],
+    "/guides/top-10-alternative-social-media-apps-2026": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
     "/guides/top-100-crypto-projects-2026": [
       "ar",
       "es",
@@ -1521,6 +1549,13 @@
       "tr"
     ],
     "/guides/young-creators-ground-you-own": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/guides/youtube-features-users-want-2026": [
       "ar",
       "es",
       "fr",

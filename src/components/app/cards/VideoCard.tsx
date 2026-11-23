@@ -58,7 +58,7 @@ const SegmentMarkerDrawer = lazy(() =>
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useQueryClient } from '@tanstack/react-query';
 import MoreVertical from '@/components/ui/cut-icons/morevertical';
-import { ListPlus, Clock, Zap, Ticket, Star, Loader2, Code } from "lucide-react";
+import { ListPlus, Clock, Zap, Ticket, Star, Code } from "lucide-react";
 import { copyPostEmbedCode } from '@/lib/post-embed-code';
 import { soundFromPost } from '@/lib/soundtrack';
 import { useOptionalGlobalDropZone } from '@/hooks/use-global-drop-zone';
@@ -106,6 +106,7 @@ import { ActionBar } from './ActionBar';
 import { useLiveReaction } from '@/hooks/use-live-reaction';
 import { ShopBoardLazy } from '../live/ShopBoardLazy';
 import { PollCard } from './PollCard';
+import { QuizCard } from '@/components/app/quiz/QuizCard';
 import { PostMetadata } from './PostMetadata';
 import { PPVDrawerContent } from './LazyPPVDrawerContent';
 import { LiquidGlassBubble } from '@/components/ui/liquid-glass-bubble';
@@ -117,6 +118,8 @@ import { FeedLinkPreviews } from '@/components/app/cards/FeedLinkPreviews';
 import { AssetRefCards, useAssetRefsInText } from '@/components/app/cards/AssetRefCards';
 import { useTranslation as useI18n } from 'react-i18next';
 const TranscodeRetry = lazy(() => import('./TranscodeRetry').then(m => ({ default: m.TranscodeRetry })));
+// Only a creator's own unfinished upload shows it: kept off the first-paint path.
+const TranscodingBadge = lazy(() => import('@/components/app/video/TranscodingBadge').then(m => ({ default: m.TranscodingBadge })));
 import { PostAIChatLazy } from './PostAIChatLazy';
 import { ReportModal } from '../modals/ReportModal';
 import { DeletePostModal } from '../modals/DeletePostModal';
@@ -135,7 +138,7 @@ const BoostModal = lazy(() =>
 );
 import { applyOptimisticEdit } from '@/lib/optimistic-edit';
 import { QuotePostModalLazy } from '../modals/QuotePostModalLazy';
-import { TipModal } from '../modals/TipModal';
+import { TipModalLazy as TipModal } from '../modals/TipModalLazy';
 import { CommentsWrapper } from './CommentsWrapper';
 import { LiveEndedMedia } from './LiveEndedMedia';
 // Lazy: only a live post ever renders it, and a static import would put the
@@ -226,6 +229,7 @@ import { useTabletPortraitFeed } from '@/hooks/use-tablet-portrait-feed';
 import { tabletPortraitTitleSize } from '@/lib/tablet-portrait-feed';
 import { noteProfileFeedOpen, useProfileFeedContext } from '@/lib/profile-feed-origin';
 import { useInMasonryColumn } from '@/components/app/feeds/masonry-context';
+import { profilePath } from '@/lib/profile-path';
 
 /**
  * How far a touch may travel and still count as a tap on the player. Matches the
@@ -402,7 +406,7 @@ function MobileCreatorInfo({
   const handleProfileClick = () => {
     if (creatorUsername) {
       const cleanUsername = creatorUsername.replace('@', '');
-      navigate(`/${cleanUsername}`);
+      navigate(profilePath(cleanUsername));
     } else if (creatorId) {
       navigate(`/app/profile?id=${creatorId}`);
     }
@@ -420,6 +424,7 @@ function MobileCreatorInfo({
       {stage ? (
         <div className="mb-3">
           <StageCreatorRow
+            tokenId={tokenId}
             name={channel}
             avatar={channelAvatar}
             handle={creatorUsername}
@@ -1021,6 +1026,8 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
   const scrubbingRef = useRef(false);
   /** Mirrors scrubbingRef for render: the storyboard tile shows while it is true. */
   const [scrubbing, setScrubbing] = useState(false);
+  /** Where a mouse rests over the timeline, 0-1: the scene there shows above it, as while dragging. */
+  const [hoverFraction, setHoverFraction] = useState<number | null>(null);
   const isHoveringRef = useRef(false);
   
   // View tracking - fires view after watching threshold
@@ -1214,136 +1221,6 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
   // this clears. Autoplay/tap-to-play must not attempt it.
   const isVideoNotReady = transcodingStatus === 'pending' || transcodingStatus === 'on' || transcodingStatus === 'failed';
 
-  // Register with playback manager and setup IntersectionObserver (stable — no isPlaying dep)
-  useEffect(() => {
-    if (!playbackAllowed) pauseVideo();
-    videoPlaybackManager.register(instanceId, pauseVideo, (muted: boolean) => {
-      // Callback for manager to force mute/unmute this video
-      if (videoRef.current) videoRef.current.muted = muted;
-      if (!muted) autoMutedRef.current = false;
-      setIsMuted(muted);
-    }, () => isProminent(containerRef.current), () => videoRef.current);
-
-    // Auto-pause when scrolled out of view + auto-play when scrolled into view (if enabled)
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          isIntersectingRef.current = entry.isIntersecting;
-          if (isVideoInPictureInPicture(videoRef.current) && !visualActivity.isCallBusy()) return;
-          if (!playbackAllowedRef.current || !visualActivity.isFeedPlaybackAllowed()) { pauseVideo(); return; }
-          // Backgrounding is not a scroll-away; PiP owns its own visible surface.
-          if (isVideoOutsideFeed(videoRef.current)) return;
-          if (!entry.isIntersecting && isPlayingRef.current) {
-            pauseVideo();
-            videoPlaybackManager.stop(instanceId);
-          } else if (entry.isIntersecting && surfaceActiveRef.current && isRendered(containerRef.current) && autoplayEnabledRef.current && !liteModeRef.current && !disableAutoplay && !isPlayingRef.current && videoRef.current?.dataset.userPaused !== 'true' && !(video.isPPV || isHoldGated(video.isLocked, video.lockedPrice) || isSubscriberGated(video.subscriberPlans, false)) && !video.isAudio && video.videoUrl && !hasErrorRef.current && !isVideoNotReady) {
-            let vid = videoRef.current;
-            // Another copy of this post holds the element. Take it back unless
-            // that copy is on screen — the post page open over the feed.
-            if (!vid && !slotOnScreen(handoffVideoHolder(video.id))) vid = takeVideoRef.current();
-            if (vid) {
-              // Fast fling race: the media-attach state may not have
-              // re-rendered yet — attach the src imperatively before play()
-              // (React reconciles to the same value on the next render).
-              attachPostMedia(vid);
-              // Only the clip that is actually on screen may take the sound;
-              // one peeking in at the bottom of the window plays silently.
-              const prominent = isProminent(containerRef.current);
-              const ownsAudio = prominent ? videoPlaybackManager.play(instanceId) : videoPlaybackManager.playMuted(instanceId);
-              // "Start autoplay muted" beats an earlier unmute: scrolling
-              // onto a clip must never be what makes sound.
-              // An opened post is not scrolled onto: it has sound unless the
-              // viewer muted a video themselves.
-              // A post link opened straight from outside has had no tap yet,
-              // and the browser would refuse to start it with sound at all.
-              const shouldMute = openedRef.current
-                ? openedVideoMuted() || !ownsAudio || navigator.userActivation?.hasBeenActive === false
-                : feedPreviewRef.current || autoplayMutedRef.current || videoPlaybackManager.globalMuted || !ownsAudio;
-              autoMutedRef.current = shouldMute && !prominent && !autoplayMutedRef.current && !videoPlaybackManager.globalMuted;
-              vid.muted = shouldMute;
-              setIsMuted(shouldMute);
-              // A clip that already has a frame (scrolled back to, or adopted) starts
-              // on that frame; covering it with the poster loader for the length
-              // of play() is the flash seen while scrolling.
-              setIsLoading(vid.readyState < HTMLMediaElement.HAVE_CURRENT_DATA);
-              autoStartedRef.current = true;
-              requestVideoPlayback(vid).catch((error) => {
-                // Landed on a post link with no tap yet: the browser refuses
-                // sound, so start it silent rather than not at all.
-                if (error?.name !== 'NotAllowedError' || vid.muted) throw error;
-                vid.muted = true;
-                setIsMuted(true);
-                return vid.play();
-              }).then(() => {
-                // Scroll-away race: if the card left the viewport while play() was
-                // pending, the pause branch above was skipped (isPlayingRef was
-                // still false), so bail here to avoid playing/holding audio off-screen.
-                if ((!autoplayEnabledRef.current && autoStartedRef.current) || vid.dataset.userPaused === 'true' || ((!playbackAllowedRef.current || !visualActivity.isFeedPlaybackAllowed()) && !isVideoInPictureInPicture(vid)) || (!isIntersectingRef.current && !isVideoOutsideFeed(vid))) {
-                  vid.pause();
-                  videoPlaybackManager.stop(instanceId);
-                  setIsLoading(false);
-                  return;
-                }
-                isPlayingRef.current = true;
-                setIsPlaying(true);
-                setIsLoading(false);
-              }).catch(() => {
-                setIsLoading(false);
-              });
-            }
-          }
-        });
-      },
-      { threshold: 0.5 }
-    );
-
-    // Hard stop once no pixel of the card is left on screen, whatever this
-    // card's own state says. The pause above trusts isPlayingRef, and the
-    // element can be playing without it: handed over from another card, or
-    // resumed by the page cache. A playing clip nobody can see is the
-    // "old video's audio keeps going" bug.
-    const offscreenObserver = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) return;
-        const vid = videoRef.current;
-        if (vid && isVideoOutsideFeed(vid)) return;
-        if (vid && !vid.paused) {
-          pauseVideo();
-          videoPlaybackManager.stop(instanceId);
-        }
-      },
-      { threshold: 0 }
-    );
-
-    // A clip that autoplayed silently because it was only peeking in takes
-    // the sound once it is scrolled fully into view, if nothing else has it.
-    const prominenceObserver = new IntersectionObserver(
-      () => {
-        const vid = videoRef.current;
-        if (!autoMutedRef.current || !vid || vid.paused || !isProminent(containerRef.current)) return;
-        if (autoplayMutedRef.current || videoPlaybackManager.globalMuted) return;
-        if (!videoPlaybackManager.takeFreeAudio(instanceId)) return;
-        autoMutedRef.current = false;
-        vid.muted = false;
-        setIsMuted(false);
-      },
-      { threshold: [0.6, 0.9, 1] }
-    );
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-      offscreenObserver.observe(containerRef.current);
-      prominenceObserver.observe(containerRef.current);
-    }
-
-    return () => {
-      videoPlaybackManager.unregister(instanceId);
-      observer.disconnect();
-      offscreenObserver.disconnect();
-      prominenceObserver.disconnect();
-    };
-  }, [instanceId, pauseVideo, video.isPPV, video.isLocked, video.lockedPrice, video.subscriberPlans, video.videoUrl, isVideoNotReady, playbackAllowed, disableAutoplay]);
-
   // Show controls briefly after any user interaction, then auto-hide
     const showControlsBriefly = useCallback(() => {
       setShowControls(true);
@@ -1409,7 +1286,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
   /** Imperative attach for paths that can beat the render that sets src. */
   const attachPostMedia = (vid: HTMLVideoElement) => {
     if (!videoSourceOf(vid) && playableVideoUrl) {
-      setVideoSource(vid, { src: playableVideoUrl, hls: ladderUrl, startLow: ladderStartsLow });
+      setVideoSource(vid, { src: playableVideoUrl, hls: ladderUrl, startLow: ladderStartsLow, aspect: video.storedAspect });
     }
   };
   const downloadVideo = useVideoDownload();
@@ -1910,7 +1787,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
   const feedVideoShape = useFeedVideoShape();
   const feedFrameAspect = Math.max(mediaAspect, FEED_VIDEO_MIN_ASPECT[feedVideoShape]);
 
-  // Long form videos on wide screens (Settings > Appearance > Media). Desktop
+  // Long form media on wide screens (Settings > Appearance > Media). Desktop
   // only: the feed card and the post page player. Ambient runs the frame full
   // width with the blurred picture beside it; rails hug the picture between
   // two glass pills, and only where there is room beside it.
@@ -1937,6 +1814,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
     src: mediaAttached && !isVideoNotReady ? playableVideoUrl : undefined,
     hlsSrc: ladderUrl,
     startLow: ladderStartsLow,
+    aspect: video.storedAspect,
     poster: thumbnail || undefined,
     muted: isMuted,
     loop: !!(video.isAd || isLooping),
@@ -2005,6 +1883,11 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
   takeVideoRef.current = takeVideoElement;
   const playbackPhase = usePlaybackRecovery(videoRef, playableVideoUrl, ownsVideoElement, {
     component: 'VideoCard', postId: video.id,
+    muteForAutoplay: () => {
+      if (!autoStartedRef.current) return false;
+      setIsMuted(true);
+      return true;
+    },
     allowed: () => !!videoRef.current && videoRef.current.dataset.userPaused !== 'true' &&
       !visualActivity.isCallBusy() && ((playbackAllowedRef.current && surfaceActiveRef.current &&
         (isIntersectingRef.current || isVideoOutsideFeed(videoRef.current)) && isRendered(containerRef.current)) || isVideoInPictureInPicture(videoRef.current)),
@@ -2022,6 +1905,136 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
       videoPlaybackManager.stop(instanceId);
     }
   }, [playbackPhase, instanceId]);
+
+  // Register with playback manager and setup IntersectionObserver (stable — no isPlaying dep)
+  useEffect(() => {
+    if (!playbackAllowed) pauseVideo();
+    videoPlaybackManager.register(instanceId, pauseVideo, (muted: boolean) => {
+      // Callback for manager to force mute/unmute this video
+      if (videoRef.current) videoRef.current.muted = muted;
+      if (!muted) autoMutedRef.current = false;
+      setIsMuted(muted);
+    }, () => isProminent(containerRef.current), () => videoRef.current);
+
+    // Auto-pause when scrolled out of view + auto-play when scrolled into view (if enabled)
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          isIntersectingRef.current = entry.isIntersecting;
+          if (isVideoInPictureInPicture(videoRef.current) && !visualActivity.isCallBusy()) return;
+          if (!playbackAllowedRef.current || !visualActivity.isFeedPlaybackAllowed()) { pauseVideo(); return; }
+          // Backgrounding is not a scroll-away; PiP owns its own visible surface.
+          if (isVideoOutsideFeed(videoRef.current)) return;
+          if (!entry.isIntersecting && isPlayingRef.current) {
+            pauseVideo();
+            videoPlaybackManager.stop(instanceId);
+          } else if (entry.isIntersecting && surfaceActiveRef.current && isRendered(containerRef.current) && autoplayEnabledRef.current && !liteModeRef.current && !disableAutoplay && !isPlayingRef.current && videoRef.current?.dataset.userPaused !== 'true' && !video.isPPV && !isContentGated && !video.isAudio && playableVideoUrl && !hasErrorRef.current && !isVideoNotReady) {
+            let vid = videoRef.current;
+            // Another copy of this post holds the element. Take it back unless
+            // that copy is on screen — the post page open over the feed.
+            if (!vid && !slotOnScreen(handoffVideoHolder(video.id))) vid = takeVideoRef.current();
+            if (vid) {
+              // Fast fling race: the media-attach state may not have
+              // re-rendered yet — attach the src imperatively before play()
+              // (React reconciles to the same value on the next render).
+              attachPostMedia(vid);
+              // Only the clip that is actually on screen may take the sound;
+              // one peeking in at the bottom of the window plays silently.
+              const prominent = isProminent(containerRef.current);
+              const ownsAudio = prominent ? videoPlaybackManager.play(instanceId) : videoPlaybackManager.playMuted(instanceId);
+              // "Start autoplay muted" beats an earlier unmute: scrolling
+              // onto a clip must never be what makes sound.
+              // An opened post is not scrolled onto: it has sound unless the
+              // viewer muted a video themselves.
+              // A post link opened straight from outside has had no tap yet,
+              // and the browser would refuse to start it with sound at all.
+              const shouldMute = openedRef.current
+                ? openedVideoMuted() || !ownsAudio || navigator.userActivation?.hasBeenActive === false
+                : feedPreviewRef.current || autoplayMutedRef.current || videoPlaybackManager.globalMuted || !ownsAudio;
+              autoMutedRef.current = shouldMute && !prominent && !autoplayMutedRef.current && !videoPlaybackManager.globalMuted;
+              vid.muted = shouldMute;
+              setIsMuted(shouldMute);
+              // A clip that already has a frame (scrolled back to, or adopted) starts
+              // on that frame; covering it with the poster loader for the length
+              // of play() is the flash seen while scrolling.
+              setIsLoading(vid.readyState < HTMLMediaElement.HAVE_CURRENT_DATA);
+              autoStartedRef.current = true;
+              requestVideoPlayback(vid).catch((error) => {
+                // Landed on a post link with no tap yet: the browser refuses
+                // sound, so start it silent rather than not at all.
+                if (error?.name !== 'NotAllowedError' || vid.muted) throw error;
+                vid.muted = true;
+                setIsMuted(true);
+                return vid.play();
+              }).then(() => {
+                // Scroll-away race: if the card left the viewport while play() was
+                // pending, the pause branch above was skipped (isPlayingRef was
+                // still false), so bail here to avoid playing/holding audio off-screen.
+                if ((!autoplayEnabledRef.current && autoStartedRef.current) || vid.dataset.userPaused === 'true' || ((!playbackAllowedRef.current || !visualActivity.isFeedPlaybackAllowed()) && !isVideoInPictureInPicture(vid)) || (!isIntersectingRef.current && !isVideoOutsideFeed(vid))) {
+                  vid.pause();
+                  videoPlaybackManager.stop(instanceId);
+                  setIsLoading(false);
+                  return;
+                }
+                isPlayingRef.current = true;
+                setIsPlaying(true);
+                setIsLoading(false);
+              }).catch(() => {
+                setIsLoading(false);
+              });
+            }
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    // Hard stop once no pixel of the card is left on screen, whatever this
+    // card's own state says. The pause above trusts isPlayingRef, and the
+    // element can be playing without it: handed over from another card, or
+    // resumed by the page cache. A playing clip nobody can see is the
+    // "old video's audio keeps going" bug.
+    const offscreenObserver = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) return;
+        const vid = videoRef.current;
+        if (vid && isVideoOutsideFeed(vid)) return;
+        if (vid && !vid.paused) {
+          pauseVideo();
+          videoPlaybackManager.stop(instanceId);
+        }
+      },
+      { threshold: 0 }
+    );
+
+    // A clip that autoplayed silently because it was only peeking in takes
+    // the sound once it is scrolled fully into view, if nothing else has it.
+    const prominenceObserver = new IntersectionObserver(
+      () => {
+        const vid = videoRef.current;
+        if (!autoMutedRef.current || !vid || vid.paused || !isProminent(containerRef.current)) return;
+        if (autoplayMutedRef.current || videoPlaybackManager.globalMuted) return;
+        if (!videoPlaybackManager.takeFreeAudio(instanceId)) return;
+        autoMutedRef.current = false;
+        vid.muted = false;
+        setIsMuted(false);
+      },
+      { threshold: [0.6, 0.9, 1] }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+      offscreenObserver.observe(containerRef.current);
+      prominenceObserver.observe(containerRef.current);
+    }
+
+    return () => {
+      videoPlaybackManager.unregister(instanceId);
+      observer.disconnect();
+      offscreenObserver.disconnect();
+      prominenceObserver.disconnect();
+    };
+  }, [instanceId, pauseVideo, video.isPPV, isContentGated, playableVideoUrl, ladderUrl, ladderStartsLow, video.isAudio, isVideoNotReady, playbackAllowed, disableAutoplay, surfaceActive, autoplayEnabled, liteMode]);
 
   // A signed URL that lapsed mid-session fails like a broken file: fetch a
   // fresh one and pick up where it stopped. An open post that fails gets one
@@ -2474,6 +2487,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
       {!isImmersive && !hideActions && !stage && (
         <div data-card-head={headerAboveMedia ? 'plain' : ''} className="flex items-start justify-between">
           <CardHeader
+            tokenId={videoTokenId}
             username={video.channel}
             visibility={video.visibility}
             handle={video.creatorUsername}
@@ -2880,15 +2894,14 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
             ) : (transcodingStatus === 'pending' || transcodingStatus === 'on') ? (
               /* Still transcoding — same optimistic videoUrl, but recoverable
                  once the job finishes, unlike the 'failed' branch above. */
-              <div className="absolute inset-0 overflow-hidden bg-black">
+              <div data-keep-dark className="absolute inset-0 overflow-hidden bg-black">
                 {thumbnail && (
                   <img src={thumbnail} srcSet={cdnImageSrcSet(thumbnail, [320, 480, 640, 960, 1280])} sizes="(min-width: 1024px) 600px, 100vw" decoding="async" alt="" className="w-full h-full object-cover opacity-50" loading={aboveFold ? 'eager' : 'lazy'} />
                 )}
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/40">
-                  <Loader2 className="w-7 h-7 text-white animate-spin" />
-                  <span className="text-white/80 text-xs font-medium tracking-wide drop-shadow">
-                    {t('videoPlayer.processing')}
-                  </span>
+                  <Suspense fallback={<span className="text-white/80 text-xs">{t('videoPlayer.transcoding')}</span>}>
+                    <TranscodingBadge tokenId={video.id} isOwner={isOwnPost} />
+                  </Suspense>
                 </div>
               </div>
             ) : video.videoUrl && !(video.isLivePost && video.isLiveNow) ? (
@@ -3180,9 +3193,11 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
 
             <StoryboardPreview
               storyboard={isContentGated ? undefined : video.storyboard}
-              fraction={currentTime / (duration || 1)}
+              fraction={!scrubbing && hoverFraction !== null ? hoverFraction : currentTime / (duration || 1)}
               duration={duration}
-              visible={scrubbing}
+              visible={scrubbing || hoverFraction !== null}
+              // A mouse over the bar with no sheet yet still gets the time.
+              timeWithoutSheet={hoverFraction !== null}
               // Fetch the sheet as soon as the video plays. Waiting for the
               // controls meant a phone's line scrubber, which shows them only
               // when the scrub starts, began the download mid-gesture and a
@@ -3335,6 +3350,10 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
                   if (controlsTimerRef.current) clearTimeout(controlsTimerRef.current);
                 }}
                 onPointerMove={(event) => {
+                  if (event.pointerType === 'mouse' && duration > 0) {
+                    const rect = event.currentTarget.getBoundingClientRect();
+                    if (rect.width > 0) setHoverFraction(Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width)));
+                  }
                   if (bareControls) return;
                   const start = hiddenScrubStart.current;
                   if (!start) return;
@@ -3348,6 +3367,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
                     setCurrentTime(time);
                   }
                 }}
+                onPointerLeave={(event) => { if (event.pointerType === 'mouse') setHoverFraction(null); }}
                 onPointerUp={bareControls ? undefined : finishScrubbing}
                 onPointerCancel={bareControls ? undefined : finishScrubbing}
                 onLostPointerCapture={bareControls ? undefined : finishScrubbing}
@@ -3419,7 +3439,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
             onClick={(e) => {
               e.stopPropagation();
               const cleanUsername = video.creatorUsername?.replace('@', '');
-              if (cleanUsername) navigate(`/${cleanUsername}`);
+              if (cleanUsername) navigate(profilePath(cleanUsername));
               else if (video.creatorId) navigate(`/app/profile?id=${video.creatorId}`);
             }}
             className="cursor-pointer"
@@ -3598,6 +3618,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
               </div>
             )}
             {parseInt(video.id, 10) > 0 && <PollCard tokenId={parseInt(video.id, 10)} />}
+            {video.hasQuiz && parseInt(video.id, 10) > 0 && <QuizCard tokenId={parseInt(video.id, 10)} />}
             {/* The creator's Shop board. Inline rather than over the player:
                 this card runs an immersive mode that reflows the video, and an
                 absolutely-positioned board would have to track it. Live keeps
@@ -3742,6 +3763,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
                 desktop — both surfaces read the same state, so the menu is a
                 reliable place to find them at every width. */}
             <PostUtilityMenuItems
+                onActionBar={!hideActions}
               onAskAI={() => { setShowOptionsDrawer(false); if (!walletAddress) { openLoginModal(); return; } setShowAIChat(true); }}
               postId={video.id}
               tokenId={videoTokenId}
@@ -3750,7 +3772,8 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
               linkText={video.description}
               onClose={() => setShowOptionsDrawer(false)}
             />
-            {!isOwnPost && (
+            {/* Tip is on the action bar on a phone (Requests 7399dd7d). */}
+            {!isOwnPost && !(isPhone && !hideActions) && (
               <button
                 onClick={() => { setShowOptionsDrawer(false); setShowTipModal(true); }}
                 className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
@@ -3926,7 +3949,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
             currentSpoilerText={video.spoilerText}
             currentQuotePolicy={video.quotePolicy}
             currentReplyPolicy={video.replyPolicy}
-            currentVisibility={(video as any).visibility}
+            currentVisibility={(video as any).justMe ? 'self' : (video as any).visibility}
             currentForKids={video.forKids}
             currentShopLinks={video.shopLinks}
             onSuccess={(edited) => {

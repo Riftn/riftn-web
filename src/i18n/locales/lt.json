@@ -1,4 +1,5 @@
 {
+  "dmVideo": {"edit": "Redaguoti vaizdo įrašą", "hiddenTag": "Paslėpta", "tapToEdit": "Bakstelėkite, kad redaguotumėte", "cover": "Viršelis", "trim": "Apkirpti", "mirror": "Veidrodinis vaizdas", "rotate": "Pasukti", "hide": "Slėpti", "timer": "Laikmatis", "sheetTitleAny": "Redaguoti prieš siunčiant", "close": "Uždaryti", "replace": "Pakeisti", "hiddenUntilTap": "Paslėpta, kol palies", "pause": "Pristabdyti", "play": "Leisti vaizdo įrašą", "mute": "Nutildyti", "unmute": "Įjungti garsą", "scrub": "Slinkti per vaizdo įrašą", "addMore": "Pridėti nuotraukų ar vaizdo įrašų", "trimAria": "Tempkite galus, kad apkirptumėte", "coverAria": "Palieskite kadrą, kad nustatytumėte viršelį", "coverHint": "Palieskite kadrą, kad nustatytumėte viršelį", "coverOwn": "Jūsų nuotrauka", "coverAuto": "Automatinis", "uploadCover": "Įkelti viršelio nuotrauką", "mirrored": "Veidrodinis", "original": "Originalas", "rotate90": "Pasukti 90°", "showNormally": "Rodyti įprastai", "showNormallyBody": "Jie mato iškart", "hideUntilTap": "Slėpti, kol palies", "hideUntilTapBody": "Sulietas, kol palies", "hidePrice": "Slėpti už kainos", "hidePriceBody": "Sulietas, kol sumokės", "priceUnavailable": "Ne šiame pokalbyje", "timerOff": "Išjungta", "timerOffBody": "Tai lieka pokalbyje.", "timerViewBody": "Išnyksta abiem pusėms, kai jie tai pamato.", "confirm": "Patvirtinti", "lockedFor": "Atrakinti už {{value1}} DHB", "lockedForUsd": "Atrakinti už {{value1}}", "editItem": "Redaguoti elementą {{value1}}", "kept": "{{time}} pasiliko", "timerTimeBody": "Išnyksta abiem pusėms {{value1}} po to, kai išsiunčiate."},
   "postBg": {
     "addMedia": "Pridėti nuotrauką, GIF ar vaizdo įrašą",
     "changeMedia": "Keisti nuotrauką, GIF ar vaizdo įrašą",
@@ -297,8 +298,10 @@
       "pronouns": "Įvardžiai",
       "location": "Vieta",
       "custom": "Pasirinktinis",
-      "customOption": "Pasirinktinė etiketė"
-    }
+      "customOption": "Pasirinktinė etiketė",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Sekti #{{tag}}",
@@ -2210,7 +2213,7 @@
     "promptDevice": "Prietaisų & OS (klaidų atveju)",
     "deviceInfoNoErrors": "Nėra",
     "promptFilters": "Rodyti pagal kategoriją",
-    "promptMediaError": "Pasirinkite nuotraukas arba vaizdo įrašus iki 50 MB kiekio.",
+    "promptMediaError": "Pasirinkite nuotraukas arba vaizdo įrašus iki 200 MB kiekio.",
     "promptMediaLimit": "Kol kas {{max}} pridėti failai.",
     "removePromptAttachment": "Panaikinkite {{name}}",
     "promptAttachment": "Pridėti {{number}}",
@@ -4211,7 +4214,7 @@
       "pageViewsTerm": "Puslapių peržiūros",
       "pageViews": "— užklausos, kurias Cloudflare priskiria puslapių įkėlimams, o ne paveikslėliams, scenarijams ar API iškvietimams.",
       "botsTerm": "Botai įskaičiuoti",
-      "bots": "— tai neapdoroti skaičiavimai tinklo pakraštyje, tad į juos patenka ir naršyklės robotai, veikimo stebėtojai bei scenarijais valdomi klientai. Juos galite pamatyti patys naršyklių suvestinėje aukščiau, kur įrašai kaip „Curl“ ir „Nežinoma“ yra automatinis srautas, o ne žmonės. Botams atfiltruoti reikia mokamo Cloudflare plano, kurio neturime, o tyliai atimti spėjimą reikštų padaryti skaičius mažiau patikrinamus, o ne labiau.",
+      "bots": "— tai neapdoroti skaičiavimai tinklo pakraštyje, tad į juos patenka ir naršyklės robotai, veikimo stebėtojai bei scenarijais valdomi klientai. Juos galite pamatyti patys naršyklių suvestinėje aukščiau, kur įrašai kaip „Curl“ ir „Nežinoma“ yra automatinis srautas, o ne žmonės. Botus vis sunkiau atskirti nuo tikrų lankytojų ir netrukus šioje statistikoje jų atskirti nebebus įmanoma, todėl bandyti juos filtruoti nėra prasmės.",
       "totalTerm": "Intervalo sumos",
       "total": "— puslapių peržiūros ir užklausos sumuojamos per visą intervalą. Lankytojų skaičiai sąmoningai nesumuojami į „bendrą lankytojų skaičių“, nes tas, kuris čia buvo pirmadienį ir antradienį, būtų suskaičiuotas du kartus.",
       "peakTerm": "Judriausia valanda / diena",
@@ -20855,5 +20858,27 @@
     "remember": "Prisiminti mano pasirinkimą",
     "rememberHint": "Bet kada pakeiskite nustatymuose",
     "failed": "Nepavyko ištrinti žinutės"
+  },
+  "profileAskAi": {
+    "row": "Klausti DI",
+    "rowSub": "Sekti, pamėgti viską, sužinoti naujienas",
+    "back": "Atgal",
+    "title": "Klausti DI apie {{handle}}",
+    "sub": "Asistentas atlieka, jūs patvirtinate",
+    "followLikeAll": "Sekti ir pamėgti viską",
+    "followLikeAllSub": "Seka {{handle}}, reaguoja į kiekvieną įrašą",
+    "likeAll": "Pamėgti visus įrašus",
+    "likeAllSub": "Praleidžia tuos, į kuriuos jau sureagavote",
+    "catchUp": "Papasakok naujienas",
+    "catchUpSub": "Ką {{handle}} neseniai paskelbė, trumpai",
+    "message": "Parašyti žinutę",
+    "messageSub": "Paruošia juodraštį, jūs išsiunčiate",
+    "placeholder": "Klauskite ko nors apie {{handle}}…",
+    "send": "Siųsti",
+    "promptFollowLikeAll": "Sek {{handle}} ir sureaguok į visus įrašus",
+    "promptLikeAll": "Sureaguok į visus {{handle}} įrašus",
+    "promptCatchUp": "Papasakok, ką {{handle}} neseniai paskelbė",
+    "promptMessage": "Padėk man parašyti žinutę {{handle}}",
+    "promptAbout": "Apie {{handle}}: {{question}}"
   }
 }

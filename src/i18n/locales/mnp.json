@@ -1,4 +1,5 @@
 {
+  "dmVideo": {"edit": "剪辑视频", "hiddenTag": "隱藏", "tapToEdit": "點擊編輯", "cover": "封面", "trim": "裁剪", "mirror": "镜像", "rotate": "旋转", "hide": "隐藏", "timer": "计时器", "sheetTitleAny": "發送前編輯", "close": "关闭", "replace": "替換", "hiddenUntilTap": "点击前隐藏", "pause": "暂停", "play": "播放视频", "mute": "靜音", "unmute": "解靜音", "scrub": "拖动视频进度", "addMore": "添加照片或视频", "trimAria": "拖动两端进行裁剪", "coverAria": "点击画面设置封面", "coverHint": "点击画面设置封面", "coverOwn": "你的照片", "coverAuto": "自動", "uploadCover": "上传封面图片", "mirrored": "已镜像", "original": "原图", "rotate90": "旋转 90°", "showNormally": "正常显示", "showNormallyBody": "立即显示", "hideUntilTap": "点击前隐藏", "hideUntilTapBody": "点击前模糊", "hidePrice": "隐藏并设置价格", "hidePriceBody": "付款前模糊", "priceUnavailable": "不在本聊天中", "timerOff": "关闭", "timerOffBody": "伊会留底在聊天记录里。", "timerViewBody": "等𫧃看过了，两边就都无了。", "confirm": "确认", "lockedFor": "解鎖給 {{value1}} DHB", "lockedForUsd": "解锁需 {{value1}}", "editItem": "编辑物件 {{value1}}", "kept": "{{time}} 保留", "timerTimeBody": "发出去 {{value1}} 后，两边就都无了。"},
   "postBg": {
     "addMedia": "添加图片、GIF 或视频",
     "changeMedia": "更换图片、GIF 或视频",
@@ -296,9 +297,11 @@
       "pronouns": "昵称",
       "location": "位置",
       "custom": "定制",
-      "customOption": "自定义标签"
+      "customOption": "自定义标签",
+      "cashapp": "Cash App"
     },
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "关注 #{{tag}}",
@@ -2210,7 +2213,7 @@
     "promptDevice": "裝置與作業系統（用於錯誤）",
     "deviceInfoNoErrors": "無",
     "promptFilters": "按類別篩選",
-    "promptMediaError": "選擇每個小於50MB的圖片或影片。",
+    "promptMediaError": "選擇每個小於200MB的圖片或影片。",
     "promptMediaLimit": "最多 {{max}} 個附件。",
     "removePromptAttachment": "移除 {{name}}",
     "promptAttachment": "附件 {{number}}",
@@ -4211,7 +4214,7 @@
       "pageViewsTerm": "页面浏览量",
       "pageViews": "— Cloudflare 归类做页面加载其请求，毋是图片、脚本抑是 API 呼叫。",
       "botsTerm": "有算入机器人",
-      "bots": "— 只寡是原始边缘计数，所以爬虫、监控共脚本客户端都算在内底。顶头浏览器细目内底汝家己就会看着，「Curl」共「Unknown」遮款其其实是自动流量，毋是人。爱过滤机器人就爱付费其 Cloudflare 等级，阮无用，若静静仔减去蜀个估计值，数字反倒无较好核实。",
+      "bots": "— 只寡是原始边缘计数，所以爬虫、监控共脚本客户端都算在内底。顶头浏览器细目内底汝家己就会看着，「Curl」共「Unknown」遮款其其实是自动流量，毋是人。机器人同真人访客越来越难分清，过不了多久，这些统计里就分不出来了，想过滤掉也没用。",
       "totalTerm": "范围总数",
       "total": "— 页面浏览量共请求会照范围加起来。访客数刁工无加做「总访客」只个标题，因为礼拜一共礼拜二拢来其人会算两摆。",
       "peakTerm": "上闹热其点钟／日",
@@ -20896,5 +20899,27 @@
     "remember": "记住我的选择",
     "rememberHint": "可随时在设置中更改",
     "failed": "无法删除消息"
+  },
+  "profileAskAi": {
+    "row": "问AI",
+    "rowSub": "关注、全部点赞、了解动态",
+    "back": "返回",
+    "title": "问AI关于{{handle}}",
+    "sub": "助手来做，你来确认",
+    "followLikeAll": "关注并全部点赞",
+    "followLikeAllSub": "关注{{handle}}，回应每条帖子",
+    "likeAll": "给伊所有帖子点赞",
+    "likeAllSub": "跳过你已经回应过其",
+    "catchUp": "给我讲讲动态",
+    "catchUpSub": "{{handle}}最近发了什乇，简单讲",
+    "message": "给伊发消息",
+    "messageSub": "起草一条消息，你来发",
+    "placeholder": "关于{{handle}}，问什乇都行…",
+    "send": "发送",
+    "promptFollowLikeAll": "关注{{handle}}，回应伊所有其帖子",
+    "promptLikeAll": "回应{{handle}}所有其帖子",
+    "promptCatchUp": "给我讲讲{{handle}}最近发了什乇",
+    "promptMessage": "帮我给{{handle}}写条消息",
+    "promptAbout": "关于{{handle}}：{{question}}"
   }
 }

@@ -28,10 +28,21 @@ export function checkWorkerConfig(source) {
   }
 }
 
-async function json(url, init = {}) {
-  const response = await fetch(url, { ...init, redirect: 'error', signal: AbortSignal.timeout(15_000) });
+async function json(url, init = {}, request = fetch) {
+  const response = await request(url, { ...init, redirect: 'error', signal: AbortSignal.timeout(15_000) });
   if (!response.ok) throw new Error(`${new URL(url).hostname}: HTTP ${response.status}`);
   return response.json();
+}
+
+export async function readProductionVersion(request = fetch) {
+  const legacy = `https://${contract.hostname}/version.json`;
+  const current = `https://${contract.canonicalHostname}/version.json`;
+  const response = await request(legacy, { redirect: 'manual', signal: AbortSignal.timeout(15_000) });
+  if (response.ok) return response.json();
+  if ([301, 308].includes(response.status) && response.headers.get('location') === current) {
+    return json(current, {}, request);
+  }
+  throw new Error(`${contract.hostname}: unexpected response for /version.json (HTTP ${response.status})`);
 }
 
 export async function main() {
@@ -45,7 +56,7 @@ export async function main() {
     checkAnswers(a, aaaa);
     console.log(`${new URL(endpoint).hostname}: direct DNS verified`);
   }
-  const version = await json(`https://${contract.hostname}/version.json`);
+  const version = await readProductionVersion();
   if (!/^[a-f0-9]{8,40}$/.test(version.id ?? '')) throw new Error('Production version response is invalid');
   const health = await json(`https://${contract.hostname}/_api/api/health`);
   if (health.status !== 'ok') throw new Error('Production API health failed');

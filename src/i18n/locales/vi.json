@@ -1,4 +1,5 @@
 {
+  "dmVideo": {"edit": "Chỉnh sửa video", "hiddenTag": "Ẩn", "tapToEdit": "Nhấn để chỉnh sửa", "cover": "Ảnh bìa", "trim": "Cắt", "mirror": "Phản chiếu", "rotate": "Xoay", "hide": "Ẩn", "timer": "Hẹn giờ", "sheetTitleAny": "Chỉnh sửa trước khi gửi", "close": "Đóng", "replace": "Thay thế", "hiddenUntilTap": "Ẩn cho đến khi họ nhấn vào", "pause": "Tạm dừng", "play": "Phát video", "mute": "Tắt tiếng", "unmute": "Bật tiếng", "scrub": "Tua video", "addMore": "Thêm ảnh hoặc video", "trimAria": "Kéo các đầu để cắt", "coverAria": "Nhấn vào một khung hình để đặt làm ảnh bìa", "coverHint": "Nhấn vào một khung hình để đặt làm ảnh bìa", "coverOwn": "Ảnh của bạn", "coverAuto": "Tự động", "uploadCover": "Tải lên ảnh bìa", "mirrored": "Đã phản chiếu", "original": "Gốc", "rotate90": "Xoay 90°", "showNormally": "Hiển thị bình thường", "showNormallyBody": "Họ nhìn thấy ngay lập tức", "hideUntilTap": "Ẩn cho đến khi được nhấn", "hideUntilTapBody": "Làm mờ cho đến khi họ nhấn vào", "hidePrice": "Ẩn sau một mức giá", "hidePriceBody": "Làm mờ cho đến khi họ thanh toán cho bạn", "priceUnavailable": "Không có trong cuộc trò chuyện này", "timerOff": "Tắt", "timerOffBody": "Nó vẫn nằm trong cuộc trò chuyện.", "timerViewBody": "Biến mất đối với cả hai người sau khi họ đã xem nó.", "confirm": "Xác nhận", "lockedFor": "Mở khóa với {{value1}} DHB", "lockedForUsd": "Mở khóa với giá {{value1}}", "editItem": "Chỉnh sửa mục {{value1}}", "kept": "{{time}} đã giữ", "timerTimeBody": "Biến mất đối với cả hai người {{value1}} sau khi bạn gửi nó."},
   "postBg": {
     "addMedia": "Thêm ảnh, GIF hoặc video",
     "changeMedia": "Đổi ảnh, GIF hoặc video",
@@ -297,8 +298,10 @@
       "location": "Địa điểm",
       "custom": "Tùy chỉnh",
       "customOption": "Nhãn tùy chỉnh",
-      "blog": "Blog"
-    }
+      "blog": "Blog",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Theo dõi #{{tag}}",
@@ -705,6 +708,7 @@
     "heading": "Video ngắn Riftn"
   },
   "settings": {
+    "loginLook": {"title": "Màn hình đăng nhập", "desc": "Cách logo và khẩu hiệu Riftn chuyển động trên màn hình đăng nhập của thiết bị này.", "tube": "TV ống", "vhs": "Băng VHS", "led": "Tường LED", "holo": "Ảnh ba chiều", "neon": "Neon", "3d": "3D", "flat": "Phẳng"}, "arrivalLook": {"title": "Sau khi đăng nhập", "desc": "Hiệu ứng phát khi tài khoản đang tải, trước khi ảnh của bạn hiện trên trang. Trên thiết bị này.", "trace": "Vệt sáng", "tune": "Dò sóng", "rift": "Khe nứt", "deck": "Bộ bài", "glass": "Giọt kính"},
     "postLanding": "Sau khi đăng",
     "postLandingDesc": "Cách bài viết mới xuất hiện trong bảng tin",
     "postLandingGhost": "Ô trống ma",
@@ -2220,7 +2224,7 @@
     "promptDevice": "Thiết bị & Hệ điều hành (cho lỗi)",
     "deviceInfoNoErrors": "Không có",
     "promptFilters": "Lọc theo danh mục",
-    "promptMediaError": "Chọn hình ảnh hoặc video dưới 50MB mỗi cái.",
+    "promptMediaError": "Chọn hình ảnh hoặc video dưới 200MB mỗi cái.",
     "promptMediaLimit": "Tối đa {{max}} tệp đính kèm.",
     "removePromptAttachment": "Xóa {{name}}",
     "promptAttachment": "Đính kèm {{number}}",
@@ -4221,7 +4225,7 @@
       "pageViewsTerm": "Lượt xem trang",
       "pageViews": "— các yêu cầu mà Cloudflare xếp là tải trang, không phải hình ảnh, tập lệnh hay lệnh gọi API.",
       "botsTerm": "Bao gồm cả bot",
-      "bots": "— đây là số đếm thô ở biên, nên có cả trình thu thập dữ liệu, bộ giám sát tình trạng hoạt động và ứng dụng chạy tự động. Bạn có thể tự thấy trong phần phân tích trình duyệt phía trên, nơi các mục như \"Curl\" và \"Không rõ\" là lưu lượng tự động chứ không phải con người. Lọc bot cần gói Cloudflare trả phí mà chúng tôi không dùng, và lặng lẽ trừ đi một con số ước tính chỉ khiến các số liệu khó kiểm chứng hơn.",
+      "bots": "— đây là số đếm thô ở biên, nên có cả trình thu thập dữ liệu, bộ giám sát tình trạng hoạt động và ứng dụng chạy tự động. Bạn có thể tự thấy trong phần phân tích trình duyệt phía trên, nơi các mục như \"Curl\" và \"Không rõ\" là lưu lượng tự động chứ không phải con người. Bot ngày càng khó phân biệt với khách truy cập là người thật và chẳng bao lâu nữa sẽ không thể phân biệt họ trong các số liệu này, nên cố lọc bot cũng vô ích.",
       "totalTerm": "Tổng theo khoảng",
       "total": "— lượt xem trang và yêu cầu được cộng dồn theo khoảng thời gian. Số khách truy cập cố tình không được cộng thành \"tổng khách truy cập\", vì người ghé cả thứ Hai và thứ Ba sẽ bị đếm hai lần.",
       "peakTerm": "Giờ / ngày bận nhất",
@@ -20937,5 +20941,27 @@
     "remember": "Ghi nhớ lựa chọn của tôi",
     "rememberHint": "Đổi bất cứ lúc nào trong Cài đặt",
     "failed": "Không xóa được tin nhắn"
+  },
+  "profileAskAi": {
+    "row": "Hỏi AI",
+    "rowSub": "Theo dõi, thích tất cả, cập nhật",
+    "back": "Quay lại",
+    "title": "Hỏi AI về {{handle}}",
+    "sub": "Trợ lý thực hiện, bạn xác nhận",
+    "followLikeAll": "Theo dõi và thích tất cả",
+    "followLikeAllSub": "Theo dõi {{handle}}, bày tỏ cảm xúc với mọi bài đăng",
+    "likeAll": "Thích tất cả bài đăng",
+    "likeAllSub": "Bỏ qua những bài bạn đã bày tỏ cảm xúc",
+    "catchUp": "Cập nhật cho tôi",
+    "catchUpSub": "{{handle}} đã đăng gì gần đây, tóm tắt",
+    "message": "Viết tin nhắn",
+    "messageSub": "Soạn sẵn tin nhắn, bạn gửi đi",
+    "placeholder": "Hỏi bất cứ điều gì về {{handle}}…",
+    "send": "Gửi",
+    "promptFollowLikeAll": "Theo dõi {{handle}} và bày tỏ cảm xúc với tất cả bài đăng của họ",
+    "promptLikeAll": "Bày tỏ cảm xúc với tất cả bài đăng của {{handle}}",
+    "promptCatchUp": "Cập nhật cho tôi những gì {{handle}} đã đăng gần đây",
+    "promptMessage": "Giúp tôi viết tin nhắn gửi {{handle}}",
+    "promptAbout": "Về {{handle}}: {{question}}"
   }
 }

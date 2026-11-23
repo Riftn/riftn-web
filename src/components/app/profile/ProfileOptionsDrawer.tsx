@@ -20,6 +20,9 @@ import { useTranslation } from 'react-i18next';
 import { DISPLAY_WALLET_OVERRIDES } from './ProfileConstants';
 import type { ProfileData } from '@/hooks/use-dehub-profile';
 import { LendBadgeRows } from './LendBadgeRows';
+import { ProfileMuteButton } from './ProfileMuteButton';
+import { BioTagRemoveRow } from './BioTagRemoveRow';
+import { AskAiMenuRow, ProfileAskAiRows } from './ProfileAskAiRows';
 import { viewerShareUrl } from '@/lib/share-url';
 import { trackShare } from '@/lib/analytics';
 import { profileFeedUrl } from '@/lib/profile-feed-url';
@@ -57,6 +60,7 @@ export function ProfileOptionsContent({
   const navigate = useNavigate();
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [lendingBadge, setLendingBadge] = useState(false);
+  const [askingAi, setAskingAi] = useState(false);
 
   const handleCopyProfileUrl = () => {
     navigator.clipboard.writeText(viewerShareUrl(`https://riftn.com/${profile.handle.replace('@', '')}`));
@@ -99,8 +103,20 @@ export function ProfileOptionsContent({
     );
   }
 
+  if (askingAi && !isViewingOwnProfile) {
+    return (
+      <ProfileAskAiRows
+        profile={profile}
+        isFollowing={isFollowing}
+        onBack={() => setAskingAi(false)}
+        onClose={() => { setAskingAi(false); setShareSheetOpen(false); }}
+      />
+    );
+  }
+
   return (
     <div className="flex flex-col gap-1">
+      {!isViewingOwnProfile && !isBlocked && <AskAiMenuRow onClick={() => setAskingAi(true)} />}
       <button
         onClick={handleCopyProfileUrl}
         className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 active:scale-[0.98] transition-[background-color,transform] text-left"
@@ -217,6 +233,8 @@ export function ProfileOptionsContent({
                   <span className="text-red-400 font-medium">{t('profileOptions.unfollow')}</span>
                 </button>
               )}
+              {profile.walletAddress && <ProfileMuteButton address={profile.walletAddress} />}
+              <BioTagRemoveRow ownerAddress={profile.walletAddress} bio={profile.bio} onDone={() => setShareSheetOpen(false)} />
               {/* Report User */}
               <button
                 onClick={() => { setShareSheetOpen(false); setReportModalOpen(true); }}

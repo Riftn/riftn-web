@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildSoundtrackTag, parseSoundtrackTag } from '@/lib/soundtrack';
-import { soundCredit, soundMix, soundTimeFor, soundWindow, withSoundMix, withSoundWindow } from '@/lib/sound-window';
+import { bindSoundWindow, releaseSoundWindow, soundCredit, soundMix, soundTimeFor, soundWindow, withSoundMix, withSoundWindow } from '@/lib/sound-window';
 
 const AUDIUS = 'https://api.audius.co/v1/tracks/ZlwB7/stream?app_name=Riftn';
 
@@ -62,5 +62,41 @@ describe('sound mix', () => {
   });
   it('a new part keeps the levels', () => {
     expect(soundMix(withSoundWindow('https://x/a.mp3#sv=50&vv=50', { start: 10, end: 20 }))).toEqual({ song: 0.5, video: 0.5 });
+  });
+});
+
+describe('sound window guard', () => {
+  const fakeAudio = (src: string) => {
+    const el = new EventTarget() as unknown as HTMLMediaElement & { currentTime: number };
+    Object.assign(el, { src, currentSrc: src, currentTime: 0, loop: true, play: () => Promise.resolve() });
+    return el;
+  };
+  const SONG = 'https://example.com/song.mp3#t=0&end=30';
+
+  it('pulls a play past the part back to its start', () => {
+    const el = fakeAudio(SONG);
+    bindSoundWindow(el);
+    el.currentTime = 600;
+    el.dispatchEvent(new Event('timeupdate'));
+    expect(el.currentTime).toBe(0);
+  });
+
+  it('lets a listener who scrubbed play the whole song', () => {
+    const el = fakeAudio(SONG);
+    bindSoundWindow(el);
+    releaseSoundWindow(el);
+    el.currentTime = 600;
+    el.dispatchEvent(new Event('timeupdate'));
+    expect(el.currentTime).toBe(600);
+  });
+
+  it('keeps the next song to its part', () => {
+    const el = fakeAudio(SONG);
+    bindSoundWindow(el);
+    releaseSoundWindow(el);
+    const next = 'https://example.com/other.mp3#t=10&end=40';
+    Object.assign(el, { src: next, currentSrc: next, currentTime: 600 });
+    el.dispatchEvent(new Event('timeupdate'));
+    expect(el.currentTime).toBe(10);
   });
 });

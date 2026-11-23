@@ -38,6 +38,7 @@ import type { VideoItem } from '@/types/feed.types';
 import { viewerShareUrl } from '@/lib/share-url';
 import { trackShare } from '@/lib/analytics';
 
+import { formatCount } from '@/lib/format-count';
 type Chip = 'top' | 'videos' | 'radio' | 'stages' | 'new';
 
 const CHIPS: { key: Chip; label: string }[] = [
@@ -330,7 +331,7 @@ export function CinematicMusic({ radioStations, blockedAddresses, showFilters = 
               rank={rank}
               image={item.thumbnail}
               title={item.title || _copy("copy.f59ab8d1331b", { defaultValue: "Untitled" })}
-              subtitle={`${item.channel}${item.views ? ` · ${item.views}` : ''}`}
+              subtitle={`${item.channel}${item.views ? ` · ${formatCount(item.views)}` : ''}`}
               trailing={item.duration && item.duration !== '0:00' ? item.duration : undefined}
               onClick={() => openPost(item)}
             />

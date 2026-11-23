@@ -130,8 +130,8 @@ html[data-system-tone="light"] .login-stack-corner {
 }
 .login-stack__ai svg { width: 11px; height: 11px; }/* ---------------------------------------------------------------------------
    The sign: Riftn wordmark + headline over the faded bottom of the lanes.
-   Four looks, picked in Settings → Appearance (lib/login-look):
-   tube (default), vhs, led, holo. Every look draws inside the letters only,
+   Seven looks, picked in Settings → Appearance (lib/login-look):
+   tube (default), vhs, led, holo, neon, 3d, flat. Every look draws inside the letters only,
    with a tight halo instead of a fuzzy glow.
    --------------------------------------------------------------------------- */
 .login-stack__title {
@@ -355,6 +355,121 @@ html[data-system-tone="light"] .login-stack__title[data-look="holo"] {
   94% { transform: none; }
 }
 
+/* E · Neon glow: a solid bright tube inside the letters with a wide coloured
+   glow around them, buzzing now and then like a sign on a wall. Static
+   filters and an opacity flicker only, so nothing repaints while it plays. */
+.login-stack__title[data-look="neon"] {
+  --ls-neon: #ff4fd8;
+  --ls-neon-core: color-mix(in srgb, var(--ls-neon) 22%, #fff);
+  animation: ls-neon-buzz 5.2s steps(1) infinite;
+}
+html[data-theme="hazy"] .login-stack__title[data-look="neon"] { --ls-neon: #b48cff; }
+html[data-theme="osaka"] .login-stack__title[data-look="neon"] { --ls-neon: #ff5fae; }
+html[data-theme="light"] .login-stack__title[data-look="neon"],
+html[data-system-tone="light"] .login-stack__title[data-look="neon"] {
+  --ls-neon: #e0249a;
+  --ls-neon-core: color-mix(in srgb, var(--ls-neon) 70%, #fff);
+}
+.login-stack__title[data-look="neon"] .login-stack__logo-mark,
+.login-stack__title[data-look="neon"] .login-stack__headline {
+  background: var(--ls-neon-core);
+}
+.login-stack__title[data-look="neon"] .login-stack__logo,
+.login-stack__title[data-look="neon"] .login-stack__headline {
+  filter:
+    drop-shadow(0 0 1.5px var(--ls-neon))
+    drop-shadow(0 0 7px var(--ls-neon))
+    drop-shadow(0 0 22px color-mix(in srgb, var(--ls-neon) 75%, transparent));
+}
+.login-stack__title[data-look="neon"] .login-stack__headline { font-weight: 800; letter-spacing: 0; }
+@keyframes ls-neon-buzz {
+  0%, 100% { opacity: 1; }
+  61% { opacity: 0.55; }
+  62% { opacity: 1; }
+  64% { opacity: 0.4; }
+  65.5% { opacity: 1; }
+  88% { opacity: 0.86; }
+  89% { opacity: 1; }
+}
+
+/* F · 3D: chunky letters lit from above with a solid side cast down and to
+   the right, the whole sign slowly turning to show its depth. The turn is a
+   transform on a layer drawn once, so it costs the GPU nothing. */
+.login-stack__title[data-look="3d"] {
+  --ls-3d-face-top: #fff;
+  --ls-3d-face-low: #c9ccd6;
+  --ls-3d-side: #4a4c57;
+  --ls-3d-side-low: #23242b;
+  animation: none;
+  perspective: 700px;
+}
+html[data-theme="hazy"] .login-stack__title[data-look="3d"] { --ls-3d-face-low: #d9c8ff; --ls-3d-side: #5b3e98; --ls-3d-side-low: #2a1a4c; }
+html[data-theme="osaka"] .login-stack__title[data-look="3d"] { --ls-3d-face-low: #ffd0e7; --ls-3d-side: #9c2f66; --ls-3d-side-low: #4a1230; }
+html[data-theme="light"] .login-stack__title[data-look="3d"],
+html[data-system-tone="light"] .login-stack__title[data-look="3d"] {
+  --ls-3d-face-top: #2a2b33;
+  --ls-3d-face-low: #0b0b0d;
+  --ls-3d-side: #9a9ba6;
+  --ls-3d-side-low: #c8c9d1;
+}
+.login-stack__title[data-look="3d"] .login-stack__logo-mark,
+.login-stack__title[data-look="3d"] .login-stack__headline {
+  background: linear-gradient(180deg, var(--ls-3d-face-top) 30%, var(--ls-3d-face-low));
+}
+.login-stack__title[data-look="3d"] .login-stack__logo,
+.login-stack__title[data-look="3d"] .login-stack__headline {
+  filter:
+    drop-shadow(1px 1px 0 var(--ls-3d-side))
+    drop-shadow(1px 1px 0 var(--ls-3d-side))
+    drop-shadow(1px 1px 0 var(--ls-3d-side-low))
+    drop-shadow(1px 1px 0 var(--ls-3d-side-low))
+    drop-shadow(1px 1px 0 var(--ls-3d-side-low))
+    drop-shadow(2px 8px 8px rgba(0, 0, 0, 0.55));
+}
+.login-stack__title[data-look="3d"] .login-stack__headline { font-weight: 900; letter-spacing: -0.01em; }
+.login-stack__title[data-look="3d"] > .login-stack__sign {
+  transform-style: preserve-3d;
+  will-change: transform;
+  animation: ls-3d-turn 7s ease-in-out infinite alternate;
+}
+@keyframes ls-3d-turn {
+  from { transform: rotateX(12deg) rotateY(-16deg); }
+  to { transform: rotateX(12deg) rotateY(16deg); }
+}
+
+/* G · Flat: plain solid letters. No glow, no lines, nothing moving. */
+.login-stack__title[data-look="flat"] { animation: none; }
+.login-stack__title[data-look="flat"] .login-stack__logo-mark,
+.login-stack__title[data-look="flat"] .login-stack__headline {
+  background: var(--ls-ink);
+}
+.login-stack__title[data-look="flat"] .login-stack__logo,
+.login-stack__title[data-look="flat"] .login-stack__headline {
+  filter: var(--ls-shade);
+}
+.login-stack__title[data-look="flat"] .login-stack__headline { font-weight: 800; letter-spacing: -0.01em; }
+/* Flat wears the desktop wordmark's finish: white fading to soft grey down
+   each line, a darker lip at the foot of the logo, and a tight shadow just
+   under the letters. Light themes get the same in ink. */
+.login-stack__title[data-look="flat"] {
+  /* Mixed from the theme's own ink, so tinted themes keep their colour. */
+  --ls-face: linear-gradient(180deg, var(--ls-ink) 0%, color-mix(in srgb, var(--ls-ink) 94%, #8a8f99) 50%, color-mix(in srgb, var(--ls-ink) 84%, #8a8f99) 90%, color-mix(in srgb, var(--ls-ink) 55%, #8a8f99) 100%);
+  --ls-face-text: linear-gradient(180deg, var(--ls-ink) 0%, color-mix(in srgb, var(--ls-ink) 95%, #8a8f99) 45%, color-mix(in srgb, var(--ls-ink) 80%, #8a8f99) 80%, color-mix(in srgb, var(--ls-ink) 72%, #8a8f99) 100%);
+  --ls-shade: drop-shadow(0 1px 0.5px rgba(0, 0, 0, 0.55)) drop-shadow(0 6px 14px rgba(0, 0, 0, 0.65));
+}
+html[data-theme="light"] .login-stack__title[data-look="flat"],
+html[data-system-tone="light"] .login-stack__title[data-look="flat"] {
+  --ls-face: linear-gradient(180deg, #2c313a 0%, #21252d 55%, #15181e 100%);
+  --ls-face-text: var(--ls-face);
+  --ls-shade: drop-shadow(0 1px 0.5px rgba(0, 0, 0, 0.22)) drop-shadow(0 6px 12px rgba(0, 0, 0, 0.22));
+}
+.login-stack__title[data-look="flat"] .login-stack__logo-mark { background: var(--ls-face); }
+.login-stack__title[data-look="flat"] .login-stack__headline {
+  background: var(--ls-face-text) 0 0 / 100% 1.05em repeat-y;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
 /* The looks set the whole background; the headline keeps it inside its letters. */
 .login-stack__title[data-look] .login-stack__headline {
   -webkit-background-clip: text;
@@ -497,3 +612,14 @@ html[data-system-tone="light"] .login-look-preview {
   transform: translate(-50%, -50%) scale(0.4);
 }
 .login-look-preview .login-stack__title { margin-top: 0; }
+/* Phone: the cards are a side-swipe carousel (LookCarousel), wider than the
+   grid cells were, so the sign is drawn bigger and never meets the edges. */
+@media (max-width: 639px) {
+  .login-look-preview { height: 118px; }
+  .login-look-preview__scale { transform: translate(-50%, -50%) scale(0.46); }
+}
+
+/* Looping previews that scrolled off screen stand still. */
+.look-previews-paused *,
+.look-previews-paused *::before,
+.look-previews-paused *::after { animation-play-state: paused !important; }

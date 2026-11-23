@@ -35,21 +35,21 @@ export function useChatReadPosition(chatId: string | null | undefined) {
     retry: 0,
   });
 
-  const [timedOut, setTimedOut] = useState(false);
+  const [timedOutChat, setTimedOutChat] = useState<string | null>(null);
   useEffect(() => {
-    setTimedOut(false);
+    setTimedOutChat(null);
     if (!enabled) return;
-    const timer = window.setTimeout(() => setTimedOut(true), WAIT_MS);
+    const timer = window.setTimeout(() => setTimedOutChat(chatId!), WAIT_MS);
     return () => window.clearTimeout(timer);
   }, [enabled, chatId]);
 
   const fetched = query.isFetchedAfterMount || query.isError;
-  const ready = !enabled || fetched || timedOut;
+  const ready = !enabled || fetched || timedOutChat === chatId;
 
   // Frozen at open: our own saves must not move the line under the reader.
   const openingRef = useRef<{ chatId: string | null | undefined; spot: ReadSpot | null; taken: boolean }>({ chatId, spot: null, taken: false });
   if (openingRef.current.chatId !== chatId) openingRef.current = { chatId, spot: null, taken: false };
-  if (!openingRef.current.taken && ready) {
+  if (enabled && !openingRef.current.taken && ready) {
     const data = query.data as ChatReadPosition | null | undefined;
     openingRef.current = { chatId, spot: data ? { messageId: data.messageId, at: data.at } : null, taken: true };
   }

@@ -8,6 +8,70 @@
       window.process = process
     </script>
     <meta charset="UTF-8" />
+    <!-- A post link asks for its post now, while the app code is still on its
+         way, instead of after it has arrived and drawn the page (that wait was
+         ~4 s on desktop, ~6 s on a mid phone). src/lib/post-prefetch.ts picks
+         the answer up. Mirrors apiCall's headers; an expired sign-in is left to
+         the app, which refreshes it first.
+
+         It asks for the post page's code now too, and for the live player's
+         the moment the answer says the post is a live. Those used to wait their
+         turn: the post page was asked for once the app had run, the player
+         once the post page had. The file lists are written in at build
+         (postLinkCodePlugin, vite.config.ts); a dev server leaves the marker
+         as it is and nothing extra is asked for. -->
+    <script>
+      (function () {
+        try {
+          var m = location.pathname.match(/^\/(?:app\/)?(?:post|video|posts)\/(\d+)(?:\/b(?:\/[^/]+)?)?\/?$/);
+          if (!m) return;
+          var code = "__POST_LINK_CODE__";
+          var conn = navigator.connection;
+          if (typeof code !== 'object' || (conn && conn.saveData)) code = null;
+          // Fetched and compiled only: nothing runs early.
+          var want = function (files) {
+            for (var i = 0; i < files.length; i++) {
+              var href = '/' + files[i], css = /\.css$/.test(href);
+              // Already asked for (the app got to it first, and writes whole
+              // addresses): nothing to add.
+              if (document.querySelector('link[href="' + href + '"],link[href="' + location.origin + href + '"]')) continue;
+              var l = document.createElement('link');
+              l.rel = css ? 'preload' : 'modulepreload';
+              if (css) l.as = 'style';
+              l.crossOrigin = '';
+              l.href = href;
+              document.head.appendChild(l);
+            }
+          };
+          if (code) want(code.r);
+          if (!window.fetch) return;
+          var ls = window.localStorage, h = { Accept: 'application/json' };
+          var tok = ls.getItem('dehub_token');
+          if (tok) {
+            var exp = parseInt(ls.getItem('dehub_token_expires_at') || '', 10);
+            if (!(exp > Date.now() + 5000)) return;
+            h.Authorization = 'Bearer ' + tok;
+          }
+          if (ls.getItem('dhb_kids_mode') === '1') h['X-Kids-Mode'] = '1';
+          window.__postPrefetch = {
+            id: m[1],
+            at: Date.now(),
+            signedIn: !!tok,
+            p: fetch('https://api.dehub.io/api/nft_info/' + m[1], { headers: h, cache: 'no-store' })
+              .then(function (r) { return r.ok ? r.json() : null; })
+              .then(function (j) {
+                try {
+                  var n = j && (j.result || j);
+                  // Same test as the post page's getContentType.
+                  if (code && n && (n.postType === 'live' || n.isLive !== undefined)) want(code.l);
+                } catch (e) {}
+                return j;
+              })
+              .catch(function () { return null; })
+          };
+        } catch (e) {}
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
     <!-- Apply the saved theme (+ dim settings) to <html> synchronously, during
          head parse — before the render-blocking stylesheet is matched and long
@@ -33,6 +97,10 @@
           if (tone === 'light') t = 'system';
           d.dataset.theme = t;
           d.dataset.systemTone = tone;
+          // Post separator: thin lines instead of cards (src/lib/feed-separator.ts).
+          if (localStorage.getItem('dehub.feedSeparator') === 'line') d.dataset.feedSep = 'line';
+          // Own-line bubbles in General Chat (src/lib/chat-own-bubble.ts).
+          if (localStorage.getItem('riftn.chat.ownBubble') === 'true') d.dataset.chatOwnBubble = '';
           d.dataset.shortsEnabled = localStorage.getItem('shorts-enabled') === 'false' ? 'false' : 'true';
           d.dataset.sidebarCollapsed = localStorage.getItem('sidebar-collapsed') === 'true' ? 'true' : 'false';
 

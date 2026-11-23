@@ -25,3 +25,4 @@ If a request needs more info from the person who posted it, or we can't test it 
 - Start from the latest default branch on GitHub. Others merge all the time, so check again right before merging.
 - Commits and PRs as maldoteth. Squash-merge with a plain one-line message. PR bodies say intent, constraints and result, and nothing about how the work was produced.
 - "Mobile" means phone web AND the app. Desktop must not change when only mobile is asked for.
+- Every counter on screen (views, listens, attended, likes, followers, members, comments, votes, points...) reads short: 1.2K, 3.4M, never 1,200 or 1200. Use `formatCount()` from `src/lib/format-count.ts`; `{{count}}` and other counter placeholders in copy are shortened for you. Only money keeps exact numbers. `node scripts/check-counters.mjs` runs in CI and fails on a raw counter (`--fix` wraps them).

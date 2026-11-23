@@ -74,6 +74,24 @@ describe('poll lookup batching', () => {
     expect(c).toBeNull();
   });
 
+  it('keeps an in-flight ballot from one account out of the next account', async () => {
+    const { __fetchPollBatched } = await freshHook();
+    let finish!: (value: unknown) => void;
+    getPolls.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+    localStorage.setItem('dehub_wallet', 'A');
+    const first = expect(__fetchPollBatched(2, 'a')).rejects.toThrow('Poll lookup interrupted');
+    await vi.advanceTimersByTimeAsync(50);
+
+    localStorage.setItem('dehub_wallet', 'B');
+    getPolls.mockResolvedValueOnce({ status: true, result: { '2': poll(2) } });
+    const second = __fetchPollBatched(2, 'b');
+    finish({ status: true, result: { '2': { ...poll(2), userVote: { optionIndexes: [0] } } } });
+    await vi.advanceTimersByTimeAsync(50);
+    await first;
+    expect((await second)?.userVote).toBeNull();
+    expect(getPolls).toHaveBeenCalledTimes(2);
+  });
+
   it('remembers the ids that had no poll, and reuses that after a reload', async () => {
     getPolls.mockResolvedValue({ status: true, result: {} });
     const first = await freshHook();

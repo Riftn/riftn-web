@@ -115,7 +115,8 @@ import { SwipeableCarousel } from '@/components/app/SwipeableCarousel';
 import { MobileWhoToFollowCarousel } from '@/components/app/mobile';
 import { NewMembersCarousel } from '@/components/app/NewMembersCarousel';
 import { LeaderboardCarousel } from '@/components/app/feeds/LeaderboardCarousel';
-import { LiveNowBar } from '@/components/app/feeds/LiveNowBar';
+import { HomeShortcuts } from '../navigation/HomeShortcuts';
+import { StoryShelf } from '@/components/app/stories/StoryShelf';
 import { PromptFlowModalLazy as PromptFlowModal } from '@/components/app/feeds/PromptFlowModalLazy';
 
 import type { VideoItem, ImagePost, TextPost, ShortVideo } from '@/types/feed.types';
@@ -393,7 +394,7 @@ function RadioCarouselSection({ stations }: { stations: RadioStation[] }) {
   if (stations.length === 0) return null;
 
   return (
-    <div data-glass-stack data-feed-radio className="bg-black/50 backdrop-blur-[24px] backdrop-saturate-[180%] border border-white/[0.12] rounded-xl p-3">
+    <div data-glass-stack className="bg-black/50 backdrop-blur-[24px] backdrop-saturate-[180%] border border-white/[0.12] rounded-xl p-3">
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-bold text-white flex items-center gap-2">
           <Radio className="w-5 h-5" />
@@ -482,6 +483,8 @@ function nftToFeedItem(pinnedPost: any): FeedItemType {
         comicBorder: pinnedPost.comicBorder,
         hideAssetCards: pinnedPost.hideAssetCards,
         hiddenLinkPreviews: pinnedPost.hiddenLinkPreviews,
+        imageTags: pinnedPost.imageTags,
+        hasQuiz: pinnedPost.hasQuiz,
         spoilerText: pinnedPost.spoilerText,
         quotePolicy: pinnedPost.quotePolicy,
         visibility: pinnedPost.visibility,
@@ -524,6 +527,8 @@ function nftToFeedItem(pinnedPost: any): FeedItemType {
         comicBorder: pinnedPost.comicBorder,
         hideAssetCards: pinnedPost.hideAssetCards,
         hiddenLinkPreviews: pinnedPost.hiddenLinkPreviews,
+        imageTags: pinnedPost.imageTags,
+        hasQuiz: pinnedPost.hasQuiz,
         spoilerText: pinnedPost.spoilerText,
         quotePolicy: pinnedPost.quotePolicy,
         visibility: pinnedPost.visibility,
@@ -571,6 +576,8 @@ function nftToFeedItem(pinnedPost: any): FeedItemType {
         comicBorder: pinnedPost.comicBorder,
         hideAssetCards: pinnedPost.hideAssetCards,
         hiddenLinkPreviews: pinnedPost.hiddenLinkPreviews,
+        imageTags: pinnedPost.imageTags,
+        hasQuiz: pinnedPost.hasQuiz,
         spoilerText: pinnedPost.spoilerText,
         quotePolicy: pinnedPost.quotePolicy,
         visibility: pinnedPost.visibility,
@@ -2203,14 +2210,14 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
       })()}
 
 
+      <HomeShortcuts />
+      {!showFilterLoader && <StoryShelf />}
       {showFilterLoader ? (
         <FeedFilterLoader />
       ) : (isLoadingState || isAutoRetrying) ? (
         <FeedCardSkeletonList count={6} columns={colCount} />
       ) : (
         <>
-      {/* Everyone live: Stages and livestreams in one row */}
-      <LiveNowBar />
 
           {/* Follow groups. Only in Following mode, and only once there is a
               group to pick — an empty row would be a permanent nudge to use a

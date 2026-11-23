@@ -26,7 +26,7 @@ const MARKERS: Record<string, string> = {
   it: 'il lo gli le di che è una per con non sono del della mi ma anche questo come più io tu ci ciao buongiorno buonasera grazie tutti',
   id: 'yang dan di ini itu dengan untuk tidak ada saya kamu aku kita kami apa akan sudah bisa juga dari selamat pagi siang malam semua terima kasih teman',
   nl: 'de het een en van ik je niet dat zijn op te met voor er maar ook wat goedemorgen hallo dank allemaal',
-  tr: 've bir bu da de için çok ne var ben sen merhaba günaydın teşekkürler iyi akşamlar herkese',
+  tr: 've bir bu da de için çok ne var ben sen merhaba günaydın teşekkürler teşekkür ederim iyi akşamlar geceler herkese selam selamlar naber nasılsın nasılsınız evet hayır tamam sağol sağolun kardeşim abi kanka güzel değil ama gibi daha şey yok olan oldu lütfen hoş geldin geldiniz',
   tl: 'ang ng mga sa na ako ka ikaw siya kayo tayo hindi salamat po magandang umaga gabi lahat',
 };
 
@@ -40,6 +40,15 @@ const SETS: Record<string, Set<string>> = Object.fromEntries(
     new Set(words.split(' ').filter((w) => lang === 'en' || !COMMON_ENGLISH.has(w))),
   ]),
 );
+
+/**
+ * Letters only one marker language writes. Turkish chat skips most small words
+ * ("selam nasılsın kanka"), but a word with ğ or dotless ı is Turkish wherever
+ * it appears, so each such word counts as a Turkish marker.
+ */
+const LETTER_HINTS: Record<string, RegExp> = {
+  tr: /[ğı]/u,
+};
 
 function base(lang: string): string {
   return lang.toLowerCase().split(/[-_]/)[0];
@@ -57,7 +66,8 @@ export function chatLineLanguage(text: string): string | null {
   let bestHits = 0;
   let runnerUp = 0;
   for (const [lang, set] of Object.entries(SETS)) {
-    const hits = tokens.filter((t) => set.has(t)).length;
+    const letters = LETTER_HINTS[lang];
+    const hits = tokens.filter((t) => set.has(t) || (!!letters && letters.test(t))).length;
     if (hits > bestHits) { runnerUp = bestHits; bestHits = hits; best = lang; }
     else if (hits > runnerUp) runnerUp = hits;
   }

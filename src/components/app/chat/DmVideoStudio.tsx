@@ -16,7 +16,7 @@ import {
   nextQuarterTurn,
   type DmVideoOptions,
 } from '@/lib/dm-video-options';
-import { DESTRUCT_CHOICES, destructLabel, destructShort, type DmDestructChoice } from '@/lib/dm-destruct';
+import { DESTRUCT_CHOICES, OPEN_CHOICES, destructLabel, destructShort, isOpenChoice, type DmDestructChoice } from '@/lib/dm-destruct';
 import { DmVideoFrame } from './DmVideo';
 import { LockPriceControl } from './LockPriceControl';
 import { LOCK_DEFAULT_USD, formatLockUsd } from '@/lib/dm-lock-price';
@@ -897,9 +897,32 @@ export function DmMediaStudio({
                     </button>
                   ))}
                 </div>
+                {/* Countdown that starts when they first open it, so it can't
+                    run out before they have seen it. */}
+                <p className="pt-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+                  {_copy('dmVideo.timerOnOpen', { defaultValue: 'Once they open it' })}
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {OPEN_CHOICES.map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      aria-pressed={destruct === c}
+                      onClick={() => onDestructChange(c)}
+                      className={cn(
+                        'rounded-full border border-white/15 px-3 py-1.5 text-xs font-semibold text-zinc-300',
+                        destruct === c && 'border-white bg-white text-black',
+                      )}
+                    >
+                      {destructLabel(c)}
+                    </button>
+                  ))}
+                </div>
                 <p className="text-[11px] leading-snug text-zinc-400">
                   {destruct == null
                     ? _copy('dmVideo.timerOffBody', { defaultValue: 'It stays in the chat.' })
+                    : isOpenChoice(destruct)
+                      ? _copy('dmVideo.timerOpenBody', { defaultValue: 'Gone for both of you {{value1}} after they first open it.', value1: destructLabel(destruct) })
                     : destruct === 'view'
                       ? _copy('dmVideo.timerViewBody', { defaultValue: 'Gone for both of you once they have seen it.' })
                       : _copy('dmVideo.timerTimeBody', { defaultValue: 'Gone for both of you {{value1}} after you send it.', value1: destructLabel(destruct) })}
@@ -928,7 +951,7 @@ function DestructChip({ choice, short }: { choice: DmDestructChoice; short?: boo
   return (
     <span className="absolute left-1.5 top-1.5 inline-flex items-center gap-1 rounded-full bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
       <Timer className="h-3 w-3" />
-      {short ? destructShort(choice) : _copy(`dmVideo.destruct.${choice}`, { defaultValue: destructLabel(choice) })}
+      {short || isOpenChoice(choice) ? destructShort(choice) : _copy(`dmVideo.destruct.${choice}`, { defaultValue: destructLabel(choice) })}
     </span>
   );
 }
@@ -953,7 +976,7 @@ function HideOption({ active, onClick, icon, title, body, disabled }: { active?:
 
 export { cleanVideoOptions };
 
-/** The photo editor's crop box over the playing video: shade outside, thirds, corner dots. */
+/** The photo editor's crop box over the playing video: shade outside, thirds, corner dots, edge bars in Free. */
 function VideoCropOverlay({ rect, ratio, frameAspect, onChange }: {
   rect: VideoCropRect;
   ratio: number | null;
@@ -998,6 +1021,24 @@ function VideoCropOverlay({ rect, ratio, frameAspect, onChange }: {
         <div className="pointer-events-none absolute inset-y-0 left-2/3 w-px bg-white/35" />
         <div className="pointer-events-none absolute inset-x-0 top-1/3 h-px bg-white/35" />
         <div className="pointer-events-none absolute inset-x-0 top-2/3 h-px bg-white/35" />
+        {ratio == null && (['t', 'b', 'l', 'r'] as const).map((e) => (
+          <div
+            key={e}
+            onPointerDown={start(e)}
+            className={cn(
+              'absolute flex items-center justify-center',
+              (e === 't' || e === 'b') && 'inset-x-3.5 h-7 cursor-ns-resize',
+              (e === 'l' || e === 'r') && 'inset-y-3.5 w-7 cursor-ew-resize',
+              e === 't' && '-top-3.5',
+              e === 'b' && '-bottom-3.5',
+              e === 'l' && '-left-3.5',
+              e === 'r' && '-right-3.5',
+            )}
+            style={{ touchAction: 'none' }}
+          >
+            <div className={cn('rounded-sm bg-white', e === 't' || e === 'b' ? 'h-1 w-5' : 'h-5 w-1')} />
+          </div>
+        ))}
         {(['tl', 'tr', 'bl', 'br'] as const).map((c) => (
           <div
             key={c}

@@ -1,4 +1,5 @@
 {
+  "dmVideo": {"edit": "Editează video", "hiddenTag": "Ascuns", "tapToEdit": "Apasă pentru a edita", "cover": "Acoperire", "trim": "Tăiere", "mirror": "Oglindit", "rotate": "Rotație", "hide": "Ascunde", "timer": "Timer", "sheetTitleAny": "Editează înainte de a trimite", "close": "Închide", "replace": "Înlocuiește", "hiddenUntilTap": "Ascuns până când îl ating", "pause": "Pauză", "play": "Redau video", "mute": "Mută", "unmute": "Dezmută", "scrub": "Scrolă prin video", "addMore": "Adaugă fotografii sau videoclipuri", "trimAria": "Trage capetele pentru a tăia", "coverAria": "Atinge un cadru pentru a-l seta ca acoperire", "coverHint": "Atinge un cadru pentru a-l seta ca acoperire", "coverOwn": "Imaginea ta", "coverAuto": "Automat", "uploadCover": "Încarca o imagine de acoperire", "mirrored": "Oglindit", "original": "Original", "rotate90": "Rotație 90°", "showNormally": "Arată normal", "showNormallyBody": "O văd imediat", "hideUntilTap": "Ascunde până la atingere", "hideUntilTapBody": "Abuzit până când îl atingi", "hidePrice": "Ascuns în spatele unui preț", "hidePriceBody": "Abuzit până când plătești", "priceUnavailable": "Nu în această conversație", "timerOff": "Oprit", "timerOffBody": "Rămâne în știre.", "timerViewBody": "Dispar pentru ambii după ce l-au văzut.", "confirm": "Confirmă", "lockedFor": "Deblochează pentru {{value1}} DHB", "lockedForUsd": "Dezblochează pentru {{value1}}", "editItem": "Editează obiectul {{value1}}", "kept": "{{time}} păstrat", "timerTimeBody": "Dispar pentru ambii {{value1}} după ce îl trimiți."},
   "postBg": {
     "addMedia": "Adaugă o imagine, un GIF sau un videoclip",
     "changeMedia": "Schimbă imaginea, GIF-ul sau videoclipul",
@@ -290,8 +291,10 @@
       "pronouns": "Pronume",
       "location": "Poziție",
       "custom": "Personalizat",
-      "customOption": "Etichetă personalizată"
-    }
+      "customOption": "Etichetă personalizată",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Urmărește #{{tag}}",
@@ -698,6 +701,7 @@
     "heading": "Shorts pe Riftn"
   },
   "settings": {
+    "loginLook": {"title": "Ecranul de conectare", "desc": "Cum se mișcă logoul și sloganul Riftn pe ecranul de conectare de pe acest dispozitiv.", "tube": "TV cu tub", "vhs": "Casetă VHS", "led": "Perete LED", "holo": "Hologramă", "neon": "Neon", "3d": "3D", "flat": "Plat"}, "arrivalLook": {"title": "După conectare", "desc": "Ce rulează cât se încarcă contul, înainte ca poza ta să ajungă pe pagină. Pe acest dispozitiv.", "trace": "Urmă", "tune": "Acord", "rift": "Fisură", "deck": "Pachet", "glass": "Picătură de sticlă"},
     "postLanding": "După ce postezi",
     "postLandingDesc": "Cum apare noua ta postare în flux",
     "postLandingGhost": "Loc fantomă",
@@ -2203,7 +2207,7 @@
     "promptDevice": "Dispozitiv și sistem de operare (pentru erori)",
     "deviceInfoNoErrors": "Niciuna",
     "promptFilters": "Filtrează după categorie",
-    "promptMediaError": "Alegeți imagini sau videoclipuri sub 50 MB fiecare.",
+    "promptMediaError": "Alegeți imagini sau videoclipuri sub 200 MB fiecare.",
     "promptMediaLimit": "Până la {{max}} atașamente.",
     "removePromptAttachment": "Elimină pe {{name}}",
     "promptAttachment": "Atașament {{number}}",
@@ -4194,7 +4198,7 @@
       "pageViewsTerm": "Afișări de pagină",
       "pageViews": "— cereri pe care Cloudflare le clasifică drept încărcări de pagină, nu imagini, scripturi sau apeluri API.",
       "botsTerm": "Boții sunt incluși",
-      "bots": "— acestea sunt numărători brute la margine, deci includ crawlere, monitoare de disponibilitate și clienți automatizați. Le vezi singur în defalcarea pe browsere de mai sus, unde intrări precum „Curl” și „Necunoscut” sunt trafic automat, nu oameni. Filtrarea boților cere un plan Cloudflare cu plată pe care nu îl avem, iar scăderea tacită a unei estimări ar face cifrele mai greu de verificat, nu mai ușor.",
+      "bots": "— acestea sunt numărători brute la margine, deci includ crawlere, monitoare de disponibilitate și clienți automatizați. Le vezi singur în defalcarea pe browsere de mai sus, unde intrări precum „Curl” și „Necunoscut” sunt trafic automat, nu oameni. Boții sunt tot mai greu de deosebit de vizitatorii umani și în curând vor fi imposibil de diferențiat în aceste statistici, așa că nu are rost să încercăm să îi filtrăm.",
       "totalTerm": "Totaluri pe interval",
       "total": "— afișările de pagină și cererile se adună pe tot intervalul. Vizitatorii nu se adună intenționat într-un „total vizitatori”, pentru că cineva care a fost aici luni și marți ar fi numărat de două ori.",
       "peakTerm": "Cea mai aglomerată oră / zi",
@@ -20866,5 +20870,27 @@
     "remember": "Ține minte alegerea mea",
     "rememberHint": "O poți schimba oricând din Setări",
     "failed": "Mesajul nu a putut fi șters"
+  },
+  "profileAskAi": {
+    "row": "Întreabă AI",
+    "rowSub": "Urmărește, apreciază tot, fii la curent",
+    "back": "Înapoi",
+    "title": "Întreabă AI despre {{handle}}",
+    "sub": "Asistentul face, tu confirmi",
+    "followLikeAll": "Urmărește și apreciază tot",
+    "followLikeAllSub": "Urmărește {{handle}}, reacționează la fiecare postare",
+    "likeAll": "Apreciază toate postările",
+    "likeAllSub": "Le sare pe cele la care ai reacționat deja",
+    "catchUp": "Pune-mă la curent",
+    "catchUpSub": "Ce a postat {{handle}} în ultima vreme, pe scurt",
+    "message": "Scrie-i un mesaj",
+    "messageSub": "Pregătește o ciornă, tu o trimiți",
+    "placeholder": "Întreabă orice despre {{handle}}…",
+    "send": "Trimite",
+    "promptFollowLikeAll": "Urmărește {{handle}} și reacționează la toate postările",
+    "promptLikeAll": "Reacționează la toate postările lui {{handle}}",
+    "promptCatchUp": "Pune-mă la curent cu ce a postat {{handle}} în ultima vreme",
+    "promptMessage": "Ajută-mă să scriu un mesaj pentru {{handle}}",
+    "promptAbout": "Despre {{handle}}: {{question}}"
   }
 }

@@ -44,59 +44,61 @@ export function CameraCaptureModal({ isOpen, onClose, onVideoRecorded, onPhotoCa
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Check for multiple cameras
-  useEffect(() => {
-    navigator.mediaDevices.enumerateDevices().then((devices) => {
-      const videoInputs = devices.filter((d) => d.kind === 'videoinput');
-      setHasMultipleCameras(videoInputs.length > 1);
-    });
+  const generation = useRef(0);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+
+  const release = useCallback(() => {
+    generation.current++;
+    const recorder = mediaRecorderRef.current;
+    mediaRecorderRef.current = null;
+    if (recorder) {
+      recorder.onstop = null;
+      recorder.ondataavailable = null;
+      if (recorder.state !== 'inactive') recorder.stop();
+    }
+    streamRef.current?.getTracks().forEach(track => track.stop());
+    streamRef.current = null;
+    if (timerRef.current) clearInterval(timerRef.current);
   }, []);
 
-  // Initialize camera
-  const initCamera = useCallback(async () => {
-    setIsInitializing(true);
-    try {
-      // Stop existing stream
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((track) => track.stop());
-      }
-
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode,
-          width: { ideal: 1920 },
-          height: { ideal: 1080 },
-        },
-        audio: true,
-      });
-
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
-    } catch (error) {
-      console.error('Camera access error:', error);
-      toast.error(_copy("copy.ac7a2d882664", { defaultValue: "Could not access camera. Please check permissions." }));
-      onClose();
-    } finally {
-      setIsInitializing(false);
-    }
-  }, [facingMode, onClose, _copy]);
-
   useEffect(() => {
-    if (isOpen && !recordedBlob) {
-      initCamera();
+    if (!isOpen) {
+      setIsRecording(false);
+      setRecordedBlob(null);
+      setPreviewUrl(null);
+      return;
     }
+    if (recordedBlob) return;
+    const id = ++generation.current;
+    setIsInitializing(true);
+    setHasMultipleCameras(false);
+    async function acquire() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode, width: { ideal: 1920 }, height: { ideal: 1080 } },
+          audio: true,
+        });
+        if (generation.current !== id) {
+          stream.getTracks().forEach(track => track.stop());
+          return;
+        }
+        streamRef.current = stream;
+        if (videoRef.current) videoRef.current.srcObject = stream;
+        setIsInitializing(false);
+        const devices = await navigator.mediaDevices.enumerateDevices?.().catch(() => []);
+        if (generation.current === id) setHasMultipleCameras((devices ?? []).filter(d => d.kind === 'videoinput').length > 1);
+      } catch {
+        if (generation.current !== id) return;
+        toast.error(_copy("copy.ac7a2d882664", { defaultValue: "Could not access camera. Please check permissions." }));
+        closeRef.current();
+      }
+    }
+    void acquire();
+    return release;
+  }, [isOpen, facingMode, recordedBlob, release, _copy]);
 
-    return () => {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((track) => track.stop());
-      }
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    };
-  }, [isOpen, initCamera, recordedBlob]);
+  useEffect(() => () => { if (previewUrl) URL.revokeObjectURL(previewUrl); }, [previewUrl]);
 
   const flipCamera = () => {
     setFacingMode((prev) => (prev === 'user' ? 'environment' : 'user'));
@@ -121,7 +123,9 @@ export function CameraCaptureModal({ isOpen, onClose, onVideoRecorded, onPhotoCa
     
     ctx.drawImage(video, 0, 0);
     
+    const id = generation.current;
     canvas.toBlob((blob) => {
+      if (generation.current !== id) return;
       if (blob) {
         if (onPhotoCaptured) {
           onPhotoCaptured(blob);
@@ -204,7 +208,6 @@ export function CameraCaptureModal({ isOpen, onClose, onVideoRecorded, onPhotoCa
     setPreviewUrl(null);
     setRecordedBlob(null);
     setRecordingTime(0);
-    initCamera();
   };
 
   const confirmVideo = () => {
@@ -215,15 +218,7 @@ export function CameraCaptureModal({ isOpen, onClose, onVideoRecorded, onPhotoCa
   };
 
   const handleClose = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-    }
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-    }
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-    }
+    release();
     setPreviewUrl(null);
     setRecordedBlob(null);
     setRecordingTime(0);

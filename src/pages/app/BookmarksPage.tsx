@@ -162,6 +162,9 @@ export default function BookmarksPage() {
           <PageTabs
             value={activeTab}
             onChange={setActiveTab}
+            // Desktop: wrap onto a second line instead of scrolling, so no tab
+            // ends up past the island's right edge with no way to reach it.
+            className="lg:flex-wrap lg:overflow-visible"
             tabs={tabKeys.map((tab) => {
               const Icon = tab.icon;
               return { id: tab.value, label: t(tab.labelKey), icon: <Icon className="h-4 w-4" /> };

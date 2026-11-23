@@ -3,7 +3,6 @@
  * ================
  * Natural collage-style image grid for profile pages (matches public image feed).
  * Every 4th image spans 2×2 for visual flow. Tapping opens the full ImageCard.
- * Unlocked when a user has 4+ image posts.
  */
 
 import { useState, memo } from 'react';
@@ -19,6 +18,7 @@ import { ImageCard } from '@/components/app/cards/ImageCard';
 import { ProfileFormatFeed } from '@/components/app/feeds/ProfileFormatFeed';
 import { useProfileFeedContext } from '@/lib/profile-feed-origin';
 
+import { formatCount } from '@/lib/format-count';
 interface ProfileImageGridProps {
   images: ImagePost[];
 }
@@ -68,7 +68,7 @@ export const ProfileImageGrid = memo(function ProfileImageGrid({ images }: Profi
               <div data-grid-hover className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 sm:gap-5">
                 <div className="flex items-center gap-1 sm:gap-1.5 text-white">
                   <ThumbsUp className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="font-semibold text-xs sm:text-sm">{post.likes.toLocaleString()}</span>
+                  <span className="font-semibold text-xs sm:text-sm">{formatCount(post.likes)}</span>
                 </div>
                 <div className="flex items-center gap-1 sm:gap-1.5 text-white">
                   <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5" />

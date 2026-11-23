@@ -75,4 +75,14 @@ jobs:
           version: '9.15.9'
       - name: Deploy worker
         if: steps.zone.outputs.ready == 'true'
-        run: pnpm dlx wrangler@4 deploy --config wrangler.builder-apps.jsonc
+        # The token can upload the Worker but not read zone routes; the *.dhb.gg
+        # route already exists, so a routes-only failure after "Uploaded" is fine.
+        run: |
+          set +e
+          pnpm dlx wrangler@4 deploy --config wrangler.builder-apps.jsonc 2>&1 | tee deploy.log
+          code=${PIPESTATUS[0]}
+          if [ "$code" != 0 ] && grep -q "Uploaded dehub-builder-apps" deploy.log && grep -q "workers/routes) failed" deploy.log; then
+            echo "::warning::Worker uploaded; the token cannot manage zone routes, so the existing *.dhb.gg route was left as it is."
+            exit 0
+          fi
+          exit $code

@@ -40,10 +40,13 @@ import { storageImage, deviceWidth, isMdUp } from '@/lib/media-url';
 import { viewerShareUrl } from '@/lib/share-url';
 import { trackShare } from '@/lib/analytics';
 
+import { formatCount } from '@/lib/format-count';
 interface CommunityHeaderProps {
   community: Community;
   isMember: boolean;
   isPendingMember: boolean;
+  /** Membership is still being read: hold the Join/Leave button back so it can't flash Join at a member. */
+  membershipLoading?: boolean;
   /** Founder, or whoever ownership was transferred to. Only drives the join button. */
   isOwner: boolean;
   /** Holds change_info — inline name/description/avatar/banner/ticker editing. */
@@ -78,7 +81,7 @@ function formatRelativeTime(dateString: string): string {
   return `${years}y`;
 }
 
-export function CommunityHeader({ community, isMember, isPendingMember, isOwner, canEdit, canManage, canInvite, onManage, isPending, onJoinLeave, autoInvite }: CommunityHeaderProps) {
+export function CommunityHeader({ community, isMember, isPendingMember, membershipLoading = false, isOwner, canEdit, canManage, canInvite, onManage, isPending, onJoinLeave, autoInvite }: CommunityHeaderProps) {
   const { walletAddress } = useAuth();
   const { openPostModal } = useGlobalDropZone();
   const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -142,7 +145,8 @@ export function CommunityHeader({ community, isMember, isPendingMember, isOwner,
   const avatarSrc = storageImage(community.avatar_url, deviceWidth(104));
   const hasBanner = !!community.banner_url;
   const buttonBase = 'rounded-xl gap-1.5 h-9 px-3 bg-white/10 border border-white/20 text-white hover:bg-white/15';
-  const joinPrimary = !isOwner && !isMember && !isPendingMember;
+  const holdJoin = membershipLoading && !isOwner && !isMember;
+  const joinPrimary = !holdJoin && !isOwner && !isMember && !isPendingMember;
   // Optional: a member can put this community's chat in their Messages list.
   // Groups and channels are always there, so they get no button.
   const { byId: chatPrefs, update: updateChatPref } = useChatPrefs();
@@ -363,16 +367,17 @@ export function CommunityHeader({ community, isMember, isPendingMember, isOwner,
         ) : null}
 
         <p className="mt-3 text-sm text-zinc-400">
-          <span className="font-bold text-white tabular-nums">{community.member_count.toLocaleString()}</span> {t('communities.members')}
+          <span className="font-bold text-white tabular-nums">{formatCount(community.member_count)}</span> {t('communities.members')}
         </p>
 
         {/* Actions */}
         <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
           <Button
             size="sm"
-            disabled={isPending || isOwner}
+            disabled={isPending || isOwner || holdJoin}
             onClick={onJoinLeave}
-            className={`rounded-xl gap-1.5 h-9 ${
+            aria-hidden={holdJoin || undefined}
+            className={`rounded-xl gap-1.5 h-9 ${holdJoin ? 'invisible ' : ''}${
               joinPrimary
                 ? 'px-6 bg-white text-black font-bold border border-white hover:bg-white/90'
                 : isMember

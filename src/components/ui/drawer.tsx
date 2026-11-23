@@ -1,6 +1,9 @@
 import * as React from "react";
+import { overlayRoot } from "@/lib/overlay-root";
 import { Drawer as DrawerPrimitive } from "vaul";
 
+import { useTranslation } from "react-i18next";
+import X from "@/components/ui/cut-icons/close";
 import { cn } from "@/lib/utils";
 import { OverlayOpenTracker } from "@/lib/overlay-open";
 import { guardOutsideDismiss } from "@/lib/overlay-dismiss";
@@ -140,12 +143,18 @@ export function warmDeferredSheets(): void {
 type CustomDrawerProps = React.ComponentProps<typeof DrawerPrimitive.Root> & {
   /** Opt this deferred sheet in to `warmDeferredSheets()` — see the note there. */
   warmable?: boolean;
+  /**
+   * Mount this one sheet out of dormancy now, closed, because its opener is a
+   * keystroke away (the @ list, once an @ is typed). Same early mount as
+   * `warmable`, but for this sheet alone rather than every listening one.
+   */
+  warm?: boolean;
   walletPrompt?: boolean;
   /** Let this sheet complete Vaul's 500ms exit; other sheets close immediately. */
   animatedExit?: boolean;
 };
 
-const Drawer = ({ shouldScaleBackground = false, modal = true, onOpenChange, warmable = false, walletPrompt = false, animatedExit = false, children, ...props }: CustomDrawerProps) => {
+const Drawer = ({ shouldScaleBackground = false, modal = true, onOpenChange, warmable = false, warm = false, walletPrompt = false, animatedExit = false, children, ...props }: CustomDrawerProps) => {
   const unlockOpen = useWalletUnlockPrompt();
   const lifetime = useOverlayLifetime(props.open, props.defaultOpen, onOpenChange, animatedExit ? 550 : 0);
   const canDeferRef = React.useRef<boolean | null>(null);
@@ -159,8 +168,8 @@ const Drawer = ({ shouldScaleBackground = false, modal = true, onOpenChange, war
   );
 
   React.useEffect(() => {
-    if (phase === "dormant" && lifetime.open) setPhase("mounting");
-  }, [phase, lifetime.open]);
+    if (phase === "dormant" && (lifetime.open || warm)) setPhase("mounting");
+  }, [phase, lifetime.open, warm]);
 
   // Same transition the open path runs, just early: a warm request mounts the
   // Root closed now so the real `open` flip later is same-frame. Once live the
@@ -252,7 +261,11 @@ Drawer.displayName = "Drawer";
 
 const DrawerTrigger = DrawerPrimitive.Trigger;
 
-const DrawerPortal = DrawerPrimitive.Portal;
+/* A `container` on the Portal, not on the Root: the Root's one also flips
+   vaul into its "custom container" layout (absolute instead of fixed). */
+const DrawerPortal = (props: React.ComponentProps<typeof DrawerPrimitive.Portal>) => (
+  <DrawerPrimitive.Portal container={overlayRoot()} {...props} />
+);
 
 const DrawerClose = DrawerPrimitive.Close;
 
@@ -288,10 +301,66 @@ DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName;
 const COLUMN_CLASS =
   "md:left-[var(--app-main-left,0px)] md:right-auto md:w-[var(--app-main-width,100vw)]";
 
+/** How a sheet's own close control is recognised: the close glyph, or an explicit mark. */
+const OWN_CLOSE = '[data-cut-icon="CutClose"], .lucide-x, [data-drawer-close], [aria-label="Close"]';
+
+/**
+ * Every sheet can be closed from the sheet itself.
+ *
+ * Tapping the backdrop and dragging down both work, but neither is visible, and
+ * a tall sheet leaves almost no backdrop to tap. Most sheets draw their own X
+ * in their header; this supplies one, in the same corner, to the ones that do
+ * not, so no sheet is left without it and none ends up with two.
+ *
+ * It looks for the sheet's own X in the DOM rather than taking a prop, because
+ * a sheet body is often a component of its own and a prop at the call site
+ * cannot see into it. The check re-runs as the body changes, since a header
+ * that arrives with loaded data brings its X with it.
+ *
+ * 12px in from the top and from the side, on an 8-unit square, so the glyph
+ * sits the same distance from both edges of the corner.
+ */
+function DrawerAutoClose() {
+  const { t } = useTranslation();
+  const probe = React.useRef<HTMLSpanElement>(null);
+  const [needed, setNeeded] = React.useState(false);
+
+  React.useLayoutEffect(() => {
+    const sheet = probe.current?.closest("[data-vaul-drawer]");
+    if (!sheet) return;
+    const check = () => {
+      const own = Array.from(sheet.querySelectorAll(OWN_CLOSE)).some(
+        (el) => !el.closest("[data-drawer-auto-close]") && el.closest("[data-vaul-drawer]") === sheet,
+      );
+      setNeeded(!own);
+    };
+    check();
+    if (typeof MutationObserver === "undefined") return;
+    const observer = new MutationObserver(check);
+    observer.observe(sheet, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <>
+      <span ref={probe} hidden />
+      {needed && (
+        <DrawerPrimitive.Close
+          data-drawer-auto-close
+          aria-label={t("copy.7d9eb7acb13e", { defaultValue: "Close" })}
+          className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-lg text-current opacity-70 transition-opacity hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+        >
+          <X className="h-5 w-5" />
+        </DrawerPrimitive.Close>
+      )}
+    </>
+  );
+}
+
 const DrawerContent = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content> & { glass?: boolean; hideHandle?: boolean; handleClassName?: string; noOverlay?: boolean; overlayClassName?: string; column?: boolean; scrollable?: boolean }
->(({ className, children, glass = false, hideHandle = true, handleClassName, noOverlay = false, overlayClassName, column = false, scrollable = false, onPointerDownOutside, ...props }, ref) => {
+  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content> & { glass?: boolean; hideHandle?: boolean; handleClassName?: string; noOverlay?: boolean; overlayClassName?: string; column?: boolean; scrollable?: boolean; /** Opt out of the corner X for a sheet that must be answered, not closed. */ hideClose?: boolean }
+>(({ className, children, glass = false, hideHandle = true, handleClassName, noOverlay = false, overlayClassName, column = false, scrollable = false, hideClose = false, onPointerDownOutside, ...props }, ref) => {
   const rootMounted = React.useContext(DrawerRootMounted);
   const present = React.useContext(OverlayContentPresent);
   const surfaceRef = useOverlayExitRef(ref);
@@ -305,6 +374,10 @@ const DrawerContent = React.forwardRef<
         sticky feed navs / mobile header get out of the way (lib/overlay-open). */}
     <OverlayOpenTracker />
     {!noOverlay && <DrawerOverlay className={cn(glass ? "bg-black/20 backdrop-blur-md" : undefined, overlayClassName)} />}
+    {/* A modal sheet with no backdrop still has to keep the page behind it
+        from taking the press that dismisses it. Shown only while Radix has the
+        page marked modal (index.css), so a non-modal sheet is unaffected. */}
+    {noOverlay && <div data-overlay-shield aria-hidden className="fixed inset-0 z-[100]" />}
     <DrawerPrimitive.Content
       ref={surfaceRef}
       className={cn(
@@ -357,6 +430,7 @@ const DrawerContent = React.forwardRef<
           {children}
         </div>
       ) : children}
+      {!hideClose && <DrawerAutoClose />}
     </DrawerPrimitive.Content>
   </DrawerPortal>
   );

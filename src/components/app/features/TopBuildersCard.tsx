@@ -21,6 +21,8 @@ import { cn } from '@/lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { COMMENT_CAP, COMMENT_POINTS, SHIPPED_POINTS, VOTE_POINTS, type BuilderPeriod, type TopBuilder } from '@/lib/top-builders';
 
+import { formatCount } from '@/lib/format-count';
+import { profilePath } from '@/lib/profile-path';
 const SHOWN = 8;
 /** Extra rows added per "Show more" tap once the full list is open. */
 const PAGE = 20;
@@ -129,6 +131,8 @@ function PointsInfo() {
 function BuilderRow({ b, rank, max, open, onToggle, mine }: { b: TopBuilder; rank: number; max: number; open: boolean; onToggle: () => void; mine?: boolean }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  // exact-number: the expanded leaderboard row reveals the actual score.
+  const exactScore = b.points.toLocaleString();
   return (
     <div className={cn('rounded-xl', mine && 'bg-white/[0.06] ring-1 ring-white/10')}>
       <button
@@ -145,7 +149,7 @@ function BuilderRow({ b, rank, max, open, onToggle, mine }: { b: TopBuilder; ran
               <span className="truncate">{mine ? t('features.topBuilders.you', 'You') : displayName(b)}</span>
               {b.username && <BadgeIcon username={b.username} lookupId={b.wallet} className="w-[1em] h-[1em] shrink-0" />}
             </span>
-            <span className="tabular-nums">{b.points}</span>
+            <span className="shrink-0 tabular-nums" title={exactScore}>{open ? exactScore : formatCount(b.points)}</span>
           </span>
           <ScoreBar builder={b} max={max} />
           {open && <Breakdown b={b} />}
@@ -155,7 +159,7 @@ function BuilderRow({ b, rank, max, open, onToggle, mine }: { b: TopBuilder; ran
         <div className="flex justify-end px-1.5 pb-1.5">
           <button
             type="button"
-            onClick={() => navigate(b.username ? `/${b.username}` : `/app/profile?id=${b.wallet}`)}
+            onClick={() => navigate(b.username ? profilePath(b.username) : `/app/profile?id=${b.wallet}`)}
             className="rounded-lg px-2.5 py-1 text-xs text-zinc-300 hover:text-white bg-white/[0.06]"
           >
             {t('features.topBuilders.viewProfile', 'View profile')}

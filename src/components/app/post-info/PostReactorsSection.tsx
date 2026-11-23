@@ -19,6 +19,8 @@ import { buildAvatarUrl, extractAvatarPath } from '@/lib/media-url';
 import { engagementWeight, NO_BADGE_ENGAGEMENT_WEIGHT } from '@/lib/engagement-weight';
 import { ReactionInfoDrawer } from '@/components/app/cards/ReactionInfoDrawer';
 
+import { formatCount } from '@/lib/format-count';
+import { profilePath } from '@/lib/profile-path';
 const PREVIEW_COUNT = 5;
 const EMOJI = new Map(REACTION_LIST.map((meta) => [meta.key, meta.emoji]));
 
@@ -41,7 +43,7 @@ export function PostReactorsSection({ tokenId }: { tokenId: string | number }) {
   const hasMore = !!data?.pagination?.hasMore || anonymousCount > 0;
 
   const goToProfile = (person: PostLiker) => {
-    if (person.username) navigate(`/${person.username.replace('@', '')}`);
+    if (person.username) navigate(profilePath(person.username.replace('@', '')));
     else if (person.address) navigate(`/app/profile?id=${person.address}`);
   };
 
@@ -49,7 +51,7 @@ export function PostReactorsSection({ tokenId }: { tokenId: string | number }) {
     <section data-post-reactors className="bg-white/5 rounded-xl p-4 border border-white/10">
       <h2 className="text-sm font-medium text-white/60 mb-3">
         {t('reactionInfo.title')}
-        {totalCount > 0 && <span className="text-white/40 font-normal"> · {totalCount}</span>}
+        {totalCount > 0 && <span className="text-white/40 font-normal"> · {formatCount(totalCount)}</span>}
       </h2>
 
       {isLoading ? (

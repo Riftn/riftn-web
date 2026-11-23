@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { normalizeFieldValue, presetOf, splitProfileFields } from '@/lib/profile-field-presets';
+import { editableFieldValue, normalizeFieldValue, presetOf, splitProfileFields } from '@/lib/profile-field-presets';
 
 describe('profile field presets', () => {
   it('reads old typed labels as their preset', () => {
@@ -28,5 +28,18 @@ describe('profile field presets', () => {
     ]);
     expect(links.map((l) => [l.preset, l.url])).toEqual([['website', 'https://a.example/']]);
     expect(rest.map((r) => r.name)).toEqual(['Website', 'Pronouns', 'Mastodon']);
+  });
+
+  it('saves a Cash App cashtag as a cash.app link and edits it as $cashtag', () => {
+    expect(presetOf('Cash App')).toBe('cashapp');
+    expect(presetOf('cashtag')).toBe('cashapp');
+    for (const typed of ['$Mal_99', 'Mal_99', 'cash.app/$Mal_99', 'https://cash.app/$Mal_99/']) {
+      expect(normalizeFieldValue('cashapp', typed)).toBe('https://cash.app/$Mal_99');
+    }
+    expect(normalizeFieldValue('cashapp', '$ not valid')).toBe('$ not valid');
+    expect(editableFieldValue('cashapp', 'https://cash.app/$Mal_99')).toBe('$Mal_99');
+    expect(editableFieldValue('website', 'https://a.example')).toBe('a.example');
+    const { links } = splitProfileFields([{ name: 'Cash App', value: 'https://cash.app/$Mal_99' }]);
+    expect(links.map((l) => [l.preset, l.url])).toEqual([['cashapp', 'https://cash.app/$Mal_99']]);
   });
 });

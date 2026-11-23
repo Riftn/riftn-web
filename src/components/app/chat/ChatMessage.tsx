@@ -1,6 +1,8 @@
+import { formatMessageTime } from '@/i18n/date-locale';
 import { outsideImage } from '@/lib/outside-image';
 import { useTranslation as _useCopy } from 'react-i18next';
-import { useDraftState } from '@/hooks/use-draft-state';
+import { InPlaceEditField, editOnClick } from './InPlaceEdit';
+import { cn } from '@/lib/utils';
 import { useState, useCallback, useRef, memo } from 'react';
 import { toast } from 'sonner';
 import Copy from '@/components/ui/cut-icons/copy';
@@ -10,10 +12,11 @@ import { useSwipeReply } from '@/hooks/use-swipe-reply';
 import { dblClickReply } from '@/lib/dblclick-reply';
 import { ChatHoldSheet, isTouchHold, type ChatHoldAction } from './ChatHoldSheet';
 import { MessageMenu, type MessageMenuAction } from './MessageMenu';
+import { copyLinkLabel } from '@/lib/chat-message-link';
 import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreButton, copyMediaWithToast } from './message-menu-kit';
 import { copyableMediaUrl } from '@/lib/copy-media';
 import Images from '@/components/ui/cut-icons/images';
-import { ShieldBan, Loader2, RotateCcw, CornerDownRight } from "lucide-react";
+import { ShieldBan, Loader2, CornerDownRight } from "lucide-react";
 import ShieldCheck from "@/components/ui/cut-icons/security";
 import Languages from "@/components/ui/cut-icons/language";
 import Reply from "@/components/ui/cut-icons/reply";
@@ -33,6 +36,8 @@ import { useTranslation as useTextTranslation } from '../TranslatableText';
 import { useTranslateUp } from '@/hooks/use-translate-up';
 import { useStableNavigate } from '@/hooks/use-stable-navigate';
 import { useQueryClient } from '@tanstack/react-query';
+import { useDeHubProfile } from '@/hooks/use-dehub-profile';
+import { localTimeLine, useProfileLocalTime } from '@/hooks/use-profile-local-time';
 import { seedProfileCache } from '@/lib/profile-cache-seed';
 import type { BadgeLock } from '@/lib/staking-badges';
 import { BadgeIcon } from '@/components/app/BadgeIcon';
@@ -42,6 +47,7 @@ import { ReactionGlyph, RollingCount, useReactionHost } from './ReactionArrival'
 import { ChatReactorsDrawer } from './ChatReactorsDrawer';
 import { SendStatus } from './SendStatus';
 import { FullscreenImageViewerLazy } from '@/components/app/cards/FullscreenImageViewerLazy';
+import { profilePath } from '@/lib/profile-path';
 
 /** Avatar with cascading fallback: primary → CDN → initials */
 function ChatAvatar({ src, address, name, className }: { src?: string; address?: string; name: string; className?: string }) {
@@ -120,6 +126,8 @@ interface ChatMessageProps {
   onDiscardSend?: (clientKey: string) => void;
   /** Open the room's search on everything this line's sender has said. */
   onSeeMessages?: (message: Message) => void;
+  /** "Copy link": a riftn.com link that opens this chat on this line. */
+  onCopyLink?: (message: Message) => void;
   /** Live chat on phones: frame the held line, and outline the line being answered. */
   holdFrame?: boolean;
   replying?: boolean;
@@ -234,6 +242,7 @@ export const ChatMessage = memo(function ChatMessage({
   onRetrySend,
   onDiscardSend,
   onSeeMessages,
+  onCopyLink,
   holdFrame,
   replying,
   onTogglePin,
@@ -254,7 +263,7 @@ export const ChatMessage = memo(function ChatMessage({
   const queryClient = useQueryClient();
   const [viewingImage, setViewingImage] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [draft, setDraft] = useDraftState(`chat:edit:${message.id}`, message.content);
+  const [editCaret, setEditCaret] = useState<number | null>(null);
 
   const isMine = !!currentUserAddress && message.userId.toLowerCase() === currentUserAddress.toLowerCase();
   // Only the words are editable. A caption swap under an image or a voice note
@@ -262,19 +271,12 @@ export const ChatMessage = memo(function ChatMessage({
   const canEdit = isMine && !!onEdit && message.type === 'text';
   const canDelete = isMine && !!onDelete;
 
-  const startEditing = useCallback(() => {
-    setDraft.initialize(message.content);
+  const startEditing = useCallback((caret: number | null = null) => {
+    setEditCaret(caret);
     setIsEditing(true);
-  }, [message.content, setDraft]);
-
-  const commitEdit = useCallback(async () => {
-    const next = draft.trim();
-    if (!next) return;
-    try {
-      const result = next === message.content ? true : await onEdit?.(message.id, next);
-      if (result !== false && setDraft.complete(draft, draft)) setIsEditing(false);
-    } catch { /* Keep the edit available for retry. */ }
-  }, [draft, message.content, message.id, onEdit, setDraft]);
+  }, []);
+  const saveEdit = useCallback((next: string) => onEdit?.(message.id, next), [message.id, onEdit]);
+  const stopEditing = useCallback(() => setIsEditing(false), []);
   const {
     isTranslated,
     translatedText,
@@ -284,6 +286,7 @@ export const ChatMessage = memo(function ChatMessage({
     handleTranslate,
     handleShowOriginal,
   } = useTextTranslation(message.content, 'chat');
+  const canTranslate = (message.type === 'text' || message.type === 'image') && !!message.content?.trim() && !isTooShort;
   // Translate also translates every message above this one that still needs it.
   const translateUp = useTranslateUp(
     'room',
@@ -300,9 +303,6 @@ export const ChatMessage = memo(function ChatMessage({
   );
   const { refs: chatAssetRefs, displayText: chatDisplayText } = useAssetRefsInText(chatLinkFreeText);
 
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
 
   const formatDate = (date: Date) => {
     const dd = String(date.getDate()).padStart(2, '0');
@@ -314,7 +314,7 @@ export const ChatMessage = memo(function ChatMessage({
   const handleProfileClick = () => {
     if (message.userHandle) {
       seedProfileCache(queryClient, { address: message.userId, username: message.userHandle, displayName: message.userName, avatarUrl: message.userAvatar }, currentUserAddress || undefined);
-      navigate(`/${message.userHandle}`);
+      navigate(profilePath(message.userHandle));
     }
   };
 
@@ -341,6 +341,10 @@ export const ChatMessage = memo(function ChatMessage({
   const [holdOpen, setHoldOpen] = useState(false);
   // Right-click with a mouse: the menu opens where the pointer is.
   const menuPoint = useMenuPoint();
+  const authorLookup = holdOpen || menuPoint.mounted ? message.userId : undefined;
+  const { data: author } = useDeHubProfile({ userId: authorLookup, address: currentUserAddress || undefined, enabled: !!authorLookup });
+  const authorLocalTime = useProfileLocalTime(author?.customs?.publicTimeZone);
+  const localTimeLabel = localTimeLine(_copy as never, authorLocalTime, author?.customs?.publicTimeZone) || undefined;
   const canHold = !message.sendState;
   const hold = useHoldMenu((point, target) => {
     if (isEditing) return false;
@@ -363,14 +367,15 @@ export const ChatMessage = memo(function ChatMessage({
   // A photo or GIF can be copied as itself, not just its caption.
   const mediaUrl = (message.type === 'image' || message.type === 'gif') ? copyableMediaUrl(message.imageUrl) : null;
   const copyMediaNow = mediaUrl ? () => copyMediaWithToast(mediaUrl, message.type === 'gif' ? 'gif' : 'image', _copy) : null;
-  if (copyMediaNow) holdActions.push({ key: 'copy-media', icon: <Images />, label: _copy('chatHold.copyMedia', { defaultValue: 'Copy media' }), onSelect: copyMediaNow });
-  if (message.type === 'text' && message.content?.trim() && !isTooShort) holdActions.push(
+  if (onCopyLink) holdActions.push({ key: 'copy-link', icon: menuIcons.link, label: copyLinkLabel(), onSelect: () => onCopyLink(message) });
+  if (onSeeMessages) holdActions.push({ key: 'their-messages', icon: <SearchIcon />, label: _copy('chatSearch.theirMessages', { defaultValue: 'Their messages' }), onSelect: () => onSeeMessages(message) });
+  if (canTranslate) holdActions.push(
     isTranslated
       ? { key: 'original', icon: <Languages />, label: _copy('chatHold.showOriginal', { defaultValue: 'Original' }), onSelect: handleShowOriginal }
       : { key: 'translate', icon: <Languages />, label: _copy('chatHold.translate', { defaultValue: 'Translate' }), onSelect: translateUp },
   );
-  if (onSeeMessages) holdActions.push({ key: 'their-messages', icon: <SearchIcon />, label: _copy('chatSearch.theirMessages', { defaultValue: 'Their messages' }), onSelect: () => onSeeMessages(message) });
-  if (canEdit) holdActions.push({ key: 'edit', icon: <Pencil />, label: _copy('copy.464c4ffd019e', { defaultValue: 'Edit' }), onSelect: startEditing });
+  if (copyMediaNow) holdActions.push({ key: 'copy-media', icon: <Images />, label: _copy('chatHold.copyMedia', { defaultValue: 'Copy media' }), onSelect: copyMediaNow });
+  if (canEdit) holdActions.push({ key: 'edit', icon: <Pencil />, label: _copy('copy.464c4ffd019e', { defaultValue: 'Edit' }), onSelect: () => startEditing() });
   if ((canDelete || showActions) && onDelete) holdActions.push({ key: 'delete', destructive: true, secondary: true, icon: <Trash2 />, label: _copy('copy.e2d0a54968ea', { defaultValue: 'Delete' }), onSelect: () => onDelete(message.id) });
   if (showActions && !isMine && onBan) holdActions.push({ key: 'ban', destructive: true, secondary: true, icon: <ShieldBan />, label: _copy('chatHold.ban', { defaultValue: 'Ban' }), onSelect: () => onBan(message.userId, message.userName) });
   if (showActions && !isMine && onUnban) holdActions.push({ key: 'unban', secondary: true, icon: <ShieldCheck />, label: _copy('chatHold.unban', { defaultValue: 'Unban' }), onSelect: () => onUnban(message.userId, message.userName) });
@@ -390,11 +395,12 @@ export const ChatMessage = memo(function ChatMessage({
   };
   const menuActions: MessageMenuAction[] = [];
   if (onReply) menuActions.push({ key: 'reply', icon: menuIcons.reply, label: _copy('copy.c253f451bdd5', { defaultValue: 'Reply' }), onSelect: () => onReply(message), hint: 'R' });
-  if (canEdit) menuActions.push({ key: 'edit', icon: menuIcons.edit, label: _copy('copy.464c4ffd019e', { defaultValue: 'Edit' }), onSelect: startEditing, hint: 'E' });
+  if (canEdit) menuActions.push({ key: 'edit', icon: menuIcons.edit, label: _copy('copy.464c4ffd019e', { defaultValue: 'Edit' }), onSelect: () => startEditing(), hint: 'E' });
   if (showActions && onTogglePin) menuActions.push({ key: 'pin', icon: isPinned ? menuIcons.unpin : menuIcons.pin, label: isPinned ? _copy('copy.ee3c71613054', { defaultValue: 'Unpin' }) : _copy('chatHold.pin', { defaultValue: 'Pin' }), onSelect: () => onTogglePin(message), hint: 'P' });
   if (message.content?.trim()) menuActions.push({ key: 'copy', icon: menuIcons.copy, label: _copy('msgMenu.copyText', { defaultValue: 'Copy Text' }), onSelect: copyText, hint: 'C' });
+  if (onCopyLink) menuActions.push({ key: 'copy-link', icon: menuIcons.link, label: copyLinkLabel(), onSelect: () => onCopyLink(message), hint: 'L' });
   if (copyMediaNow) menuActions.push({ key: 'copy-media', icon: menuIcons.copyMedia, label: _copy('msgMenu.copyMedia', { defaultValue: 'Copy Media' }), onSelect: copyMediaNow });
-  if (message.type === 'text' && message.content?.trim() && !isTooShort) menuActions.push(
+  if (canTranslate) menuActions.push(
     isTranslated
       ? { key: 'original', icon: menuIcons.translate, label: _copy('chatHold.showOriginal', { defaultValue: 'Original' }), onSelect: handleShowOriginal }
       : { key: 'translate', icon: menuIcons.translate, label: _copy('chatHold.translate', { defaultValue: 'Translate' }), onSelect: translateUp, hint: 'T' },
@@ -403,7 +409,7 @@ export const ChatMessage = memo(function ChatMessage({
   if ((canDelete || showActions) && onDelete) menuActions.push({ key: 'delete', divided: true, destructive: true, icon: menuIcons.delete, label: _copy('copy.e2d0a54968ea', { defaultValue: 'Delete' }), onSelect: () => onDelete(message.id) });
   if (showActions && !isMine && onBan) menuActions.push({ key: 'ban', divided: !((canDelete || showActions) && onDelete), destructive: true, icon: menuIcons.ban, label: _copy('chatHold.ban', { defaultValue: 'Ban' }), onSelect: () => onBan(message.userId, message.userName) });
   if (showActions && !isMine && onUnban) menuActions.push({ key: 'unban', icon: menuIcons.unban, label: _copy('chatHold.unban', { defaultValue: 'Unban' }), onSelect: () => onUnban(message.userId, message.userName) });
-  if (showActions && onTogglePin) holdActions.splice(Math.min(1, holdActions.length), 0, {
+  if (showActions && onTogglePin) holdActions.push({
     key: 'pin', icon: isPinned ? menuIcons.unpin : menuIcons.pin,
     label: isPinned ? _copy('copy.ee3c71613054', { defaultValue: 'Unpin' }) : _copy('chatHold.pin', { defaultValue: 'Pin' }),
     onSelect: () => onTogglePin(message),
@@ -421,8 +427,10 @@ export const ChatMessage = memo(function ChatMessage({
       mine={mineReactions}
       onReact={handleQuickReact}
       actions={holdActions}
+      scrollActions
       frame={holdFrame}
       reactors={reactors}
+      meta={localTimeLabel}
     />
   );
   const menu = menuPoint.mounted ? (
@@ -434,7 +442,7 @@ export const ChatMessage = memo(function ChatMessage({
       onReact={handleQuickReact}
       actions={menuActions}
       reactors={reactors}
-      meta={messageMenuMeta(message.timestamp, message.isEdited)}
+      meta={[messageMenuMeta(message.timestamp, message.isEdited), localTimeLabel].filter(Boolean).join(' · ')}
     />
   ) : null;
 
@@ -508,57 +516,34 @@ export const ChatMessage = memo(function ChatMessage({
         </div>
         
         {message.type === 'text' && isEditing && (
-          <div className="mt-1">
-            <textarea
-              autoFocus
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  commitEdit();
-                } else if (e.key === 'Escape') {
-                  e.preventDefault();
-                  setIsEditing(false);
-                }
-              }}
-              rows={2}
-              maxLength={500}
-              className="w-full resize-none rounded-lg border border-white/15 bg-white/[0.06] px-2 py-1.5 text-sm text-white outline-none focus:border-white/30"
-            />
-            <div className="mt-1 flex items-center gap-2 text-[10px] text-zinc-500">
-              <button onClick={commitEdit} className="text-white hover:underline">{_copy("copy.1509f561f241", { defaultValue: "Save" })}</button>
-              <button onClick={() => setIsEditing(false)} className="hover:text-zinc-300">{_copy("copy.19766ed6ccb2", { defaultValue: "Cancel" })}</button>
-              <span className="hidden sm:inline">{_copy("copy.f9ddeccf9629", { defaultValue: "Enter to save · Esc to cancel" })}</span>
-            </div>
-          </div>
+          <InPlaceEditField
+            keepOpenOnTouchBlur
+            draftKey={`chat:edit:${message.id}`}
+            text={message.content}
+            caret={editCaret}
+            onSave={saveEdit}
+            onDone={stopEditing}
+            maxLength={500}
+            className="text-zinc-300 text-sm whitespace-pre-wrap"
+          />
         )}
 
         {message.type === 'text' && !isEditing && (
             <div>
               {chatDisplayText && (
-                <p className="text-zinc-300 text-sm break-words whitespace-pre-wrap">
+                <p
+                  className={cn("text-zinc-300 text-sm break-words whitespace-pre-wrap", canEdit && !isTranslated && "cursor-text")}
+                  onClick={canEdit && !isTranslated ? editOnClick((caret) => startEditing(chatDisplayText === message.content ? caret : null)) : undefined}
+                >
                   {renderTextWithLinks(chatDisplayText)}
                 </p>
               )}
               <DehubLinkEmbeds links={chatDehubLinks} />
               <AssetRefCards refs={chatAssetRefs} />
               <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="text-zinc-500 text-[10px] whitespace-nowrap">{formatDate(message.timestamp)} {formatTime(message.timestamp)}</span>
+                <span className="text-zinc-500 text-[10px] whitespace-nowrap">{formatDate(message.timestamp)} {formatMessageTime(message.timestamp)}</span>
                 {sendMark}
-                {!isTooShort && (
-                  isTranslateLoading ? (
-                    <Loader2 className="w-2.5 h-2.5 text-zinc-500 animate-spin" />
-                  ) : isTranslated ? (
-                    <button onClick={handleShowOriginal} className="flex items-center text-zinc-500 hover:text-zinc-300 transition-colors">
-                      <RotateCcw className="w-2.5 h-2.5" />
-                    </button>
-                  ) : (
-                    <button onClick={translateUp} className="flex items-center text-zinc-500 hover:text-zinc-300 transition-colors">
-                      <Languages className="w-3 h-3" />
-                    </button>
-                  )
-                )}
+                {isTranslateLoading && <Loader2 className="w-2.5 h-2.5 text-zinc-500 animate-spin" />}
                 {translateError && (
                   <span className="text-zinc-500 text-[10px]">{translateError}</span>
                 )}
@@ -587,21 +572,9 @@ export const ChatMessage = memo(function ChatMessage({
               </p>
             )}
             <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="text-zinc-500 text-[10px] whitespace-nowrap">{formatDate(message.timestamp)} {formatTime(message.timestamp)}</span>
+              <span className="text-zinc-500 text-[10px] whitespace-nowrap">{formatDate(message.timestamp)} {formatMessageTime(message.timestamp)}</span>
                 {sendMark}
-              {message.content && !isTooShort && (
-                isTranslateLoading ? (
-                  <Loader2 className="w-2.5 h-2.5 text-zinc-500 animate-spin" />
-                ) : isTranslated ? (
-                  <button onClick={handleShowOriginal} className="flex items-center text-zinc-500 hover:text-zinc-300 transition-colors">
-                    <RotateCcw className="w-2.5 h-2.5" />
-                  </button>
-                ) : (
-                  <button onClick={translateUp} className="flex items-center text-zinc-500 hover:text-zinc-300 transition-colors">
-                    <Languages className="w-3 h-3" />
-                  </button>
-                )
-              )}
+              {isTranslateLoading && <Loader2 className="w-2.5 h-2.5 text-zinc-500 animate-spin" />}
             </div>
           </div>
         )}
@@ -620,7 +593,7 @@ export const ChatMessage = memo(function ChatMessage({
           <div className="mt-1 flex flex-col gap-1">
             <VoiceWaveformPlayer src={message.audioUrl} />
             <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="text-zinc-500 text-[10px] whitespace-nowrap">{formatDate(message.timestamp)} {formatTime(message.timestamp)}</span>
+              <span className="text-zinc-500 text-[10px] whitespace-nowrap">{formatDate(message.timestamp)} {formatMessageTime(message.timestamp)}</span>
                 {sendMark}
             </div>
           </div>

@@ -38,6 +38,12 @@ export interface SendMessagePayload {
    * decrypts, re-encrypts for the target and cites the original here.
    */
   forwardedFrom?: { messageId: string };
+  /** One-to-one text: held by the server until the other person next comes online. */
+  whenOnline?: boolean;
+  /** "Send in their language": what was typed, when `content` is its translation. */
+  original?: string;
+  /** The language `content` was translated into. */
+  translatedTo?: string;
 }
 
 export interface EditedMessage {
@@ -47,6 +53,8 @@ export interface EditedMessage {
   dmId: string;
   content: string;
   editedAt: string;
+  /** Set when the edit went out in their language; null clears an older one. */
+  original?: { content: string; lang: string } | null;
 }
 
 export interface DeletedMessage {
@@ -394,6 +402,9 @@ export interface EditMessagePayload {
   dmId: string;
   messageId: string;
   content: string;
+  /** "Send in their language": what was typed, when `content` is its translation. */
+  original?: string;
+  translatedTo?: string;
 }
 
 /**

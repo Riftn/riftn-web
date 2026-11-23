@@ -18,10 +18,9 @@ import type { ShortVideo, VideoItem } from '@/types/feed.types';
 import { videoNeedsAccess } from '@/lib/api/dehub/video-access';
 import { duetOfPost } from '@/lib/duet';
 
+import { formatCount as formatShortCount } from '@/lib/format-count';
 export function formatLikes(count: number): string {
-  if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
-  if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
-  return String(count);
+  return formatShortCount(count);
 }
 
 // Parse duration string to seconds (e.g., "0:15" → 15)
@@ -31,6 +30,22 @@ export function parseDurationToSeconds(duration: string): number {
   if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
   if (parts.length === 2) return parts[0] * 60 + parts[1];
   return parts[0] || 0;
+}
+
+/** Cover mature media before any viewer player, poster or preloader receives it. */
+export function asViewerSlide(short: ShortVideo): ShortVideo {
+  if (short.contentRating !== 'mature' || short.reelPost?.kind === 'mature') return short;
+  return {
+    ...short,
+    reelPost: { kind: 'mature' },
+    thumbnail: '',
+    videoUrl: '',
+    hlsUrl: undefined,
+    storyboard: undefined,
+    imageUrls: undefined,
+    soundtrackUrl: undefined,
+    duetOf: undefined,
+  };
 }
 
 // Map video NFT to ShortVideo format

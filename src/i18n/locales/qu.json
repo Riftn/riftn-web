@@ -1,4 +1,5 @@
 {
+  "dmVideo": {"edit": "Video qillqay", "hiddenTag": "Pakasqa", "tapToEdit": "Qillqanapaq ñit'iy", "cover": "Qallariy", "trim": "Kuchuy", "mirror": "Espejo", "rotate": "Muyuchiy", "hide": "Pakay", "timer": "Pacha tupuy", "sheetTitleAny": "Manaraq kachashaspa qillqay", "close": "Wichqay", "replace": "Aylluy", "hiddenUntilTap": "Taqaykama pakay", "pause": "Sayachiy", "play": "Videota pukllachiy", "mute": "Upallachiy", "unmute": "Upallachiyta qichuy", "scrub": "Videota qhawariy", "addMore": "Fotokunata utaq videokunata yapay", "trimAria": "Kuchunankupaq qillqata aysay", "coverAria": "Qallariynin kananpaq huk fotota akllay", "coverHint": "Qallariynin kananpaq huk fotota akllay", "coverOwn": "Sut'iyki", "coverAuto": "Kikinmanta", "uploadCover": "Qallariynin fotota churay", "mirrored": "Espejoman tikrasqa", "original": "Kikin", "rotate90": "90° muyuchiy", "showNormally": "Sapaqllata rikuchiy", "showNormallyBody": "Chaylla rikunkuman", "hideUntilTap": "Taqaykama pakay", "hideUntilTapBody": "Taqaykama llimp'iy", "hidePrice": "Qullqillawan rikuy", "hidePriceBody": "Qullqita qunankukama llimp'iy", "priceUnavailable": "Kay rimanakuypiqa manan", "timerOff": "Paskay", "timerOffBody": "Chayqa rimanakuy ukhupin qepan.", "timerViewBody": "Paykuna rikuqtinkuqa iskayniykichismantan chinkanqa.", "confirm": "Aswan allin", "lockedFor": "{{value1}} DHB kaqpaq kicharimuy", "lockedForUsd": "Kichay {{value1}}", "editItem": "Imatapas allichay {{value1}}", "kept": "{{time}} waqaychasqa", "timerTimeBody": "Kachasqayki qhepaman {{value1}} iskayniykichismantan chinkanqa."},
   "postBg": {
     "addMedia": "Siq'iyta, GIF-ta utaq videota yapay",
     "changeMedia": "Siq'iyta, GIF-ta utaq videota tikray",
@@ -297,8 +298,10 @@
       "pronouns": "Suti rantikuna",
       "location": "Tarikusqan",
       "custom": "Chullachasqa",
-      "customOption": "Etiqueta personalizada nisqa"
-    }
+      "customOption": "Etiqueta personalizada nisqa",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} qatiy",
@@ -2211,7 +2214,7 @@
     "promptDevice": "Dispositivo & OS (pantasqakunapaq) .",
     "deviceInfoNoErrors": "Mana mayqinpas",
     "promptFilters": "Katiguriyawan akllay",
-    "promptMediaError": "Sapakama 50MB nisqamanta pisi siq’ikunata utaq videokunata akllay.",
+    "promptMediaError": "Sapakama 200MB nisqamanta pisi siq’ikunata utaq videokunata akllay.",
     "promptMediaLimit": "{{max}} k'askachiykuna kama.",
     "removePromptAttachment": "{{name}} qichuy",
     "promptAttachment": "K'askachiy {{number}}",
@@ -4242,7 +4245,7 @@
       "pageViewsTerm": "P'anqa qhawariykuna",
       "pageViews": "— Cloudflare p'anqa qhawariy hina churasqan mañakuykuna, mana rikchakuna, script-kuna icha API waqyaykuna hinachu.",
       "botsTerm": "Botskuna yaykusqan kachkan",
-      "bots": "— kaykunaqa ch'usaq 'edge' yupaykunam, chayrayku crawlers, uptime monitors, script kliente-kunapas kaypi kanku. Kikiykipa rikuyta atinki hawapi kaq browser t'aqasqapi, maypichus \"Curl\" hina \"Unknown\" hina qillqasqakunaqa mana runakunachu, ashka kachkan kikinmanta puriq tráficom. Bots-kunata anchhuchinapaqqa Cloudflare-pa pagasqa nivelninta munachikun, mana llamk'achisqaykutachu; huk yupayta pakaymanta hurquyqa yupaykunata aswan mana qhawarina hinam saqinman, mana aswan allintachu.",
+      "bots": "— kaykunaqa ch'usaq 'edge' yupaykunam, chayrayku crawlers, uptime monitors, script kliente-kunapas kaypi kanku. Kikiykipa rikuyta atinki hawapi kaq browser t'aqasqapi, maypichus \"Curl\" hina \"Unknown\" hina qillqasqakunaqa mana runakunachu, ashka kachkan kikinmanta puriq tráficom. Bots-kunata runa watukuqkunamanta rakiyqa aswan sasaña kachkan. Pisi tiempomanta kay yupaykunapi mana rakiyta atisunñachu, chayrayku paykunata anchhuchiyta munayqa mana imapaqpas allinchu.",
       "totalTerm": "Pachapa llapan yupaynin",
       "total": "— p'anqa qhawariykuna, mañakuykunapas pacha ukhupi huñusqa yupakunku. Watukuqkuna yupaykunataq mana huñunchu 'llapan watukuqkuna' hina, imaraykuchus lunes, martes p'unchawpi kaq runaqa iskay kutita yupasqa kanman.",
       "peakTerm": "Aswan llamk'aysapa ura / punchaw",
@@ -20886,5 +20889,27 @@
     "remember": "Akllasqayta yuyariy",
     "rememberHint": "Ima pachapas Churanapi tikray",
     "failed": "Willakuyta mana pichayta atikurqanchu"
+  },
+  "profileAskAi": {
+    "row": "AI-ta tapuy",
+    "rowSub": "Qatiy, llapanta munay, musuqkunata yachay",
+    "back": "Kutiy",
+    "title": "{{handle}}-manta AI-ta tapuy",
+    "sub": "Yanapaq ruwan, qam takyachinki",
+    "followLikeAll": "Qatiy llapanta munaytawan",
+    "followLikeAllSub": "{{handle}}-ta qatin, sapa churasqaman kutichin",
+    "likeAll": "Llapan churasqankunata munay",
+    "likeAllSub": "Ñapas kutichisqaykikunata saqen",
+    "catchUp": "Musuqkunata willaway",
+    "catchUpSub": "{{handle}} qayllapi ima churasqan, pisillapi",
+    "message": "Willakuyta qillqay",
+    "messageSub": "Willakuy borradorta ruwan, qam apachinki",
+    "placeholder": "{{handle}}-manta imatapas tapuy…",
+    "send": "Apachiy",
+    "promptFollowLikeAll": "{{handle}}-ta qatiy, llapan churasqankunaman kutichiy",
+    "promptLikeAll": "{{handle}}-pa llapan churasqankunaman kutichiy",
+    "promptCatchUp": "{{handle}} qayllapi ima churasqanta willaway",
+    "promptMessage": "{{handle}}-man willakuyta qillqanaypaq yanapaway",
+    "promptAbout": "{{handle}}-manta: {{question}}"
   }
 }

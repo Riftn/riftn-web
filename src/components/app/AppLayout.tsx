@@ -58,6 +58,7 @@ import { OnboardingChecklistProvider } from '@/contexts/OnboardingChecklistConte
 import { PiPProvider } from '@/contexts/PiPContext';
 import { ChartPiPProvider } from '@/contexts/ChartPiPContext';
 import { FloatingPiPOverlay } from '@/components/app/tv/FloatingPiPOverlay';
+import { useStoriesStore } from '@/store/storiesStore';
 import { FloatingChartPiPOverlay } from '@/components/app/charts/FloatingChartPiPOverlay';
 import { NewMemberRegistrar } from '@/components/app/NewMemberRegistrar';
 // Lazy: both are self-timed prompts that open seconds after load at the
@@ -123,6 +124,7 @@ import { GlobalFeedNavProvider } from '@/contexts/GlobalFeedNavContext';
 import { useFeedSwallowClip } from '@/hooks/use-feed-swallow-clip';
 import { useStageAlerts } from '@/hooks/use-stage-alerts';
 import { usePublicChatAlerts } from '@/hooks/use-public-chat-alerts';
+import { usePublicChatReadSync } from '@/hooks/use-public-chat-unread';
 import { cn } from '@/lib/utils';
 import { KidsModeGate } from '@/components/app/KidsModeGate';
 // Lazy: only rendered as the post overlay when a post is opened from home —
@@ -136,6 +138,7 @@ const OnlinePresenceHost = React.lazy(() => import('@/components/app/OnlinePrese
 // and mounted only from the first swipe on: the viewer and its five feed
 // queries are nothing to anyone who never makes the gesture.
 const BrainrotFeedHost = React.lazy(() => import('@/components/app/BrainrotFeedHost'));
+const StoriesHost = React.lazy(() => import('@/components/app/stories/StoriesHost'));
 import { useBrainrotEverOpened } from '@/lib/brainrot-feed';
 
 
@@ -257,6 +260,7 @@ function AppLayoutContent({ children }: AppLayoutContentProps) {
   const hasPoppedOutAudio = useAudioPostPoppedOut();
   const spotifyOpen = useSpotifyPlayer().current !== null;
   const brainrotOpened = useBrainrotEverOpened();
+  const storiesMounted = useStoriesStore(st => st.mounted);
 
   // "A stage you set a reminder for is starting soon / just started" — announced
   // wherever you are in the app, so it mounts with the shell rather than on the
@@ -267,6 +271,7 @@ function AppLayoutContent({ children }: AppLayoutContentProps) {
   // reason as the stage alerts above: it has to reach you wherever you are,
   // not only on the page that owns the feature.
   usePublicChatAlerts();
+  usePublicChatReadSync();
 
   // Expose the middle panel's live bounds (the gap between the left/right
   // sidebars) as CSS vars so anything mounted outside AppLayout — the login
@@ -666,6 +671,11 @@ function AppLayoutContent({ children }: AppLayoutContentProps) {
       {brainrotOpened && (
         <Suspense fallback={null}>
           <BrainrotFeedHost />
+        </Suspense>
+      )}
+      {storiesMounted && (
+        <Suspense fallback={null}>
+          <StoriesHost />
         </Suspense>
       )}
       

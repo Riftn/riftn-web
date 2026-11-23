@@ -58,6 +58,8 @@ import {
   type RankedEntry,
 } from '@/lib/leaderboard-rules';
 
+import { formatCount } from '@/lib/format-count';
+import { profilePath } from '@/lib/profile-path';
 // Same project URL and fallback as src/integrations/supabase/client.ts.
 const SUPABASE_URL =
   import.meta.env.VITE_SUPABASE_URL || 'https://aigxuutjaqsywioxjefr.supabase.co';
@@ -213,7 +215,7 @@ export default function LeaderboardPage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['leaderboard', apiSortMode, timePeriod],
     queryFn: () => getLeaderboard(apiSortMode, timePeriod),
-    staleTime: 5 * 60_000,
+    staleTime: apiSortMode === 'followers' ? 0 : 5 * 60_000,
     gcTime: 2 * 60 * 60 * 1000,
     refetchOnMount: true,
     // Focus-refetch only while the leaderboard is actually on screen — an
@@ -224,10 +226,10 @@ export default function LeaderboardPage() {
     // without a focus change (restarts on return because the gate is
     // reactive route state). The cache row is rebuilt on a schedule, so
     // polling faster than this only re-reads the same row.
-    refetchInterval: isLeaderboardRouteActive ? 15 * 60_000 : false,
+    refetchInterval: isLeaderboardRouteActive ? (apiSortMode === 'followers' ? 60_000 : 15 * 60_000) : false,
     // Switching period/category keeps the previous ranked list visible while
     // the new one loads, instead of dropping the page to a spinner.
-    placeholderData: keepPreviousData,
+    placeholderData: apiSortMode === 'followers' ? undefined : keepPreviousData,
     enabled: !isAffiliates,
   });
 
@@ -552,7 +554,7 @@ export default function LeaderboardPage() {
             {visibleEntries.map((entry) => {
               const rank = entry.rank;
               const hidden = isHidden(entry);
-              const profileHref = entry.username ? `/${entry.username}` : null;
+              const profileHref = entry.username ? profilePath(entry.username) : null;
               const displayName = getDisplayName(entry);
               const rowClass = cn(
                 phone ? "flex items-center gap-2 px-1 py-3.5" : "grid grid-cols-12 gap-2 sm:gap-4 px-4 sm:px-6 py-4 transition-colors items-center",
@@ -589,7 +591,7 @@ export default function LeaderboardPage() {
                       const [holders, dhb] = ogValueParts(entry);
                       return (
                         <>
-                          <span className="block">{holders}</span>
+                          <span className="block">{formatCount(holders)}</span>
                           {dhb && <span className="block text-xs font-semibold text-zinc-400">{dhb}</span>}
                         </>
                       );

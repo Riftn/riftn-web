@@ -90,3 +90,38 @@ describe('assistant intent classification', () => {
     expect(isDeHubBrandedImageRequest('my DHB withdrawal is already pending')).toBe(false);
   });
 });
+
+describe('a question is answered, not drawn (Requests 1385bb79)', () => {
+  const questions = [
+    'what does "create a group" do on riftn',
+    'how do I make me a creator page',
+    'is it possible to design my own profile theme',
+    'why does my feed render so slowly',
+    'Hi, what is the best way to create a community?',
+    'tell me how to generate a referral code',
+    'what does riftn do',
+    'I want to know who made this app',
+  ];
+  it.each(questions)('stays a chat answer: %s', (message) => {
+    expect(requiresImageGeneration(message, false)).toBe(false);
+    expect(requiresImageGeneration(message, false, { conversational: true })).toBe(false);
+  });
+
+  it.each([
+    'can you give me a short summary of Riftn which I can use to share with people',
+    'give me a caption for my live tonight',
+    'could you write me a bio for my profile',
+    'make me a short intro I can share with friends',
+  ])('a request for words gets words: %s', (message) => {
+    expect(requiresImageGeneration(message, false)).toBe(false);
+    expect(requiresImageGeneration(message, false, { conversational: true })).toBe(false);
+  });
+
+  it('still draws when asked for a picture', () => {
+    expect(requiresImageGeneration('draw me a fox I can share with people', false, { conversational: true })).toBe(true);
+    expect(requiresImageGeneration('what does a snow leopard look like', false, { conversational: true })).toBe(true);
+    expect(requiresImageGeneration('can you create a logo for my channel', false, { conversational: true })).toBe(true);
+    expect(requiresImageGeneration('how about a picture of a fox in the snow', false)).toBe(true);
+    expect(requiresImageGeneration('design a banner with neon colours', false)).toBe(true);
+  });
+});

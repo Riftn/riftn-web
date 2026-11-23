@@ -1,4 +1,5 @@
 {
+  "dmVideo": {"edit": "Edit video", "hiddenTag": "Hidden", "tapToEdit": "Tap to edit", "cover": "Cover", "trim": "Trim", "mirror": "Mirror", "rotate": "Rotate", "hide": "Hide", "timer": "Timer", "sheetTitleAny": "Edit before sending", "close": "Close", "replace": "Replace", "hiddenUntilTap": "E hide tey dem tap am", "pause": "Pause", "play": "Play video", "mute": "Mute", "unmute": "Unmute", "scrub": "Push the video go front or back", "addMore": "Put photo or video", "trimAria": "Pull the side dem make you cut am", "coverAria": "Tap one frame make you set am as cover", "coverHint": "Tap one frame make you set am as cover", "coverOwn": "Your picture", "coverAuto": "Auto", "uploadCover": "Put one cover picture", "mirrored": "Mirrored", "original": "Original", "rotate90": "Rotate 90°", "showNormally": "Show normally", "showNormallyBody": "Dem see e go straight away", "hideUntilTap": "Hide until tapped", "hidePrice": "Hide for back of price", "hidePriceBody": "E blur tey make dem pay you", "priceUnavailable": "No bi for dis chat", "timerOff": "Off", "timerOffBody": "I di stay for inside chat.", "timerViewBody": "I di komot for una two once dèm don si am.", "confirm": "Confirm", "lockedForUsd": "Open am for {{value1}}", "editItem": "Edit item {{value1}}", "kept": "{{time}} kept", "timerTimeBody": "I di komot for una two {{value1}} after you send am."},
   "postBg": {
     "addMedia": "Add pikcha, GIF or video",
     "changeMedia": "Chenj pikcha, GIF or video",
@@ -295,10 +296,12 @@
       "pronouns": "Pronouns",
       "location": "Location",
       "custom": "Custom",
-      "customOption": "Custom label"
+      "customOption": "Custom label",
+      "cashapp": "Cash App"
     },
     "descriptionPresets": "Add website, pronoun or any oda ting. Link dem go show wit ya social dem.",
-    "needsLabel": "Give each custom field yi label"
+    "needsLabel": "Give each custom field yi label",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Follow #{{tag}}",
@@ -2210,7 +2213,7 @@
     "promptDevice": "Kamfon & Sisị (pamụ na bug)",
     "deviceInfoNoErrors": "Nothing",
     "promptFilters": "Filter by category",
-    "promptMediaError": "Choose pikin pikin wey dey below 50MB.",
+    "promptMediaError": "Choose pikin pikin wey dey below 200MB.",
     "promptMediaLimit": "Up to {{max}} attachment.",
     "removePromptAttachment": "Remove {{name}}",
     "promptAttachment": "Attachment {{number}}",
@@ -4201,7 +4204,7 @@
       "pageViewsTerm": "Page view dem",
       "pageViews": "— request dem weh Cloudflare di classify lek page load dem, no be picture dem, script dem or API call dem.",
       "botsTerm": "Bot dem dei insaid",
-      "bots": "— dis dem na raw edge count dem, so crawler dem, uptime monitor dem an scripted client dem dei insaid. Yu fit si-am yuaself fo di browser breakdown weh dei op, wia entry dem lek “Curl” an “Unknown” na automated traffic, no be pesin dem. For filter bot dem komot, i nid wan paid Cloudflare tier weh wi no di run, an if wi kwaitli subtract wan estimate i go mek di number dem les checkable, no moa checkable.",
+      "bots": "— dis dem na raw edge count dem, so crawler dem, uptime monitor dem an scripted client dem dei insaid. Yu fit si-am yuaself fo di browser breakdown weh dei op, wia entry dem lek “Curl” an “Unknown” na automated traffic, no be pesin dem. E di hard pass for tell bot dem from real visitor dem, an soon wi no go fit tell dem apart for dis stats, so e no get use for try filter dem komot.",
       "totalTerm": "Range total dem",
       "total": "— page view dem an request dem di add op across di range. Visitor count dem, dem no purposely sum-am go wan headline “total visitors”, bikos som pesin weh dei ya Monday an Tuesday go dem count-am tuways.",
       "peakTerm": "Awa / dei weh get plenti activity pas",
@@ -20856,5 +20859,27 @@
     "remember": "Remember wetin I choose",
     "rememberHint": "Change am any time fo Settings",
     "failed": "E no fit delete di message"
+  },
+  "profileAskAi": {
+    "row": "Ask AI",
+    "rowSub": "Follow, laik ɔltin, no wetin di hapin",
+    "back": "Go back",
+    "title": "Ask AI bɔt {{handle}}",
+    "sub": "Di Helpa go du am, na yu go gri",
+    "followLikeAll": "Follow an laik ɔltin",
+    "followLikeAllSub": "I go follow {{handle}}, sho feeling fɔ ɛvri post",
+    "likeAll": "Laik ɔl dɛn post dem",
+    "likeAllSub": "I go skip di wan dem we yu don sho feeling",
+    "catchUp": "Tɛl mi wetin di hapin",
+    "catchUpSub": "Wetin {{handle}} don post nau nau, fɔ shɔt",
+    "message": "Rait dɛn mesej",
+    "messageSub": "I go draft mesej, na yu go sen am",
+    "placeholder": "Ask ɛnitin bɔt {{handle}}…",
+    "send": "Sen",
+    "promptFollowLikeAll": "Follow {{handle}} an sho feeling fɔ ɔl dɛn post dem",
+    "promptLikeAll": "Sho feeling fɔ ɔl di post dem we {{handle}} put",
+    "promptCatchUp": "Tɛl mi wetin {{handle}} don post nau nau",
+    "promptMessage": "Hɛlp mi rait mesej gi {{handle}}",
+    "promptAbout": "Bɔt {{handle}}: {{question}}"
   }
 }

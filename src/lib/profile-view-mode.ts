@@ -1,23 +1,8 @@
-/**
- * Profile view mode
- * =================
- * The All tab on a profile shows posts as a grid of tiles or as the full
- * post list.
- *
- * The profile's owner picks which one visitors start on (Settings > Profile
- * posts layout, saved in the account's public `customs.defaultProfileView`).
- * A visitor can still flip the toolbar toggle; that flip holds for that
- * profile for the rest of this browser tab, then the owner's choice applies
- * again on the next visit.
- *
- * ProfilePage provides the mode through ProfileViewModeContext so the toolbar
- * toggle and the tab that draws the posts agree. Without a provider (gallery
- * previews) both fall back to one shared in-memory mode.
- *
- * @module lib/profile-view-mode
+/** All, Images and Videos share one grid/list choice per reader and profile.
+ * The owner's public default and the reader's account preferences apply until
+ * the reader picks a layout for this profile on this device.
  */
-
-import { createContext, useCallback, useContext, useMemo, useSyncExternalStore } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useSyncExternalStore } from 'react';
 
 export type ProfileViewMode = 'grid' | 'list';
 
@@ -45,80 +30,94 @@ export function startingProfileView(ownerDefault: ProfileViewMode, readerPref: P
   return isOwnProfile || readerPref === 'owner' ? ownerDefault : readerPref;
 }
 
-const SESSION_KEY = 'riftn.profileViewFlips';
 const listeners = new Set<() => void>();
-let flips: Record<string, ProfileViewMode> | null = null;
+const memory = new Map<string, ProfileViewMode>();
 
-function readFlips(): Record<string, ProfileViewMode> {
-  if (flips) return flips;
-  flips = {};
+function preferenceKey(profile: string | null | undefined, reader?: string | null) {
+  return profile ? `riftn.profileView.${reader?.toLowerCase() || 'guest'}.${profile.toLowerCase()}` : '';
+}
+
+function notify() {
+  listeners.forEach(fn => fn());
+}
+
+function subscribe(fn: () => void) {
+  listeners.add(fn);
+  window.addEventListener('storage', fn);
+  return () => {
+    listeners.delete(fn);
+    window.removeEventListener('storage', fn);
+  };
+}
+
+function readMode(key: string): ProfileViewMode | undefined {
+  if (memory.has(key)) return memory.get(key);
+  if (key) {
+    try {
+      const value = window.localStorage.getItem(key);
+      if (value === 'list' || value === 'grid') return value;
+    } catch { /* fall back to memory when storage is unavailable */ }
+  }
+  return undefined;
+}
+
+function writeMode(key: string, mode?: ProfileViewMode) {
+  let stored = false;
+  if (mode) memory.set(key, mode);
+  else memory.delete(key);
+  if (key) {
+    try {
+      if (mode) window.localStorage.setItem(key, mode);
+      else window.localStorage.removeItem(key);
+      memory.delete(key);
+      stored = true;
+    } catch { /* keep the selection for this session */ }
+  }
+  notify();
+  return stored;
+}
+
+// Older builds kept a profile-only map for the current browser tab. Claim a
+// choice once when that profile opens, so it cannot leak to another reader.
+function migrateLegacyMode(profile: string, destination?: string) {
   try {
-    const raw = window.sessionStorage.getItem(SESSION_KEY);
-    const parsed = raw ? JSON.parse(raw) : null;
-    if (parsed && typeof parsed === 'object') {
-      for (const [k, v] of Object.entries(parsed)) {
-        if (v === 'grid' || v === 'list') flips[k] = v;
-      }
+    const key = 'riftn.profileViewFlips';
+    const raw = window.sessionStorage.getItem(key);
+    if (!raw) return;
+    const entries = JSON.parse(raw);
+    const id = profile.toLowerCase();
+    const mode = entries?.[id];
+    if (mode !== 'grid' && mode !== 'list') return;
+    if (destination) {
+      const current = window.localStorage.getItem(destination);
+      if (current !== 'grid' && current !== 'list' && !writeMode(destination, memory.get(destination) ?? mode)) return;
     }
-  } catch {
-    /* no storage: flips last for this page load */
-  }
-  return flips;
+    delete entries[id];
+    if (Object.keys(entries).length) window.sessionStorage.setItem(key, JSON.stringify(entries));
+    else window.sessionStorage.removeItem(key);
+  } catch { /* session storage may be unavailable */ }
 }
 
-function writeFlip(profileKey: string, mode: ProfileViewMode): void {
-  flips = { ...readFlips(), [profileKey]: mode };
-  try {
-    window.sessionStorage.setItem(SESSION_KEY, JSON.stringify(flips));
-  } catch {
-    /* private mode */
-  }
-  listeners.forEach((fn) => fn());
-}
-
-/** Drop this tab's flip for a profile, so its owner's default shows again. */
+/** An explicit change to the owner's layout in Settings supersedes the toolbar choice. */
 export function clearProfileViewFlip(profileKey: string | null | undefined): void {
   if (!profileKey) return;
-  const key = profileKey.toLowerCase();
-  if (!(key in readFlips())) return;
-  const { [key]: _dropped, ...rest } = readFlips();
-  flips = rest;
-  try {
-    window.sessionStorage.setItem(SESSION_KEY, JSON.stringify(flips));
-  } catch {
-    /* private mode */
-  }
-  listeners.forEach((fn) => fn());
+  migrateLegacyMode(profileKey);
+  writeMode(preferenceKey(profileKey, profileKey));
 }
-
-function subscribe(fn: () => void): () => void {
-  listeners.add(fn);
-  return () => listeners.delete(fn);
-}
-
-function snapshot(): Record<string, ProfileViewMode> {
-  return typeof window === 'undefined' ? {} : readFlips();
-}
-
-const EMPTY: Record<string, ProfileViewMode> = {};
-
-/** Key used when no profile provides its own (gallery, previews). */
-const LOOSE_KEY = '__loose__';
 
 export interface ProfileViewModeState {
   mode: ProfileViewMode;
   setMode: (mode: ProfileViewMode) => void;
 }
 
-/**
- * The view for one profile: this tab's flip if the visitor made one, else
- * the owner's saved default.
- */
-export function useProfileViewState(profileKey: string | null | undefined, ownerDefault: ProfileViewMode): ProfileViewModeState {
-  const all = useSyncExternalStore(subscribe, snapshot, () => EMPTY);
-  const key = profileKey ? profileKey.toLowerCase() : LOOSE_KEY;
-  const mode = all[key] ?? ownerDefault;
-  const setMode = useCallback((next: ProfileViewMode) => writeFlip(key, next), [key]);
+export function useProfileViewState(profile: string | null | undefined, ownerDefault: ProfileViewMode, reader?: string | null): ProfileViewModeState {
+  const key = preferenceKey(profile, reader);
+  useEffect(() => {
+    if (!profile) return;
+    migrateLegacyMode(profile, key);
+  }, [key, profile]);
+  const mode = useSyncExternalStore(subscribe, () => readMode(key) ?? ownerDefault, () => ownerDefault);
+  const setMode = useCallback((next: ProfileViewMode) => writeMode(key, next), [key]);
   return useMemo(() => ({ mode, setMode }), [mode, setMode]);
 }
 

@@ -137,4 +137,21 @@ describe('entity SEO routes', () => {
     expect(gateJoin.test('/app/live/join/not-a-room')).toBe(false);
     expect(gateJoin.test(`/app/live/join/${id}/extra`)).toBe(false);
   });
+
+  /** Invite links and gallery pictures unfurled as the homepage before these. */
+  it('cards a community invite link and its /app twin', () => {
+    const invite = workerRegex(WORKER, String.raw`communities\/join\/([A-Za-z0-9_-]`);
+    expect(invite.test('/communities/join/3f9a0c12be47')).toBe(true);
+    expect(invite.test('/app/communities/join/3f9a0c12be47')).toBe(true);
+    expect(invite.test('/communities/synth-lab')).toBe(false);
+    expect(WORKER).toContain("supabaseRpc('community_preview_invite'");
+  });
+
+  it('lets a Creator gallery picture past the gate and cards it', () => {
+    const gateGallery = workerRegex(gate(), String.raw`\/creator\/gallery\/`);
+    expect(gateGallery.test('/creator/gallery/0b9d7a3c-6c0e-4f7a-9d55-2f1e1c0a9b11')).toBe(true);
+    expect(gateGallery.test('/creator/gallery')).toBe(false);
+    expect(WORKER).toContain('rpc/creator_gallery_read?p_id=');
+  });
 });
+

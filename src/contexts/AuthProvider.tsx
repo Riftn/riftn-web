@@ -70,7 +70,6 @@ import { isMidSessionUnlock } from '@/lib/session-unlock';
 import { authenticateProfileSession, SupabaseSessionMissingError } from '@/lib/profile-login';
 import { ACCOUNT_DELETED_CODE } from '@/lib/deleted-account';
 import { advanceAuthTrace, beginAuthTrace, clearAuthTrace, readAuthTrace } from '@/lib/auth-trace';
-import { isSessionForEmail } from '@/lib/magic-link-session';
 import { clearEngagementCaches } from '@/lib/clear-engagement-caches';
 import { clearPersistedQueryCache } from '@/lib/query-persist';
 import { supabase } from '@/integrations/supabase/client';
@@ -118,6 +117,8 @@ import {
   abortProfileSwitch,
   removeProfile,
 } from '@/lib/profiles';
+import { unregisterPushToken } from '@/lib/api/dehub/push';
+import { getDeviceId } from '@/lib/device-id';
 import { AuthContext, LoginSheetContext, type SocialProvider, type WalletProvider, type WalletPhase } from './AuthContext';
 import { finishWalletUnlock, setWalletUnlockPrompt } from '@/lib/wallet-unlock-flow';
 import { isChunkLoadError, recoverFromChunkError } from '@/lib/lazy-with-retry';
@@ -288,6 +289,8 @@ function normalizeUser(userData: Partial<DeHubUser> | null | undefined, fallback
     createdAt: safe.createdAt,
     lastLoginTimestamp: safe.lastLoginTimestamp,
     badgeBalance,
+    badgeLock: safe.badgeLock,
+    hideBadgeAndBalance: safe.hideBadgeAndBalance,
     // Governance votes count only this, so a lent badge can be told apart.
     ownBadgeBalance: typeof safe.ownBadgeBalance === 'number' ? safe.ownBadgeBalance : undefined,
     balanceData: safe.balanceData,
@@ -444,7 +447,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(isSocialLoginResumeExpected);
   // Why the sheet is open — plain sign-in, or adding/switching a profile from
   // Settings while already signed in. Only changes the sheet's title.
-  const [loginIntent, setLoginIntent] = useState<'login' | 'add-profile'>('login');
+  const [loginIntent, setLoginIntent] = useState<'login' | 'signup' | 'add-profile'>('login');
   const [walletPhase, setWalletPhase] = useState<WalletPhase>('none');
   // Signing can fail concurrently in several mounted surfaces (the DM thread,
   // fee gate and encryption bootstrap all do work on entry). Treat their
@@ -606,8 +609,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Guards double-processing of a landed Supabase session (OAuth return fires
   // both INITIAL_SESSION and SIGNED_IN).
   const supaLoginHandledRef = useRef(false);
-  // Cleanup for the cross-device magic-link realtime channel (see connectWithEmail).
-  const emailSyncCleanupRef = useRef<null | (() => void)>(null);
 
   const isAuthenticated = !!user && !!walletAddress && (
     isLoading ||
@@ -640,7 +641,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const openLoginModal = useCallback((options?: {
-    intent?: 'login' | 'add-profile';
+    intent?: 'login' | 'signup' | 'add-profile';
     /**
      * The saved profile this sign-in is meant to restore, when there is one.
      * An account already on the device is not a new one, so it is not held
@@ -700,7 +701,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Whatever they tapped carries on once they are signed in.
       armAfterSignIn({ run: options?.then, path: options?.path, fromAddress: sheetOpenedWithAddressRef.current });
     }
-    setLoginIntent(options?.intent === 'add-profile' ? 'add-profile' : 'login');
+    setLoginIntent(options?.intent ?? 'login');
     setIsLoginModalOpen(true);
   }, []);
 
@@ -2192,6 +2193,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       addProfilePrevIdRef.current = null;
       displacedAnAccountRef.current = false;
       adoptCurrentProfile();
+      if (!authResponse.result?.isNewAccount) void refreshUser(authAddress);
     } else {
       snapshotCurrentSession();
     }
@@ -2293,6 +2295,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       addProfilePrevIdRef.current = null;
       displacedAnAccountRef.current = false;
       adoptCurrentProfile();
+      if (!authResponse.result?.isNewAccount) void refreshUser(address);
     } else {
       snapshotCurrentSession();
     }
@@ -2841,77 +2844,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(SUPA_LOGIN_PENDING_KEY, '1');
     localStorage.setItem(SUPA_LOGIN_PENDING_AT_KEY, String(Date.now()));
 
-    // Generate a per-request nonce for cross-device sync. The initiating
-    // device (this one) subscribes to a realtime channel keyed by the nonce
-    // and passes it through the magic link via emailRedirectTo. When the
-    // link is opened on any device, /auth/confirm broadcasts the session
-    // tokens back here and this tab hydrates via setSession() — so the user
-    // ends up signed in on both browsers/devices.
-    const syncNonce = crypto.randomUUID();
     try {
-      // Tear down any previous sync channel from an earlier attempt.
-      if (emailSyncCleanupRef.current) {
-        try { emailSyncCleanupRef.current(); } catch { /* ignore */ }
-        emailSyncCleanupRef.current = null;
-      }
-      const channel = supabase.channel(`auth-sync-${syncNonce}`, {
-        config: { broadcast: { self: false, ack: false } },
-      });
-      channel.on('broadcast', { event: 'session' }, async (msg) => {
-        const payload = (msg as any)?.payload || {};
-        const access_token = payload.access_token as string | undefined;
-        const refresh_token = payload.refresh_token as string | undefined;
-        if (!access_token || !refresh_token) return;
-        // Anyone holding the emailed link can send here. Only a session for
-        // the email this tab asked a link for is taken (lib/magic-link-session).
-        if (!isSessionForEmail(access_token, email)) {
-          authLogger.warn('magic-link-sync:other-identity-ignored');
-          return;
-        }
-        try {
-          supaLoginHandledRef.current = true;
-          setIsProcessingRedirect(true);
-          const { data, error } = await supabase.auth.setSession({ access_token, refresh_token });
-          if (error) throw error;
-          // Same check on the user the server confirmed, not just the token.
-          if (data?.session?.user?.email?.trim().toLowerCase() !== email.trim().toLowerCase()) {
-            await supabase.auth.signOut({ scope: 'local' });
-            throw new Error('Magic link session was for a different email');
-          }
-          const uid = data?.session?.user?.id;
-          if (uid) await proceedToWalletPhase(uid);
-          toast.success(_copy("copy.a551108d059e", { defaultValue: "Signed in — link confirmed on another device" }));
-        } catch (err) {
-          console.error('Cross-device session hydrate failed:', err);
-        } finally {
-          setIsProcessingRedirect(false);
-          supaLoginHandledRef.current = false;
-          try { await supabase.removeChannel(channel); } catch { /* ignore */ }
-          emailSyncCleanupRef.current = null;
-        }
-      });
-      // Wait for the channel to actually be SUBSCRIBED before sending the
-      // magic link. Without this, signInWithOtp could fire (and the user
-      // could tap the email link) before this tab's realtime subscription
-      // was live on the server — the broadcast would be sent to no one and
-      // silently lost. This only affects the cross-device path above; this
-      // device's own sign-in in AuthConfirm.tsx never depends on it.
-      await new Promise<void>((resolve) => {
-        let settled = false;
-        const finish = () => { if (settled) return; settled = true; resolve(); };
-        channel.subscribe((status) => { if (status === 'SUBSCRIBED') finish(); });
-        setTimeout(finish, 2500);
-      });
-      emailSyncCleanupRef.current = () => {
-        try { supabase.removeChannel(channel); } catch { /* ignore */ }
-      };
-
       try {
         await wagmiDisconnect();
         clearWagmiStorage();
       } catch { /* ignore */ }
 
-      const redirectTo = `${window.location.origin}/auth/confirm?sync=${syncNonce}`;
+      const redirectTo = `${window.location.origin}/auth/confirm`;
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: { shouldCreateUser: true, emailRedirectTo: redirectTo },
@@ -2925,10 +2864,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem(SUPA_LOGIN_PENDING_KEY);
       setConnectionSource(previousSource);
       restoreConnectionSource(previousSource);
-      if (emailSyncCleanupRef.current) {
-        try { emailSyncCleanupRef.current(); } catch { /* ignore */ }
-        emailSyncCleanupRef.current = null;
-      }
       throw error;
     } finally {
       setIsConnecting(false);
@@ -2936,10 +2871,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const cancelEmailMagicLink = () => {
-    if (emailSyncCleanupRef.current) {
-      try { emailSyncCleanupRef.current(); } catch { /* ignore */ }
-      emailSyncCleanupRef.current = null;
-    }
     localStorage.removeItem(SUPA_LOGIN_PENDING_KEY);
   };
 
@@ -3336,6 +3267,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // The way out of a wallet that never answers. Safari in particular can sit
+  // on the signature (the wallet app never opens, or the request is lost on the
+  // way), and the sheet was dimmed with nothing to tap until a 5-minute
+  // deadline. This lets go of the attempt and the attached wallet, so the
+  // sheet goes back to the sign-in options. A signature that still arrives
+  // later simply finishes signing in.
+  const cancelWalletLogin = async () => {
+    setWagmiAuthIntent(false);
+    wagmiAuthInProgressRef.current = false;
+    setIsConnecting(false);
+    clearWagmiStorage();
+    try {
+      await wagmiDisconnectAsync();
+    } catch { /* already gone */ }
+  };
+
   const disconnect = async (options?: { forgetProfile?: boolean }) => {
     // An account page left open behind a sign-out goes home quietly rather
     // than asking them to sign straight back in.
@@ -3351,6 +3298,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Read the identity off storage before any of it is cleared below, so an
     // explicit sign-out can drop that account from this device's profile list.
     const forgetId = options?.forgetProfile ? currentProfileId() : null;
+    if (options?.forgetProfile) {
+      // This browser stops getting that account's notifications. Sent while
+      // the account's token is still in storage (apiCall reads it before its
+      // first await); the next account registers the browser again itself.
+      unregisterPushToken(getDeviceId()).catch(() => {});
+    }
 
     // Clean up local state FIRST for immediate UI feedback
     clearAuthSession();
@@ -3366,6 +3319,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // "Log out" means this browser forgets the session — its stored profile
     // snapshot (now-dead tokens) goes with it. Other saved profiles stay.
     if (forgetId) removeProfile(forgetId);
+    // Logging out of one of several saved accounts lands on the next one
+    // (most recently used first) instead of the signed-out screen.
+    const nextProfile = options?.forgetProfile
+      ? listProfiles().find((p) => p.id !== forgetId && p.session) ?? null
+      : null;
 
     setWalletAddress(null);
     setUser(null);
@@ -3391,6 +3349,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     clearPersistedQueryCache();
 
     // Provider-level disconnect AFTER local cleanup (non-blocking)
+    let supabaseSignedOut: Promise<unknown> = Promise.resolve();
     try {
       if (connectionSource === 'web3auth') {
         clearAAProvider();
@@ -3400,13 +3359,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         clearWalletCache();
         clearPasskeyCache();
         try { sessionStorage.removeItem('dhb_approved_chains'); } catch { /* */ }
-        supabase.auth.signOut().catch(() => {});
+        supabaseSignedOut = supabase.auth.signOut().catch(() => {});
         clearWagmiStorage();
       } else {
         wagmiDisconnect();
       }
     } catch (error) {
       console.error('Disconnect provider error (non-blocking):', error);
+    }
+
+    if (nextProfile) {
+      // Supabase clears its stored session only after the sign-out request
+      // returns. Let that finish first, or it would wipe the next account's
+      // session right after the switch writes it.
+      await Promise.race([
+        supabaseSignedOut,
+        new Promise((resolve) => setTimeout(resolve, 4_000)),
+      ]);
+      await switchToProfile(nextProfile.id);
     }
   };
 
@@ -3469,13 +3439,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // than logging anybody out). It only ever calls through after mount.
   switchToProfileRef.current = switchToProfile;
 
-  const refreshUser = async () => {
-    if (!walletAddress) return;
+  const refreshUser = async (address = walletAddress) => {
+    if (!address) return;
+    const profileId = currentProfileId();
     try {
-      const userData = await getAccountInfo(walletAddress);
-      const normalizedUser = normalizeUser(userData, walletAddress);
+      const userData = await getAccountInfo(address);
+      if (currentProfileId() !== profileId || localStorage.getItem('dehub_wallet')?.toLowerCase() !== address.toLowerCase()) return;
+      const normalizedUser = normalizeUser({ ...userData, hideBadgeAndBalance: userData.hideBadgeAndBalance === true }, address);
       setUser(normalizedUser);
       localStorage.setItem('dehub_user', JSON.stringify(normalizedUser));
+      snapshotCurrentSession();
     } catch (error) {
       console.error('Failed to refresh user data:', error);
     }
@@ -3485,7 +3458,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(prev => {
       if (!prev) return prev;
       const patched = { ...prev, ...patch };
-      localStorage.setItem('dehub_user', JSON.stringify(patched));
+      const serialized = JSON.stringify(patched);
+      localStorage.setItem('dehub_user', serialized);
+      queueMicrotask(() => {
+        if (localStorage.getItem('dehub_user') === serialized) snapshotCurrentSession();
+      });
       return patched;
     });
   };
@@ -3544,6 +3521,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     connectWithTelegram,
     connectWithPasskey,
     connectWithWallet,
+    cancelWalletLogin,
     completeSmartWalletLogin,
     exportPrivateKey,
     exportPrivateKeyWithBiometrics,

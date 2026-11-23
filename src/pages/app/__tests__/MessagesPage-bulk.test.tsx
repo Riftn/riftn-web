@@ -23,8 +23,12 @@ vi.mock('@/hooks/use-messages', () => ({
   messagesKeys: { messages: (id: string) => ['dm', id], conversations: () => ['dm'] },
 }));
 const layout = vi.hoisted(() => ({ phone: false }));
-const prefs = vi.hoisted(() => ({ update: vi.fn() }));
-vi.mock('@/hooks/use-chat-prefs', () => ({ useChatPrefs: () => ({ byId: new Map(), update: prefs.update }), useClearChatHistory: () => vi.fn(), isArchived: () => false, isMuted: () => false }));
+const prefs = vi.hoisted(() => ({ update: vi.fn(), byId: new Map<string, { archivedAt: string }>() }));
+vi.mock('@/hooks/use-chat-prefs', async importOriginal => ({
+  ...await importOriginal<typeof import('@/hooks/use-chat-prefs')>(),
+  useChatPrefs: () => ({ byId: prefs.byId, update: prefs.update }),
+  useClearChatHistory: () => vi.fn(),
+}));
 vi.mock('@/hooks/use-chat-tabs', () => ({ useChatTabs: () => ({ tabs: [{ id: 'all', name: 'All', emoji: '', builtin: true, hidden: false, chats: [] }], state: { tabs: [], order: ['all'], hidden: [] }, canAdd: true, create: vi.fn(), update: vi.fn(), remove: vi.fn(), toggleChat: vi.fn(), addChats: vi.fn(), setHidden: vi.fn(), reorder: vi.fn() }) }));
 vi.mock('@/hooks/use-public-chat-unread', () => ({ usePublicChatUnreadCount: () => 0, usePublicChatReading: vi.fn() }));
 vi.mock('@/hooks/use-dm-realtime', () => ({ useDMRealtime: vi.fn() }));
@@ -224,6 +228,33 @@ describe('picking several chats on a phone', () => {
     expect(document.querySelectorAll('[data-bulk-checked="true"]')).toHaveLength(2);
     fireEvent.click(document.querySelector('[data-chat-bulk-delete]')!);
     expect(del.scheduleDelete.mock.calls.map(c => c[0])).toEqual(['a', 'c']);
+  });
+
+  it('archives and restores the selected chat on a phone', () => {
+    vi.useFakeTimers();
+    prefs.update.mockImplementation((id: string, patch: { archived: boolean }) => {
+      if (patch.archived) prefs.byId.set(id, { archivedAt: '2026-11-18T12:00:00Z' });
+      else prefs.byId.delete(id);
+    });
+    try {
+      render(page());
+      hold(row('Aaron'));
+      fireEvent.click(document.querySelector('[data-chat-bulk-archive]')!);
+      expect(prefs.update).toHaveBeenCalledWith('a', { archived: true });
+      expect(screen.queryByRole('button', { name: /Aaron/ })).toBeNull();
+      expect(row('Bea')).toBeInTheDocument();
+      fireEvent.click(document.querySelector('[data-chat-tab="archived"]')!);
+      expect(row('Aaron')).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /Bea/ })).toBeNull();
+      hold(row('Aaron'));
+      fireEvent.click(document.querySelector('[data-chat-bulk-archive]')!);
+      expect(prefs.update).toHaveBeenCalledWith('a', { archived: false });
+      fireEvent.click(screen.getByRole('tab', { name: 'All' }));
+      expect(row('Aaron')).toBeInTheDocument();
+    } finally {
+      prefs.byId.clear();
+      prefs.update.mockReset();
+    }
   });
 
   it('a quick tap still opens the chat', () => {

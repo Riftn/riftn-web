@@ -10,6 +10,7 @@ import { canonicalTierName } from '@/lib/staking-badges';
 import i18n from '@/i18n';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
 
+import { formatCount as formatShortCount } from '@/lib/format-count';
 export interface PovrTierInfo {
   name: string;
   min: number;
@@ -208,8 +209,5 @@ export function formatUsd(v: number | null | undefined, dp = 2): string {
 }
 
 export function formatCompact(v: number | null | undefined): string {
-  const n = Number(v ?? 0);
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
-  return `${Math.round(n)}`;
+  return formatShortCount(Number(v ?? 0));
 }

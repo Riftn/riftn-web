@@ -23,4 +23,12 @@ describe('video crop', () => {
     expect(cropPayload({ x: 0, y: 0, w: 1, h: 1 })).toBeUndefined();
     expect(videoEditsPayload({ crop: { x: 0.25, y: 0, w: 0.5, h: 1 } })).toEqual({ crop: { x: 0.25, y: 0, w: 0.5, h: 1 } });
   });
+
+  it('drags one edge in Free and leaves the other sides put', () => {
+    const full = { x: 0, y: 0, w: 1, h: 1 };
+    expect(dragCropRect(full, 't', 0.3, 0.25, null, 1)).toEqual({ x: 0, y: 0.25, w: 1, h: 0.75 });
+    expect(dragCropRect(full, 'r', -0.4, 0.2, null, 1)).toEqual({ x: 0, y: 0, w: 0.6, h: 1 });
+    expect(dragCropRect(full, 'b', 0, -2, null, 1)?.h).toBeCloseTo(0.08);
+    expect(dragCropRect(full, 'l', 0.1, 0, 1, 1)).toBeNull();
+  });
 });

@@ -5,9 +5,10 @@
  * Works with both contentEditable elements and regular textareas.
  */
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { startTransition, useState, useCallback, useRef } from 'react';
 import type { MentionUser } from '@/components/app/mentions';
 import { getEditorCaret, setEditorCaret } from '@/lib/editor-text';
+import { fetchPeople, normalizeMentionQuery, warmMentionPeople } from '@/lib/mention-people';
 
 interface UseMentionOptions {
   inputRef: React.RefObject<HTMLTextAreaElement | HTMLInputElement | HTMLDivElement | null>;
@@ -17,6 +18,8 @@ interface UseMentionOptions {
 interface UseMentionReturn {
   // State
   isOpen: boolean;
+  /** An @ has been typed here, so the list is likely a letter away: get it ready. */
+  armed: boolean;
   query: string;
   position: { top: number; left: number };
   selectedIndex: number;
@@ -83,10 +86,15 @@ export function isDeletion(previous: string, next: string): boolean {
   return prefix + suffix === next.length;
 }
 
+// The list is a sheet with its own place on screen. It used to be a popover
+// measured against the caret on every key and every scroll frame; the field
+// stays for the callers that still pass it along.
+const NO_POSITION = { top: 0, left: 0 };
+
 export function useMention({ inputRef, onMentionInsert }: UseMentionOptions): UseMentionReturn {
   const [isOpen, setIsOpen] = useState(false);
+  const [armed, setArmed] = useState(false);
   const [query, setQuery] = useState('');
-  const [position, setPosition] = useState({ top: 0, left: 0 });
   const [selectedIndex, setSelectedIndex] = useState(0);
   const mentionStartRef = useRef<number>(-1);
   const textRef = useRef<string>('');
@@ -94,69 +102,14 @@ export function useMention({ inputRef, onMentionInsert }: UseMentionOptions): Us
   // a new character.
   const deletingRef = useRef(false);
 
-  // Calculate dropdown position — always directly above the @ symbol
-  const updatePosition = useCallback(() => {
-    const input = inputRef.current;
-    if (!input) return;
-    
-    const dropdownWidth = 280;
-    const dropdownHeight = 300; // Approximate max height for 5 users + header + padding
-    
-    // For contentEditable, get precise caret position
-    if (input instanceof HTMLDivElement) {
-      const selection = window.getSelection();
-      if (selection && selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
-        const caretRect = range.getBoundingClientRect();
-        
-        if (caretRect.height > 0 && caretRect.top > 0) {
-          // Always position above the caret
-          let top = caretRect.top - dropdownHeight - 8;
-          let left = caretRect.left - 20;
-          
-          left = Math.max(12, Math.min(left, window.innerWidth - dropdownWidth - 12));
-          
-          // Only flip below if literally no space above (very top of screen)
-          if (top < 8) {
-            top = caretRect.bottom + 8;
-          }
-          
-          setPosition({ top, left });
-          return;
-        }
-      }
-    }
-    
-    // For textareas/inputs — position above the input element
-    if (input instanceof HTMLTextAreaElement || input instanceof HTMLInputElement) {
-      const rect = input.getBoundingClientRect();
-      let top = rect.top - dropdownHeight - 8;
-      let left = Math.max(12, Math.min(rect.left, window.innerWidth - dropdownWidth - 12));
-      
-      if (top < 8) {
-        top = rect.bottom + 8;
-      }
-      
-      setPosition({ top, left });
-      return;
-    }
-    
-    // Fallback
-    const rect = input.getBoundingClientRect();
-    let top = rect.top - dropdownHeight - 8;
-    let left = Math.max(12, Math.min(rect.left, window.innerWidth - dropdownWidth - 12));
-    
-    if (top < 8) {
-      top = rect.bottom + 8;
-    }
-    
-    setPosition({ top, left });
-  }, [inputRef]);
-
   // Handle text input changes
   const handleInput = useCallback((text: string, cursorPosition?: number) => {
     const previous = textRef.current;
     textRef.current = text;
+    // Somebody is writing: have their own people ready before the @, and
+    // the list itself once there is one.
+    if (text) warmMentionPeople();
+    if (text.includes('@')) setArmed(true);
     
     // Deleting never opens the list, and shuts it if it was open. It comes
     // back with the next character typed. A repeat of the same text (some
@@ -193,17 +146,26 @@ export function useMention({ inputRef, onMentionInsert }: UseMentionOptions): Us
     const mention = extractMentionQuery(text, cursorPos);
     
     if (mention) {
-      setQuery(mention.query);
+      // The list is opening: ask for its first answer now, while the sheet is
+      // still being drawn, rather than after it is on screen.
+      if (mentionStartRef.current === -1) {
+        const first = normalizeMentionQuery(mention.query);
+        if (first) void fetchPeople(first).catch(() => undefined);
+      }
       mentionStartRef.current = mention.startIndex;
-      setIsOpen(true);
-      setSelectedIndex(0);
-      updatePosition();
+      // Not urgent next to the letter itself: the key shows in the box first,
+      // then the list follows, instead of the key waiting on the list.
+      startTransition(() => {
+        setQuery(mention.query);
+        setIsOpen(true);
+        setSelectedIndex(0);
+      });
     } else {
       setIsOpen(false);
       setQuery('');
       mentionStartRef.current = -1;
     }
-  }, [inputRef, updatePosition]);
+  }, [inputRef]);
 
   // Handle keyboard navigation
   const handleKeyDown = useCallback((e: React.KeyboardEvent): boolean => {
@@ -292,24 +254,11 @@ export function useMention({ inputRef, onMentionInsert }: UseMentionOptions): Us
     mentionStartRef.current = -1;
   }, []);
 
-  // Update position on scroll/resize
-  useEffect(() => {
-    if (!isOpen) return;
-    
-    const handleUpdate = () => updatePosition();
-    window.addEventListener('scroll', handleUpdate, true);
-    window.addEventListener('resize', handleUpdate);
-    
-    return () => {
-      window.removeEventListener('scroll', handleUpdate, true);
-      window.removeEventListener('resize', handleUpdate);
-    };
-  }, [isOpen, updatePosition]);
-
   return {
     isOpen,
+    armed,
     query,
-    position,
+    position: NO_POSITION,
     selectedIndex,
     handleInput,
     handleKeyDown,

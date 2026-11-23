@@ -18,6 +18,7 @@ import {
   usePeerIdentity,
 } from './CallChrome';
 import { CallCaptionsControl, CallCaptionsOverlay } from './CallCaptions';
+import { CallBackgroundPanel, CallFxButton, useCallBackgroundAvailable } from './CallBackgroundPicker';
 
 const VideoCallModal: React.FC = () => {
   const { walletAddress } = useAuth();
@@ -40,9 +41,16 @@ const VideoCallModal: React.FC = () => {
     switchCamera,
     isMinimized,
     minimizeCall,
+    callBackground,
+    callBackgroundBusy,
+    setCallBackground,
+    callFaceFilter,
+    setCallFaceFilter,
   } = useCall();
 
   const { t } = useTranslation();
+  const fxAvailable = useCallBackgroundAvailable();
+  const [fxOpen, setFxOpen] = React.useState(false);
 
   const peer = usePeerIdentity(peerAddress);
 
@@ -95,6 +103,10 @@ const VideoCallModal: React.FC = () => {
         />
       )}
 
+      {!isIncoming && fxAvailable ? (
+        <CallFxButton open={fxOpen} onToggle={() => setFxOpen(open => !open)} active={callBackground !== 'none' || callFaceFilter !== 'none'} />
+      ) : null}
+
       {/* Your own camera. Hidden on an incoming call until you accept: there is no track yet. */}
       {!isIncoming && (
         <div className="call-stage__self">
@@ -109,6 +121,9 @@ const VideoCallModal: React.FC = () => {
 
       <div className="call-stage__foot">
         {isCallActive ? <CallCaptionsOverlay /> : null}
+        {fxOpen && !isIncoming && fxAvailable ? (
+          <CallBackgroundPanel value={callBackground} busy={callBackgroundBusy} onPick={setCallBackground} onClose={() => setFxOpen(false)} faceFilter={callFaceFilter} onPickFace={setCallFaceFilter} />
+        ) : null}
         {isIncoming ? (
           <div className="call-row">
             <CallPill icon={PhoneOff} label={t('calls.decline')} onClick={rejectCall} />

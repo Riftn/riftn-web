@@ -26,7 +26,9 @@ import { useAutoOpenComments } from '@/hooks/use-auto-open-comments';
 import { usePostMenuContext } from '@/lib/post-menu';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { ChevronDown, ChevronUp, ChevronLeft, Globe, Ticket, BarChart2, Star } from "lucide-react";
+import { ChevronDown, ChevronUp, ChevronLeft, Globe, Ticket, BarChart2, Star, UserRound, UserX } from "lucide-react";
+import { PhotoTagger } from "@/components/app/photo-tags/PhotoTagger";
+import { setPhotoTags as savePhotoTags, removeMyPhotoTag } from "@/lib/api/dehub";
 import Eye from "@/components/ui/cut-icons/visibility";
 import Flag from "@/components/ui/cut-icons/report";
 import Ban from "@/components/ui/cut-icons/blocked";
@@ -66,6 +68,9 @@ import { ContentWarningGate, useContentWarning } from './ContentWarningGate';
 import { ActionBar } from './ActionBar';
 import { ShopBoardLazy } from '../live/ShopBoardLazy';
 import { PollCard } from './PollCard';
+import { QuizCard } from '@/components/app/quiz/QuizCard';
+import { PhotoTagsOverlay } from '@/components/app/photo-tags/PhotoTagsOverlay';
+import type { PhotoTag } from '@/lib/api/dehub';
 import { CommentsWrapper } from './CommentsWrapper';
 import { PostMetadata } from './PostMetadata';
 import { PPVDrawerContent } from './LazyPPVDrawerContent';
@@ -85,7 +90,7 @@ const BoostModal = lazy(() =>
 import { applyOptimisticEdit } from '@/lib/optimistic-edit';
 import { QuotePostModalLazy } from '../modals/QuotePostModalLazy';
 import { QuotedPostEmbed, RemovedQuoteNotice } from './QuotedPostEmbed';
-import { TipModal } from '../modals/TipModal';
+import { TipModalLazy as TipModal } from '../modals/TipModalLazy';
 import { SwipeableCarousel } from '../SwipeableCarousel';
 import { usePostTipCount } from '@/hooks/use-post-tip-count';
 import { useTapGestures } from '@/hooks/use-tap-gestures';
@@ -448,9 +453,12 @@ function ImageCarousel({
   soundPlaying = false,
   wide,
   railPanel,
+  imageTags,
 }: {
+  /** People tagged on the photos, shown behind a small person button. */
+  imageTags?: PhotoTag[];
   /**
-   * Desktop "Long form videos on wide screens" setting, applied to a single
+   * Desktop "Long form media on wide screens" setting, applied to a single
    * tall photo the same way: Ambient fills the space beside it with the photo
    * blurred, Rails puts the info panel beside it. Undefined everywhere else.
    */
@@ -631,7 +639,7 @@ function ImageCarousel({
           <div
             key={idx}
             className={cn(
-              'min-w-0',
+              'relative min-w-0',
               hasMultiple ? 'flex-none max-w-full' : 'flex-[0_0_100%]',
               framed && 'flex flex-col justify-center',
               fillsFrame(idx) && 'flex-[0_0_100%]',
@@ -651,6 +659,7 @@ function ImageCarousel({
               fill={fillsFrame(idx)}
               centered={wideAmbient || wideRails}
             />
+            <PhotoTagsOverlay tags={imageTags} index={idx} />
           </div>
         ))}
       </div>
@@ -896,6 +905,10 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
   const [showTipModal, setShowTipModal] = useState(false);
   const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [showPollCreator, setShowPollCreator] = useState(false);
+  /** People tagged on the photos, as saved from this card (until the feed refetches). */
+  const [tagsOverride, setTagsOverride] = useState<PhotoTag[] | null>(null);
+  const [showTagger, setShowTagger] = useState(false);
+  const imageTags = tagsOverride ?? post.imageTags ?? [];
   const [pollQuestion, setPollQuestion] = useSurfaceDraft("components/app/cards/ImageCard.tsx:pollQuestion", '', draftIdentity(post));
   const [pollOptions, setPollOptions] = useState(['', '']);
   const [pollMultiple, setPollMultiple] = useState(false);
@@ -991,11 +1004,14 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
   // View tracking - batches views when post is visible for 2+ seconds
   const viewRef = useFeedViewTracking(post.id);
 
-  const soundtrackEnabled = !matureGate.isGated && !isPPV && !isLocked && !isSubGated && !isW2E;
-  const soundtrack = useImageSoundtrack(post.soundtrackUrl, viewRef, soundtrackEnabled, post.id);
-  const soundtrackControl = post.soundtrackUrl && soundtrackEnabled ? (
+  const mediaAccessible = !matureGate.isGated && !isPPV && !isLocked && !isSubGated && !isW2E;
+  const canDownloadImage = mediaAccessible && !contentWarning.hidden;
+  const soundtrack = useImageSoundtrack(post.soundtrackUrl, viewRef, mediaAccessible, post.id);
+  const soundtrackControl = post.soundtrackUrl && mediaAccessible ? (
     <SoundtrackControl title={post.soundtrackTitle} creator={post.soundtrackCreator} url={post.soundtrackUrl} {...soundtrack} />
   ) : null;
+  // While the song plays its player docks under the photo, not over it.
+  const soundtrackOpen = !!soundtrackControl && (soundtrack.playing || soundtrack.loading);
   
   // Translation hook for text content
   const descriptionText = [post.title, post.description].filter(Boolean).join('\n\n');
@@ -1016,7 +1032,7 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
     ? post.imageUrls 
     : [post.image], [post.imageUrls, post.image]);
 
-  // Long form videos on wide screens (Settings > Appearance > Media) covers a
+  // Long form media on wide screens (Settings > Appearance > Media) covers a
   // single tall photo too: desktop feed card and post page only.
   const isDesktopViewport = useIsDesktopViewport();
   const wideVideoMode = useWideVideoMode();
@@ -1028,21 +1044,22 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
 
   const [isDownloading, setIsDownloading] = useState(false);
   const handleDownloadImage = useCallback(async () => {
-    const source = images[activeImageIndex] || images[0];
-    if (!source || isDownloading) return;
+    const index = Math.min(activeImageIndex, images.length - 1);
+    const source = cdnImageSource(images[index]);
+    if (!canDownloadImage || !source || isDownloading) return;
     setShowOptionsDrawer(false);
     setIsDownloading(true);
     const toastId = `image-download-${post.id}`;
     toast.loading(_copy("copy.757726036c1c", { defaultValue: "Preparing download..." }), { id: toastId });
     try {
-      await downloadMedia(source, imageDownloadName(source, post.id, activeImageIndex));
+      await downloadMedia(source, imageDownloadName(source, post.id, index));
       toast.success(_copy("copy.efece5dd1933", { defaultValue: "Download started" }), { id: toastId });
     } catch {
       toast.error(_copy("copy.d2bde7afd757", { defaultValue: "Download failed. Please try again." }), { id: toastId });
     } finally {
       setIsDownloading(false);
     }
-  }, [images, activeImageIndex, isDownloading, post.id, _copy]);
+  }, [images, activeImageIndex, canDownloadImage, isDownloading, post.id, _copy]);
 
   const openPost = useCallback(() => {
     if (wasDrawerJustDismissed() || showPPVDrawer || showBountyDrawer || showLockedDrawer) return;
@@ -1206,6 +1223,7 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
     <div data-card-head={stage ? undefined : 'plain'} className={stage ? 'contents' : 'flex items-start justify-between'} style={{ paddingBottom: 0 }}>
       {stage ? (
         <StageCreatorRow
+          tokenId={postTokenId}
           name={post.username}
           avatar={post.avatar}
           handle={post.creatorUsername}
@@ -1215,6 +1233,7 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
         />
       ) : (
       <CardHeader
+        tokenId={postTokenId}
         username={post.username}
         visibility={post.visibility}
         handle={post.creatorUsername}
@@ -1252,6 +1271,7 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
                   on desktop — both surfaces read the same state, so the menu
                   is a reliable place to find them at every width. */}
               <PostUtilityMenuItems
+                onActionBar
                 onAskAI={() => { setShowOptionsDrawer(false); if (!walletAddress) { openLoginModal(); return; } setShowAIChat(true); }}
                 postId={post.id}
                 tokenId={postTokenId}
@@ -1260,7 +1280,8 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
                 linkText={[post.title, post.description].filter(Boolean).join('\n')}
                 onClose={() => setShowOptionsDrawer(false)}
               />
-              {!isOwnPost && (
+              {/* Tip is on the action bar on a phone (Requests 7399dd7d). */}
+              {!isOwnPost && !isPhone && (
                 <button
                   onClick={() => { setShowOptionsDrawer(false); setShowTipModal(true); }}
                   className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
@@ -1274,7 +1295,7 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
               >
                 <Languages className="w-5 h-5" /> {t('postOptions.translateImage')}
               </button>
-              {!isPPV && !isW2E && !isLocked && (
+              {canDownloadImage && (
                 <button onClick={handleDownloadImage} disabled={isDownloading} className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left disabled:opacity-50">
                   <Download className="w-5 h-5" /> {t('postOptions.download')}
                 </button>
@@ -1315,6 +1336,23 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
                   <Gift className="w-5 h-5" /> {t('postOptions.giftBoost', { defaultValue: 'Gift a boost' })}
                 </button>
               )}
+              {!isOwnPost && postTokenId && walletAddress && imageTags.some((tag) => tag.address?.toLowerCase() === walletAddress.toLowerCase()) && (
+                <button
+                  onClick={async () => {
+                    setShowOptionsDrawer(false);
+                    try {
+                      const { imageTags: next } = await removeMyPhotoTag(Number(postTokenId));
+                      setTagsOverride(next);
+                      toast.success(t('photoTags.removedMe', { defaultValue: 'Your tag was removed' }));
+                    } catch (err: any) {
+                      toast.error(err?.message || t('photoTags.saveFailed', { defaultValue: 'Could not save tags' }));
+                    }
+                  }}
+                  className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                >
+                  <UserX className="w-5 h-5" /> {t('photoTags.removeMe', { defaultValue: 'Remove me from this photo' })}
+                </button>
+              )}
               {isOwnPost && (
                 <>
                   <div className="border-t border-white/10 my-1" />
@@ -1323,6 +1361,14 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
                     className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
                   >
                     <BarChart2 className="w-5 h-5" />{_copy("copy.b8e082c979d9", { defaultValue: " Create Poll" })}</button>
+                  {postTokenId && images.length > 0 && (
+                    <button
+                      onClick={() => { setShowOptionsDrawer(false); setTimeout(() => setShowTagger(true), 300); }}
+                      className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                    >
+                      <UserRound className="w-5 h-5" /> {t('photoTags.title', { defaultValue: 'Tag people' })}
+                    </button>
+                  )}
                   <button
                     onClick={() => { setShowOptionsDrawer(false); setTimeout(() => setShowEditModal(true), 300); }}
                     className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
@@ -1576,6 +1622,7 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
             return (
               <Suspense fallback={<div style={{ aspectRatio: '4 / 5' }} />}>
                 <ComicDeckLazy
+                  onIndexChange={setActiveImageIndex}
                   images={images}
                   captions={post.mediaCaptions}
                   border={post.comicBorder}
@@ -1592,12 +1639,13 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
             <ImageCarousel
               images={images}
               descriptions={post.mediaDescriptions}
+              imageTags={imageTags}
               onImageClick={handleImageClick}
               onIndexChange={setActiveImageIndex}
               aboveFold={aboveFold}
               postId={post.id}
               immersive={isImmersive}
-              overlay={fullscreenOpen ? undefined : soundtrackControl}
+              overlay={fullscreenOpen || soundtrackOpen ? undefined : soundtrackControl}
               soundPlaying={soundtrack.playing && !fullscreenOpen}
               wide={widePhoto}
               railPanel={widePhoto === 'rails' ? (
@@ -1643,6 +1691,12 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
           </div>
         )}
       </div>
+
+      {soundtrackOpen && !fullscreenOpen && (
+        <div className={cn('mt-2', isImmersive && 'px-3')} onClick={(event) => event.stopPropagation()}>
+          <SoundtrackControl title={post.soundtrackTitle} creator={post.soundtrackCreator} url={post.soundtrackUrl} {...soundtrack} layout="bar" />
+        </div>
+      )}
 
       {/* Info & Actions. Immersive media runs edge to edge, so the copy under it
           brings its own gutter — the same px-3 the immersive video card uses. */}
@@ -1690,6 +1744,7 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
         {/* A photo post can carry a poll too, under the caption as on text posts.
             On the post page the page itself places it. */}
         {!postPage && !isLocked && !isSubGated && !isPPV && parseInt(post.id, 10) > 0 && <PollCard tokenId={parseInt(post.id, 10)} />}
+        {!postPage && !isLocked && !isSubGated && !isPPV && post.hasQuiz && parseInt(post.id, 10) > 0 && <QuizCard tokenId={parseInt(post.id, 10)} />}
 
         {/* The creator's Shop board — affiliate links, opened in place. */}
         <ShopBoardLazy tokenId={post.id} links={post.shopLinks} listingCount={post.shopListingCount} variant="inline" />
@@ -1772,6 +1827,7 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
 
       {/* Fullscreen Image Viewer */}
       <FullscreenImageViewerLazy
+        downloadable={canDownloadImage}
         images={images}
         soundtrackControl={soundtrackControl && (
           <SoundtrackControl title={post.soundtrackTitle} creator={post.soundtrackCreator} url={post.soundtrackUrl} {...soundtrack} layout="inline" />
@@ -1780,6 +1836,14 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
         isOpen={fullscreenOpen}
         onClose={() => setFullscreenOpen(false)}
         postId={post.id}
+        author={{
+          name: post.username,
+          avatar: post.avatar,
+          handle: post.creatorUsername,
+          creatorId: post.creatorId,
+          verified: post.verified,
+          caption: isTranslated && translatedText ? translatedText : descriptionText,
+        }}
         actions={{
           isLiked: post.isLiked,
           isDisliked: post.isDisliked,
@@ -1866,7 +1930,7 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
             currentSpoilerText={post.spoilerText}
             currentQuotePolicy={post.quotePolicy}
             currentReplyPolicy={post.replyPolicy}
-            currentVisibility={(post as any).visibility}
+            currentVisibility={(post as any).justMe ? 'self' : (post as any).visibility}
             currentForKids={post.forKids}
             currentShopLinks={post.shopLinks}
             onSuccess={(edited) => {
@@ -2037,6 +2101,25 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
         onOpenChange={setShowQuoteModal}
         quotedPost={postAsNFT as any}
       />
+
+      {showTagger && postTokenId && (
+        <PhotoTagger
+          open={showTagger}
+          onOpenChange={setShowTagger}
+          images={images}
+          value={imageTags}
+          onDone={async (tags) => {
+            try {
+              const { imageTags: saved } = await savePhotoTags(Number(postTokenId), tags);
+              setTagsOverride(saved);
+              toast.success(t('photoTags.saved', { defaultValue: 'Tags saved' }));
+            } catch (err: any) {
+              toast.error(err?.message || t('photoTags.saveFailed', { defaultValue: 'Could not save tags' }));
+              throw err;
+            }
+          }}
+        />
+      )}
 
       {/* Poll Creator Drawer */}
       <Drawer open={showPollCreator} onOpenChange={setShowPollCreator}>

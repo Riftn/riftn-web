@@ -1,4 +1,5 @@
 import { apiCall, authedUpload } from './core';
+import { loadStreamerCollection } from '../../streamer-collection';
 import type { DeHubUser } from './types';
 
 export interface LiveStream {
@@ -30,7 +31,7 @@ export interface StreamKeyInfo {
 
 export interface StreamActivity {
   id: string;
-  type: 'join' | 'leave' | 'like' | 'gift' | 'giftSub' | 'comment' | 'start' | 'end' | 'paused' | 'resumed' | 'reaction' | 'message';
+  type: 'join' | 'leave' | 'like' | 'gift' | 'giftSub' | 'reward' | 'pointsGift' | 'comment' | 'start' | 'end' | 'paused' | 'resumed' | 'reaction' | 'message';
   address: string;
   username?: string;
   avatarUrl?: string;
@@ -39,6 +40,11 @@ export interface StreamActivity {
   giftCurrency?: string;
   /** Subscriptions bought for others, on a `giftSub` moment. */
   giftCount?: number;
+  /** The reward a viewer spent channel points on, on a `reward` moment. */
+  rewardTitle?: string;
+  /** pointsGift: how many points, and who got them. */
+  pointsAmount?: number;
+  recipientName?: string;
   timestamp: string;
 }
 
@@ -457,13 +463,15 @@ export interface StreamerProgress {
 }
 
 export async function getStreamerProgress(address: string): Promise<StreamerProgress> {
-  const res = await apiCall<StreamerProgress | { result: StreamerProgress }>(
-    `/api/live/creator/${address.toLowerCase()}/progress`,
-    { params: { collection: '20' } },
-  );
-  return 'result' in res && res.result && typeof res.result === 'object' && 'level' in res.result
-    ? res.result
-    : (res as StreamerProgress);
+  return loadStreamerCollection(async collection => {
+    const res = await apiCall<StreamerProgress | { result: StreamerProgress }>(
+      `/api/live/creator/${address.toLowerCase()}/progress`,
+      { params: { collection } },
+    );
+    return 'result' in res && res.result && typeof res.result === 'object' && 'level' in res.result
+      ? res.result
+      : (res as StreamerProgress);
+  });
 }
 
 export function selectStreamerBadge(badgeId: StreamerCardId): Promise<{ selectedBadgeId: StreamerCardId }> {

@@ -236,6 +236,28 @@ export function edgeWhepEndpointFor(stream: LiveStreamRef): string | undefined {
 }
 
 /**
+ * Where a viewer's hang-up goes.
+ *
+ * A session's own URL on the ingest host answers the browser's preflight
+ * with a bare 404, so a DELETE sent there never leaves the browser: every
+ * viewer who left logged a CORS error and the server kept the session until
+ * it timed out. The signaling edge fronts the same server and takes the
+ * hang-up for a session wherever it was opened.
+ */
+export function whepHangUpUrl(resource: string): string {
+  if (!MEDIAMTX_HOST) return resource;
+  try {
+    const url = new URL(resource);
+    if (url.host === MEDIAMTX_HOST && /^\/[^/]+\/whep\/[^/]+$/.test(url.pathname)) {
+      return `${EDGE_SIGNALING_BASE}${url.pathname}`;
+    }
+  } catch {
+    // Not an absolute URL: leave it as given.
+  }
+  return resource;
+}
+
+/**
  * TURN relay servers for the media leg, or [] when no relay is deployed.
  *
  * The API answers with coturn REST credentials (expiry-stamp username, HMAC
@@ -311,6 +333,29 @@ export function isAacCopyUrl(url: string | undefined): boolean {
   return !!url && new RegExp(`/[^/]+${AAC_COPY_SUFFIX}/[^/]+\\.m3u8`).test(url);
 }
 
+/**
+ * Open the connection to the ingest as soon as a self-hosted live turns up in
+ * anything the page lists, before any player asks for it. It is its own host
+ * (not behind the CDN the rest of the site rides), so the first request to it
+ * otherwise pays the DNS lookup and the TLS handshake in front of the stream:
+ * two to three round trips. `crossorigin` because the players fetch without
+ * credentials, and a connection opened with them is a different one.
+ */
+let ingestPreconnected = false;
+function preconnectIngest(): void {
+  if (ingestPreconnected || !MEDIAMTX_HOST || typeof document === 'undefined') return;
+  ingestPreconnected = true;
+  try {
+    const link = document.createElement('link');
+    link.rel = 'preconnect';
+    link.href = `https://${MEDIAMTX_HOST}`;
+    link.crossOrigin = 'anonymous';
+    document.head.appendChild(link);
+  } catch {
+    /* A hint only. */
+  }
+}
+
 /** HLS ladder — the fallback WHEP drops to, and what non-WebRTC clients get. */
 export function hlsUrlFor(stream: LiveStreamRef): string | undefined {
   const playbackId = stream?.playbackId;
@@ -318,6 +363,7 @@ export function hlsUrlFor(stream: LiveStreamRef): string | undefined {
   if (liveProviderOf(stream) !== 'mediamtx') {
     return `https://livepeercdn.studio/hls/${playbackId}/index.m3u8`;
   }
+  preconnectIngest();
   return hlsPlaysOpus()
     ? `https://${MEDIAMTX_HOST}/${playbackId}/index.m3u8`
     : `https://${MEDIAMTX_HOST}/${playbackId}${AAC_COPY_SUFFIX}/index.m3u8`;

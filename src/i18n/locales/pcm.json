@@ -1,4 +1,5 @@
 {
+  "dmVideo": {"edit": "Edit video", "hiddenTag": "Hidden", "tapToEdit": "Tap to edit", "cover": "Cover", "trim": "Trim", "mirror": "Mirror", "rotate": "Rotate", "hide": "Hide", "timer": "Timer", "sheetTitleAny": "Edit before sending", "close": "Close", "replace": "Replace", "pause": "Pause", "play": "Play video", "mute": "Mute", "unmute": "Unmute", "trimAria": "Drag the ends make you trim am", "coverAria": "Tap one frame make you set di cover", "coverHint": "Tap one frame make you set di cover", "coverOwn": "Your picture", "coverAuto": "Auto", "mirrored": "Mirrored", "original": "Original", "rotate90": "Rotate 90°", "showNormally": "Show normally", "showNormallyBody": "Dem see am sharp sharp", "hideUntilTap": "Hide until tapped", "hideUntilTapBody": "E go blur until dem tap am", "priceUnavailable": "No bi for dis chat", "timerOff": "Off", "timerOffBody": "E dey stay for di chat.", "timerViewBody": "E go comot for una two once dem don see am.", "confirm": "Confirm", "editItem": "Edit item {{value1}}", "kept": "{{time}} kept", "timerTimeBody": "E go comot for una two {{value1}} after you send am."},
   "postBg": {
     "addMedia": "Add picture, GIF or video",
     "changeMedia": "Change picture, GIF or video",
@@ -288,10 +289,12 @@
       "pronouns": "Pronouns",
       "location": "Location",
       "custom": "Custom",
-      "customOption": "Custom label"
+      "customOption": "Custom label",
+      "cashapp": "Cash App"
     },
     "descriptionPresets": "Add website, pronouns or anything else. Links go show with your socials.",
-    "needsLabel": "Give each custom field one label"
+    "needsLabel": "Give each custom field one label",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Follow #{{tag}}",
@@ -2204,7 +2207,7 @@
     "promptDevice": "Device & OS (for bug)",
     "deviceInfoNoErrors": "Nothing",
     "promptFilters": "Filter by category",
-    "promptMediaError": "Choose image or video wey dey less than 50MB.",
+    "promptMediaError": "Choose image or video wey dey less than 200MB.",
     "promptMediaLimit": "Up to {{max}} attachments.",
     "removePromptAttachment": "Remove {{name}}",
     "promptAttachment": "Attachment {{number}}",
@@ -4195,7 +4198,7 @@
       "pageViewsTerm": "Page views",
       "pageViews": "— requests wey Cloudflare classify as page loads, no be images, scripts or API calls.",
       "botsTerm": "Bots dey inside",
-      "bots": "— dis one na raw edge counts, so crawlers, uptime monitors and scripted clients dey inside am. You fit see am yourself for di browser breakdown wey dey up top, where entries like \"Curl\" and \"Unknown\" na automated traffic instead of people. To filter bots out need paid Cloudflare tier wey we no dey run, and if we quietly subtract estimate, e go make di numbers harder to check, no be easier.",
+      "bots": "— dis one na raw edge counts, so crawlers, uptime monitors and scripted clients dey inside am. You fit see am yourself for di browser breakdown wey dey up top, where entries like \"Curl\" and \"Unknown\" na automated traffic instead of people. E dey harder to tell bots from real visitors, and soon we no go fit tell dem apart for these stats, so e no get use to try filter dem comot.",
       "totalTerm": "Range totals",
       "total": "— page views and requests dey add up across di range. Visitor counts no dey sum join for one headline \"total visitors\" on purpose, because person wey dey here Monday and Tuesday go count twice.",
       "peakTerm": "Busiest hour / day",
@@ -20857,5 +20860,27 @@
     "remember": "Remember wetin I choose",
     "rememberHint": "Change am anytime for Settings",
     "failed": "We no fit delete di message"
+  },
+  "profileAskAi": {
+    "row": "Ask AI",
+    "rowSub": "Follow, like everytin, sabi wetin dey happen",
+    "back": "Go back",
+    "title": "Ask AI about {{handle}}",
+    "sub": "Di Assistant go do am, na you go confam",
+    "followLikeAll": "Follow and like everytin",
+    "followLikeAllSub": "E go follow {{handle}}, react to every post",
+    "likeAll": "Like all dia post dem",
+    "likeAllSub": "E go skip di ones wey you don react to",
+    "catchUp": "Tell me wetin dey happen",
+    "catchUpSub": "Wetin {{handle}} don post lately, for short",
+    "message": "Write dem message",
+    "messageSub": "E go draft message, na you go send am",
+    "placeholder": "Ask anytin about {{handle}}…",
+    "send": "Send",
+    "promptFollowLikeAll": "Follow {{handle}} and react to all dia post dem",
+    "promptLikeAll": "React to all di post dem wey {{handle}} put",
+    "promptCatchUp": "Tell me wetin {{handle}} don post lately",
+    "promptMessage": "Help me write message give {{handle}}",
+    "promptAbout": "About {{handle}}: {{question}}"
   }
 }

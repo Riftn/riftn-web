@@ -33,12 +33,15 @@ import { createOverlayEventBus, OverlayEventContext } from '../overlay/overlay-e
 import { createRuleBus, RuleAudio, RuleBusContext } from '../overlay/rule-bus';
 import { RulesPanel } from './RulesPanel';
 import { ModerationPanel } from './ModerationPanel';
+import { StreamBotPanel } from './StreamBotPanel';
 import { PollPanel } from './PollPanel';
 import { RecapPanel } from './RecapPanel';
 import { HighlightsPanel } from './HighlightsPanel';
 import { QuickControls } from './QuickControls';
 import { SubathonPanel } from './SubathonPanel';
 import { PointsPanel } from './PointsPanel';
+import { RewardsPanel } from './RewardsPanel';
+import { PetPanel } from './PetPanel';
 import { OverlayCreatorContext, SubathonContext } from '../overlay/subathon';
 import { HypeContext } from '../overlay/hype-train';
 import { BadgesPanel } from './BadgesPanel';
@@ -401,11 +404,17 @@ export function LiveStudio() {
 
       <SubathonPanel subathon={subathon} onChange={setSubathon} />
 
+      <RewardsPanel />
+
       <PointsPanel address={walletAddress} />
+
+      <PetPanel />
 
       <BadgesPanel />
 
       {!justEnded && <RecapPanel address={walletAddress} />}
+
+      <StreamBotPanel />
 
       <RulesPanel hasAlertWidget={widgets.some((w) => w.kind === 'rule_alert' && w.enabled)} />
 

@@ -15,6 +15,7 @@ import { usePhonePill } from '@/components/app/page-kit/PageKit';
 import { ExploreListSection } from '@/components/app/explore/ExploreListSection';
 import { cn } from '@/lib/utils';
 
+import { formatCount } from '@/lib/format-count';
 export const CleanSection = ExploreListSection;
 
 /** True on phones, where pages draw their clean list. */
@@ -65,7 +66,7 @@ export function CleanWords<T extends string>({
             >
               {item.label}
               {item.count ? (
-                <span className={cn('tabular-nums', active ? 'text-zinc-300' : 'text-zinc-600')}>{item.count}</span>
+                <span className={cn('tabular-nums', active ? 'text-zinc-300' : 'text-zinc-600')}>{formatCount(item.count)}</span>
               ) : null}
               {active && size === 'md' && (
                 <motion.span

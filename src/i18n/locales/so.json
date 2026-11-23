@@ -1,4 +1,5 @@
 {
+  "dmVideo": {"edit": "Tafatir muuqaalka", "hiddenTag": "Qarsan", "tapToEdit": "Taabo si aad u tafatirto", "cover": "Dabool", "mirror": "Muraayad", "rotate": "Wareeji", "hide": "Qari", "timer": "Saacad-joojiyaha", "sheetTitleAny": "Tafatir ka hor inta aadan dirin", "close": "Xir", "replace": "Beddel", "hiddenUntilTap": "Qari ilaa ay taabtaan", "pause": "Jooji", "play": "Daar muuqaalka", "mute": "Aamus", "unmute": "Aamuska ka qaad", "scrub": "Soo rog muuqaalka", "addMore": "Ku dar sawirro ama muuqaallo", "trimAria": "Jiid darafyada si aad u gooyso", "coverAria": "Taabo qaab si aad u dejiso daboolka", "coverHint": "Taabo qaab si aad u dejiso daboolka", "coverOwn": "Sawirkaaga", "coverAuto": "Auto", "uploadCover": "Soo geli sawirka daboolka", "mirrored": "Muraayadaysan", "original": "Asalka", "showNormally": "Muuji si caadi ah", "showNormallyBody": "Waxay u arkaan isla markiiba", "hideUntilTap": "Qari ilaa laga taabto", "hideUntilTapBody": "Waa la qariyey ilaa ay taabtaan", "hidePrice": "Ka dhuumo qiimo", "hidePriceBody": "Waa la qariyay ilaa ay ku siiyaan lacagta", "priceUnavailable": "Chat-kan kuma jiro", "timerOff": "Ka bax", "timerOffBody": "Waxay ku sii jiraysaa wada-hadalka.", "timerViewBody": "Way ka tirtirmaysaa labadiinaba marka ay arkaan.", "confirm": "Xaqiiji", "lockedFor": "Fur si aad u hesho {{value1}} DHB", "lockedForUsd": "Fur {{value1}}", "editItem": "Wax ka beddel shayga {{value1}}", "kept": "{{time}} ayaa la haystay", "timerTimeBody": "Way ka tirtirmaysaa labadiinaba {{value1}} marka aad dirto ka dib."},
   "postBg": {
     "addMedia": "Ku dar sawir, GIF ama muuqaal",
     "changeMedia": "Beddel sawirka, GIF-ka ama muuqaalka",
@@ -295,10 +296,12 @@
       "pronouns": "Pronouns",
       "location": "Goobta",
       "custom": "Custom",
-      "customOption": "Calaamad Custom"
+      "customOption": "Calaamad Custom",
+      "cashapp": "Cash App"
     },
     "add": "Ku dar goob",
-    "remove": "Ka saar goobta"
+    "remove": "Ka saar goobta",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Raac #{{tag}}",
@@ -2210,7 +2213,7 @@
     "promptDevice": "Qalabka & OS (loogu talagalay cayayaanka)",
     "deviceInfoNoErrors": "Midna",
     "promptFilters": "Isku shaandheyn by category",
-    "promptMediaError": "Dooro sawiro ama fiidiyowyo ka yar 20MB mid kasta.",
+    "promptMediaError": "Dooro sawiro ama fiidiyowyo ka yar 200MB mid kasta.",
     "promptMediaLimit": "Badiyadka to {{max}} attachments",
     "removePromptAttachment": "Ka saar {{name}}",
     "promptAttachment": "Lifaaqa {{number}}",
@@ -4211,7 +4214,7 @@
       "pageViewsTerm": "Muuqaalada bogga",
       "pageViews": "— codsiyada Cloudflare u kala saaro inay yihiin soo dejinta bogga, ee ma aha sawirro, qoraallo ama wicitaanno API.",
       "botsTerm": "Bots way ku jiraan",
-      "bots": "— kuwani waa tirooyin ceyriin ah oo cidhifka ah, sidaas darteed crawlers, kormeerayaasha shaqaynta iyo macaamiisha qoraalka ayaa ku jira. Waxaad ku arki kartaa qeybinta browserada ee kore, halkaas oo qoraallada sida \"Curl\" iyo \"Lama garanayo\" ay yihiin taraafik otomaatig ah oo aan dad ahayn. Sifaynta bots waxay u baahan tahay qorshe Cloudflare oo la bixiyo oo aanan lahayn, oo si aamusan qiyaas laga jaro waxay tirooyinka ka dhigi lahayd kuwo aan la hubin karin, ma aha kuwo la hubin karo.",
+      "bots": "— kuwani waa tirooyin ceyriin ah oo cidhifka ah, sidaas darteed crawlers, kormeerayaasha shaqaynta iyo macaamiisha qoraalka ayaa ku jira. Waxaad ku arki kartaa qeybinta browserada ee kore, halkaas oo qoraallada sida \"Curl\" iyo \"Lama garanayo\" ay yihiin taraafik otomaatig ah oo aan dad ahayn. Kala saaridda bots iyo booqdayaasha dhabta ah way sii adkaanaysaa, dhowaan tirakoobkan laguma kala garan doono, markaa isku dayga in bots la sifeeyo waxba ma tarayo.",
       "totalTerm": "Wadarta xilliga",
       "total": "— muuqaalada bogga iyo codsiyada waa lagu wada xisaabiyaa xilliga. Tirada booqdayaasha si ula kac ah looma isku darin \"wadarta booqdayaasha\", maxaa yeelay qofka joogay Isniinta iyo Talaadada laba jeer ayaa la tirin lahaa.",
       "peakTerm": "Saacadda / maalinta ugu mashquulsan",
@@ -20855,5 +20858,27 @@
     "remember": "Xasuuso doorashadayda",
     "rememberHint": "Ku beddel waqti kasta Settings",
     "failed": "Lama tirtiri karin fariinta"
+  },
+  "profileAskAi": {
+    "row": "Weydii AI",
+    "rowSub": "Raac, jeclow dhammaan, la soco",
+    "back": "Dib u noqo",
+    "title": "Weydii AI wax ku saabsan {{handle}}",
+    "sub": "Kaaliyaha ayaa sameeya, adiga ayaa xaqiijiya",
+    "followLikeAll": "Raac oo jeclow dhammaan",
+    "followLikeAllSub": "Wuxuu raacaa {{handle}}, wuxuu ka falceliyaa qoraal kasta",
+    "likeAll": "Jeclow dhammaan qoraalladooda",
+    "likeAllSub": "Wuu ka boodaa kuwa aad horey uga falcelisay",
+    "catchUp": "I war geli",
+    "catchUpSub": "Waxa {{handle}} dhowaan soo dhigay, si kooban",
+    "message": "U qor fariin",
+    "messageSub": "Wuxuu diyaariyaa qabyo fariin, adiga ayaa dira",
+    "placeholder": "Wax kasta ka weydii {{handle}}…",
+    "send": "Dir",
+    "promptFollowLikeAll": "Raac {{handle}} oo ka falceli dhammaan qoraalladooda",
+    "promptLikeAll": "Ka falceli dhammaan qoraallada {{handle}}",
+    "promptCatchUp": "I war geli waxa {{handle}} dhowaan soo dhigay",
+    "promptMessage": "I caawi inaan fariin u qoro {{handle}}",
+    "promptAbout": "Ku saabsan {{handle}}: {{question}}"
   }
 }

@@ -12,17 +12,40 @@ const one: ChatReactionSummary = {
 };
 
 describe('reaction alerts in the Chat list', () => {
-  it('shows the emoji itself for one reaction, no number', () => {
+  const emojis = () => Array.from(document.querySelectorAll('[data-reaction-alert-emoji]')).map((n) => n.getAttribute('data-reaction-alert-emoji'));
+
+  it('shows the emoji itself for one reaction, no number, no pill', () => {
     render(<ReactionAlertBadge reactions={one} />);
     const badge = document.querySelector('[data-reaction-alert]')!;
-    expect(badge.textContent).toBe('❤️');
+    expect(emojis()).toEqual(['❤️']);
+    expect(document.querySelector('[data-reaction-alert-total]')).toBeNull();
+    expect(badge.className).not.toContain('bg-white');
+    expect(badge.hasAttribute('data-count-badge')).toBe(false);
   });
 
-  it('stacks up to three emojis with the total for several', () => {
-    render(<ReactionAlertBadge reactions={{ ...one, total: 7, emojis: [
+  it('plays the animated emoji by default', () => {
+    render(<ReactionAlertBadge reactions={one} />);
+    expect(document.querySelector('[data-reaction-alert-emoji]')?.getAttribute('data-reaction-alert-art')).toBe('/emoji/animated/chat/2764_fe0f.webp');
+  });
+
+  it('shows still emojis when reaction motion is Off', () => {
+    localStorage.setItem('riftn.chat.reactionStyle', 'off');
+    try {
+      render(<ReactionAlertBadge reactions={one} />);
+      expect(document.querySelector('[data-reaction-alert-emoji]')?.hasAttribute('data-reaction-alert-art')).toBe(false);
+      expect(document.querySelector('[data-reaction-alert-emoji] img')).toBeNull();
+      expect(document.querySelector('[data-reaction-alert]')!.textContent).toBe('❤️');
+    } finally {
+      localStorage.removeItem('riftn.chat.reactionStyle');
+    }
+  });
+
+  it('stacks up to three emojis, newest first, with the total for several', () => {
+    render(<ReactionAlertBadge reactions={{ ...one, total: 7, last: { ...one.last, emoji: '😂' }, emojis: [
       { emoji: '❤️', count: 3 }, { emoji: '😂', count: 2 }, { emoji: '🔥', count: 1 }, { emoji: '👍', count: 1 },
     ] }} />);
-    expect(document.querySelector('[data-reaction-alert]')!.textContent).toBe('❤️😂🔥7');
+    expect(emojis()).toEqual(['😂', '❤️', '🔥']);
+    expect(document.querySelector('[data-reaction-alert-total]')!.textContent).toBe('7');
   });
 
   it('renders nothing when none are waiting', () => {

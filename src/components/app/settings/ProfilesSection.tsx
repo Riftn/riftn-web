@@ -21,6 +21,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useSelfBadge } from '@/hooks/use-self-badge-balance';
 import { buildAvatarUrl, deviceWidth } from '@/lib/media-url';
 import { ButtonLoader } from '@/components/app/DeHubLoader';
+import { SavedProfileName } from '@/components/app/profile/SavedProfileName';
 import {
   listProfiles,
   currentProfileId,
@@ -30,12 +31,8 @@ import {
   type StoredProfile,
 } from '@/lib/profiles';
 
-function shortAddress(address: string): string {
-  return address.length > 12 ? `${address.slice(0, 6)}…${address.slice(-4)}` : address;
-}
-
 function profileLabel(profile: StoredProfile): string {
-  return profile.name || profile.username || shortAddress(profile.address);
+  return profile.name || profile.username || '';
 }
 
 export function ProfilesSection({ onSelect }: { onSelect?: () => void } = {}) {
@@ -142,13 +139,15 @@ export function ProfilesSection({ onSelect }: { onSelect?: () => void } = {}) {
                   </AvatarFallback>
                 </Avatar>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-medium text-white truncate">
-                    {profileLabel(profile)}
-                  </span>
-                  <span className="block text-xs text-zinc-500 truncate">
-                    {shortAddress(profile.address)}
-                    {profile.session ? '' : ` · ${t('settings.profileSignedOut', 'sign in to switch')}`}
-                  </span>
+                  <SavedProfileName profile={profile} className="text-sm font-medium text-white" />
+                  {(profile.username || !profile.session) && (
+                    <span className="block text-xs text-zinc-500 truncate">
+                      {[
+                        profile.username && `@${profile.username}`,
+                        !profile.session && t('settings.profileSignedOut', 'sign in to switch'),
+                      ].filter(Boolean).join(' · ')}
+                    </span>
+                  )}
                 </span>
                 {switchingId === profile.id && (
                   /* Switching profile tears down one session and restores

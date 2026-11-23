@@ -2988,6 +2988,86 @@ export const blogPostsMetadata: BlogPost[] = [
 // arrays at runtime in blogUtils.ts — metadata-only logic, no third copy here.
 export const newPostsMetadata: BlogPost[] = [
   {
+    "id": "how-to-stream-on-riftn",
+    "slug": "how-to-stream-on-riftn",
+    "title": "How to Stream on Riftn: Every Way to Go Live, Step by Step",
+    "excerpt": "Go live from your browser, your phone, the Riftn app, OBS or a capture card. Host audio Stages, bring guests on screen, call your group and multistream to Twitch and YouTube. Then set up alerts, a chat bot, channel points and more in Live Studio. Here is every step.",
+    "content": "",
+    "bannerImage": "/media/how-to-stream-on-riftn-banner.jpg",
+    "bannerImageAlt": "How to stream on Riftn: every way to go live, step by step",
+    "author": {
+      "name": "Riftn Team"
+    },
+    "publishedAt": "2026-11-22T18:00:00.000Z",
+    "updatedAt": "2026-11-22T18:00:00.000Z",
+    "tags": [
+      "Live Streaming",
+      "How To",
+      "OBS",
+      "Creators",
+      "Riftn"
+    ],
+    "readingTime": 11,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "How to Stream on Riftn (2026): Every Way to Go Live",
+    "seoDescription": "Step-by-step guide to live streaming on Riftn: go live from your browser, phone, the app, OBS or a capture card, host audio Stages, add guests, multistream to Twitch and YouTube, and set up alerts, a chat bot and channel points."
+  },
+  {
+    "id": "youtube-features-users-want-2026",
+    "slug": "youtube-features-users-want-2026",
+    "title": "10 Features YouTube Users Keep Asking For (Riftn Already Has Them)",
+    "excerpt": "Dislike counts, a feed in time order, fewer ads, viewer clips, private messages and pay from day one. YouTube users ask for them every year, and YouTube keeps saying no. Here are the 10 biggest requests of 2026, and where Riftn already delivers each one.",
+    "content": "",
+    "bannerImage": "/media/youtube-features-users-want-banner-r2.jpg",
+    "bannerImageAlt": "YouTube said no: 10 features YouTube users keep asking for that Riftn already built",
+    "author": {
+      "name": "Riftn Team"
+    },
+    "publishedAt": "2026-11-20T20:00:00.000Z",
+    "updatedAt": "2026-11-20T20:00:00.000Z",
+    "tags": [
+      "YouTube",
+      "YouTube Alternative",
+      "Dislike Button",
+      "Creator Economy",
+      "Riftn"
+    ],
+    "readingTime": 9,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "10 Features YouTube Users Want (2026) and Who Has Them",
+    "seoDescription": "Dislike counts, a feed in time order, fewer ads, viewer clips, private messages and pay from day one: the 10 features YouTube users keep asking for in 2026, and where Riftn already delivers them."
+  },
+  {
+    "id": "top-10-alternative-social-media-apps-2026",
+    "slug": "top-10-alternative-social-media-apps-2026",
+    "title": "Top 10 Alternative Social Media Apps in 2026 (and Why Riftn Leads)",
+    "excerpt": "Tired of feeds built to sell your attention? Here are the 10 best alternatives to X, Instagram, TikTok and Reddit in 2026, from Bluesky and Mastodon to Nostr and Farcaster. Riftn takes the top spot because its users own it, run it and build it.",
+    "content": "",
+    "bannerImage": "/media/top-10-alternative-social-media-apps-banner-r2.jpg",
+    "bannerImageAlt": "Top 10 alternative social media apps in 2026, ranked, with Riftn at number one",
+    "author": {
+      "name": "Riftn Team"
+    },
+    "publishedAt": "2026-11-20T15:00:00.000Z",
+    "updatedAt": "2026-11-20T15:30:00.000Z",
+    "tags": [
+      "Alternative Social Media",
+      "Decentralized Social Media",
+      "Bluesky",
+      "Mastodon",
+      "Farcaster",
+      "Nostr",
+      "Riftn"
+    ],
+    "readingTime": 11,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "Top 10 Alternative Social Media Apps 2026: Ranked",
+    "seoDescription": "The 10 best alternatives to X, Instagram, TikTok and Reddit in 2026: Riftn, Bluesky, Mastodon, Nostr, Farcaster, Lens, Hive, Pixelfed, Lemmy and Zora, ranked by who owns them."
+  },
+  {
     "id": "decentralization-spectrum-social-media",
     "slug": "decentralization-spectrum-social-media",
     "title": "The Decentralization Spectrum: How Decentralized Can Social Media Really Get?",
@@ -3727,30 +3807,30 @@ export const newPostsMetadata: BlogPost[] = [
 
 // getLatestPost() result — docs home hero.
 export const latestPostMetadata: BlogPost | undefined = {
-  "id": "decentralization-spectrum-social-media",
-  "slug": "decentralization-spectrum-social-media",
-  "title": "The Decentralization Spectrum: How Decentralized Can Social Media Really Get?",
-  "excerpt": "Putting data on a blockchain does not make a social network decentralized. We ranked 30 crypto and decentralized social platforms by who really controls them: rules, moderation, ownership, revenue and code. Here is the spectrum, and why Riftn sits at the top.",
+  "id": "how-to-stream-on-riftn",
+  "slug": "how-to-stream-on-riftn",
+  "title": "How to Stream on Riftn: Every Way to Go Live, Step by Step",
+  "excerpt": "Go live from your browser, your phone, the Riftn app, OBS or a capture card. Host audio Stages, bring guests on screen, call your group and multistream to Twitch and YouTube. Then set up alerts, a chat bot, channel points and more in Live Studio. Here is every step.",
   "content": "",
-  "bannerImage": "/media/decentralization-spectrum-banner-r2.jpg",
-  "bannerImageAlt": "The decentralization spectrum: how decentralized can social media really get?",
+  "bannerImage": "/media/how-to-stream-on-riftn-banner.jpg",
+  "bannerImageAlt": "How to stream on Riftn: every way to go live, step by step",
   "author": {
     "name": "Riftn Team"
   },
-  "publishedAt": "2026-11-13T22:00:00.000Z",
+  "publishedAt": "2026-11-22T18:00:00.000Z",
+  "updatedAt": "2026-11-22T18:00:00.000Z",
   "tags": [
-    "Decentralization",
-    "Decentralized Social Media",
-    "Open Source",
-    "Moderation",
-    "Blockchain",
+    "Live Streaming",
+    "How To",
+    "OBS",
+    "Creators",
     "Riftn"
   ],
-  "readingTime": 12,
+  "readingTime": 11,
   "featured": false,
   "status": "published",
-  "seoTitle": "The Decentralization Spectrum: How Decentralized Can Social Media Get?",
-  "seoDescription": "30 decentralized and crypto social apps ranked by who really controls them, from Bluesky and Farcaster to Nostr and Hive. Why on-chain is not the same as decentralized."
+  "seoTitle": "How to Stream on Riftn (2026): Every Way to Go Live",
+  "seoDescription": "Step-by-step guide to live streaming on Riftn: go live from your browser, phone, the app, OBS or a capture card, host audio Stages, add guests, multistream to Twitch and YouTube, and set up alerts, a chat bot and channel points."
 };
 
 export const excludedTitles: string[] = [

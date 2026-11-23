@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useReauthHandler } from '@/hooks/use-reauth-handler';
 import { useFollowedSuggestions } from '@/hooks/use-followed-suggestions';
 import { useFollowOverrides, toggleFollowFor } from '@/hooks/use-follow';
+import { profilePath } from '@/lib/profile-path';
 
 const BATCH_SIZE = 10;
 const MAX_PAGES = 10;
@@ -132,7 +133,7 @@ export function WhoToFollow() {
   const handleUserClick = (user: SuggestedAccount) => {
     const target = user.username || user.address;
     if (target) {
-      navigate(`/${target}`);
+      navigate(profilePath(target));
     }
   };
 

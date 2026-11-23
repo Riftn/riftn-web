@@ -37,6 +37,8 @@ import { buildAvatarUrl, extractAvatarPath } from '@/lib/media-url';
 import { engagementWeight, formatEngagementWeight, NO_BADGE_ENGAGEMENT_WEIGHT } from '@/lib/engagement-weight';
 import { AppState } from '@/components/app/AppState';
 
+import { formatCount } from '@/lib/format-count';
+import { profilePath } from '@/lib/profile-path';
 const PAGE_SIZE = 50;
 
 interface ReactionInfoDrawerProps {
@@ -108,7 +110,7 @@ export function ReactionInfoDrawer({ open, onOpenChange, tokenId }: ReactionInfo
 
   const goToProfile = (person: PostLiker) => {
     onOpenChange(false);
-    if (person.username) navigate(`/${person.username.replace('@', '')}`);
+    if (person.username) navigate(profilePath(person.username.replace('@', '')));
     else if (person.address) navigate(`/app/profile?id=${person.address}`);
   };
 
@@ -122,7 +124,7 @@ export function ReactionInfoDrawer({ open, onOpenChange, tokenId }: ReactionInfo
         <DrawerHeader className="px-5 pt-4 pb-3 shrink-0">
           <DrawerTitle className="text-base font-medium text-white text-center">
             {t("reactionInfo.title")}
-            {totalCount > 0 && <span className="text-white/40 font-normal"> · {totalCount}</span>}
+            {totalCount > 0 && <span className="text-white/40 font-normal"> · {formatCount(totalCount)}</span>}
           </DrawerTitle>
         </DrawerHeader>
 

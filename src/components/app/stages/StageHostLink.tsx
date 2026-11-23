@@ -17,6 +17,7 @@ import { useTranslation as _useCopy } from 'react-i18next';
 import { ProfileHoverCard } from '@/components/app/ProfileHoverCard';
 import { cn } from '@/lib/utils';
 import type { AudioSpace } from '@/types/audio-spaces.types';
+import { profilePath } from '@/lib/profile-path';
 
 interface StageHostLinkProps {
   space: Pick<AudioSpace, 'host_username' | 'host_wallet_address'>;
@@ -46,7 +47,7 @@ export function StageHostLink({
 
   const openProfile = (e: { stopPropagation: () => void }) => {
     e.stopPropagation();
-    if (handle) navigate(`/${handle}`);
+    if (handle) navigate(profilePath(handle));
     else navigate(`/app/profile?id=${space.host_wallet_address}`);
   };
 

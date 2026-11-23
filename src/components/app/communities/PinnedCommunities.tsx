@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { storageImage, deviceWidth } from '@/lib/media-url';
 import { DescriptionWithLinks } from '@/components/app/communities/DescriptionWithLinks';
 
+import { formatCount } from '@/lib/format-count';
 interface PinnedCommunitiesProps {
   walletAddress: string;
   isOwnProfile: boolean;
@@ -145,7 +146,7 @@ function PinnedCommunityCard({ community, onClick, isOwnProfile, onManagePins, a
           <div className="flex items-center gap-1.5 mt-1">
             <Users className="w-3 h-3 text-zinc-500" />
             <span className="text-xs text-zinc-500">
-              <span className="font-semibold text-zinc-300">{community.member_count.toLocaleString()}</span> {t('communities.membersLabel')}
+              <span className="font-semibold text-zinc-300">{formatCount(community.member_count)}</span> {t('communities.membersLabel')}
             </span>
           </div>
         </div>

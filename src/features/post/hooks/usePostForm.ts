@@ -20,6 +20,8 @@ import { createLogger } from '@/lib/logger';
 
 const mintLogger = createLogger('PostForm.handlePost');
 import { useCreatorPlansLite } from '@/hooks/use-creator-plans';
+import { createQuiz, isQuizDraftValid, type QuizDraft } from '@/lib/api/dehub/quiz';
+import { setPhotoTags as savePhotoTags, type PhotoTag } from '@/lib/api/dehub/photo-tags';
 import { mintPost, createPoll, getMintFee, getPostQuota, quotePostCharge, keepPostOffChain, AuthenticationError, PaymentRequiredError, UploadHttpError, type MintFeeQuoteResponse, type MintResponse, type PostQuotaStatus, type ShopLink } from '@/lib/api/dehub';
 import { videoEditsPayload, hasVideoEdits } from '../lib/video-edits';
 import { startDraftVideo, isDraftUsable, type DraftVideoUpload, type DraftVideoSnapshot } from '../lib/draft-video';
@@ -30,10 +32,11 @@ import { isSmartWalletSession } from '@/lib/connection-source';
 import { applyEditsToImageFile } from '@/lib/filters';
 import { startDraftImage, resolveDraftImages } from '../lib/draftImages';
 import { MEDIA_LIMITS } from '@/constants/post.constants';
+import { createVoiceRecorder, voiceRecordingBlob, voiceRecordingFile } from '@/lib/voice-recording';
 import { splitTitleFromText } from '@/features/post/lib/title-split';
 import { shrinkComicPages } from '@/lib/comic-pages';
 import type { ComicBorder } from '@/lib/comic-borders';
-import { getComicImageLimitForBadge, getPostImageBytesForBadge, getPostImageLimitForBadge, MAX_IMAGE_UPLOAD_BYTES, MAX_REQUEST_IMAGE_BYTES } from '@/lib/post-image-allowance';
+import { getComicImageLimitForBadge, getPostMediaAllowanceForAccount, getPostImageLimitForBadge, MAX_IMAGE_UPLOAD_BYTES, MAX_REQUEST_IMAGE_BYTES } from '@/lib/post-image-allowance';
 // NOTE: mint/bounty helpers reach wallet/contract code (wagmi + web3auth).
 // usePostForm is reachable from eager UI (PostModal is used by the sidebar /
 // bottom nav / feed), so those helpers are dynamically imported inside
@@ -333,6 +336,7 @@ export function usePostForm(
   quotedPost?: DeHubNFT | null,
   /** The new post's token id, once the server has it (a duet links itself to its source here). */
   onPosted?: (tokenId: string) => void,
+  composerOpen = true,
 ): UsePostFormReturn {
   const { t: _copy } = _useCopy();
   const isQuoting = !!quotedPost;
@@ -373,6 +377,10 @@ export function usePostForm(
   const [tokenAmount, setTokenAmount] = useDraftState(draftScope + ":tokenAmount", d?.tokenAmount ?? '');
   const [liveMode, setLiveMode] = useState<LiveMode>(null);
   const [poll, setPoll] = useDraftState<PollData | null>(draftScope + ":poll", d?.poll ?? null);
+  /** Create Post > Quiz: questions attached to the post once it is out. */
+  const [quiz, setQuiz] = useState<QuizDraft | null>(null);
+  /** People tagged on the photos, by photo index; saved once the post is out. */
+  const [photoTags, setPhotoTags] = useState<PhotoTag[]>([]);
   // The content warning being written: null is "none", '' is "toggled on, still empty".
   const [contentWarning, setContentWarning] = useState<string | null>(null);
   /** The comic's border preset; null is the theme's own foil. */
@@ -563,15 +571,24 @@ export function usePostForm(
    * every keystroke. Null means "could not read it" and shows nothing —
    * never a zero, which would read as "you are out".
    */
-  const [postQuota, setPostQuota] = useState<PostQuotaStatus | null>(null);
-  const mediaUploadLimit = postQuota?.mediaBytesPerDay ?? MEDIA_LIMITS.BASE_MEDIA_UPLOAD_SIZE;
+  const address = user?.address;
+  const activeAddress = useRef(address);
+  activeAddress.current = address;
+  const [quotaRead, setQuotaRead] = useState<{ address: string; quota: PostQuotaStatus | null } | null>(null);
+  const postQuota = quotaRead && quotaRead.address === address ? quotaRead.quota : null;
+  const fallback = getPostMediaAllowanceForAccount(user);
+  const mediaUploadLimit = postQuota?.mediaBytesPerDay ?? fallback.bytes;
+  const mediaUploadTier = (postQuota ? postQuota.tier : fallback.tier) || 'base';
   const mediaUploadLimitLabel = `${Number((mediaUploadLimit / (1024 ** 3)).toFixed(1))}GB`;
   const refreshPostQuota = useCallback(() => {
-    getPostQuota().then(setPostQuota);
-  }, []);
+    if (!address || activeAddress.current !== address) return;
+    getPostQuota().then(quota => {
+      if (activeAddress.current === address) setQuotaRead({ address, quota });
+    });
+  }, [address]);
   useEffect(() => {
-    if (!user?.address) {
-      setPostQuota(null);
+    if (!address) {
+      setQuotaRead(null);
       return;
     }
     let cancelled = false;
@@ -583,10 +600,10 @@ export function usePostForm(
       .catch(() => {})
       .then(() => getPostQuota())
       .then((quota) => {
-        if (!cancelled) setPostQuota(quota);
+        if (!cancelled && activeAddress.current === address) setQuotaRead({ address, quota });
       });
     return () => { cancelled = true; };
-  }, [user?.address]);
+  }, [address]);
 
   const [isGeneratingThumbnail, setIsGeneratingThumbnail] = useState(false);
 
@@ -685,7 +702,7 @@ export function usePostForm(
   const audioInputRef = useRef<HTMLInputElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
+  const recordingRequest = useRef<symbol | null>(null);
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Computed values
@@ -714,17 +731,11 @@ export function usePostForm(
   const pollIsValid = poll !== null && poll.question.trim().length > 0 && poll.options.filter(o => o.text.trim()).length >= 2;
   // Enough in the composer to publish or save. Drafts key off this, so running
   // out of posts for the day still leaves the draft path open.
-  const hasContent = Boolean((text.trim() || media.length > 0 || isLive || pollIsValid) && !isGeneratingThumbnail);
+  const quizIsValid = isQuizDraftValid(quiz);
+  const hasContent = Boolean((text.trim() || media.length > 0 || isLive || pollIsValid || quizIsValid) && !isGeneratingThumbnail);
   const canPost = hasContent;
 
   // Actions
-  const handleImageSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-    processImageFiles(Array.from(files));
-    e.target.value = '';
-  }, []);
-
   const processImageFiles = useCallback((files: File[]) => {
     // Can't add images if there's already a video
     if (hasVideo) {
@@ -745,8 +756,7 @@ export function usePostForm(
 
     const imageFiles = files.filter(f => f.type.startsWith('image/'));
     // Images share the creator's general media upload ceiling.
-    const imageByteLimit = Math.min(MAX_IMAGE_UPLOAD_BYTES, postQuota?.mediaBytesPerDay
-      ?? getPostImageBytesForBadge(user?.badgeBalance, user?.username, user?.badgeLock));
+    const imageByteLimit = Math.min(MAX_IMAGE_UPLOAD_BYTES, mediaUploadLimit);
     const imageLimitMb = imageByteLimit / 1_000_000;
     const oversized = imageFiles.filter(f => f.size > imageByteLimit);
     if (oversized.length > 0) {
@@ -777,14 +787,14 @@ export function usePostForm(
       const preview = URL.createObjectURL(file);
       setMedia(prev => [...prev, { file, preview, type: 'image' }]);
     });
-  }, [hasVideo, media, postLayout, user?.badgeBalance, user?.badgeLock, user?.username, postQuota?.mediaBytesPerDay, postQuota?.tier, t, _copy]);
+  }, [hasVideo, media, postLayout, user?.badgeBalance, user?.badgeLock, user?.username, mediaUploadLimit, postQuota?.tier, t, _copy]);
     
-  const handleVideoSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (!files || files.length === 0) return;
-    await processVideoFile(files[0]);
+    if (!files) return;
+    processImageFiles(Array.from(files));
     e.target.value = '';
-  }, []);
+  }, [processImageFiles]);
 
   const processVideoFile = useCallback(async (file: File, replace = false) => {
     // Can't add video if there are already images
@@ -802,7 +812,7 @@ export function usePostForm(
     if (file.size > mediaUploadLimit) {
       // Without this an oversized video uploaded for up to 8 minutes and died
       // at the XHR timeout with a generic failure.
-      toast.error(_copy("copy.8be9a68e0703", { defaultValue: "Video is too large — your {{value1}} tier allows {{value2}}", value1: postQuota?.tier || 'base', value2: mediaUploadLimitLabel }));
+      toast.error(_copy("copy.8be9a68e0703", { defaultValue: "Video is too large — your {{value1}} tier allows {{value2}}", value1: mediaUploadTier, value2: mediaUploadLimitLabel }));
       return;
     }
 
@@ -903,7 +913,14 @@ export function usePostForm(
     } finally {
       setIsGeneratingThumbnail(false);
     }
-  }, [hasImage, hasVideo, text, titleText, editorRef, mediaUploadLimit, mediaUploadLimitLabel, postQuota?.tier, setText, setTitleText, _copy]);
+  }, [hasImage, hasVideo, text, titleText, editorRef, mediaUploadLimit, mediaUploadLimitLabel, mediaUploadTier, setText, setTitleText, _copy]);
+
+  const handleVideoSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    await processVideoFile(files[0]);
+    e.target.value = '';
+  }, [processVideoFile]);
 
   const removeMedia = useCallback((index: number) => {
     setMedia(prev => {
@@ -926,7 +943,7 @@ export function usePostForm(
 
   const processAudioFile = useCallback((file: File) => {
     if (file.size > mediaUploadLimit) {
-      toast.error(_copy("copy.7de82e4f914f", { defaultValue: "Audio is too large — your {{value1}} tier allows {{value2}}", value1: postQuota?.tier || 'base', value2: mediaUploadLimitLabel }));
+      toast.error(_copy("copy.7de82e4f914f", { defaultValue: "Audio is too large — your {{value1}} tier allows {{value2}}", value1: mediaUploadTier, value2: mediaUploadLimitLabel }));
       return;
     }
     const url = URL.createObjectURL(file);
@@ -959,7 +976,7 @@ export function usePostForm(
         toast.success(_copy("copy.8697acaccf6a", { defaultValue: "Audio uploaded" }));
       }
     };
-  }, [hasImage, text, titleText, editorRef, mediaUploadLimit, mediaUploadLimitLabel, postQuota?.tier, setText, setTitleText, _copy]);
+  }, [hasImage, text, titleText, editorRef, mediaUploadLimit, mediaUploadLimitLabel, mediaUploadTier, setText, setTitleText, _copy]);
 
   const handleFileDrop = useCallback((files: FileList) => {
     const fileArray = Array.from(files);
@@ -1285,6 +1302,8 @@ export function usePostForm(
     setTokenAmount.complete(tokenAmount, '');
     setLiveMode(null);
     setPoll.complete(poll, null);
+    setQuiz(null);
+    setPhotoTags([]);
     setContentWarning(null);
     setHideAssetCards(false);
     setHiddenLinkPreviews([]);
@@ -1442,53 +1461,83 @@ export function usePostForm(
   }, [drafts, user?.address]);
 
   // Audio recording functions
+  useEffect(() => {
+    if (!composerOpen) {
+      setIsRecording(false);
+      setRecordingTime(0);
+    }
+    return () => {
+      recordingRequest.current = null;
+      const recorder = mediaRecorderRef.current;
+      mediaRecorderRef.current = null;
+      if (recorder) {
+        recorder.onstop = null;
+        recorder.onerror = null;
+        if (recorder.state !== 'inactive') recorder.stop();
+        recorder.stream.getTracks().forEach(track => track.stop());
+      }
+      if (recordingIntervalRef.current) {
+        clearInterval(recordingIntervalRef.current);
+        recordingIntervalRef.current = null;
+      }
+    };
+  }, [composerOpen]);
+
   const startRecording = useCallback(async () => {
+    if (recordingRequest.current || mediaRecorderRef.current) return;
+    const request = Symbol();
+    recordingRequest.current = request;
+    let stream: MediaStream | undefined;
+    const resetRecording = () => {
+      stream?.getTracks().forEach(track => track.stop());
+      mediaRecorderRef.current = null;
+      if (recordingIntervalRef.current) {
+        clearInterval(recordingIntervalRef.current);
+        recordingIntervalRef.current = null;
+      }
+      setRecordingTime(0);
+      setIsRecording(false);
+    };
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      if (recordingRequest.current !== request) {
+        stream.getTracks().forEach(track => track.stop());
+        return;
+      }
+      const mediaRecorder = createVoiceRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
-      audioChunksRef.current = [];
+      const chunks: Blob[] = [];
+      const startedAt = performance.now();
 
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
+          chunks.push(event.data);
         }
       };
 
       mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        resetRecording();
+        const audioBlob = voiceRecordingBlob(chunks, mediaRecorder.mimeType);
+        if (!audioBlob.size) return;
         const audioUrl = URL.createObjectURL(audioBlob);
-        
-        // Create audio element to get duration
-        const audioEl = new Audio(audioUrl);
-        audioEl.onloadedmetadata = () => {
-          const duration = Math.round(audioEl.duration);
-          
-          if (hasImage) {
-            // Add audio to all images
-            setMedia(prev => prev.map(m => 
-              m.type === 'image' ? { ...m, audio: { blob: audioBlob, url: audioUrl, duration } } : m
-            ));
-            toast.success(_copy("copy.57cc482b01a5", { defaultValue: "Audio added to images" }));
-          } else {
-            // Standalone audio post - create a File from the blob
-            const audioFile = new File([audioBlob], `recording-${Date.now()}.webm`, { type: 'audio/webm' });
-            setMedia(prev => [...prev, { file: audioFile, preview: audioUrl, type: 'audio', duration }]);
-            toast.success(_copy("copy.a1c44e01b157", { defaultValue: "Audio recorded" }));
-          }
-        };
-
-        // Stop all tracks
-        stream.getTracks().forEach(track => track.stop());
-
-        // Clear recording interval
-        if (recordingIntervalRef.current) {
-          clearInterval(recordingIntervalRef.current);
-          recordingIntervalRef.current = null;
+        // Live WebM recorders may write an indefinite metadata duration.
+        const duration = Math.max(1, Math.round((performance.now() - startedAt) / 1000));
+        if (hasImage) {
+          setMedia(prev => prev.map(m =>
+            m.type === 'image' ? { ...m, audio: { blob: audioBlob, url: audioUrl, duration } } : m
+          ));
+          toast.success(_copy("copy.57cc482b01a5", { defaultValue: "Audio added to images" }));
+        } else {
+          const file = voiceRecordingFile(audioBlob);
+          setMedia(prev => [...prev, { file, preview: audioUrl, type: 'audio', duration }]);
+          toast.success(_copy("copy.a1c44e01b157", { defaultValue: "Audio recorded" }));
         }
-        setRecordingTime(0);
       };
 
+      mediaRecorder.onerror = () => {
+        mediaRecorder.onstop = null;
+        resetRecording();
+      };
       mediaRecorder.start();
       setIsRecording(true);
 
@@ -1499,8 +1548,12 @@ export function usePostForm(
 
       toast.success(_copy("copy.be3f4838b198", { defaultValue: "Recording started" }));
     } catch (err) {
+      if (recordingRequest.current !== request) return;
+      resetRecording();
       console.error('Failed to start recording:', err);
       toast.error(_copy("copy.d82a155e3482", { defaultValue: "Could not access microphone. Please check permissions." }));
+    } finally {
+      if (recordingRequest.current === request) recordingRequest.current = null;
     }
   }, [hasImage, _copy]);
 
@@ -2241,6 +2294,19 @@ export function usePostForm(
       // The poll rides on the post, whatever else the post carries (photos,
       // a video, a quote). Its clock starts when the post goes out.
       const attachPoll = async (startsAt: number) => {
+        const createdTokenId = typeof mintResponse.createdTokenId === 'string' ? parseInt(mintResponse.createdTokenId, 10) : mintResponse.createdTokenId;
+        // The quiz and the photo tags ride on the post the same way.
+        if (quiz && quizIsValid && createdTokenId) {
+          await createQuiz(createdTokenId, quiz).catch((quizErr) => {
+            console.warn('[Mint] Quiz creation failed:', quizErr);
+            toast.error(_copy('quiz.attachFailed', { defaultValue: 'Your post is up, but the quiz could not be added' }));
+          });
+        }
+        const imageCount = media.filter((m) => m.type === 'image').length;
+        const tags = photoTags.filter((tag) => tag.i < imageCount);
+        if (tags.length && createdTokenId) {
+          await savePhotoTags(createdTokenId, tags).catch((tagErr) => console.warn('[Mint] Photo tags failed:', tagErr));
+        }
         if (!poll || !pollIsValid) return;
         try {
           const validOptions = poll.options.filter(o => o.text.trim()).map(o => o.text.trim());
@@ -2901,7 +2967,7 @@ export function usePostForm(
     isWatch2Earn, w2eViews, w2eComments, w2eTotal,
     isTokenGated, tokenContract, tokenSymbol, tokenAmount, liveMode, scheduledDate,
     hasVideo, hasImage, hasAudio, isPosting, resetForm, onClose, navigate, addOptimisticPost, user,
-    showTitle, titleText, connectionSource, poll, pollIsValid, chainId,
+    showTitle, titleText, connectionSource, poll, pollIsValid, quiz, quizIsValid, photoTags, chainId,
     refreshSession, openLoginModal, requestWalletUnlock,
     effectiveShouldMint, mintFee, isMature, isForKids,
     selectedCategory, shopLinks, shopListingIds, myPlanIds,
@@ -2939,6 +3005,8 @@ export function usePostForm(
       tokenAmount,
       liveMode,
       poll,
+      quiz,
+      photoTags,
       contentWarning,
       hideAssetCards,
       hiddenLinkPreviews,
@@ -2987,6 +3055,8 @@ export function usePostForm(
       setTokenAmount,
       setLiveMode,
       setPoll,
+      setQuiz,
+      setPhotoTags,
       setContentWarning,
       setHideAssetCards,
       setHiddenLinkPreviews,

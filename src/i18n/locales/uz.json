@@ -1,4 +1,5 @@
 {
+  "dmVideo": {"edit": "Videoni tahrirlash", "hiddenTag": "Yashirin", "tapToEdit": "Tahrirlash uchun bosing", "cover": "Muqova", "trim": "Qirqish", "mirror": "Oyna", "rotate": "Aylantirish", "hide": "Yashirish", "timer": "Taymer", "sheetTitleAny": "Yuborishdan oldin tahrirlash", "close": "Yopish", "replace": "Almashtirish", "hiddenUntilTap": "Ular bosmaguncha yashirin", "pause": "Pauza", "play": "Videoni ijro etish", "mute": "Ovozni o‘chirish", "unmute": "Ovozni yoqish", "scrub": "Video bo‘ylab harakatlanish", "addMore": "Foto yoki videolar qo‘shish", "trimAria": "Qirqish uchun chetlarini torting", "coverAria": "Muqovani belgilash uchun kadrni bosing", "coverHint": "Muqovani belgilash uchun kadrni bosing", "coverOwn": "Sizning rasmingiz", "coverAuto": "Avto", "uploadCover": "Muqova rasmini yuklash", "mirrored": "Oynalangan", "original": "Asl", "rotate90": "90° ga aylantirish", "showNormally": "Oddiy ko‘rinish", "showNormallyBody": "Ular uni darhol ko‘rishadi", "hideUntilTap": "Bosilguncha yashirish", "hideUntilTapBody": "Ular bosmaguncha xiralashtirilgan", "hidePrice": "Narx ortiga yashirish", "hidePriceBody": "Ular to‘lamaguncha xiralashtirilgan", "priceUnavailable": "Bu chatda emas", "timerOff": "O‘chirilgan", "timerOffBody": "U chatda qoladi.", "timerViewBody": "Ular ko‘rib bo‘lgach, ikkingiz uchun ham yo‘qoladi.", "confirm": "Tasdiqlash", "lockedFor": "{{value1}} DHB uchun qulfdan chiqarish", "lockedForUsd": "{{value1}} uchun qulfdan chiqarish", "editItem": "Elementni tahrirlash {{value1}}", "kept": "{{time}} saqlab qolindi", "timerTimeBody": "Siz yuborganingizdan so‘ng {{value1}} o‘tib, ikkingiz uchun ham yo‘qoladi."},
   "postBg": {
     "addMedia": "Rasm, GIF yoki video qo‘shish",
     "changeMedia": "Rasm, GIF yoki videoni almashtirish",
@@ -297,8 +298,10 @@
       "pronouns": "Unvonlar",
       "location": "Mekan",
       "custom": "Kamolot",
-      "customOption": "Maxsus etiket"
-    }
+      "customOption": "Maxsus etiket",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} ni kuzatish",
@@ -2228,7 +2231,7 @@
     "promptDevice": "Qurilma va operatsion tizim (xatoliklar uchun)",
     "deviceInfoNoErrors": "Yo'q",
     "promptFilters": "Kategoriya bo&#39;yicha filtrlash",
-    "promptMediaError": "Har biri 50 MB dan kam rasm yoki videolarni tanlang.",
+    "promptMediaError": "Har biri 200 MB dan kam rasm yoki videolarni tanlang.",
     "promptMediaLimit": "{{max}} gacha qo&#39;shimchalar.",
     "removePromptAttachment": "{{name}} ni olib tashlang",
     "promptAttachment": "Ilova {{number}}",
@@ -4229,7 +4232,7 @@
       "pageViewsTerm": "Sahifa ko'rishlari",
       "pageViews": "— Cloudflare rasm, skript yoki API chaqiruvi emas, sahifa yuklanishi deb tasniflagan so'rovlar.",
       "botsTerm": "Botlar ham hisobga olingan",
-      "bots": "— bular chekkadagi xom hisoblar, shuning uchun ularda krawlerlar, ishlash monitorlari va skriptli mijozlar ham bor. Ularni yuqoridagi brauzerlar taqsimotida o'zingiz ko'rasiz: «Curl» va «Noma'lum» kabi yozuvlar odam emas, avtomatik trafik. Botlarni filtrlash uchun bizda yo'q pullik Cloudflare tarifi kerak, taxminni jimgina ayirish esa raqamlarni kamroq tekshiriladigan qiladi, ko'proq emas.",
+      "bots": "— bular chekkadagi xom hisoblar, shuning uchun ularda krawlerlar, ishlash monitorlari va skriptli mijozlar ham bor. Ularni yuqoridagi brauzerlar taqsimotida o'zingiz ko'rasiz: «Curl» va «Noma'lum» kabi yozuvlar odam emas, avtomatik trafik. Botlarni haqiqiy tashrifchilardan ajratish tobora qiyinlashmoqda va tez orada bu statistikada ularni ajratib bo‘lmaydi, shuning uchun botlarni filtrlashga urinishdan foyda yo‘q.",
       "totalTerm": "Oraliq jamlari",
       "total": "— sahifa ko'rishlari va so'rovlar oraliq bo'ylab qo'shiladi. Tashrif buyuruvchilar soni ataylab «jami tashrif buyuruvchilar»ga qo'shilmaydi, chunki dushanba va seshanba kelgan odam ikki marta sanalardi.",
       "peakTerm": "Eng band soat / kun",
@@ -20907,5 +20910,27 @@
     "remember": "Tanlovimni eslab qolish",
     "rememberHint": "Buni istalgan vaqtda Sozlamalarda o'zgartiring",
     "failed": "Xabarni o'chirib bo'lmadi"
+  },
+  "profileAskAi": {
+    "row": "Sun'iy intellektdan so'rash",
+    "rowSub": "Obuna bo'lish, hammasini yoqtirish, xabardor bo'lish",
+    "back": "Orqaga",
+    "title": "{{handle}} haqida sun'iy intellektdan so'rash",
+    "sub": "Yordamchi bajaradi, siz tasdiqlaysiz",
+    "followLikeAll": "Obuna bo'lish va hammasini yoqtirish",
+    "followLikeAllSub": "{{handle}}ga obuna bo'ladi, har bir postga reaksiya bildiradi",
+    "likeAll": "Barcha postlarini yoqtirish",
+    "likeAllSub": "Reaksiya bildirganlaringizni o'tkazib yuboradi",
+    "catchUp": "Yangiliklarni aytib ber",
+    "catchUpSub": "{{handle}} yaqinda nima joyladi, qisqacha",
+    "message": "Xabar yozish",
+    "messageSub": "Xabar qoralamasini tuzadi, siz yuborasiz",
+    "placeholder": "{{handle}} haqida istalgan narsani so'rang…",
+    "send": "Yuborish",
+    "promptFollowLikeAll": "{{handle}}ga obuna bo'l va uning barcha postlariga reaksiya bildir",
+    "promptLikeAll": "{{handle}}ning barcha postlariga reaksiya bildir",
+    "promptCatchUp": "{{handle}} yaqinda nimalar joylaganini aytib ber",
+    "promptMessage": "{{handle}}ga xabar yozishimga yordam ber",
+    "promptAbout": "{{handle}} haqida: {{question}}"
   }
 }

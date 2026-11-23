@@ -1,4 +1,5 @@
 {
+  "dmVideo": {"edit": "Rediģēt video", "hiddenTag": "Paslēpts", "tapToEdit": "Pieskarieties, lai rediģētu", "cover": "Vāks", "trim": "Apgriezt", "mirror": "Spogulis", "rotate": "Pagriezt", "hide": "Paslēpt", "timer": "Taimeris", "sheetTitleAny": "Rediģēt pirms nosūtīšanas", "close": "Aizvērt", "replace": "Aizstāt", "hiddenUntilTap": "Paslēpts, līdz uz tā uzspiež", "pause": "Pauze", "play": "Atskaņot video", "mute": "Izslēgt skaņu", "unmute": "Ieslēgt skaņu", "scrub": "Pārvietoties pa video", "addMore": "Pievienot fotoattēlus vai video", "trimAria": "Velc galus, lai apgrieztu", "coverAria": "Uzspied uz kadra, lai iestatītu vāku", "coverHint": "Uzspied uz kadra, lai iestatītu vāku", "coverOwn": "Jūsu attēls", "coverAuto": "Automātiski", "uploadCover": "Augšupielādēt vāka attēlu", "mirrored": "Spoguļattēls", "original": "Oriģināls", "rotate90": "Pagriezt par 90°", "showNormally": "Rādīt parasti", "showNormallyBody": "Viņi to redz uzreiz", "hideUntilTap": "Paslēpt, līdz uzspiež", "hideUntilTapBody": "Aizmiglots, līdz uz tā uzspiež", "hidePrice": "Paslēpt aiz cenas", "hidePriceBody": "Aizmiglots, līdz samaksā", "priceUnavailable": "Nav šajā čatā", "timerOff": "Izslēgts", "timerOffBody": "Tas paliek čatā.", "timerViewBody": "Pazūd abiem, tiklīdz viņi to ir redzējuši.", "confirm": "Apstiprināt", "lockedFor": "Atbloķēt par {{value1}} DHB", "lockedForUsd": "Atbloķēt par {{value1}}", "editItem": "Rediģēt vienumu {{value1}}", "kept": "{{time}} paturēts", "timerTimeBody": "Pazūd abiem {{value1}} pēc tam, kad to nosūtīji."},
   "postBg": {
     "addMedia": "Pievienot attēlu, GIF vai video",
     "changeMedia": "Mainīt attēlu, GIF vai video",
@@ -297,8 +298,10 @@
       "pronouns": "Vietniekvārdi",
       "location": "Atrašanās vieta",
       "custom": "Pielāgots",
-      "customOption": "Pielāgota etiķete"
-    }
+      "customOption": "Pielāgota etiķete",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Sekot #{{tag}}",
@@ -2210,7 +2213,7 @@
     "promptDevice": "Iedalījums & sistēma (par kļūdām)",
     "deviceInfoNoErrors": "Nav",
     "promptFilters": "Filtrēt pēc kategorijas",
-    "promptMediaError": "Izvēlēties attēlus vai video, kas ir mazāks par 50MB.",
+    "promptMediaError": "Izvēlēties attēlus vai video, kas ir mazāks par 200MB.",
     "promptMediaLimit": "Līdz {{max}} attēliem vai video.",
     "removePromptAttachment": "Noņemt {{name}}",
     "promptAttachment": "Attēls {{number}}",
@@ -4211,7 +4214,7 @@
       "pageViewsTerm": "Lapu skatījumi",
       "pageViews": "— pieprasījumi, ko Cloudflare klasificē kā lapu ielādes, nevis attēlus, skriptus vai API izsaukumus.",
       "botsTerm": "Boti ir ieskaitīti",
-      "bots": "— tie ir neapstrādāti skaitījumi tīkla malā, tāpēc tajos ir arī rāpuļprogrammas, pieejamības uzraugi un skriptēti klienti. Tos varat redzēt paši pārlūku sadalījumā augstāk, kur ieraksti kā “Curl” un “Nezināms” ir automatizēta datplūsma, nevis cilvēki. Botu izfiltrēšanai nepieciešams maksas Cloudflare plāns, kāda mums nav, un klusa aplēses atņemšana padarītu skaitļus mazāk pārbaudāmus, nevis vairāk.",
+      "bots": "— tie ir neapstrādāti skaitījumi tīkla malā, tāpēc tajos ir arī rāpuļprogrammas, pieejamības uzraugi un skriptēti klienti. Tos varat redzēt paši pārlūku sadalījumā augstāk, kur ieraksti kā “Curl” un “Nezināms” ir automatizēta datplūsma, nevis cilvēki. Botus kļūst arvien grūtāk atšķirt no īstiem apmeklētājiem, un drīz šajā statistikā tos vairs nevarēs atšķirt, tāpēc nav jēgas mēģināt tos izfiltrēt.",
       "totalTerm": "Diapazona kopsummas",
       "total": "— lapu skatījumi un pieprasījumi tiek saskaitīti visā diapazonā. Apmeklētāju skaits apzināti netiek saskaitīts “kopējā apmeklētāju skaitā”, jo kāds, kas šeit bija pirmdien un otrdien, tiktu ieskaitīts divreiz.",
       "peakTerm": "Noslogotākā stunda / diena",
@@ -20855,5 +20858,27 @@
     "remember": "Atcerēties manu izvēli",
     "rememberHint": "Mainiet to jebkurā laikā Iestatījumos",
     "failed": "Neizdevās dzēst ziņu"
+  },
+  "profileAskAi": {
+    "row": "Jautāt MI",
+    "rowSub": "Sekot, atzīmēt visu, būt lietas kursā",
+    "back": "Atpakaļ",
+    "title": "Jautāt MI par {{handle}}",
+    "sub": "Asistents izdara, tu apstiprini",
+    "followLikeAll": "Sekot un atzīmēt visu ar patīk",
+    "followLikeAllSub": "Seko {{handle}}, reaģē uz katru ierakstu",
+    "likeAll": "Atzīmēt visus ierakstus ar patīk",
+    "likeAllSub": "Izlaiž tos, uz kuriem jau esi reaģējis",
+    "catchUp": "Pastāsti jaunumus",
+    "catchUpSub": "Ko {{handle}} nesen publicējis, īsumā",
+    "message": "Uzrakstīt ziņu",
+    "messageSub": "Sagatavo melnrakstu, tu to nosūti",
+    "placeholder": "Jautā jebko par {{handle}}…",
+    "send": "Sūtīt",
+    "promptFollowLikeAll": "Seko {{handle}} un reaģē uz visiem ierakstiem",
+    "promptLikeAll": "Reaģē uz visiem {{handle}} ierakstiem",
+    "promptCatchUp": "Pastāsti, ko {{handle}} nesen publicējis",
+    "promptMessage": "Palīdzi man uzrakstīt ziņu {{handle}}",
+    "promptAbout": "Par {{handle}}: {{question}}"
   }
 }

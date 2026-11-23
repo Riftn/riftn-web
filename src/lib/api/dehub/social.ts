@@ -76,6 +76,10 @@ export interface FollowListItem {
   followsYou?: boolean;
   badgeBalance?: number | string | null;
   hideBadgeAndBalance?: boolean;
+  /** Their follower count. */
+  followers?: number;
+  /** When the follow on this row was made. */
+  followedAt?: string;
 }
 
 export interface CommentLikeResponse {
@@ -245,7 +249,7 @@ export async function getFollowList(
   let items: any[];
   let pagination: any;
   if (raw && typeof raw === 'object' && !Array.isArray(raw) && Array.isArray(raw.items)) {
-    items = raw.items.map((entry: any) => entry.user || entry);
+    items = raw.items.map((entry: any) => (entry.user ? { ...entry.user, followedAt: entry.followedAt } : entry));
     pagination = raw.pagination;
   } else if (Array.isArray(raw)) {
     items = raw;

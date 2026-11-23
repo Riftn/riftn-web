@@ -12,15 +12,17 @@ import ArrowLeft from '@/components/ui/cut-icons/back';
 import Users from '@/components/ui/cut-icons/communities';
 import Megaphone from '@/components/ui/cut-icons/advertising';
 import { CommunityChat } from '@/components/app/communities/CommunityChat';
-import { useIsCommunityMember, type Community } from '@/hooks/use-communities';
+import { useIsCommunityMember, isMembershipLoading, type Community } from '@/hooks/use-communities';
 import { isEffectivelyActive } from '@/hooks/use-community-admin';
 import { communityKindOf } from '@/lib/community-kinds';
 import { storageImage, deviceWidth } from '@/lib/media-url';
 
+import { formatCount } from '@/lib/format-count';
 export function RoomChatPane({ community, onBack }: { community: Community; onBack: () => void }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { data: membership } = useIsCommunityMember(community.id);
+  const membershipQuery = useIsCommunityMember(community.id);
+  const membership = membershipQuery.data;
   const isMember = isEffectivelyActive(membership);
   const kind = communityKindOf(community);
   const KindIcon = kind === 'channel' ? Megaphone : Users;
@@ -50,7 +52,7 @@ export function RoomChatPane({ community, onBack }: { community: Community; onBa
           <span className="min-w-0">
             <span className="block truncate font-semibold text-white">{community.name}</span>
             <span className="block truncate text-xs text-zinc-500">
-              {t('communities.chat.paneMembers', { defaultValue: '{{formattedCount}} members', count: community.member_count ?? 0, formattedCount: (community.member_count ?? 0).toLocaleString() })}
+              {t('communities.chat.paneMembers', { defaultValue: '{{formattedCount}} members', count: community.member_count ?? 0, formattedCount: formatCount(community.member_count ?? 0) })}
             </span>
           </span>
         </button>
@@ -72,6 +74,7 @@ export function RoomChatPane({ community, onBack }: { community: Community; onBa
           community={community}
           membership={membership}
           isMember={isMember}
+          membershipLoading={isMembershipLoading(membershipQuery)}
           onJoin={() => navigate(`${pageUrl}?tab=chat`)}
         />
       </div>

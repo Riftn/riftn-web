@@ -17,6 +17,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { buildAvatarUrl, deviceWidth } from '@/lib/media-url';
+import { SavedProfileName } from '@/components/app/profile/SavedProfileName';
 import {
   listProfiles,
   currentProfileId,
@@ -27,11 +28,8 @@ import {
 /** Keeps the sheet a sheet — the login options must stay above the fold. */
 const MAX_ROWS = 3;
 
-const shortAddress = (address: string) =>
-  address.length > 12 ? `${address.slice(0, 6)}…${address.slice(-4)}` : address;
-
 const label = (profile: StoredProfile) =>
-  profile.name || profile.username || shortAddress(profile.address);
+  profile.name || profile.username;
 
 interface LoginSavedProfilesProps {
   disabled?: boolean;
@@ -75,10 +73,10 @@ export function LoginSavedProfiles({ disabled, onSwitch }: LoginSavedProfilesPro
             </AvatarFallback>
           </Avatar>
           <span className="min-w-0 flex-1">
-            <span className="block text-white text-sm truncate">{label(profile)}</span>
-            <span className="block text-white/40 text-[11px] truncate">
-              {shortAddress(profile.address)}
-            </span>
+            <SavedProfileName profile={profile} className="text-sm text-white" />
+            {profile.username && (
+              <span className="block text-white/40 text-[11px] truncate">@{profile.username}</span>
+            )}
           </span>
         </button>
       ))}

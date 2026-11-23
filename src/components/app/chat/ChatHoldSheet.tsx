@@ -10,7 +10,10 @@ import { cn } from '@/lib/utils';
 import { reactionEntries, reactorCount, type ReactorsSource } from './ChatReactorsList';
 import { ChatReactorsDrawer } from './ChatReactorsDrawer';
 import { ReactorFaces } from './ReactorFaces';
+import { HOLD_EVENT, isTouchHold } from './chat-hold-event';
 import '@/styles/chat-hold.css';
+
+export { HOLD_EVENT, isTouchHold };
 
 export interface ChatHoldAction {
   key: string;
@@ -37,16 +40,15 @@ interface ChatHoldSheetProps {
   /** Show the "+" for the full emoji panel. Off where only a fixed set exists (comment reactions). */
   allowMore?: boolean;
   actions: ChatHoldAction[];
+  /** Keep the main actions in one swipeable row. */
+  scrollActions?: boolean;
   /** Draw a soft frame around the held row (live chat). */
   frame?: boolean;
   /** Who reacted: a row above the tiles that opens the people sheet. */
   reactors?: ReactorsSource | null;
+  meta?: string;
 }
 
-/** Phones with a finger, not a mouse. Desktop keeps hover buttons and the browser's own right-click. */
-export function isTouchHold() {
-  return typeof window !== 'undefined' && !!window.matchMedia?.('(pointer: coarse)').matches;
-}
 
 function scrollParent(el: HTMLElement): HTMLElement | null {
   let node = el.parentElement;
@@ -63,8 +65,6 @@ const GAP = 12;
 const TOP_BAR = 64;
 /** Up to five tiles sit in one row; six make two rows of three. */
 const columns = (n: number) => (n <= 5 ? n : n === 6 ? 3 : 4);
-/** The comments sheet keeps its height while a hold sheet is up. */
-export const HOLD_EVENT = 'chat-hold-sheet';
 let releases = 0;
 const SLIDE = { type: 'tween', duration: 0.26, ease: [0.32, 0.72, 0, 1] } as const;
 
@@ -92,7 +92,7 @@ const KEEP = {
  * back and the keyboard dropped), and nothing here closes the sheet it sits
  * in.
  */
-export function ChatHoldSheet({ open, onOpenChange, anchor, quickReactions, mine = [], onReact, allowMore = true, actions, frame = false, reactors }: ChatHoldSheetProps) {
+export function ChatHoldSheet({ open, onOpenChange, anchor, quickReactions, mine = [], onReact, allowMore = true, actions, scrollActions = false, frame = false, reactors, meta }: ChatHoldSheetProps) {
   const { t } = useTranslation();
   // The people sheet outlives the hold sheet: a tap on the reactions row
   // closes this one and opens that one.
@@ -278,10 +278,12 @@ export function ChatHoldSheet({ open, onOpenChange, anchor, quickReactions, mine
               </button>
             )}
 
+            {meta && !moreOpen && <p className="px-2 pt-2 text-xs opacity-70">{meta}</p>}
+
             {mainActions.length > 0 && !moreOpen && (
               <div
-                className={cn('grid gap-2', reactors && reactorTotal > 0 ? 'pt-2' : quickReactions && onReact ? 'pt-3.5' : 'pt-1')}
-                style={{ gridTemplateColumns: `repeat(${columns(mainActions.length)}, minmax(0, 1fr))` }}
+                className={cn('gap-2', scrollActions ? 'flex overflow-x-auto overscroll-x-contain' : 'grid', reactors && reactorTotal > 0 ? 'pt-2' : quickReactions && onReact ? 'pt-3.5' : 'pt-1')}
+                style={scrollActions ? undefined : { gridTemplateColumns: `repeat(${columns(mainActions.length)}, minmax(0, 1fr))` }}
               >
                 {mainActions.map((a) => (
                   <button
@@ -291,7 +293,7 @@ export function ChatHoldSheet({ open, onOpenChange, anchor, quickReactions, mine
                     // Act first, inside the tap, so Reply can still raise the
                     // keyboard (phones only open it from a user gesture).
                     onClick={() => { a.onSelect(); close(); }}
-                    className="flex min-w-0 flex-col items-center gap-1.5 rounded-2xl px-1 pb-2.5 pt-3 text-[12px] font-bold transition-transform active:scale-95"
+                    className={cn('flex flex-col items-center gap-1.5 rounded-2xl pb-2.5 pt-3 text-[12px] font-bold transition-transform active:scale-95', scrollActions ? 'min-w-[68px] shrink-0 px-2' : 'min-w-0 px-1')}
                     data-chat-hold-tile={a.prime ? 'prime' : a.destructive ? 'danger' : ''}
                   >
                     <span className="grid h-5 w-5 place-items-center [&>svg]:h-5 [&>svg]:w-5">{a.icon}</span>

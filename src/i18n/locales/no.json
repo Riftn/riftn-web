@@ -1,4 +1,5 @@
 {
+  "dmVideo": {"edit": "Rediger video", "hiddenTag": "Skjult", "tapToEdit": "Trykk for å redigere", "cover": "Omslag", "trim": "Trim", "mirror": "Speilvend", "rotate": "Roter", "hide": "Skjul", "timer": "Tidtaker", "sheetTitleAny": "Rediger før sending", "close": "Lukk", "replace": "Erstatt", "hiddenUntilTap": "Skjult til de trykker på den", "pause": "Pause", "play": "Spill av video", "mute": "Demp", "unmute": "Slå på lyd", "scrub": "Skroll gjennom videoen", "addMore": "Legg til bilder eller videoer", "trimAria": "Dra i endene for å trimme", "coverAria": "Trykk på en ramme for å velge omslag", "coverHint": "Trykk på en ramme for å velge omslag", "coverOwn": "Ditt bilde", "coverAuto": "Auto", "uploadCover": "Last opp et omslagsbilde", "mirrored": "Speilvendt", "original": "Original", "rotate90": "Roter 90°", "showNormally": "Vis normalt", "showNormallyBody": "De ser det med en gang", "hideUntilTap": "Skjul til det trykkes på", "hideUntilTapBody": "Uskarpt til de trykker på det", "hidePrice": "Skjul bak en pris", "hidePriceBody": "Uskarpt til de betaler deg", "priceUnavailable": "Ikke i denne chatten", "timerOff": "Av", "timerOffBody": "Det blir værende i chatten.", "timerViewBody": "Borte for dere begge når de har sett det.", "confirm": "Bekreft", "lockedFor": "Lås opp for {{value1}} DHB", "lockedForUsd": "Lås opp for {{value1}}", "editItem": "Rediger element {{value1}}", "kept": "{{time}} beholdt", "timerTimeBody": "Borte for dere begge {{value1}} etter at du har sendt det."},
   "postBg": {
     "addMedia": "Legg til et bilde, en GIF eller en video",
     "changeMedia": "Bytt bilde, GIF eller video",
@@ -297,8 +298,10 @@
       "pronouns": "Pronomen",
       "location": "Sted",
       "custom": "Skikk",
-      "customOption": "Tilpasset etikett"
-    }
+      "customOption": "Tilpasset etikett",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Følg #{{tag}}",
@@ -2210,7 +2213,7 @@
     "promptDevice": "Enhet og operativsystem (for feil)",
     "deviceInfoNoErrors": "Ingen",
     "promptFilters": "Filtrer etter kategori",
-    "promptMediaError": "Velg bilder eller videoer under 50 MB hver.",
+    "promptMediaError": "Velg bilder eller videoer under 200 MB hver.",
     "promptMediaLimit": "Opptil {{max}} vedlegg.",
     "removePromptAttachment": "Fjern {{name}}",
     "promptAttachment": "Vedlegg {{number}}",
@@ -4201,7 +4204,7 @@
       "pageViewsTerm": "Sidevisninger",
       "pageViews": "— forespørsler som Cloudflare klassifiserer som sideinnlastinger, ikke bilder, skript eller API-kall.",
       "botsTerm": "Bots er inkludert",
-      "bots": "— dette er rå tellinger i kanten, så crawlere, oppetidsovervåkere og skriptede klienter er med. Du kan se dem selv i nettleserfordelingen over, der oppføringer som «Curl» og «Ukjent» er automatisert trafikk og ikke mennesker. Å filtrere bort bots krever en betalt Cloudflare-plan vi ikke har, og å trekke fra et anslag i det stille ville gjøre tallene mindre etterprøvbare, ikke mer.",
+      "bots": "— dette er rå tellinger i kanten, så crawlere, oppetidsovervåkere og skriptede klienter er med. Du kan se dem selv i nettleserfordelingen over, der oppføringer som «Curl» og «Ukjent» er automatisert trafikk og ikke mennesker. Det blir stadig vanskeligere å skille bots fra menneskelige besøkende, og snart vil de være umulige å skille i denne statistikken, så det er ingen vits i å prøve å filtrere dem bort.",
       "totalTerm": "Totaler for området",
       "total": "— sidevisninger og forespørsler summeres over området. Besøkstall summeres bevisst ikke til et «totalt antall besøkende», fordi noen som var her mandag og tirsdag ville telle to ganger.",
       "peakTerm": "Travleste time / dag",
@@ -20855,5 +20858,27 @@
     "remember": "Husk valget mitt",
     "rememberHint": "Endre det når som helst i Innstillinger",
     "failed": "Kunne ikke slette meldingen"
+  },
+  "profileAskAi": {
+    "row": "Spør AI",
+    "rowSub": "Følg, lik alt, bli oppdatert",
+    "back": "Tilbake",
+    "title": "Spør AI om {{handle}}",
+    "sub": "Assistenten gjør det, du bekrefter",
+    "followLikeAll": "Følg og lik alt",
+    "followLikeAllSub": "Følger {{handle}}, reagerer på hvert innlegg",
+    "likeAll": "Lik alle innleggene",
+    "likeAllSub": "Hopper over dem du allerede har reagert på",
+    "catchUp": "Oppdater meg",
+    "catchUpSub": "Hva {{handle}} har lagt ut i det siste, kort",
+    "message": "Skriv en melding",
+    "messageSub": "Lager et utkast, du sender det",
+    "placeholder": "Spør om hva som helst om {{handle}}…",
+    "send": "Send",
+    "promptFollowLikeAll": "Følg {{handle}} og reager på alle innleggene",
+    "promptLikeAll": "Reager på alle innleggene til {{handle}}",
+    "promptCatchUp": "Oppdater meg på hva {{handle}} har lagt ut i det siste",
+    "promptMessage": "Hjelp meg å skrive en melding til {{handle}}",
+    "promptAbout": "Om {{handle}}: {{question}}"
   }
 }

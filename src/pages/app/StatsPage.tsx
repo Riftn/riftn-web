@@ -22,8 +22,7 @@ import { useTranslation } from 'react-i18next';
 import {
   Area,
   AreaChart,
-  Line,
-  LineChart,
+  CartesianGrid,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -55,6 +54,7 @@ import { useFinanceStats } from '@/hooks/use-finance-stats';
 import { cn } from '@/lib/utils';
 import { PageBody, PageIsland, PageTabs } from '@/components/app/page-kit/PageKit';
 
+import { formatCount as formatShortCount } from '@/lib/format-count';
 type Range = '24h' | '3d' | '7d' | '30d' | '1y' | 'all';
 
 /**
@@ -115,14 +115,12 @@ function aggregateBreakdown(rows: SiteStatsBreakdownDay[]) {
 
 function formatCount(n: number | null | undefined): string {
   if (n == null) return '—';
-  return n.toLocaleString();
+  return formatShortCount(n);
 }
 
 function formatCompact(n: number | null | undefined): string {
   if (n == null) return '—';
-  if (n < 1000) return String(n);
-  if (n < 1_000_000) return `${(n / 1000).toFixed(n < 10_000 ? 1 : 0)}K`;
-  return `${(n / 1_000_000).toFixed(1)}M`;
+  return formatShortCount(n);
 }
 
 function formatBytes(bytes: number | null | undefined): string {
@@ -472,6 +470,14 @@ function CommunityTooltip({
  * the traffic half of the page stands on its own, and a permanent error card
  * for a section nobody asked to see would be noise.
  */
+/** Monthly at the back, daily in front, so each smaller group sits inside the
+ *  bigger one. Fixed hues read on every theme, light or dark. */
+const ACTIVE_LAYERS = [
+  { key: 'monthly', color: '#7c5cff', fill: 0.15, labelKey: 'stats.community.thisMonth', fallback: 'This month', legendKey: 'stats.community.layerMonthly', legendFallback: 'Monthly' },
+  { key: 'weekly', color: '#3aa0ff', fill: 0.2, labelKey: 'stats.community.thisWeek', fallback: 'This week', legendKey: 'stats.community.layerWeekly', legendFallback: 'Weekly' },
+  { key: 'daily', color: '#3ecf8e', fill: 0.3, labelKey: 'stats.community.today', fallback: 'Today', legendKey: 'stats.community.layerDaily', legendFallback: 'Daily' },
+] as const;
+
 function CommunitySection({ range }: { range: Range }) {
   const { t } = useTranslation();
   const { data: stats } = useUserStats();
@@ -497,12 +503,14 @@ function CommunitySection({ range }: { range: Range }) {
       // having counted are not the same thing.
       // Only `daily` resets at midnight; weekly and monthly are rolling
       // windows that never drop, so topping them up would inflate them.
+      // Labelled by its own length, not the members span: active history is
+      // much shorter, and month-only labels repeated the same month.
       active: smoothLiveTail(
         days
           .filter((d) => d.activeDaily != null)
-          .map((d) => ({
+          .map((d, _i, recorded) => ({
             date: d.date,
-            label: formatSpanLabel(d.date, span),
+            label: formatSpanLabel(d.date, recorded.length),
             daily: d.activeDaily,
             weekly: d.activeWeekly,
             monthly: d.activeMonthly,
@@ -546,6 +554,13 @@ function CommunitySection({ range }: { range: Range }) {
       label: monthLabel,
       value: active.monthly,
       hint: t('stats.countries.window', 'last {{days}} days', { days: 30 }),
+    },
+    {
+      key: 'stickiness',
+      label: t('stats.community.stickiness', 'Stickiness'),
+      value: null,
+      display: active.monthly > 0 ? `${Math.round((active.daily / active.monthly) * 100)}%` : '–',
+      hint: t('stats.community.stickinessHint', 'today ÷ last 30 days'),
     },
   ];
 
@@ -593,12 +608,12 @@ function CommunitySection({ range }: { range: Range }) {
           previously wedged into the right half of the members card at a
           smaller type scale than any comparable figure on the page. */}
       <GroupHeading icon={Activity} title={activeLabel} />
-      <div className="grid grid-cols-3 gap-2 sm:gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
         {activeTiles.map((tile) => (
           <StatTile
             key={tile.key}
             label={tile.label}
-            value={formatCount(tile.value)}
+            value={'display' in tile && tile.display ? tile.display : formatCount(tile.value ?? 0)}
             hint={tile.hint}
           />
         ))}
@@ -682,9 +697,9 @@ function CommunitySection({ range }: { range: Range }) {
         )}
       </div>
 
-      {/* Active people. This one genuinely starts on the day it was first
-          recorded, because there is no query that recovers who was around on a
-          day already gone. It lengthens by a point a day from here. */}
+      {/* Active people: daily, weekly and monthly as three layers, the same
+          chart admin shows. Days before live recording are recounted from the
+          activity log by the API, never estimated. */}
       <div data-page-bento data-kit-section className="bg-zinc-900 border border-zinc-800 p-4">
         <div className="flex items-baseline justify-between mb-3 gap-2">
           <span className="text-sm font-semibold text-white">
@@ -705,7 +720,8 @@ function CommunitySection({ range }: { range: Range }) {
         ) : (
           <div className="text-white">
             <ResponsiveContainer width="100%" height={180}>
-              <LineChart data={view.active} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+              <AreaChart data={view.active} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+                <CartesianGrid vertical={false} stroke="currentColor" strokeOpacity={0.08} />
                 <XAxis
                   dataKey="label"
                   tick={{ fontSize: 10, fill: 'currentColor', opacity: 0.45 }}
@@ -726,38 +742,30 @@ function CommunitySection({ range }: { range: Range }) {
                   content={<CommunityTooltip />}
                   cursor={{ stroke: 'currentColor', strokeOpacity: 0.15 }}
                 />
-                {/* One colour, three weights — the theme owns the hue, and the
-                    tooltip names each line, so nothing here needs a palette.
-                    Points are dotted while the series is too short to read as
-                    a line, which it will be for the first couple of days. */}
-                <Line
-                  type="monotone"
-                  dataKey="monthly"
-                  name={t('stats.community.thisMonth', 'This month')}
-                  stroke="currentColor"
-                  strokeOpacity={0.3}
-                  strokeWidth={2}
-                  dot={view.active.length < 3}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="weekly"
-                  name={t('stats.community.thisWeek', 'This week')}
-                  stroke="currentColor"
-                  strokeOpacity={0.6}
-                  strokeWidth={2}
-                  dot={view.active.length < 3}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="daily"
-                  name={t('stats.community.today', 'Today')}
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  dot={view.active.length < 3}
-                />
-              </LineChart>
+                {ACTIVE_LAYERS.map((layer) => (
+                  <Area
+                    key={layer.key}
+                    type="monotone"
+                    dataKey={layer.key}
+                    name={t(layer.labelKey, layer.fallback)}
+                    stroke={layer.color}
+                    strokeWidth={2}
+                    fill={layer.color}
+                    fillOpacity={layer.fill}
+                    dot={view.active.length < 3}
+                    isAnimationActive={false}
+                  />
+                ))}
+              </AreaChart>
             </ResponsiveContainer>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-3 text-[11px] text-zinc-400">
+              {[...ACTIVE_LAYERS].reverse().map((layer) => (
+                <span key={layer.key} className="flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-sm" style={{ background: layer.color }} />
+                  {t(layer.legendKey, layer.legendFallback)}
+                </span>
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -1201,7 +1209,7 @@ export default function StatsPage() {
                   <span className="text-zinc-300">{t('stats.definitions.botsTerm', 'Bots are included')}</span>{' '}
                   {t(
                     'stats.definitions.bots',
-                    '— these are raw edge counts, so crawlers, uptime monitors and scripted clients are in them. You can see them yourself in the browser breakdown above, where entries like “Curl” and “Unknown” are automated traffic rather than people. Filtering bots out needs a paid Cloudflare tier we do not run, and quietly subtracting an estimate would make the numbers less checkable, not more.',
+                    '— these are raw edge counts, so crawlers, uptime monitors and scripted clients are in them. You can see them yourself in the browser breakdown above, where entries like “Curl” and “Unknown” are automated traffic rather than people. Bots are getting harder to distinguish from human visitors and will soon be indistinguishable in these stats, so there’s little point in trying to filter them out.',
                   )}
                 </li>
                 <li>

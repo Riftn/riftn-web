@@ -62,6 +62,7 @@ interface ShareToDmModalProps {
   onOpenChange: (open: boolean) => void;
   /** Absolute URL of the thing being shared — build it with `dehubLinkFor`. */
   url: string;
+  aboveMoment?: boolean;
 }
 
 /**
@@ -84,7 +85,7 @@ function conversationFeeOf(conv: DeHubConversation): number {
 
 type RowStatus = 'idle' | 'sending' | 'sent';
 
-export function ShareToDmModal({ open, onOpenChange, url }: ShareToDmModalProps) {
+export function ShareToDmModal({ open, onOpenChange, url, aboveMoment }: ShareToDmModalProps) {
   const { t: _copy } = _useCopy();
   const [caption, setCaption] = useSurfaceDraft("components/app/modals/ShareToDmModal.tsx:caption", '', url);
   const [searchInput, setSearchInput] = useSurfaceDraft("components/app/modals/ShareToDmModal.tsx:searchInput", '', url);
@@ -251,7 +252,8 @@ export function ShareToDmModal({ open, onOpenChange, url }: ShareToDmModalProps)
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent column
         glass
-        className="max-h-[85dvh]"
+        className={aboveMoment ? "max-h-[85dvh] z-[2147482010]" : "max-h-[85dvh]"}
+        overlayClassName={aboveMoment ? "z-[2147482009]" : undefined}
         data-no-navigate
         onClick={(e: React.MouseEvent) => e.stopPropagation()}
         onPointerDown={(e: React.PointerEvent) => e.stopPropagation()}

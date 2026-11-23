@@ -26,6 +26,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { BadgeIcon } from '@/components/app/BadgeIcon';
 import { buildAvatarUrl } from '@/lib/media-url';
 import type { LiveAudience, LiveAudienceAccount } from '@/lib/api/dehub/livestream';
+import { profilePath } from '@/lib/profile-path';
 
 const compact = (n: number) => {
   try {
@@ -90,7 +91,7 @@ export function LiveAudienceSheet({ open, onOpenChange, audience, loading }: Pro
   const openProfile = useCallback(
     (a: LiveAudienceAccount) => {
       onOpenChange(false);
-      if (a.username) navigate(`/${a.username.replace('@', '')}`);
+      if (a.username) navigate(profilePath(a.username.replace('@', '')));
       else if (a.address) navigate(`/app/profile?id=${a.address}`);
     },
     [navigate, onOpenChange],

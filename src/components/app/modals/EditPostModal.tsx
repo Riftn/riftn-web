@@ -118,10 +118,11 @@ export function EditPostModal({
   const [spoilerText, setSpoilerText] = useState(currentSpoilerText);
   const [quotePolicy, setQuotePolicy] = useState<QuotePolicy>(currentQuotePolicy);
   const [replyPolicy, setReplyPolicy] = useState<ReplyPolicy>(currentReplyPolicy);
-  // A followers-only or mentioned-only post can be opened up to everyone (not
-  // narrowed: it may already have been seen outside the smaller audience).
-  const narrowVisibility = currentVisibility === 'followers' || currentVisibility === 'direct' ? currentVisibility : null;
-  const [visibility, setVisibility] = useState<PostVisibility>(narrowVisibility ?? 'public');
+  // Who can see it, changeable after posting: Everyone, Followers only, or
+  // Only me (hides it without deleting it). Mentioned-only stays a choice for
+  // new posts, so it is only listed for a post that already has it.
+  const startVisibility: PostVisibility = currentVisibility === 'followers' || currentVisibility === 'direct' || currentVisibility === 'self' ? currentVisibility : 'public';
+  const [visibility, setVisibility] = useState<PostVisibility>(startVisibility);
   // Text cap scales with the badge tier; only read once the modal opens,
   // because every feed card mounts this component.
   const [tierTextMax, setTierTextMax] = useState(BASE_POST_TEXT_CHARS);
@@ -226,8 +227,8 @@ export function EditPostModal({
     if (spoilerText.trim() !== currentSpoilerText.trim()) params.spoilerText = spoilerText.trim();
     if (quotePolicy !== currentQuotePolicy) params.quotePolicy = quotePolicy;
     if (replyPolicy !== currentReplyPolicy) params.replyPolicy = replyPolicy;
-    const openedUp = !!narrowVisibility && visibility === 'public';
-    if (openedUp) params.visibility = 'public';
+    const audienceChanged = visibility !== startVisibility && visibility !== 'direct';
+    if (audienceChanged) params.visibility = visibility;
     const nextRating: ContentRating = isMature ? 'mature' : 'safe';
     // The API stores nothing for a safe post, so an unrated one arrives as
     // undefined — compare against the rating it means rather than the field.
@@ -310,7 +311,7 @@ export function EditPostModal({
       setArticleBody.complete(articleBody, articleBody);
       setCategories.complete(categories, categories);
       setShopLinks.complete(shopLinks, shopLinks);
-      onSuccess?.({ name: name.trim(), description: description.trim(), articleBody: currentArticleBody !== undefined ? articleBody.trim() : undefined, categories, commentsDisabled, contentRating: nextRating, forKids: isForKids, shopLinks, shopListingCount: pickedListingIds.length, spoilerText: spoilerText.trim(), ...(openedUp ? { visibility: 'public' as PostVisibility } : {}) });
+      onSuccess?.({ name: name.trim(), description: description.trim(), articleBody: currentArticleBody !== undefined ? articleBody.trim() : undefined, categories, commentsDisabled, contentRating: nextRating, forKids: isForKids, shopLinks, shopListingCount: pickedListingIds.length, spoilerText: spoilerText.trim(), ...(audienceChanged ? { visibility } : {}) });
         onOpenChange(false);
       } else {
         toast.error(_copy("copy.3cd8b962fe5d", { defaultValue: "Failed to update post" }));
@@ -367,9 +368,8 @@ export function EditPostModal({
             />
           </div>
 
-          {/* Who can see it. Only a followers-only or mentioned-only post gets
-              this row, and it can only be opened up to everyone. */}
-          {narrowVisibility && (
+          {/* Who can see it: Everyone, Followers only or Only me. */}
+          {(
             <div className="flex items-center justify-between gap-3">
               <Label htmlFor="edit-visibility" className="text-sm font-medium text-zinc-300">{t('postVisibility.label')}</Label>
               <select
@@ -378,8 +378,10 @@ export function EditPostModal({
                 onChange={(e) => setVisibility(e.target.value as PostVisibility)}
                 className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none"
               >
-                <option value={narrowVisibility}>{t(`postVisibility.${narrowVisibility}`)}</option>
                 <option value="public">{t('postVisibility.public')}</option>
+                <option value="followers">{t('postVisibility.followers')}</option>
+                {startVisibility === 'direct' && <option value="direct">{t('postVisibility.direct')}</option>}
+                <option value="self">{t('postVisibility.self', 'Only me')}</option>
               </select>
             </div>
           )}

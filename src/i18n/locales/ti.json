@@ -1,4 +1,5 @@
 {
+  "dmVideo": {"edit": "ቪድዮ ኣርትዕ", "hiddenTag": "ተሓቢኡ", "tapToEdit": "ንምዕራይ ጠውቕ", "cover": "ሽፋን", "trim": "ቁረጽ", "mirror": "መስትያት", "rotate": "አዙር", "hide": "ኽደን", "timer": "ሰዓት መቁጠሪ", "sheetTitleAny": "ቅድሚ ምልኣኽካ ኣርትዕ", "close": "ዕጸው", "replace": "ተክእ", "hiddenUntilTap": "ክሳብ ዝተንክፍዎ ተኸዲኑ ይጸንሕ", "pause": "ኣቋርጽ", "play": "ቪድዮ ኣጻውት", "mute": "ድምጺ ኣጥፍእ", "unmute": "ድምጺ ወልዕ", "scrub": "ኣብ ውሽጢ ቪድዮ ተመላለስ", "addMore": "ስእልታት ወይ ቪድዮታት ወስኽ", "trimAria": "ንኽትቁርጾ መወዳእታታቱ ሰሓብ", "coverAria": "ሽፋን ንምግባር ፍሬም ተንክፍ", "coverHint": "ሽፋን ንምግባር ፍሬም ተንክፍ", "coverOwn": "ስእልኻ", "coverAuto": "ባዕሉ (Auto)", "uploadCover": "ሽፋን ስእሊ ኣውርድ", "mirrored": "ተመሰለ", "original": "ኦሪጅናል", "rotate90": "90° ኣዙር", "showNormally": "ብቡሩህ ኣርኢ", "showNormallyBody": "ብኡንብኡ ይርእይዎ", "hideUntilTap": "ክሳብ ዝተንክፍዎ ተኸዲኑ ይጸንሕ", "hideUntilTapBody": "ክሳብ ዝተንክፍዎ ብድብዘዛ ይጸንሕ", "hidePrice": "ብዋጋ ተኸዲኑ ይጸንሕ", "hidePriceBody": "ክሳብ ዝኸፍሉልካ ብድብዘዛ ይጸንሕ", "priceUnavailable": "ኣብዚ ቻት የለን", "timerOff": "ኣጥፍእ", "timerOffBody": "ኣብቲ ቻት ይጸንሕ።", "timerViewBody": "ምስ ረኣይዎ ንኽልቴኹም ይጠፍእ።", "confirm": "ኣረጋግጽ", "lockedFor": "ን {{value1}} DHB ክፈቶ", "lockedForUsd": "ክፈቶ ን {{value1}}", "editItem": "ንብረት ኣስተኻኽል {{value1}}", "kept": "{{time}} ተታሒዙ", "timerTimeBody": "ካብ ዝለኣኽካዮ ንደሓር ንኽልቴኹም ይጠፍእ {{value1}}።"},
   "postBg": {
     "addMedia": "ስእሊ፣ GIF ወይ ቪድዮ ወስኽ",
     "changeMedia": "ስእሊ፣ GIF ወይ ቪድዮ ቀይር",
@@ -296,9 +297,11 @@
       "pronouns": "ክብርታት",
       "location": "ቦታ",
       "custom": "እተለምደ",
-      "customOption": "እተለምደ መርትዖ"
+      "customOption": "እተለምደ መርትዖ",
+      "cashapp": "Cash App"
     },
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} ተኸተል",
@@ -2210,7 +2213,7 @@
     "promptDevice": "መሳርሒታትን ኦኤስታትን (ብጉልበት)",
     "deviceInfoNoErrors": "ወላሓደ",
     "promptFilters": "ብመደብ ኣጣሪ",
-    "promptMediaError": "ምስሊ ወይ ቪድዮ ትሕቲ 50 ሜባ ንነፍሲ ወከፍ ሕረጽ ።",
+    "promptMediaError": "ምስሊ ወይ ቪድዮ ትሕቲ 200 ሜባ ንነፍሲ ወከፍ ሕረጽ ።",
     "promptMediaLimit": "ክሳብ {{max}} መተሓሓዚታት።",
     "removePromptAttachment": "ኣልግስ {{name}}",
     "promptAttachment": "መተሓሓዚ {{number}}",
@@ -4211,7 +4214,7 @@
       "pageViewsTerm": "ናይ ገጽ ርእይቶታት",
       "pageViews": "— Cloudflare ከም ናይ ገጽ ምጽዓን ገይሩ ዝፈርዶም ጠለባት እዮም፡ ካብ ስእልታት፡ scripts ወይ API calls ዝፍለዩ።",
       "botsTerm": "Bots ተጠቓለሉ ኣለዉ",
-      "bots": "— እዚኦም ጥረ ናይ edge ቁጽርታት እዮም፡ ስለዚ crawlers፡ uptime monitors ን ብስክሪፕት ዝሰርሑ clients ን የጠቓልሉ። ኣብ ላዕሊ ኣብ ዘሎ ናይ ብራውዘር ዝርዝር ባዕልኻ ክትርእዮም ትኽእል፡ ኣብኡ ከም \"Curl\" ን \"Unknown\" ዝኣመሰሉ መእተዊታት ካብ ሰብ ዘይኮነስ ካብ automated traffic ዝመጹ እዮም። Bots ንምውጻእ ዝኽፈሎ ደረጃ Cloudflare የድሊ፡ ንሕና ግን ኣይንጥቀመሉን፣ ብህድኣት ግምት ምቕናስ ከኣ ነቶም ቁጽርታት ንምርግጋጽ ዝቐልል ዘይኮነስ ዘሸግር ምገበሮም።",
+      "bots": "— እዚኦም ጥረ ናይ edge ቁጽርታት እዮም፡ ስለዚ crawlers፡ uptime monitors ን ብስክሪፕት ዝሰርሑ clients ን የጠቓልሉ። ኣብ ላዕሊ ኣብ ዘሎ ናይ ብራውዘር ዝርዝር ባዕልኻ ክትርእዮም ትኽእል፡ ኣብኡ ከም \"Curl\" ን \"Unknown\" ዝኣመሰሉ መእተዊታት ካብ ሰብ ዘይኮነስ ካብ automated traffic ዝመጹ እዮም። ቦት ካብ ሰብ ተበጻሕቲ ምፍላይ እናኸበደ ይኸይድ ኣሎ። ኣብ ቀረባ እዋን ኣብዚ ስታቲስቲክስ ምፍላዮም ስለዘይከኣል፡ ቦት ንምጽራይ ምፍታን ጥቕሚ የብሉን።",
       "totalTerm": "ጠቕላላ ናይ ክሊ",
       "total": "— ናይ ገጽ ርእይቶታትን ጠለባትን ኣብ ልዕሊ እቲ ክሊ ይድመሩ። ናይ በጻሕቲ ቁጽርታት ግና ብድሌት ናብ ሓደ \"ጠቕላላ በጻሕቲ\" ኣይድመሩን፡ ምኽንያቱ ሓደ ሰብ ሰኑይን ሰሉስን ኣብዚ ዝጸንሐ፡ ክልተ ግዜ ምተቖጽረ።",
       "peakTerm": "እቲ ዝበዝሐ ስራሕ ዝረኣየሉ ሰዓት / መዓልቲ",
@@ -20855,5 +20858,27 @@
     "remember": "ምርጫይ ዘክር",
     "rememberHint": "ኣብ ዝኾነ ግዜ ኣብ ቅጥዒታት ቀይሮ",
     "failed": "መልእኽቲ ክድምሰስ ኣይከኣለን"
+  },
+  "profileAskAi": {
+    "row": "AI ሕተት",
+    "rowSub": "ተኸተል፣ ኩሉ ፈትው፣ ሓድሽ ፍለጥ",
+    "back": "ተመለስ",
+    "title": "ብዛዕባ {{handle}} AI ሕተት",
+    "sub": "ተሓጋጋዚ ይገብሮ፣ ንስኻ ተረጋግጽ",
+    "followLikeAll": "ተኸተል ኩሉ ድማ ፈትው",
+    "followLikeAllSub": "{{handle}} ይኽተል፣ ንነፍሲ ወከፍ ጽሑፍ ግብረመልሲ ይህብ",
+    "likeAll": "ኩሎም ጽሑፋቶም ፈትው",
+    "likeAllSub": "ቀደም ግብረመልሲ ዝሃብካሎም ይሓልፍ",
+    "catchUp": "ሓድሽ ንገረኒ",
+    "catchUpSub": "{{handle}} ኣብዚ ቀረባ እዋን ዝለጠፎ፣ ብሓጺሩ",
+    "message": "መልእኽቲ ጽሓፈሎም",
+    "messageSub": "ንድፊ መልእኽቲ የዳሉ፣ ንስኻ ትልእኽ",
+    "placeholder": "ብዛዕባ {{handle}} ዝኾነ ሕተት…",
+    "send": "ላኽ",
+    "promptFollowLikeAll": "{{handle}} ተኸተል ንኹሎም ጽሑፋቶም ድማ ግብረመልሲ ሃብ",
+    "promptLikeAll": "ንኹሎም ጽሑፋት {{handle}} ግብረመልሲ ሃብ",
+    "promptCatchUp": "{{handle}} ኣብዚ ቀረባ እዋን እንታይ ከም ዝለጠፈ ንገረኒ",
+    "promptMessage": "ን{{handle}} መልእኽቲ ክጽሕፍ ሓግዘኒ",
+    "promptAbout": "ብዛዕባ {{handle}}፦ {{question}}"
   }
 }

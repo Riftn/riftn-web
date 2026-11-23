@@ -1,4 +1,5 @@
 import * as React from "react";
+import { overlayRoot } from "@/lib/overlay-root";
 import * as ContextMenuPrimitive from "@radix-ui/react-context-menu";
 import { Circle } from "lucide-react";
 import Check from "@/components/ui/cut-icons/check";
@@ -14,7 +15,9 @@ const ContextMenuTrigger = ContextMenuPrimitive.Trigger;
 
 const ContextMenuGroup = ContextMenuPrimitive.Group;
 
-const ContextMenuPortal = ContextMenuPrimitive.Portal;
+const ContextMenuPortal = (props: ContextMenuPrimitive.ContextMenuPortalProps) => (
+  <ContextMenuPrimitive.Portal container={overlayRoot()} {...props} />
+);
 
 const ContextMenuSub = ContextMenuPrimitive.Sub;
 
@@ -61,9 +64,10 @@ const ContextMenuContent = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Content>
 >(({ className, ...props }, ref) => (
-  <ContextMenuPrimitive.Portal>
+  <ContextMenuPrimitive.Portal container={overlayRoot()}>
     <ContextMenuPrimitive.Content
       ref={ref}
+      data-modal-shield=""
       className={cn(
         "z-50 min-w-[8rem] overflow-hidden rounded-2xl p-1 text-white shadow-2xl animate-in fade-in-80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
         "bg-zinc-900/70 backdrop-blur-xl border-0",

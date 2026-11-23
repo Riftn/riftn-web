@@ -5,6 +5,7 @@ import { UnreadMarker, UnreadJumpButton } from './UnreadJump';
 import type { UnreadAnchor } from '@/lib/chat-unread-anchor';
 import { anchorFromReadSpot, newestLineOnScreen } from '@/lib/chat-read-position';
 import { useChatReadPosition } from '@/hooks/use-chat-read-position';
+import { countLinesBelow, glideToBottom } from '@/lib/chat-lines-below';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { MoreVertical, Loader2, ShieldBan, MessageSquarePlus, AlertCircle, RotateCcw, ChevronsDown } from "lucide-react";
 import ShieldCheck from "@/components/ui/cut-icons/security";
@@ -24,6 +25,8 @@ import { ChatMessage, Message } from './ChatMessage';
 import { TranslatableText, SharedTranslationContext } from '../TranslatableText';
 import { ChatInput, type ChatInputSendArgs } from './ChatInput';
 import { CreateTopicRoomModal } from './CreateTopicRoomModal';
+import { usePublicChatDelete } from './PublicChatDeleteDialog';
+import { useHiddenLines } from '@/lib/public-chat-hidden';
 import { RoomSettingsModal } from './RoomSettingsModal';
 import { useLiveChatRooms, useLiveChatMessages, useLiveChatRoomDetails, useLiveChatPresence, type SupabaseLiveChatMessage } from '@/hooks/use-livechat';
 import { getMediaUrl, banLiveChatUser, unbanLiveChatUser, uploadChatImage, uploadLiveChatVoice, pinLiveChatMessage, unpinLiveChatMessage, type LiveChatRoom } from '@/lib/api/dehub';
@@ -46,6 +49,7 @@ import { AppState } from '@/components/app/AppState';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
 import { useFocusChatMessage, chatMessageDomId } from '@/hooks/use-focus-chat-message';
 import { bringIntoViewAndFlash } from '@/lib/focus-scroll';
+import { canLinkMessage, copyChatMessageLink, peekPendingChatLink, useLinkedMessage } from '@/lib/chat-message-link';
 import { useStickToBottom } from '@/hooks/use-stick-to-bottom';
 import { ChatSearchBar, ChatSearchPanel, ChatSearchPill, rememberChatSearch, useChatSearch, type ChatSearchPerson } from './ChatSearch';
 import {
@@ -181,11 +185,14 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
   const [createRoomOpen, setCreateRoomOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
-  // Auto-select the first room once loaded
+  // Auto-select the first room once loaded, or the room a copied message
+  // link names.
   useEffect(() => {
-    if (rooms.length > 0 && !selectedRoomId) {
-      setSelectedRoomId(rooms[0].id);
-    }
+    if (!rooms.length) return;
+    const linked = peekPendingChatLink('public')?.target;
+    const linkedRoom = linked?.kind === 'public' && linked.roomId && rooms.some((r) => r.id === linked.roomId) ? linked.roomId : null;
+    if (linkedRoom && linkedRoom !== selectedRoomId) setSelectedRoomId(linkedRoom);
+    else if (!selectedRoomId) setSelectedRoomId(rooms[0].id);
   }, [rooms, selectedRoomId]);
 
   const {
@@ -239,6 +246,9 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
   useAssistantReplyEngine(apiMessages);
   const localAssistantReplies = useAssistantReplies();
 
+  // Lines you deleted for yourself only (lib/public-chat-hidden).
+  const hiddenLines = useHiddenLines(walletAddress);
+
   // The room's lines with buy alerts and local assistant replies folded in
   const filteredMessages = useMemo(() => {
     // Buy alerts sit beside the history that is loaded, never further back:
@@ -270,10 +280,10 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
       replyTo: r.replyToName ? { id: '', content: '', senderName: r.replyToName } : undefined,
     }));
 
-    return [...messages, ...buyAlertMessages, ...(hasNewer ? [] : localAssistantMessages)].sort(
-      (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
-    );
-  }, [messages, buyAlerts, localAssistantReplies, hasNewer]);
+    return [...messages, ...buyAlertMessages, ...(hasNewer ? [] : localAssistantMessages)]
+      .filter((m) => !hiddenLines.has(m.id))
+      .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+  }, [messages, buyAlerts, localAssistantReplies, hasNewer, hiddenLines]);
 
   // ─── Where you left off ───────────────────────────────────────────────────
   // Signed in, the room opens on the first line you haven't seen (saved on
@@ -283,6 +293,7 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
   const [unreadMarkerSeen, setUnreadMarkerSeen] = useState(false);
   const [unreadMarkerAbove, setUnreadMarkerAbove] = useState(false);
   const [unreadBelow, setUnreadBelow] = useState(0);
+  const [linesBelow, setLinesBelow] = useState(0);
   const [scrolledUp, setScrolledUp] = useState(false);
   const readDecidedRoom = useRef<string | null>(null);
   const unreadPlacedRef = useRef(false);
@@ -354,6 +365,28 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
     if (found) focusRow(hit.id);
     else toast.error(_copy('chatSearch.gone', { defaultValue: 'That message is no longer here' }));
   }, [jumping, search, searchText, jumpTo, focusRow, _copy]);
+
+  // A copied message link: open the room on that line and light it up.
+  const linkedTarget = peekPendingChatLink('public')?.target;
+  const linkedRoomId = linkedTarget?.kind === 'public' ? linkedTarget.roomId : null;
+  const linkRoomReady = !!selectedRoomId && (!linkedRoomId || linkedRoomId === selectedRoomId || !rooms.some((r) => r.id === linkedRoomId));
+  useLinkedMessage(
+    'public',
+    linkRoomReady && !messagesLoading && messages.length > 0,
+    async (id) => {
+      followLatest.current = false;
+      if (selectedRoomId) readDecidedRoom.current = selectedRoomId;
+      readTrackingRef.current = true;
+      setUnreadAnchor(null);
+      const found = await jumpTo(id);
+      // Signed out past the guest window: the chat shows its sign-in wall.
+      return found || isAuthenticated ? found : null;
+    },
+    (id) => document.getElementById(chatMessageDomId(id)),
+  );
+  const handleCopyLink = useCallback((message: Message) => {
+    copyChatMessageLink({ kind: 'public', roomId: selectedRoomId }, message.id);
+  }, [selectedRoomId]);
 
   /** Back to the newest lines after reading old history. */
   const goToLatest = useCallback(async () => {
@@ -454,6 +487,13 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedRoomId, messages.length, messagesLoading, readSpot.ready, hasOlder, loadingOlder, signInWall]);
 
+  /** Every line below the fold (the scroll-down count), not just the unread ones. */
+  const refreshLinesBelow = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    setLinesBelow(countLinesBelow(container, messages.map((m) => m.id), (id) => document.getElementById(chatMessageDomId(id))));
+  }, [messages]);
+
   /** How many unread lines sit below the fold, and whether the marker is above it. */
   const refreshUnreadJump = useCallback(() => {
     const container = scrollContainerRef.current;
@@ -491,9 +531,10 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
     scrollFrame.current = requestAnimationFrame(() => {
       scrollFrame.current = 0;
       refreshUnreadJump();
+      refreshLinesBelow();
       reportReadSpot();
     });
-  }, [refreshUnreadJump, reportReadSpot]);
+  }, [refreshUnreadJump, refreshLinesBelow, reportReadSpot]);
   useEffect(() => () => cancelAnimationFrame(scrollFrame.current), []);
   useEffect(() => {
     const timer = window.setTimeout(scheduleScrollWork, 400);
@@ -534,7 +575,7 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
     const container = scrollContainerRef.current;
     if (!container) return;
     followLatest.current = true;
-    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+    glideToBottom(container);
   }, []);
 
   const handleReply = useCallback((message: Message) => {
@@ -629,13 +670,21 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
    * is what lets anyone clear their own line here, and it tells the room
    * straight away instead of waiting on a refetch.
    */
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
+  const { requestDelete, dialog: deleteDialog } = usePublicChatDelete({
+    account: walletAddress,
+    canDeleteAny: isModerator,
+    deleteForEveryone: deleteMessage,
+  });
+  // Asks "for everyone" or "for me", like DMs and community chats.
   const handleDeleteMessage = useCallback((messageId: string) => {
-    void deleteMessage(messageId);
-  }, [deleteMessage]);
+    const line = messagesRef.current.find((m) => m.id === messageId);
+    const mine = !!line && !!walletAddress && line.userId?.toLowerCase() === walletAddress.toLowerCase();
+    requestDelete(messageId, mine);
+  }, [requestDelete, walletAddress]);
 
-  const handleEditMessage = useCallback((messageId: string, content: string) => {
-    void editMessage(messageId, content);
-  }, [editMessage]);
+  const handleEditMessage = useCallback((messageId: string, content: string) => editMessage(messageId, content), [editMessage]);
 
   /*
    * Pinned line, Telegram style: a bar over the list, moderators pin and
@@ -716,6 +765,7 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
         onRetrySend={retrySend}
         onDiscardSend={discardSend}
         onSeeMessages={handleSeeMessages}
+        onCopyLink={canLinkMessage(message.id) ? handleCopyLink : undefined}
         holdFrame
         replying={!!replyTo && replyTo.id === message.id}
         onTogglePin={isModerator ? handleTogglePin : undefined}
@@ -723,14 +773,15 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
       />
       )
       );
-      if (unreadAnchor?.id !== message.id || readDecidedRoom.current !== selectedRoomId) return row;
       return (
-        <Fragment key={`unread-${message.id}`}>
-          <UnreadMarker count={unreadAnchor.count} />
+        <Fragment key={message.clientKey ?? message.id}>
+          {unreadAnchor?.id === message.id && readDecidedRoom.current === selectedRoomId && (
+            <UnreadMarker count={unreadAnchor.count} />
+          )}
           {row}
         </Fragment>
       );
-    }), [filteredMessages, buyBotHidden, hideBuyBot, isModerator, roomDetails?.moderators, walletAddress, handleBanUser, handleUnbanUser, handleDeleteMessage, handleEditMessage, isAuthenticated, addReaction, promptSignIn, removeReaction, handleReply, retrySend, discardSend, handleSeeMessages, replyTo, handleTogglePin, pinnedMessage?.id, unreadAnchor, selectedRoomId]);
+    }), [filteredMessages, buyBotHidden, hideBuyBot, isModerator, roomDetails?.moderators, walletAddress, handleBanUser, handleUnbanUser, handleDeleteMessage, handleEditMessage, isAuthenticated, addReaction, promptSignIn, removeReaction, handleReply, retrySend, discardSend, handleSeeMessages, handleCopyLink, replyTo, handleTogglePin, pinnedMessage?.id, unreadAnchor, selectedRoomId]);
 
   return (
     <div data-page-bento data-bento-flat className="flex flex-col h-full overflow-hidden overflow-x-hidden">
@@ -966,13 +1017,14 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
         )}
         {!hasNewer && !showSearchList && !isSearchOpen && (() => {
           // Same control as DMs: up to the unread line until it has been seen,
-          // then down to the newest, with the unread lines still below.
+          // then down to the newest, counting every line still below you.
           const up = !!unreadAnchor && !unreadMarkerSeen && unreadMarkerAbove;
-          if (!(up || scrolledUp || unreadBelow > 0)) return null;
+          const below = Math.max(linesBelow, unreadBelow);
           return (
             <UnreadJumpButton
+              show={up || scrolledUp || below > 0}
               up={up}
-              count={unreadAnchor ? unreadBelow : 0}
+              count={below}
               onClick={up ? jumpToUnreadMarker : jumpToNewest}
               className="absolute bottom-3 right-3 z-10"
             />
@@ -1014,6 +1066,7 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
       </div>
 
       {/* Modals */}
+      {deleteDialog}
       <CreateTopicRoomModal
         open={createRoomOpen}
         onOpenChange={setCreateRoomOpen}

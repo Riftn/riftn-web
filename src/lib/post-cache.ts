@@ -14,6 +14,7 @@ import { getVoteCache } from '@/lib/vote-cache';
 import { parseFormattedCount } from '@/lib/feed-utils';
 import { liveSourceFromHlsUrl } from '@/lib/live-ingest';
 import { warmPostPage } from '@/lib/preload-post-page';
+import { warmPostData } from '@/lib/post-warm';
 import { buildSoundtrackTag } from '@/lib/soundtrack';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
 
@@ -231,29 +232,38 @@ function applyVoteCache(postId: string, nft: Partial<DeHubNFT>): Partial<DeHubNF
  * invalidate, the shell counts as fresh for the whole staleTime and fields
  * the feed doesn't carry (e.g. quotedPost) never arrive.
  */
-function seedPostCache(queryClient: QueryClient, id: string, nftData: Partial<DeHubNFT>): void {
+function seedPostCache(queryClient: QueryClient, id: string, nftData: Partial<DeHubNFT>, articleSlug?: string): void {
   warmPostPage();
+  // The page's own request only leaves after its first render; start it now.
+  warmPostData(id);
   queryClient.setQueryData(['single-post', id], nftData);
   queryClient.invalidateQueries({ queryKey: ['single-post', id], exact: true, refetchType: 'none' });
+  // An article opens at its readable address, which the page turns back into
+  // this id with a request before it draws anything. The card already knows
+  // the answer, so the article opens as fast as any other post.
+  const slug = articleSlug?.toLowerCase();
+  if (slug && /^\d+$/.test(id) && queryClient.getQueryData(['article-slug', slug]) === undefined) {
+    queryClient.setQueryData(['article-slug', slug], { tokenId: Number(id), articleSlug: slug });
+  }
 }
 
 /**
  * Pre-cache video data before navigation
  */
 export function cacheVideoForNavigation(queryClient: QueryClient, video: VideoItem): void {
-  seedPostCache(queryClient, video.id, applyVoteCache(video.id, videoItemToNFT(video)));
+  seedPostCache(queryClient, video.id, applyVoteCache(video.id, videoItemToNFT(video)), video.articleSlug);
 }
 
 /**
  * Pre-cache image post data before navigation
  */
 export function cacheImageForNavigation(queryClient: QueryClient, post: ImagePost): void {
-  seedPostCache(queryClient, post.id, applyVoteCache(post.id, imagePostToNFT(post)));
+  seedPostCache(queryClient, post.id, applyVoteCache(post.id, imagePostToNFT(post)), post.articleSlug);
 }
 
 /**
  * Pre-cache text post data before navigation
  */
 export function cacheTextPostForNavigation(queryClient: QueryClient, post: TextPost): void {
-  seedPostCache(queryClient, post.id, applyVoteCache(post.id, textPostToNFT(post)));
+  seedPostCache(queryClient, post.id, applyVoteCache(post.id, textPostToNFT(post)), post.articleSlug);
 }

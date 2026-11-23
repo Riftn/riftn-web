@@ -1,6 +1,7 @@
 import { ProfileFollowButton } from './ProfileFollowButton';
 import { useTranslation as _useCopy } from 'react-i18next';
-import { Star, EllipsisVertical, Loader2 } from "lucide-react";
+import { Star, EllipsisVertical, Loader2, Mail } from "lucide-react";
+import { readAccountCategory, readContactEmail } from "@/lib/account-type";
 import Pencil from "@/components/ui/cut-icons/edit";
 import Copy from "@/components/ui/cut-icons/copy";
 import Wallet from "@/components/ui/cut-icons/wallet";
@@ -9,7 +10,7 @@ import Ban from "@/components/ui/cut-icons/blocked";
 import MessageSquare from "@/components/ui/cut-icons/message-envelope";
 
 import { Skeleton } from '@/components/ui/skeleton';
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { AuthContext } from '@/contexts/AuthContext';
 import { saveOwnProfileImage, type ProfileImageKind } from '@/lib/profile-image-edit';
@@ -24,7 +25,9 @@ import { TranslatableText, hasTranslatableText } from '@/components/app/Translat
 import { BioTranslateButton } from '@/components/app/profile/BioTranslateButton';
 import { ProfileLinksPill } from '@/components/app/profile/ProfileSocialLinks';
 import { ProfileFieldsList } from '@/components/app/profile/ProfileFieldsList';
+import { MomentArchive } from './MomentArchive';
 import { TotalReachPill } from '@/components/app/profile/TotalReachPill';
+import { localTimeLine, useProfileLocalTime } from '@/hooks/use-profile-local-time';
 import { MutualFollowers } from '@/components/app/profile/MutualFollowers';
 import { useMutualFollowers } from '@/hooks/use-mutual-followers';
 import { StreamerLevelCard } from '@/components/app/live/StreamerLevelCard';
@@ -45,6 +48,7 @@ import { buildAvatarCdnFallbackUrl, cdnImageSrcSet } from '@/lib/media-url';
 import { BadgeIcon } from '@/components/app/BadgeIcon';
 import { NewMemberChip } from '@/components/app/NewMemberChip';
 import { OnboardingCompleteChip } from '@/components/app/OnboardingCompleteChip';
+import { EarlySupporterChip } from '@/components/app/EarlySupporterChip';
 import { BadgePatronChip } from '@/components/app/BadgePatronChip';
 import { toast } from 'sonner';
 import { DISPLAY_WALLET_OVERRIDES, getDefaultBanner, type TabValue } from './ProfileConstants';
@@ -55,6 +59,8 @@ import { LiveRipple } from '@/components/app/LiveRipple';
 import { viewerShareUrl } from '@/lib/share-url';
 import { trackShare } from '@/lib/analytics';
 
+import { formatCount } from '@/lib/format-count';
+const ProfilePetCard = lazy(() => import('@/components/app/pet/ProfilePetCard'));
 export interface ProfileHeaderProps {
   profile: ProfileData;
   apiProfile: ProfileData | undefined;
@@ -138,6 +144,7 @@ export function ProfileHeader({
   // The links pill sits in the card's bottom corner: on the mutuals row when
   // one shows, otherwise at the end of the Following/Followers line.
   const mutualFollowers = useMutualFollowers({ profileAddress: apiProfile?.walletAddress, enabled: !isViewingOwnProfile });
+  const localTime = useProfileLocalTime(profile.customs?.publicTimeZone);
   const hasMutualsRow = !isViewingOwnProfile && !mutualFollowers.isLoading && mutualFollowers.mutuals.length > 0;
   const linksOnCountsRow = !hasMutualsRow && (!hideFollowerCounts || isViewingOwnProfile);
   const messageSettings = (apiProfile as (ProfileData & {
@@ -383,6 +390,22 @@ export function ProfileHeader({
                   <MessageSquare className="w-4 h-4" />
                 </Button>
               )}
+              {!isViewingOwnProfile && readContactEmail(profile.customs as Record<string, unknown> | undefined) && (
+                <Button
+                  asChild
+                  variant="glass"
+                  size="icon"
+                  className="rounded-xl h-9 w-9"
+                >
+                  <a
+                    href={`mailto:${readContactEmail(profile.customs as Record<string, unknown> | undefined)}`}
+                    aria-label={t('accountType.contact', 'Contact')}
+                    title={t('accountType.contact', 'Contact')}
+                  >
+                    <Mail className="w-4 h-4" />
+                  </a>
+                </Button>
+              )}
               <Drawer open={shareSheetOpen} onOpenChange={(open) => {
                 if (!isAuthenticated && open) {
                   setLoginModalOpen(true);
@@ -445,6 +468,8 @@ export function ProfileHeader({
                   finished — it is derived from your progress row, not from
                   anything stored on the profile. */}
               <OnboardingCompleteChip address={profile.walletAddress} />
+              {/* One of their requests on the Requests board shipped. */}
+              <EarlySupporterChip address={profile.walletAddress} username={profile.handle} />
             </div>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <button
@@ -501,11 +526,23 @@ export function ProfileHeader({
             );
           })()}
           
+          {/* Creator or Business category, Instagram style: a quiet line above the bio. */}
+          {(() => {
+            const category = readAccountCategory(profile.customs as Record<string, unknown> | undefined);
+            return category ? (
+              <p data-account-category className="mt-2 text-sm text-zinc-400">{t(`accountType.cat.${category}`)}</p>
+            ) : null;
+          })()}
           {profile.bio && (
             <TranslatableText publicContent text={translatedBio || profile.bio} className="mt-3 text-white/90 text-base leading-6 block" as="p" />
           )}
 
           <ProfileFieldsList fields={profile.profileFields} />
+          {localTime && (
+            <p className="mt-1 text-sm text-zinc-400" title={String(profile.customs?.publicTimeZone)}>
+              {localTimeLine(t as never, localTime, profile.customs?.publicTimeZone)}
+            </p>
+          )}
 
           {/* Pinned Communities */}
           {profile.walletAddress && (
@@ -545,7 +582,7 @@ export function ProfileHeader({
                   className="hover:underline"
                 >
                   {profile.following != null ? (
-                    <><span className="font-bold text-white">{profile.following.toLocaleString()}</span><span className="text-zinc-500 ml-1">{t('profile.following')}</span></>
+                    <><span className="font-bold text-white">{formatCount(profile.following)}</span><span className="text-zinc-500 ml-1">{t('profile.following')}</span></>
                   ) : (
                     <Skeleton className="h-4 w-16 rounded bg-white/10" />
                   )}
@@ -553,7 +590,7 @@ export function ProfileHeader({
               ) : (
                 <div className="flex items-center">
                   {profile.following != null ? (
-                    <><span className="font-bold text-white">{profile.following.toLocaleString()}</span><span className="text-zinc-500 ml-1">{t('profile.following')}</span></>
+                    <><span className="font-bold text-white">{formatCount(profile.following)}</span><span className="text-zinc-500 ml-1">{t('profile.following')}</span></>
                   ) : (
                     <Skeleton className="h-4 w-16 rounded bg-white/10" />
                   )}
@@ -568,7 +605,7 @@ export function ProfileHeader({
                   className="hover:underline"
                 >
                   {profile.followers != null ? (
-                    <><span className="font-bold text-white">{profile.followers.toLocaleString()}</span><span className="text-zinc-500 ml-1">{t('profile.followers')}</span></>
+                    <><span className="font-bold text-white">{formatCount(profile.followers)}</span><span className="text-zinc-500 ml-1">{t('profile.followers')}</span></>
                   ) : (
                     <Skeleton className="h-4 w-16 rounded bg-white/10" />
                   )}
@@ -576,7 +613,7 @@ export function ProfileHeader({
               ) : (
                 <div className="flex items-center">
                   {profile.followers != null ? (
-                    <><span className="font-bold text-white">{profile.followers.toLocaleString()}</span><span className="text-zinc-500 ml-1">{t('profile.followers')}</span></>
+                    <><span className="font-bold text-white">{formatCount(profile.followers)}</span><span className="text-zinc-500 ml-1">{t('profile.followers')}</span></>
                   ) : (
                     <Skeleton className="h-4 w-16 rounded bg-white/10" />
                   )}
@@ -609,10 +646,19 @@ export function ProfileHeader({
             )}
           </div>
 
+          {isViewingOwnProfile && profile.walletAddress && <MomentArchive key={profile.walletAddress} profileAddress={profile.walletAddress} />}
+
           {/* The streamer ladder. Renders nothing for a profile that has
               never ended a stream, so a non-streamer's page is unchanged. */}
           {isViewingOwnProfile && (
             <StreamerLevelCard address={profile.walletAddress} className="mt-4" />
+          )}
+
+          {/* The creator's stream pet. Nothing for someone without one. */}
+          {profile.walletAddress && (
+            <Suspense fallback={null}>
+              <ProfilePetCard address={profile.walletAddress} own={!!isViewingOwnProfile} className="mt-4" />
+            </Suspense>
           )}
         </div>
       </div>

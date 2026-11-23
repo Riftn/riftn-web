@@ -22,6 +22,7 @@ import { UnreadMarker, UnreadJumpButton } from '../chat/UnreadJump';
 import type { UnreadAnchor } from '@/lib/chat-unread-anchor';
 import { anchorFromReadSpot, newestLineOnScreen } from '@/lib/chat-read-position';
 import { useChatReadPosition } from '@/hooks/use-chat-read-position';
+import { countLinesBelow, glideToBottom } from '@/lib/chat-lines-below';
 import { roomChatId } from '@/lib/api/dehub/chat-prefs';
 import { holderGateOf, runHolderCheck } from '@/hooks/use-holder-gate';
 import { useQueryClient } from '@tanstack/react-query';
@@ -88,6 +89,11 @@ import Sparkles from "@/components/ui/cut-icons/assistant";
 
 import { QUICK_CHAT_REACTIONS } from '@/components/app/chat/reaction-options';
 import { MoreReactionsButton } from '@/components/app/chat/MoreReactionsButton';
+import { ChatHoldSheet, isTouchHold, type ChatHoldAction } from '@/components/app/chat/ChatHoldSheet';
+import { MessageMenu, type MessageMenuAction } from '@/components/app/chat/MessageMenu';
+import { menuIcons, messageMenuMeta, keepBrowserMenu } from '@/components/app/chat/message-menu-kit';
+import { useHoldMenu } from '@/hooks/use-hold-menu';
+import { canLinkMessage, copyChatMessageLink, copyLinkLabel, useLinkedMessage } from '@/lib/chat-message-link';
 
 /** "Forever" mutes are stored as a date far in the future rather than as null. */
 const FOREVER_YEAR = 9000;
@@ -134,6 +140,7 @@ function formatCountdown(seconds: number): string {
 import { BuyAlertCard } from '../chat/BuyAlertCard';
 import { useBuyBotHidden } from '@/hooks/use-buy-bot-hidden';
 import { SendStatus } from '@/components/app/chat/SendStatus';
+import { profilePath } from '@/lib/profile-path';
 
 function ChatAvatar({ src, address, name }: { src?: string | null; address?: string; name: string }) {
   const [failed, setFailed] = useState(false);
@@ -208,6 +215,8 @@ interface CommunityChatProps {
   community: Community;
   membership: CommunityMember | null | undefined;
   isMember: boolean;
+  /** Membership is still being read: show neither the join prompt nor the message box yet. */
+  membershipLoading?: boolean;
   /** The chat is the tab on screen. Defaults to true for a chat shown on its own. */
   active?: boolean;
   /** Joins the community: the "join to chat" bar calls it. */
@@ -220,7 +229,7 @@ interface CommunityChatProps {
 /** History pages (50 lines each) a chat may pull in at open to reach where you left off. */
 const MAX_READ_SPOT_PAGES = 10;
 
-export function CommunityChat({ communityId, community, membership, isMember, active = true, onJoin, joining, fill = false }: CommunityChatProps) {
+export function CommunityChat({ communityId, community, membership, isMember, membershipLoading = false, active = true, onJoin, joining, fill = false }: CommunityChatProps) {
   const { t: _copy } = _useCopy();
   const [newMessage, setNewMessage] = useSurfaceDraft("components/app/communities/CommunityChat.tsx:newMessage", '', communityId);
   const [replyTo, setReplyTo] = useDraftState<CommunityChatMessage | null>(`community:${communityId}:reply`, null);
@@ -242,6 +251,8 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [showJumpToLatest, setShowJumpToLatest] = useState(false);
   const [newMessageCount, setNewMessageCount] = useState(0);
+  // Every line below the fold: the number on the scroll-down button.
+  const [linesBelow, setLinesBelow] = useState(0);
   const [highlight, setHighlight] = useState<{ id: string; nonce: number } | null>(null);
   const [pinPendingId, setPinPendingId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<CommunityChatMessage | null>(null);
@@ -552,15 +563,22 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
     if (line) readSpot.report(line.id, line.created_at);
   }, [messages, searchQuery, readSpot.report]);
 
+  const refreshLinesBelow = useCallback(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+    setLinesBelow(countLinesBelow(container, messages.map((m) => m.id), (id) => messageRefs.current[id]));
+  }, [messages]);
+
   const scrollFrame = useRef(0);
   const scheduleScrollWork = useCallback(() => {
     if (scrollFrame.current) return;
     scrollFrame.current = requestAnimationFrame(() => {
       scrollFrame.current = 0;
       refreshUnreadJump();
+      refreshLinesBelow();
       reportReadSpot();
     });
-  }, [refreshUnreadJump, reportReadSpot]);
+  }, [refreshUnreadJump, refreshLinesBelow, reportReadSpot]);
   useEffect(() => () => cancelAnimationFrame(scrollFrame.current), []);
   // Lines landing while you sit at the bottom are read as they arrive.
   useEffect(() => {
@@ -759,15 +777,17 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
     try {
       await showLatest();
       setSearchQuery('');
-      setVisibleCount(PAGE_SIZE);
+      // Folding the loaded history back to one page mid-glide made the list
+      // snap; only do it when we were in an old window or a search.
+      if (isHistoryWindow || searchQuery.trim()) setVisibleCount(PAGE_SIZE);
       requestAnimationFrame(() => {
         const el = scrollRef.current;
-        if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+        if (el) glideToBottom(el);
       });
       setNewMessageCount(0);
       setShowJumpToLatest(false);
     } catch { toast.error(t('common.failedToLoad')); }
-  }, [showLatest, setSearchQuery, t]);
+  }, [showLatest, setSearchQuery, t, isHistoryWindow, searchQuery]);
 
   const handleSetPinned = useCallback(async (messageId: string, pinned: boolean) => {
     setPinPendingId(messageId);
@@ -984,6 +1004,67 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
     }
   }, [isAuthenticated, walletAddress, messages, addReaction, removeReaction]);
 
+  // Hold a line on a phone, or right-click it with a mouse: reactions and the
+  // line's actions, Copy link among them.
+  const [held, setHeld] = useState<{ msg: CommunityChatMessage; el: HTMLElement } | null>(null);
+  const [menu, setMenu] = useState<{ msg: CommunityChatMessage; point: { x: number; y: number } } | null>(null);
+  const [menuMounted, setMenuMounted] = useState(false);
+  const hold = useHoldMenu((point, target) => {
+    if (editingId) return false;
+    const el = target.closest<HTMLElement>('[data-cc-msg]');
+    const msg = el ? messages.find((m) => m.id === el.dataset.ccMsg) : undefined;
+    if (!el || !msg || msg.send_state) return false;
+    if (isTouchHold()) { setHeld({ msg, el }); return; }
+    if (keepBrowserMenu(target, el)) return false;
+    setMenuMounted(true);
+    setMenu({ msg, point });
+  });
+  const lineActions = (msg: CommunityChatMessage | undefined, phone: boolean) => {
+    const list: (MessageMenuAction & { prime?: boolean; secondary?: boolean })[] = [];
+    if (!msg) return list;
+    const mine = !!walletAddress && msg.wallet_address?.toLowerCase() === walletAddress.toLowerCase();
+    if (isAuthenticated && isMember) list.push({ key: 'reply', prime: phone, icon: menuIcons.reply, label: t('communities.reply'), onSelect: () => setReplyTo(msg), hint: 'R' });
+    if (msg.content?.trim() && msg.message_type !== 'gif') list.push({
+      key: 'copy', icon: menuIcons.copy,
+      label: phone ? _copy('chatHold.copy', { defaultValue: 'Copy' }) : _copy('msgMenu.copyText', { defaultValue: 'Copy Text' }), hint: 'C',
+      onSelect: () => { void navigator.clipboard?.writeText(msg.content).then(() => toast.success(_copy('chatHold.copied', { defaultValue: 'Copied' })), () => undefined); },
+    });
+    if (community.slug && canLinkMessage(msg.id)) list.push({
+      key: 'copy-link', icon: menuIcons.link, label: copyLinkLabel(), hint: 'L',
+      onSelect: () => copyChatMessageLink({ kind: 'community', slug: community.slug }, msg.id),
+    });
+    if (mine && isAuthenticated && isMember && msg.message_type !== 'gif') list.push({ key: 'edit', icon: menuIcons.edit, label: t('communities.edit'), onSelect: () => { setEditingId(msg.id); setEditInitial(msg.content); }, hint: 'E' });
+    if (canPinMessages && isAuthenticated && isMember) list.push({
+      key: 'pin', icon: msg.pinned_at ? menuIcons.unpin : menuIcons.pin,
+      label: msg.pinned_at ? t('communities.chat.unpin', { defaultValue: 'Unpin' }) : t('communities.chat.pin', { defaultValue: 'Pin' }),
+      onSelect: () => void handleSetPinned(msg.id, !msg.pinned_at), hint: 'P',
+    });
+    if (isAuthenticated && isMember) list.push({ key: 'delete', divided: true, destructive: true, secondary: phone, icon: menuIcons.delete, label: t('communities.chat.delete', { defaultValue: 'Delete' }), onSelect: () => setDeleteTarget(msg) });
+    return list;
+  };
+  const reactedByMe = (msg: CommunityChatMessage | undefined) => (msg && walletAddress
+    ? Object.entries(msg.reactions ?? {})
+        .filter(([, addrs]) => addrs?.some((a) => a.toLowerCase() === walletAddress.toLowerCase()))
+        .map(([emoji]) => emoji)
+    : []);
+
+  // A copied message link to this community's chat: open on that line,
+  // reading the history around it when it is older than what is held.
+  useLinkedMessage(
+    community.slug ? `community:${community.slug.toLowerCase()}` : null,
+    active && !isLoading && messages.length > 0 && readSpot.ready,
+    async (id) => {
+      didInitialScrollRef.current = true;
+      readTrackingRef.current = true;
+      setUnreadAnchor(null);
+      setSearchQuery('');
+      if (!messages.some((m) => m.id === id)) await showMessage(id);
+      setVisibleCount((c) => Math.max(c, messages.length + 50));
+      return true;
+    },
+    (id) => messageRefs.current[id] ?? null,
+  );
+
   const pinnedSenderName = pinnedMessage
     ? pinnedMessage.display_name
       || pinnedMessage.username
@@ -1012,7 +1093,7 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
         {/* Search bar */}
         <div className="px-1 pb-1 flex items-center gap-1">
           {!showSearch && isMember && communityKindOf(community) === 'group' ? (
-            <GroupCallButtons groupId={communityId} groupName={community?.name ?? ''} />
+            <GroupCallButtons groupId={communityId} groupName={community?.name ?? ''} canStart={abilities.isOwner || abilities.isAdmin || abilities.can('start_calls')} />
           ) : null}
           {showSearch ? (
             <div className="flex-1 min-w-0">
@@ -1065,7 +1146,7 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
               onNewer={() => void openResult(activeHit - 1)}
             />
           )}
-          <div ref={scrollRef} onScroll={handleScroll} className={`absolute inset-0 chat-text-zone overflow-y-auto py-2 space-y-2 ${showSearchList ? 'invisible' : ''}`}>
+          <div ref={scrollRef} onScroll={handleScroll} className={`absolute inset-0 chat-text-zone overflow-y-auto py-2 space-y-2 ${showSearchList ? 'invisible' : ''}`} {...hold}>
             {historyError && (
               <button onClick={() => void refreshHistory()} className="mx-3 px-3 py-2 text-sm" role="alert">
                 {t('common.failedToLoad')} — {t('common.retry')}
@@ -1195,7 +1276,7 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
                 const avatarUrl = buildAvatarUrl(msg.wallet_address, msg.avatar_url);
                 const name = msg.display_name || msg.username || msg.wallet_address?.slice(0, 8) || _copy("copy.90395d452a30", { defaultValue: "Anon" });
                 const handle = msg.username;
-                const openProfile = handle ? () => navigate(`/${handle}`) : undefined;
+                const openProfile = handle ? () => navigate(profilePath(handle)) : undefined;
                 // Owners and admins who may restrict members get the member's
                 // actions (mute, ban, remove) from a click on the name or face.
                 const canActHere = canRestrictMembers && !!msg.wallet_address
@@ -1212,6 +1293,7 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
                   <SwipeReplyRow key={msg.client_key ?? msg.id} onReply={isMember && !msg.send_state ? () => setReplyTo(msg) : undefined}>
                   <div
                     ref={(node) => { messageRefs.current[msg.id] = node; }}
+                    data-cc-msg={msg.id}
                     className={`group relative px-3 py-0.5 rounded-xl transition-shadow duration-300 ${isMine ? 'bg-white/5 py-1' : ''} ${isHighlighted ? 'ring-1 ring-white/30' : ''}`}
                   >
                     {msg.reply_to && (
@@ -1471,11 +1553,11 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
               unread lines still below. */}
           {(() => {
             const up = !!unreadAnchor && !unreadMarkerSeen && unreadMarkerAbove;
-            if (!(up || showJumpToLatest || newMessageCount > 0 || isHistoryWindow)) return null;
             return (
               <UnreadJumpButton
+                show={up || showJumpToLatest || newMessageCount > 0 || isHistoryWindow}
                 up={up}
-                count={unreadBelow + newMessageCount}
+                count={Math.max(linesBelow, unreadBelow + newMessageCount)}
                 onClick={up ? jumpToUnreadMarker : () => void scrollToBottom()}
                 className="absolute bottom-3 right-3 z-10"
               />
@@ -1501,7 +1583,13 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
       )}
 
       {/* Input area */}
-      {!isMember ? (
+      {!isMember && membershipLoading && isAuthenticated ? (
+        // Same height as the join bar, empty: a member must never see
+        // "Join this community" flash while their row is still loading.
+        <div className="px-1 py-3" data-composer-pending aria-hidden>
+          <div className="h-[46px]" />
+        </div>
+      ) : !isMember ? (
         <div className="px-1 py-3">
           <button
             onClick={() => {
@@ -1562,6 +1650,7 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
                 query={mention.query}
                 isOpen={mention.isOpen}
                 position={mention.position}
+                armed={mention.armed}
                 selectedIndex={mention.selectedIndex}
                 onSelectedIndexChange={mention.setSelectedIndex}
                 onSelect={mention.handleSelect}
@@ -1648,6 +1737,28 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
         </div>
       )}
 
+      <ChatHoldSheet
+        open={!!held}
+        onOpenChange={(open) => { if (!open) setHeld(null); }}
+        anchor={held?.el ?? null}
+        quickReactions={isAuthenticated && isMember ? QUICK_CHAT_REACTIONS.slice(0, 6) : null}
+        mine={reactedByMe(held?.msg)}
+        onReact={(emoji) => { if (held) handleReact(held.msg.id, emoji); }}
+        actions={lineActions(held?.msg, true).map(({ hint: _hint, divided: _divided, ...a }) => a as ChatHoldAction)}
+        reactors={held?.msg.reactions ? { reactions: held.msg.reactions } : null}
+      />
+      {menuMounted && (
+        <MessageMenu
+          point={menu?.point ?? null}
+          onClose={() => setMenu(null)}
+          quickReactions={isAuthenticated && isMember ? QUICK_CHAT_REACTIONS : null}
+          mine={reactedByMe(menu?.msg)}
+          onReact={(emoji) => { if (menu) handleReact(menu.msg.id, emoji); }}
+          actions={lineActions(menu?.msg, false).map(({ prime: _prime, secondary: _secondary, ...a }) => a)}
+          reactors={menu?.msg.reactions ? { reactions: menu.msg.reactions } : null}
+          meta={menu ? messageMenuMeta(menu.msg.created_at, !!menu.msg.edited_at) : null}
+        />
+      )}
       <DeleteMessageDialog
         open={!!deleteTarget}
         onOpenChange={(open) => { if (!open && !deletePending) setDeleteTarget(null); }}

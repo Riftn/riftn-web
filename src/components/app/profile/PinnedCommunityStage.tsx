@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import type { Community } from '@/hooks/use-communities';
 import { storageImage } from '@/lib/media-url';
 
+import { formatCount } from '@/lib/format-count';
 /**
  * The owner's top pin dresses the header when it has art. Without art it
  * leads the list as a card instead, so the chosen order always holds.
@@ -78,7 +79,7 @@ export function PinnedCommunityStrip({
           <span className="block truncate text-sm font-semibold text-white">{community.name}</span>
           <span className="flex items-center gap-1 text-xs text-white opacity-80">
             {onManagePins && <Pin className="h-3 w-3 flex-shrink-0" />}
-            <span className="truncate">{onManagePins && <>{t('comments.pinnedBadge')} · </>}{community.member_count.toLocaleString()} {t('communities.members')}</span>
+            <span className="truncate">{onManagePins && <>{t('comments.pinnedBadge')} · </>}{formatCount(community.member_count)} {t('communities.members')}</span>
           </span>
         </span>
       </button>

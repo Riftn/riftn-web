@@ -37,6 +37,8 @@ import { getAccountInfo, getMyPosts, getDHBPrice } from '@/lib/api/dehub';
 import { cn } from '@/lib/utils';
 import { resolveViewCount } from '@/lib/engagement';
 
+import { formatCount } from '@/lib/format-count';
+import { formatCount as formatShortCount } from '@/lib/format-count';
 /**
  * Per-1000-view creator payout, in USD, before tax.
  *
@@ -89,11 +91,7 @@ const usd = (n: number) =>
     ? `$${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
     : `$${n.toFixed(2)}`;
 
-const compact = (n: number) => {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
-  return n.toLocaleString();
-};
+const compact = (n: number) => formatShortCount(n);
 
 export function EarningsComparison() {
   const { t: _copy } = _useCopy();
@@ -186,7 +184,7 @@ export function EarningsComparison() {
             <div className="rounded-xl bg-white/[0.03] border border-white/10 p-3">
               <p className="text-zinc-500 text-[11px]">{_copy("copy.ddcfdfe02311", { defaultValue: "Total views" })}</p>
               <p className="text-white text-lg font-bold mt-0.5">{compact(totalViews)}</p>
-              <p className="text-zinc-600 text-[10px] mt-0.5">{_copy("copy.29aa7a49aa25", { defaultValue: "across " })}{postCount}{_copy("copy.e8468d49b505", { defaultValue: " posts" })}</p>
+              <p className="text-zinc-600 text-[10px] mt-0.5">{_copy("copy.29aa7a49aa25", { defaultValue: "across " })}{formatCount(postCount)}{_copy("copy.e8468d49b505", { defaultValue: " posts" })}</p>
             </div>
             <div className="rounded-xl bg-white/[0.03] border border-white/10 p-3">
               <p className="text-zinc-500 text-[11px]">{_copy("copy.9f9c6f0d0963", { defaultValue: "Your Riftn RPM" })}</p>

@@ -38,6 +38,8 @@ import { useBadgeScale } from '@/hooks/use-badge-scale';
 import { useSelfBadge, preferLiveBalance } from '@/hooks/use-self-badge-balance';
 
 export interface ResolvedBadge {
+  displayName?: string;
+  hideBadgeAndBalance?: boolean;
   badgeBalance?: number;
   /** The tier this user has grandfathered, when the account row carries one. */
   badgeLock?: BadgeLock | null;
@@ -65,6 +67,8 @@ const waiting = new Map<string, Waiter[]>();
 let flushTimer: ReturnType<typeof setTimeout> | null = null;
 
 interface BadgeRow {
+  displayName?: string | null;
+  hideBadgeAndBalance?: boolean;
   badgeBalance?: number | null;
   badgeLock?: unknown;
   username?: string | null;
@@ -74,6 +78,8 @@ interface BadgeRow {
 
 function toResolved(user: BadgeRow): ResolvedBadge {
   return {
+    displayName: user?.displayName || undefined,
+    hideBadgeAndBalance: user?.hideBadgeAndBalance,
     badgeBalance: user?.badgeBalance,
     badgeLock: parseBadgeLock(user?.badgeLock),
     username: user?.username || undefined,

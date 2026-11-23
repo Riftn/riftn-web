@@ -16,6 +16,8 @@
  * registered and copied on its own (components/ui/overlay-exit).
  */
 
+import { OVERLAY_ROOT_ID } from './overlay-root';
+
 const GHOST_ATTR = 'data-overlay-ghost';
 const SLIDE_MS = 240;
 const POP_MS = 150;
@@ -70,8 +72,11 @@ export function exitFor(node: Element, rect: DOMRect, vw: number, vh: number): E
 /** The body child that holds this overlay (its portal), or null when it is not portalled. */
 function portalHost(node: HTMLElement): HTMLElement | null {
   let host: HTMLElement = node;
-  while (host.parentElement && host.parentElement !== document.body) host = host.parentElement;
-  if (host.parentElement !== document.body) return null;
+  // Overlays portal into the overlay root (lib/overlay-root); anything still
+  // portalling straight to <body> is handled the same way.
+  const isPortalParent = (el: Element | null) => el === document.body || el?.id === OVERLAY_ROOT_ID;
+  while (host.parentElement && !isPortalParent(host.parentElement)) host = host.parentElement;
+  if (!isPortalParent(host.parentElement)) return null;
   // Never copy the app itself: an overlay rendered inline has no portal of its own.
   if (host.id === 'root' || host.querySelector('#root')) return null;
   return host;
@@ -164,6 +169,16 @@ function stripMotion(transform: string) {
 }
 
 const ghosted = new WeakSet<Element>();
+
+let exitsInFlight = 0;
+/**
+ * Is a closed overlay still sliding off screen? Its copy cannot be clicked, so
+ * for those few frames a press goes straight through it to the page — on a
+ * slow device that is long enough to act on (lib/overlay-click-guard).
+ */
+export function isOverlayExiting(): boolean {
+  return exitsInFlight > 0;
+}
 
 /**
  * Replace a closing overlay surface with a copy that slides or fades away.
@@ -265,9 +280,11 @@ export function ghostOverlayExit(node: HTMLElement | null | undefined): void {
     }
 
     let removed = false;
+    exitsInFlight++;
     const remove = () => {
       if (removed) return;
       removed = true;
+      exitsInFlight = Math.max(0, exitsInFlight - 1);
       clone.remove();
     };
     Promise.all(anims.map((a) => a.finished)).then(remove, remove);

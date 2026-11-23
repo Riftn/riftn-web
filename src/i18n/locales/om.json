@@ -1,4 +1,5 @@
 {
+  "dmVideo": {"edit": "Viidiyoo gulaali", "hiddenTag": "Dhokataa", "tapToEdit": "Gulaaluuf tuqi", "cover": "Qola", "trim": "Murii", "mirror": "Ilaalii", "rotate": "Naannessi", "hide": "Dhoksi", "timer": "Yeroo", "sheetTitleAny": "Erguun dura gulaali", "close": "Cufi", "replace": "Bakka buusi", "hiddenUntilTap": "Hanga isaan tuqanitti dhokataa dha", "pause": "Dhaabi", "play": "Viidiyoo taphachiisi", "mute": "Sagalee haqi", "unmute": "Sagalee deebisi", "scrub": "Viidiyoo keessa darbi", "addMore": "Suuraa ykn viidiyoo itti dabali", "trimAria": "Muruf qarqara isaa harkisi", "coverAria": "Qola ta'uuf firaamee tokko tuqi", "coverHint": "Qola ta'uuf firaamee tokko tuqi", "coverOwn": "Suuraa kee", "coverAuto": "Ofiin (Auto)", "uploadCover": "Suuraa qolaa fe'i", "mirrored": "Ilaalii (Mirror)", "original": "Asli", "rotate90": "Digrii 90 naannessi", "showNormally": "Akkuma idileetti argisiisi", "showNormallyBody": "Isaan battalumatti argu", "hideUntilTap": "Hanga tuqamutti dhoksi", "hideUntilTapBody": "Hanga isaan tuqanitti hafuuraa (blurred) ta'a", "hidePrice": "Gatii duuba dhoksi", "hidePriceBody": "Hanga isaan siif kaffalanitti hafuuraa (blurred) ta'a", "priceUnavailable": "Chat kana keessa miti", "timerOff": "Hojiin ala", "timerOffBody": "Chat keessatti hafa.", "timerViewBody": "Erga isaan ilaalanii booda isin lamaanuuf ni bada.", "confirm": "Mirkaneessi", "lockedFor": "{{value1}} DHB tiin banadhu", "lockedForUsd": "{{value1}}f bani", "editItem": "Wanticha gulaali {{value1}}", "kept": "{{time}} qabameera", "timerTimeBody": "Erga ergitee booda {{value1}} isin lamaanuuf ni bada."},
   "postBg": {
     "addMedia": "Suuraa, GIF ykn viidiyoo dabali",
     "changeMedia": "Suuraa, GIF ykn viidiyoo jijjiiri",
@@ -297,8 +298,10 @@
       "pronouns": "Bamaqoota",
       "location": "Bakka",
       "custom": "Aadaa",
-      "customOption": "Asxaa amala"
-    }
+      "customOption": "Asxaa amala",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} hordofi",
@@ -2223,7 +2226,7 @@
     "promptDevice": "Meeshaa & OS (rakkoolee teknikaaf)",
     "deviceInfoNoErrors": "Homaa",
     "promptFilters": "Gosa tokkoon calaluu",
-    "promptMediaError": "Suuraa ykn viidiyoo tokkoon tokkoon isaanii 50MB gadi filadhaa.",
+    "promptMediaError": "Suuraa ykn viidiyoo tokkoon tokkoon isaanii 200MB gadi filadhaa.",
     "promptMediaLimit": "Hanga {{max}} dabalataatti.",
     "removePromptAttachment": "{{name}} irraa kaasaa.",
     "promptAttachment": "Dabalata {{number}}",
@@ -4224,7 +4227,7 @@
       "pageViewsTerm": "Ilaalcha fuulaa",
       "pageViews": "— gaaffiiwwan Cloudflare akka fe'umsa fuulaatti ramadu, suuraa, iskiriiptii ykn waamicha API osoo hin taane.",
       "botsTerm": "Bootonni dabalamaniiru",
-      "bots": "— kunneen lakkoofsa qulqulluu qarqara irratti argaman waan ta'aniif crawler, to'attoota hojii fi maamiltoota iskiriiptii isaan keessa jiru. Ofii kee hiruu browserii armaan olii keessatti argita, achitti galmeewwan akka \"Curl\" fi \"Hin beekamne\" tiraafikii ofumaan hojjetu malee namoota miti. Bootota calaluun karoora Cloudflare kaffalamaa nuti hin qabne barbaada, tilmaama callisanii hir'isuun immoo lakkoofsota mirkaneessuuf salphaa osoo hin taane rakkisaa taasisa.",
+      "bots": "— kunneen lakkoofsa qulqulluu qarqara irratti argaman waan ta'aniif crawler, to'attoota hojii fi maamiltoota iskiriiptii isaan keessa jiru. Ofii kee hiruu browserii armaan olii keessatti argita, achitti galmeewwan akka \"Curl\" fi \"Hin beekamne\" tiraafikii ofumaan hojjetu malee namoota miti. Bootota namoota daawwattoota irraa adda baasuun caalaatti rakkisaa ta’aa jira. Yeroo dhiyootti istaatistiksii kana keessatti adda baasuun hin danda’amu, kanaaf isaan calaluuf yaaluun faayidaa hin qabu.",
       "totalTerm": "Waliigala hangii",
       "total": "— ilaalchi fuulaa fi gaaffiiwwan hangii guutuu keessatti walitti ida'amu. Lakkoofsi daawwattootaa beekumsaan \"waliigala daawwattootaa\" tti hin ida'amu, sababiin isaas namni Wiixata fi Kibxata as ture yeroo lama lakkaa'ama.",
       "peakTerm": "Sa'aatii / guyyaa baay'ee hojii qabu",
@@ -20902,5 +20905,27 @@
     "remember": "Filannoo koo yaadadhu",
     "rememberHint": "Yeroo kamiyyuu Qindaa'ina keessatti jijjiiri",
     "failed": "Ergaa haquu hin dandeenye"
+  },
+  "profileAskAi": {
+    "row": "AI gaafadhu",
+    "rowSub": "Hordofi, hunda jaalladhu, odeeffannoo argadhu",
+    "back": "Duubatti",
+    "title": "Waa'ee {{handle}} AI gaafadhu",
+    "sub": "Gargaaraan ni hojjeta, ati mirkaneessita",
+    "followLikeAll": "Hordofi fi hunda jaalladhu",
+    "followLikeAllSub": "{{handle}} hordofa, barreeffama hundaaf deebii kenna",
+    "likeAll": "Barreeffamoota isaanii hunda jaalladhu",
+    "likeAllSub": "Kanneen dursitee deebii kenniteef ni darba",
+    "catchUp": "Odeeffannoo naaf kenni",
+    "catchUpSub": "Wanta {{handle}} dhiyeenya maxxanse, gabaabinaan",
+    "message": "Ergaa barreessiif",
+    "messageSub": "Ergaa qopheessa, ati ergita",
+    "placeholder": "Waa'ee {{handle}} waan barbaadde gaafadhu…",
+    "send": "Ergi",
+    "promptFollowLikeAll": "{{handle}} hordofii barreeffamoota isaanii hundaaf deebii kenni",
+    "promptLikeAll": "Barreeffamoota {{handle}} hundaaf deebii kenni",
+    "promptCatchUp": "Wanta {{handle}} dhiyeenya maxxanse natti himi",
+    "promptMessage": "Ergaa {{handle}}f barreessuuf na gargaari",
+    "promptAbout": "Waa'ee {{handle}}: {{question}}"
   }
 }

@@ -102,6 +102,7 @@ import {
   clearRelayFailed,
 } from '@/lib/live-ingest';
 
+import { formatCount } from '@/lib/format-count';
 // The chat is a heavy component (mentions, voice notes, realtime) and most
 // broadcasts never open it, so it stays out of the broadcaster chunk.
 const LivePostChat = lazy(() =>
@@ -2636,7 +2637,7 @@ export function GoLiveBroadcaster({
           )}
           <span className="flex items-center gap-1.5 leading-none">
             <Heart className="h-3.5 w-3.5 shrink-0" />
-            <span className="tabular-nums">{room?.likes ?? 0}</span>
+            <span className="tabular-nums">{formatCount(room?.likes ?? 0)}</span>
           </span>
           {/* No gift icon: the DHB coin already says what this number is, and
               two glyphs around one figure read as two separate stats. */}

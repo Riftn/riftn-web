@@ -39,11 +39,15 @@ interface Session {
   requested: string;
   engine: Engine;
   startLow: boolean;
+  /** The post's stored width / height, when known. */
+  aspect?: number;
   player?: Hls;
   parsed: boolean;
   loading: boolean;
   recoveredMedia: boolean;
   disposed: boolean;
+  /** Rung and end time of the last video fragment buffered (see keepPictureAcrossRungs). */
+  lastFragment?: { level: number; end: number };
   unbind: () => void;
 }
 
@@ -82,6 +86,53 @@ function capReadAhead(config: Pick<HlsConfig, 'maxBufferLength' | 'maxMaxBufferL
   config.maxMaxBufferLength = seconds;
 }
 
+/**
+ * What the last ladder measured the connection at. hls.js starts every new
+ * player from a fixed guess of half a megabit, so each short opened on its
+ * smallest rung and stepped up a few seconds in, however fast the line was.
+ */
+let measuredBitsPerSecond: number | undefined;
+
+/** The browser's own estimate, where it has one (Chromium), for the first video of a visit. */
+function connectionBitsPerSecond(): number | undefined {
+  const downlink = (typeof navigator === 'undefined' ? undefined : (navigator as Navigator & { connection?: { downlink?: number } }).connection)?.downlink;
+  return typeof downlink === 'number' && downlink > 0 ? downlink * 1_000_000 * 0.8 : undefined;
+}
+
+/** A fragment starting this close to where the last rung stopped does not overlap it. */
+const RUNG_SEAM_SECONDS = 0.1;
+/** How far ahead of the picture on screen the decoder may already have read. */
+const DECODE_AHEAD_SECONDS = 0.5;
+
+/**
+ * Keep the picture moving when the player changes rung.
+ *
+ * A ladder's rungs do not always cut at the same instants: the top rung is
+ * the MP4's own keyframes, and older ladders cut the rungs under it every
+ * four seconds regardless. Stepping up then loads a fragment that starts
+ * behind what is already playing and replaces it. The browser plays out the
+ * old rung's frames, finds no keyframe in the new one to carry on from, and
+ * holds the last picture until that rung's next keyframe, up to eight
+ * seconds later, while the sound runs on.
+ *
+ * A seek to where the video already is makes the decoder start again from
+ * the new rung. On a short still warming up (paused) nothing shows at all;
+ * on one that is playing it costs a blink instead of a frozen picture.
+ */
+function keepPictureAcrossRungs(el: HTMLVideoElement, session: Session, frag: { type?: string; sn?: number | string; level: number; start: number; end: number }) {
+  if (frag.type !== 'main' || frag.sn === 'initSegment' || session.disposed) return;
+  const previous = session.lastFragment;
+  session.lastFragment = { level: frag.level, end: frag.end };
+  if (!previous || previous.level === frag.level) return;
+  // Starts where the other rung stopped: nothing on screen is replaced.
+  if (frag.start >= previous.end - RUNG_SEAM_SECONDS) return;
+  const at = el.currentTime;
+  // The overlap is all still ahead of the picture, or all behind it.
+  if (at < frag.start - DECODE_AHEAD_SECONDS || at > frag.end) return;
+  if (el.seeking || el.readyState < 1) return;
+  try { el.currentTime = at; } catch { /* not seekable yet */ }
+}
+
 const HLS_TYPE = 'application/vnd.apple.mpegurl';
 
 /** Is this a master playlist URL rather than a file? */
@@ -116,6 +167,13 @@ export interface VideoSourceOptions {
   hls?: string;
   /** Start on the lowest rung — feed cards, which are small and many. */
   startLow?: boolean;
+  /**
+   * The video's width / height as the backend probed it (`videoInfo`). The
+   * ladder is only judged the wrong shape against this, never the poster: a
+   * poster is whatever image the creator picked (a film's upright one-sheet
+   * over a widescreen film) and used to throw a fine ladder away mid-play.
+   */
+  aspect?: number;
 }
 
 /**
@@ -123,7 +181,7 @@ export interface VideoSourceOptions {
  * the element already has is a no-op, so the hand-off pool can re-apply a
  * card's props without restarting the download.
  */
-export function setVideoSource(el: HTMLVideoElement, { src, hls, startLow = false }: VideoSourceOptions): void {
+export function setVideoSource(el: HTMLVideoElement, { src, hls, startLow = false, aspect }: VideoSourceOptions): void {
   const current = sessions.get(el);
   const ladder = isHlsUrl(hls) && !failedLadders.has(hls) ? hls : undefined;
   // Same post: keep what is running. A card whose copy of the post has no
@@ -149,6 +207,7 @@ export function setVideoSource(el: HTMLVideoElement, { src, hls, startLow = fals
     requested: hls ?? '',
     engine: prefersNativeHls(el) ? 'native' : 'hlsjs',
     startLow,
+    aspect,
     parsed: false,
     loading: false,
     recoveredMedia: false,
@@ -170,7 +229,7 @@ export function setVideoSource(el: HTMLVideoElement, { src, hls, startLow = fals
   // short being swiped to.
   const onPlay = () => applyLoadPolicy(el, session);
   const onMetadata = () => {
-    void checkLadderShape(el).then((wrong) => {
+    void checkLadderShape(el, session.aspect).then((wrong) => {
       if (wrong && !session.disposed) fallBackToFile(el, session, 'aspect-mismatch');
     });
   };
@@ -216,11 +275,18 @@ export function setVideoSource(el: HTMLVideoElement, { src, hls, startLow = fals
         maxMaxBufferLength: METADATA_BUFFER_SECONDS,
         backBufferLength: 30,
       };
+      const knownSpeed = measuredBitsPerSecond ?? connectionBitsPerSecond();
+      if (knownSpeed) config.abrEwmaDefaultEstimate = knownSpeed;
       const player = new HlsCtor(config);
       session.player = player;
       player.on(HlsCtor.Events.MANIFEST_PARSED, () => {
         session.parsed = true;
         applyLoadPolicy(el, session);
+      });
+      player.on(HlsCtor.Events.FRAG_BUFFERED, (_event, data) => {
+        const speed = player.bandwidthEstimate;
+        if (Number.isFinite(speed) && speed > 0) measuredBitsPerSecond = speed;
+        keepPictureAcrossRungs(el, session, data.frag);
       });
       player.on(HlsCtor.Events.ERROR, (_event, data) => {
         if (!data.fatal || session.disposed) return;
@@ -280,23 +346,15 @@ function shapeOf(width: number, height: number): 'portrait' | 'landscape' | null
 
 /**
  * Is the ladder's picture the wrong shape for the post? Ladders made before
- * the backend sized rungs by the displayed size squeeze a phone video shot
- * upright into a landscape frame. The post's thumbnail is cut from the MP4
- * the right way up, so a ladder that is clearly landscape under a clearly
- * portrait poster (or the other way round) is one of those.
+ * the backend sized rungs by the displayed size squeezed a phone video shot
+ * upright into a landscape frame. The size the backend probed from the MP4
+ * says which way up the post really is; with no size on the post there is
+ * nothing trustworthy to compare with, so the ladder is kept.
  */
-async function checkLadderShape(el: HTMLVideoElement): Promise<boolean> {
+async function checkLadderShape(el: HTMLVideoElement, aspect?: number): Promise<boolean> {
   const video = shapeOf(el.videoWidth, el.videoHeight);
-  const poster = el.poster;
-  if (!video || !poster) return false;
-  const img = new Image();
-  img.src = poster;
-  try {
-    await img.decode();
-  } catch {
-    return false;
-  }
-  const expected = shapeOf(img.naturalWidth, img.naturalHeight);
+  if (!video || !(aspect && aspect > 0)) return false;
+  const expected = shapeOf(aspect * 1000, 1000);
   return !!expected && expected !== video;
 }
 

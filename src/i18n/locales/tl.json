@@ -1,4 +1,5 @@
 {
+  "dmVideo": {"edit": "I-edit ang video", "hiddenTag": "Nakatago", "tapToEdit": "I-tap para i-edit", "cover": "Cover", "trim": "Trim", "mirror": "Mirror", "rotate": "Rotate", "hide": "Hide", "timer": "Timer", "sheetTitleAny": "I-edit bago ipadala", "close": "Close", "replace": "Palitan", "hiddenUntilTap": "Nakatago hanggang sa i-tap nila ito", "pause": "Pause", "play": "Play video", "mute": "I-mute", "unmute": "I-unmute", "scrub": "Mag-scrub sa video", "addMore": "Magdagdag ng mga larawan o video", "trimAria": "I-drag ang mga dulo para i-trim", "coverAria": "I-tap ang frame para gawing cover", "coverHint": "I-tap ang frame para gawing cover", "coverOwn": "Ang iyong larawan", "coverAuto": "Auto", "uploadCover": "Mag-upload ng cover picture", "mirrored": "Naka-mirror", "original": "Orihinal", "rotate90": "I-rotate nang 90°", "showNormally": "Ipakita nang normal", "showNormallyBody": "Nakikita nila ito agad", "hideUntilTap": "Itago hanggang sa i-tap", "hideUntilTapBody": "Blurred hanggang sa i-tap nila ito", "hidePrice": "Itago sa likod ng presyo", "hidePriceBody": "Blurred hanggang sa magbayad sila sa iyo", "priceUnavailable": "Hindi sa chat na ito", "timerOff": "Off", "timerOffBody": "Mananatili ito sa chat.", "timerViewBody": "Mawawala para sa inyong dalawa kapag nakita na nila ito.", "confirm": "Kumpirmahin", "lockedFor": "I-unlock para sa {{value1}} DHB", "lockedForUsd": "I-unlock para sa {{value1}}", "editItem": "I-edit ang item {{value1}}", "kept": "{{time}} napanatili", "timerTimeBody": "Mawawala para sa inyong dalawa {{value1}} pagkatapos mong ipadala ito."},
   "postBg": {
     "addMedia": "Magdagdag ng larawan, GIF, o video",
     "changeMedia": "Palitan ang larawan, GIF, o video",
@@ -296,9 +297,11 @@
       "pronouns": "Mga Panghalip",
       "location": "Lokasyon",
       "custom": "Custom",
-      "customOption": "Iniangkop na label"
+      "customOption": "Iniangkop na label",
+      "cashapp": "Cash App"
     },
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "I-follow ang #{{tag}}",
@@ -705,6 +708,7 @@
     "heading": "Shorts ng Riftn"
   },
   "settings": {
+    "loginLook": {"title": "Screen ng pag-sign in", "desc": "Kung paano gumagalaw ang logo at slogan ng Riftn sa screen ng pag-sign in sa device na ito.", "tube": "Tube TV", "vhs": "VHS tape", "led": "LED wall", "holo": "Hologram", "neon": "Neon", "3d": "3D", "flat": "Patag"}, "arrivalLook": {"title": "Pagkatapos mag-sign in", "desc": "Ang ipinapakita habang naglo-load ang account mo, bago lumapag ang larawan mo sa page. Sa device na ito.", "trace": "Bakas", "tune": "I-tune in", "rift": "Lamat", "deck": "Baraha", "glass": "Patak ng salamin"},
     "postLanding": "Pagkatapos mag-post",
     "postLandingDesc": "Kung paano lumalabas ang bago mong post sa feed",
     "postLandingGhost": "Ghost slot",
@@ -2255,7 +2259,7 @@
     "promptDevice": "Device & OS (para sa mga bug)",
     "deviceInfoNoErrors": "Wala",
     "promptFilters": "I - filter ayon sa kategorya",
-    "promptMediaError": "Pumili ng mga larawan o video sa ilalim ng 50MB bawat isa.",
+    "promptMediaError": "Pumili ng mga larawan o video sa ilalim ng 200MB bawat isa.",
     "promptMediaLimit": "Hanggang {{max}}(na) attachment.",
     "removePromptAttachment": "Alisin ang {{name}}",
     "promptAttachment": "Kalakip {{number}}",
@@ -4256,7 +4260,7 @@
       "pageViewsTerm": "Mga page view",
       "pageViews": "— mga kahilingang inuuri ng Cloudflare bilang page load, hindi larawan, script o API call.",
       "botsTerm": "Kasama ang mga bot",
-      "bots": "— hilaw na bilang ito sa edge, kaya kasama rito ang mga crawler, uptime monitor at scripted client. Makikita mo mismo sa breakdown ng browser sa itaas, kung saan ang mga entry gaya ng \"Curl\" at \"Hindi alam\" ay awtomatikong trapiko at hindi tao. Ang pagsala ng bot ay nangangailangan ng bayad na Cloudflare plan na wala kami, at ang tahimik na pagbawas ng tantiya ay gagawing mas mahirap suriin ang mga numero, hindi mas madali.",
+      "bots": "— hilaw na bilang ito sa edge, kaya kasama rito ang mga crawler, uptime monitor at scripted client. Makikita mo mismo sa breakdown ng browser sa itaas, kung saan ang mga entry gaya ng \"Curl\" at \"Hindi alam\" ay awtomatikong trapiko at hindi tao. Pahirap nang pahirap pag-ibahin ang mga bot at totoong bisita, at sa lalong madaling panahon ay hindi na sila makikilala sa mga estadistikang ito, kaya walang saysay subukang salain ang mga bot.",
       "totalTerm": "Kabuuan ng saklaw",
       "total": "— nagsasama-sama ang mga page view at kahilingan sa buong saklaw. Sadyang hindi pinagsasama ang bilang ng bisita sa isang \"kabuuang bisita\", dahil ang taong narito noong Lunes at Martes ay mabibilang nang dalawang beses.",
       "peakTerm": "Pinakaabalang oras / araw",
@@ -21030,5 +21034,27 @@
     "remember": "Tandaan ang pinili ko",
     "rememberHint": "Baguhin ito anumang oras sa Settings",
     "failed": "Hindi mabura ang mensahe"
+  },
+  "profileAskAi": {
+    "row": "Magtanong sa AI",
+    "rowSub": "I-follow, i-like lahat, humabol sa balita",
+    "back": "Bumalik",
+    "title": "Magtanong sa AI tungkol kay {{handle}}",
+    "sub": "Ang Assistant ang gagawa, ikaw ang magkukumpirma",
+    "followLikeAll": "I-follow at i-like lahat",
+    "followLikeAllSub": "Ifo-follow si {{handle}}, magre-react sa bawat post",
+    "likeAll": "I-like lahat ng post nila",
+    "likeAllSub": "Nilalaktawan ang mga na-react-an mo na",
+    "catchUp": "Ibalita mo sa akin",
+    "catchUpSub": "Ang mga bagong post ni {{handle}}, sa madaling salita",
+    "message": "Sumulat ng mensahe",
+    "messageSub": "Gagawa ng draft, ikaw ang magpapadala",
+    "placeholder": "Magtanong ng kahit ano tungkol kay {{handle}}…",
+    "send": "Ipadala",
+    "promptFollowLikeAll": "I-follow si {{handle}} at mag-react sa lahat ng post nila",
+    "promptLikeAll": "Mag-react sa lahat ng post ni {{handle}}",
+    "promptCatchUp": "Ibalita mo sa akin ang mga pinost ni {{handle}} kamakailan",
+    "promptMessage": "Tulungan mo akong sumulat ng mensahe kay {{handle}}",
+    "promptAbout": "Tungkol kay {{handle}}: {{question}}"
   }
 }

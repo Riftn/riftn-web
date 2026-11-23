@@ -31,6 +31,8 @@ interface Options {
   ids: string[];
   /** Called once on drop, only when the order changed. */
   onCommit: (ids: string[]) => void;
+  /** Handle a drop outside this list, consuming the provisional reorder. */
+  onDropOutside?: (id: string, x: number, y: number) => boolean;
   /** Turn dragging off (e.g. while a search filter is typed). */
   disabled?: boolean;
   /** How long a touch must hold still before it lifts. */
@@ -106,7 +108,7 @@ function scrollParent(el: HTMLElement | null): HTMLElement | null {
   return null;
 }
 
-export function useDragReorder({ ids, onCommit, disabled = false, holdMs = 380, liftScale = 1.06, axis, handle = false }: Options) {
+export function useDragReorder({ ids, onCommit, onDropOutside, disabled = false, holdMs = 380, liftScale = 1.06, axis, handle = false }: Options) {
   const [liveOrder, setLiveOrder] = useState<string[] | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
   /** True while a drop or reset glide is still running. */
@@ -128,6 +130,8 @@ export function useDragReorder({ ids, onCommit, disabled = false, holdMs = 380, 
   idsRef.current = ids;
   const commitRef = useRef(onCommit);
   commitRef.current = onCommit;
+  const dropOutside = useRef(onDropOutside);
+  dropOutside.current = onDropOutside;
   const swallowClick = useRef(false);
   // Rects of every item just before a reorder render, for the slide animation;
   // `stagger` is set for a reset, which glides everything in reading order.
@@ -424,7 +428,8 @@ export function useDragReorder({ ids, onCommit, disabled = false, holdMs = 380, 
     const onUp = (e: PointerEvent) => {
       const d = drag.current;
       if (!d || e.pointerId !== d.pointerId) return;
-      finish(true);
+      const handled = d.started && dropOutside.current?.(d.id, e.clientX, e.clientY);
+      finish(!handled);
     };
     const onCancel = (e: PointerEvent) => {
       const d = drag.current;

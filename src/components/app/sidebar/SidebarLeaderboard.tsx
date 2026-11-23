@@ -30,6 +30,7 @@ import medal7 from '@/assets/medal-7.png';
 import medal8 from '@/assets/medal-8.png';
 import medal9 from '@/assets/medal-9.png';
 import medal10 from '@/assets/medal-10.png';
+import { profilePath } from '@/lib/profile-path';
 
 const PERIODS = ['1D', '1W', '1M', '1Y', 'All'] as const;
 type PeriodLabel = typeof PERIODS[number];
@@ -129,7 +130,7 @@ const PeriodList = memo(function PeriodList({ period, isActive }: { period: Peri
         return (
           <Link
             key={entry.account}
-            to={`/${entry.username}`}
+            to={profilePath(entry.username)}
             aria-label={`${t('leaderboard.rankN', { rank })} · ${displayName}`}
             // The strip's off-screen panels must not be tab stops.
             tabIndex={isActive ? 0 : -1}
@@ -242,7 +243,7 @@ export const SidebarLeaderboard = forwardRef<SidebarLeaderboardHandle>(function 
       </div>
 
       {/* Scrollable list — sliding strip */}
-      <div data-fade-mask-bottom className="flex-1 overflow-hidden relative">
+      <div className="flex-1 overflow-hidden relative">
         <div
           className="absolute inset-0 flex transition-transform duration-300 ease-out"
           style={{
@@ -263,15 +264,17 @@ export const SidebarLeaderboard = forwardRef<SidebarLeaderboardHandle>(function 
         </div>
       </div>
 
-      {/* Bottom fade gradient */}
-      <div data-view-all className="relative px-4 pb-2" style={{ marginTop: '-3px' }}>
-        <div className="absolute -top-8 left-0 right-0 h-8 bg-gradient-to-t from-zinc-900 to-transparent pointer-events-none" />
+      {/* The button has its own row under the list. It used to be pulled up
+          over the last name with a grey fade laid on top of both, so a
+          see-through button sat on half a row of smudged text. The list now
+          ends on a clean edge and nothing overlaps it. */}
+      <div data-view-all className="relative px-3 pt-2 pb-3">
         <LiquidGlassBubble2
           label={t('commandCentre.viewAll')}
           onClick={() => navigate('/app/leaderboard')}
           width="100%"
           height="auto"
-          className="-translate-y-[6px] [&>div]:!py-2 [&>div]:from-zinc-900/90 [&>div]:to-white/5 [&>div]:before:from-transparent [&>div]:after:from-transparent"
+          className="[&>div]:!py-2 [&>div]:from-zinc-900/90 [&>div]:to-white/5 [&>div]:before:from-transparent [&>div]:after:from-transparent"
         />
       </div>
     </div>

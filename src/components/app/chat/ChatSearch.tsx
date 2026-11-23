@@ -12,6 +12,7 @@ import { AppState } from '@/components/app/AppState';
 import { buildAvatarUrl } from '@/lib/media-url';
 import { searchLiveChat, type LiveChatMessage, type LiveChatSearchPerson } from '@/lib/api/dehub';
 
+import { formatCount } from '@/lib/format-count';
 /*
  * Search inside one chat room, in one box.
  *
@@ -261,7 +262,7 @@ function SectionLabel({ children, count }: { children: ReactNode; count?: ReactN
   return (
     <div className="flex items-center justify-between px-4 pb-1 pt-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
       <span>{children}</span>
-      {count != null ? <span>{count}</span> : null}
+      {count != null ? <span>{typeof count === 'number' || typeof count === 'string' ? formatCount(count) : count}</span> : null}
     </div>
   );
 }

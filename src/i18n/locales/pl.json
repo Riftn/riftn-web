@@ -1,4 +1,5 @@
 {
+  "dmVideo": {"edit": "Edytuj wideo", "hiddenTag": "Ukryte", "tapToEdit": "Stuknij, aby edytować", "cover": "Okładka", "trim": "Przytnij", "mirror": "Odbicie lustrzane", "rotate": "Obróć", "hide": "Ukryj", "timer": "Minutnik", "sheetTitleAny": "Edytuj przed wysłaniem", "close": "Zamknij", "replace": "Zastąp", "hiddenUntilTap": "Ukryte do momentu kliknięcia", "pause": "Wstrzymaj", "play": "Odtwórz wideo", "mute": "Wycisz", "unmute": "Wyłącz wyciszenie", "scrub": "Przewijaj wideo", "addMore": "Dodaj zdjęcia lub filmy", "trimAria": "Przeciągnij końce, aby przyciąć", "coverAria": "Kliknij klatkę, aby ustawić okładkę", "coverHint": "Kliknij klatkę, aby ustawić okładkę", "coverOwn": "Twoje zdjęcie", "coverAuto": "Auto", "uploadCover": "Prześlij zdjęcie okładki", "mirrored": "Odbicie lustrzane", "original": "Oryginał", "rotate90": "Obróć o 90°", "showNormally": "Pokaż normalnie", "showNormallyBody": "Widzą to od razu", "hideUntilTap": "Ukryj do momentu kliknięcia", "hideUntilTapBody": "Rozmyte do momentu kliknięcia", "hidePrice": "Ukryj za ceną", "hidePriceBody": "Rozmyte do momentu zapłaty", "priceUnavailable": "Nie w tym czacie", "timerOff": "Wył.", "timerOffBody": "Zostaje na czacie.", "timerViewBody": "Znika dla obu stron, gdy tylko to zobaczą.", "confirm": "Potwierdź", "lockedFor": "Odblokuj za {{value1}} DHB", "lockedForUsd": "Odblokuj za {{value1}}", "editItem": "Edytuj element {{value1}}", "kept": "{{time}} zachowano", "timerTimeBody": "Znika dla obu stron {{value1}} po wysłaniu."},
   "postBg": {
     "addMedia": "Dodaj obraz, GIF lub film",
     "changeMedia": "Zmień obraz, GIF lub film",
@@ -297,8 +298,10 @@
       "pronouns": "Zaimki",
       "location": "Lokalizacja",
       "custom": "Niestandardowe",
-      "customOption": "Etykieta niestandardowa"
-    }
+      "customOption": "Etykieta niestandardowa",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Obserwuj #{{tag}}",
@@ -705,6 +708,7 @@
     "heading": "Krótkie filmy Riftn"
   },
   "settings": {
+    "loginLook": {"title": "Ekran logowania", "desc": "Jak logo i hasło Riftn poruszają się na ekranie logowania na tym urządzeniu.", "tube": "Telewizor kineskopowy", "vhs": "Kaseta VHS", "led": "Ściana LED", "holo": "Hologram", "neon": "Neon", "3d": "3D", "flat": "Płaski"}, "arrivalLook": {"title": "Po zalogowaniu", "desc": "Co widać, gdy konto się wczytuje, zanim zdjęcie trafi na stronę. Na tym urządzeniu.", "trace": "Ślad", "tune": "Dostrajanie", "rift": "Szczelina", "deck": "Talia", "glass": "Szklana kropla"},
     "postLanding": "Po opublikowaniu",
     "postLandingDesc": "Jak nowy post pojawia się w Twoim feedzie",
     "postLandingGhost": "Puste miejsce",
@@ -2212,7 +2216,7 @@
     "promptDevice": "Urządzenie i system operacyjny (dla błędów)",
     "deviceInfoNoErrors": "Brak",
     "promptFilters": "Filtruj według kategorii",
-    "promptMediaError": "Wybierz obrazy lub filmy o rozmiarze poniżej 50 MB każdy.",
+    "promptMediaError": "Wybierz obrazy lub filmy o rozmiarze poniżej 200 MB każdy.",
     "promptMediaLimit": "Do {{max}} załączników.",
     "removePromptAttachment": "Usuń {{name}}",
     "promptAttachment": "Załącznik {{number}}",
@@ -4213,7 +4217,7 @@
       "pageViewsTerm": "Odsłony",
       "pageViews": "— żądania, które Cloudflare klasyfikuje jako wczytania strony, a nie obrazy, skrypty czy wywołania API.",
       "botsTerm": "Boty są wliczone",
-      "bots": "— to surowe liczniki z edge, więc mieszczą się w nich roboty indeksujące, monitory dostępności i klienci skryptowe. Widać je w rozbiciu na przeglądarki powyżej, gdzie pozycje takie jak „Curl\" i „Nieznane\" to ruch automatyczny, a nie ludzie. Odfiltrowanie botów wymaga płatnego planu Cloudflare, którego nie mamy, a ciche odejmowanie szacunku uczyniłoby liczby mniej sprawdzalnymi, nie bardziej.",
+      "bots": "— to surowe liczniki z edge, więc mieszczą się w nich roboty indeksujące, monitory dostępności i klienci skryptowe. Widać je w rozbiciu na przeglądarki powyżej, gdzie pozycje takie jak „Curl\" i „Nieznane\" to ruch automatyczny, a nie ludzie. Boty coraz trudniej odróżnić od osób odwiedzających stronę, a wkrótce w tych statystykach nie będzie można ich rozróżnić, więc próby filtrowania botów nie mają sensu.",
       "totalTerm": "Sumy zakresu",
       "total": "— odsłony i żądania sumują się w całym zakresie. Liczb odwiedzających celowo nie sumujemy w „łączną liczbę odwiedzających\", bo ktoś obecny w poniedziałek i wtorek zostałby policzony dwa razy.",
       "peakTerm": "Najbardziej ruchliwa godzina / dzień",
@@ -20922,5 +20926,27 @@
     "remember": "Zapamiętaj mój wybór",
     "rememberHint": "Zmienisz to w każdej chwili w Ustawieniach",
     "failed": "Nie udało się usunąć wiadomości"
+  },
+  "profileAskAi": {
+    "row": "Zapytaj AI",
+    "rowSub": "Obserwuj, polub wszystko, nadrób",
+    "back": "Wstecz",
+    "title": "Zapytaj AI o {{handle}}",
+    "sub": "Asystent to zrobi, ty potwierdzasz",
+    "followLikeAll": "Obserwuj i polub wszystko",
+    "followLikeAllSub": "Obserwuje {{handle}}, reaguje na każdy post",
+    "likeAll": "Polub wszystkie posty",
+    "likeAllSub": "Pomija te, na które już zareagowano",
+    "catchUp": "Streść mi",
+    "catchUpSub": "Co {{handle}} ostatnio publikował, w skrócie",
+    "message": "Napisz wiadomość",
+    "messageSub": "Przygotuje wiadomość, ty ją wysyłasz",
+    "placeholder": "Zapytaj o cokolwiek na temat {{handle}}…",
+    "send": "Wyślij",
+    "promptFollowLikeAll": "Zaobserwuj {{handle}} i zareaguj na wszystkie posty",
+    "promptLikeAll": "Zareaguj na wszystkie posty {{handle}}",
+    "promptCatchUp": "Streść mi, co {{handle}} ostatnio publikował",
+    "promptMessage": "Pomóż mi napisać wiadomość do {{handle}}",
+    "promptAbout": "O {{handle}}: {{question}}"
   }
 }

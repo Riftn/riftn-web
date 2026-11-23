@@ -1,4 +1,5 @@
 {
+  "dmVideo": {"edit": "Edit video", "hiddenTag": "Hidden", "tapToEdit": "Tap to edit", "cover": "Jalada", "trim": "Punguza", "mirror": "Kioo", "rotate": "Zungusha", "hide": "Ficha", "timer": "Kipima muda", "sheetTitleAny": "Edit before sending", "close": "Funga", "replace": "Replace", "hiddenUntilTap": "Imefichwa hadi watakapogonga", "pause": "Sitisha", "play": "Cheza video", "mute": "Mute", "unmute": "Unmute", "scrub": "Sogeza video", "addMore": "Ongeza picha au video", "trimAria": "Buruta ncha ili kupunguza", "coverAria": "Gonga fremu ili kuweka jalada", "coverHint": "Gonga fremu ili kuweka jalada", "coverOwn": "Your picture", "coverAuto": "Auto", "uploadCover": "Pakia picha ya jalada", "mirrored": "Imeakisiwa", "original": "Asilia", "rotate90": "Zungusha 90°", "showNormally": "Onyesha kawaida", "showNormallyBody": "Wanaiona mara moja", "hideUntilTap": "Ficha hadi igongwe", "hideUntilTapBody": "Imefifishwa hadi watakapogonga", "hidePrice": "Ficha nyuma ya bei", "hidePriceBody": "Imefifishwa hadi wakulipe", "priceUnavailable": "Si katika gumzo hili", "timerOff": "Zima", "timerOffBody": "Inabaki kwenye gumzo.", "timerViewBody": "Imekwisha kwa nyinyi wawili pindi tu watakapokiona.", "confirm": "Thibitisha", "lockedForUsd": "Fungua kwa ajili ya {{value1}}", "editItem": "Hariri kipengee {{value1}}", "kept": "{{time}} imehifadhiwa", "timerTimeBody": "Imeondoka kwa ajili yenu nyote wawili {{value1}} baada ya kuituma."},
   "postBg": {
     "addMedia": "Ongeza picha, GIF au video",
     "changeMedia": "Badilisha picha, GIF au video",
@@ -295,10 +296,12 @@
       "pronouns": "Viwakilishi",
       "location": "Eneo",
       "custom": "Maalum",
-      "customOption": "Lebo mahususi"
+      "customOption": "Lebo mahususi",
+      "cashapp": "Cash App"
     },
     "add": "Ongeza sehemu",
-    "remove": "Ondoa sehemu"
+    "remove": "Ondoa sehemu",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Fuata #{{tag}}",
@@ -705,6 +708,7 @@
     "heading": "Video Fupi za Riftn"
   },
   "settings": {
+    "loginLook": {"title": "Skrini ya kuingia", "desc": "Jinsi nembo na kauli mbiu ya Riftn zinavyosonga kwenye skrini ya kuingia kwenye kifaa hiki.", "tube": "TV ya bomba", "vhs": "Kanda ya VHS", "led": "Ukuta wa LED", "holo": "Hologramu", "neon": "Neoni", "3d": "3D", "flat": "Bapa"}, "arrivalLook": {"title": "Baada ya kuingia", "desc": "Kinachocheza akaunti yako ikipakia, kabla picha yako haijatua kwenye ukurasa. Kwenye kifaa hiki.", "trace": "Mstari", "tune": "Tafuta kituo", "rift": "Ufa", "deck": "Karata", "glass": "Tone la kioo"},
     "postLanding": "Baada ya kuchapisha",
     "postLandingDesc": "Jinsi chapisho lako jipya linavyoingia kwenye mlisho",
     "postLandingGhost": "Nafasi tupu",
@@ -2211,7 +2215,7 @@
     "promptDevice": "Kifaa & OS (kwa hitilafu)",
     "deviceInfoNoErrors": "Hakuna",
     "promptFilters": "Chuja kwa kategoria",
-    "promptMediaError": "Chagua picha au video chini ya 50MB kila moja.",
+    "promptMediaError": "Chagua picha au video chini ya 200MB kila moja.",
     "promptMediaLimit": "Hadi {{max}} viambatanisho.",
     "removePromptAttachment": "Ondoa {{name}}",
     "promptAttachment": "Kiambatanisho {{number}}",
@@ -4212,7 +4216,7 @@
       "pageViewsTerm": "Mionekano ya kurasa",
       "pageViews": "— maombi ambayo Cloudflare huyaainisha kama upakiaji wa kurasa, si picha, hati au miito ya API.",
       "botsTerm": "Roboti zimejumuishwa",
-      "bots": "— hizi ni hesabu ghafi za ukingoni, kwa hiyo watambaaji, vifuatiliaji vya upatikanaji na wateja wa hati wamo ndani yake. Unaweza kuziona mwenyewe katika mchanganuo wa vivinjari hapo juu, ambapo vipengee kama \"Curl\" na \"Haijulikani\" ni trafiki ya kiotomatiki si watu. Kuchuja roboti kunahitaji mpango wa Cloudflare wa kulipia ambao hatuutumii, na kutoa makadirio kimya kimya kungefanya takwimu zisikaguliwe kwa urahisi zaidi, si kidogo.",
+      "bots": "— hizi ni hesabu ghafi za ukingoni, kwa hiyo watambaaji, vifuatiliaji vya upatikanaji na wateja wa hati wamo ndani yake. Unaweza kuziona mwenyewe katika mchanganuo wa vivinjari hapo juu, ambapo vipengee kama \"Curl\" na \"Haijulikani\" ni trafiki ya kiotomatiki si watu. Inazidi kuwa vigumu kutofautisha roboti na wageni halisi, na hivi karibuni hazitaweza kutofautishwa katika takwimu hizi, kwa hiyo hakuna faida ya kujaribu kuzichuja.",
       "totalTerm": "Jumla za kipindi",
       "total": "— mionekano ya kurasa na maombi hujumlishwa katika kipindi chote. Idadi ya wageni kwa makusudi haijumlishwi kuwa \"jumla ya wageni\", kwa sababu mtu aliyekuwa hapa Jumatatu na Jumanne angehesabiwa mara mbili.",
       "peakTerm": "Saa / siku yenye shughuli nyingi",
@@ -20856,5 +20860,27 @@
     "remember": "Kumbuka chaguo langu",
     "rememberHint": "Libadilishe wakati wowote kwenye Mipangilio",
     "failed": "Imeshindwa kufuta ujumbe"
+  },
+  "profileAskAi": {
+    "row": "Uliza AI",
+    "rowSub": "Fuata, penda kila kitu, pata habari mpya",
+    "back": "Rudi",
+    "title": "Uliza AI kuhusu {{handle}}",
+    "sub": "Msaidizi anafanya, wewe unathibitisha",
+    "followLikeAll": "Fuata na penda kila kitu",
+    "followLikeAllSub": "Anamfuata {{handle}}, anaitikia kila chapisho",
+    "likeAll": "Penda machapisho yao yote",
+    "likeAllSub": "Anaruka yale uliyokwisha kuitikia",
+    "catchUp": "Nipe habari mpya",
+    "catchUpSub": "Alichochapisha {{handle}} hivi karibuni, kwa ufupi",
+    "message": "Mwandikie ujumbe",
+    "messageSub": "Anaandaa rasimu ya ujumbe, wewe unatuma",
+    "placeholder": "Uliza chochote kuhusu {{handle}}…",
+    "send": "Tuma",
+    "promptFollowLikeAll": "Mfuate {{handle}} na uitikie machapisho yao yote",
+    "promptLikeAll": "Itikia machapisho yote ya {{handle}}",
+    "promptCatchUp": "Nipe habari za alichochapisha {{handle}} hivi karibuni",
+    "promptMessage": "Nisaidie kumwandikia {{handle}} ujumbe",
+    "promptAbout": "Kuhusu {{handle}}: {{question}}"
   }
 }

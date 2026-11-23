@@ -2,7 +2,8 @@ import { outsideImage } from '@/lib/outside-image';
 import { FullscreenImageViewerLazy } from '@/components/app/cards/FullscreenImageViewerLazy';
 import CornerDownRight from "@/components/ui/cut-icons/reply";
 import { useTranslation as _useCopy } from 'react-i18next';
-import { useDraftState } from '@/hooks/use-draft-state';
+import { InPlaceEditField, editOnClick } from '@/components/app/chat/InPlaceEdit';
+import { cn } from '@/lib/utils';
 import { useDraft } from '@/hooks/use-draft';
 import { useStickToBottom } from '@/hooks/use-stick-to-bottom';
 import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
@@ -66,6 +67,9 @@ import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreB
 import { copyableMediaUrl } from '@/lib/copy-media';
 import { LiveChatOnlineCount } from '@/components/app/chat/LiveChatOnlineCount';
 import { ChatTextSizeButton } from '@/components/app/chat/ChatTextSizeButton';
+import { ASSISTANT_PROFILE_PATH, profilePath } from '@/lib/profile-path';
+import { usePublicChatDelete } from '@/components/app/chat/PublicChatDeleteDialog';
+import { useHiddenLines } from '@/lib/public-chat-hidden';
 
 /**
  * A text message in the side panel, with the same cards every other chat
@@ -82,12 +86,18 @@ import { ChatTextSizeButton } from '@/components/app/chat/ChatTextSizeButton';
 /** Lines the side chat opens on, and reads back per press of Load older. */
 const SIDE_CHAT_PAGE = 30;
 
-function SidebarMessageBody({ content }: { content: string }) {
+function SidebarMessageBody({ content, onEditAt }: { content: string; onEditAt?: (caret: number | null) => void }) {
   const { links, displayText } = useDehubLinks(content);
   return (
     <>
       {displayText.trim() && (
-        <TranslatableText text={displayText} className="chat-body text-xs text-zinc-300 break-words" as="p" auto="chat" />
+        // Your own words edit in place: click into them and type.
+        <div
+          className={cn(onEditAt && 'cursor-text')}
+          onClick={onEditAt ? editOnClick((caret) => onEditAt(displayText === content ? caret : null)) : undefined}
+        >
+          <TranslatableText text={displayText} className="chat-body text-xs text-zinc-300 break-words" as="p" auto="chat" />
+        </div>
       )}
       <DehubLinkEmbeds links={links} compact />
       <ChatLinkPreviews content={displayText} />
@@ -192,19 +202,17 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
   // Edits happen in the row itself rather than in the composer at the foot of
   // the rail — the composer is a 169-character single line shared with the
   // mention picker, and hijacking it would strand a half-typed message.
+  // Same as a Requests comment: the words become the field, a pause saves.
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editInitial, setEditInitial] = useState('');
-  const [editDraft, setEditDraft] = useDraftState(editingId ? `chat:edit:${editingId}` : null, editInitial);
-  const commitDraftEdit = async (id: string) => {
-    if (!editDraft.trim()) return;
-    try {
-      const result = await editMessage(id, editDraft);
-      if (result !== false && setEditDraft.complete(editDraft, editDraft)) setEditingId(current => current === id ? null : current);
-    } catch { /* Keep the edit available for retry. */ }
-  };
+  const [editCaret, setEditCaret] = useState<number | null>(null);
+  const startEdit = (id: string, caret: number | null = null) => { setEditCaret(caret); setEditingId(id); };
+  const stopEdit = useCallback(() => setEditingId(null), []);
 
-  const translateSignal = 0;
-  const originalSignal = 0;
+  // Translate from a line's menu translates the whole side chat, the same as
+  // Translate in the full chat (which also translates every line above).
+  const [translateSignal, setTranslateSignal] = useState(0);
+  const [originalSignal, setOriginalSignal] = useState(0);
+  const [sideTranslated, setSideTranslated] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   usePublicChatReading(isActive, scrollContainerRef);
@@ -258,6 +266,14 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
   useAssistantReplyEngine(messages);
   const localAssistantReplies = useAssistantReplies();
 
+  // Lines you deleted for yourself only; "Delete" asks for everyone or for me.
+  const hiddenLines = useHiddenLines(walletAddress);
+  const { requestDelete, dialog: deleteDialog } = usePublicChatDelete({
+    account: walletAddress,
+    canDeleteAny: false,
+    deleteForEveryone: deleteMessage,
+  });
+
   // Merge livechat messages + buy alerts + any local fallback replies
   type MergedItem =
     | { type: 'message'; data: typeof messages[0] }
@@ -265,7 +281,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
     | { type: 'assistant'; data: AssistantReply };
   const mergedItems: MergedItem[] = useMemo(() => {
     const items: MergedItem[] = [
-      ...messages.map((m) => ({ type: 'message' as const, data: m })),
+      ...messages.filter((m) => !hiddenLines.has(m.id)).map((m) => ({ type: 'message' as const, data: m })),
       // Buy alerts sit beside the history that is loaded, never further back.
       ...(buyBotHidden ? [] : buyAlerts
         .filter((a) => !messages.length || a.created_at >= messages[0].created_at)
@@ -276,7 +292,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
       it.type === 'assistant' ? it.data.timestamp.getTime() : new Date(it.data.created_at).getTime();
     items.sort((a, b) => tsOf(a) - tsOf(b));
     return items;
-  }, [messages, buyAlerts, localAssistantReplies, buyBotHidden]);
+  }, [messages, buyAlerts, localAssistantReplies, buyBotHidden, hiddenLines]);
 
   // The rail is only 400px tall. Mount recent rows first so old link previews,
   // badges and media do not compete with the feed at startup.
@@ -477,15 +493,20 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
   if (menuMsg) {
     const own = !!walletAddress && menuMsg.sender_address?.toLowerCase() === walletAddress.toLowerCase();
     if (isAuthenticated) menuActions.push({ key: 'reply', icon: menuIcons.reply, label: _copy('copy.c253f451bdd5', { defaultValue: 'Reply' }), onSelect: () => setReplyTo(menuMsg), hint: 'R' });
-    if (own && (!menuMsg.message_type || menuMsg.message_type === 'text')) menuActions.push({ key: 'edit', icon: menuIcons.edit, label: _copy('copy.464c4ffd019e', { defaultValue: 'Edit' }), onSelect: () => { setEditingId(menuMsg.id); setEditInitial(menuMsg.content || ''); }, hint: 'E' });
+    if (own && (!menuMsg.message_type || menuMsg.message_type === 'text')) menuActions.push({ key: 'edit', icon: menuIcons.edit, label: _copy('copy.464c4ffd019e', { defaultValue: 'Edit' }), onSelect: () => startEdit(menuMsg.id), hint: 'E' });
     if (menuMsg.content?.trim() && (!menuMsg.message_type || menuMsg.message_type === 'text')) menuActions.push({
       key: 'copy', icon: menuIcons.copy, label: _copy('msgMenu.copyText', { defaultValue: 'Copy Text' }), hint: 'C',
       onSelect: () => { void navigator.clipboard?.writeText(menuMsg.content).then(() => toast.success(_copy('chatHold.copied', { defaultValue: 'Copied' })), () => undefined); },
     });
+    if (menuMsg.content?.trim() && (!menuMsg.message_type || menuMsg.message_type === 'text')) menuActions.push(
+      sideTranslated
+        ? { key: 'original', icon: menuIcons.translate, label: _copy('chatHold.showOriginal', { defaultValue: 'Original' }), onSelect: () => { setSideTranslated(false); setOriginalSignal((n) => n + 1); } }
+        : { key: 'translate', icon: menuIcons.translate, label: _copy('chatHold.translate', { defaultValue: 'Translate' }), hint: 'T', onSelect: () => { setSideTranslated(true); setTranslateSignal((n) => n + 1); } },
+    );
     const sideMediaUrl = menuMsg.message_type === 'image' ? copyableMediaUrl(getMediaUrl(menuMsg.image_url) || menuMsg.image_url)
       : menuMsg.message_type === 'gif' ? copyableMediaUrl(menuMsg.image_url || menuMsg.content) : null;
     if (sideMediaUrl) menuActions.push({ key: 'copy-media', icon: menuIcons.copyMedia, label: _copy('msgMenu.copyMedia', { defaultValue: 'Copy Media' }), onSelect: () => copyMediaWithToast(sideMediaUrl, menuMsg.message_type === 'gif' ? 'gif' : 'image', _copy) });
-    if (own) menuActions.push({ key: 'delete', divided: true, destructive: true, icon: menuIcons.delete, label: _copy('copy.e2d0a54968ea', { defaultValue: 'Delete' }), onSelect: () => void deleteMessage(menuMsg.id) });
+    if (own) menuActions.push({ key: 'delete', divided: true, destructive: true, icon: menuIcons.delete, label: _copy('copy.e2d0a54968ea', { defaultValue: 'Delete' }), onSelect: () => requestDelete(menuMsg.id, true) });
   }
   const lineMenu = menuPoint.mounted && menuMsg ? (
     <MessageMenu
@@ -505,6 +526,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
   return (
     <div data-sidebar-chat className="flex flex-col h-full pl-px">
       {lineMenu}
+      {deleteDialog}
       <SharedTranslationContext.Provider value={{ translateSignal, originalSignal, requestTranslate: () => {}, requestOriginal: () => {} }}>
       <div className="relative flex-1">
         <div
@@ -590,12 +612,14 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
                     style={{ paddingLeft: '10px', paddingRight: '10px' }}
                   >
                     <div className="flex items-start gap-2">
+                      <button type="button" onClick={() => navigate(ASSISTANT_PROFILE_PATH)} className="flex-shrink-0" aria-label={_copy("copy.a39a7ffad4a3", { defaultValue: "assistant" })}>
                       <Avatar className="w-6 h-6 flex-shrink-0">
                         <AvatarImage src={assistantAvatar} alt={_copy("copy.a39a7ffad4a3", { defaultValue: "assistant" })} />
                         <AvatarFallback className="bg-primary/20 text-primary">
                           <Sparkles className="w-3 h-3" />
                         </AvatarFallback>
                       </Avatar>
+                      </button>
                       <div className="min-w-0 flex-1">
                         {assistantView.replyToName && (
                           <div className="flex items-center gap-1 text-[10px] text-zinc-500 mb-0.5">
@@ -604,7 +628,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
                           </div>
                         )}
                         <span className="inline-flex items-baseline gap-1.5">
-                          <span className="text-xs font-semibold text-white">{_copy("copy.a39a7ffad4a3", { defaultValue: "assistant" })}</span>
+                          <button type="button" onClick={() => navigate(ASSISTANT_PROFILE_PATH)} className="text-xs font-semibold text-white hover:underline">{_copy("copy.a39a7ffad4a3", { defaultValue: "assistant" })}</button>
                           <span className="text-[8px] uppercase tracking-wide px-1 py-px rounded bg-primary/20 text-primary border border-primary/30">
                             AI
                           </span>
@@ -639,7 +663,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
                 // Seed what the row already shows, so the profile opens with
                 // this person's photo and name instead of a blank placeholder.
                 seedProfileCache(queryClient, { address: msg.sender_address || undefined, username: handle, displayName: name, avatarUrl }, walletAddress || undefined);
-                navigate(`/${handle}`);
+                navigate(profilePath(handle));
               } : undefined;
               return (
                 <div key={msg.client_key ?? msg.id} data-message-id={msg.id} data-chat-own={(!!walletAddress && msg.sender_address?.toLowerCase() === walletAddress.toLowerCase()) || undefined} data-chat-continued={continued || undefined} data-msg-menu-open={menuPoint.point && menuMsg?.id === msg.id ? '' : undefined} onContextMenu={(e) => openLineMenu(e, msg)} onDoubleClick={(e) => dblClickReply(e, isAuthenticated && (() => setReplyTo(msg)))} className={`group relative transition-colors duration-500${continued ? ' -mt-1.5' : ''}`} style={{ paddingLeft: '10px', paddingRight: '10px' }}>
@@ -687,34 +711,15 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
                         )}
                       </span>
                       {editingId === msg.id ? (
-                        <div className="mt-0.5">
-                          <textarea
-                            autoFocus
-                            value={editDraft}
-                            onChange={(e) => setEditDraft(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter' && !e.shiftKey) {
-                                e.preventDefault();
-                                void commitDraftEdit(msg.id);
-                              } else if (e.key === 'Escape') {
-                                e.preventDefault();
-                                setEditingId(null);
-                              }
-                            }}
-                            rows={2}
-                            maxLength={169}
-                            className="w-full resize-none rounded-lg border border-white/15 bg-white/[0.06] px-2 py-1 text-xs text-white outline-none focus:border-white/30"
-                          />
-                          <div className="mt-0.5 flex items-center gap-2 text-[10px] text-zinc-500">
-                            <button
-                              onClick={() => {
-                                void commitDraftEdit(msg.id);
-                              }}
-                              className="text-white hover:underline"
-                            >{_copy("copy.1509f561f241", { defaultValue: "Save" })}</button>
-                            <button onClick={() => setEditingId(null)} className="hover:text-zinc-300">{_copy("copy.19766ed6ccb2", { defaultValue: "Cancel" })}</button>
-                          </div>
-                        </div>
+                        <InPlaceEditField
+                          draftKey={`chat:edit:${msg.id}`}
+                          text={msg.content || ''}
+                          caret={editCaret}
+                          onSave={(next) => editMessage(msg.id, next)}
+                          onDone={stopEdit}
+                          maxLength={169}
+                          className="chat-body text-xs text-zinc-300"
+                        />
                       ) : msg.message_type === 'image' && msg.image_url ? (
                         <img src={getMediaUrl(msg.image_url)} alt="" className="max-w-full max-h-24 rounded mt-0.5 cursor-zoom-in" onClick={() => setViewingImage(getMediaUrl(msg.image_url) || msg.image_url)} />
                       ) : msg.message_type === 'gif' && (msg.image_url || msg.content) ? (
@@ -724,7 +729,11 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
                           <VoiceWaveformPlayer src={msg.audio_url || msg.image_url || ''} />
                         </div>
                       ) : (
-                        <SidebarMessageBody content={msg.content} />
+                        <SidebarMessageBody
+                          content={msg.content}
+                          onEditAt={!!walletAddress && msg.sender_address?.toLowerCase() === walletAddress.toLowerCase() && !msg.send_state && !msg.id.startsWith('temp-')
+                            ? (caret) => startEdit(msg.id, caret) : undefined}
+                        />
                       )}
                       {/* Reactions */}
                       <SidebarReactions
@@ -819,6 +828,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
             query={mention.query}
             isOpen={mention.isOpen}
             position={mention.position}
+            armed={mention.armed}
             selectedIndex={mention.selectedIndex}
             onSelectedIndexChange={mention.setSelectedIndex}
             onSelect={mention.handleSelect}

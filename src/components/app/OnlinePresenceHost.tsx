@@ -17,6 +17,7 @@ import {
   publishOnline,
   usePresenceReaders,
 } from '@/lib/online-presence';
+import { SEEN_PING_MS, getShowLastSeen, pingSeen } from '@/lib/last-seen';
 
 export default function OnlinePresenceHost() {
   const { walletAddress, isAuthenticated } = useAuth();
@@ -47,6 +48,17 @@ export default function OnlinePresenceHost() {
       publishOnline(new Set());
     };
   }, [me, showOnline, visible, needed]);
+
+  // "Last seen": while opted in, tell the API we're here every few minutes
+  // and once more as the tab goes to the background.
+  const showLastSeen = getShowLastSeen(profile?.customs);
+  useEffect(() => {
+    if (!me || !showLastSeen) return;
+    if (!visible) { void pingSeen(); return; }
+    void pingSeen();
+    const timer = setInterval(() => void pingSeen(), SEEN_PING_MS);
+    return () => clearInterval(timer);
+  }, [me, showLastSeen, visible]);
 
   return null;
 }

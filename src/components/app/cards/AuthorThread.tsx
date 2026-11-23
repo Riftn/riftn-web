@@ -72,6 +72,8 @@ import type { Comment } from '@/lib/comment-mapper';
 import { viewerShareUrl } from '@/lib/share-url';
 import { trackShare } from '@/lib/analytics';
 
+import { formatCount } from '@/lib/format-count';
+import { profilePath } from '@/lib/profile-path';
 interface AuthorThreadProps {
   tokenId: string;
   /** Post author's wallet address — the only comments that thread. */
@@ -335,7 +337,7 @@ function ThreadEntry({
               ) : (
                 <ThumbIcon down={thumbDown} nod={thumbMine} className={cn('w-3.5 h-3.5', thumbMine && 'fill-current')} />
               )}
-              {(thumbCount > 0 || isOwn) && <span className="text-xs">{thumbCount}</span>}
+              {(thumbCount > 0 || isOwn) && <span className="text-xs">{formatCount(thumbCount)}</span>}
             </button>
           </span>
           <button
@@ -627,7 +629,7 @@ export function AuthorThread({ tokenId, authorAddress, highlightId }: AuthorThre
                   entry.address.toLowerCase() === walletAddress.toLowerCase()
                 }
                 highlighted={highlightId === entry.id}
-                onProfile={(username) => navigate(`/${username}`)}
+                onProfile={(username) => navigate(profilePath(username))}
               />
             ))}
           </div>

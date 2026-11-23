@@ -61,6 +61,7 @@ import { LINE_HEIGHT, ellipsize, fontOf, type TextKit } from './text';
 import { MAX_CELEBRATIONS, celebrationLife, paintCelebration, type Celebration } from './celebration';
 import type { Translate } from './strings';
 
+import { formatCount } from '@/lib/format-count';
 type Ctx = CanvasRenderingContext2D;
 
 // ─── What widgets share ──────────────────────────────────────────────────────
@@ -1011,7 +1012,7 @@ class PointsBoard implements Widget {
         rank: String(i + 1),
         place: i + 1,
         name: r.displayName || r.username || `${r.address.slice(0, 6)}…`,
-        amount: sh.t('liveOverlay.points', { count: r.points, formatted: r.points.toLocaleString() }),
+        amount: sh.t('liveOverlay.points', { count: r.points, formatted: formatCount(r.points) }),
         coin: false,
         addedAt: 0,
       }));

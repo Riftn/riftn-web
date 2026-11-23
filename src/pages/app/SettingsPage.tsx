@@ -25,10 +25,6 @@ import ConnectIcon from "@/components/ui/cut-icons/connect";
 import Moon from "@/components/ui/cut-icons/appearance";
 import Lock from "@/components/ui/cut-icons/privacy";
 import LayoutGrid from "@/components/ui/cut-icons/apps";
-import PublicChatIcon from "@/components/ui/cut-icons/chat";
-import { applyNavOrder, publicChatInBar, withPublicChatInBar } from '@/lib/nav-order';
-import { useNavOrderEditor } from '@/hooks/use-nav-order';
-import { DEFAULT_BAR_IDS } from '@/components/app/MobileBottomNav';
 import HomeCutIcon from "@/components/ui/cut-icons/home";
 import FilterCutIcon from "@/components/ui/cut-icons/filter";
 import { FEED_TABS } from "@/constants/app.constants";
@@ -48,6 +44,7 @@ import Gift from "@/components/ui/cut-icons/gifts";
 import Ban from "@/components/ui/cut-icons/blocked";
 import Megaphone from "@/components/ui/cut-icons/advertising";
 import Radio from "@/components/ui/cut-icons/live";
+import LastSeenIcon from "@/components/ui/cut-icons/history";
 import Trash2 from "@/components/ui/cut-icons/delete";
 import Pause from "@/components/ui/cut-icons/pause";
 
@@ -68,6 +65,7 @@ import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { readPublicTimeZone } from '@/hooks/use-profile-local-time';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { LiquidGlassBubble2 } from '@/components/ui/liquid-glass-bubble-2';
@@ -104,6 +102,7 @@ import { getBlockListPaginated, unblockUser as apiUnblockUser, type BlockedUser,
 import { isReservedUsername } from '@/lib/reserved-usernames';
 import { buildAvatarUrl, buildCoverUrl, bumpProfileImageVersion, deviceWidth } from '@/lib/media-url';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import { useStoriesEnabled } from '@/hooks/use-stories-enabled';
 import { useAuth as useAuthContext } from '@/contexts/AuthContext';
 import { useMatureContent } from '@/hooks/use-mature-content';
 import { useKidsMode } from '@/hooks/use-kids-mode';
@@ -159,11 +158,14 @@ import { useShortsEnabled } from '@/contexts/ShortsEnabledContext';
 import { useLeftHanded } from '@/hooks/use-left-handed';
 import { BrowserNotificationsSetting } from '@/components/app/settings/BrowserNotificationsSetting';
 import { PostLandingSetting } from '@/components/app/settings/PostLandingSetting';
+import { FeedSeparatorSetting } from '@/components/app/settings/FeedSeparatorSetting';
+import { ShareIconSetting } from '@/components/app/settings/ShareIconSetting';
 import { ChatTextSizeSetting } from '@/components/app/settings/ChatTextSizeSetting';
+import { ChatOwnBubbleSetting, MessagesPillsSetting } from '@/components/app/settings/ChatOwnBubbleSetting';
 import { LoginLookSetting } from '@/components/app/settings/LoginLookSetting';
+import { ArrivalLookSetting } from '@/components/app/settings/ArrivalLookSetting';
 import { ChatDeleteChoiceSetting } from '@/components/app/settings/ChatDeleteChoiceSetting';
 import { ChatReactionStyleSetting } from '@/components/app/settings/ChatReactionStyleSetting';
-import { ChatCardsSetting } from '@/components/app/settings/ChatCardsSetting';
 import { PublicChatAlertsSetting } from '@/components/app/settings/PublicChatAlertsSetting';
 import { WalletMenuContent } from '@/components/app/CoinBalanceMenu';
 import { useDhbHoldings } from '@/hooks/use-dhb-holdings';
@@ -292,12 +294,14 @@ import { ThemePreviewCard } from '@/components/app/settings/ThemePreviewCard';
 import { KeywordFiltersSection } from '@/components/app/settings/KeywordFiltersSection';
 import { AccountAllowReactions } from '@/components/app/remix/AllowReactionsSwitch';
 import { NotificationFiltersSetting } from '@/components/app/settings/NotificationFiltersSetting';
+import { AccountTypeSetting } from '@/components/app/settings/AccountTypeSetting';
 import { ProfileFieldsSetting } from '@/components/app/settings/ProfileFieldsSetting';
 import { FediverseHandleSetting } from '@/components/app/settings/FediverseHandleSetting';
 import { SignedFollowsSetting } from '@/components/app/settings/SignedFollowsSetting';
 import { ConnectedAppsSetting } from '@/components/app/settings/ConnectedAppsSetting';
 import { OwnAiKeysSetting } from '@/components/app/settings/OwnAiKeysSetting';
 
+import { formatCount } from '@/lib/format-count';
 /** `initialTab` opens a tab directly (the full-screen chat opens Messages). */
 export default function SettingsPage({ initialTab }: { initialTab?: string } = {}) {
   const { t: _copy } = _useCopy();
@@ -586,6 +590,8 @@ function ProfileSettings() {
   const [displayName, setDisplayName] = useSurfaceDraft("pages/app/SettingsPage.tsx:displayName", '');
   const [username, setUsername] = useSurfaceDraft("pages/app/SettingsPage.tsx:username", '');
   const [bio, setBio] = useSurfaceDraft("pages/app/SettingsPage.tsx:bio", '');
+  const [publicTimeZone, setPublicTimeZone] = useState('');
+  const deviceTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const [twitterLink, setTwitterLink] = useSurfaceDraft("pages/app/SettingsPage.tsx:twitterLink", '');
   const [discordLink, setDiscordLink] = useSurfaceDraft("pages/app/SettingsPage.tsx:discordLink", '');
   const [instagramLink, setInstagramLink] = useSurfaceDraft("pages/app/SettingsPage.tsx:instagramLink", '');
@@ -619,6 +625,7 @@ function ProfileSettings() {
     displayName: '',
     username: '',
     bio: '',
+    publicTimeZone: '',
     twitterLink: '',
     discordLink: '',
     instagramLink: '',
@@ -639,7 +646,6 @@ function ProfileSettings() {
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
   const debouncedUsername = useDebouncedValue(username, 300);
   const avatarInputRef = useRef<HTMLInputElement>(null);
-  const coverInputRef = useRef<HTMLInputElement>(null);
   
   // Load profile data via react-query so cached tab returns render instantly
   const { data: profileData, error: profileError } = useQuery({
@@ -672,6 +678,7 @@ function ProfileSettings() {
     const loadedBio = userData.aboutMe || userData.bio || '';
 
     const customs = userData.customs as Record<string, string> | undefined;
+    const loadedTimeZone = readPublicTimeZone(customs?.publicTimeZone);
     const raw = userData as Record<string, unknown>;
     // Check both top-level API fields and customs object (API may return either)
     const loadedTwitter = (raw.twitterLink as string) || customs?.twitterLink || '';
@@ -685,6 +692,7 @@ function ProfileSettings() {
     setDisplayName.initialize(loadedDisplayName);
     setUsername.initialize(loadedUsername);
     setBio.initialize(loadedBio);
+    setPublicTimeZone(loadedTimeZone);
     setTwitterLink.initialize(loadedTwitter);
     setDiscordLink.initialize(loadedDiscord);
     setInstagramLink.initialize(loadedInstagram);
@@ -697,6 +705,7 @@ function ProfileSettings() {
       displayName: loadedDisplayName,
       username: loadedUsername,
       bio: loadedBio,
+      publicTimeZone: loadedTimeZone,
       twitterLink: loadedTwitter,
       discordLink: loadedDiscord,
       instagramLink: loadedInstagram,
@@ -757,6 +766,7 @@ function ProfileSettings() {
     displayName !== originalValues.displayName ||
     username !== originalValues.username ||
     bio !== originalValues.bio ||
+    publicTimeZone !== originalValues.publicTimeZone ||
     twitterLink !== originalValues.twitterLink ||
     discordLink !== originalValues.discordLink ||
     instagramLink !== originalValues.instagramLink ||
@@ -787,6 +797,11 @@ function ProfileSettings() {
   
   const updateMutation = useMutation({
     mutationFn: async (data: UpdateProfileData) => {
+      if (data.customs && authUser?.address) {
+        const latest = await getAccountInfo(authUser.address);
+        const latestCustoms = latest.customs as UpdateProfileData['customs'];
+        data = { ...data, customs: { ...latestCustoms, ...data.customs } };
+      }
       return updateProfile(data);
     },
     onSuccess: async (_result, variables) => {
@@ -851,7 +866,6 @@ function ProfileSettings() {
 
       // Reset file inputs so re-selecting the same file triggers onChange
       if (avatarInputRef.current) avatarInputRef.current.value = '';
-      if (coverInputRef.current) coverInputRef.current.value = '';
 
       await refreshUser();
       // Re-apply optimistic avatar/cover to AuthContext user (sidebar, navbar, etc.)
@@ -873,6 +887,7 @@ function ProfileSettings() {
           displayName: userData.displayName || userData.display_name || '',
           username: userData.username || '',
           bio: userData.aboutMe || userData.bio || '',
+          publicTimeZone: readPublicTimeZone(refreshedCustoms?.publicTimeZone),
           twitterLink: (refreshedRaw.twitterLink as string) || refreshedCustoms?.twitterLink || '',
           discordLink: (refreshedRaw.discordLink as string) || refreshedCustoms?.discordLink || '',
           instagramLink: (refreshedRaw.instagramLink as string) || refreshedCustoms?.instagramLink || '',
@@ -941,19 +956,6 @@ function ProfileSettings() {
     }
   };
   
-  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 10 * 1024 * 1024) {
-        toast.error(t('settings.imageTooLarge10'));
-        return;
-      }
-      setCoverFile(file);
-      setRemoveCover(false);
-      setCoverPreview(prev => swapBlobPreview(prev, file));
-    }
-  };
-  
   // Right-click / hold menu and Ctrl/Cmd+V paste on the banner and picture.
   // Same as picking a file: shown at once, saved with Save.
   const setPickedCover = (file: File) => {
@@ -1017,6 +1019,19 @@ function ProfileSettings() {
     // would be refused by the guard in updateProfile while editing their bio.
     if (username && usernameChanged) data.username = username;
     if (bio) data.aboutMe = bio;
+    if (publicTimeZone !== originalValues.publicTimeZone) {
+      // The server replaces the whole blob, so carry every other saved
+      // setting (account type, follow visibility, ...) along with this one.
+      const kept: Record<string, string | number | boolean> = {};
+      const stored = {
+        ...((profileData?.customs as Record<string, unknown> | undefined) ?? {}),
+        ...((authUser?.customs as Record<string, unknown> | undefined) ?? {}),
+      };
+      for (const [key, value] of Object.entries(stored)) {
+        if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') kept[key] = value;
+      }
+      data.customs = { ...kept, publicTimeZone: publicTimeZone || false };
+    }
     // Always send social links (even empty strings) so they persist correctly
     data.twitterLink = twitterLink;
     data.discordLink = discordLink;
@@ -1091,7 +1106,7 @@ function ProfileSettings() {
         <button
           type="button"
           data-on-media
-          onClick={() => coverInputRef.current?.click()}
+          onClick={coverMenu.openPicker}
           aria-label={t('settings.clickCameraUpload')}
           className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors hover:bg-black/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
         >
@@ -1099,13 +1114,6 @@ function ProfileSettings() {
             <Camera className="size-5 text-white" />
           </span>
         </button>
-        <input
-          ref={coverInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handleCoverChange}
-        />
         {coverMenu.menu}
       </div>
 
@@ -1125,6 +1133,8 @@ function ProfileSettings() {
             type="button"
             onClick={() => avatarInputRef.current?.click()}
             aria-label={t('settings.clickCameraUpload')}
+            data-keep-dark
+            data-on-media
             className="absolute bottom-0 right-0 flex size-8 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-800 transition-colors hover:bg-zinc-700"
           >
             <Camera className="w-4 h-4 text-white" />
@@ -1213,6 +1223,26 @@ function ProfileSettings() {
 
       {/* Profile fields — label/value lines under the bio, links verified by rel="me" */}
       <ProfileFieldsSetting />
+
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <label htmlFor="settings-public-timezone" className={SETTINGS_LABEL_CLASS}>
+            {t('profile.shareLocalTime', { defaultValue: 'Show my local time' })}
+          </label>
+          <p className="text-sm text-zinc-400">
+            {t('profile.shareLocalTimeHint', { defaultValue: 'Show your timezone and local time on your public profile and in chat.' })}
+          </p>
+        </div>
+        <Switch
+          id="settings-public-timezone"
+          checked={!!publicTimeZone}
+          disabled={!deviceTimeZone && !publicTimeZone}
+          onCheckedChange={enabled => setPublicTimeZone(enabled ? deviceTimeZone || '' : '')}
+        />
+      </div>
+
+      {/* Personal, Creator or Business: a category under the name, a Contact button */}
+      <AccountTypeSetting />
 
       {/* Fediverse — the @username@riftn.com address Mastodon can follow */}
       <FediverseHandleSetting />
@@ -1786,8 +1816,7 @@ function QuietHoursSection() {
 function PrivacySettings() {
   const { t: _copy } = _useCopy();
   const { t } = useTranslation();
-  const { showFollowersList, showFollowingList, hideFollowerCounts, isPrivate, hideBadgeAndBalance, defaultPostVisibility, aiScraping, showOnline, showDislikes, showLikes, updateSettings, isUpdating, isLoading } = usePrivacySettings();
-  const { whoCanMessage, doNotDisturb, isUpdating: isDmUpdating, updateWhoCanMessage, updateDoNotDisturb } = useDmSettings();
+  const { showFollowersList, showFollowingList, hideFollowerCounts, isPrivate, hideBadgeAndBalance, defaultPostVisibility, aiScraping, showOnline, showLastSeen, showDislikes, showLikes, updateSettings, isUpdating, isLoading } = usePrivacySettings();
   const { option: walletUnlockInterval, setOption: setWalletUnlockInterval } = useWalletUnlockInterval();
   const [isUpdatingVisibility, setIsUpdatingVisibility] = useState(false);
   const { user } = useAuthContext();
@@ -1963,6 +1992,15 @@ function PrivacySettings() {
             disabled={isUpdating || isLoading}
           />
           <SettingToggle
+            icon={LastSeenIcon}
+            anchor="show-last-seen"
+            title={t('settings.showLastSeen')}
+            description={t('settings.showLastSeenDesc')}
+            defaultChecked={showLastSeen}
+            onCheckedChange={(checked) => updateSettings({ show_last_seen: checked })}
+            disabled={isUpdating || isLoading}
+          />
+          <SettingToggle
             icon={ThumbsUp}
             anchor="show-likes"
             title={t('settings.showLikes')}
@@ -2079,47 +2117,8 @@ function PrivacySettings() {
         </div>
       </div>
 
-      {/* Messaging */}
-      <div>
-        <h3 className="font-medium text-zinc-400 text-sm mb-4">{t('settings.messages', 'Messages')}</h3>
-        <div className="space-y-4">
-          {/* Who Can Message */}
-          <SettingsRow
-            icon={<MessageCircle />}
-            title={t('settings.whoCanMessage', 'Who can message you')}
-            description={t('settings.whoCanMessageDesc', 'Control who can send you direct messages')}
-            action={<SettingDrawerSelect
-              value={whoCanMessage}
-              onValueChange={(value) => updateWhoCanMessage(value as WhoCanMessage)}
-              disabled={isDmUpdating}
-              title={t('settings.whoCanMessage', 'Who can message you')}
-              options={DM_ACCESS_OPTIONS(t)}
-            />}
-          />
-
-          {/* Message Fee */}
-          <SettingsRow
-            icon={<img src={dehubCoin} alt="" />}
-            title={t('settings.messageFee', 'Message fee')}
-            description={t('settings.messageFeeDesc')}
-            action={<MessageFeeControl />}
-          />
-
-          {/* Do Not Disturb */}
-          <SettingToggle
-            icon={Ban}
-            anchor="do-not-disturb"
-            title={t('settings.doNotDisturb', 'Do not disturb')}
-            description={t('settings.doNotDisturbDesc', 'Mute all message notifications')}
-            defaultChecked={doNotDisturb}
-            onCheckedChange={(checked) => updateDoNotDisturb(checked)}
-            disabled={isDmUpdating}
-          />
-        </div>
-      </div>
-
-      {/* Free DM Access List */}
-      <FreeAccessListSection />
+      {/* Message settings (who can message, fee, do not disturb, free access)
+          live only on the Messages tab. */}
 
       {/* Account Security */}
       <div>
@@ -2195,7 +2194,7 @@ function PrivacySettings() {
               <Users className="size-7 text-white" />
             </div>
             <h3 id="go-public-title" className="text-white font-bold text-lg text-center">{_copy("copy.e186aeeede46", { defaultValue: "Switch to Public?" })}</h3>
-            <p className="text-zinc-300 text-sm text-center">{_copy("copy.1bd68dc16f30", { defaultValue: "You have " })}<span className="text-white font-semibold">{pendingRequestCount}</span>{_copy("copy.8342c8fd8b8e", { defaultValue: " pending follow " })}{pendingRequestCount === 1 ? _copy("copy.1f58b9145b24", { defaultValue: "request" }) : _copy("copy.ec72420df5df", { defaultValue: "requests" })}{_copy("copy.942059c59c39", { defaultValue: ". What would you like to do before going public?" })}</p>
+            <p className="text-zinc-300 text-sm text-center">{_copy("copy.1bd68dc16f30", { defaultValue: "You have " })}<span className="text-white font-semibold">{formatCount(pendingRequestCount)}</span>{_copy("copy.8342c8fd8b8e", { defaultValue: " pending follow " })}{pendingRequestCount === 1 ? _copy("copy.1f58b9145b24", { defaultValue: "request" }) : _copy("copy.ec72420df5df", { defaultValue: "requests" })}{_copy("copy.942059c59c39", { defaultValue: ". What would you like to do before going public?" })}</p>
             <div className="space-y-2 pt-1">
               <Button
                 type="button"
@@ -2764,8 +2763,11 @@ function AppearanceSettings({ theme, themeChoice, setTheme }: { theme: string; t
         </div>
       </div>
 
-      {/* Sign-in screen look: Tube TV, VHS, LED wall or Hologram */}
+      {/* Sign-in screen look: Tube TV, VHS, LED wall, Hologram, Neon glow, 3D or Flat */}
       <LoginLookSetting />
+
+      {/* What plays after signing in: Rift, Trace, Picture frame or Orbit */}
+      <ArrivalLookSetting />
 
       {/* Language */}
       <div data-setting-anchor="language">
@@ -2800,13 +2802,15 @@ function AppearanceSettings({ theme, themeChoice, setTheme }: { theme: string; t
               ]}
             />}
           />
+          <FeedSeparatorSetting />
+          <ShareIconSetting />
           <MenuLayoutRow />
-          <PublicChatBarRow />
           <DefaultFeedSetting />
           <FeedTogglesSetting />
           <PostLandingSetting />
           <ChatTextSizeSetting />
-          <ChatCardsSetting />
+          <ChatOwnBubbleSetting />
+          <MessagesPillsSetting />
           <ChatDeleteChoiceSetting />
           <ChatReactionStyleSetting />
           <SettingsRow
@@ -2957,6 +2961,7 @@ function LanguageSelector() {
 }
 
 function ContentSettings() {
+  const { storiesEnabled, canChange, setStoriesEnabled } = useStoriesEnabled();
   const { t } = useTranslation();
   const { chainId, setChainId, saving } = usePostingChain();
 
@@ -3005,6 +3010,15 @@ function ContentSettings() {
       <div>
         <h3 className="font-medium text-zinc-400 text-sm mb-4">{t('settings.playback', 'Playback')}</h3>
         <div className="space-y-4">
+          <SettingToggle
+            icon={Eye}
+            anchor="show-stories"
+            title={t('settings.showStories', 'Show Stories on Home')}
+            description={t('settings.showStoriesDesc', 'Live broadcasts stay visible when Stories are off.')}
+            defaultChecked={storiesEnabled}
+            onCheckedChange={setStoriesEnabled}
+            disabled={!canChange}
+          />
           <HideWatchedToggle />
           <SkipSegmentsToggle />
           <VideoGlitchToggle />
@@ -3425,7 +3439,7 @@ function VideoGlitchToggle() {
 }
 
 /**
- * Settings > Appearance > Media: how a tall or square long video fills the
+ * Settings > Appearance > Media: how a tall or square video or photo fills the
  * column on a computer (lib/wide-video-mode). Phones and tablets never use it,
  * so the row only shows on wide screens.
  */
@@ -3434,46 +3448,22 @@ function WideVideoModeRow() {
   const mode = useWideVideoMode();
   const isDesktop = useIsDesktopViewport();
   if (!isDesktop) return null;
-  const title = t('settings.wideVideoMode', 'Long form videos on wide screens');
+  const title = t('settings.wideMediaMode', 'Long form media on wide screens');
   return (
     <SettingsRow
       icon={<RectangleHorizontal />}
       anchor="wide-video-mode"
       title={title}
-      description={t('settings.wideVideoModeDesc', 'What fills the space beside tall and square videos on a computer')}
+      description={t('settings.wideMediaModeDesc', 'What fills the space beside tall and square videos and photos on a computer')}
       action={<SettingDrawerSelect
         value={mode}
         onValueChange={(value) => { if (isWideVideoMode(value)) writeWideVideoMode(value); }}
         title={title}
         options={[
-          { value: 'ambient', label: t('settings.wideVideoAmbient', 'Ambient'), description: t('settings.wideVideoAmbientDesc', 'The video fills the width, with a soft blurred glow of itself on each side') },
-          { value: 'rails', label: t('settings.wideVideoRails', 'Glass rails'), description: t('settings.wideVideoRailsDesc', 'The video beside one glass panel with what it is, a Follow button and the top comments') },
-          { value: 'standard', label: t('settings.wideVideoStandard', 'Standard'), description: t('settings.wideVideoStandardDesc', 'The video on its own, as before') },
+          { value: 'ambient', label: t('settings.wideVideoAmbient', 'Ambient'), description: t('settings.wideMediaAmbientDesc', 'The video or photo fills the width, with a soft blurred glow of itself on each side') },
+          { value: 'rails', label: t('settings.wideVideoRails', 'Glass rails'), description: t('settings.wideMediaRailsDesc', 'The video or photo beside one glass panel with what it is, a Follow button and the top comments') },
+          { value: 'standard', label: t('settings.wideVideoStandard', 'Standard'), description: t('settings.wideMediaStandardDesc', 'The video or photo on its own, as before') },
         ]}
-      />}
-    />
-  );
-}
-
-/**
- * Phones: put Public Chat on the bottom bar's first screen (lib/nav-order
- * withPublicChatInBar). Writes the shared bar order, so the app follows.
- */
-function PublicChatBarRow() {
-  const { t } = useTranslation();
-  const isDesktop = useIsDesktopViewport();
-  const { order, save } = useNavOrderEditor('bar', DEFAULT_BAR_IDS);
-  const effective = useMemo(() => applyNavOrder(DEFAULT_BAR_IDS, order, (id) => id), [order]);
-  if (isDesktop) return null;
-  return (
-    <SettingsRow
-      icon={<PublicChatIcon />}
-      anchor="public-chat-bar"
-      title={t('settings.publicChatInBar', 'Public Chat in the bottom bar')}
-      description={t('settings.publicChatInBarDesc', 'One tap into Public Chat from the bar at the bottom of the screen')}
-      action={<Switch
-        checked={publicChatInBar(effective)}
-        onCheckedChange={(on) => save(withPublicChatInBar(effective, on))}
       />}
     />
   );

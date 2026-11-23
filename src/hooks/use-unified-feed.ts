@@ -7,6 +7,7 @@
  * @module hooks/use-unified-feed
  */
 
+import { noteCoAuthors } from '@/lib/co-author-store';
 import { isSignInWall, noteSignInWall } from '@/lib/sign-in-wall';
 import { useEffect, useMemo, useState } from 'react';
 import { useInfiniteQuery, useQuery, useQueryClient, keepPreviousData, type QueryClient } from '@tanstack/react-query';
@@ -110,6 +111,10 @@ export interface UnifiedFeedItem {
   hideAssetCards?: boolean;
   /** Links in the text whose preview card the poster closed, so no surface draws one. */
   hiddenLinkPreviews?: string[];
+  /** People tagged on the photos. */
+  imageTags?: { address?: string; username: string; i: number; x: number; y: number }[];
+  /** A quiz hangs off this post (GET /quiz/:tokenId). */
+  hasQuiz?: boolean;
   /** Content warning: the post opens collapsed behind this one line. */
   spoilerText?: string;
   /** Who may quote it; absent means anyone. */
@@ -369,6 +374,8 @@ function mapVideoItem(item: UnifiedFeedItem, index: number): VideoItem {
     comicBorder: item.comicBorder,
     hideAssetCards: item.hideAssetCards,
     hiddenLinkPreviews: item.hiddenLinkPreviews,
+    imageTags: item.imageTags,
+    hasQuiz: item.hasQuiz,
     spoilerText: item.spoilerText,
     quotePolicy: item.quotePolicy,
     visibility: item.visibility,
@@ -475,6 +482,8 @@ function mapImagePost(item: UnifiedFeedItem, index: number): ImagePost {
     comicBorder: item.comicBorder,
     hideAssetCards: item.hideAssetCards,
     hiddenLinkPreviews: item.hiddenLinkPreviews,
+    imageTags: item.imageTags,
+    hasQuiz: item.hasQuiz,
     spoilerText: item.spoilerText,
     quotePolicy: item.quotePolicy,
     visibility: item.visibility,
@@ -554,6 +563,8 @@ function mapTextPost(item: UnifiedFeedItem, index: number): TextPost {
     comicBorder: item.comicBorder,
     hideAssetCards: item.hideAssetCards,
     hiddenLinkPreviews: item.hiddenLinkPreviews,
+    imageTags: item.imageTags,
+    hasQuiz: item.hasQuiz,
     spoilerText: item.spoilerText,
     quotePolicy: item.quotePolicy,
     visibility: item.visibility,
@@ -760,6 +771,7 @@ async function loadUnifiedFeedPage(args: {
     page: pageParam,
     limit,
   }, viewer);
+  noteCoAuthors(response);
 
   // Store the shuffleSeed from the first page for subsequent pages
   if (params.sortBy === 'random' && response.shuffleSeed && pageParam === 1 && shuffleSeedRef) {

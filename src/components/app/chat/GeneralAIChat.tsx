@@ -32,6 +32,8 @@ import { payForJob } from '@/lib/ai-payment';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { MarkdownText } from '@/lib/markdown';
+import { AssistantActionCard } from '@/components/app/assistant/AssistantActionCard';
+import { assistantActionIds, withoutAssistantActionLinks } from '@/lib/assistant-action-links';
 import { PostModal } from '@/features/post';
 import { SwapActionCard } from './SwapActionCard';
 import dehubLogo from '@/assets/riftn-logo-white.png';
@@ -356,7 +358,10 @@ export function GeneralAIChat({ isOpen, onClose }: GeneralAIChatProps) {
                   )}
                   {message.role === 'assistant' ? (
                     <>
-                      <MarkdownText content={message.content} className="text-sm" />
+                      <MarkdownText content={withoutAssistantActionLinks(message.content)} className="text-sm" />
+                      {assistantActionIds(message.content).map((id) => (
+                        <AssistantActionCard key={id} actionId={id} />
+                      ))}
                       {/* Show swap action card */}
                       {message.swapAction && (
                         <SwapActionCard action={message.swapAction} autoQuote />

@@ -16,6 +16,7 @@ export function createPublicChatUnreadStore(storage: {
   write: (key: string, value: string) => void;
 }) {
   const accounts = new Map<string, ReadState>();
+  const synced = new Set<string>();
   const listeners = new Set<() => void>();
   const keyFor = (account: string) => `dehub_public_chat_unread:${account.toLowerCase()}`;
   const emit = () => listeners.forEach((listener) => listener());
@@ -50,6 +51,18 @@ export function createPublicChatUnreadStore(storage: {
     emit();
   }
 
+  function catchUp(account: string, at: number) {
+    if (!account || !Number.isFinite(at) || at <= 0) return false;
+    const state = stateFor(account);
+    let changed = false;
+    if (at > state.readAt) { state.readAt = at; changed = true; }
+    for (const [id, when] of state.unread) {
+      if (when <= at) { state.unread.delete(id); changed = true; }
+    }
+    if (changed) save(account, state);
+    return changed;
+  }
+
   return {
     subscribe(listener: () => void) {
       listeners.add(listener);
@@ -57,6 +70,22 @@ export function createPublicChatUnreadStore(storage: {
     },
     count(account: string) {
       return account ? stateFor(account).unread.size : 0;
+    },
+    hasSynced(account: string) {
+      return synced.has(account.toLowerCase());
+    },
+    syncReadPosition(account: string, at: number | null | undefined, startedAt: number) {
+      if (!account) return;
+      const key = account.toLowerCase();
+      const verified = synced.has(key);
+      const resolved = at === null || (typeof at === 'number' && Number.isFinite(at) && at > 0);
+      if (!resolved) return;
+      synced.add(key);
+      // A confirmed missing bookmark opens at the latest line in the room.
+      // Discard history replayed at startup once, preserving new live lines.
+      const position = at === null && !verified ? startedAt : at;
+      const changed = typeof position === 'number' && catchUp(key, position);
+      if (!verified && !changed) emit();
     },
     record(account: string, message: PublicChatUnreadMessage): boolean {
       if (!account || !message.id || message.excluded
@@ -79,6 +108,14 @@ export function createPublicChatUnreadStore(storage: {
       state.unread.clear();
       save(account, state);
     },
+    /**
+     * The server's "read up to here" for Public Chat (shared by every device).
+     * Lines at or before it were read somewhere else, so they leave the count;
+     * newer ones stay. Without this the list counted every line since this
+     * device last opened the room, while the room itself counted from the
+     * shared spot (97 on the row, 19 inside).
+     */
+    catchUp,
     refresh() {
       accounts.clear();
       emit();

@@ -14,6 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import {
   getContacts,
   getConversations,
+  getConversation,
   getMessages,
   createConversation,
   markConversationAsRead,
@@ -56,7 +57,8 @@ import {
 } from '@/lib/api/dehub/dm-socket';
 import type { QueryClient } from '@tanstack/react-query';
 import { isEncryptedContent } from '@/lib/dm-e2ee/crypto';
-import { decryptFromPeer, decryptMessageInPlace, loadIdentity, onIdentityChange, prepareOutgoing } from '@/lib/dm-e2ee/keys';
+import { decryptFromPeer, decryptMessageInPlace, hasIdentityFor, loadIdentity, onIdentityChange, prepareOutgoing } from '@/lib/dm-e2ee/keys';
+import { translateOutgoing } from '@/lib/dm-translate-out';
 import { openMediaPlaintext } from '@/lib/dm-e2ee/media-message';
 import { messageHistoryItems, mergeMessageHead, needsMessageHistoryRecovery, nextMessagePage, markRecentlySent, isRecentlySent, type MessageHistory } from '@/lib/dm-head';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
@@ -330,12 +332,31 @@ export async function decryptThread(
   const needs = items.some((m) => isEncryptedContent(m?.content) || isEncryptedContent(m?.replyTo?.content));
   if (!needs) return items;
   const me = (myAddress || '').toLowerCase();
+  if (me) loadIdentity(me);
   let peer = peerAddressForConversation(queryClient, conversationId, me);
   if (!peer) {
     const other = items.find((m) => m.sender?.address && m.sender.address.toLowerCase() !== me);
     peer = other?.sender?.address?.toLowerCase() || null;
   }
-  return Promise.all(items.map((m) => decryptMessageInPlace(m, peer)));
+  // A direct link may open before the inbox cache, with a page containing
+  // only the reader's own messages. Resolve the other participant once.
+  if (!peer && me && /^[0-9a-f]{24}$/i.test(conversationId)) {
+    const conversation = await queryClient.fetchQuery({
+      queryKey: [...messagesKeys.conversation(conversationId), 'participants', me],
+      queryFn: async () => {
+        try {
+          return await getConversation(conversationId, me);
+        } catch {
+          const contacts = await getContacts(me);
+          return contacts.find(contact => contact.id === conversationId) ?? null;
+        }
+      },
+      staleTime: 60_000,
+    }).catch(() => null);
+    peer = conversation?.otherUser?.address?.toLowerCase() || null;
+  }
+  const activePeer = me && hasIdentityFor(me) ? peer : null;
+  return Promise.all(items.map((m) => decryptMessageInPlace(m, activePeer)));
 }
 
 // ─── Messages ─────────────────────────────────────────────────────────────────
@@ -643,6 +664,7 @@ export function useMessages(conversationId: string | null) {
                     content,
                     isEdited: true,
                     editedAt: data.editedAt,
+                    ...(data.original !== undefined ? { original: data.original } : {}),
                     ...(isEncryptedContent(data.content) ? { encrypted: true, undecryptable } : {}),
                   }
                 : m
@@ -891,6 +913,8 @@ type SendVariables = {
   destruct?: DmDestructChoice;
   /** Pay-to-unlock price for a photo or video. */
   lockPrice?: number;
+  /** Text only: delivered when the other person next comes online. */
+  whenOnline?: boolean;
   /** The clientKey of the line already on screen (a retry, or drawn before the mutation). */
   retryKey?: string;
 };
@@ -938,7 +962,7 @@ export function useSendMessage(conversationId: string) {
    * line in the thread yet.
    */
   const insertOptimistic = (variables: SendVariables): string => {
-    const { content, msgType, gifUrl, mediaFile, voiceDuration, replyPreview, mediaOptions, destruct, lockPrice } = variables;
+    const { content, msgType, gifUrl, mediaFile, voiceDuration, replyPreview, mediaOptions, destruct, lockPrice, whenOnline } = variables;
     const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     pendingSends.set(tempId, variables);
     // Optimistic: prepend temp message, drawn exactly as it will look delivered.
@@ -971,6 +995,7 @@ export function useSendMessage(conversationId: string) {
       voiceDuration: voiceDuration ?? null,
       ...(mediaOptions ? { mediaOptions } : {}),
       ...(destruct ? { destruct: destructFromChoice(destruct) } : {}),
+      ...(whenOnline ? { whenOnline: true } : {}),
       isRead: false,
       isEdited: false,
       editedAt: null,
@@ -1027,6 +1052,7 @@ export function useSendMessage(conversationId: string) {
       mediaOptions,
       destruct,
       lockPrice,
+      whenOnline,
     }: {
       content: string;
       msgType?: DmMsgType;
@@ -1042,6 +1068,8 @@ export function useSendMessage(conversationId: string) {
       destruct?: DmDestructChoice;
       /** Pay-to-unlock price for a photo or video. */
       lockPrice?: number;
+      /** Text only: delivered when the other person next comes online. */
+      whenOnline?: boolean;
       /** Resend a failed line in place: the clientKey of the bubble already on screen. */
       retryKey?: string;
     }): Promise<DmMessage> => {
@@ -1096,7 +1124,15 @@ export function useSendMessage(conversationId: string) {
         return sent;
       }
 
-      const wire = await prepareOutgoing(peerAddress, content);
+      // "Send in their language": translated before it is sealed, so the
+      // line they get (and their push) is in their language. Plain text in a
+      // real one-to-one chat only; anything else goes as typed.
+      const translated = msgType === 'msg' && !isVirtual && !forwardedFrom
+        ? await translateOutgoing(resolvedId, content)
+        : null;
+      const wire = translated
+        ? { content: translated.content, encrypted: false }
+        : await prepareOutgoing(peerAddress, content);
 
       /*
        * Confirm the socket is up BEFORE emitting. socket.io's emit does not
@@ -1119,12 +1155,15 @@ export function useSendMessage(conversationId: string) {
         txHash,
         voiceDuration,
         forwardedFrom,
+        ...(whenOnline ? { whenOnline: true } : {}),
+        ...(translated ? { original: translated.original, translatedTo: translated.lang } : {}),
       };
       const sent = await emitSendMessage(payload);
       return {
         ...sent,
         conversation: resolvedId,
-        content,
+        content: translated ? translated.content : content,
+        ...(translated ? { original: { content: translated.original, lang: translated.lang } } : {}),
         encrypted: wire.encrypted,
         author: 'me',
         isRead: false,

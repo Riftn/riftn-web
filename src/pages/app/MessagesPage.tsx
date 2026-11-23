@@ -1,4 +1,5 @@
 import { useTranslation as _useCopy } from 'react-i18next';
+import { clearPendingChatLink, peekPendingChatLink, toastNotInLinkedChat } from '@/lib/chat-message-link';
 import { UnreadCountChip } from '@/components/app/chat/UnreadCountChip';
 import { ReactionAlertBadge, reactionAlertLine } from '@/components/app/chat/ReactionAlertBadge';
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
@@ -11,7 +12,7 @@ import { DhbCoin } from '@/components/app/DhbAmount';
 import { lazy, Suspense, useState, useEffect, useRef, useCallback, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react';
 import CloseIcon from '@/components/ui/cut-icons/close';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Loader2 } from "lucide-react";
 import RefreshCw from "@/components/ui/cut-icons/refresh";
 import Trash2 from "@/components/ui/cut-icons/delete";
@@ -23,6 +24,7 @@ import MessageCircle from "@/components/ui/cut-icons/message-envelope";
 import Fullscreen from "@/components/ui/cut-icons/fullscreen";
 import { FullScreenChatShell } from '@/components/app/chat/FullScreenChatShell';
 import { ChatTextSizeButton } from '@/components/app/chat/ChatTextSizeButton';
+import { PhoneChatListTop } from '@/components/app/chat/PhoneChatListTop';
 import { ChatIconButton, ChatListTop } from '@/components/app/chat/FullScreenChatChrome';
 import { ChatRowContextMenu, type ChatOptionsHandlers } from '@/components/app/chat/ChatOptionsMenu';
 import { isArchived, isMuted, useChatPrefs, useClearChatHistory } from '@/hooks/use-chat-prefs';
@@ -34,7 +36,7 @@ import { useRowLongPress } from '@/hooks/use-row-long-press';
 import { MessageRequestsHeader, MessageRequestsRow } from '@/components/app/chat/MessageRequestBar';
 import { MessagesNavGlyph } from '@/components/app/navigation/MessagesNavGlyph';
 import '@/styles/messages-cards.css';
-import { useChatCards } from '@/lib/chat-cards';
+import { useFeedSeparator } from '@/lib/feed-separator';
 
 import { VerifiedBadge } from '@/components/app/VerifiedBadge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -78,6 +80,7 @@ import dehubLogo from '@/assets/dehub-logo.png';
 import { SEOHead } from '@/components/SEOHead';
 import { blockUser } from '@/lib/api/dehub/blocks';
 import { toast } from 'sonner';
+import { NotesSheetHost, openNotesSheet } from '@/components/app/chat/NotesRow';
 import { LiveRipple } from '@/components/app/LiveRipple';
 import { NewGroupChannelSheet, type NewChatKind } from '@/components/app/chat/NewGroupChannelSheet';
 import { GroupChatRow } from '@/components/app/chat/GroupChatRow';
@@ -89,6 +92,7 @@ import { insertCommunityChatMessage } from '@/lib/community-chat-send';
 import { reportCommunityChatMessage } from '@/lib/community-chat-notify';
 import { previewLinks } from '@/lib/dehub-links';
 
+import { formatCount } from '@/lib/format-count';
 /**
  * The other person's name with their badge sitting on its baseline, the same
  * BadgedName system the feed uses. The badge rides straight after the name
@@ -264,7 +268,7 @@ export function ConversationItem({
               matching the mobile app. White-on-near-black instead of red-500:
               the palette has no colour in it, and Osaka/Jungle still repaint
               this through [data-count-badge]. */}
-          <ReactionAlertBadge reactions={reactions} className="ml-0.5" />
+          <ReactionAlertBadge reactions={reactions} rowKey={`dm:${conversation.id}`} className="ml-0.5" />
           <UnreadCountChip count={conversation.unreadCount} className="ml-0.5" />
         </div>
         {draft ? (
@@ -300,6 +304,12 @@ const EmbeddedSettings = lazy(() => import('@/pages/app/SettingsPage'));
 const RoomChatPane = lazy(() => import('@/components/app/chat/RoomChatPane').then(m => ({ default: m.RoomChatPane })));
 // Phones on /chat: the app's bottom nav pill (already loaded by the app shell).
 const MobileBottomNav = lazy(() => import('@/components/app/MobileBottomNav').then(m => ({ default: m.MobileBottomNav })));
+
+/** A group is found by its name or its @name (the slug in its link). Requests 483e1e5f. */
+function groupMatchesSearch(c: { name: string; slug?: string | null }, query: string) {
+  const q = query.trim().toLowerCase().replace(/^@/, '');
+  return c.name.toLowerCase().includes(q) || (c.slug || '').toLowerCase().includes(q);
+}
 
 export default function MessagesPage({ fullscreen = false }: { fullscreen?: boolean } = {}) {
   const { t: _copy } = _useCopy();
@@ -355,7 +365,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // and for group/channel/community chats alike.
   const { byId: chatPrefs, update: updateChatPref, seeReactions } = useChatPrefs();
   const groupChats = chatsFromMemberships(myMemberships, id => !!chatPrefs.get(roomChatId(id))?.listedAt).filter(c =>
-    !searchQuery.trim() || c.name.toLowerCase().includes(searchQuery.trim().toLowerCase()));
+    !searchQuery.trim() || groupMatchesSearch(c, searchQuery));
   const { isAuthenticated, walletAddress, user, isLoading: authLoading, openLoginModal } = useAuth();
   const guest = !authLoading && !isAuthenticated;
 
@@ -536,8 +546,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // Groups / Requests (/ Archived) tabs: in the header pill on computers, in
   // a row at the top of the list on phones.
   const cards = !fullscreen;
-  // Settings → Appearance → Chats as cards, off: the same page as a plain list.
-  const plainList = !useChatCards() && cards;
+  const plainList = useFeedSeparator() === 'line' && cards;
   const deskCards = cards && !phonePill;
   const clearHistory = useClearChatHistory();
   const [showArchived, setShowArchived] = useState(false);
@@ -555,20 +564,15 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   }, [selectedConversation, showPublicChat, selectedRoom]);
   const [clearTarget, setClearTarget] = useState<DeHubConversation | null>(null);
   const lastActivity = (c: DeHubConversation) => c.lastMessage?.createdAt || c.updatedAt;
-  const archivedConversations = richList
-    ? visibleConversations.filter(c => isArchived(chatPrefs.get(c.id), lastActivity(c)))
-    : [];
+  const archivedConversations = visibleConversations.filter(c => isArchived(chatPrefs.get(c.id), lastActivity(c)));
   const pinnedAt = (c: DeHubConversation) => {
     const at = chatPrefs.get(c.id)?.pinnedAt;
     return at ? new Date(at).getTime() : 0;
   };
-  const listedConversations = !richList
-    ? visibleConversations
-    : showArchived
-      ? archivedConversations
-      : visibleConversations
-          .filter(c => !isArchived(chatPrefs.get(c.id), lastActivity(c)))
-          .sort((a, b) => pinnedAt(b) - pinnedAt(a));
+  const otherConversations = visibleConversations.filter(c => !isArchived(chatPrefs.get(c.id), lastActivity(c)));
+  const phoneSearch = phonePill && !!searchQuery.trim();
+  const listedConversations = phoneSearch ? visibleConversations : showArchived ? archivedConversations
+    : richList ? otherConversations.sort((a, b) => pinnedAt(b) - pinnedAt(a)) : otherConversations;
   // Group, channel and community chats share the same settings, keyed by
   // community id: archived ones move under Archived chats, pinned ones go first.
   const roomPref = (c: { id: string }) => chatPrefs.get(roomChatId(c.id));
@@ -576,12 +580,10 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     const at = roomPref(c)?.pinnedAt;
     return at ? new Date(at).getTime() : 0;
   };
-  const archivedRooms = richList ? groupChats.filter(c => isArchived(roomPref(c))) : [];
-  const listedRooms = !richList
-    ? groupChats
-    : showArchived
-      ? archivedRooms
-      : groupChats.filter(c => !isArchived(roomPref(c))).sort((a, b) => roomPinnedAt(b) - roomPinnedAt(a));
+  const archivedRooms = groupChats.filter(c => isArchived(roomPref(c)));
+  const otherRooms = groupChats.filter(c => !isArchived(roomPref(c)));
+  const listedRooms = phoneSearch ? groupChats : showArchived ? archivedRooms
+    : richList ? otherRooms.sort((a, b) => roomPinnedAt(b) - roomPinnedAt(a)) : otherRooms;
   // "Add to tab" in a chat's menu.
   const tabMenuFor = (chatId: string): Pick<ChatOptionsHandlers, 'tabs' | 'onToggleTab' | 'onNewTabWith'> => (guest ? {} : {
     tabs: chatTabs.tabs.filter(x => !x.builtin).map(x => ({ id: x.id, name: x.name, emoji: x.emoji, has: x.chats.includes(chatId) })),
@@ -649,6 +651,9 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
       onToggleEncryption: conv.isGroup
         ? undefined
         : () => updateChatPref(conv.id, { encrypted: !chatPrefs.get(conv.id)?.encryptedAt }),
+      onToggleTranslateOut: conv.isGroup || !/^[0-9a-f]{24}$/i.test(conv.id)
+        ? undefined
+        : () => updateChatPref(conv.id, { translateOut: !chatPrefs.get(conv.id)?.translateOutAt }),
       onBlock: () => handleBlockConversationUser(conv),
       onClearHistory: () => setClearTarget(conv),
       onDelete: () => handleDeleteConversation(conv),
@@ -680,7 +685,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     e.preventDefault();
     holdToPick(id);
   };
-  // The phone list does not pin, archive or show mutes, but a chat you marked
+  // The phone list does not pin or show mutes, but a chat you marked
   // unread (here or on another device) still shows its marker.
   const unreadOnly = (p: ChatPref | undefined): ChatPref | undefined =>
     p?.markedUnread ? { ...p, pinnedAt: null, mutedUntil: null } : undefined;
@@ -698,6 +703,18 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const bulkAllUnread = bulkCount > 0
     && bulkChats.every(c => c.unreadCount > 0 || !!chatPrefs.get(c.id)?.markedUnread)
     && bulkRooms.every(c => !!roomPref(c)?.markedUnread);
+  const bulkAllArchived = bulkChats.every(c => isArchived(chatPrefs.get(c.id), lastActivity(c)))
+    && bulkRooms.every(c => isArchived(roomPref(c)));
+  const archiveWallet = useRef(walletAddress);
+  archiveWallet.current = walletAddress;
+  const bulkToggleArchive = async () => {
+    const ids = [...bulkChats.map(c => c.id), ...bulkRooms.map(c => roomChatId(c.id))];
+    setBulkIds(null);
+    for (const id of ids) {
+      if (archiveWallet.current !== walletAddress) break;
+      await updateChatPref(id, { archived: !bulkAllArchived });
+    }
+  };
   const bulkToggleUnread = () => {
     const unread = !bulkAllUnread;
     for (const c of bulkChats) updateChatPref(c.id, { unread });
@@ -890,6 +907,11 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     pendingConversationIdRef.current = null;
     const match = conversations.find(c => c.id === id);
     if (match) openConversation(match);
+    // A copied message link to a chat this account is not in.
+    else if (peekPendingChatLink(`dm:${id}`)) {
+      clearPendingChatLink();
+      toastNotInLinkedChat();
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, conversations, isLoading, pendingConversationTrigger]);
 
@@ -997,11 +1019,14 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
 
   useEffect(() => {
     if (!isMessagesRouteActive) return;
+    // Signed out, /app/messages is only a gate (or a hop to /chat for a
+    // Public Chat link): pushing ?chat=1 here would pull them back from /chat.
+    if (!isAuthenticated && !fullscreen) return;
     if (chatOpen && !chatEntryRef.current) {
       chatEntryRef.current = true;
       navigate(`${routeBase}?chat=1`);
     }
-  }, [chatOpen, isMessagesRouteActive, navigate, routeBase]);
+  }, [chatOpen, isMessagesRouteActive, navigate, routeBase, isAuthenticated, fullscreen]);
 
   // Back was pressed: the param is gone, so close the chat rather than leave
   // the route. This also clears a selection that would otherwise survive —
@@ -1133,6 +1158,11 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // its one page of history opens the sign-in sheet in place.
   // Block access for unauthenticated users everywhere else.
   if (!isAuthenticated && !fullscreen) {
+    // A copied Public Chat link opened while signed out: the public room is
+    // readable at riftn.com/chat, so carry the visitor there to see the line.
+    if (!authLoading && (new URLSearchParams(location.search).get('chat') === 'public' || peekPendingChatLink('public'))) {
+      return <Navigate to="/chat?chat=public" replace />;
+    }
     return <AuthGate description={_copy("copy.b38dabfa0639", { defaultValue: "Log in to access your messages and chat with others." })} />;
   }
 
@@ -1162,6 +1192,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
         conversations={conversations ?? []}
         myAddress={walletAddress}
         onPick={pickFromDrawer}
+        onNote={() => { setShowNewMessageDrawer(false); openNotesSheet(); }}
         onGroup={() => { setShowNewMessageDrawer(false); setNewChatKind('group'); }}
         onChannel={() => { setShowNewMessageDrawer(false); setNewChatKind('channel'); }}
       />
@@ -1306,13 +1337,14 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
         void chatTabs.addChats(tabId, [chatId]);
         toast.success(_copy('chatTabs.addedTo', { defaultValue: 'Added to {{name}}', name: tab.name }));
       }}
-      className={deskCards ? 'px-0 pb-0 pt-0' : undefined}
-      trailing={deskCards && (archivedCount > 0 || showArchived) ? (
+      className={deskCards ? 'px-0 pb-0 pt-0' : phonePill ? 'pl-3 pr-1 pb-0 pt-0' : undefined}
+      bare={phonePill}
+      trailing={(deskCards || phonePill) && (archivedCount > 0 || showArchived) ? (
         <button type="button" role="tab" data-chat-tab="archived" data-msg-cards-archived aria-selected={showArchived}
-          onClick={() => { setShowRequests(false); setShowArchived(!showArchived); }}>
+          onClick={() => { setShowRequests(false); setActiveTab('all'); setShowArchived(!showArchived); }}>
           <Archive className="h-3.5 w-3.5" />
           <span className="whitespace-nowrap">{_copy('chatMenu.archived', { defaultValue: 'Archived' })}</span>
-          {archivedCount > 0 && <span data-chat-tab-unread data-quiet>{archivedCount}</span>}
+          {archivedCount > 0 && <span data-chat-tab-unread data-quiet>{formatCount(archivedCount)}</span>}
         </button>
       ) : undefined}
     />
@@ -1407,6 +1439,25 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     />
   ) : null;
 
+  // Phones: no pill. The filter chips scroll sideways and the one menu, new
+  // chat and search stay pinned at the end of their row.
+  const phoneTop = phonePill ? (
+    <PhoneChatListTop
+      title={_copy('settings.chat', { defaultValue: 'Chat' })}
+      chips={tabBar}
+      searchValue={searchQuery}
+      onSearch={setSearchQuery}
+      searchPlaceholder={t('messages.searchConversations')}
+      onNewChat={openNewMessage}
+      onRefresh={() => refetch()}
+      refreshing={isRefetching}
+      picking={picking}
+      onTogglePicking={guest ? undefined : togglePicking}
+      onNewTab={guest ? undefined : () => setTabEditor({})}
+      onEditTabs={guest ? undefined : () => setTabManager(true)}
+    />
+  ) : null;
+
   // Same total as the nav icon: requests never light it.
   const dmUnread = liveConversations.reduce((sum, c) => sum + (c.isRequest ? 0 : c.unreadCount || 0), 0);
   const deskTop = deskCards ? (
@@ -1478,7 +1529,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
             here becomes a frosted rectangle. */}
         <div data-page-bento data-bento-flat data-msg-cards={cards ? '' : undefined} data-msg-plain={plainList ? '' : undefined} data-msg-cards-picking={deskCards && picking ? '' : undefined} className="relative w-full h-full flex flex-col overflow-hidden">
           {/* Header */}
-          {fullscreenTop ?? deskTop ?? (<PageIsland
+          {fullscreenTop ?? deskTop ?? phoneTop ?? (<PageIsland
             className={fullscreen ? 'shrink-0 top-0 lg:top-0 px-2 pt-2' : 'shrink-0'}
             icon={<BrandIcon src={messagesBubbleIcon} alt={_copy("copy.04d7b4833927", { defaultValue: "Messages" })} className="h-8 w-8 object-contain" />}
             title={_copy('settings.chat', { defaultValue: 'Chat' })}
@@ -1567,7 +1618,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
             </div>
           </PageIsland>)}
 
-          {!deskCards && tabBar}
+          {!deskCards && !phonePill && tabBar}
           {tabSheets}
 
           {/* Conversation List */}
@@ -1609,7 +1660,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                 <span className="flex items-center gap-1.5">
                   <span className="font-semibold text-white truncate">{t('publicChat.title')}</span>
                   {publicLastLine && <span data-room-last-at className="ml-auto shrink-0 text-zinc-500 text-sm tabular-nums">{formatTimeAgo(publicLastLine.created_at)}</span>}
-                  {!showPublicChat && <ReactionAlertBadge reactions={publicReactions} className={publicLastLine ? 'ml-0.5' : 'ml-auto'} />}
+                  {!showPublicChat && <ReactionAlertBadge reactions={publicReactions} rowKey="public" className={publicLastLine ? 'ml-0.5' : 'ml-auto'} />}
                   {/* Same white number as a private chat, not a red pill. */}
                   {publicUnread > 0 && !showPublicChat && <UnreadCountChip count={publicUnread} className={publicLastLine || publicReactions ? 'ml-0.5' : 'ml-auto'} />}
                 </span>
@@ -1735,7 +1786,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
               >
                 <Archive className="h-[18px] w-[18px]" />
                 <span className="flex-1">{_copy('chatMenu.archivedChats', { defaultValue: 'Archived chats' })}</span>
-                <span className="tabular-nums">{archivedCount}</span>
+                <span className="tabular-nums">{formatCount(archivedCount)}</span>
               </button>
             )}
 
@@ -1822,6 +1873,8 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
               chatIds={bulkChats.map(c => c.id)}
               allUnread={bulkAllUnread}
               onToggleUnread={bulkToggleUnread}
+              allArchived={bulkAllArchived}
+              onToggleArchive={phonePill && !guest && !inRequests && !bulkChats.some(c => c.isRequest) ? bulkToggleArchive : undefined}
               onDelete={bulkDelete}
               onReply={bulkReply}
               onCancel={() => setBulkIds(null)}
@@ -1863,9 +1916,18 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
         open={showMessageSelector}
         onOpenChange={setShowMessageSelector}
         onSelectDM={() => setShowNewConversation(true)}
+        onSelectNote={openNotesSheet}
         onSelectGroup={() => setNewChatKind('group')}
         onSelectChannel={() => setNewChatKind('channel')}
       />
+
+      {!guest && walletAddress && (
+        <NotesSheetHost onMessage={(author, reply) => {
+          // A reply to a note is sent as soon as the chat with them is ready.
+          if (reply) pendingAutoSendRef.current = { peerAddress: author.address.toLowerCase(), body: reply };
+          handleSelectSearchUser({ ...author, _id: author.address } as unknown as DeHubUser);
+        }} />
+      )}
 
       <NewGroupChannelSheet
         kind={newChatKind ?? 'group'}
