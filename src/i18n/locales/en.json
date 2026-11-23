@@ -7837,7 +7837,12 @@
     "saySomething": "Say something…",
     "replyTo": "Reply to {{name}}",
     "momentChat": "Moment chat",
-    "upNext": "Up next"
+    "upNext": "Up next",
+    "shareToMoment": "Share to Moment",
+    "goToPost": "Go to post",
+    "fromYourPost": "From your post",
+    "postNotPublic": "Only public posts can be shared to a Moment.",
+    "postNotMedia": "Only photo and video posts can be shared to a Moment."
   },
   "subscriptions": {
     "subscribersOnly": "Subscribers only",

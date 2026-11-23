@@ -17,7 +17,7 @@ import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { ChevronLeft, ChevronRight, Eye, Heart, Link2, Loader2, Repeat2, Volume2, VolumeX } from 'lucide-react';
+import { ArrowUpRight, ChevronLeft, ChevronRight, Eye, Heart, Link2, Loader2, Repeat2, Volume2, VolumeX } from 'lucide-react';
 import Close from '@/components/ui/cut-icons/close';
 import MoreVertical from '@/components/ui/cut-icons/morevertical';
 import Plus from '@/components/ui/cut-icons/add';
@@ -487,6 +487,11 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
     navigate(`/app/profile?id=${address}`);
   };
 
+  const openPost = (tokenId: number) => {
+    close();
+    navigate(`/app/post/${tokenId}`);
+  };
+
   const followAuthor = () => {
     if (!entry) return;
     if (!isAuthenticated) return openLoginModal();
@@ -709,12 +714,18 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
           )}
         </div>
 
-        {(item.caption || item.remixSourceId) && (
+        {(item.caption || item.remixSourceId || item.postTokenId != null) && (
           <div data-sv-caption data-with-room={roomComments.length > 0 && !docked ? 'true' : undefined}>
             {item.remixSourceId && (
               <button type="button" data-sv-original data-st-dark-glass onClick={openOriginal} disabled={openingOriginal}>
                 <Repeat2 className="w-4 h-4" />
                 {t('stories.watchOriginal', { defaultValue: 'Watch original moment' })}
+              </button>
+            )}
+            {item.postTokenId != null && (
+              <button type="button" data-sv-original data-sv-go-post data-st-dark-glass onClick={() => openPost(item.postTokenId!)}>
+                {t('stories.goToPost', { defaultValue: 'Go to post' })}
+                <ArrowUpRight className="w-4 h-4" />
               </button>
             )}
             {item.caption && <MomentCaption key={item.id} text={item.caption} publicContent={item.shareable === true} />}

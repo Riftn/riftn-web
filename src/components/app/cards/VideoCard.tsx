@@ -1,3 +1,4 @@
+import { canShareToMoment } from '@/lib/moment-share';
 import Minimize from "@/components/ui/cut-icons/exit-fullscreen";
 import FastForward from "@/components/ui/cut-icons/fast-forward";
 import Rewind from "@/components/ui/cut-icons/rewind";
@@ -3668,6 +3669,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
               postId={video.id}
               tokenId={videoTokenId}
               isOwnPost={!!isOwnPost}
+              canShareToMoment={!!video.videoUrl && !video.isAudio && canShareToMoment(video)}
               onBeforeNavigate={() => setShowOptionsDrawer(false)}
               linkText={video.description}
               onClose={() => setShowOptionsDrawer(false)}

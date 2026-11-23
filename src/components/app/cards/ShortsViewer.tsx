@@ -1,3 +1,4 @@
+import { canShareToMoment } from '@/lib/moment-share';
 import { useTranslation as _useCopy } from 'react-i18next';
 import { useVideoDownload } from "@/hooks/use-video-download";
 import { useMatureGate } from "./MatureContentGate";
@@ -3013,6 +3014,7 @@ export function ShortsViewer({ shorts: entries, initialIndex, onClose, onLoadMor
               postId={currentShort.id}
               tokenId={parseInt(currentShort.id, 10) || undefined}
               isOwnPost={isOwnShort}
+              canShareToMoment={!currentShort.gated && (!!currentShort.videoUrl || !!currentShort.imageUrls?.length) && canShareToMoment(currentShort)}
               onBeforeNavigate={() => { setShareSheetOpen(false); onClose(); }}
             />
             <button

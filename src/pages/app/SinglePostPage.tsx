@@ -1,3 +1,4 @@
+import { canShareToMoment } from '@/lib/moment-share';
 import { useTranslation as _useCopy } from 'react-i18next';
 import { CoAuthorInviteBanner } from '@/components/app/co-authors/CoAuthorInviteBanner';
 import { useRouteContentReady } from '@/hooks/use-route-content-ready';
@@ -1796,6 +1797,7 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
                 postId={id}
                 tokenId={id ? parseInt(id, 10) || undefined : undefined}
                 isOwnPost={!!(walletAddress && videoData.creatorId?.toLowerCase() === walletAddress.toLowerCase())}
+                canShareToMoment={!!videoData.videoUrl && !videoData.isAudio && canShareToMoment(videoData)}
                 onBeforeNavigate={() => setShowDesktopOptionsDrawer(false)}
                 linkText={videoData.description}
                 onClose={() => setShowDesktopOptionsDrawer(false)}

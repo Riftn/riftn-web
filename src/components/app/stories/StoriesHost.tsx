@@ -22,7 +22,7 @@ export default function StoriesHost() {
           onClose={closeViewer}
         />
       )}
-      {creator && <StoryCreator onClose={closeCreator} remixSource={creator.remixSource} />}
+      {creator && <StoryCreator onClose={closeCreator} remixSource={creator.remixSource} postTokenId={creator.postTokenId} />}
     </>
   );
 }

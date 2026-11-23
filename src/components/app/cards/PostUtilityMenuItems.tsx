@@ -36,6 +36,8 @@ import { useTogglePin, useIsPostPinned } from '@/hooks/use-pins';
 import { previewedLinkUrl, refreshLinkPreview } from '@/lib/api/link-preview';
 import { AuthContext } from '@/contexts/AuthContext';
 import { openCoAuthorSheet, useCoAuthors } from '@/lib/co-author-store';
+import { useStoriesStore } from '@/store/storiesStore';
+import { MomentAdd } from '@/components/app/stories/moment-icons';
 
 interface PostUtilityMenuItemsProps {
   postId?: string;
@@ -59,6 +61,11 @@ interface PostUtilityMenuItemsProps {
   onClose?: () => void;
   /** The host card shows the post's action bar (bookmark, info) under the post. */
   onActionBar?: boolean;
+  /**
+   * Your own public photo or video post: a "Share to Moment" row opens the
+   * Moment editor with it. Leave out for paid, held or followers-only posts.
+   */
+  canShareToMoment?: boolean;
 }
 
 const ROW =
@@ -73,6 +80,7 @@ export function PostUtilityMenuItems({
   linkText,
   onClose,
   onActionBar = false,
+  canShareToMoment = false,
 }: PostUtilityMenuItemsProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -132,6 +140,21 @@ export function PostUtilityMenuItems({
         >
           <Pin className={cn('w-5 h-5', isPinned && 'fill-current')} />
           {isPinned ? t('postOptions.unpinPost', 'Unpin from your profile') : t('postOptions.pinPost', 'Pin to your profile')}
+        </button>
+      )}
+
+      {isOwnPost && canShareToMoment && !!tokenId && (
+        <button
+          onClick={() => {
+            onClose?.();
+            onBeforeNavigate?.();
+            useStoriesStore.getState().openPostMoment(tokenId);
+          }}
+          className={cn(ROW, 'text-white')}
+          data-share-to-moment
+        >
+          <MomentAdd className="w-5 h-5" />
+          {t('stories.shareToMoment', 'Share to Moment')}
         </button>
       )}
 

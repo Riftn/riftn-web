@@ -7838,7 +7838,12 @@
     "saySomething": "Bir şey söyle…",
     "replyTo": "{{name}} kişisine yanıt ver",
     "momentChat": "An sohbeti",
-    "upNext": "Sıradaki"
+    "upNext": "Sıradaki",
+    "shareToMoment": "An'a paylaş",
+    "goToPost": "Gönderiye git",
+    "fromYourPost": "Gönderinden",
+    "postNotPublic": "Yalnızca herkese açık gönderiler An'a paylaşılabilir.",
+    "postNotMedia": "Yalnızca fotoğraf ve video gönderileri An'a paylaşılabilir."
   },
   "subscriptions": {
     "subscribersOnly": "Yalnızca aboneler",

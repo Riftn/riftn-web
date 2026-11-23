@@ -897,6 +897,7 @@ const GALLERY_AUTH = {
 } as unknown as AuthContextType;
 
 import { ComicDeck } from '@/components/app/comic/ComicDeck';
+import { PostUtilityMenuItems } from '@/components/app/cards/PostUtilityMenuItems';
 import { FeedPresetsRow } from '@/components/app/feeds/FeedFilterLine';
 import { NamedFeedsRow } from '@/components/app/feeds/NamedFeedsRow';
 import type { HomePostTypeValue } from '@/lib/feed-utils';
@@ -2010,6 +2011,24 @@ function LiveShareGallery() {
 }
 
 /**
+ * "Share to Moment" (Build 407651da): the row in your own photo/video post's
+ * menu. Tapping it opens the Moment editor on the post.
+ */
+function ShareToMomentGallery() {
+  const { t } = useTranslation();
+  return (
+    <AuthContext.Provider value={GALLERY_AUTH}>
+    <section data-page-bento data-share-to-moment-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">MOMENTS · {t('stories.shareToMoment', 'Share to Moment')}</h2>
+      <div data-keep-dark className="max-w-[360px] rounded-2xl bg-zinc-900/90 p-2 flex flex-col gap-1">
+        <PostUtilityMenuItems postId="990030" tokenId={990030} isOwnPost canShareToMoment />
+      </div>
+    </section>
+    </AuthContext.Provider>
+  );
+}
+
+/**
  * Disliking a post folds it out of the feed (the 👎 button below plays that
  * without casting a real vote; ↺ brings it back), and the profile Dislikes
  * tab's empty and private states.
@@ -2568,6 +2587,7 @@ export default function StateGalleryPage() {
         <LiveAvatarsGallery />
         <ReactionsGallery />
         <LiveShareGallery />
+        <ShareToMomentGallery />
         <DislikesGallery />
         <MenusGallery />
 

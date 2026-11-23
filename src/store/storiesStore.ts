@@ -23,11 +23,13 @@ export interface StoryRemixSource {
 interface StoriesState {
   mounted: boolean;
   viewer: { entries: ShelfEntry[]; author: number; item: number; from?: DOMRect | null } | null;
-  creator: { remixSource?: StoryRemixSource } | null;
+  creator: { remixSource?: StoryRemixSource; postTokenId?: number } | null;
   pending: PendingMoment | null;
   openViewer: (entries: ShelfEntry[], author: number, opts?: { item?: number; from?: DOMRect | null }) => void;
   closeViewer: () => void;
   openCreator: (remixSource?: StoryRemixSource) => void;
+  /** "Share to Moment": the creator opens on one of your own posts. */
+  openPostMoment: (postTokenId: number) => void;
   closeCreator: () => void;
   setPending: (pending: PendingMoment | null | ((p: PendingMoment | null) => PendingMoment | null)) => void;
 }
@@ -41,6 +43,7 @@ export const useStoriesStore = create<StoriesState>((set) => ({
     set({ mounted: true, viewer: { entries, author, item: opts.item ?? -1, from: opts.from ?? null } }),
   closeViewer: () => set({ viewer: null }),
   openCreator: (remixSource) => set({ mounted: true, creator: { remixSource } }),
+  openPostMoment: (postTokenId) => set({ mounted: true, viewer: null, creator: { postTokenId } }),
   closeCreator: () => set({ creator: null }),
   setPending: (pending) => set((s) => ({ pending: typeof pending === 'function' ? pending(s.pending) : pending })),
 }));

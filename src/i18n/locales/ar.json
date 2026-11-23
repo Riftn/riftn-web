@@ -7862,7 +7862,12 @@
     "saySomething": "قل شيئًا…",
     "replyTo": "رد على {{name}}",
     "momentChat": "دردشة اللحظة",
-    "upNext": "التالي"
+    "upNext": "التالي",
+    "shareToMoment": "مشاركة في لحظة",
+    "goToPost": "الانتقال إلى المنشور",
+    "fromYourPost": "من منشورك",
+    "postNotPublic": "يمكن مشاركة المنشورات العامة فقط في لحظة.",
+    "postNotMedia": "يمكن مشاركة منشورات الصور والفيديو فقط في لحظة."
   },
   "subscriptions": {
     "subscribersOnly": "للمشتركين فقط",

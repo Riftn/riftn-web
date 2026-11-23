@@ -6,8 +6,8 @@ import { translateCopy } from '@/i18n/copy';
 
 export interface MomentToShare {
   kind: 'photo' | 'video';
-  /** Photo: the flattened JPEG. Video: the clip as picked or recorded. */
-  file: Blob;
+  /** Photo: the flattened JPEG. Video: the clip as picked or recorded, or null for a video post (the server cuts it). */
+  file: Blob | null;
   overlay?: Blob | null;
   preview: string;
   fields: Omit<CreateStoryFields, 'draftVideoId'>;
@@ -32,7 +32,16 @@ export function shareMoment(moment: MomentToShare, onDone: () => void) {
     try {
       let created;
       if (moment.kind === 'photo') {
-        created = await createStory(moment.fields, { photo: moment.file }, { onProgress: p => update({ progress: Math.max(2, p) }) });
+        created = await createStory(moment.fields, { photo: moment.file ?? undefined }, { onProgress: p => update({ progress: Math.max(2, p) }) });
+      } else if (!moment.file) {
+        created = await createStory({ ...moment.fields, type: 'video' }, { overlay: moment.overlay ?? null }, { onProgress: p => update({ progress: Math.max(2, Math.round(p * 0.92)) }) });
+        update({ state: 'processing', progress: 100 });
+        const started = Date.now();
+        while (created.status === 'processing' && Date.now() - started < POLL_LIMIT_MS) {
+          await new Promise(r => setTimeout(r, POLL_MS));
+          created = (await getStory(created.id).catch(() => ({ item: created }))).item;
+        }
+        if (created.status === 'failed') throw new Error(created.error || 'failed');
       } else {
         const file = moment.file instanceof File ? moment.file : new File([moment.file], `moment.${moment.file.type.includes('mp4') ? 'mp4' : 'webm'}`, { type: moment.file.type || 'video/webm' });
         const draft = await createDraftVideo(file, 'short', { onProgress: p => update({ progress: Math.max(2, Math.round(p * 0.92)) }) });
