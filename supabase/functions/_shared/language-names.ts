@@ -31,7 +31,7 @@ export const LANGUAGE_NAMES: Record<string, string> = {
   it: 'Italian',
   pt: 'Portuguese',
   ru: 'Russian',
-  zh: 'Chinese',
+  zh: 'Simplified Chinese',
   zh_tw: 'Traditional Chinese (Taiwan)',
   ja: 'Japanese',
   ko: 'Korean',
@@ -158,5 +158,8 @@ export const LANGUAGE_NAMES: Record<string, string> = {
 export function languageNameFor(code: string | undefined): string | null {
   if (!code) return null;
   const lower = code.toLowerCase();
-  return LANGUAGE_NAMES[lower] ?? LANGUAGE_NAMES[lower.split(/[-_]/)[0]] ?? null;
+  const normalized = lower.replace(/-/g, '_');
+  if (/^zh_(?:hant|tw|hk|mo)(?:_|$)/.test(normalized)) return LANGUAGE_NAMES.zh_tw;
+  const key = Object.prototype.hasOwnProperty.call(LANGUAGE_NAMES, normalized) ? normalized : normalized.split('_')[0];
+  return Object.prototype.hasOwnProperty.call(LANGUAGE_NAMES, key) ? LANGUAGE_NAMES[key] : null;
 }
