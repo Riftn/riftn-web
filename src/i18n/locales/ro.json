@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Editează video", "hiddenTag": "Ascuns", "tapToEdit": "Apasă pentru a edita", "cover": "Acoperire", "trim": "Tăiere", "mirror": "Oglindit", "rotate": "Rotație", "hide": "Ascunde", "timer": "Timer", "sheetTitleAny": "Editează înainte de a trimite", "close": "Închide", "replace": "Înlocuiește", "hiddenUntilTap": "Ascuns până când îl ating", "pause": "Pauză", "play": "Redau video", "mute": "Mută", "unmute": "Dezmută", "scrub": "Scrolă prin video", "addMore": "Adaugă fotografii sau videoclipuri", "trimAria": "Trage capetele pentru a tăia", "coverAria": "Atinge un cadru pentru a-l seta ca acoperire", "coverHint": "Atinge un cadru pentru a-l seta ca acoperire", "coverOwn": "Imaginea ta", "coverAuto": "Automat", "uploadCover": "Încarca o imagine de acoperire", "mirrored": "Oglindit", "original": "Original", "rotate90": "Rotație 90°", "showNormally": "Arată normal", "showNormallyBody": "O văd imediat", "hideUntilTap": "Ascunde până la atingere", "hideUntilTapBody": "Abuzit până când îl atingi", "hidePrice": "Ascuns în spatele unui preț", "hidePriceBody": "Abuzit până când plătești", "priceUnavailable": "Nu în această conversație", "timerOff": "Oprit", "timerOffBody": "Rămâne în știre.", "timerViewBody": "Dispar pentru ambii după ce l-au văzut.", "confirm": "Confirmă", "lockedFor": "Deblochează pentru {{value1}} DHB", "lockedForUsd": "Dezblochează pentru {{value1}}", "editItem": "Editează obiectul {{value1}}", "kept": "{{time}} păstrat", "timerTimeBody": "Dispar pentru ambii {{value1}} după ce îl trimiți."},
+  "dmVideo": {"edit": "Editează video", "hiddenTag": "Ascuns", "tapToEdit": "Apasă pentru a edita", "cover": "Acoperire", "trim": "Tăiere", "mirror": "Oglindit", "rotate": "Rotație", "hide": "Ascunde", "timer": "Timer", "sheetTitleAny": "Editează înainte de a trimite", "close": "Închide", "replace": "Înlocuiește", "hiddenUntilTap": "Ascuns până când îl ating", "pause": "Pauză", "play": "Redau video", "mute": "Mută", "unmute": "Dezmută", "scrub": "Scrolă prin video", "addMore": "Adaugă fotografii sau videoclipuri", "trimAria": "Trage capetele pentru a tăia", "coverAria": "Atinge un cadru pentru a-l seta ca acoperire", "coverHint": "Atinge un cadru pentru a-l seta ca acoperire", "coverOwn": "Imaginea ta", "coverAuto": "Automat", "uploadCover": "Încarca o imagine de acoperire", "mirrored": "Oglindit", "original": "Original", "rotate90": "Rotație 90°", "showNormally": "Arată normal", "showNormallyBody": "O văd imediat", "hideUntilTap": "Ascunde până la atingere", "hideUntilTapBody": "Abuzit până când îl atingi", "hidePrice": "Ascuns în spatele unui preț", "hidePriceBody": "Abuzit până când plătești", "priceUnavailable": "Nu în această conversație", "timerOff": "Oprit", "timerOffBody": "Rămâne în știre.", "timerViewBody": "Dispar pentru ambii după ce l-au văzut.", "confirm": "Confirmă", "lockedFor": "Deblochează pentru {{value1}} tokenuri", "lockedForUsd": "Dezblochează pentru {{value1}}", "editItem": "Editează obiectul {{value1}}", "kept": "{{time}} păstrat", "timerTimeBody": "Dispar pentru ambii {{value1}} după ce îl trimiți."},
   "postBg": {
     "addMedia": "Adaugă o imagine, un GIF sau un videoclip",
     "changeMedia": "Schimbă imaginea, GIF-ul sau videoclipul",
@@ -2114,7 +2114,7 @@
     "ogHolders_one": "{{count}} deținător OG",
     "ogHolders_other": "{{count}} deținători OG",
     "ogChallengeTitle": "Adu înapoi deținătorii OG",
-    "ogChallengeBody": "Invită persoane care încă dețin DHB. Când se înscriu cu linkul tău de invitație și își păstrează DHB în portofelul Riftn, contează pentru tine aici.",
+    "ogChallengeBody": "Invită persoane care încă dețin tokenuri. Când se înscriu cu linkul tău de invitație și își păstrează tokenuri în portofelul Riftn, contează pentru tine aici.",
     "ogChallengeCta": "Obține linkul de invitație"
   },
   "dhbListing": {
@@ -12222,7 +12222,7 @@
           "4": "Pentru a înregistra o notă vocală, apăsați pictograma microfon.",
           "5": "Pentru a adăuga un GIF, apăsați pictograma GIF și căutați unul.",
           "6": "Folosește #hashtag-uri pentru a clasifica postarea (de ex., #crypto, #defi).",
-          "7": "Folosește $cashtag-uri pentru a face referire la token-uri (de ex., $RIFT, $ETH).",
+          "7": "Folosește $cashtag-uri pentru a face referire la token-uri (de ex., $BTC, $ETH).",
           "8": "Folosește @mențiuni pentru a eticheta alți utilizatori (de ex., @username).",
           "9": "Apăsați 'Postare' pentru a publica. Postarea ta apare imediat în flux."
         },

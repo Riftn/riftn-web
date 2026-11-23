@@ -76,7 +76,7 @@ export default function FractionsPage() {
         <SEOHead
           title={t('nftMarket.seoTitle', { defaultValue: 'NFT Market: buy and sell NFTs on BNB and Base | Riftn' })}
           description={t('nftMarket.seoDescription', {
-            defaultValue: 'Buy, sell and make offers on NFTs on BNB Chain and Base. Pay in BNB, ETH or DHB. Every trade swaps the NFT and the payment in one step.',
+            defaultValue: 'Buy, sell and make offers on NFTs on BNB Chain and Base. Pay in BNB, ETH or tokens. Every trade swaps the NFT and the payment in one step.',
           })}
           url="https://riftn.com/fractions?tab=nfts"
           image="https://riftn.com/og/nfts.jpg"

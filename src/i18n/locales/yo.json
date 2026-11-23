@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Ṣàtúnṣe fídíò", "hiddenTag": "Ó wà ní ìkọ̀kọ̀", "tapToEdit": "Tẹ láti ṣàtúnṣe", "cover": "Iboju", "trim": "Ge", "mirror": "Iro", "rotate": "Yiyi", "hide": "Fipamọ", "timer": "Akoko", "sheetTitleAny": "Ṣàtúnṣe kí o tó fi ránṣẹ́", "close": "Pa", "replace": "Rọ́pò", "hiddenUntilTap": "Titi di igba ti wọn ba tẹ e", "pause": "Duro", "play": "Ṣe fidio", "mute": "Pa ohùn", "unmute": "Tan ohùn", "scrub": "Ṣiṣan fidio naa", "addMore": "Fi awọn fọto tabi awọn fidio kun", "trimAria": "Fa awọn opin lati ge", "coverAria": "Tẹ fireemu kan lati ṣeto iboju", "coverHint": "Tẹ fireemu kan lati ṣeto iboju", "coverOwn": "Àwòrán rẹ", "coverAuto": "Àdáṣiṣẹ́", "uploadCover": "Po si aworan iboju", "mirrored": "Ti a ṣe afẹfẹ", "original": "Atilẹba", "rotate90": "Yiyi 90°", "showNormally": "Ṣe afihan ni deede", "showNormallyBody": "Wọn ri i lẹsẹkẹsẹ", "hideUntilTap": "Fipamọ titi ti wọn yoo tẹ", "hideUntilTapBody": "Ti a fi blur titi ti wọn yoo tẹ", "hidePrice": "Fipamọ lẹyin owo kan", "hidePriceBody": "Ti a fi blur titi ti wọn yoo sanwo fun ọ", "priceUnavailable": "Kò sí nínú ibaraẹnisọrọ yìí", "timerOff": "Pa", "timerOffBody": "Ó máa wà nínú ì tánràn náà.", "timerViewBody": "Ó máa parẹ́ fún ẹ̀yin méjèèjì ní kété tí wọ́n bá ti rí i.", "confirm": "Ìmúdájú", "lockedFor": "Ṣí i fún {{value1}} DHB", "lockedForUsd": "Ṣí àtìpà fún {{value1}}", "editItem": "Ṣàtúnṣe nǹkan {{value1}}", "kept": "{{time}} pa mọ́", "timerTimeBody": "Ó máa parẹ́ fún ẹ̀yin méjèèjì {{value1}} lẹ́yìn tí o bá ti rán an."},
+  "dmVideo": {"edit": "Ṣàtúnṣe fídíò", "hiddenTag": "Ó wà ní ìkọ̀kọ̀", "tapToEdit": "Tẹ láti ṣàtúnṣe", "cover": "Iboju", "trim": "Ge", "mirror": "Iro", "rotate": "Yiyi", "hide": "Fipamọ", "timer": "Akoko", "sheetTitleAny": "Ṣàtúnṣe kí o tó fi ránṣẹ́", "close": "Pa", "replace": "Rọ́pò", "hiddenUntilTap": "Titi di igba ti wọn ba tẹ e", "pause": "Duro", "play": "Ṣe fidio", "mute": "Pa ohùn", "unmute": "Tan ohùn", "scrub": "Ṣiṣan fidio naa", "addMore": "Fi awọn fọto tabi awọn fidio kun", "trimAria": "Fa awọn opin lati ge", "coverAria": "Tẹ fireemu kan lati ṣeto iboju", "coverHint": "Tẹ fireemu kan lati ṣeto iboju", "coverOwn": "Àwòrán rẹ", "coverAuto": "Àdáṣiṣẹ́", "uploadCover": "Po si aworan iboju", "mirrored": "Ti a ṣe afẹfẹ", "original": "Atilẹba", "rotate90": "Yiyi 90°", "showNormally": "Ṣe afihan ni deede", "showNormallyBody": "Wọn ri i lẹsẹkẹsẹ", "hideUntilTap": "Fipamọ titi ti wọn yoo tẹ", "hideUntilTapBody": "Ti a fi blur titi ti wọn yoo tẹ", "hidePrice": "Fipamọ lẹyin owo kan", "hidePriceBody": "Ti a fi blur titi ti wọn yoo sanwo fun ọ", "priceUnavailable": "Kò sí nínú ibaraẹnisọrọ yìí", "timerOff": "Pa", "timerOffBody": "Ó máa wà nínú ì tánràn náà.", "timerViewBody": "Ó máa parẹ́ fún ẹ̀yin méjèèjì ní kété tí wọ́n bá ti rí i.", "confirm": "Ìmúdájú", "lockedFor": "Ṣí i fún {{value1}} awọn ami-ami", "lockedForUsd": "Ṣí àtìpà fún {{value1}}", "editItem": "Ṣàtúnṣe nǹkan {{value1}}", "kept": "{{time}} pa mọ́", "timerTimeBody": "Ó máa parẹ́ fún ẹ̀yin méjèèjì {{value1}} lẹ́yìn tí o bá ti rán an."},
   "postBg": {
     "addMedia": "Ṣàfikún àwòrán, GIF tàbí fídíò",
     "changeMedia": "Yí àwòrán, GIF tàbí fídíò padà",
@@ -2121,7 +2121,7 @@
     "ogHolders_one": "Olùní OG {{count}}",
     "ogHolders_other": "Olùní OG {{count}}",
     "ogChallengeTitle": "Mú àwọn olùní OG padà wá",
-    "ogChallengeBody": "Pe àwọn ènìyàn tí wọ́n ṣì ní DHB. Nígbà tí wọ́n bá darapọ̀ pẹ̀lú ìjápọ̀ ìpè rẹ tí wọ́n sì tọ́jú DHB wọn sínú àpò owó Riftn wọn, wọ́n á kà fún ọ níbí.",
+    "ogChallengeBody": "Pe àwọn ènìyàn tí wọ́n ṣì ní awọn ami-ami. Nígbà tí wọ́n bá darapọ̀ pẹ̀lú ìjápọ̀ ìpè rẹ tí wọ́n sì tọ́jú awọn ami-ami wọn sínú àpò owó Riftn wọn, wọ́n á kà fún ọ níbí.",
     "ogChallengeCta": "Gba ìjápọ̀ ìpè rẹ"
   },
   "dhbListing": {
@@ -12234,7 +12234,7 @@
           "4": "Láti gba àkíyèsí ohùn sílẹ̀, tẹ àmì gbohungbohun náà.",
           "5": "Láti fi GIF kún un, tẹ àmì GIF kí o sì wá ọ̀kan.",
           "6": "Lo #hashtags láti ṣètò iṣẹ́ rẹ (bí àpẹẹrẹ, #crypto, #defi).",
-          "7": "Lo $cashtags sí àwọn àmì ìtọ́kasí (bí àpẹẹrẹ, $RIFT, $ETH).",
+          "7": "Lo $cashtags sí àwọn àmì ìtọ́kasí (bí àpẹẹrẹ, $BTC, $ETH).",
           "8": "Lo @ mẹ́nu kan láti fi àmì sí àwọn olùṣàmúlò mìíràn (bí àpẹẹrẹ, @lorúkọ oníṣe).",
           "9": "Tẹ 'Post' láti ṣe ìtẹ̀jáde. Ifiweranṣẹ rẹ farahàn nínú oúnjẹ lẹ́sẹ̀kẹsẹ̀."
         },

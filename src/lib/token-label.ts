@@ -1,8 +1,8 @@
 import i18n from 'i18next';
+import { isDhbSymbol } from '@/lib/market/dhb-symbols';
 
 /** Display wording only; callers keep the original symbol for settlement. */
-export function tokenLabel(symbol: string | null | undefined = 'DHB'): string {
-  return !symbol || /^(?:\$?DHB|DEHUB)$/i.test(symbol.trim())
-    ? i18n.t('buyCoins.tokensUnit', { defaultValue: 'tokens' })
-    : symbol;
+export function tokenLabel(symbol?: string | null): string {
+  if (symbol?.trim() && !isDhbSymbol(symbol)) return symbol;
+  return i18n.t('buyCoins.tokensUnit', { defaultValue: 'tokens' }) || 'tokens';
 }

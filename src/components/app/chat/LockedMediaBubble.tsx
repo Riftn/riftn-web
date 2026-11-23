@@ -99,7 +99,7 @@ export function LockedMediaBubble({ message, onOpenImage }: LockedMediaBubblePro
   useEffect(() => (!signedIn ? undefined : onDmMediaUnlocked(data => {
     if (data.messageId !== message._id) return;
     void queryClient.invalidateQueries({ queryKey: lockedMediaKey(message._id) });
-    if (mine) toast.success(t('dmPaidLock.lockedUnlockedByThem', { defaultValue: 'Your locked {{kind}} was unlocked: +{{amount}} DHB', kind: lock.kind === 'video' ? 'video' : lock.kind === 'file' ? 'file' : 'photo', amount: formatPrice(data.amount) }));
+    if (mine) toast.success(t('dmPaidLock.lockedUnlockedByThem', { defaultValue: 'Your locked {{kind}} was unlocked: +{{amount}} tokens', kind: lock.kind === 'video' ? 'video' : lock.kind === 'file' ? 'file' : 'photo', amount: formatPrice(data.amount) }));
   })), [signedIn, message._id, mine, lock.kind, queryClient, t]);
 
   const view = status?.lock ?? lock;
