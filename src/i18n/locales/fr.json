@@ -9832,6 +9832,7 @@
     "groupVoiceCall": "Appel vocal de groupe",
     "groupVideoCall": "Appel vidéo de groupe",
     "callingGroup": "Appel du groupe...",
+    "waitingForPeople": "En attente de participants...",
     "isCalling": "{{name}} vous appelle",
     "leave": "Quitter",
     "joinCall": "Rejoindre",

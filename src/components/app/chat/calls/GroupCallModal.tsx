@@ -8,6 +8,7 @@ import VideoOff from '@/components/ui/cut-icons/video-off';
 import { useCall } from '@/contexts/CallContext';
 import { useAuth } from '@/contexts/AuthContext';
 import type { GroupParticipant } from '@/hooks/use-call';
+import { PUBLIC_CHAT_CALL_ID } from '@/lib/group-call';
 import { CallDuration } from './CallDuration';
 import {
   CallStage,
@@ -76,7 +77,9 @@ const GroupCallModal: React.FC = () => {
     const status = isIncoming
       ? t('calls.isCalling', { name: caller.name, defaultValue: '{{name}} is calling' })
       : isRinging
-        ? t('calls.callingGroup', 'Ringing the group...')
+        ? currentCall.group_id === PUBLIC_CHAT_CALL_ID
+          ? t('calls.waitingForPeople', 'Waiting for people to join...')
+          : t('calls.callingGroup', 'Ringing the group...')
         : t('calls.connecting');
     return (
       <CallStage peer={stagePeer} onMinimize={isIncoming ? undefined : minimizeCall} minimizeLabel={t('calls.minimize')}>

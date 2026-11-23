@@ -9828,6 +9828,7 @@
     "groupVoiceCall": "Llamada de voz grupal",
     "groupVideoCall": "Videollamada grupal",
     "callingGroup": "Llamando al grupo...",
+    "waitingForPeople": "Esperando a que se una gente...",
     "isCalling": "{{name}} está llamando",
     "leave": "Salir",
     "joinCall": "Unirse",

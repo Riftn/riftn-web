@@ -9852,6 +9852,7 @@
     "groupVoiceCall": "مكالمة صوتية جماعية",
     "groupVideoCall": "مكالمة فيديو جماعية",
     "callingGroup": "جارٍ الاتصال بالمجموعة...",
+    "waitingForPeople": "في انتظار انضمام الآخرين...",
     "isCalling": "{{name}} يتصل",
     "leave": "مغادرة",
     "joinCall": "انضمام",
