@@ -14,6 +14,8 @@ export interface LiveChatRoom {
   createdAt?: string;
   settings?: Record<string, unknown>;
   moderators?: string[];
+  /** Super moderators: the only ones who can ban, mute or kick another moderator. */
+  superModerators?: string[];
   slowMode?: boolean;
   slowModeSeconds?: number;
   subscribersOnly?: boolean;

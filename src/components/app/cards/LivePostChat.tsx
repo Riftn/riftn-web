@@ -271,9 +271,12 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
     onMentionInsert: (_user, newText) => setNewMessage(newText),
   });
 
-  const { messages: chatMessages, isLoading, isSending, send, retrySend, discardSend, editMessage, deleteMessage, addReaction, removeReaction, isModerator, isBanned: bannedHere, mutedUntil } = useLiveChatMessages(streamId);
+  const { messages: chatMessages, isLoading, isSending, send, retrySend, discardSend, editMessage, deleteMessage, addReaction, removeReaction, isModerator, isBanned: bannedHere, mutedUntil, staff, isSuperModerator } = useLiveChatMessages(streamId);
   // The stream's creator and the moderators they appointed act on other people's lines.
   const canModerate = isHost || isModerator;
+  // Platform moderators can only be timed out or banned by a super moderator.
+  const canModerateSender = (address?: string | null) =>
+    canModerate && !!address && (isSuperModerator || !staff.includes(address.toLowerCase()));
   // A stream timeout quiets this viewer here until it runs out, then lets go.
   const [muted, setMuted] = useState(false);
   useEffect(() => {
@@ -614,7 +617,7 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
       label: heldMsg.id === pinnedMessageId ? _copy('copy.ee3c71613054', { defaultValue: 'Unpin' }) : _copy('chatHold.pin', { defaultValue: 'Pin' }),
       onSelect: () => { if (heldMsg.id === pinnedMessageId) void handleUnpinMessage(); else void handlePinMessage(heldMsg); },
     });
-    if (canModerate && !isMine(heldMsg) && heldMsg.sender_address) holdActions.push({
+    if (canModerateSender(heldMsg.sender_address) && !isMine(heldMsg)) holdActions.push({
       key: 'moderate', icon: <ShieldCheck />, label: t('liveChatModeration.title', 'Moderate'),
       // The full list (timeouts, ban, make moderator) is the existing menu,
       // opened where the line is once the sheet has gone.
@@ -668,7 +671,7 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
     if (menuTranslate) menuActions.push(menuTranslate.isTranslated
       ? { key: 'original', icon: menuIcons.translate, label: _copy('chatHold.showOriginal', { defaultValue: 'Original' }), onSelect: () => menuTranslate.toggle() }
       : { key: 'translate', icon: menuIcons.translate, label: _copy('chatHold.translate', { defaultValue: 'Translate' }), hint: 'T', onSelect: () => menuTranslate.toggle() });
-    if (canModerate && !mineLine && menuMsg.sender_address) menuActions.push({
+    if (canModerateSender(menuMsg.sender_address) && !mineLine) menuActions.push({
       key: 'moderate', icon: menuIcons.ban, label: t('liveChatModeration.title', 'Moderate'),
       // Timeouts, ban and make moderator: the moderation list, where the menu was.
       onSelect: () => {
@@ -959,7 +962,7 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
           menu or the hold sheet. Portalled: the chat often sits inside a
           blurred or transformed panel, which turns `fixed` into "fixed to
           that panel" and threw the menu off screen. */}
-      {contextMenuMsg && canModerate && !isMine(contextMenuMsg) && contextMenuMsg.message_type !== 'system' && contextMenuMsg.sender_address && createPortal(
+      {contextMenuMsg && canModerateSender(contextMenuMsg.sender_address) && !isMine(contextMenuMsg) && contextMenuMsg.message_type !== 'system' && contextMenuMsg.sender_address && createPortal(
         <div
           ref={contextMenuRef}
           data-glass-menu

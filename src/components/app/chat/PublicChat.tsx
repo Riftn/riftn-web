@@ -235,6 +235,13 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
     );
   }, [walletAddress, roomDetails, selectedRoom]);
   const isModerator = isRoomModerator;
+  // Moderators can't ban each other: only a super moderator can.
+  const canBanSender = useCallback((address?: string) => {
+    const mods = (roomDetails?.moderators || []).map((m: string) => m.toLowerCase());
+    const supers = (roomDetails?.superModerators || []).map((m: string) => m.toLowerCase());
+    if (!address || !mods.includes(address.toLowerCase())) return true;
+    return !!walletAddress && supers.includes(walletAddress.toLowerCase());
+  }, [roomDetails, walletAddress]);
 
   // Convert API messages to local format
   const messages: Message[] = useMemo(() => apiMessages.map(toLocalMessageCached), [apiMessages]);
@@ -755,7 +762,7 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
         showActions={isModerator}
         moderators={roomDetails?.moderators}
         currentUserAddress={walletAddress || undefined}
-        onBan={handleBanUser}
+        onBan={canBanSender(message.userId) ? handleBanUser : undefined}
         onUnban={handleUnbanUser}
         onDelete={handleDeleteMessage}
         onEdit={handleEditMessage}
@@ -781,7 +788,7 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
           {row}
         </Fragment>
       );
-    }), [filteredMessages, buyBotHidden, hideBuyBot, isModerator, roomDetails?.moderators, walletAddress, handleBanUser, handleUnbanUser, handleDeleteMessage, handleEditMessage, isAuthenticated, addReaction, promptSignIn, removeReaction, handleReply, retrySend, discardSend, handleSeeMessages, handleCopyLink, replyTo, handleTogglePin, pinnedMessage?.id, unreadAnchor, selectedRoomId]);
+    }), [filteredMessages, buyBotHidden, hideBuyBot, isModerator, roomDetails?.moderators, walletAddress, handleBanUser, canBanSender, handleUnbanUser, handleDeleteMessage, handleEditMessage, isAuthenticated, addReaction, promptSignIn, removeReaction, handleReply, retrySend, discardSend, handleSeeMessages, handleCopyLink, replyTo, handleTogglePin, pinnedMessage?.id, unreadAnchor, selectedRoomId]);
 
   return (
     <div data-page-bento data-bento-flat className="flex flex-col h-full overflow-hidden overflow-x-hidden">
