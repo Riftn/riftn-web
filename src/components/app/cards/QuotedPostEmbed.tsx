@@ -25,6 +25,7 @@ import Lock from "@/components/ui/cut-icons/privacy";
 import Play from "@/components/ui/cut-icons/play";
 
 import { getMediaUrl } from '@/lib/api/dehub/core';
+import { DEHUB_CDN_BASE } from '@/lib/api/dehub';
 import { buildAvatarUrl, extractAvatarPath, buildFeedImageUrls, buildImageUrl } from '@/lib/media-url';
 import { isHoldGated, isSubscriberGated } from '@/lib/content-gate';
 import { isTokenUnlocked } from '@/lib/unlocked-tokens-store';
@@ -60,6 +61,12 @@ export function resolveQuotedPostMedia(post: DeHubNFT) {
   const thumbnailUrl = hasVideo
     ? (getMediaUrl(post.thumbnail_url) || buildImageUrl(post.tokenId, post.imageUrl))
     : firstImageUrl;
+  // A live's cover is read from images/{tokenId} above. A live set up without
+  // one has only the stream's own frame (live/thumbnails/…), so that is the
+  // fallback when the cover does not load.
+  const isLive = postType === 'live';
+  const streamFrame = isLive ? (post.stream as { thumbnail?: string } | undefined)?.thumbnail : undefined;
+  const fallbackUrl = streamFrame ? (streamFrame.startsWith('http') ? streamFrame : `${DEHUB_CDN_BASE}${streamFrame.replace(/^\/+/, '')}`) : undefined;
 
   // Gated content must stay gated in embeds (quotes, DM shares) — otherwise a
   // locked PPV post shared into a DM leaks its media as a free preview. Same
@@ -78,17 +85,21 @@ export function resolveQuotedPostMedia(post: DeHubNFT) {
   );
   const gated = ((isPPV || isHoldLocked) && !canBypassGating) || isSubGated;
 
-  return { hasVideo, hasImage, thumbnailUrl, imageCount: resolvedImageUrls?.length ?? 0, gated, isPPV };
+  return { hasVideo, hasImage, thumbnailUrl, fallbackUrl, isLive, imageCount: resolvedImageUrls?.length ?? 0, gated, isPPV };
 }
 
 /** The media block of an embedded post — thumbnail, play glyph, image count, gate. */
 export function QuotedPostMedia({ post, className }: { post: DeHubNFT; className?: string }) {
   const { t: _copy } = _useCopy();
-  const { hasVideo, hasImage, thumbnailUrl, imageCount, gated, isPPV } = resolveQuotedPostMedia(post);
+  const { hasVideo, hasImage, thumbnailUrl: firstUrl, fallbackUrl, isLive, imageCount, gated, isPPV } = resolveQuotedPostMedia(post);
+  const [failed, setFailed] = useState<string[]>([]);
+  const thumbnailUrl = [firstUrl, fallbackUrl].find((url): url is string => !!url && !failed.includes(url));
   // Only draw the media box when there is something to put in it. Text and
   // poll posts can still come back typed as "image" with no image URL, which
-  // used to leave an empty grey block above the quoted text.
+  // used to leave an empty grey block above the quoted text. A live whose
+  // pictures all failed is dropped the same way.
   if (!thumbnailUrl && !hasVideo) return null;
+  const showPlay = hasVideo || isLive;
   return (
     <div className={`relative w-full aspect-video max-h-[200px] sm:max-h-[240px] bg-zinc-900 overflow-hidden ${className || ''}`}>
       {thumbnailUrl && (
@@ -97,6 +108,7 @@ export function QuotedPostMedia({ post, className }: { post: DeHubNFT; className
           alt=""
           className={`w-full h-full object-cover rounded-lg ${gated ? 'blur-2xl scale-110 select-none pointer-events-none' : ''}`}
           loading="lazy"
+          onError={() => setFailed((list) => (list.includes(thumbnailUrl) ? list : [...list, thumbnailUrl]))}
         />
       )}
       {gated && (
@@ -109,7 +121,7 @@ export function QuotedPostMedia({ post, className }: { post: DeHubNFT; className
           </p>
         </div>
       )}
-      {!gated && hasVideo && (
+      {!gated && showPlay && (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-10 h-10 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center">
             <Play className="w-5 h-5 text-white fill-white ml-0.5" />
