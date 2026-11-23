@@ -969,15 +969,15 @@ function getNavigationLink(notification: DeHubNotification): string | null {
   const FEATURE_COMMENT_TYPES = ['feature_request_comment', 'feature_request_reply', 'feature_request_mention', 'feature_request_activity', 'feature_request_comment_like'];
   if ((notification.type as string) === 'feature_request_like' || (notification.type as string) === 'feature_request_new' || (notification.type as string) === 'feature_request_status' || FEATURE_COMMENT_TYPES.includes(notification.type as string)) {
     const requestId = customReferenceId(notification);
-    if (!requestId) return '/features';
+    if (!requestId) return '/build';
     if (!FEATURE_COMMENT_TYPES.includes(notification.type as string)) {
-      return `/features?request=${encodeURIComponent(requestId)}`;
+      return `/build?request=${encodeURIComponent(requestId)}`;
     }
     // The row carries the comment it is about, so the thread opens on that row
     // rather than at the top — the same `?comment=` a post notification uses.
     const commentId = (notification as DeHubNotification & { _customCommentId?: string })._customCommentId;
     const commentSuffix = commentId ? `&comment=${encodeURIComponent(commentId)}` : '';
-    return `/features?request=${encodeURIComponent(requestId)}&comments=1${commentSuffix}`;
+    return `/build?request=${encodeURIComponent(requestId)}&comments=1${commentSuffix}`;
   }
   // Joins, mentions and @here all land on the community they came from. The
   // reference is normally its slug, but the join trigger has written the uuid

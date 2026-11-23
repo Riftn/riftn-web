@@ -35,5 +35,5 @@ export function getShippedFeatureDestination(feature: ShippedFeatureDestinationI
   const matchedDestination = DESTINATION_RULES.find(({ terms }) => terms.test(searchableText));
   if (matchedDestination) return matchedDestination.path;
 
-  return `/app/features?tab=shipped&feature=${encodeURIComponent(feature.id)}`;
+  return `/build?tab=shipped&feature=${encodeURIComponent(feature.id)}`;
 }

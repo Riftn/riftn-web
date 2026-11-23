@@ -945,7 +945,7 @@ export default function SinglePostPage(props: SinglePostPageProps = {}) {
   if (!props.overrideId && postId && FEATURE_REQUEST_ID.test(postId)) {
     const params = new URLSearchParams(search);
     params.delete('feature');
-    return <Navigate replace to={`/app/features?feature=${encodeURIComponent(postId)}${params.size ? `&${params}` : ''}`} />;
+    return <Navigate replace to={`/build?feature=${encodeURIComponent(postId)}${params.size ? `&${params}` : ''}`} />;
   }
 
   if (slug && slugQuery.isLoading) {

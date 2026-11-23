@@ -86,7 +86,7 @@ describe('entity sitemaps', () => {
       { id: 'f3', title: 'bug', description: 'broken', status: 'open' },
     ]]);
     parses(features);
-    expect(locs(features)).toEqual(['https://riftn.com/features?feature=f1']);
+    expect(locs(features)).toEqual(['https://riftn.com/build?feature=f1']);
   });
 
   it('is a valid, empty urlset when a table has no rows', () => {

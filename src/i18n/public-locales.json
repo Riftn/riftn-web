@@ -1,5 +1,5 @@
 {
-  "version": "e95835874a18d7fa",
+  "version": "5bdfd6723dac52e4",
   "routes": {
     "/": [
       "ar",
@@ -142,6 +142,13 @@
       "tr"
     ],
     "/bridge": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/build": [
       "ar",
       "es",
       "fr",
@@ -513,13 +520,6 @@
       "tr"
     ],
     "/explore": [
-      "ar",
-      "es",
-      "fr",
-      "nl",
-      "tr"
-    ],
-    "/features": [
       "ar",
       "es",
       "fr",

@@ -142,7 +142,7 @@ const SCROLL_NAV_ITEMS = [
   { icon: Landmark, label: 'DAO', path: '/dao' },
   { icon: Trophy, label: 'Leaderboard', path: '/app/leaderboard' },
   { icon: Bookmark, label: 'Bookmarks', path: '/app/bookmarks' },
-  { icon: Lightbulb, label: 'Features', path: '/features' },
+  { icon: Lightbulb, label: 'Features', path: '/build' },
   { icon: MessageSquare, label: 'Feedback', path: '/feedback' },
   { icon: Map, label: 'Guide', path: '/guide' },
   { icon: BarChart3, label: 'Stats', path: '/stats' },
@@ -356,7 +356,7 @@ export function MobileBottomNav() {
     handleNavClick(e, path);
   };
 
-  const onRequests = /^\/(?:app\/)?features\/?$/i.test(location.pathname);
+  const onRequests = /^\/build\/?$/i.test(location.pathname);
   const warmCreate = () => {
     if (isAuthenticated && !onRequests) warmPostComposer();
   };

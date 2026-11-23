@@ -124,7 +124,7 @@ export function ShippedFeatureNotificationModal() {
                 type="button"
                 onClick={() => handleViewShipped(
                   isPlural
-                    ? '/app/features?tab=shipped'
+                    ? '/build?tab=shipped'
                     : getShippedFeatureDestination(shippedItems[0])
                 )}
                 className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold bg-white text-black hover:bg-zinc-200 transition-all"

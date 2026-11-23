@@ -354,6 +354,17 @@ function NftsRedirect() {
   return <Navigate to={`/fractions?tab=nfts${rest ? `&${rest}` : ''}${hash}`} replace />;
 }
 
+/**
+ * The Build board (once Requests, once Features) lives at /build. Every older
+ * address forwards with its ?feature= / ?request= / ?comment= / ?tab= and hash
+ * intact, so shared cards, notifications and old bookmarks still land on the
+ * right request. The edge 301s direct hits the same way.
+ */
+function BuildRedirect() {
+  const { search, hash } = useLocation();
+  return <Navigate to={`/build${search}${hash}`} replace />;
+}
+
 function LegacyBuilderRedirect() {
   const { pathname, search, hash } = useLocation();
   return <Navigate to={`${pathname.replace('/app/builder', '/builder')}${search}${hash}`} replace />;
@@ -709,10 +720,12 @@ function AppContent() {
           <Route path="/mcp" element={<Navigate to="/connect" replace />} />
           <Route path="/developers" element={<Navigate to="/docs/developers" replace />} />
           <Route path="/developer" element={<Navigate to="/docs/developers" replace />} />
-          {/* The sidebar calls this board "Requests" but it has always lived at
-              /features, so the URL people actually type went to the username
-              catch-all and bounced them to the homepage. */}
-          <Route path="/requests" element={<Navigate to="/features" replace />} />
+          {/* The Build board's older addresses. */}
+          <Route path="/requests" element={<BuildRedirect />} />
+          <Route path="/features" element={<BuildRedirect />} />
+          <Route path="/app/features" element={<BuildRedirect />} />
+          <Route path="/app/requests" element={<BuildRedirect />} />
+          <Route path="/app/build" element={<BuildRedirect />} />
           {/* Renamed to /converter — kept as a redirect for anyone with the old link. */}
           <Route path="/yt-dlp" element={<Navigate to="/converter" replace />} />
           {/* The app's sign-in help link points here; without it the address fell
@@ -768,7 +781,7 @@ function AppContent() {
             <Route path="/stats" element={null} />
             {/* Revenue & costs was parked here before it joined /stats. */}
             <Route path="/stats/money" element={<Navigate to="/stats" replace />} />
-            <Route path="/features" element={null} />
+            <Route path="/build" element={null} />
             <Route path="/feedback" element={null} />
             <Route path="/compare" element={<Suspense fallback={<PageLoader />}><ComparePage /></Suspense>} />
             <Route path="/app/compare" element={<Suspense fallback={<PageLoader />}><ComparePage /></Suspense>} />
@@ -835,10 +848,8 @@ function AppContent() {
               <Route path="buy" element={null} />
               <Route path="agents" element={null} />
               <Route path="tv" element={null} />
-              <Route path="features" element={null} />
               <Route path="feedback" element={null} />
               <Route path="planned" element={null} />
-              <Route path="requests" element={<Navigate to="/app/features" replace />} />
               <Route path="governance" element={null} />
               <Route path="dao" element={null} />
               <Route path="governance/:proposalId" element={<Suspense fallback={<PageLoader />}><GovernanceProposalPage /></Suspense>} />

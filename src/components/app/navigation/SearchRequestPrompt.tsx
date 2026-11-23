@@ -68,7 +68,7 @@ export function SearchRequestPrompt({ query, source, compact = false, onNavigate
           <span>{t('sidebar.requestSent', 'Sent to Build')}</span>
         </div>
         <p className="mt-1 text-xs text-zinc-500">{t('sidebar.requestSentHint', 'We will tell you when it ships.')}</p>
-        <Link to="/app/features" onClick={onNavigate} className="mt-2 inline-block text-xs font-semibold text-zinc-300 underline-offset-2 hover:underline">
+        <Link to="/build" onClick={onNavigate} className="mt-2 inline-block text-xs font-semibold text-zinc-300 underline-offset-2 hover:underline">
           {t('sidebar.requestSeeIt', 'See it on Build')}
         </Link>
       </div>
