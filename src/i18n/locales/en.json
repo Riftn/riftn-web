@@ -23014,7 +23014,49 @@
       "label": "Market prices",
       "gold": "Gold (oz)"
     },
-    "withFriends": "Play with friends"
+    "withFriends": "Play with friends",
+    "sillycoin": {
+      "title": "SillyCoin",
+      "cardBlurb": "Tap to mine, buy upgrades, send coins to friends. Just for fun, no value.",
+      "intro": "Tap to mine, upgrade, send coins to friends.",
+      "seoTitle": "SillyCoin mining simulator | Riftn Arcade",
+      "seoDescription": "Tap to mine SillyCoins, buy a bigger pick and auto-miners, and send coins to friends. Just for fun: SillyCoins have no value. Free on Riftn.",
+      "balanceLabel": "Your SillyCoins",
+      "rates": "{{tap}} per tap · {{second}} a second",
+      "tapLabel": "Tap to mine",
+      "tapHint": "Tap the coin to mine. Up to 15 taps a second count.",
+      "signInPrompt": "Sign in to save your SillyCoins, buy upgrades and send coins to friends.",
+      "upgradesTitle": "Upgrades",
+      "upgrade": {
+        "pick": "Bigger pick",
+        "miner": "Auto-miner",
+        "rig": "Drill rig"
+      },
+      "bought": {
+        "pick": "Bigger pick bought",
+        "miner": "Auto-miner bought",
+        "rig": "Drill rig bought"
+      },
+      "level": "Lv {{level}}",
+      "effectTap": "+{{n}} per tap",
+      "effectSecond": "+{{n}} a second",
+      "maxed": "Max",
+      "idleNote": "Auto-miners keep digging while you are away, for up to 8 hours.",
+      "awayToast": "Your miners dug {{coins}} SillyCoins while you were away ({{hours}} h).",
+      "sendTitle": "Send SillyCoins",
+      "toPlaceholder": "@username",
+      "amountPlaceholder": "How many",
+      "notePlaceholder": "Note (optional)",
+      "sendButton": "Send",
+      "sendMissing": "Pick who to send to and how many.",
+      "sent": "Sent {{coins}} SillyCoins to {{name}}",
+      "sendNote": "They get the coins straight away. SillyCoins stay in the game: no wallet, no token.",
+      "fromLine": "From {{name}}",
+      "toLine": "To {{name}}",
+      "boardTitle": "Top miners",
+      "boardEmpty": "Nobody has mined yet. Be the first.",
+      "disclaimer": "SillyCoins are just for fun and have no value. They are not a cryptocurrency, never touch your wallet, and cannot be bought, sold or cashed out."
+    }
   },
   "hideReply": {
     "hide": "Hide reply",

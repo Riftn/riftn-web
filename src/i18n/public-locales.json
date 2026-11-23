@@ -1,5 +1,5 @@
 {
-  "version": "98d77d0b50012008",
+  "version": "f9a2f2f826650540",
   "routes": {
     "/": [
       "ar",
@@ -107,6 +107,13 @@
       "tr"
     ],
     "/arcade/okey": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/arcade/sillycoin": [
       "ar",
       "es",
       "fr",

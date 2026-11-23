@@ -23040,7 +23040,49 @@
       "label": "Piyasa fiyatları",
       "gold": "Altın (ons)"
     },
-    "withFriends": "Arkadaşlarla oyna"
+    "withFriends": "Arkadaşlarla oyna",
+    "sillycoin": {
+      "title": "SillyCoin",
+      "cardBlurb": "Kazmak için dokun, yükseltme al, arkadaşlarına coin gönder. Sadece eğlence için, değeri yok.",
+      "intro": "Kazmak için dokun, yükselt, arkadaşlarına coin gönder.",
+      "seoTitle": "SillyCoin madencilik simülatörü | Riftn Arcade",
+      "seoDescription": "SillyCoin kazmak için dokun, daha büyük kazma ve otomatik madenciler al, arkadaşlarına coin gönder. Sadece eğlence için: SillyCoin’lerin değeri yok. Riftn’de ücretsiz.",
+      "balanceLabel": "SillyCoin’lerin",
+      "rates": "dokunuş başına {{tap}} · saniyede {{second}}",
+      "tapLabel": "Kazmak için dokun",
+      "tapHint": "Kazmak için coin’e dokun. Saniyede en fazla 15 dokunuş sayılır.",
+      "signInPrompt": "SillyCoin’lerini kaydetmek, yükseltme almak ve arkadaşlarına coin göndermek için giriş yap.",
+      "upgradesTitle": "Yükseltmeler",
+      "upgrade": {
+        "pick": "Daha büyük kazma",
+        "miner": "Otomatik madenci",
+        "rig": "Sondaj makinesi"
+      },
+      "bought": {
+        "pick": "Daha büyük kazma alındı",
+        "miner": "Otomatik madenci alındı",
+        "rig": "Sondaj makinesi alındı"
+      },
+      "level": "Sv {{level}}",
+      "effectTap": "dokunuş başına +{{n}}",
+      "effectSecond": "saniyede +{{n}}",
+      "maxed": "Maks",
+      "idleNote": "Otomatik madenciler sen yokken de kazmaya devam eder, en fazla 8 saat.",
+      "awayToast": "Sen yokken madencilerin {{coins}} SillyCoin kazdı ({{hours}} sa).",
+      "sendTitle": "SillyCoin gönder",
+      "toPlaceholder": "@kullanıcıadı",
+      "amountPlaceholder": "Kaç tane",
+      "notePlaceholder": "Not (isteğe bağlı)",
+      "sendButton": "Gönder",
+      "sendMissing": "Kime ve kaç tane göndereceğini seç.",
+      "sent": "{{name}} kişisine {{coins}} SillyCoin gönderildi",
+      "sendNote": "Coin’ler hemen ulaşır. SillyCoin’ler oyunda kalır: cüzdan yok, token yok.",
+      "fromLine": "{{name}} gönderdi",
+      "toLine": "{{name}} kişisine",
+      "boardTitle": "En iyi madenciler",
+      "boardEmpty": "Henüz kimse kazmadı. İlk sen ol.",
+      "disclaimer": "SillyCoin’ler sadece eğlence içindir ve değeri yoktur. Kripto para değildir, cüzdanına asla dokunmaz; satın alınamaz, satılamaz veya nakde çevrilemez."
+    }
   },
   "hideReply": {
     "hide": "Yanıtı gizle",

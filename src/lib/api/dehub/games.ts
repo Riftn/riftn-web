@@ -251,3 +251,69 @@ export function isPairTiles(tiles: number[], indicator: number): boolean {
   const fb = b >= 104 ? okeyOf(indicator) : tileFace(b);
   return fa.c === fb.c && fa.n === fb.n;
 }
+
+// ------------------------------------------------------------------ SillyCoin
+// Tap-to-mine idle game. SillyCoins are game points with no value: not a
+// token, never connected to a wallet. The server caps taps at 15 a second and
+// idle pay at 8 hours (riftn-backend src/games/sillycoin.service.ts).
+
+export type SillyUpgradeKind = 'pick' | 'miner' | 'rig';
+
+export interface SillyUpgrade {
+  kind: SillyUpgradeKind;
+  level: number;
+  cost: number | null;
+  maxed: boolean;
+  perTap: number;
+  perSecond: number;
+}
+
+export interface SillyMe {
+  balance: number;
+  totalMined: number;
+  totalSent: number;
+  totalReceived: number;
+  perTap: number;
+  perSecond: number;
+  upgrades: SillyUpgrade[];
+  awayEarned: number;
+  awaySeconds: number;
+  serverTime: string;
+}
+
+export interface SillyTransfer {
+  id: string;
+  direction: 'in' | 'out';
+  other: GamePlayer;
+  amount: number;
+  note: string | null;
+  createdAt: string;
+}
+
+export interface SillyBoardRow {
+  rank: number;
+  player: GamePlayer;
+  totalMined: number;
+}
+
+export interface SillyState {
+  rules: { maxTapsPerSecond: number; offlineCapHours: number; maxLevel: number };
+  me: SillyMe | null;
+  transfers: SillyTransfer[];
+  leaderboard: SillyBoardRow[];
+}
+
+export const sillyState = (signedIn: boolean) => apiCall<SillyState>('/api/games/sillycoin', { requiresAuth: signedIn });
+export const sillyMine = (taps: number) =>
+  apiCall<{ me: SillyMe; accepted: number }>('/api/games/sillycoin/mine', { method: 'POST', body: { taps }, requiresAuth: true });
+export const sillyUpgrade = (kind: SillyUpgradeKind, taps: number) =>
+  apiCall<{ me: SillyMe }>('/api/games/sillycoin/upgrade', { method: 'POST', body: { kind, taps }, requiresAuth: true });
+export const sillySend = (body: { to: string; amount: number; note?: string; taps: number }) =>
+  apiCall<{ me: SillyMe; transfer: SillyTransfer }>('/api/games/sillycoin/send', { method: 'POST', body, requiresAuth: true });
+
+/** Local stand-in for signed-out players: the same upgrade prices as the server. */
+export const SILLY_UPGRADES: Record<SillyUpgradeKind, { base: number; growth: number; perTap: number; perSecond: number }> = {
+  pick: { base: 20, growth: 1.55, perTap: 1, perSecond: 0 },
+  miner: { base: 50, growth: 1.45, perTap: 0, perSecond: 1 },
+  rig: { base: 1500, growth: 1.5, perTap: 0, perSecond: 10 },
+};

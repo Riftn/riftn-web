@@ -23288,7 +23288,49 @@
       "label": "Marktprijzen",
       "gold": "Goud (oz)"
     },
-    "withFriends": "Speel met vrienden"
+    "withFriends": "Speel met vrienden",
+    "sillycoin": {
+      "title": "SillyCoin",
+      "cardBlurb": "Tik om te minen, koop upgrades en stuur munten naar vrienden. Gewoon voor de lol, zonder waarde.",
+      "intro": "Tik om te minen, upgrade en stuur munten naar vrienden.",
+      "seoTitle": "SillyCoin mijnsimulator | Riftn Arcade",
+      "seoDescription": "Tik om SillyCoins te minen, koop een grotere houweel en automatische miners, en stuur munten naar vrienden. Gewoon voor de lol: SillyCoins hebben geen waarde. Gratis op Riftn.",
+      "balanceLabel": "Jouw SillyCoins",
+      "rates": "{{tap}} per tik · {{second}} per seconde",
+      "tapLabel": "Tik om te minen",
+      "tapHint": "Tik op de munt om te minen. Tot 15 tikken per seconde tellen mee.",
+      "signInPrompt": "Log in om je SillyCoins te bewaren, upgrades te kopen en munten naar vrienden te sturen.",
+      "upgradesTitle": "Upgrades",
+      "upgrade": {
+        "pick": "Grotere houweel",
+        "miner": "Automatische miner",
+        "rig": "Boorinstallatie"
+      },
+      "bought": {
+        "pick": "Grotere houweel gekocht",
+        "miner": "Automatische miner gekocht",
+        "rig": "Boorinstallatie gekocht"
+      },
+      "level": "Lv {{level}}",
+      "effectTap": "+{{n}} per tik",
+      "effectSecond": "+{{n}} per seconde",
+      "maxed": "Max",
+      "idleNote": "Automatische miners blijven graven als je weg bent, tot 8 uur lang.",
+      "awayToast": "Je miners groeven {{coins}} SillyCoins terwijl je weg was ({{hours}} u).",
+      "sendTitle": "SillyCoins sturen",
+      "toPlaceholder": "@gebruikersnaam",
+      "amountPlaceholder": "Hoeveel",
+      "notePlaceholder": "Notitie (optioneel)",
+      "sendButton": "Versturen",
+      "sendMissing": "Kies naar wie en hoeveel.",
+      "sent": "{{coins}} SillyCoins gestuurd naar {{name}}",
+      "sendNote": "Ze krijgen de munten meteen. SillyCoins blijven in het spel: geen wallet, geen token.",
+      "fromLine": "Van {{name}}",
+      "toLine": "Aan {{name}}",
+      "boardTitle": "Beste miners",
+      "boardEmpty": "Nog niemand heeft gemined. Wees de eerste.",
+      "disclaimer": "SillyCoins zijn gewoon voor de lol en hebben geen waarde. Het is geen cryptomunt, ze komen nooit aan je wallet en je kunt ze niet kopen, verkopen of uitbetalen."
+    }
   },
   "hideReply": {
     "hide": "Hide reply",
