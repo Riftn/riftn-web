@@ -205,6 +205,7 @@ export function PetPanel() {
               </div>
             )}
             <p className="text-xs text-zinc-500">{t('streamPet.studio.rules')}</p>
+            <p className="text-xs text-zinc-500">{t('streamPet.studio.requests')}</p>
           </div>
 
           {!!data?.feeders.length && (

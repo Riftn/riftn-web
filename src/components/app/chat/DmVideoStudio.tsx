@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { useTranslation as _useCopy } from 'react-i18next';
 import type { StudioEdits } from '@/features/post/lib/studioPaint';
-import { Crop, Image as ImageIcon, Scissors, FlipHorizontal2, RotateCw, EyeOff, Lock, Eye, Timer, Plus, Play, Pause, Trash2, Check, Type, Palette, SlidersHorizontal, Music, Upload, Gauge, Pencil, Volume2, VolumeX } from 'lucide-react';
+import { Crop, Image as ImageIcon, Scissors, FlipHorizontal2, RotateCw, EyeOff, Lock, Eye, Timer, Plus, Play, Pause, Trash2, Check, Type, Palette, SlidersHorizontal, Music, Upload, Gauge, Pencil, Volume2, VolumeX, RotateCcw } from 'lucide-react';
 import { ADJUST_RANGES, DEFAULT_ADJUST, STUDIO_LOOKS, studioColorMatrix, type StudioAdjust, type StudioAdjustKey } from '@/features/post/lib/studioColor';
 import { POST_DESTRUCT_CHOICES, VIDEO_SPEEDS, postDestructLabel, svgMatrixValues, vignetteBackground } from '@/features/post/lib/video-edits';
 import { VIDEO_CROP_RATIOS, cropRatioValue, dragCropRect, fitCropRect, isFullCrop, type CropHandle, type CropRatioId, type VideoCropRect } from '@/features/post/lib/video-crop';
@@ -140,6 +140,8 @@ export interface DmStudioItem {
   duration?: number;
   options: DmVideoOptions;
   destruct: DmDestructChoice | null;
+  /** On-open timers: they can open it once more after the countdown runs out. */
+  destructReplay?: boolean;
   lockPrice: number | null;
   /** Photo editor: the untouched original and the edits over it. */
   studioOriginal?: File;
@@ -224,6 +226,7 @@ export function DmMediaStudio({
   const duration = item?.duration;
   const options = item?.options ?? {};
   const destruct = item?.destruct ?? null;
+  const destructReplay = !!item?.destructReplay;
   const lockPrice = item?.lockPrice ?? null;
   const onOptionsChange = (o: DmVideoOptions) => onItemChange(active, { options: o });
   const onDestructChange = (c: DmDestructChoice | null) => onItemChange(active, { destruct: c });
@@ -412,7 +415,7 @@ export function DmMediaStudio({
                 alt=""
                 className={cn('block max-h-[42vh] max-w-full object-contain transition-[filter] duration-500', lockPrice != null && 'blur-xl brightness-75')}
               />
-              {destruct && <DestructChip choice={destruct} />}
+              {destruct && <DestructChip choice={destruct} replay={destructReplay} />}
               {lockPrice != null && (
                 <span className="absolute bottom-2 left-1/2 inline-flex -translate-x-1/2 items-center gap-1 whitespace-nowrap rounded-full bg-black/60 px-2.5 py-1 text-xs font-bold">
                   <Lock className="h-3.5 w-3.5" /> {_copy('dmVideo.lockedFor', { defaultValue: 'Unlock for {{value1}} tokens', value1: lockPrice })}
@@ -466,7 +469,7 @@ export function DmMediaStudio({
                 <EyeOff className="h-3.5 w-3.5" /> {_copy('dmVideo.hiddenUntilTap', { defaultValue: 'Hidden until they tap it' })}
               </span>
             )}
-            {destruct && <DestructChip choice={destruct} />}
+            {destruct && <DestructChip choice={destruct} replay={destructReplay} />}
             {lockPrice != null && (
               <span className="absolute bottom-2 left-1/2 inline-flex -translate-x-1/2 items-center gap-1 whitespace-nowrap rounded-full bg-black/60 px-2.5 py-1 text-xs font-bold">
                 <Lock className="h-3.5 w-3.5" /> {_copy('dmVideo.lockedForUsd', { defaultValue: 'Unlock for {{value1}}', value1: formatLockUsd(lockPrice) })}
@@ -918,6 +921,25 @@ export function DmMediaStudio({
                     </button>
                   ))}
                 </div>
+                {isOpenChoice(destruct) && (
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={destructReplay}
+                    onClick={() => onItemChange(active, { destructReplay: !destructReplay })}
+                    className="flex w-full items-center gap-2.5 rounded-xl border border-white/15 px-3 py-2 text-left"
+                    data-dm-timer-replay
+                  >
+                    <RotateCcw className="h-4 w-4 shrink-0 text-zinc-300" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-xs font-semibold text-white">{_copy('dmVideo.timerReplay', { defaultValue: 'Allow one replay' })}</span>
+                      <span className="block text-[11px] leading-snug text-zinc-400">{_copy('dmVideo.timerReplayBody', { defaultValue: 'They can open it one more time. The countdown starts again.' })}</span>
+                    </span>
+                    <span className={cn('relative h-5 w-9 shrink-0 rounded-full transition-colors', destructReplay ? 'bg-white' : 'bg-white/20')}>
+                      <span className={cn('absolute top-0.5 h-4 w-4 rounded-full transition-transform', destructReplay ? 'translate-x-[18px] bg-black' : 'translate-x-0.5 bg-white')} />
+                    </span>
+                  </button>
+                )}
                 <p className="text-[11px] leading-snug text-zinc-400">
                   {destruct == null
                     ? _copy('dmVideo.timerOffBody', { defaultValue: 'It stays in the chat.' })
@@ -946,12 +968,13 @@ export function DmMediaStudio({
   );
 }
 
-function DestructChip({ choice, short }: { choice: DmDestructChoice; short?: boolean }) {
+function DestructChip({ choice, short, replay }: { choice: DmDestructChoice; short?: boolean; replay?: boolean }) {
   const { t: _copy } = _useCopy();
   return (
     <span className="absolute left-1.5 top-1.5 inline-flex items-center gap-1 rounded-full bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
       <Timer className="h-3 w-3" />
       {short || isOpenChoice(choice) ? destructShort(choice) : _copy(`dmVideo.destruct.${choice}`, { defaultValue: destructLabel(choice) })}
+      {replay && isOpenChoice(choice) && <RotateCcw className="h-3 w-3" aria-label={_copy('dmVideo.timerReplay', { defaultValue: 'Allow one replay' })} />}
     </span>
   );
 }

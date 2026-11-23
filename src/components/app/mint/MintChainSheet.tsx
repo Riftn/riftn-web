@@ -11,6 +11,8 @@ import { SOLANA_MAINNET_CHAIN_ID } from '@/lib/chains/constants';
 import { getMintFee, type MintFeeQuoteResponse } from '@/lib/api/dehub';
 import { isSmartWalletSession } from '@/lib/connection-source';
 import { cn } from '@/lib/utils';
+import { MintHomeAllowance, MintHomeAllowanceLine } from './MintHomeAllowance';
+import type { PostQuotaStatus } from '@/lib/api/dehub';
 
 /**
  * Chains a post that is already published can be minted on. Solana is left
@@ -66,6 +68,8 @@ interface MintChainSheetProps {
   onConfirm: (chainId: ChainId) => void;
   /** Override for the state gallery; otherwise read from the session. */
   sponsored?: boolean;
+  /** Override for the state gallery; otherwise read from the creator's allowance. */
+  homeAllowance?: Pick<PostQuotaStatus, 'mintsPerDay' | 'homeMintsRemaining'>;
 }
 
 /**
@@ -73,7 +77,7 @@ interface MintChainSheetProps {
  * now. Prices come from GET /api/mint_fee, the same quote the mint charges, so
  * the number on the button is the number taken.
  */
-export function MintChainSheet({ open, onOpenChange, defaultChainId, isMinting, onConfirm, sponsored: sponsoredOverride }: MintChainSheetProps) {
+export function MintChainSheet({ open, onOpenChange, defaultChainId, isMinting, onConfirm, sponsored: sponsoredOverride, homeAllowance }: MintChainSheetProps) {
   const { t } = useTranslation();
   const sponsored = sponsoredOverride ?? isSmartWalletSession();
   const fallback = MINT_LATER_CHAINS.some((c) => c.id === defaultChainId) ? (defaultChainId as ChainId) : (getDefaultChainId() as ChainId);
@@ -142,6 +146,11 @@ export function MintChainSheet({ open, onOpenChange, defaultChainId, isMinting, 
           })}
         </div>
         <div className="px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          {homeAllowance ? (
+            <MintHomeAllowanceLine quota={homeAllowance} className="mb-3 text-center" />
+          ) : (
+            <MintHomeAllowance enabled={open} className="mb-3 text-center" />
+          )}
           <button
             type="button"
             disabled={isMinting}

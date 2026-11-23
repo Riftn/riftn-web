@@ -237,7 +237,9 @@
     "destructSecs": "{{n}} sn",
     "destructShortSecs": "{{n}}s",
     "revealAria": "Gizli videoyu göster",
-    "tapToReveal": "Göstermek için dokun"
+    "tapToReveal": "Göstermek için dokun",
+    "timerReplay": "Bir kez tekrara izin ver",
+    "timerReplayBody": "Bir kez daha açabilirler. Geri sayım yeniden başlar."
   },
   "assistantCards": {
     "requestDraft": "Herkese açık istek taslağı",
@@ -3791,6 +3793,7 @@
     "anonymousLikes_other": "Anonim rozet sahiplerinden {{count}} beğeni"
   },
   "mintChain": {
+    "homeAllowance": "Bugünkü {{total}} mint hakkının {{left}} tanesi Ana Sayfa'ya ulaşır. Fazla mintler profiline ve pazara gider.",
     "title": "Darphane postası",
     "subtitle": "Bir zincir seçin. Fiyatlar canlıdır ve her dakika güncellenir.",
     "free": "Ücretsiz",
@@ -12758,6 +12761,8 @@
     "intro": "Her katman dolar cinsinden sabit bir maliyete sahiptir. Yanındaki jeton rakamı, 0,001 ABD doları referans fiyatıyla maliyetidir — uygulama, canlı fiyata ölçeklenmiş bu rakamı ister ve asla daha fazlasını istemez, bu nedenle düşen bir fiyat çubuğu yükseltemez veya zaten kazandığınız bir katmanı geri alamaz."
   },
   "postingAllowance": {
+    "mintsLabel": "mint",
+    "mintNote": "Mintler metin gönderileriyle aynı sayıları kullanır: günde bu kadar mint Ana Sayfa akışına ulaşır. Fazla mintler yine de gerçekleşir ve profilinde, Takip Edilenler'de ve kesir pazarında görünür. Mint asla engellenmez.",
     "footnote": "Rozet katmanı, BNB Chain ve Base'de tuttuğunuz ve stake ettiğiniz Riftn jetonlarınızdır — rozetinizin çekildiği bakiye ile aynıdır. Merdiven dolar cinsinden fiyatlandırılır, bu nedenle yukarıdaki jeton rakamları, her katmanın 0,001 ABD doları satış fiyatıyla maliyetidir ve gereksinim jeton fiyatı yükseldikçe düşer; zaten kazandığınız bir katman asla fiyat tarafından geri alınmaz. Bir patron tarafından size ödünç verilen bir rozet profilinizde görünür ancak gönderi limitinizi artırmaz — bu, kendinizin tuttuklarından gelir. Limitler 00:00 UTC'de sıfırlanır ve buradaki bir gigabayt 1.024 MB'dir."
   },
   "postComposer": {
@@ -13161,7 +13166,8 @@
           "3": "Bir gönderi limiti aşacaksa, uygulama önce fiyatını belirler ve herhangi bir yüklemeden önce cüzdanınızın bunu karşılayıp karşılayamayacağını kontrol eder.",
           "4": "Gönderi, limit dahilindeymiş gibi yayınlanır — yayınlama asla ödeme beklemez.",
           "5": "Ardından, yalnızca o gönderi için bir transferi onaylarsınız, bu transfer Base veya BNB Chain'den hangisinde yeterli Riftn token'ı varsa orada gerçekleşir.",
-          "6": "Her iki havuz da UTC gece yarısı sıfırlanır."
+          "6": "Her iki havuz da UTC gece yarısı sıfırlanır.",
+          "7": "Mintler de aynı şekilde çalışır: rozetin günde kaç mintin Ana Sayfa akışına ulaşacağını belirler, bu sayı metin gönderilerinle aynıdır. Fazla mintler yine de gerçekleşir ve profilinde, Takip Edilenler'de ve kesir pazarında görünür."
         },
         "tips": {
           "1": "Aşım orantılıdır: Limitinizin 200 MB fazlası, tam bir gigabayt değil, 200 MB olarak ücretlendirilir.",
@@ -13543,7 +13549,13 @@
       "opened": "Açıldı",
       "tapPhoto": "Görmek için dokun",
       "tapVideo": "İzlemek için dokun",
-      "goneAfter": "Açtıktan {{time}} sonra kaybolur"
+      "goneAfter": "Açtıktan {{time}} sonra kaybolur",
+      "left": "{{n}} sn",
+      "replayAllowed": "Bir kez tekrar açılabilir",
+      "tapReplay": "Tekrar açmak için dokun",
+      "lastView": "Son bakış, {{time}}",
+      "goneAfterReplay": "Açtıktan {{time}} sonra kaybolur. Bir kez tekrar açılabilir.",
+      "replaying": "Tekrar"
     },
     "shareKindGroup": "Grup",
     "shareKindChannel": "Kanal",
@@ -23210,6 +23222,9 @@
     "hoursStreamed_other": "{{formatted}} saat yayın",
     "toNext_one": "{{stage}} için {{formatted}} atıştırmalık",
     "toNext_other": "{{stage}} için {{formatted}} atıştırmalık",
+    "requestsToday_one": "Bekleyen istekler: bugün {{formatted}} atıştırmalık",
+    "requestsToday_other": "Bekleyen istekler: bugün {{formatted}} atıştırmalık",
+    "requestsTomorrow": "Bekleyen istekler: ilk atıştırmalık yarın",
     "open": "{{pet}} aç",
     "feed": "Atıştırmalık ver",
     "fed": "{{pet}} atıştırmalığını yedi",
@@ -23240,6 +23255,7 @@
       "feeding": "İzleyiciler kanal puanlarıyla besleyebilir",
       "cost": "Atıştırmalık başına puan",
       "rules": "Her izleyici günde en fazla 20 atıştırmalık verebilir. Puanların parasal değeri yoktur.",
+      "requests": "İstekler panosunda hâlâ bekleyen isteklerin de onu besler: yumurtadan çıktıktan sonra her biri günde 1 atıştırmalık, günde en fazla 3.",
       "feeders": "En çok besleyenler"
     }
   },
@@ -23264,5 +23280,30 @@
     "open": "Sohbeti aç",
     "encrypted": "Şifreli mesaj",
     "sentAttachment": "Bir ek gönderdi"
+  },
+  "badgeMuseum": {
+    "title": "Rozet Müzesi",
+    "open": "Rozet Müzesini aç",
+    "summary": "{{total}} rozetten {{earned}} tanesi kazanıldı",
+    "loading": "Rozetler yükleniyor…",
+    "earned": "Kazanıldı",
+    "progress": "{{value}} / {{goal}}",
+    "footer": "Rozetler, kilometre taşlarına ulaşıldıkça kendiliğinden açılır.",
+    "name": {
+      "views": "{{value}} görüntülenme",
+      "videos": "{{value}} video",
+      "followers": "{{value}} takipçi",
+      "likes": "{{value}} beğeni",
+      "firstLive": "İlk canlı yayın",
+      "liveHours": "{{value}} saat canlı yayın"
+    },
+    "hint": {
+      "views": "Tüm gönderilerdeki görüntülenmeler",
+      "videos": "Yüklenen videolar",
+      "followers": "Takipçiler",
+      "likes": "Alınan beğeniler",
+      "firstLive": "Bir kez canlı yayın yap",
+      "liveHours": "Canlı yayın saatleri"
+    }
   }
 }

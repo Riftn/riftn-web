@@ -46,6 +46,7 @@ import { useCreatorPlansLite } from '@/hooks/use-creator-plans';
 import { Star } from 'lucide-react';
 import { normalizeCategoryName } from '@/lib/category-names';
 import { storageImage, deviceWidth } from '@/lib/media-url';
+import { MintHomeAllowance } from '@/components/app/mint/MintHomeAllowance';
 
 interface PostAccessTogglesProps {
   draftScope?: string;
@@ -483,6 +484,7 @@ export function PostAccessToggles({
             className="data-[state=checked]:bg-white scale-75"
           />
         </label>
+        {(shouldMint || mintRequired) && <MintHomeAllowance className="pl-6 -mt-0.5 pb-0.5" />}
 
         {/* Title - forced on for video/audio, toggleable for others */}
         {!hasVideoOrAudio && (

@@ -237,7 +237,9 @@
     "destructSecs": "{{n}} sec",
     "destructShortSecs": "{{n}}s",
     "revealAria": "Révéler la vidéo masquée",
-    "tapToReveal": "Appuyez pour révéler"
+    "tapToReveal": "Appuyez pour révéler",
+    "timerReplay": "Autoriser une relecture",
+    "timerReplayBody": "Ils peuvent l’ouvrir une fois de plus. Le compte à rebours repart."
   },
   "assistantCards": {
     "requestDraft": "Brouillon de demande publique",
@@ -3795,6 +3797,7 @@
     "anonymousLikes_other": "{{count}} j'aime de détenteurs de badges anonymes"
   },
   "mintChain": {
+    "homeAllowance": "{{left}} mints sur {{total}} aujourd'hui atteignent l'Accueil. Les mints en plus vont sur ton profil et sur le marché.",
     "title": "Poste de menthe",
     "subtitle": "Choisissez une chaîne. Les prix sont en direct et mis à jour toutes les minutes.",
     "free": "Gratuit",
@@ -12762,6 +12765,8 @@
     "intro": "Chaque niveau coûte un montant fixe en dollars. Le nombre de tokens qui l'accompagne représente ce que cela coûte au prix de référence de 0,001 $ — l'application demande ce montant mis à l'échelle du prix en direct, et jamais plus que cela, donc une baisse de prix ne peut pas relever la barre ou reprendre un niveau que vous avez déjà gagné."
   },
   "postingAllowance": {
+    "mintsLabel": "mints",
+    "mintNote": "Les mints suivent les mêmes chiffres que les posts texte : ce nombre de mints par jour atteint le fil d'Accueil. Les mints en plus passent quand même et apparaissent sur ton profil, dans Abonnements et sur le marché des fractions. Le mint n'est jamais bloqué.",
     "footnote": "Le niveau de badge correspond à vos tokens Riftn détenus et stakés sur BNB Chain et Base — le même solde à partir duquel votre badge est tiré. L'échelle est tarifée en dollars, donc les chiffres des tokens ci-dessus représentent ce que chaque niveau coûte au prix de vente de 0,001 $ et l'exigence diminue à mesure que le prix du token augmente ; un niveau que vous avez déjà gagné n'est jamais repris par le prix. Un badge qui vous est prêté par un mécène s'affiche sur votre profil mais n'augmente pas votre allocation de publication — celle-ci provient de ce que vous détenez vous-même. Les allocations sont réinitialisées à 00h00 UTC, et un gigaoctet ici équivaut à 1 024 Mo."
   },
   "postComposer": {
@@ -13165,7 +13170,8 @@
           "3": "Lorsqu'une publication dépasse le quota, l'application la tarifie d'abord et vérifie si votre portefeuille peut la couvrir avant toute téléversement.",
           "4": "La publication s'effectue exactement comme si elle était dans le quota — la publication n'attend jamais un paiement.",
           "5": "Ensuite, vous approuvez un transfert pour cette publication uniquement, réglé sur la chaîne Base ou BNB qui détient suffisamment de jetons Riftn.",
-          "6": "Les deux pools sont réinitialisés à minuit UTC."
+          "6": "Les deux pools sont réinitialisés à minuit UTC.",
+          "7": "Les mints fonctionnent pareil : ton badge fixe combien de mints par jour atteignent le fil d'Accueil, le même nombre que tes posts texte. Les mints en plus passent quand même et apparaissent sur ton profil, dans Abonnements et sur le marché des fractions."
         },
         "tips": {
           "1": "Le dépassement est au prorata : 200 Mo au-delà de votre quota coûtent 200 Mo, pas un gigaoctet entier.",
@@ -13547,7 +13553,13 @@
       "opened": "Ouvert",
       "tapPhoto": "Appuyez pour voir",
       "tapVideo": "Appuyez pour regarder",
-      "goneAfter": "Disparaît {{time}} après l’ouverture"
+      "goneAfter": "Disparaît {{time}} après l’ouverture",
+      "left": "{{n}} s",
+      "replayAllowed": "Une relecture autorisée",
+      "tapReplay": "Appuyez pour revoir",
+      "lastView": "Dernière vue, {{time}}",
+      "goneAfterReplay": "Disparaît {{time}} après l’ouverture. Une relecture.",
+      "replaying": "Relecture"
     },
     "shareKindGroup": "Groupe",
     "shareKindChannel": "Canal",
@@ -23214,6 +23226,9 @@
     "hoursStreamed_other": "{{formatted}} heures de live",
     "toNext_one": "{{formatted}} en-cas avant {{stage}}",
     "toNext_other": "{{formatted}} en-cas avant {{stage}}",
+    "requestsToday_one": "Demandes en attente : {{formatted}} en-cas aujourd'hui",
+    "requestsToday_other": "Demandes en attente : {{formatted}} en-cas aujourd'hui",
+    "requestsTomorrow": "Demandes en attente : premier en-cas demain",
     "open": "Ouvrir {{pet}}",
     "feed": "Donner un en-cas",
     "fed": "{{pet}} a mangé ton en-cas",
@@ -23244,6 +23259,7 @@
       "feeding": "Les spectateurs peuvent le nourrir avec leurs points de chaîne",
       "cost": "Points par en-cas",
       "rules": "Chaque spectateur peut lui donner jusqu'à 20 en-cas par jour. Les points n'ont aucune valeur en argent.",
+      "requests": "Tes demandes encore en attente sur le tableau des Demandes le nourrissent aussi : 1 en-cas par jour chacune, jusqu'à 3 par jour, une fois éclos.",
       "feeders": "L'ont le plus nourri"
     }
   },
@@ -23268,5 +23284,30 @@
     "open": "Ouvrir le chat",
     "encrypted": "Message chiffré",
     "sentAttachment": "A envoyé une pièce jointe"
+  },
+  "badgeMuseum": {
+    "title": "Musée des badges",
+    "open": "Ouvrir le Musée des badges",
+    "summary": "{{earned}} badges obtenus sur {{total}}",
+    "loading": "Chargement des badges…",
+    "earned": "Obtenu",
+    "progress": "{{value}} / {{goal}}",
+    "footer": "Les badges se débloquent tout seuls à chaque palier atteint.",
+    "name": {
+      "views": "{{value}} vues",
+      "videos": "{{value}} vidéos",
+      "followers": "{{value}} abonnés",
+      "likes": "{{value}} j'aime",
+      "firstLive": "Premier live",
+      "liveHours": "{{value}} heures de live"
+    },
+    "hint": {
+      "views": "Vues sur toutes les publications",
+      "videos": "Vidéos publiées",
+      "followers": "Abonnés",
+      "likes": "J'aime reçus",
+      "firstLive": "Faire un live une fois",
+      "liveHours": "Heures diffusées en live"
+    }
   }
 }

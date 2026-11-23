@@ -53,6 +53,7 @@ import { DmVideoBubble } from './DmVideo';
 import type { DmVideoOptions } from '@/lib/dm-video-options';
 import type { DmDestruct, DmDestructChoice } from '@/lib/dm-destruct';
 import { markDmMessageViewed } from '@/lib/api/dehub/dm';
+import { DmTimeLeft } from './DmTimeLeft';
 import { DmOpenTimerMedia } from './DmOpenTimerMedia';
 import { DmUndecryptableMessages } from './DmLockedState';
 import { useChatPrefs } from '@/hooks/use-chat-prefs';
@@ -458,12 +459,14 @@ function EncryptedMediaBody({
 
   if (status === 'ready' && url) {
     return (
-      <img
-        src={url}
-        alt={_copy("copy.f9c984552075", { defaultValue: "Shared image" })}
-        className="max-w-full max-h-64 rounded-lg object-cover cursor-zoom-in"
-        onClick={() => onOpenImage?.(url)}
-      />
+      <DmTimeLeft destruct={destruct}>
+        <img
+          src={url}
+          alt={_copy("copy.f9c984552075", { defaultValue: "Shared image" })}
+          className="max-w-full max-h-64 rounded-lg object-cover cursor-zoom-in"
+          onClick={() => onOpenImage?.(url)}
+        />
+      </DmTimeLeft>
     );
   }
   return <EncryptedMediaPlaceholder media={media} status={uploading || status === 'idle' ? 'loading' : status} onRetry={retry} />;
@@ -1338,12 +1341,14 @@ const MessageBubble = memo(function MessageBubble({
                         isPending={false}
                       />
                     ) : (
-                    <SettledImg
-                      src={getMediaUrl(primaryMediaUrl)!}
-                      alt={_copy("copy.f9c984552075", { defaultValue: "Shared image" })}
-                      className="max-w-full max-h-64 rounded-lg object-cover cursor-zoom-in"
-                      onClick={() => onOpenImage?.(getMediaUrl(primaryMediaUrl)!)}
-                    />
+                    <DmTimeLeft destruct={message.destruct}>
+                      <SettledImg
+                        src={getMediaUrl(primaryMediaUrl)!}
+                        alt={_copy("copy.f9c984552075", { defaultValue: "Shared image" })}
+                        className="max-w-full max-h-64 rounded-lg object-cover cursor-zoom-in"
+                        onClick={() => onOpenImage?.(getMediaUrl(primaryMediaUrl)!)}
+                      />
+                    </DmTimeLeft>
                     )}
                     {/* Driven by the same hook as a text message, not by
                         <TranslatableText>, so a caption follows the chat rules

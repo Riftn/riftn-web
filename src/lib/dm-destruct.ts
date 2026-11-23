@@ -10,7 +10,9 @@ const tx = (key: string, defaultValue: string, vars: Record<string, unknown> = {
   i18n.isInitialized ? String(i18n.t(key, { defaultValue, ...vars })) : defaultValue.replace(/\{\{(\w+)\}\}/g, (_, k: string) => String(vars[k] ?? ''));
 
 export type DmOpenChoice = 'open:3' | 'open:10' | 'open:25' | 'open:60';
-export type DmDestructChoice = 'view' | 60 | 3600 | 43200 | 86400 | 604800 | 31536000 | DmOpenChoice;
+/** An on-open countdown that lets them open it once more after it runs out. */
+export type DmOpenReplayChoice = `${DmOpenChoice}:r1`;
+export type DmDestructChoice = 'view' | 60 | 3600 | 43200 | 86400 | 604800 | 31536000 | DmOpenChoice | DmOpenReplayChoice;
 
 export const DESTRUCT_CHOICES: DmDestructChoice[] = ['view', 60, 3600, 43200, 86400, 604800, 31536000];
 
@@ -22,8 +24,14 @@ export function isOpenChoice(c: unknown): c is DmOpenChoice {
 }
 
 /** Seconds of an on-open countdown: 'open:10' -> 10. */
-export function openSeconds(c: DmOpenChoice): number {
-  return Number(c.slice(5));
+export function openSeconds(c: DmOpenChoice | DmOpenReplayChoice): number {
+  return Number(c.split(':')[1]);
+}
+
+/** What is sent: the picked timer, with one replay added when asked for (on-open ones only). */
+export function withReplay(c: DmDestructChoice | null | undefined, replay?: boolean): DmDestructChoice | undefined {
+  if (!c) return undefined;
+  return replay && isOpenChoice(c) ? `${c}:r1` : c;
 }
 
 export interface DmDestruct {
@@ -31,6 +39,21 @@ export interface DmDestruct {
   seconds?: number;
   expiresAt?: string;
   destroyedAt?: string;
+  /** On-open: when they first opened it. */
+  openedAt?: string;
+  /** On-open: replays the sender allowed (0 or 1) and how many were started. */
+  replaysAllowed?: number;
+  replaysUsed?: number;
+}
+
+/** Replays still left on an on-open message, as the server last said. */
+export function replaysLeft(d: DmDestruct | null | undefined): number {
+  return Math.max(0, (Number(d?.replaysAllowed) || 0) - (Number(d?.replaysUsed) || 0));
+}
+
+/** The big countdown on an open photo or video: "29s". */
+export function countdownLabel(seconds: number): string {
+  return tx('dm.openTimer.left', '{{n}}s', { n: Math.max(0, Math.ceil(seconds)) });
 }
 
 const LABELS: Record<string, string> = { view: '1 view', 60: '1 min', 3600: '1 hour', 43200: '12 hours', 86400: '1 day', 604800: '1 week', 31536000: '1 year' };
@@ -66,5 +89,7 @@ export function destructFromChoice(c: DmDestructChoice | null | undefined, now =
   if (!c) return null;
   if (c === 'view') return { mode: 'view' };
   if (isOpenChoice(c)) return { mode: 'open', seconds: openSeconds(c) };
+  if (typeof c === 'string' && c.startsWith('open:')) return { mode: 'open', seconds: openSeconds(c as DmOpenReplayChoice), replaysAllowed: 1, replaysUsed: 0 };
+  if (typeof c !== 'number') return null;
   return { mode: 'time', seconds: c, expiresAt: new Date(now + c * 1000).toISOString() };
 }

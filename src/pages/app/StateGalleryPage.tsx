@@ -1596,7 +1596,7 @@ function MintChainGallery() {
         <Button variant="glass" size="sm" data-open-mint-sheet="dehub" onClick={() => setOpen('dehub')}>Riftn wallet</Button>
         <Button variant="glass" size="sm" data-open-mint-sheet="own" onClick={() => setOpen('own')}>Own wallet</Button>
       </div>
-      <MintChainSheet open={open !== null} onOpenChange={(o) => { if (!o) setOpen(null); }} defaultChainId={8453} sponsored={open === 'dehub'} onConfirm={() => setOpen(null)} />
+      <MintChainSheet open={open !== null} onOpenChange={(o) => { if (!o) setOpen(null); }} defaultChainId={8453} sponsored={open === 'dehub'} homeAllowance={{ mintsPerDay: 3, homeMintsRemaining: 2 }} onConfirm={() => setOpen(null)} />
     </section>
   );
 }
@@ -2792,8 +2792,11 @@ const GALLERY_PET: StreamPet = {
   stage: 'teen',
   stageIndex: 3,
   food: 96,
-  streamFood: 88,
+  streamFood: 86,
   viewerFood: 8,
+  requestFood: 2,
+  requestFoodToday: 2,
+  requestsWaiting: 2,
   stageFood: 60,
   nextStageFood: 240,
   progress: 36 / 180,
@@ -2845,7 +2848,7 @@ function StreamPetGallery() {
           <PetCard pet={{ ...GALLERY_PET, streamingNow: false }} />
         </div>
         <div data-stream-pet-profile-asleep>
-          <PetCard pet={{ ...GALLERY_PET, name: 'Pip', color: 'coral', stage: 'kid', stageIndex: 2, food: 30, stageFood: 12, nextStageFood: 60, progress: 18 / 48, mood: 'asleep', streamingNow: false, sleepsAt: null }} own />
+          <PetCard pet={{ ...GALLERY_PET, name: 'Pip', color: 'coral', stage: 'kid', stageIndex: 2, food: 30, stageFood: 12, nextStageFood: 60, progress: 18 / 48, mood: 'asleep', streamingNow: false, sleepsAt: null, requestFoodToday: 0, requestsWaiting: 1 }} own />
         </div>
       </div>
       <AuthContext.Provider value={GALLERY_POINTS_AUTH}>
