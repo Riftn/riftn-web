@@ -160,6 +160,6 @@ export function languageNameFor(code: string | undefined): string | null {
   const lower = code.toLowerCase();
   const normalized = lower.replace(/-/g, '_');
   if (/^zh_(?:hant|tw|hk|mo)(?:_|$)/.test(normalized)) return LANGUAGE_NAMES.zh_tw;
-  const key = Object.hasOwn(LANGUAGE_NAMES, normalized) ? normalized : normalized.split('_')[0];
-  return Object.hasOwn(LANGUAGE_NAMES, key) ? LANGUAGE_NAMES[key] : null;
+  const key = Object.prototype.hasOwnProperty.call(LANGUAGE_NAMES, normalized) ? normalized : normalized.split('_')[0];
+  return Object.prototype.hasOwnProperty.call(LANGUAGE_NAMES, key) ? LANGUAGE_NAMES[key] : null;
 }

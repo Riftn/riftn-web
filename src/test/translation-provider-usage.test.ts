@@ -260,7 +260,7 @@ it.each([
   const call = vi.mocked(fetch).mock.calls.find(([url]) => String(url).includes('googleapis'));
   const payload = JSON.parse(String(call?.[1]?.body));
   expect(payload.contents[0].parts[0].text).toBe(text);
-  if (options.targetLang === 'zh-TW') expect(payload.systemInstruction.parts[0].text).toContain('Traditional Chinese');
+  if ((options as { targetLang?: string }).targetLang === 'zh-TW') expect(payload.systemInstruction.parts[0].text).toContain('Traditional Chinese');
 });
 
 it('ignores old segmented cache rows and replaces them after regeneration', async () => {
