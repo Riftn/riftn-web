@@ -93,6 +93,7 @@ import {
 import type { WhepState, WhepSubscription } from '@/lib/livepeer/whep';
 import { nativeLiveEdge, watchLiveProgress } from '@/lib/live/stall-watchdog';
 import { NO_RELAY_CANDIDATE, firstWhepRoute, forgetWhepRouteBlocked, forgetWhepSilent, hasRealPicture, rememberWhepRouteBlocked, rememberWhepSilent, whepRecentlySilent, whepRouteBlocked, type WhepRoute } from '@/lib/live/whep-memory';
+import { dropWarmLiveHls, SLOW_KEYFRAME_SEC, takeWarmLiveHls, warmLiveHls } from '@/lib/live/hls-standby';
 import { peekLiveSession, takeLiveSession } from '@/lib/live-handoff';
 import { useStreamActions, useStreamActivities } from '@/hooks/use-livestream';
 import { useBlockAuthor } from '@/hooks/use-block-author';
@@ -169,6 +170,14 @@ const WHEP_ANSWER_TIMEOUT_MS = 3500;
 const WHEP_CONNECT_TIMEOUT_MS = 2000;
 /** Connected: the first picture waits on the broadcast's next keyframe. */
 const WHEP_FRAME_TIMEOUT_MS = 2500;
+
+/** hls.js settings for a live, shared by the standby and the player. */
+const LIVE_HLS_CONFIG = { enableWorker: true, lowLatencyMode: true, backBufferLength: 60 } as const;
+
+/** Safari and iOS play these themselves; everything else goes through hls.js. */
+const playsNativeHls = (video: HTMLVideoElement, url: string | undefined) =>
+  (liveSourceFromHlsUrl(url)?.provider !== 'mediamtx' || isAacCopyUrl(url)) &&
+  !!video.canPlayType('application/vnd.apple.mpegurl');
 
 /** What the player overlay says while playback is struggling; worded at render. */
 type PlaybackError = 'reconnecting' | 'alternateSource' | 'connecting' | 'unavailable' | 'playFailed';
@@ -624,8 +633,9 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
   }, [showGiftDrawer, walletAddress, giftBalanceVersion]);
 
   /**
-   * WebRTC first (about a second behind), HLS second (10-20 seconds). A
-   * failure or a silent connect falls back to the ladder below.
+   * WebRTC first (about a second behind), HLS second (a few seconds). HLS is
+   * made ready in the background the moment WebRTC starts, so whichever way
+   * WebRTC fails, the picture comes from something already loaded.
    */
   useEffect(() => {
     if (transport !== 'whep' || streamEnded || !whepPlaybackId) return;
@@ -641,8 +651,9 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
       // Latched: without it the promote-on-live effect below would flip the
       // transport straight back and the two would trade the element forever.
       whepFailedRef.current = true;
-      // Answered but never sent a picture: next open goes straight to HLS.
-      if (reason === 'no frames') rememberWhepSilent(whepPlaybackId);
+      // The stream itself cannot be shown over WebRTC in time (silent, refused
+      // by the server, or keyframes far apart): next open goes straight to HLS.
+      if (reason === 'no frames' || reason === 'refused' || reason === 'slow keyframes') rememberWhepSilent(whepPlaybackId);
       setTransport('hls');
     };
 
@@ -682,7 +693,10 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
       // The host answered, so HLS will too: show that picture now rather
       // than sit through a second connect. A session that connected and sent
       // nothing is the stream itself, and the relay would only repeat it.
-      const relayNext = !triedRelay && selfHosted && reason !== 'no media route' && !(reason === 'no frames' && connected) && !whepRouteBlocked('relay');
+      // The same goes for a stream the server refused, or one HLS will show
+      // sooner: neither is the network's doing.
+      const streamsOwn = reason === 'refused' || reason === 'not on air' || reason === 'slow keyframes';
+      const relayNext = !triedRelay && selfHosted && !streamsOwn && reason !== 'no media route' && !(reason === 'no frames' && connected) && !whepRouteBlocked('relay');
       if (relayNext) {
         triedRelay = true;
         const relay = await fetchTurnServers();
@@ -765,7 +779,13 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
           setIsPlaying(false);
         }, undefined, undefined, () => video, true);
       } catch (e) {
-        if (attempt === attempts) void failOver((e as Error)?.message || 'subscribe failed');
+        if (attempt !== attempts) return;
+        // Answered with a refusal: no other route changes that. A 404 is a
+        // stream between two broadcasts, which says nothing about the next
+        // one, so only the other refusals are remembered.
+        if ((e as Error)?.name === 'WhepRefusedError') {
+          void failOver((e as { status?: number }).status === 404 ? 'not on air' : 'refused');
+        } else void failOver((e as Error)?.message || 'subscribe failed');
       }
     };
 
@@ -781,6 +801,24 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
       }
       await start('direct');
     };
+
+    // HLS, loaded in the background while WebRTC tries. Its first playlist
+    // also says how far apart this stream's keyframes are: WebRTC can only
+    // start on one, so when they are seconds apart HLS shows a picture first.
+    // Not for a session handed over by the feed card: its picture is up.
+    const standbyUrl = urlsToTry[0];
+    if (!peekLiveSession(whepPlaybackId) && !playsNativeHls(video, standbyUrl)) {
+      warmLiveHls(standbyUrl, LIVE_HLS_CONFIG, (segmentSeconds) => {
+        if (cancelled || segmentSeconds < SLOW_KEYFRAME_SEC || hasRealPicture(video)) return;
+        void failOver('slow keyframes');
+      });
+    }
+    const onPicture = () => {
+      if (video.srcObject && hasRealPicture(video)) dropWarmLiveHls(standbyUrl);
+    };
+    video.addEventListener('resize', onPicture);
+    video.addEventListener('loadeddata', onPicture);
+
     void open();
 
     // A session can stay "connected" while the picture stops (common on
@@ -796,6 +834,8 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
       cancelled = true;
       clearTimeout(timer);
       stopWatch();
+      video.removeEventListener('resize', onPicture);
+      video.removeEventListener('loadeddata', onPicture);
       videoPlaybackManager.unregister(videoId);
       releaseAfterPictureInPicture(video, () => {
         void session?.stop();
@@ -804,6 +844,9 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
         if (video.srcObject) video.srcObject = null;
       });
     };
+    // urlsToTry is read for the standby only; a new list for the same stream
+    // must not restart a WebRTC session that is playing.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transport, whepPlaybackId, whepSource?.provider, streamEnded, videoId, stream.id, setPlaybackWanted]);
 
   useEffect(() => {
@@ -830,8 +873,7 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
     // and skips its download. Not for a self-hosted ladder carrying Opus,
     // which a positive native probe does not promise to play — the server's
     // AAC copy, which is what such a browser is handed, is fine.
-    const selfHosted = liveSourceFromHlsUrl(currentUrl())?.provider === 'mediamtx';
-    if ((!selfHosted || isAacCopyUrl(currentUrl())) && video.canPlayType('application/vnd.apple.mpegurl')) {
+    if (playsNativeHls(video, currentUrl())) {
       // Native playback has none of hls.js's built-in resilience, so re-create
       // the essentials here: multi-CDN failover through urlsToTry, bounded
       // reconnect attempts for live streams, and the error overlay.
@@ -928,13 +970,18 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
       retryTimeouts.add(id);
     };
     (async () => {
-    const { default: Hls } = await import('hls.js');
+    // Made ready while WebRTC was trying: playlists and the first piece of
+    // video are already here, so attaching the element is all that is left.
+    const warmed = await (takeWarmLiveHls(currentUrl()) ?? null);
+    if (disposed) {
+      warmed?.hls.destroy();
+      return;
+    }
+    const { default: Hls } = warmed ? { default: warmed.Hls } : await import('hls.js');
     if (disposed) return;
     if (Hls.isSupported()) {
-      const hls = new Hls({
-        enableWorker: true,
-        lowLatencyMode: true,
-        backBufferLength: 60,
+      const hls = warmed?.hls ?? new Hls({
+        ...LIVE_HLS_CONFIG,
         ...(bigEvent ? BIG_EVENT_HLS_CONFIG : {}),
       });
 
@@ -944,7 +991,7 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
         hls.loadSource(streamUrl);
       };
 
-      tryLoad();
+      if (!warmed) tryLoad();
       hls.attachMedia(video);
       resumePlayback();
 

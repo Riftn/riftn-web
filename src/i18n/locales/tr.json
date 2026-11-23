@@ -8674,6 +8674,7 @@
     "endStreamConfirmBody": "Yayınınız izleyen herkes için durur ve yeniden başlatılamaz.",
     "keepStreaming": "Yayında kal",
     "encoderPermanentHint": "Bu anahtar asla değişmez. Kodlayıcınızı bir kez ayarlayın — bir dahaki sefere buradan Başlat'a basmanız yeterlidir ve Riftn sizin için gönderiyi oluşturur.",
+    "encoderSettingsTip": "Yayınının izleyicilerde hızlı açılması için kodlayıcında Anahtar Kare Aralığını (Keyframe Interval) 2 saniye yap (OBS: Ayarlar → Çıkış), varsa B-frames ayarını da 0 yap. Otomatikte bırakılırsa izleyiciler görüntü için 8 saniyeye kadar bekleyebilir.",
     "notEnoughTokensForBounty": "Yeterli jeton yok. {{need}} jetona ihtiyacınız var ancak {{have}} var."
   },
   "events": {

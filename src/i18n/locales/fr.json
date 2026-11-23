@@ -8678,6 +8678,7 @@
     "endStreamConfirmBody": "Votre diffusion s'arrête pour tous les spectateurs et ne peut pas être reprise.",
     "keepStreaming": "Continuer la diffusion",
     "encoderPermanentHint": "Cette touche ne change jamais. Configurez votre encodeur une fois — la prochaine fois, appuyez simplement sur Démarrer là et Riftn crée la publication pour vous.",
+    "encoderSettingsTip": "Pour que votre live s’ouvre vite pour les spectateurs, réglez l’intervalle d’images clés (Keyframe Interval) sur 2 secondes dans votre encodeur (OBS : Paramètres → Sortie), et les B-frames sur 0 si ce réglage existe. Laissé sur auto, les spectateurs peuvent attendre jusqu’à 8 secondes avant de voir l’image.",
     "notEnoughTokensForBounty": "Jetons insuffisants. Besoin de {{need}} jetons mais vous en avez {{have}}."
   },
   "events": {

@@ -35,7 +35,7 @@ export function waitForIceGathering(
    * browser than in the app. One reflexive (or relay) candidate is all the
    * far side needs.
    */
-  enough?: RTCIceCandidateType,
+  enough?: RTCIceCandidateType | 'any',
   /** How long to hold the offer for that candidate. */
   capMs: number = ICE_GATHERING_TIMEOUT_MS,
 ): Promise<void> {
@@ -57,7 +57,11 @@ export function waitForIceGathering(
       if (pc.iceGatheringState === 'complete') finish();
     };
     const onCandidate = (event: RTCPeerConnectionIceEvent) => {
-      if (!enough || grace || event.candidate?.type !== enough) return;
+      if (!enough || grace || !event.candidate) return;
+      // 'any' is for a far side with a public address of its own (our
+      // ingest): it learns where the browser is from the browser's first
+      // connectivity check, so the offer needs no STUN answer in it.
+      if (enough !== 'any' && event.candidate.type !== enough) return;
       grace = setTimeout(finish, ICE_ENOUGH_GRACE_MS);
     };
 

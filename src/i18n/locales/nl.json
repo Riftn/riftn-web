@@ -8863,6 +8863,7 @@
     "endStreamConfirmBody": "Uw uitzending stopt voor iedereen die kijkt en kan niet worden hervat.",
     "keepStreaming": "Doorgaan met streamen",
     "encoderPermanentHint": "Deze toets verandert nooit. Stel uw encoder één keer in — druk de volgende keer gewoon op Start daar en Riftn maakt de post voor u aan.",
+    "encoderSettingsTip": "Zet het keyframe-interval (Keyframe Interval) in je encoder op 2 seconden (OBS: Instellingen → Uitvoer) en B-frames op 0 als die instelling er is, zodat je stream snel opent voor kijkers. Op automatisch kunnen kijkers tot 8 seconden op het beeld wachten.",
     "notEnoughTokensForBounty": "Niet genoeg tokens. Nodig {{need}} tokens maar heb {{have}}."
   },
   "events": {
