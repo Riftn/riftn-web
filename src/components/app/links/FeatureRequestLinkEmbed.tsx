@@ -55,7 +55,7 @@ export function FeatureRequestLinkEmbed({ featureRequestId, path, fallback = nul
         <div className="min-w-0 flex-1">
           <div className="mb-1.5 flex items-center gap-1.5 text-[11px] text-zinc-400">
             <FeatureRequests className="h-3.5 w-3.5 shrink-0" />
-            <span className="font-medium">{t('nav.featureRequests', 'Requests')}</span>
+            <span className="font-medium">{t('nav.featureRequests', 'Build')}</span>
             {showStatus && (
               <span className="flex items-center gap-1.5 font-medium text-zinc-300">
                 <span aria-hidden>·</span>
