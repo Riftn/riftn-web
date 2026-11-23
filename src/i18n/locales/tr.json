@@ -23340,6 +23340,9 @@
   },
   "badgeMuseum": {
     "title": "Rozet Müzesi",
+    "showSetting": "Rozet Müzesi'ni profilimde göster",
+    "showSettingHint": "Kapalıyken diğer kişiler rozetlerini görmez. Sen yine görürsün.",
+    "hiddenNote": "Diğerlerinden gizli",
     "open": "Rozet Müzesini aç",
     "summary": "{{total}} rozetten {{earned}} tanesi kazanıldı",
     "loading": "Rozetler yükleniyor…",

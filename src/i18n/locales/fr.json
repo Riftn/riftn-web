@@ -23344,6 +23344,9 @@
   },
   "badgeMuseum": {
     "title": "Musée des badges",
+    "showSetting": "Afficher le Musée des badges sur mon profil",
+    "showSettingHint": "Désactivé, les autres ne verront pas vos badges. Vous les voyez toujours.",
+    "hiddenNote": "Masqué pour les autres",
     "open": "Ouvrir le Musée des badges",
     "summary": "{{earned}} badges obtenus sur {{total}}",
     "loading": "Chargement des badges…",

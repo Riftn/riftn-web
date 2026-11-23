@@ -22,7 +22,20 @@ export interface Milestones {
   top: string[];
   earned: number;
   total: number;
+  /**
+   * The owner keeps the museum to themselves. Other viewers then get no
+   * badges; the owner still gets everything, with this set.
+   */
+  hidden?: boolean;
   updatedAt: string;
+}
+
+/** Profile setting in `customs`: `public` (also when absent) or `hidden`. */
+export const BADGE_MUSEUM_VISIBILITY_KEY = 'badgeMuseumVisibility';
+
+/** Whether other people see this account's Badge Museum. On unless switched off. */
+export function badgeMuseumIsShown(customs: Record<string, unknown> | null | undefined): boolean {
+  return customs?.[BADGE_MUSEUM_VISIBILITY_KEY] !== 'hidden';
 }
 
 /**

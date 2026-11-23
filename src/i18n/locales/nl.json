@@ -23588,6 +23588,9 @@
   },
   "badgeMuseum": {
     "title": "Badgemuseum",
+    "showSetting": "Badgemuseum tonen op mijn profiel",
+    "showSettingHint": "Uit: anderen zien je badges niet. Jij ziet ze nog wel.",
+    "hiddenNote": "Verborgen voor anderen",
     "open": "Badgemuseum openen",
     "summary": "{{earned}} van {{total}} badges verdiend",
     "loading": "Badges laden…",

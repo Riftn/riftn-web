@@ -9,13 +9,22 @@
  *   earned badges, one per kind. Tapping one opens the museum. On your own
  *   profile, with nothing earned yet, a single "Badge Museum" chip opens it so
  *   you can see what's ahead.
+ * - `BadgeMuseumPanel` sits under the follower counts (Requests a63c7686): a
+ *   framed panel of every earned badge as hexagon tiles, six to a row on a
+ *   phone. Locked steps stay out of it; tapping a tile or the title opens the
+ *   museum. Nothing renders until something is earned.
  * - `BadgeMuseumSheet` lists every step: earned ones lit, locked ones dimmed
  *   with a progress bar ("640 / 1K").
+ *
+ * The owner can hide all of it from other people in Edit profile (Requests
+ * f493327b, `customs.badgeMuseumVisibility`); the server then sends other
+ * viewers no badges, and the owner sees a "Hidden from others" note.
  *
  * @module components/app/profile/BadgeMuseum
  */
 
 import { useState } from 'react';
+import { EyeOff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
@@ -101,7 +110,7 @@ export function MilestoneChips({ address, own, className }: MilestoneChipsProps)
   const [open, setOpen] = useState(false);
   const { data } = useMilestones(address);
 
-  if (!data) return null;
+  if (!data || (data.hidden && !own)) return null;
   const top = data.top
     .map((id) => data.milestones.find((m) => m.id === id))
     .filter((m): m is Milestone => !!m);
@@ -142,6 +151,130 @@ export function MilestoneChips({ address, own, className }: MilestoneChipsProps)
   );
 }
 
+/**
+ * One colour per kind, so a row of tiles reads as families at a glance. Kept
+ * soft (they sit on glass in every theme) and paired with the badge's own icon.
+ */
+const KIND_HUE: Record<string, number> = {
+  views: 205,
+  videos: 270,
+  followers: 150,
+  likes: 335,
+  lives: 12,
+  liveHours: 42,
+};
+
+interface BadgeMuseumPanelProps {
+  /** Wallet of the person whose profile is on screen. */
+  address?: string | null;
+  /** True on your own profile: shows the "Hidden from others" note when it applies. */
+  own?: boolean;
+  className?: string;
+}
+
+export function BadgeMuseumPanel({ address, own, className }: BadgeMuseumPanelProps) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const { data } = useMilestones(address);
+
+  if (!data || (data.hidden && !own)) return null;
+  const earned = data.milestones.filter((m) => m.earned).sort((a, b) => b.rarity - a.rarity);
+  if (!earned.length) return null;
+
+  const title = t('badgeMuseum.title', 'Badge Museum');
+  const openLabel = t('badgeMuseum.open', 'Open Badge Museum');
+
+  return (
+    <section data-badge-museum-panel aria-label={title} className={cn('relative mt-5 pt-3', className)}>
+      <div
+        className={cn(
+          'relative rounded-2xl border px-2.5 pb-3 pt-5 sm:px-4',
+          'bg-white/[0.03] backdrop-blur-sm',
+          'border-[color-mix(in_srgb,var(--tint-accent,rgb(161_161_170))_45%,transparent)]',
+          'shadow-[0_0_18px_-4px_color-mix(in_srgb,var(--tint-accent,rgb(161_161_170))_55%,transparent),inset_0_0_14px_-6px_color-mix(in_srgb,var(--tint-accent,rgb(161_161_170))_45%,transparent)]',
+        )}
+      >
+        <ul className="flex flex-wrap justify-center gap-y-2.5 [--gap:0.375rem] gap-x-[var(--gap)] sm:[--gap:0.75rem]">
+          {earned.map((m) => {
+            const name = milestoneName(t, m);
+            return (
+              <li key={m.id} className="w-[calc((100%-5*var(--gap))/6)] sm:w-[calc((100%-7*var(--gap))/8)]">
+                <button
+                  type="button"
+                  data-milestone-tile={m.id}
+                  onClick={() => setOpen(true)}
+                  title={`${name} · ${openLabel}`}
+                  aria-label={`${name}. ${openLabel}`}
+                  className="group flex w-full flex-col items-center gap-1 rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/60"
+                >
+                  <HexBadge m={m} />
+                  <span className="line-clamp-2 w-full break-words text-center text-[9.5px] font-semibold leading-tight text-white/75 sm:text-[11px]">
+                    {name}
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+        {own && data.hidden && (
+          <p data-badge-museum-hidden className="mt-2.5 flex items-center justify-center gap-1 text-[11px] text-white/50">
+            <EyeOff aria-hidden className="h-3 w-3" />
+            {t('badgeMuseum.hiddenNote', 'Hidden from others')}
+          </p>
+        )}
+      </div>
+      {/* The title sits in a notch on the frame's top edge. */}
+      <button
+        type="button"
+        data-badge-museum-title
+        onClick={() => setOpen(true)}
+        title={openLabel}
+        className={cn(
+          'absolute left-1/2 top-0 -translate-x-1/2 inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-1',
+          'text-xs font-semibold text-white transition-colors hover:text-white',
+          'bg-[var(--float-solid,rgb(9_9_11))]',
+          'border-[color-mix(in_srgb,var(--tint-accent,rgb(161_161_170))_55%,transparent)]',
+          'shadow-[0_0_12px_-3px_color-mix(in_srgb,var(--tint-accent,rgb(161_161_170))_60%,transparent)]',
+        )}
+      >
+        <span aria-hidden>🏆</span>
+        {title}
+        <span className="font-mono text-[10px] text-white/50">{formatCount(earned.length)}</span>
+      </button>
+      <BadgeMuseumSheet address={address} open={open} onOpenChange={setOpen} />
+    </section>
+  );
+}
+
+/** A hexagon tile in the badge's family colour with its icon in the middle. */
+function HexBadge({ m }: { m: Milestone }) {
+  const hue = KIND_HUE[m.kind] ?? 220;
+  const hex = 'polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%)';
+  // The glow sits on a wrapper: a filter on the clipped shape would be clipped too.
+  return (
+    <span
+      aria-hidden
+      className="block w-full max-w-[56px] transition-transform duration-200 group-hover:scale-105"
+      style={{ filter: `drop-shadow(0 0 5px hsl(${hue} 90% 60% / 0.45))` }}
+    >
+      <span
+        className="relative block aspect-[0.9] w-full"
+        style={{ clipPath: hex, background: `linear-gradient(160deg, hsl(${hue} 85% 64%), hsl(${hue} 70% 38%))` }}
+      >
+        <span
+          className="absolute inset-[2px] flex items-center justify-center text-[18px] leading-none sm:text-[22px]"
+          style={{
+            clipPath: hex,
+            background: `radial-gradient(circle at 50% 35%, hsl(${hue} 70% 34%), hsl(${hue} 60% 14%))`,
+          }}
+        >
+          {milestoneIcon(m.id)}
+        </span>
+      </span>
+    </span>
+  );
+}
+
 interface BadgeMuseumSheetProps {
   address?: string | null;
   open: boolean;
@@ -175,6 +308,12 @@ export function BadgeMuseumSheet({ address, open, onOpenChange }: BadgeMuseumShe
                   total: formatCount(data.total),
                 })
               : t('badgeMuseum.loading', 'Loading badges…')}
+            {data?.hidden && (
+              <span data-badge-museum-hidden className="ml-2 inline-flex items-center gap-1 align-middle">
+                <EyeOff aria-hidden className="h-3 w-3" />
+                {t('badgeMuseum.hiddenNote', 'Hidden from others')}
+              </span>
+            )}
           </DrawerDescription>
         </DrawerHeader>
         <div className="overflow-y-auto px-4 pb-8">
