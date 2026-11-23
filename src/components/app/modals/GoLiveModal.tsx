@@ -250,6 +250,12 @@ export function GoLiveModal({ isOpen, onClose, initialSource, initialStream }: G
   const [isLoading, setIsLoading] = useState(false);
   const [streamData, setStreamData] = useState<{ tokenId: string; streamKey: string; ingestUrl: string; playbackUrl: string; streamId: string; hlsUrl?: string; playbackId?: string; provider?: string } | null>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  // An encoder left on "auto" sends a keyframe only every 8 seconds or so,
+  // and a viewer cannot start watching until the next one arrives.
+  const encoderSettingsTip = t('goLive.encoderSettingsTip', {
+    defaultValue:
+      'So your stream opens fast for viewers, set Keyframe Interval to 2 seconds in your encoder (OBS: Settings → Output), and B-frames to 0 if it has that setting. Left on auto, viewers can wait up to 8 seconds for the picture.',
+  });
   /**
    * The creator's PERMANENT encoder credentials, if they have any.
    *
@@ -1369,6 +1375,7 @@ export function GoLiveModal({ isOpen, onClose, initialSource, initialStream }: G
                       onCopy={copyToClipboard}
                       keyLabel={t('goLive.streamKey')}
                       serverLabel={t('goLive.ingestUrl')}
+                      tip={encoderSettingsTip}
                     />
                     {/* Alerts and widgets live beside the key: the OBS overlay link is set up there. */}
                     <a
@@ -1616,6 +1623,7 @@ export function GoLiveModal({ isOpen, onClose, initialSource, initialStream }: G
                         onCopy={copyToClipboard}
                         keyLabel={t('goLive.streamKey')}
                         serverLabel={t('goLive.ingestUrl')}
+                        tip={encoderSettingsTip}
                       />
                     </>
                   ) : (
@@ -1626,6 +1634,7 @@ export function GoLiveModal({ isOpen, onClose, initialSource, initialStream }: G
                       onCopy={copyToClipboard}
                       keyLabel={t('goLive.streamKey')}
                       serverLabel={t('goLive.ingestUrl')}
+                      tip={encoderSettingsTip}
                     />
                   )}
 
@@ -1743,6 +1752,7 @@ function EncoderFields({
   onCopy,
   keyLabel,
   serverLabel,
+  tip,
 }: {
   server: string;
   streamKey: string;
@@ -1750,6 +1760,8 @@ function EncoderFields({
   onCopy: (text: string, field: string) => void;
   keyLabel: string;
   serverLabel: string;
+  /** The one encoder setting that decides how fast the stream opens for viewers. */
+  tip?: string;
 }) {
   return (
     <>
@@ -1772,6 +1784,8 @@ function EncoderFields({
           </Button>
         </div>
       </div>
+
+      {tip && <p className="text-[11px] leading-4 text-zinc-400">{tip}</p>}
     </>
   );
 }

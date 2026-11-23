@@ -177,6 +177,34 @@ const LivePostChat = lazyWithRetry(() =>
 );
 
 /**
+ * A link straight to a live. index.html asked for the post while the app was
+ * still loading, so the answer is often here before the page has drawn
+ * anything. The moment it says "live", fetch the player and its chat, and
+ * open the connection to the stream's host, instead of waiting for the page
+ * to render its way down to each of them in turn (measured: the chat's code
+ * was only asked for 1.2 s after the player's).
+ */
+function preloadLiveFromPrefetch() {
+  try {
+    const pre = (window as Window & { __postPrefetch?: { p?: Promise<unknown> } }).__postPrefetch;
+    void pre?.p
+      ?.then((data) => {
+        const nft = data && typeof data === 'object' && 'result' in data ? (data as { result: unknown }).result : data;
+        if (!nft || typeof nft !== 'object' || getContentType(nft as DeHubNFT) !== 'live') return;
+        void LiveStreamCard.preload().catch(() => undefined);
+        void LivePostChat.preload().catch(() => undefined);
+        // Building the address is what opens the connection (see hlsUrlFor).
+        const stream = (nft as { stream?: Parameters<typeof hlsUrlFor>[0] }).stream;
+        if (stream?.playbackId) hlsUrlFor(stream);
+      })
+      .catch(() => undefined);
+  } catch {
+    /* A head start only. */
+  }
+}
+if (typeof window !== 'undefined') preloadLiveFromPrefetch();
+
+/**
  * Detect content type from API response
  */
 function getContentType(post: DeHubNFT): 'video' | 'image' | 'post' | 'live' {

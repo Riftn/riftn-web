@@ -41,4 +41,15 @@ describe('waiting for candidates', () => {
     await vi.advanceTimersByTimeAsync(160);
     expect(done).toHaveBeenCalled();
   });
+
+  it('takes the first candidate of any kind when the far side has a public address', async () => {
+    const pc = fakePeer();
+    const done = vi.fn();
+    void waitForIceGathering(pc, 'any', 600).then(done);
+    await vi.advanceTimersByTimeAsync(100);
+    expect(done).not.toHaveBeenCalled();
+    pc.dispatchEvent(candidate('host'));
+    await vi.advanceTimersByTimeAsync(160);
+    expect(done).toHaveBeenCalled();
+  });
 });
