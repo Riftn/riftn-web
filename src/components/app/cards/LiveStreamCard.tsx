@@ -35,6 +35,7 @@ import Ban from "@/components/ui/cut-icons/blocked";
 import Volume2 from "@/components/ui/cut-icons/volume";
 import VolumeX from "@/components/ui/cut-icons/mute";
 import Maximize from "@/components/ui/cut-icons/fullscreen";
+import MessageSquare from "@/components/ui/cut-icons/messages";
 import PictureInPicture2 from "@/components/ui/cut-icons/picture-in-picture";
 import Gift from "@/components/ui/cut-icons/gifts";
 import Info from "@/components/ui/cut-icons/information";
@@ -249,6 +250,11 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
   const [showReportModal, setShowReportModal] = useState(false);
   const [showActivityLog, setShowActivityLog] = useState(false);
   const [showGiftDrawer, setShowGiftDrawer] = useState(false);
+  // Desktop fullscreen: the chat as a column down the right of the picture,
+  // opened from the chat button in the player's own bar.
+  const [fullscreenChat, setFullscreenChat] = useState(false);
+  // Phone, cleared screen: the room shown back over the picture on its own.
+  const [clearedChat, setClearedChat] = useState(false);
   const [showGiftSubs, setShowGiftSubs] = useState(false);
   // Offered once the stream API takes gift checkouts; asked when the gift sheet first opens.
   const { data: giftSubsReady } = useQuery({
@@ -430,6 +436,7 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
     }
   }, [rotation, unrotate]);
   useEffect(() => { if (!chromeHidden) unrotate(); }, [chromeHidden, unrotate]);
+  useEffect(() => { if (!chromeHidden) setClearedChat(false); }, [chromeHidden]);
   useEffect(() => () => unrotate(), [unrotate]);
   /**
    * The replay timeline, for the scrub line the chrome draws.
@@ -1780,12 +1787,45 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
             {/* The card's own control bar. Full-bleed replaces all of it:
                 the state moved to a pill, the audience to the header, and
                 mute to a chrome circle beside it. */}
-            <div className={cn('absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent', immersive && 'hidden')}>
+            <div className={cn('absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent', immersive && 'hidden', isFullscreen && fullscreenChat && chatSlot && 'right-[min(380px,40%)]')}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span data-live-badge className="px-2 py-0.5 bg-red-500 text-white text-xs font-semibold rounded">{_copy("copy.35e0d0360a0a", { defaultValue: "LIVE" })}</span>
                 </div>
                 <div className="flex items-center gap-2">
+                  {/* Like (tap again and again, every tap floats one) and the
+                      emoji tray (hover or hold), on the picture itself, as on
+                      the phone. In fullscreen the share sheet can't draw
+                      over the player, so share reposts straight away there. */}
+                  <div data-no-navigate data-live-player-actions onClick={(e) => e.stopPropagation()}>
+                    <ActionBar
+                      compact
+                      quickRepost={isFullscreen}
+                      onLiveReaction={sendLiveReaction}
+                      postId={stream.id}
+                      tokenId={parseInt(stream.id, 10) || undefined}
+                      isLiked={stream.isLiked}
+                      isDisliked={stream.isDisliked}
+                      myReaction={stream.myReaction}
+                      reactionCounts={stream.reactionCounts}
+                      likeCount={stream.likeCount}
+                      dislikeCount={stream.dislikeCount}
+                      commentCount={stream.commentCount}
+                      nativeShare={{ title: stream.title }}
+                    />
+                  </div>
+                  {isFullscreen && chatSlot && (
+                    <button
+                      type="button"
+                      data-live-fullscreen-chat-toggle
+                      onClick={(e) => { e.stopPropagation(); setFullscreenChat(open => !open); }}
+                      aria-pressed={fullscreenChat}
+                      aria-label={fullscreenChat ? t('stages.hideChat', 'Hide chat') : t('stages.showChat', 'Show chat')}
+                      className={cn('p-2 text-white hover:bg-white/20 rounded transition-colors', fullscreenChat && 'bg-white/20')}
+                    >
+                      <MessageSquare className="w-5 h-5" />
+                    </button>
+                  )}
                   <button
                     onClick={toggleMute}
                     aria-label={isMuted ? t('stages.unmute', 'Unmute') : t('stages.mute', 'Mute')}
@@ -1878,6 +1918,20 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
           className={cn('absolute left-3 z-20 max-w-[70%]', immersive ? 'top-[max(6.5rem,calc(env(safe-area-inset-top)+6.5rem))]' : 'top-14')}
         />
         <LiveReactionFlow streamId={stream.streamId} enabled={!!stream.isLive && !streamEnded} bottom={immersive ? 100 : 56} self={selfReaction} />
+        {/* Fullscreen chat, YouTube style: a column down the right edge. The
+            chat under the card steps aside while this one is open, so the
+            room is only ever joined once. */}
+        {!immersive && isFullscreen && fullscreenChat && chatSlot && (
+          <div
+            data-no-navigate
+            data-live-fullscreen-chat
+            data-keep-dark
+            onClick={(e) => e.stopPropagation()}
+            className="absolute inset-y-0 right-0 z-30 flex w-[min(380px,40%)] flex-col overflow-y-auto overscroll-contain border-l border-white/10 bg-black/75 p-3 backdrop-blur-xl"
+          >
+            {chatSlot}
+          </div>
+        )}
         {stream.streamId && stream.isLive && !streamEnded && !isOwnStream && (
           <Suspense fallback={null}>
             <CoStreamViewerLayer streamId={stream.streamId} owner={stream.creatorId} onRoomChange={quietForGuestRoom} />
@@ -1905,6 +1959,8 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
         )}
         {immersive && chromeHidden && (
           <LiveClearedLayer
+            onToggleChat={chatSlot && rotation !== 'css' ? () => setClearedChat(open => !open) : undefined}
+            chatOpen={clearedChat}
             onRestore={() => setHidden(false)}
             onRotate={() => void toggleRotation()}
             onTouchStart={swipeFeed ? undefined : onSwipeStart}
@@ -1956,7 +2012,8 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
           className={cn(
             'absolute inset-x-3 bottom-0 z-20 flex max-h-[45%] flex-col justify-end transition-opacity duration-300',
             keyboardOpen ? 'pb-2' : 'pb-[max(0.75rem,env(safe-area-inset-bottom))]',
-            chromeHidden && 'invisible pointer-events-none opacity-0'
+            chromeHidden && !(clearedChat && rotation !== 'css') && 'invisible pointer-events-none opacity-0',
+            chromeHidden && clearedChat && rotation !== 'css' && 'z-[45] right-16'
           )}
         >
           <LiveViewerActionsProvider
@@ -2012,7 +2069,7 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
       {/* The chat, or the comments when there is no chat to show — same
           button, same drop-down position under the action bar. */}
       {chatSlot ? (
-        !immersive && showComments && (
+        !immersive && showComments && !(isFullscreen && fullscreenChat) && (
           <div className="mt-3" data-no-navigate onClick={(e) => e.stopPropagation()}>
             {chatSlot}
           </div>

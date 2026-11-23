@@ -58,6 +58,8 @@ export interface StoryItem {
   remixSourceId?: string | null;
   /** Shared from this post ("Share to Moment"): viewers get "Go to post". */
   postTokenId?: number | null;
+  /** Someone else's post shared to this moment: their handle, for the credit. */
+  postAuthorName?: string | null;
   shareable?: boolean;
   mentions: StoryMention[];
   song: StorySong | null;

@@ -5358,6 +5358,8 @@
     "shopAllowanceUsed": "{{allowance}} sur {{allowance}} utilisés. Staké plus de jetons Riftn pour un badge supérieur et un emplacement supplémentaire."
   },
   "stages": {
+    "showChat": "Afficher le chat",
+    "hideChat": "Masquer le chat",
     "radioShow": {
       "toggle": "Émission de radio",
       "hint": "La musique d'abord : passe tes morceaux ou une playlist, parle quand tu veux. Les auditeurs arrivent à tout moment, et l'émission apparaît dans la rangée Radio d'Explorer.",
@@ -7847,6 +7849,7 @@
     "shareToMoment": "Partager en Moment",
     "goToPost": "Voir la publication",
     "fromYourPost": "De ta publication",
+    "fromAPost": "D'une publication",
     "postNotPublic": "Seules les publications publiques peuvent être partagées en Moment.",
     "postNotMedia": "Seules les publications photo et vidéo peuvent être partagées en Moment."
   },
