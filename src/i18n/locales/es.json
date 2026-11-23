@@ -2262,7 +2262,9 @@
     "receiveEvm": "Base · BNB · ETH",
     "receiveSolanaDescription": "Solo envíe tokens SOL y SPL aquí. Cualquier cosa enviada desde otra red se pierde.",
     "solanaSendUnavailable": "Los envíos en Solana aún no están disponibles",
-    "solanaSendUnavailableHint": "Usa Phantom directamente para mover este saldo."
+    "solanaSendUnavailableHint": "Usa Phantom directamente para mover este saldo.",
+    "showBalance": "Mostrar saldo",
+    "hideBalance": "Ocultar saldo"
   },
   "bookmarks": {
     "title": "Tus Marcadores",

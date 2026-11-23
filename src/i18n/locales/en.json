@@ -2262,7 +2262,9 @@
     "receiveEvm": "Base · BNB · ETH",
     "receiveSolanaDescription": "Only send SOL and SPL tokens here. Anything sent from another network is lost.",
     "solanaSendUnavailable": "Sending on Solana is not available yet",
-    "solanaSendUnavailableHint": "Use Phantom directly to move this balance."
+    "solanaSendUnavailableHint": "Use Phantom directly to move this balance.",
+    "showBalance": "Show balance",
+    "hideBalance": "Hide balance"
   },
   "bookmarks": {
     "title": "Your Bookmarks",
