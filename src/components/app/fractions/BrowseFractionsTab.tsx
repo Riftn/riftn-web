@@ -44,8 +44,10 @@ export function BrowseFractionsTab() {
   // Cheapest ask on the whole board — the one number that tells you whether
   // fractions are currently worth anything at all.
   const floor = useMemo(() => {
-    if (!listings.length) return null;
-    return Math.min(...listings.map(l => l.price_per_fraction));
+    // Free giveaways are not an asking price.
+    const paid = listings.filter(l => l.price_per_fraction > 0);
+    if (!paid.length) return null;
+    return Math.min(...paid.map(l => l.price_per_fraction));
   }, [listings]);
 
   return (
