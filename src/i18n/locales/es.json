@@ -21832,6 +21832,8 @@
   },
   "notes": {
     "add": "Nota",
+    "yourStatus": "Tu estado",
+    "whatsUp": "¿Qué tal?",
     "yourNote": "Tu nota",
     "count": "Notas {{count}}",
     "hide": "Ocultar",

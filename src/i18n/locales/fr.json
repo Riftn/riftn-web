@@ -21836,6 +21836,8 @@
   },
   "notes": {
     "add": "Note",
+    "yourStatus": "Ton statut",
+    "whatsUp": "Quoi de neuf ?",
     "yourNote": "Ta note",
     "count": "Notes {{count}}",
     "hide": "Masquer",
