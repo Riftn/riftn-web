@@ -7846,7 +7846,10 @@
     "fromYourPost": "From your post",
     "fromAPost": "From a post",
     "postNotPublic": "Only public posts can be shared to a Moment.",
-    "postNotMedia": "Only photo and video posts can be shared to a Moment."
+    "postNotMedia": "Only photo and video posts can be shared to a Moment.",
+    "watchMomentsOf": "Watch {{name}}'s Moments",
+    "momentEnded": "That Moment has ended",
+    "momentOpenFailed": "Couldn't open that Moment"
   },
   "subscriptions": {
     "subscribersOnly": "Subscribers only",
@@ -23472,5 +23475,8 @@
     "tooBig": "That file is over 42 MB",
     "minted": "NFT minted. It shows on the market in a minute.",
     "failed": "Could not create the NFT"
+  },
+  "profileImage": {
+    "view": "View photo"
   }
 }

@@ -7847,7 +7847,10 @@
     "fromYourPost": "De tu publicación",
     "fromAPost": "De una publicación",
     "postNotPublic": "Solo las publicaciones públicas se pueden compartir en un Momento.",
-    "postNotMedia": "Solo las publicaciones con foto o video se pueden compartir en un Momento."
+    "postNotMedia": "Solo las publicaciones con foto o video se pueden compartir en un Momento.",
+    "watchMomentsOf": "Ver los Momentos de {{name}}",
+    "momentEnded": "Ese Momento ya terminó",
+    "momentOpenFailed": "No se pudo abrir ese Momento"
   },
   "subscriptions": {
     "subscribersOnly": "Solo suscriptores",
@@ -23498,5 +23501,8 @@
     "tooBig": "Ese archivo pasa de 42 MB",
     "minted": "NFT acuñado. Aparecerá en el mercado en un minuto.",
     "failed": "No se pudo crear el NFT"
+  },
+  "profileImage": {
+    "view": "Ver foto"
   }
 }

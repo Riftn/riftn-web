@@ -98,12 +98,19 @@ export function getStoryShelf(liveHosts: string, signedIn: boolean): Promise<{ s
   return apiCall('/api/stories/shelf', { params: { liveHosts: liveHosts || undefined }, requiresAuth: signedIn });
 }
 
-export function getStoryRings(addresses: string[]): Promise<{ rings: Record<string, 'unseen' | 'seen'> }> {
-  return apiCall('/api/stories/rings', { params: { addresses: addresses.join(',') } });
+/** A Moment mark for one face: whether it's all watched, how many are up, and the picture shown on the face. */
+export interface MomentPeek {
+  state: 'unseen' | 'seen';
+  count: number;
+  cover: string | null;
 }
 
-export function getUserStories(address: string): Promise<{ author: StoryAuthor | null; items: StoryItem[] }> {
-  return apiCall(`/api/stories/user/${encodeURIComponent(address.toLowerCase())}`);
+export function getStoryRings(addresses: string[], signedIn = false): Promise<{ rings: Record<string, 'unseen' | 'seen'>; peeks?: Record<string, MomentPeek> }> {
+  return apiCall('/api/stories/rings', { params: { addresses: addresses.join(',') }, requiresAuth: signedIn });
+}
+
+export function getUserStories(address: string, signedIn = false): Promise<{ author: StoryAuthor | null; items: StoryItem[] }> {
+  return apiCall(`/api/stories/user/${encodeURIComponent(address.toLowerCase())}`, { requiresAuth: signedIn });
 }
 
 export function getStory(id: string, signedIn = false): Promise<{ author: StoryAuthor | null; item: StoryItem }> {
