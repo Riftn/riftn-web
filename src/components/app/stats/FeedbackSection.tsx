@@ -241,74 +241,74 @@ export function FeedbackSection({ source }: { source?: 'converter' | 'migration'
         )}
       </PageSection>
 
-        <PageSection>
-          <div className="flex items-center gap-2 mb-3">
-            <Quote className="w-4 h-4 text-zinc-400" />
-            <span className="text-sm font-semibold text-white">
-              {t('stats.feedback.wallTitle', 'What people say')}
-            </span>
-            <span className="text-[11px] text-zinc-500 ml-auto">
-              {t('stats.feedback.wallNote', 'published with permission')}
-            </span>
-          </div>
-          <div role="status" className="text-xs text-zinc-400">
-            {feedback.isPending ? t('common.loading') : null}
-            {!feedback.isPending && !feedback.isError && approved.length === 0 ? t('explorePage.noResults') : null}
-            {feedback.isError ? t('common.failedToLoad') : null}
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-3">
-            {approved.map((item) => {
-              const account = item.username ? accounts?.[item.username.toLowerCase()] : undefined;
-              const handle = account?.username ?? item.username;
-              const name = account?.displayName || handle || t('stats.feedback.anonymous', 'A Riftn member');
-              const avatar = account?.address && account.avatarImageUrl ? buildAvatarUrl(account.address, account.avatarImageUrl) : undefined;
-              const face = (
-                <Avatar className="w-8 h-8 shrink-0">
-                  {avatar && <AvatarImage src={avatar} />}
-                  <AvatarFallback className="bg-zinc-700 text-white text-xs font-medium">
-                    {handle ? name.charAt(0).toUpperCase() : <Quote className="w-3.5 h-3.5 text-zinc-300" />}
-                  </AvatarFallback>
-                </Avatar>
-              );
-              const who = (
-                <span className="min-w-0 flex flex-col leading-tight">
-                  <span className="truncate text-xs font-semibold text-white">{name}</span>
-                  {(handle || item.time_using) && (
-                    <span className="truncate text-[11px] text-zinc-500">
-                      {handle ? `@${handle}` : ''}
-                      {handle && item.time_using ? ' · ' : ''}
-                      {item.time_using ?? ''}
+      <PageSection>
+        <div className="flex items-center gap-2 mb-3">
+          <Quote className="w-4 h-4 text-zinc-400" />
+          <span className="text-sm font-semibold text-white">
+            {t('stats.feedback.wallTitle', 'What people say')}
+          </span>
+          <span className="text-[11px] text-zinc-500 ml-auto">
+            {t('stats.feedback.wallNote', 'published with permission')}
+          </span>
+        </div>
+        <div role="status" className="text-xs text-zinc-400">
+          {feedback.isPending ? t('common.loading') : null}
+          {!feedback.isPending && !feedback.isError && approved.length === 0 ? t('explorePage.noResults') : null}
+          {feedback.isError ? t('common.failedToLoad') : null}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-3">
+          {approved.map((item) => {
+            const account = item.username ? accounts?.[item.username.toLowerCase()] : undefined;
+            const handle = account?.username ?? item.username;
+            const name = account?.displayName || handle || t('stats.feedback.anonymous', 'A Riftn member');
+            const avatar = account?.address && account.avatarImageUrl ? buildAvatarUrl(account.address, account.avatarImageUrl) : undefined;
+            const face = (
+              <Avatar className="w-8 h-8 shrink-0">
+                {avatar && <AvatarImage src={avatar} />}
+                <AvatarFallback className="bg-zinc-700 text-white text-xs font-medium">
+                  {handle ? name.charAt(0).toUpperCase() : <Quote className="w-3.5 h-3.5 text-zinc-300" />}
+                </AvatarFallback>
+              </Avatar>
+            );
+            const who = (
+              <span className="min-w-0 flex flex-col leading-tight">
+                <span className="truncate text-xs font-semibold text-white">{name}</span>
+                {(handle || item.time_using) && (
+                  <span className="truncate text-[11px] text-zinc-500">
+                    {handle ? `@${handle}` : ''}
+                    {handle && item.time_using ? ' · ' : ''}
+                    {item.time_using ?? ''}
+                  </span>
+                )}
+              </span>
+            );
+            return (
+              <figure key={item.id} className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-3">
+                <figcaption className="mb-2">
+                  {handle ? (
+                    <Link to={profilePath(handle)} className="inline-flex max-w-full items-center gap-2 rounded-lg hover:opacity-80 transition-opacity">
+                      {face}
+                      {who}
+                    </Link>
+                  ) : (
+                    <span className="inline-flex max-w-full items-center gap-2">
+                      {face}
+                      {who}
                     </span>
                   )}
-                </span>
-              );
-              return (
-                <figure key={item.id} className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-3">
-                  <figcaption className="mb-2">
-                    {handle ? (
-                      <Link to={profilePath(handle)} className="inline-flex max-w-full items-center gap-2 rounded-lg hover:opacity-80 transition-opacity">
-                        {face}
-                        {who}
-                      </Link>
-                    ) : (
-                      <span className="inline-flex max-w-full items-center gap-2">
-                        {face}
-                        {who}
-                      </span>
-                    )}
-                  </figcaption>
-                  <blockquote className="whitespace-pre-line text-xs text-zinc-300 leading-relaxed">“{item.body}”</blockquote>
-                </figure>
-              );
-            })}
-          </div>
-          {(feedback.isError || feedback.hasNextPage) && (
-            <KitButton variant="quiet" className="mt-3" disabled={feedback.isFetching}
-              onClick={() => { void (feedback.isError ? (approved.length ? feedback.fetchNextPage() : feedback.refetch()) : feedback.fetchNextPage()); }}>
-              {t(feedback.isFetching ? 'common.loading' : feedback.isError ? 'common.retry' : 'common.loadMore')}
-            </KitButton>
-          )}
-        </PageSection>
+                </figcaption>
+                <blockquote className="whitespace-pre-line text-xs text-zinc-300 leading-relaxed">“{item.body}”</blockquote>
+              </figure>
+            );
+          })}
+        </div>
+        {(feedback.isError || feedback.hasNextPage) && (
+          <KitButton variant="quiet" className="mt-3" disabled={feedback.isFetching}
+            onClick={() => { void (feedback.isError ? (approved.length ? feedback.fetchNextPage() : feedback.refetch()) : feedback.fetchNextPage()); }}>
+            {t(feedback.isFetching ? 'common.loading' : feedback.isError ? 'common.retry' : 'common.loadMore')}
+          </KitButton>
+        )}
+      </PageSection>
     </div>
   );
 }
