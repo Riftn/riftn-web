@@ -12,6 +12,7 @@ import { useTranslation as _useCopy } from 'react-i18next';
  * Keeping the vocabulary identical is what will make that move cheap.
  */
 
+import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -35,6 +36,7 @@ import {
 } from '@/lib/comment-threads';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
 import { patchFeatureRow } from '@/hooks/use-feature-requests';
+import { pingFeatureComments, watchFeatureComments } from '@/lib/feature-comment-live';
 
 export interface FeatureRequestComment extends ThreadedComment {
   feature_request_id: string;
@@ -58,6 +60,15 @@ interface CommentRow extends ThreadCommentRow {
 export function useFeatureRequestComments(featureRequestId: string | null) {
   const { walletAddress } = useAuth();
   const viewer = walletAddress?.toLowerCase() ?? null;
+  const queryClient = useQueryClient();
+
+  // Someone else commented, edited, deleted or reacted: read the thread again.
+  useEffect(() => {
+    if (!featureRequestId) return;
+    return watchFeatureComments(featureRequestId, () => {
+      void queryClient.invalidateQueries({ queryKey: ['feature-request-comments', featureRequestId] });
+    });
+  }, [featureRequestId, queryClient]);
 
   return useQuery({
     queryKey: ['feature-request-comments', featureRequestId, viewer],
@@ -88,7 +99,9 @@ export function useFeatureRequestComments(featureRequestId: string | null) {
       return buildThreads(attachReactions(rows, reactions, viewer));
     },
     enabled: !!featureRequestId,
-    staleTime: 30_000,
+    staleTime: 10_000,
+    // Safety net for missed pings and older app builds; paused in hidden tabs.
+    refetchInterval: 15_000,
   });
 }
 
@@ -174,8 +187,8 @@ const ASSISTANT_MENTION_RE = /(^|[^a-zA-Z0-9_])@assistant(?![a-zA-Z0-9_])/i;
  *
  * The reply is written server-side as a real comment owned by the assistant
  * account, so there is nothing to render here — only a refetch once it lands.
- * The board has no realtime channel, which is why this waits on the call
- * rather than hoping an invalidation catches it.
+ * The reply is written server-side, which sends no ping, so this waits on the
+ * call and pings for it once it lands.
  */
 async function requestAssistantReply(commentId: string): Promise<void> {
   await ensureFreshToken();
@@ -253,6 +266,7 @@ export function useSubmitComment() {
       return data;
     },
     onSuccess: (data, variables) => {
+      pingFeatureComments(variables.featureRequestId);
       queryClient.invalidateQueries({ queryKey: ['feature-request-comments', variables.featureRequestId] });
 
       // Tagging @assistant here gets an answer from the assistant itself, in
@@ -265,6 +279,7 @@ export function useSubmitComment() {
       if (newCommentId && ASSISTANT_MENTION_RE.test(variables.content)) {
         void requestAssistantReply(newCommentId)
           .then(() => {
+            pingFeatureComments(variables.featureRequestId);
             queryClient.invalidateQueries({
               queryKey: ['feature-request-comments', variables.featureRequestId],
             });
@@ -299,6 +314,7 @@ export function useEditComment() {
       if (error) throw error;
     },
     onSuccess: (_data, variables) => {
+      pingFeatureComments(variables.featureRequestId);
       queryClient.invalidateQueries({ queryKey: ['feature-request-comments', variables.featureRequestId] });
     },
     onError: () => {
@@ -326,6 +342,7 @@ export function useDeleteComment() {
       return { featureRequestId };
     },
     onSuccess: (_data, variables) => {
+      pingFeatureComments(variables.featureRequestId);
       queryClient.invalidateQueries({ queryKey: ['feature-request-comments', variables.featureRequestId] });
       // Optimistically decrement comment count without refetching the list
       patchFeatureRow(queryClient, variables.featureRequestId, (fr) => ({ ...fr, comment_count: Math.max(0, (fr.comment_count || 0) - 1) }));
@@ -384,6 +401,7 @@ export function useReactToComment() {
       if (error) throw error;
     },
     onSuccess: (_data, variables) => {
+      pingFeatureComments(variables.featureRequestId);
       queryClient.invalidateQueries({ queryKey: ['feature-request-comments', variables.featureRequestId] });
     },
     onError: () => {
