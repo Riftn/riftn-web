@@ -21808,13 +21808,15 @@
     "notInChat": "That link is to a private chat you're not in."
   },
   "notes": {
-    "add": "Note",
-    "yourNote": "Your note",
-    "count": "Notes {{count}}",
+    "yourStatus": "Your status",
+    "whatsUp": "What’s up?",
+    "add": "Status",
+    "yourNote": "Your status",
+    "count": "Status {{count}}",
     "hide": "Hide",
-    "inGroup": "Notes from this group",
-    "shared": "Your note is up for 24 hours",
-    "failed": "Your note didn't go up. Try again.",
+    "inGroup": "Status from this group",
+    "shared": "Your status is up for 24 hours",
+    "failed": "Your status didn't go up. Try again.",
     "placeholder": "Share a thought…",
     "removeGif": "Remove GIF",
     "removeSong": "Remove song",
@@ -21822,17 +21824,17 @@
     "removePlace": "Remove place",
     "song": "Song",
     "place": "Place",
-    "gifHost": "Pick a GIF from the GIF tab for notes.",
-    "back": "Back to notes",
+    "gifHost": "Pick a GIF from the GIF tab for statuses.",
+    "back": "Back to statuses",
     "fromFollowing": "From people you follow",
     "replyTo": "Reply to {{name}}…",
     "send": "Send",
     "optionDetail": "A short line, song or GIF for 24 hours",
     "who": "People who follow you can see it for 24 hours.",
-    "delete": "Delete note",
+    "delete": "Delete status",
     "share": "Share",
     "message": "Message",
-    "title": "Notes"
+    "title": "Status"
   },
   "comparison": {
     "f": {

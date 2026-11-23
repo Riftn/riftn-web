@@ -9,7 +9,7 @@ import { IslandAction, PageIsland, usePhonePill } from '@/components/app/page-ki
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
 import { PULL_REFRESH_THRESHOLD } from '@/lib/pill-pull-motion';
 import { DhbCoin } from '@/components/app/DhbAmount';
-import { lazy, Suspense, useState, useEffect, useRef, useCallback, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react';
+import { lazy, Suspense, useState, useEffect, useRef, useCallback, useMemo, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react';
 import CloseIcon from '@/components/ui/cut-icons/close';
 import { useTranslation } from 'react-i18next';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
@@ -80,7 +80,8 @@ import dehubLogo from '@/assets/dehub-logo.png';
 import { SEOHead } from '@/components/SEOHead';
 import { blockUser } from '@/lib/api/dehub/blocks';
 import { toast } from 'sonner';
-import { NotesSheetHost, openNotesSheet } from '@/components/app/chat/NotesRow';
+import { NotesSheetHost, openNotesSheet, StatusRow } from '@/components/app/chat/NotesRow';
+import type { StoryAuthor } from '@/lib/api/dehub/stories';
 import { LiveRipple } from '@/components/app/LiveRipple';
 import { MomentFace } from '@/components/app/stories/MomentFace';
 import { NewGroupChannelSheet, type NewChatKind } from '@/components/app/chat/NewGroupChannelSheet';
@@ -637,6 +638,11 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const convHasUnread = (c: DeHubConversation) => (c.unreadCount || 0) > 0 || !!chatPrefs.get(c.id)?.markedUnread || !!chatPrefs.get(c.id)?.reactions;
   const roomHasUnread = (c: (typeof groupChats)[number]) => !!roomPref(c)?.markedUnread || !!roomPref(c)?.reactions || (roomSummaries[c.id]?.unread ?? 0) > 0;
   const publicReactions = chatPrefs.get(PUBLIC_CHAT_PREF_ID)?.reactions ?? null;
+  const statusMe = useMemo<StoryAuthor | null>(() => {
+    if (!walletAddress) return null;
+    const u = user as { username?: string; displayName?: string; avatarImageUrl?: string; avatarUrl?: string } | null;
+    return { address: walletAddress, username: u?.username ?? null, displayName: u?.displayName ?? null, avatarImageUrl: u?.avatarImageUrl || u?.avatarUrl || null };
+  }, [walletAddress, user]);
   const tabFilter = tabsOn && activeTab === 'unread' && !showArchived && !inRequests ? 'unread' : 'all';
   const shownConversations = tabFilter === 'unread' ? listedConversations.filter(convHasUnread) : listedConversations;
   const shownRooms = tabFilter === 'unread' ? listedRooms.filter(roomHasUnread) : listedRooms;
@@ -1651,6 +1657,10 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
               </div>
             </div>
             <div ref={chatPullRef} data-chat-list-body>
+            {/* Statuses from people you follow, Instagram style, above the chat cards. */}
+            {!guest && walletAddress && !inRequests && !showArchived && (!tabsOn || activeTab === 'all') && (
+              <StatusRow me={statusMe} />
+            )}
             <ChatPinStrip
               conversations={pinStrip}
               selectedId={selectedConversation?.id}
