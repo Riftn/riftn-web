@@ -1750,7 +1750,9 @@
     "menuLayoutFolders": "Klasörler",
     "menuLayoutFoldersDesc": "Ana sayfaların, ardından her grup için bir klasör",
     "publicChatInBar": "Alt çubukta Genel Sohbet",
-    "publicChatInBarDesc": "Ekranın altındaki çubuktan tek dokunuşla Genel Sohbet'e gir"
+    "publicChatInBarDesc": "Ekranın altındaki çubuktan tek dokunuşla Genel Sohbet'e gir",
+    "blurMoments": "Anı önizlemelerini bulanıklaştır",
+    "blurMomentsDesc": "Diğer kişilerin Anları, sen açana kadar Ana sayfada bulanık kalır."
   },
   "common": {
     "notNow": "Şimdi değil",

@@ -21,6 +21,7 @@ import { buildAvatarUrl, buildAvatarCdnFallbackUrl, deviceWidth } from '@/lib/me
 import type { ShelfEntry } from '@/lib/api/dehub/stories';
 import { coverOf, handleOf, nameOf, playable } from './story-utils';
 import { rememberShelfSeat } from '@/lib/story-shelf-seat';
+import { useMomentPreviewsBlurred } from '@/lib/moment-preview-blur';
 import '@/styles/stories.css';
 
 const bg = (url?: string | null) => (url ? { backgroundImage: `url("${url.replace(/"/g, '%22')}")` } : undefined);
@@ -206,6 +207,7 @@ function LiveTile({ item, onOpen }: { item: LiveNowItem; onOpen: () => void }) {
 function PersonTile({ entry, onOpen }: { entry: ShelfEntry; onOpen: (el: HTMLElement) => void }) {
   const a = entry.author;
   const face = a.avatarImageUrl ? buildAvatarUrl(a.address, a.avatarImageUrl, deviceWidth(68)) : buildAvatarCdnFallbackUrl(a.address, undefined);
+  const blurred = useMomentPreviewsBlurred();
   return (
     <button
       type="button"
@@ -213,6 +215,7 @@ function PersonTile({ entry, onOpen }: { entry: ShelfEntry; onOpen: (el: HTMLEle
       data-story-tile
       data-kind="person"
       data-seen={entry.seen ? 'true' : 'false'}
+      data-blur={blurred ? 'true' : undefined}
       onClick={e => onOpen(e.currentTarget)}
       aria-label={nameOf(a)}
     >

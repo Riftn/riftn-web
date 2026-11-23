@@ -1750,7 +1750,9 @@
     "menuLayoutFolders": "Mappen",
     "menuLayoutFoldersDesc": "Je hoofdpagina's, dan een map per groep",
     "publicChatInBar": "Openbare chat in de onderste balk",
-    "publicChatInBarDesc": "Met één tik vanuit de balk onderaan het scherm naar de openbare chat"
+    "publicChatInBarDesc": "Met één tik vanuit de balk onderaan het scherm naar de openbare chat",
+    "blurMoments": "Momentvoorbeelden vervagen",
+    "blurMomentsDesc": "Momenten van anderen blijven vaag op Home tot je ze opent."
   },
   "common": {
     "notNow": "Niet nu",
