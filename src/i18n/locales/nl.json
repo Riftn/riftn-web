@@ -3942,6 +3942,7 @@
     "anonymousLikes_other": "{{count}} likes van anonieme badgehouders"
   },
   "mintChain": {
+    "homeAllowance": "{{left}} van {{total}} mints vandaag bereiken Home. Extra mints gaan naar je profiel en de markt.",
     "title": "Muntpaal",
     "subtitle": "Kies een keten. Prijzen zijn live en worden elke minuut bijgewerkt.",
     "free": "Gratis",
@@ -12968,6 +12969,8 @@
     "intro": "Elke laag kost een vast bedrag in dollars. Het tokenbedrag ernaast is wat dat kost tegen de referentieprijs van $0,001 — de app vraagt om dat bedrag geschaald naar de live prijs, en nooit meer dan dat, dus een dalende prijs kan de lat niet hoger leggen of een laag die je al hebt verdiend terugnemen."
   },
   "postingAllowance": {
+    "mintsLabel": "mints",
+    "mintNote": "Mints volgen dezelfde aantallen als tekstposts: zoveel mints per dag bereiken de Home-feed. Extra mints gaan gewoon door en staan op je profiel, in Volgend en op de fractiemarkt. Minten wordt nooit geblokkeerd.",
     "footnote": "Badge-niveau is je Riftn-tokens die je hebt vastgehouden en gestaked op BNB Chain en Base — dezelfde balans waaruit je badge wordt getrokken. De ladder is geprijsd in dollars, dus de bovenstaande tokenbedragen zijn wat elke laag kost tegen de verkoopprijs van $0,001 en de vereiste daalt naarmate de tokendaling stijgt; een laag die je al hebt verdiend, wordt nooit teruggenomen door de prijs. Een badge die je door een sponsor is verleend, wordt weergegeven op je profiel, maar verhoogt je postlimiet niet — die komt van wat je zelf vasthoudt. Limieten worden gereset om 00:00 UTC, en een gigabyte hier is 1.024 MB."
   },
   "postComposer": {
@@ -13371,7 +13374,8 @@
           "3": "Wanneer een bericht de limiet zou overschrijden, berekent de app eerst de prijs en controleert of uw portemonnee dit kan dekken voordat er iets wordt geüpload.",
           "4": "Het bericht wordt exact gepubliceerd zoals het binnen de limiet zou zijn — publicatie wacht nooit op een betaling.",
           "5": "Vervolgens keurt u één overboeking goed voor dat specifieke bericht, afgerekend op de Base of BNB Chain die voldoende Riftn tokens bevat.",
-          "6": "Beide pools worden om middernacht UTC gereset."
+          "6": "Beide pools worden om middernacht UTC gereset.",
+          "7": "Mints werken hetzelfde: je badge bepaalt hoeveel mints per dag de Home-feed bereiken, hetzelfde aantal als je tekstposts. Extra mints gaan gewoon door en staan op je profiel, in Volgend en op de fractiemarkt."
         },
         "tips": {
           "1": "Overschrijding is pro rata: 200 MB boven uw limiet kost 200 MB, niet een hele gigabyte.",
