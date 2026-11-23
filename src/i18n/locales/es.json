@@ -1,4 +1,42 @@
 {
+  "painting": {
+    "title": "Pintura",
+    "close": "Cerrar",
+    "undo": "Deshacer",
+    "redo": "Rehacer",
+    "done": "Listo",
+    "clear": "Borrar todo",
+    "size": "Tamaño",
+    "colour": "Color",
+    "customColour": "Color personalizado",
+    "fillShape": "Rellenar forma",
+    "shape": "Forma del lienzo",
+    "discardTitle": "¿Descartar esta pintura?",
+    "discard": "Descartar",
+    "keep": "Seguir pintando",
+    "saveFailed": "No se pudo guardar la pintura. Inténtalo de nuevo.",
+    "tools": {
+      "pencil": "Lápiz",
+      "brush": "Pincel",
+      "eraser": "Borrador",
+      "fill": "Relleno",
+      "line": "Línea",
+      "rect": "Rectángulo",
+      "ellipse": "Elipse",
+      "oil": "Óleo",
+      "pastel": "Pastel",
+      "watercolor": "Acuarela",
+      "charcoal": "Carboncillo"
+    },
+    "aspect": {
+      "portrait": "Vertical",
+      "square": "Cuadrado",
+      "wide": "Horizontal"
+    },
+    "hue": "Tono",
+    "saturation": "Saturación",
+    "brightness": "Brillo"
+  },
   "ownKeys": {
     "working": "Funcionando",
     "invalid": "Rechazado, reemplázalo",

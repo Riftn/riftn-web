@@ -1,4 +1,42 @@
 {
+  "painting": {
+    "title": "Peinture",
+    "close": "Fermer",
+    "undo": "Annuler",
+    "redo": "Rétablir",
+    "done": "OK",
+    "clear": "Tout effacer",
+    "size": "Taille",
+    "colour": "Couleur",
+    "customColour": "Couleur personnalisée",
+    "fillShape": "Remplir la forme",
+    "shape": "Format de la toile",
+    "discardTitle": "Abandonner cette peinture ?",
+    "discard": "Abandonner",
+    "keep": "Continuer à peindre",
+    "saveFailed": "Impossible d'enregistrer la peinture. Réessayez.",
+    "tools": {
+      "pencil": "Crayon",
+      "brush": "Pinceau",
+      "eraser": "Gomme",
+      "fill": "Remplissage",
+      "line": "Ligne",
+      "rect": "Rectangle",
+      "ellipse": "Ellipse",
+      "oil": "Huile",
+      "pastel": "Pastel",
+      "watercolor": "Aquarelle",
+      "charcoal": "Fusain"
+    },
+    "aspect": {
+      "portrait": "Portrait",
+      "square": "Carré",
+      "wide": "Paysage"
+    },
+    "hue": "Teinte",
+    "saturation": "Saturation",
+    "brightness": "Luminosité"
+  },
   "ownKeys": {
     "working": "En cours",
     "invalid": "Rejeté, remplacez-le",

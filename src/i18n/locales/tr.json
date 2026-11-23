@@ -1,4 +1,42 @@
 {
+  "painting": {
+    "title": "Resim",
+    "close": "Kapat",
+    "undo": "Geri al",
+    "redo": "Yinele",
+    "done": "Bitti",
+    "clear": "Temizle",
+    "size": "Boyut",
+    "colour": "Renk",
+    "customColour": "Özel renk",
+    "fillShape": "Şekli doldur",
+    "shape": "Tuval biçimi",
+    "discardTitle": "Bu resim silinsin mi?",
+    "discard": "Sil",
+    "keep": "Boyamaya devam et",
+    "saveFailed": "Resim kaydedilemedi. Tekrar dene.",
+    "tools": {
+      "pencil": "Kurşun kalem",
+      "brush": "Fırça",
+      "eraser": "Silgi",
+      "fill": "Doldur",
+      "line": "Çizgi",
+      "rect": "Dikdörtgen",
+      "ellipse": "Elips",
+      "oil": "Yağlı boya",
+      "pastel": "Pastel",
+      "watercolor": "Suluboya",
+      "charcoal": "Kömür kalem"
+    },
+    "aspect": {
+      "portrait": "Dikey",
+      "square": "Kare",
+      "wide": "Geniş"
+    },
+    "hue": "Ton",
+    "saturation": "Doygunluk",
+    "brightness": "Parlaklık"
+  },
   "ownKeys": {
     "working": "Çalışıyor",
     "invalid": "Reddedildi, değiştir",

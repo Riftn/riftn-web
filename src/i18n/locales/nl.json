@@ -1,4 +1,42 @@
 {
+  "painting": {
+    "title": "Schilderen",
+    "close": "Sluiten",
+    "undo": "Ongedaan maken",
+    "redo": "Opnieuw",
+    "done": "Klaar",
+    "clear": "Wissen",
+    "size": "Grootte",
+    "colour": "Kleur",
+    "customColour": "Eigen kleur",
+    "fillShape": "Vorm vullen",
+    "shape": "Vorm van het doek",
+    "discardTitle": "Dit schilderij weggooien?",
+    "discard": "Weggooien",
+    "keep": "Verder schilderen",
+    "saveFailed": "Het schilderij kon niet worden opgeslagen. Probeer het opnieuw.",
+    "tools": {
+      "pencil": "Potlood",
+      "brush": "Penseel",
+      "eraser": "Gum",
+      "fill": "Vullen",
+      "line": "Lijn",
+      "rect": "Rechthoek",
+      "ellipse": "Ellips",
+      "oil": "Olieverf",
+      "pastel": "Pastel",
+      "watercolor": "Waterverf",
+      "charcoal": "Houtskool"
+    },
+    "aspect": {
+      "portrait": "Staand",
+      "square": "Vierkant",
+      "wide": "Breed"
+    },
+    "hue": "Tint",
+    "saturation": "Verzadiging",
+    "brightness": "Helderheid"
+  },
   "ownKeys": {
     "working": "Werkt",
     "invalid": "Geweigerd, vervang het",

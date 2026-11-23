@@ -1,4 +1,42 @@
 {
+  "painting": {
+    "title": "الرسم",
+    "close": "إغلاق",
+    "undo": "تراجع",
+    "redo": "إعادة",
+    "done": "تم",
+    "clear": "مسح",
+    "size": "الحجم",
+    "colour": "اللون",
+    "customColour": "لون مخصص",
+    "fillShape": "ملء الشكل",
+    "shape": "شكل اللوحة",
+    "discardTitle": "هل تريد تجاهل هذه اللوحة؟",
+    "discard": "تجاهل",
+    "keep": "متابعة الرسم",
+    "saveFailed": "تعذّر حفظ اللوحة. حاول مرة أخرى.",
+    "tools": {
+      "pencil": "قلم رصاص",
+      "brush": "فرشاة",
+      "eraser": "ممحاة",
+      "fill": "تعبئة",
+      "line": "خط",
+      "rect": "مستطيل",
+      "ellipse": "شكل بيضاوي",
+      "oil": "زيت",
+      "pastel": "باستيل",
+      "watercolor": "ألوان مائية",
+      "charcoal": "فحم"
+    },
+    "aspect": {
+      "portrait": "عمودي",
+      "square": "مربع",
+      "wide": "عريض"
+    },
+    "hue": "درجة اللون",
+    "saturation": "التشبع",
+    "brightness": "السطوع"
+  },
   "ownKeys": {
     "working": "يعمل",
     "invalid": "مرفوض، استبدله",
