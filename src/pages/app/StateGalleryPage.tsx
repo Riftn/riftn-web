@@ -2792,8 +2792,11 @@ const GALLERY_PET: StreamPet = {
   stage: 'teen',
   stageIndex: 3,
   food: 96,
-  streamFood: 88,
+  streamFood: 86,
   viewerFood: 8,
+  requestFood: 2,
+  requestFoodToday: 2,
+  requestsWaiting: 2,
   stageFood: 60,
   nextStageFood: 240,
   progress: 36 / 180,
@@ -2845,7 +2848,7 @@ function StreamPetGallery() {
           <PetCard pet={{ ...GALLERY_PET, streamingNow: false }} />
         </div>
         <div data-stream-pet-profile-asleep>
-          <PetCard pet={{ ...GALLERY_PET, name: 'Pip', color: 'coral', stage: 'kid', stageIndex: 2, food: 30, stageFood: 12, nextStageFood: 60, progress: 18 / 48, mood: 'asleep', streamingNow: false, sleepsAt: null }} own />
+          <PetCard pet={{ ...GALLERY_PET, name: 'Pip', color: 'coral', stage: 'kid', stageIndex: 2, food: 30, stageFood: 12, nextStageFood: 60, progress: 18 / 48, mood: 'asleep', streamingNow: false, sleepsAt: null, requestFoodToday: 0, requestsWaiting: 1 }} own />
         </div>
       </div>
       <AuthContext.Provider value={GALLERY_POINTS_AUTH}>

@@ -3065,6 +3065,7 @@ export function usePostForm(
       setReplyPolicy,
       setVisibility,
       handleImageSelect,
+      addImageFiles: processImageFiles,
       handleVideoSelect,
       handleFileDrop,
       removeMedia,

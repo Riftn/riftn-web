@@ -1,4 +1,42 @@
 {
+  "painting": {
+    "title": "Schilderen",
+    "close": "Sluiten",
+    "undo": "Ongedaan maken",
+    "redo": "Opnieuw",
+    "done": "Klaar",
+    "clear": "Wissen",
+    "size": "Grootte",
+    "colour": "Kleur",
+    "customColour": "Eigen kleur",
+    "fillShape": "Vorm vullen",
+    "shape": "Vorm van het doek",
+    "discardTitle": "Dit schilderij weggooien?",
+    "discard": "Weggooien",
+    "keep": "Verder schilderen",
+    "saveFailed": "Het schilderij kon niet worden opgeslagen. Probeer het opnieuw.",
+    "tools": {
+      "pencil": "Potlood",
+      "brush": "Penseel",
+      "eraser": "Gum",
+      "fill": "Vullen",
+      "line": "Lijn",
+      "rect": "Rechthoek",
+      "ellipse": "Ellips",
+      "oil": "Olieverf",
+      "pastel": "Pastel",
+      "watercolor": "Waterverf",
+      "charcoal": "Houtskool"
+    },
+    "aspect": {
+      "portrait": "Staand",
+      "square": "Vierkant",
+      "wide": "Breed"
+    },
+    "hue": "Tint",
+    "saturation": "Verzadiging",
+    "brightness": "Helderheid"
+  },
   "ownKeys": {
     "working": "Werkt",
     "invalid": "Geweigerd, vervang het",
@@ -205,7 +243,7 @@
   },
   "assistantCards": {
     "requestDraft": "Concept voor openbaar verzoek",
-    "postRequest": "Plaatsen bij Verzoeken",
+    "postRequest": "Plaatsen op Bouwen",
     "possibleDuplicates": "Mogelijke duplicaten",
     "viewPostedRequest": "Geplaatst verzoek bekijken",
     "fitting": "Passend",
@@ -963,7 +1001,7 @@
     "wallet": "Portemonnee",
     "docs": "Documentatie",
     "roadmap": "Routekaart",
-    "featureRequests": "Verzoeken",
+    "featureRequests": "Bouwen",
     "staking": "Uitzetten",
     "governance": "Bestuur",
     "dao": "DAO",
@@ -2832,7 +2870,7 @@
     "followBack": "Volg terug"
   },
   "features": {
-    "myRequests": "Mijn verzoeken",
+    "myRequests": "Mijn prompts",
     "cropDraw": "Bijsnijden en tekenen",
     "crop": "Bijsnijden",
     "cropHint": "Sleep een kader over het deel dat je wilt houden. Sleep erin om het te verplaatsen.",
@@ -2840,8 +2878,8 @@
     "resetCrop": "Bijsnijden herstellen",
     "prompts": "Voorstellen",
     "queued": "In de wachtrij",
-    "promptPageTitle": "Verzoeken",
-    "promptSubtitle": "Bouw mee aan Riftn met een voorstel",
+    "promptPageTitle": "Bouwen",
+    "promptSubtitle": "Bouw Riftn door ermee te praten.",
     "promptNew": "Nieuw voorstel",
     "promptSearch": "Voorstellen zoeken…",
     "promptHeading": "Wat moeten we hierna bouwen?",
@@ -3838,11 +3876,11 @@
     "requestDraftMenu": "Voeg {{query}} toe aan Riftn",
     "requestDraftSettings": "Een instelling voor {{query}}",
     "requestSend": "Verzoek sturen",
-    "requestPostsTo": "Komt op Verzoeken",
-    "requestHint": "Komt op Verzoeken onder jouw naam. We laten het weten zodra het live is.",
-    "requestSent": "Verstuurd naar Verzoeken",
+    "requestPostsTo": "Plaatst op Bouwen",
+    "requestHint": "Plaatst op Bouwen namens jou. We laten het je weten als het live is.",
+    "requestSent": "Verstuurd naar Bouwen",
     "requestSentHint": "We laten het weten zodra het live is.",
-    "requestSeeIt": "Bekijk het op Verzoeken"
+    "requestSeeIt": "Bekijk op Bouwen"
   },
   "comments": {
     "reportComment": "Opmerking melden",
@@ -7931,6 +7969,10 @@
     "moreActions": "Verhaalopties",
     "remixing": "Remix van het verhaal van {{name}}",
     "watchOriginal": "Oorspronkelijk verhaal bekijken",
+    "translate": "Vertalen",
+    "seeOriginal": "Origineel bekijken",
+    "translating": "Vertalen…",
+    "alreadyYourLanguage": "Staat al in je taal",
     "originalUnavailable": "Het oorspronkelijke verhaal is niet meer beschikbaar.",
     "copyLinkFailed": "De link naar het verhaal kon niet worden gekopieerd.",
     "whoWatched": "Wie heeft gekeken",
@@ -12778,7 +12820,7 @@
     "settings": "Instellingen",
     "settingsDesc": "Beheer je accountvoorkeuren, taal, privacyinstellingen en uiterlijk.",
     "governance": "Bestuur",
-    "featureRequests": "Functieverzoeken",
+    "featureRequests": "Bouwen",
     "featureRequestsDesc": "Stel nieuwe functies voor en stem op community-ideeën. Populaire aanvragen krijgen prioriteit voor ontwikkeling.",
     "upvote": "Upvote",
     "upvoteDesc": "Stem voor een governancevoorstel of functieverzoek. Helpt bij het signaleren van community-ondersteuning.",
@@ -18421,9 +18463,9 @@
     "72a478ec65bf": "Apparaat- en OS-gegevens (optioneel)",
     "cbf32246775e": "Afbeeldingen of video's bijvoegen (optioneel)",
     "ea3a3da9b73e": " — tot ",
-    "5d2d9bc248a3": "Functieverzoeken & Bugmeldingen | Riftn",
-    "2c94a53da07c": "Stuur functieverzoeken in, meld bugs en stem over gemeenschapsideeën om de roadmap van Riftn te beïnvloeden. Volg openstaande, lopende en geleverde functies.",
-    "64ce9ca9f7d1": "Riftn-functies - Functieverzoeken, bugrapportage en routekaart voor de community",
+    "5d2d9bc248a3": "Build Riftn door er met te praten | Riftn",
+    "2c94a53da07c": "Build Riftn door er met te praten. Post ideeën en bugrapporten als prompts, stem op wat anderen hebben gevraagd, en volg ze van Queued tot Shipped.",
+    "64ce9ca9f7d1": "Build: vorm Riftn door er met te praten",
     "5697d03daef4": "Kenmerken",
     "c46c50e9cf58": "Nog geen functies",
     "b98adf20f5f3": "Portemonnee: Beheer uw crypto-activa",
@@ -19643,7 +19685,7 @@
     "68f66b1f5bba": "Ontdek trending content, creators en onderwerpen op Riftn.",
     "fd274232d93a": "Klik om te uploaden",
     "d7246da527c1": "Nog een toevoegen",
-    "d2c76d7df46f": "Stuur functieverzoeken in, meld bugs en stem op gemeenschapsideeën om de roadmap van Riftn te vormen.",
+    "d2c76d7df46f": "Build Riftn door er met te praten. Post ideeën en bugrapporten als prompts en stem op wat er als volgende wordt gebouwd.",
     "90d6f4c823a9": "Kon adres niet kopiëren",
     "15e17712534d": "Token mint adres",
     "b4c1cebc35f6": "dit netwerk",
@@ -23443,6 +23485,9 @@
     "hoursStreamed_other": "{{formatted}} uur gestreamd",
     "toNext_one": "Nog {{formatted}} snack tot {{stage}}",
     "toNext_other": "Nog {{formatted}} snacks tot {{stage}}",
+    "requestsToday_one": "Wachtende verzoeken: {{formatted}} snack vandaag",
+    "requestsToday_other": "Wachtende verzoeken: {{formatted}} snacks vandaag",
+    "requestsTomorrow": "Wachtende verzoeken: eerste snack morgen",
     "open": "{{pet}} openen",
     "feed": "Geef een snack",
     "fed": "{{pet}} heeft je snack opgegeten",
@@ -23473,6 +23518,7 @@
       "feeding": "Kijkers kunnen het voeren met kanaalpunten",
       "cost": "Punten per snack",
       "rules": "Elke kijker kan het tot 20 snacks per dag geven. Punten hebben geen geldwaarde.",
+      "requests": "Je verzoeken die nog wachten op het Verzoekenbord voeren het ook: 1 snack per dag per verzoek, tot 3 per dag, zodra het is uitgekomen.",
       "feeders": "Heeft het het meest gevoerd"
     }
   },
@@ -23497,5 +23543,30 @@
     "open": "Chat openen",
     "encrypted": "Versleuteld bericht",
     "sentAttachment": "Heeft een bijlage gestuurd"
+  },
+  "badgeMuseum": {
+    "title": "Badgemuseum",
+    "open": "Badgemuseum openen",
+    "summary": "{{earned}} van {{total}} badges verdiend",
+    "loading": "Badges laden…",
+    "earned": "Verdiend",
+    "progress": "{{value}} / {{goal}}",
+    "footer": "Badges worden vanzelf vrijgespeeld zodra een mijlpaal is bereikt.",
+    "name": {
+      "views": "{{value}} weergaven",
+      "videos": "{{value}} video's",
+      "followers": "{{value}} volgers",
+      "likes": "{{value}} likes",
+      "firstLive": "Eerste livestream",
+      "liveHours": "{{value}} uur live"
+    },
+    "hint": {
+      "views": "Weergaven op alle posts",
+      "videos": "Geüploade video's",
+      "followers": "Volgers",
+      "likes": "Ontvangen likes",
+      "firstLive": "Ga één keer live",
+      "liveHours": "Uren live gestreamd"
+    }
   }
 }

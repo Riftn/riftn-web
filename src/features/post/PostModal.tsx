@@ -44,6 +44,7 @@ const CreatePlanModal = lazy(() =>
   })),
 );
 const ScheduledLivestreams = lazy(() => import('./components/ScheduledLivestreams'));
+const PaintingStudio = lazy(() => import('./components/PaintingStudio'));
 
 interface PostModalProps {
   isOpen: boolean;
@@ -83,6 +84,7 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
   const { attachedSound, selectSound, clearSound } = usePostSound();
   const [categoryDrawerOpen, setCategoryDrawerOpen] = useState(false);
   const [taggerOpen, setTaggerOpen] = useState(false);
+  const [paintingOpen, setPaintingOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [soundPickerOpen, setSoundPickerOpen] = useState(false);
   const [planDrawerOpen, setPlanDrawerOpen] = useState(false);
@@ -541,9 +543,21 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
         tagCount={state.photoTags.length}
         onToggleComic={isQuoting ? undefined : () => (comicMode ? exitComicMode() : selectComicMode())}
         isComic={comicMode}
+        onOpenPainting={isQuoting ? undefined : () => setPaintingOpen(true)}
         onToggleContentWarning={() => actions.setContentWarning(state.contentWarning === null ? '' : null)}
         hasContentWarning={state.contentWarning !== null}
       />
+      {paintingOpen && (
+        <Suspense fallback={null}>
+          <PaintingStudio
+            onClose={() => setPaintingOpen(false)}
+            onDone={(file) => {
+              setPaintingOpen(false);
+              actions.addImageFiles([file]);
+            }}
+          />
+        </Suspense>
+      )}
       {taggerOpen && (
         <PhotoTagger
           open={taggerOpen}
