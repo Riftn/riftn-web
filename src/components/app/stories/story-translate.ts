@@ -92,7 +92,7 @@ function textScript(letters: string[]): string {
 
 export function momentTextLooksForeign(text: string | null | undefined, readerLang: string): boolean {
   const words = prose(text ?? '');
-  const letters = words.match(/\p{L}/gu) ?? [];
+  const letters: string[] = words.match(/\p{L}/gu) ?? [];
   if (!letters.length) return false;
   const reader = base(readerLang || 'en');
   const script = textScript(letters);
