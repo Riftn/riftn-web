@@ -1813,6 +1813,10 @@
     "tokensUnit": "tokens"
   },
   "postOptions": {
+    "copyImage": "Copy image",
+    "copyGif": "Copy GIF",
+    "copyVideo": "Copy video",
+    "videoLinkCopied": "Video link copied",
     "notInterestedDone": "Got it. You'll see fewer posts like this.",
     "notInterested": "Not interested",
     "liveAlertsOn": "Following {{name}}. You'll get a notification when they go live.",

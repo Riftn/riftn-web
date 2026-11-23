@@ -2439,6 +2439,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
     myReaction: video.myReaction,
     isReposted: video.isReposted,
     noTip: !!video.creatorPaymentsDisabled,
+    videoUrl: requiresVideoAccess || video.isAudio || video.isLivePost ? null : video.videoUrl,
     actions: {
       comments: () => {
         if (onOpenComments) { onOpenComments(); return; }

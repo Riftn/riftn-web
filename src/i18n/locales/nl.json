@@ -2002,6 +2002,10 @@
     "tokensUnit": "tokens"
   },
   "postOptions": {
+    "copyImage": "Afbeelding kopiëren",
+    "copyGif": "GIF kopiëren",
+    "copyVideo": "Video kopiëren",
+    "videoLinkCopied": "Videolink gekopieerd",
     "notInterestedDone": "Begrepen. Je ziet minder berichten zoals deze.",
     "notInterested": "Niet geïnteresseerd",
     "liveAlertsOn": "Je volgt nu {{name}}. Je krijgt een melding wanneer ze live gaan.",

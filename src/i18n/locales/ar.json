@@ -1813,6 +1813,10 @@
     "tokensUnit": "توكن"
   },
   "postOptions": {
+    "copyImage": "نسخ الصورة",
+    "copyGif": "نسخ GIF",
+    "copyVideo": "نسخ الفيديو",
+    "videoLinkCopied": "تم نسخ رابط الفيديو",
     "notInterestedDone": "تم. سترى منشورات أقل مثل هذا.",
     "notInterested": "غير مهتم",
     "liveAlertsOn": "أنت الآن تتابع {{name}}. سيصلك إشعار عندما يبدأ البث المباشر.",

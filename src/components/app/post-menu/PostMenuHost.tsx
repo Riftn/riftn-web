@@ -16,12 +16,15 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { EyeOff, Palette, Pin, Share, Type, UserCheck } from 'lucide-react';
+import { copyMedia } from '@/lib/copy-media';
 import { MessageMenu, type MessageMenuAction } from '@/components/app/chat/MessageMenu';
 import Flag from '@/components/ui/cut-icons/report';
 import Ban from '@/components/ui/cut-icons/blocked';
 import VolumeX from '@/components/ui/cut-icons/mute';
 import UserPlus from '@/components/ui/cut-icons/add-account';
 import Link2 from '@/components/ui/cut-icons/link';
+import ImagesIcon from '@/components/ui/cut-icons/images';
+import VideoIcon from '@/components/ui/cut-icons/video';
 import MessageSquare from '@/components/ui/cut-icons/messages';
 import Repeat2 from '@/components/ui/cut-icons/repost';
 import Quote from '@/components/ui/cut-icons/quote';
@@ -218,6 +221,20 @@ function PostMenuBody({ open, target, sheet, setSheet }: {
     }
   }, [t]);
 
+  // Copy image / GIF / video: whatever was under the pointer. A picture goes on
+  // the clipboard as a picture; a video can't sit on any clipboard, so its
+  // file link goes on and the toast says so.
+  const copyPostMedia = useCallback(() => {
+    const media = target.media;
+    if (!media) return;
+    void copyMedia(media.url, media.kind).then(
+      (result) => toast.success(result === 'image'
+        ? (media.kind === 'gif' ? t('chatHold.gifCopied', 'GIF copied') : t('chatHold.imageCopied', 'Image copied'))
+        : media.kind === 'video' ? t('postOptions.videoLinkCopied', 'Video link copied') : t('chatHold.mediaLinkCopied', 'Link copied')),
+      () => toast.error(t('chatHold.copyFailed', "Couldn't copy")),
+    );
+  }, [target.media, t]);
+
   const words = (target.text || '').trim();
   const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
 
@@ -258,8 +275,14 @@ function PostMenuBody({ open, target, sheet, setSheet }: {
       icon: <Palette />, onSelect: () => openPostLook(target.look!),
     });
 
+    const media = target.media;
+    add(!!media && {
+      key: 'copy-media',
+      label: media.kind === 'video' ? t('postOptions.copyVideo', 'Copy video') : media.kind === 'gif' ? t('postOptions.copyGif', 'Copy GIF') : t('postOptions.copyImage', 'Copy image'),
+      icon: media.kind === 'video' ? <VideoIcon /> : <ImagesIcon />, hint: 'P', divided: true, onSelect: copyPostMedia,
+    });
     add({
-      key: 'copy-link', label: t('postOptions.copyLink', 'Copy link'), icon: <Link2 />, hint: 'L', divided: true,
+      key: 'copy-link', label: t('postOptions.copyLink', 'Copy link'), icon: <Link2 />, hint: 'L', divided: !media,
       onSelect: () => { void copy(link, t('postOptions.postUrlCopied', 'Post link copied')).then((ok) => { if (ok) trackLinkCopy(target.id, walletAddress, linkCopyCount); }); },
     });
     add(!!words && { key: 'copy-text', label: t('comments.copyText', 'Copy text'), icon: <Type />, hint: 'X', onSelect: () => { void copy(words, t('common.copied', 'Copied')); } });
@@ -319,7 +342,7 @@ function PostMenuBody({ open, target, sheet, setSheet }: {
     }
     return list;
   }, [phone, target, tokenId, isPublic, isOwn, reposted, isBookmarked, isPinned, words, canShare, canGiftBoost, following, authorLabel, authorName, linkCopyCount, walletAddress,
-    t, navigate, sendInDm, repost, quote, needLogin, setSheet, toggleBookmark, togglePin, copy, trackLinkCopy, toggleFollow, muteAuthor, blockAuthor, notInterested]);
+    t, navigate, sendInDm, repost, quote, needLogin, setSheet, toggleBookmark, togglePin, copy, copyPostMedia, trackLinkCopy, toggleFollow, muteAuthor, blockAuthor, notInterested]);
 
   const header = authorLabel ? (
     <p className="truncate text-[12px] font-semibold opacity-60">{authorLabel}</p>
