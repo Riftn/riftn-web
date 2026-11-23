@@ -5,6 +5,7 @@
  * one piece of code: a change to one is a change to both.
  */
 
+import { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ExternalLink } from 'lucide-react';
@@ -12,6 +13,8 @@ import ArrowLeft from '@/components/ui/cut-icons/back';
 import Users from '@/components/ui/cut-icons/communities';
 import Megaphone from '@/components/ui/cut-icons/advertising';
 import { CommunityChat } from '@/components/app/communities/CommunityChat';
+import { GroupChatNotesRow } from '@/components/app/chat/NotesRow';
+import { AuthContext } from '@/contexts/AuthContext';
 import { useIsCommunityMember, isMembershipLoading, type Community } from '@/hooks/use-communities';
 import { isEffectivelyActive } from '@/hooks/use-community-admin';
 import { communityKindOf } from '@/lib/community-kinds';
@@ -27,6 +30,7 @@ export function RoomChatPane({ community, onBack }: { community: Community; onBa
   const kind = communityKindOf(community);
   const KindIcon = kind === 'channel' ? Megaphone : Users;
   const pageUrl = `/app/communities/${community.slug}`;
+  const walletAddress = useContext(AuthContext)?.walletAddress ?? null;
 
   return (
     <div data-room-chat-pane={kind} className="flex h-full min-h-0 flex-col">
@@ -66,6 +70,8 @@ export function RoomChatPane({ community, onBack }: { community: Community; onBa
           <ExternalLink className="h-4 w-4" />
         </button>
       </div>
+      {/* Notes from members of this group, across the top of the chat. */}
+      <GroupChatNotesRow groupId={community.id} me={walletAddress} />
       <div className="min-h-0 flex-1">
         <CommunityChat
           key={community.id}

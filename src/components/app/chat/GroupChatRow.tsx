@@ -3,6 +3,8 @@
  * its chat. All three are communities underneath and share one row.
  */
 
+import { GroupCardNotes } from './NotesRow';
+import type { NoteEntry } from '@/lib/api/dehub/notes';
 import { useTranslation } from 'react-i18next';
 import { BellOff, Pin } from 'lucide-react';
 import { isMuted } from '@/hooks/use-chat-prefs';
@@ -22,7 +24,7 @@ import { roomPreviewLine } from '@/lib/room-chat-read';
 import type { RoomSummary } from '@/hooks/use-room-chat-summaries';
 
 import { formatCount } from '@/lib/format-count';
-export function GroupChatRow({ community, onClick, pref, reactions, selected, selecting = false, checked = false, onLongPress, summary, me = '' }: {
+export function GroupChatRow({ community, onClick, pref, reactions, selected, selecting = false, checked = false, onLongPress, summary, me = '', notes }: {
   community: Community;
   /** Newest line and unread number (hooks/use-room-chat-summaries). */
   summary?: RoomSummary;
@@ -38,6 +40,8 @@ export function GroupChatRow({ community, onClick, pref, reactions, selected, se
   checked?: boolean;
   /** Phones: holding the row starts picking (or toggles it while picking). */
   onLongPress?: () => void;
+  /** Notes from members of this group (people you follow), last 24 hours. */
+  notes?: NoteEntry[];
 }) {
   const { t } = useTranslation();
   const hold = useRowLongPress(onLongPress);
@@ -67,7 +71,7 @@ export function GroupChatRow({ community, onClick, pref, reactions, selected, se
       data-selected={selected ? '' : undefined}
       data-bulk-checked={selecting ? (checked ? 'true' : 'false') : undefined}
       aria-pressed={selecting ? checked : undefined}
-      className={`w-full flex items-center gap-3 p-4 border-t border-white/[0.07] hover:bg-white/[0.04] transition-colors text-left ${(selecting ? checked : selected) ? 'bg-white/[0.06]' : ''}`}
+      className={`w-full flex ${notes?.length ? 'items-start' : 'items-center'} gap-3 p-4 border-t border-white/[0.07] hover:bg-white/[0.04] transition-colors text-left ${(selecting ? checked : selected) ? 'bg-white/[0.06]' : ''}`}
     >
       {selecting && (
         <span
@@ -114,6 +118,7 @@ export function GroupChatRow({ community, onClick, pref, reactions, selected, se
           )}
         </p>
         )}
+        {!selecting && notes && notes.length > 0 && <GroupCardNotes notes={notes} />}
       </div>
     </button>
   );
