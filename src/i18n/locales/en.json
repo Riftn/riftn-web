@@ -1,4 +1,42 @@
 {
+  "painting": {
+    "title": "Painting",
+    "close": "Close",
+    "undo": "Undo",
+    "redo": "Redo",
+    "done": "Done",
+    "clear": "Clear",
+    "size": "Size",
+    "colour": "Colour",
+    "customColour": "Custom colour",
+    "fillShape": "Fill shape",
+    "shape": "Canvas shape",
+    "discardTitle": "Discard this painting?",
+    "discard": "Discard",
+    "keep": "Keep painting",
+    "saveFailed": "Couldn't save the painting. Try again.",
+    "tools": {
+      "pencil": "Pencil",
+      "brush": "Brush",
+      "eraser": "Eraser",
+      "fill": "Fill",
+      "line": "Line",
+      "rect": "Rectangle",
+      "ellipse": "Ellipse",
+      "oil": "Oil",
+      "pastel": "Pastel",
+      "watercolor": "Watercolour",
+      "charcoal": "Charcoal"
+    },
+    "aspect": {
+      "portrait": "Portrait",
+      "square": "Square",
+      "wide": "Wide"
+    },
+    "hue": "Hue",
+    "saturation": "Saturation",
+    "brightness": "Brightness"
+  },
   "ownKeys": {
     "working": "Working",
     "invalid": "Rejected, replace it",

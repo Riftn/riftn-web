@@ -37,6 +37,7 @@ import { DmMediaStudio, type DmStudioItem } from '@/components/app/chat/DmVideoS
 import { cropPayload } from '../lib/video-crop';
 import { cn } from '@/lib/utils';
 import { hasVideoEdits, paintEditedFrame, svgMatrixValues, videoEditsMatrix, vignetteBackground, type PostVideoEdits } from '../lib/video-edits';
+import { isPaintingFile } from '@/lib/painting/engine';
 
 /** The frame at `at` seconds, with the video's edits painted on, as a JPEG blob URL for the post's cover. */
 function grabVideoFrame(url: string, at: number, edits?: PostVideoEdits | null): Promise<string | null> {
@@ -238,7 +239,8 @@ export function PostMediaPreview({
   useEffect(() => {
     const photos = media.filter((m) => m.type === 'image').map((m) => m.preview);
     if (!seenPhotos.current) { seenPhotos.current = new Set(photos); return; }
-    const fresh = media.findIndex((m) => m.type === 'image' && m.file.type !== 'image/gif' && !seenPhotos.current!.has(m.preview));
+    // A painting comes straight from the Painting canvas, so it skips the editor.
+    const fresh = media.findIndex((m) => m.type === 'image' && m.file.type !== 'image/gif' && !isPaintingFile(m.file.name) && !seenPhotos.current!.has(m.preview));
     photos.forEach((v) => seenPhotos.current!.add(v));
     if (fresh >= 0 && onReplaceImage && !studio && !videoEdit) setStudio({ index: fresh, tab: 'crop' });
   }, [media, studio, videoEdit, onReplaceImage]);
