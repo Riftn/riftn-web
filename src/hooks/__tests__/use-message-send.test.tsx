@@ -2,6 +2,7 @@ import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { CachedPageActiveContext } from '@/contexts/CachedPageActiveContext';
 
 const mocks = vi.hoisted(() => ({ send: vi.fn(), getMessages: vi.fn() }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({
@@ -156,4 +157,28 @@ it('keeps a thread open until every rendered copy releases it', () => {
   expect(isConversationOpen('shared-thread')).toBe(true);
   closeSecond();
   expect(isConversationOpen('shared-thread')).toBe(false);
+});
+
+it('pauses history polling while the cached Messages page is hidden', async () => {
+  vi.useFakeTimers();
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  client.setQueryData(messagesKeys.messages('c1'), {
+    pages: [{ items: [stored], hasMore: false, totalCount: 1 }], pageParams: [0],
+  });
+  const close = registerOpenConversation('c1');
+  const wrapper = ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={client}>
+      <CachedPageActiveContext.Provider value={false}>{children}</CachedPageActiveContext.Provider>
+    </QueryClientProvider>
+  );
+  const hook = renderHook(() => useMessages('c1'), { wrapper });
+  try {
+    await act(async () => { await vi.advanceTimersByTimeAsync(30_001); });
+    expect(mocks.getMessages).not.toHaveBeenCalled();
+    expect(hook.result.current.messages).toEqual([stored]);
+  } finally {
+    hook.unmount();
+    close();
+    client.clear();
+  }
 });

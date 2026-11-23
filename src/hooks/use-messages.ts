@@ -7,10 +7,11 @@
 
 import type { DmVideoOptions } from '@/lib/dm-video-options';
 import { destructFromChoice, type DmDestructChoice } from '@/lib/dm-destruct';
-import { useEffect, useRef, useReducer, useCallback, useMemo, useSyncExternalStore } from 'react';
+import { useContext, useEffect, useRef, useReducer, useCallback, useMemo, useSyncExternalStore } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
+import { CachedPageActiveContext } from '@/contexts/CachedPageActiveContext';
 import {
   getContacts,
   getConversations,
@@ -373,13 +374,11 @@ export function useMessages(conversationId: string | null) {
   useEffect(() => { walletAddressRef.current = walletAddress?.toLowerCase(); }, [walletAddress]);
 
   const isVirtual = conversationId?.startsWith('new_') || (conversationId ? /^0x[0-9a-fA-F]{40}$/i.test(conversationId) : false);
-  // MessagesPage stays mounted forever (PersistentPageCache CSS-hides it), so
-  // polling must be tied to the ROUTE, not the mount — otherwise opening one
-  // DM leaves a 5s poll running for the rest of the session. useLocation makes
-  // this reactive: leaving /app/messages stops the interval, returning
-  // restarts it (and the stale query refetches immediately).
+  // Cached pages retain their last location and keep threads registered even
+  // when hidden. Use visibility to stop their refreshes, including reconnects.
+  const pageActive = useContext(CachedPageActiveContext);
   const { pathname } = useLocation();
-  const isMessagesRouteActive = pathname === '/app/messages';
+  const isMessagesRoute = pathname === '/app/messages' || pathname === '/messages';
   const dockOpen = useSyncExternalStore(
     subscribeOpenConversations,
     () => isConversationOpen(conversationId),
@@ -426,7 +425,7 @@ export function useMessages(conversationId: string | null) {
   });
 
   const headEnabled = isAuthenticated && !!conversationId && !isVirtual
-    && !!query.data && (isMessagesRouteActive || dockOpen);
+    && !!query.data && pageActive && (isMessagesRoute || dockOpen);
   useQuery({
     queryKey: messagesKeys.head(conversationId || ''),
     queryFn: async () => {
