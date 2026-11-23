@@ -1173,7 +1173,7 @@ export default function HomePage() {
                   ? handleNavBack
                   : () => window.dispatchEvent(new CustomEvent('home-tab-reclick', { detail: activeTab }))}
                 className={cn(
-                  "relative flex items-center justify-center px-3 h-[35px] rounded-xl transition-colors overflow-hidden",
+                  "relative flex items-center justify-center px-3 h-[35px] lg:h-9 rounded-xl transition-colors overflow-hidden",
                   hasActiveFilters
                     ? "text-white"
                     // Hover only where a real pointer hovers: phones keep
