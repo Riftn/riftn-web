@@ -175,7 +175,7 @@ const OG_CARD_ROUTES = new Set([
   'videos', 'images', 'shorts', 'guides/best-decentralized-social-media', 'guides/best-web3-social-media-dapps',
   'guides/best-decentralized-streaming-apps',
   'connect', 'connect/chatgpt', 'connect/claude', 'communities',
-  'stages', 'guide', 'features', 'pricing', 'depin',
+  'stages', 'guide', 'build', 'pricing', 'depin',
   'builder', 'creator', 'editor', 'prompt', 'work',
   'affiliate', 'premium', 'governance', 'leaderboard', 'dao', 'packs',
   'top-100', 'music', 'tv', 'cinema',
@@ -1588,7 +1588,7 @@ ${DEHUB_APP_PAGE.faq.map(({ q, a }) => `<h3>${q}</h3>\n<p>${a}</p>`).join('\n')}
   // The rest of SSR_STATIC_ROUTES, moved here from the Supabase fn's own
   // STATIC_ROUTES map. The fn deploys on its own track (`supabase functions
   // deploy ssr-seo`), not with the Cloudflare build, so edits to it sat unshipped
-  // — /features kept serving a product-tour blurb for weeks after the copy was
+  // — /features (now /build) kept serving a product-tour blurb for weeks after the copy was
   // corrected in the repo, because only the merge happened. Rendered here, the
   // copy ships with the worker and can never drift from what was merged.
   //
@@ -1598,11 +1598,11 @@ ${DEHUB_APP_PAGE.faq.map(({ q, a }) => `<h3>${q}</h3>\n<p>${a}</p>`).join('\n')}
   // to people, and /jobs, /bridge, /glossary and /top-100 diverged the same way.
   // /creator, /prompt, /affiliate and /premium have no SEOHead of their own yet,
   // so those four keep the fn's wording until the pages grow one.
-  'features': {
+  'build': {
     title: 'Build Riftn by talking to it | Riftn',
     description: 'Build Riftn by talking to it. Post ideas and bug reports as prompts, vote on what others asked for, and follow them from Queued to Shipped.',
     heading: 'Build: shape Riftn by talking to it',
-    bodyHtml: `<p>The Riftn Features page is a community board: submit new feature ideas, report bugs, and vote on suggestions to help shape the roadmap.</p>
+    bodyHtml: `<p>Build is the Riftn community board: post ideas and bug reports as prompts, and vote on suggestions to help shape the roadmap.</p>
 <ul>
 <li><strong>Submit ideas &amp; bug reports</strong>: suggest features or report bugs with device details and attachments.</li>
 <li><strong>Community voting</strong>: vote on requests to help prioritise what gets built next.</li>
@@ -4409,8 +4409,8 @@ function buildProposalHtml(proposal) {
 }
 
 /**
- * A single request or bug report on the community board, /features?feature=<id>
- * (also reachable as /app/features?...). FeaturesPage never mints a per-request
+ * A single request or bug report on the Build board, /build?feature=<id>
+ * (older /features and /requests links 301 here, query intact). FeaturesPage never mints a per-request
  * URL of its own — `?feature=<id>` is read purely client-side to scrollIntoView
  * the card by its DOM id (`#feature-<id>`) — so every deep link into the board,
  * no matter which request or whose reply someone was looking at when they
@@ -4419,14 +4419,14 @@ function buildProposalHtml(proposal) {
  * bounties above: ssr-seo has never heard of this table either.
  */
 function buildFeatureRequestHtml(feature) {
-  const canonicalUrl = `${APP_URL}/features?feature=${feature.id}`;
+  const canonicalUrl = `${APP_URL}/build?feature=${feature.id}`;
   const name = feature.title || 'Feature Request';
   const title = `${name} | Build on Riftn`;
   const description = truncate(
     feature.description || 'A community feature request or bug report on the Riftn roadmap board.',
     200,
   );
-  const image = absolutizeImage(feature.image_url) || shareImage('features');
+  const image = absolutizeImage(feature.image_url) || shareImage('build');
   const authorName = feature.author_username
     ? `@${feature.author_username}`
     : `${feature.author_wallet_address.slice(0, 6)}...${feature.author_wallet_address.slice(-4)}`;
@@ -4443,7 +4443,7 @@ function buildFeatureRequestHtml(feature) {
     // finished bounty: shareable by whoever holds the link, not crawlable.
     noindex: feature.status === 'declined',
     heading: name,
-    breadcrumb: `<a href="${APP_URL}">Riftn</a> › <a href="${APP_URL}/features">Build</a>`,
+    breadcrumb: `<a href="${APP_URL}">Riftn</a> › <a href="${APP_URL}/build">Build</a>`,
     bodyHtml: `<p>${escHtml(description)}</p>
 <p><strong>${escHtml(status)}</strong> · ${escHtml(category)}</p>
 <p>${Number(feature.vote_count) || 0} votes · ${Number(feature.comment_count) || 0} comments · posted by ${escHtml(authorName)}</p>`,
@@ -4949,7 +4949,7 @@ export function appHref(url) {
 // Static marketing/app routes that need per-route OG meta (bots only).
 // Kept in sync with the STATIC_ROUTES map inside supabase/functions/ssr-seo.
 const SSR_STATIC_ROUTES = new Set([
-  'features', 'pricing', 'depin', 'creator', 'editor', 'prompt', 'work',
+  'build', 'pricing', 'depin', 'creator', 'editor', 'prompt', 'work',
   'affiliate', 'premium', 'governance', 'leaderboard', 'top-100', 'dao',
   'music', 'radio', 'tv', 'bridge', 'agents',
   'assistant', 'creators', 'jobs',
@@ -4962,7 +4962,7 @@ const SSR_STATIC_ROUTES = new Set([
   // Listed for canonicalizePath, not for the Supabase fn: /app/arcade is a
   // real SPA route and without this it self-canonicalizes, indexing as a
   // duplicate of /arcade. The page itself is rendered from MARKETING_PAGES,
-  // which is checked before the fn is ever consulted (same as 'features').
+  // which is checked before the fn is ever consulted (same as 'build').
   'arcade',
   // Same again: each of these is one page with a top-level route AND an /app
   // twin, both rendered from MARKETING_PAGES.
@@ -6335,7 +6335,7 @@ const ENTITY_SITEMAPS = {
   features: [{
     query: () => 'feature_requests?status=neq.declined&select=id,title,description,status,image_url,updated_at&order=created_at.asc&limit=5000',
     entry: (f) => (f.status !== 'declined' && substantiveLength(`${f.title || ''} ${f.description || ''}`) >= ENTITY_SITEMAP_MIN_TEXT
-      ? { loc: `${APP_URL}/features?feature=${f.id}`, lastmod: f.updated_at, changefreq: 'weekly', priority: '0.4', image: absolutizeImage(f.image_url) }
+      ? { loc: `${APP_URL}/build?feature=${f.id}`, lastmod: f.updated_at, changefreq: 'weekly', priority: '0.4', image: absolutizeImage(f.image_url) }
       : null),
   }],
 };
@@ -6639,7 +6639,7 @@ async function handleRequest(request, env, ctx) {
     bridge: '/bridge',
     stream: '/videos',
     'beta-stream': '/videos',
-    dapps: '/features',
+    dapps: '/build',
     raffle: '/raffle',
   };
   // Apex paths from the pre-Angular dehub.net site with no dehub.io twin. The
@@ -6992,16 +6992,19 @@ async function handleRequest(request, env, ctx) {
     // Short address for the developer hub (App.tsx redirects it the same way).
     '/developers': '/docs/developers',
     '/developer': '/docs/developers',
-    // The sidebar calls the board 'Requests'; the SPA redirects both to the
-    // board (dehubweb#1427) and 'requests' is a reserved username, but without
-    // this crawlers still read it as a username and served Not Found.
-    '/requests': '/features',
-    '/app/requests': '/features',
     // The sign-in help link in the app opens /support.
     '/support': '/docs/contact',
   };
   const spaTarget = SPA_REDIRECTS[trimmedPath.toLowerCase()];
   if (spaTarget) return redirect301(`${APP_URL}${spaTarget}`);
+
+  // The Build board has lived at /features and /requests (and their /app
+  // twins). It is /build now; every older address 301s there with its query
+  // intact, so ?feature= / ?request= / ?comment= / ?tab= / ?hl= still land on
+  // the same request. App.tsx BuildRedirect does the same in the SPA.
+  if (/^\/(?:app\/)?(?:features|requests)$|^\/app\/build$/i.test(trimmedPath)) {
+    return redirect301(`${APP_URL}/build${url.search}`);
+  }
 
   // The Requests board shared its cards as /app/post/<request id>, which no
   // post route can answer (posts are numbers or slugs, never UUIDs), so every
@@ -7012,7 +7015,7 @@ async function handleRequest(request, env, ctx) {
     const q = new URLSearchParams(url.search);
     q.delete('feature');
     const rest = q.toString();
-    return redirect301(`${APP_URL}/features?feature=${requestAsPost[1].toLowerCase()}${rest ? `&${rest}` : ''}`);
+    return redirect301(`${APP_URL}/build?feature=${requestAsPost[1].toLowerCase()}${rest ? `&${rest}` : ''}`);
   }
 
   // The NFT market moved into the Fractions page as its NFTs tab (App.tsx
@@ -7794,11 +7797,11 @@ async function handleRequest(request, env, ctx) {
     }
   }
 
-  // A single request or bug report, /features?feature=<id>. Same PostgREST-
+  // A single request or bug report, /build?feature=<id>. Same PostgREST-
   // direct shape as stores/events/stages/bounties below — checked ahead of the
   // generic MARKETING_PAGES dispatch two blocks down so a resolvable id gets
   // its own card instead of the board's static one.
-  if (sectionKey === 'features') {
+  if (sectionKey === 'build') {
     // Share buttons hand out ?feature=<id>; notifications and comment links ?request=<id>.
     const featureId = url.searchParams.get('feature') || url.searchParams.get('request');
     if (featureId && /^[0-9a-fA-F-]{8,}$/.test(featureId)) {

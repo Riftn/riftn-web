@@ -36,7 +36,7 @@ export const BARE_CANONICAL_KEYS: ReadonlySet<string> = new Set([
   // SECTION_PAGES
   'explore', 'videos', 'images', 'shorts',
   // SSR_STATIC_ROUTES
-  'features', 'pricing', 'depin', 'creator', 'editor', 'prompt', 'work',
+  'build', 'pricing', 'depin', 'creator', 'editor', 'prompt', 'work',
   'affiliate', 'premium', 'governance', 'leaderboard', 'top-100', 'dao',
   'music', 'radio', 'tv', 'bridge', 'agents', 'assistant', 'creators', 'jobs',
   'usernames', 'nfts', 'arcade', 'accounts', 'converter', 'events', 'launchpad', 'stats',

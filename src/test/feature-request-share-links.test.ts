@@ -14,7 +14,7 @@ describe('feature request share links', () => {
   it('shares a request as its board link, not as a post', () => {
     const page = read('src/pages/app/FeaturesPage.tsx');
     expect(page).toContain('shareUrl={dehubLinkFor.featureRequest(feature.id)}');
-    expect(read('src/lib/dehub-links.ts')).toContain('/features?feature=${encodeURIComponent(id)}');
+    expect(read('src/lib/dehub-links.ts')).toContain('/build?feature=${encodeURIComponent(id)}');
   });
 
   it('pins the request for either query name', () => {

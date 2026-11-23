@@ -254,10 +254,13 @@ describe('feature request and page links', () => {
   it('cards a Requests share link as that request', () => {
     expect(parseDehubLink(`https://riftn.com/features?feature=${id}`)).toMatchObject({ kind: 'featureRequest', featureRequestId: id });
     expect(parseDehubLink(`https://riftn.com/app/features?request=${id}`)).toMatchObject({ kind: 'featureRequest', featureRequestId: id });
+    expect(parseDehubLink(`https://riftn.com/build?feature=${id}`)).toMatchObject({ kind: 'featureRequest', featureRequestId: id });
   });
 
   it('cards the bare board, and our other pages, as pages', () => {
-    expect(parseDehubLink('https://riftn.com/features')).toMatchObject({ kind: 'page', pagePath: '/features' });
+    expect(parseDehubLink('https://riftn.com/build')).toMatchObject({ kind: 'page', pagePath: '/build' });
+    expect(parseDehubLink('https://riftn.com/features')).toMatchObject({ kind: 'page', pagePath: '/build' });
+    expect(parseDehubLink('https://riftn.com/app/requests')).toMatchObject({ kind: 'page', pagePath: '/build' });
     expect(parseDehubLink('riftn.com/app/leaderboard')).toMatchObject({ kind: 'page', pagePath: '/app/leaderboard' });
     expect(parseDehubLink('https://riftn.com/shorts')).toMatchObject({ kind: 'page', pagePath: '/shorts' });
     expect(parseDehubLink('https://riftn.com/app/top-100/')).toMatchObject({ kind: 'page', pagePath: '/app/top-100' });

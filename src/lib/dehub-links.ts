@@ -80,7 +80,7 @@ export interface DehubLinkMatch {
   /** `/app/governance/<n>` or the legacy `/app/governance/<uuid>` — a governance proposal. */
   proposalId?: string;
   skillSlug?: string;
-  /** `/features?feature=<uuid>` — one card on the Requests board. */
+  /** `/build?feature=<uuid>` — one card on the Build board. */
   featureRequestId?: string;
   /**
    * Any other page of ours (Leaderboard, Shorts, an arcade game...). The card
@@ -356,10 +356,11 @@ export function parseDehubLink(input: string): DehubLinkMatch | null {
     return { ...base, kind: 'bounty', bountyJobKey: scoped[1] };
   }
 
-  // ── /features?feature=<uuid> — one request on the Requests board ──
+  // ── /build?feature=<uuid> — one request on the Build board ──
   //
-  // `?request=` is the older name for the same thing and still routes.
-  if (scoped[0] === 'features' && !scoped[1]) {
+  // `?request=` is the older name for the same thing and still routes, and so
+  // do the board's older addresses, /features and /requests.
+  if ((scoped[0] === 'build' || scoped[0] === 'features' || scoped[0] === 'requests') && !scoped[1]) {
     const params = new URLSearchParams(search);
     const id = params.get('feature') || params.get('request');
     if (id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
@@ -482,7 +483,7 @@ export function shareOrigin(): string {
 export const dehubLinkFor = {
   skill: (slug: string) => `${shareOrigin()}/app/assistant?skill=${encodeURIComponent(slug)}`,
   /** One card on the Requests board. Requests are not posts: never /app/post/<id>. */
-  featureRequest: (id: string) => `${shareOrigin()}/features?feature=${encodeURIComponent(id)}`,
+  featureRequest: (id: string) => `${shareOrigin()}/build?feature=${encodeURIComponent(id)}`,
   post: (tokenId: string | number) => `${shareOrigin()}/app/post/${tokenId}`,
   /** An article's readable URL — /app/post/<first-ten-words-of-the-title>. */
   article: (slug: string) => `${shareOrigin()}/app/post/${slug}`,

@@ -68,7 +68,7 @@ export function FeatureRequestComments({
   }), [walletAddress]);
 
   const permalink = useCallback(
-    (commentId: string) => `${window.location.origin}/features?request=${featureRequestId}&comment=${commentId}`,
+    (commentId: string) => `${window.location.origin}/build?request=${featureRequestId}&comment=${commentId}`,
     [featureRequestId],
   );
 

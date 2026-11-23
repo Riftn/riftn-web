@@ -74,7 +74,7 @@ export const NAV_ITEMS: NavItem[] = [
   { icon: Wallet, label: 'Wallet', path: '/app/wallet' },
   { icon: CalendarDays, label: 'Events', path: '/app/events' },
   { icon: Trophy, label: 'Leaderboard', path: '/app/leaderboard' },
-  { icon: Lightbulb, label: 'Feature Requests', path: '/features' },
+  { icon: Lightbulb, label: 'Feature Requests', path: '/build' },
   { icon: MessageSquare, label: 'Feedback', path: '/feedback' },
   { icon: Vault, label: 'Staking', path: '/app/stake' },
   // Directly under Staking, because it is what staking buys. Without an entry

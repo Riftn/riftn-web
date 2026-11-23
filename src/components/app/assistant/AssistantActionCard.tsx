@@ -182,7 +182,7 @@ export function AssistantActionCard({ actionId, initial }: { actionId: string; i
             <div className="space-y-1 text-xs">
               <div className="font-medium text-white/70">{t('assistantCards.possibleDuplicates', { defaultValue: 'Possible duplicates' })}</div>
               {preview.duplicates.map((request) => (
-                <a key={request.id} className="block text-white underline" href={`/app/features?request=${encodeURIComponent(request.id)}`} target="_blank" rel="noopener">
+                <a key={request.id} className="block text-white underline" href={`/build?request=${encodeURIComponent(request.id)}`} target="_blank" rel="noopener">
                   {request.title}
                 </a>
               ))}
@@ -235,7 +235,7 @@ export function AssistantActionCard({ actionId, initial }: { actionId: string; i
       )}
 
       {status === 'done' && kind === 'request_post' && result?.requestId && (
-        <a className="inline-flex items-center gap-2 text-xs text-white underline" href={`/app/features?request=${encodeURIComponent(result.requestId)}`}>
+        <a className="inline-flex items-center gap-2 text-xs text-white underline" href={`/build?request=${encodeURIComponent(result.requestId)}`}>
           <CutCheck className="h-3.5 w-3.5 shrink-0" />
           {t('assistantCards.viewPostedRequest', { defaultValue: 'View posted request' })}
         </a>

@@ -33,7 +33,7 @@ function LocationProbe() {
   return <output>{useLocation().search}</output>;
 }
 
-it.each(['/features', '/app/features/'])('routes Create to the request composer from %s', path => {
+it.each(['/build', '/build/'])('routes Create to the request composer from %s', path => {
   render(<MemoryRouter initialEntries={[path + '?tab=shipped&id=42']}><MobileBottomNav /><LocationProbe /></MemoryRouter>);
   const create = screen.getByRole('button');
   fireEvent.focus(create);
@@ -62,7 +62,7 @@ vi.mock('@/hooks/use-feature-requests', () => ({
 }));
 
 it('takes a queued-board reader to the existing request field on every tap', () => {
-  const view = render(<MemoryRouter initialEntries={['/features?tab=queued']}><FeaturesPage /><MobileBottomNav /><LocationProbe /></MemoryRouter>);
+  const view = render(<MemoryRouter initialEntries={['/build?tab=queued']}><FeaturesPage /><MobileBottomNav /><LocationProbe /></MemoryRouter>);
   const field = view.container.querySelector('[data-feature-composer] textarea')!;
   expect(field).not.toBeVisible();
   const create = view.container.querySelector('[data-bottom-nav] [data-nav-create]')!.closest('button')!;

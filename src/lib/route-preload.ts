@@ -44,8 +44,7 @@ const PRELOADERS: Record<string, Preloader | Preloader[]> = {
   '/app/buy': () => import('@/pages/app/BuyCoinsPage'),
   '/app/agents': () => import('@/pages/app/AgentsPage'),
   '/agents': () => import('@/pages/app/AgentsPage'),
-  '/app/features': () => import('@/pages/app/FeaturesPage'),
-  '/features': () => import('@/pages/app/FeaturesPage'),
+  '/build': () => import('@/pages/app/FeaturesPage'),
   '/app/governance': [
     () => import('@/pages/app/GovernancePage'),
     () => import('@/pages/app/GovernanceProposalPage'),
