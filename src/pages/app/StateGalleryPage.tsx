@@ -77,6 +77,7 @@ import { ArticleReader } from '@/components/app/article/ArticleReader';
 import { ArticleComposer } from '@/features/post/components/ArticleComposer';
 import { BADGE_ORDER, badgeImage } from '@/lib/staking-badges';
 import { BadgeIcon } from '@/components/app/BadgeIcon';
+import { BadgeMuseumGallery } from '@/components/app/profile/BadgeMuseumGallery';
 import { BadgedName } from '@/components/app/BadgedName';
 import { preloadBadgeShowcase } from '@/lib/badge-showcase';
 import { badgeAnimationStyle } from '@/lib/badge-animation-style';
@@ -2363,6 +2364,7 @@ export default function StateGalleryPage() {
         {params.get('composer') === '1' && <ThreadedComposerGallery />}
         {params.get('notifs') === '1' && <NotificationRowsGallery />}
         {params.get('links') === '1' && <LinkCardsGallery mention={params.get('mention')} />}
+        {params.get('museum') && <BadgeMuseumGallery sheet={params.get('museum') === 'sheet'} />}
 
         <AvatarPromptGallery initiallyOpen={params.get('sheet') === 'avatar-prompt'} />
 

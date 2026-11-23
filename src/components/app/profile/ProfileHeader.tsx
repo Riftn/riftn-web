@@ -650,9 +650,9 @@ export function ProfileHeader({
             )}
           </div>
 
-          {/* Badge Museum: every earned badge in a framed grid under the
-              counts. Nothing until one is earned, or when the owner hides it. */}
-          {profile.walletAddress && <BadgeMuseumPanel address={profile.walletAddress} own={!!isViewingOwnProfile} />}
+          {/* Badge Museum: the rarest earned medals under the counts, only
+              when the owner has switched it on in Settings (off by default). */}
+          {profile.walletAddress && <BadgeMuseumPanel address={profile.walletAddress} />}
 
           {isViewingOwnProfile && profile.walletAddress && <MomentArchive key={profile.walletAddress} profileAddress={profile.walletAddress} />}
 
