@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { mintExistingPost, getMintFee, type MintFeeQuoteResponse } from '@/lib/api/dehub';
+import type { EditionChoice } from '@/lib/api/dehub/content';
 import { confirmEvmMint } from '@/lib/api/dehub/solana';
 import { isSmartWalletSession } from '@/lib/connection-source';
 import { formatMintFee, mintFeeShortfall, mintFeeTopUpPath } from '@/lib/mint-fee-balance';
@@ -30,9 +31,10 @@ export function useMintExistingPost() {
 
   /**
    * `chosenChainId` is the chain picked in the mint sheet. Without one the
-   * post goes on-chain where it was published.
+   * post goes on-chain where it was published. `edition` is the creator's
+   * copies and resale royalties from the same sheet.
    */
-  const mint = useCallback(async (tokenId: number | string, chainId?: number, chosenChainId?: number) => {
+  const mint = useCallback(async (tokenId: number | string, chainId?: number, chosenChainId?: number, edition?: EditionChoice) => {
     if (isMinting) return false;
     setIsMinting(true);
     const toastId = 'mint-existing';
@@ -84,7 +86,7 @@ export function useMintExistingPost() {
 
       toast.loading(_copy("copy.ef478f3aaf43", { defaultValue: "Minting post" }), { id: toastId, duration: Infinity });
 
-      const sig = await mintExistingPost(tokenId, targetChain);
+      const sig = await mintExistingPost(tokenId, targetChain, hasBounty ? undefined : edition);
       // The signature binds the chain. A server that ignored the pick signed
       // for the old one, and sending that to another chain would only revert.
       const signedChain = Number((sig as { chainId?: number }).chainId ?? targetChain);
@@ -104,6 +106,11 @@ export function useMintExistingPost() {
           s: sig.s,
           uri: sig.uri,
           chainId: targetChain,
+          supply: sig.supply,
+          fees: sig.fees?.map((f) => ({ recipient: f.recipient, value: BigInt(f.value) })),
+          signature: sig.signature,
+          deadline: sig.deadline,
+          sigVersion: sig.sigVersion,
         },
         fee,
       );

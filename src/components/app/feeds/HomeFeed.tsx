@@ -73,8 +73,13 @@ import {
   type SortOption, 
   type DateFilterOption, 
   type ContentTypeFilters, 
-  type PostTypeFilterValue 
+  type PostTypeFilterValue,
+  type HomePostTypeValue,
+  namedFeedFor,
+  homeApiPostType,
+  toHomePostType,
   } from '@/lib/feed-utils';
+import { NamedFeedsRow } from './NamedFeedsRow';
   import { getPostAllowanceForBadge } from '@/lib/post-quota';
 import { resolveViewCount } from '@/lib/engagement';
 
@@ -242,8 +247,8 @@ interface FilterSectionProps {
   categories: DeHubCategory[];
   selectedDate: DateFilterOption;
   onDateSelect: (o: DateFilterOption) => void;
-  selectedPostType: PostTypeFilterValue;
-  onPostTypeSelect: (v: PostTypeFilterValue) => void;
+  selectedPostType: HomePostTypeValue;
+  onPostTypeSelect: (v: HomePostTypeValue) => void;
   contentFilters: ContentTypeFilters;
   onContentFilterToggle: (filter: keyof ContentTypeFilters) => void;
   onReset: () => void;
@@ -281,6 +286,7 @@ function SortFilterSection({
 
   return (
     <div className="relative flex flex-col gap-4">
+      <NamedFeedsRow value={selectedPostType} onSelect={onPostTypeSelect} />
       {presetsRow}
       {/* Sort Options */}
       <div className="flex flex-col gap-2">
@@ -351,7 +357,7 @@ function SortFilterSection({
         <div className="relative">
           <GlassFilterRow
             items={POST_TYPE_FILTERS.map((o) => ({ key: o.value, label: o.value === 'article' ? t('articles.label') : t(`filters.${o.value === 'all' ? 'all' : o.value === 'video' ? 'videos' : o.value === 'feed-images' ? 'images' : o.value === 'feed-audio' ? 'audio' : 'text'}`, o.label) }))}
-            activeKey={selectedPostType}
+            activeKey={namedFeedFor(selectedPostType) ? undefined : (selectedPostType as PostTypeFilterValue)}
             onSelect={(key) => onPostTypeSelect(key as PostTypeFilterValue)}
             borderRadius="0.75rem"
             buttonClassName="px-3 py-2 rounded-xl text-sm"
@@ -688,7 +694,7 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
   // Default to Latest (chronological) — persisted to sessionStorage. "For You" remains a filter option.
   const [selectedSort, setSelectedSortRaw] = usePersistedFeedFilter<SortOption>('home', 'sort', DEFAULT_HOME_SORT, SORT_OPTIONS);
   const [selectedDate, setSelectedDateRaw] = usePersistedFeedFilter<DateFilterOption>('home', 'date', DATE_FILTER_OPTIONS[0], DATE_FILTER_OPTIONS);
-  const [selectedPostType, setSelectedPostTypeRaw] = usePersistedFeedFilter<PostTypeFilterValue>('home', 'postType', 'all');
+  const [selectedPostType, setSelectedPostTypeRaw] = usePersistedFeedFilter<HomePostTypeValue>('home', 'postType', 'all');
   const [contentFilters, toggleContentFilterRaw, resetContentFiltersRaw] = usePersistedContentFilters('home');
   const [selectedCategories, setSelectedCategoriesRaw] = usePersistedFeedFilter<string[]>('home', 'categories', []);
 
@@ -725,9 +731,9 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
     setOptimisticDate(prev => (typeof value === 'function' ? (value as (p: DateFilterOption) => DateFilterOption)(prev) : value));
     startTransition(() => setSelectedDateRaw(value));
   }, [setSelectedDateRaw, beginFilterTransition]);
-  const setSelectedPostType = useCallback((value: PostTypeFilterValue | ((prev: PostTypeFilterValue) => PostTypeFilterValue)) => {
+  const setSelectedPostType = useCallback((value: HomePostTypeValue | ((prev: HomePostTypeValue) => HomePostTypeValue)) => {
     beginFilterTransition();
-    setOptimisticPostType(prev => (typeof value === 'function' ? (value as (p: PostTypeFilterValue) => PostTypeFilterValue)(prev) : value));
+    setOptimisticPostType(prev => (typeof value === 'function' ? (value as (p: HomePostTypeValue) => HomePostTypeValue)(prev) : value));
     startTransition(() => setSelectedPostTypeRaw(value));
   }, [setSelectedPostTypeRaw, beginFilterTransition]);
   const setSelectedCategories = useCallback((value: string[] | ((prev: string[]) => string[])) => {
@@ -773,7 +779,7 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
     if (!preset) return;
     setSelectedSort(SORT_OPTIONS.find((o) => o.value === preset.sort) ?? DEFAULT_HOME_SORT);
     setSelectedDate(DATE_FILTER_OPTIONS.find((o) => o.value === preset.date) ?? DATE_FILTER_OPTIONS[0]);
-    setSelectedPostType((POST_TYPE_FILTERS.find((o) => o.value === preset.postType)?.value ?? 'all') as PostTypeFilterValue);
+    setSelectedPostType(toHomePostType(preset.postType));
     setSelectedCategories(preset.categories ?? []);
     const want = new Set<PresetAccess>(preset.access ?? []);
     (['ppv', 'w2e', 'locked'] as const).forEach((k) => {
@@ -789,7 +795,16 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
   }, [setSelectedSort, setSelectedDate, setSelectedPostType, setSelectedCategories, resetContentFilters]);
   const filterLineItems = useMemo<FeedFilterLineItem[]>(() => {
     const items: FeedFilterLineItem[] = [];
-    if (optimisticPostType !== 'all') {
+    const named = namedFeedFor(optimisticPostType);
+    if (named) {
+      // A named filter reads as its name and purpose: "Motion · Watch".
+      items.push({
+        key: 'type',
+        group: t('feedFilters.groupType', 'Type'),
+        label: `${named.name} · ${t(named.purposeKey, named.purpose)}`,
+        onRemove: () => setSelectedPostType('all'),
+      });
+    } else if (optimisticPostType !== 'all') {
       const o = POST_TYPE_FILTERS.find((x) => x.value === optimisticPostType);
       items.push({
         key: 'type',
@@ -1130,7 +1145,7 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
   // Fallback: single unified feed when post type filter is active OR using global sort
   const singleFeed = useUnifiedFeed({
     ...commonParams,
-    postType: deferredPostType === 'all' ? undefined : deferredPostType,
+    postType: homeApiPostType(deferredPostType),
     enabled: !useInterleavedFeed,
   });
 
@@ -1152,7 +1167,7 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
   // held behind railsEnabled so it never competes with the first page.
   const { newPostCount: polledNewPostCount, atCap: newPostsAtCap, newPostAuthors, latestNewAt } = useNewPostsSignal({
     ...commonParams,
-    postType: deferredPostType === 'all' ? undefined : deferredPostType,
+    postType: homeApiPostType(deferredPostType),
     enabled: isHomeActive && railsEnabled,
     chronological: !useInterleavedFeed && deferredSort.value === 'latest',
     newestCreatedAt: newestRenderedCreatedAt,
@@ -1698,7 +1713,7 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
     (
       sort: SortOption,
       date: DateFilterOption,
-      postType: PostTypeFilterValue,
+      postType: HomePostTypeValue,
       cats: string[],
       content: ContentTypeFilters,
     ) =>

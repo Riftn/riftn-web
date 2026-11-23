@@ -19,7 +19,7 @@ import { useKidsModeLock } from '@/hooks/use-kids-mode';
 import { useStoriesStore } from '@/store/storiesStore';
 import { buildAvatarUrl, buildAvatarCdnFallbackUrl, deviceWidth } from '@/lib/media-url';
 import type { ShelfEntry } from '@/lib/api/dehub/stories';
-import { ageLabel, coverOf, handleOf, nameOf, playable } from './story-utils';
+import { coverOf, handleOf, nameOf, playable } from './story-utils';
 import { rememberShelfSeat } from '@/lib/story-shelf-seat';
 import '@/styles/stories.css';
 
@@ -206,7 +206,6 @@ function LiveTile({ item, onOpen }: { item: LiveNowItem; onOpen: () => void }) {
 function PersonTile({ entry, onOpen }: { entry: ShelfEntry; onOpen: (el: HTMLElement) => void }) {
   const a = entry.author;
   const face = a.avatarImageUrl ? buildAvatarUrl(a.address, a.avatarImageUrl, deviceWidth(68)) : buildAvatarCdnFallbackUrl(a.address, undefined);
-  const latest = entry.items[entry.items.length - 1];
   return (
     <button
       type="button"
@@ -219,7 +218,6 @@ function PersonTile({ entry, onOpen }: { entry: ShelfEntry; onOpen: (el: HTMLEle
     >
       <span data-st-bg style={bg(coverOf(entry))} />
       <span data-st-shade />
-      {latest?.createdAt && <span data-st-time>{ageLabel(latest.createdAt)}</span>}
       <ShelfAvatar src={face} />
       <TileIdentity address={a.address} username={a.username} displayName={a.displayName} />
     </button>

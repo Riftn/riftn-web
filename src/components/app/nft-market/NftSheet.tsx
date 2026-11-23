@@ -34,6 +34,8 @@ import {
 } from '@/lib/market/market';
 import { NATIVE, buildListing, buildOffer, currentPrice, type RoyaltyTerm } from '@/lib/market/seaport';
 import { NftArt, formatPrice } from './NftCard';
+import { AuctionBox } from './AuctionBox';
+import type { Auction } from '@/lib/api/dehub/collect';
 
 export interface NftSheetTarget {
   chainId: number;
@@ -126,6 +128,7 @@ export function NftSheet({
   bundle,
   collectionOffer,
   onClose,
+  auctionPreview,
 }: {
   target: NftSheetTarget | null;
   /** Opens straight into an offer on any NFT in the target's collection. */
@@ -133,6 +136,8 @@ export function NftSheet({
   /** Two to four NFTs to list together; opens straight into the listing form. */
   bundle?: NftSheetTarget[] | null;
   onClose: () => void;
+  /** State gallery: show this auction instead of asking the server. */
+  auctionPreview?: Auction | null;
 }) {
   const { t } = useTranslation();
   // useContext, not useAuth: the state gallery renders this sheet with no AuthProvider.
@@ -378,6 +383,21 @@ export function NftSheet({
                     {busy === `fill:${cheapest.orderHash}` ? <Loader2 className="h-4 w-4 animate-spin" /> : t('nftMarket.buy', { defaultValue: 'Buy' })}
                   </KitButton>
                 </div>
+              ) : null}
+
+              {!isBundle && target ? (
+                <AuctionBox
+                  target={target}
+                  me={me}
+                  isAuthenticated={isAuthenticated}
+                  held={held}
+                  standard={standard}
+                  dhb={dhb}
+                  offers={offers}
+                  name={name}
+                  image={image}
+                  preview={auctionPreview}
+                />
               ) : null}
 
               {isAuthenticated ? <div className="flex flex-wrap gap-2">
