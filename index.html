@@ -12,12 +12,39 @@
          way, instead of after it has arrived and drawn the page (that wait was
          ~4 s on desktop, ~6 s on a mid phone). src/lib/post-prefetch.ts picks
          the answer up. Mirrors apiCall's headers; an expired sign-in is left to
-         the app, which refreshes it first. -->
+         the app, which refreshes it first.
+
+         It asks for the post page's code now too, and for the live player's
+         the moment the answer says the post is a live. Those used to wait their
+         turn: the post page was asked for once the app had run, the player
+         once the post page had. The file lists are written in at build
+         (postLinkCodePlugin, vite.config.ts); a dev server leaves the marker
+         as it is and nothing extra is asked for. -->
     <script>
       (function () {
         try {
           var m = location.pathname.match(/^\/(?:app\/)?(?:post|video|posts)\/(\d+)(?:\/b(?:\/[^/]+)?)?\/?$/);
-          if (!m || !window.fetch) return;
+          if (!m) return;
+          var code = "__POST_LINK_CODE__";
+          var conn = navigator.connection;
+          if (typeof code !== 'object' || (conn && conn.saveData)) code = null;
+          // Fetched and compiled only: nothing runs early.
+          var want = function (files) {
+            for (var i = 0; i < files.length; i++) {
+              var href = '/' + files[i], css = /\.css$/.test(href);
+              // Already asked for (the app got to it first, and writes whole
+              // addresses): nothing to add.
+              if (document.querySelector('link[href="' + href + '"],link[href="' + location.origin + href + '"]')) continue;
+              var l = document.createElement('link');
+              l.rel = css ? 'preload' : 'modulepreload';
+              if (css) l.as = 'style';
+              l.crossOrigin = '';
+              l.href = href;
+              document.head.appendChild(l);
+            }
+          };
+          if (code) want(code.r);
+          if (!window.fetch) return;
           var ls = window.localStorage, h = { Accept: 'application/json' };
           var tok = ls.getItem('dehub_token');
           if (tok) {
@@ -32,6 +59,14 @@
             signedIn: !!tok,
             p: fetch('https://api.dehub.io/api/nft_info/' + m[1], { headers: h, cache: 'no-store' })
               .then(function (r) { return r.ok ? r.json() : null; })
+              .then(function (j) {
+                try {
+                  var n = j && (j.result || j);
+                  // Same test as the post page's getContentType.
+                  if (code && n && (n.postType === 'live' || n.isLive !== undefined)) want(code.l);
+                } catch (e) {}
+                return j;
+              })
               .catch(function () { return null; })
           };
         } catch (e) {}

@@ -94,6 +94,7 @@ import { useFeedSwallowClip } from '@/hooks/use-feed-swallow-clip';
 import { FeedSwallowMotion } from '@/components/app/feeds/FeedSwallowMotion';
 import type { VideoItem, ImagePost, TextPost, LiveStream } from '@/types/feed.types';
 import { hlsUrlFor, liveProviderOf, noteLatencyMode } from '@/lib/live-ingest';
+import { warmLiveStandbyFor } from '@/lib/live/hls-standby';
 import { FocusCommentProvider, NoFocusComment } from '@/lib/focus-comment';
 import { bringIntoView } from '@/lib/focus-scroll';
 import { canonicalUrl } from '@/lib/seo/route-meta';
@@ -196,6 +197,9 @@ function preloadLiveFromPrefetch() {
         // Building the address is what opens the connection (see hlsUrlFor).
         const stream = (nft as { stream?: Parameters<typeof hlsUrlFor>[0] }).stream;
         if (stream?.playbackId) hlsUrlFor(stream);
+        // And the stream itself starts loading now, not once the page has
+        // rendered its way down to the player.
+        warmLiveStandbyFor(toLiveStream(nft as DeHubNFT));
       })
       .catch(() => undefined);
   } catch {

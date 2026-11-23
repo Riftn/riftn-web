@@ -33,7 +33,21 @@ class FakeHls {
 
 vi.mock('hls.js', () => ({ default: FakeHls }));
 
-const { dropWarmLiveHls, takeWarmLiveHls, warmLiveHls } = await import('./hls-standby');
+const bigEvents = new Set<string>();
+const handedOver = new Set<string>();
+vi.mock('@/lib/live-ingest', () => ({
+  liveSourceFromHlsUrl: (url?: string) => {
+    const m = url ? /^https:\/\/(live|livepeer)\.example\/([^/]+)\//.exec(url) : null;
+    return m ? { provider: m[1] === 'live' ? 'mediamtx' : 'livepeer', playbackId: m[2] } : null;
+  },
+  isAacCopyUrl: (url?: string) => !!url && url.includes('-aac/'),
+  isBigEventPlayback: (url?: string) => !!url && [...bigEvents].some((id) => url.includes(`/${id}/`)),
+}));
+vi.mock('@/lib/live-handoff', () => ({
+  peekLiveSession: (id?: string | null) => (id && handedOver.has(id) ? {} : null),
+}));
+
+const { dropWarmLiveHls, takeWarmLiveHls, warmLiveHls, warmLiveStandbyFor } = await import('./hls-standby');
 
 const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
 let n = 0;
@@ -103,5 +117,64 @@ describe('HLS made ready while WebRTC tries', () => {
     await settle();
     expect(made[0].destroyed).toBe(true);
     expect(takeWarmLiveHls(url)).toBeNull();
+  });
+});
+
+describe('a live started loading before its player is drawn', () => {
+  beforeEach(() => {
+    made.length = 0;
+    bigEvents.clear();
+    handedOver.clear();
+  });
+
+  const live = (extra: Record<string, unknown> = {}) => {
+    const url = nextUrl();
+    return { url, stream: { isLive: true, playbackUrl: url, playbackUrls: [url], ...extra } };
+  };
+
+  it('loads a live stream and hands the player the same instance', async () => {
+    const { url, stream } = live();
+    warmLiveStandbyFor(stream);
+    await settle();
+    expect(made).toHaveLength(1);
+    expect(made[0].source).toBe(url);
+    expect(made[0].config.lowLatencyMode).toBe(true);
+
+    // The player asks again when it mounts: no second download.
+    const heard = vi.fn();
+    warmLiveHls(url, {}, heard);
+    made[0].emit('levelLoaded', { details: { targetduration: 8 } });
+    expect(heard).toHaveBeenCalledWith(8);
+    expect(made).toHaveLength(1);
+    expect((await takeWarmLiveHls(url))?.hls).toBe(made[0]);
+  });
+
+  it.each([
+    ['is over', { isLive: false }],
+    ['is pay per view', { isPPV: true }],
+    ['is locked to holders', { isLocked: true }],
+    ['is for subscribers', { subscriberPlans: [{}] }],
+    ['is marked mature', { contentRating: 'mature' }],
+  ])('leaves a stream that %s alone', async (_, extra) => {
+    warmLiveStandbyFor(live(extra).stream);
+    await settle();
+    expect(made).toHaveLength(0);
+  });
+
+  it('leaves a big event, a Livepeer stream and a handed-over session alone', async () => {
+    const event = live();
+    bigEvents.add(event.url.split('/')[3]);
+    warmLiveStandbyFor(event.stream);
+
+    const livepeer = 'https://livepeer.example/abc/index.m3u8';
+    warmLiveStandbyFor({ isLive: true, playbackUrl: livepeer });
+
+    const handed = live();
+    handedOver.add(handed.url.split('/')[3]);
+    warmLiveStandbyFor(handed.stream);
+
+    warmLiveStandbyFor(null);
+    await settle();
+    expect(made).toHaveLength(0);
   });
 });

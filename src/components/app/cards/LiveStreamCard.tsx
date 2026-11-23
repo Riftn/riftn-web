@@ -86,14 +86,13 @@ import {
   whepEndpointFor,
   edgeWhepEndpointFor,
   fetchTurnServers,
-  isAacCopyUrl,
   isBigEventPlayback,
   BIG_EVENT_HLS_CONFIG,
 } from '@/lib/live-ingest';
 import type { WhepState, WhepSubscription } from '@/lib/livepeer/whep';
 import { nativeLiveEdge, watchLiveProgress } from '@/lib/live/stall-watchdog';
 import { NO_RELAY_CANDIDATE, firstWhepRoute, forgetWhepRouteBlocked, forgetWhepSilent, hasRealPicture, rememberWhepRouteBlocked, rememberWhepSilent, whepRecentlySilent, whepRouteBlocked, type WhepRoute } from '@/lib/live/whep-memory';
-import { dropWarmLiveHls, SLOW_KEYFRAME_SEC, takeWarmLiveHls, warmLiveHls } from '@/lib/live/hls-standby';
+import { dropWarmLiveHls, LIVE_HLS_CONFIG, playsNativeHls, SLOW_KEYFRAME_SEC, takeWarmLiveHls, warmLiveHls } from '@/lib/live/hls-standby';
 import { peekLiveSession, takeLiveSession } from '@/lib/live-handoff';
 import { useStreamActions, useStreamActivities } from '@/hooks/use-livestream';
 import { useBlockAuthor } from '@/hooks/use-block-author';
@@ -170,14 +169,6 @@ const WHEP_ANSWER_TIMEOUT_MS = 3500;
 const WHEP_CONNECT_TIMEOUT_MS = 2000;
 /** Connected: the first picture waits on the broadcast's next keyframe. */
 const WHEP_FRAME_TIMEOUT_MS = 2500;
-
-/** hls.js settings for a live, shared by the standby and the player. */
-const LIVE_HLS_CONFIG = { enableWorker: true, lowLatencyMode: true, backBufferLength: 60 } as const;
-
-/** Safari and iOS play these themselves; everything else goes through hls.js. */
-const playsNativeHls = (video: HTMLVideoElement, url: string | undefined) =>
-  (liveSourceFromHlsUrl(url)?.provider !== 'mediamtx' || isAacCopyUrl(url)) &&
-  !!video.canPlayType('application/vnd.apple.mpegurl');
 
 /** What the player overlay says while playback is struggling; worded at render. */
 type PlaybackError = 'reconnecting' | 'alternateSource' | 'connecting' | 'unavailable' | 'playFailed';
