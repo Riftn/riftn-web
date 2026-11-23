@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Edytuj wideo", "hiddenTag": "Ukryte", "tapToEdit": "Stuknij, aby edytować", "cover": "Okładka", "trim": "Przytnij", "mirror": "Odbicie lustrzane", "rotate": "Obróć", "hide": "Ukryj", "timer": "Minutnik", "sheetTitleAny": "Edytuj przed wysłaniem", "close": "Zamknij", "replace": "Zastąp", "hiddenUntilTap": "Ukryte do momentu kliknięcia", "pause": "Wstrzymaj", "play": "Odtwórz wideo", "mute": "Wycisz", "unmute": "Wyłącz wyciszenie", "scrub": "Przewijaj wideo", "addMore": "Dodaj zdjęcia lub filmy", "trimAria": "Przeciągnij końce, aby przyciąć", "coverAria": "Kliknij klatkę, aby ustawić okładkę", "coverHint": "Kliknij klatkę, aby ustawić okładkę", "coverOwn": "Twoje zdjęcie", "coverAuto": "Auto", "uploadCover": "Prześlij zdjęcie okładki", "mirrored": "Odbicie lustrzane", "original": "Oryginał", "rotate90": "Obróć o 90°", "showNormally": "Pokaż normalnie", "showNormallyBody": "Widzą to od razu", "hideUntilTap": "Ukryj do momentu kliknięcia", "hideUntilTapBody": "Rozmyte do momentu kliknięcia", "hidePrice": "Ukryj za ceną", "hidePriceBody": "Rozmyte do momentu zapłaty", "priceUnavailable": "Nie w tym czacie", "timerOff": "Wył.", "timerOffBody": "Zostaje na czacie.", "timerViewBody": "Znika dla obu stron, gdy tylko to zobaczą.", "confirm": "Potwierdź", "lockedFor": "Odblokuj za {{value1}} DHB", "lockedForUsd": "Odblokuj za {{value1}}", "editItem": "Edytuj element {{value1}}", "kept": "{{time}} zachowano", "timerTimeBody": "Znika dla obu stron {{value1}} po wysłaniu."},
+  "dmVideo": {"edit": "Edytuj wideo", "hiddenTag": "Ukryte", "tapToEdit": "Stuknij, aby edytować", "cover": "Okładka", "trim": "Przytnij", "mirror": "Odbicie lustrzane", "rotate": "Obróć", "hide": "Ukryj", "timer": "Minutnik", "sheetTitleAny": "Edytuj przed wysłaniem", "close": "Zamknij", "replace": "Zastąp", "hiddenUntilTap": "Ukryte do momentu kliknięcia", "pause": "Wstrzymaj", "play": "Odtwórz wideo", "mute": "Wycisz", "unmute": "Wyłącz wyciszenie", "scrub": "Przewijaj wideo", "addMore": "Dodaj zdjęcia lub filmy", "trimAria": "Przeciągnij końce, aby przyciąć", "coverAria": "Kliknij klatkę, aby ustawić okładkę", "coverHint": "Kliknij klatkę, aby ustawić okładkę", "coverOwn": "Twoje zdjęcie", "coverAuto": "Auto", "uploadCover": "Prześlij zdjęcie okładki", "mirrored": "Odbicie lustrzane", "original": "Oryginał", "rotate90": "Obróć o 90°", "showNormally": "Pokaż normalnie", "showNormallyBody": "Widzą to od razu", "hideUntilTap": "Ukryj do momentu kliknięcia", "hideUntilTapBody": "Rozmyte do momentu kliknięcia", "hidePrice": "Ukryj za ceną", "hidePriceBody": "Rozmyte do momentu zapłaty", "priceUnavailable": "Nie w tym czacie", "timerOff": "Wył.", "timerOffBody": "Zostaje na czacie.", "timerViewBody": "Znika dla obu stron, gdy tylko to zobaczą.", "confirm": "Potwierdź", "lockedFor": "Odblokuj za {{value1}} tokeny", "lockedForUsd": "Odblokuj za {{value1}}", "editItem": "Edytuj element {{value1}}", "kept": "{{time}} zachowano", "timerTimeBody": "Znika dla obu stron {{value1}} po wysłaniu."},
   "postBg": {
     "addMedia": "Dodaj obraz, GIF lub film",
     "changeMedia": "Zmień obraz, GIF lub film",
@@ -2089,7 +2089,7 @@
     "ogHolders_many": "{{count}} posiadaczy OG",
     "ogHolders_other": "{{count}} posiadaczy OG",
     "ogChallengeTitle": "Sprowadź posiadaczy OG z powrotem",
-    "ogChallengeBody": "Zaproś osoby, które wciąż mają DHB. Gdy dołączą przez Twój link i zatrzymają DHB w portfelu Riftn, liczą się tutaj dla Ciebie.",
+    "ogChallengeBody": "Zaproś osoby, które nadal mają tokeny. Jeśli dołączą za pomocą Twojego linku i zachowają swoje tokeny w portfelu Riftn, zostaną tu zaliczone na Twoją korzyść.",
     "ogChallengeCta": "Pobierz link z zaproszeniem",
     "directReferrals_one": "{{count}} bezpośrednich",
     "directReferrals_other": "{{count}} bezpośrednich",
@@ -12301,7 +12301,7 @@
           "4": "Aby nagrać notatkę głosową, kliknij ikonę mikrofonu.",
           "5": "Aby dodać GIF, kliknij ikonę GIF i wyszukaj go.",
           "6": "Używaj #hashtagów do kategoryzowania swojego posta (np. #crypto, #defi).",
-          "7": "Używaj $cashtagów do odwoływania się do tokenów (np. $RIFT, $ETH).",
+          "7": "Używaj $cashtagów do odwoływania się do tokenów (np. $BTC, $ETH).",
           "8": "Używaj @wzmianek do oznaczania innych użytkowników (np. @nazwa_użytkownika).",
           "9": "Kliknij „Post”, aby opublikować. Twój post pojawi się w kanale natychmiast."
         },

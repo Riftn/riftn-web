@@ -102,7 +102,7 @@ export function LockPriceControl({ value, onChange, kind }: LockPriceControlProp
       )}
       {on && (
         <span data-lock-dhb className="basis-full text-[11px] font-medium opacity-80">
-          {t('dmPaidLock.lockDhbNow', { defaultValue: '≈ {{dhb}} today. They always pay {{price}}, whatever DHB is worth.', dhb: formatLockDhb(lockDhbForUsd(value)), price: formatLockUsd(value) })}
+          {t('dmPaidLock.lockDhbNow', { defaultValue: '≈ {{dhb}} today. They always pay {{price}}, whatever tokens are worth.', dhb: formatLockDhb(lockDhbForUsd(value)), price: formatLockUsd(value) })}
         </span>
       )}
       {on && (

@@ -27,6 +27,7 @@ import Mic from "@/components/ui/cut-icons/mic";
 import { motion, LayoutGroup, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { TickerLogo } from './TickerLogo';
+import { isDhbSymbol } from '@/lib/market/dhb-symbols';
 import { cn } from '@/lib/utils';
 import { LiquidGlassBubble2 } from '@/components/ui/liquid-glass-bubble-2';
 import { getTopTickers, type TickerPeriod } from '@/lib/ticker-search-tracker';
@@ -223,7 +224,7 @@ export const WhatsHappening = memo(function WhatsHappening({ showCountrySelector
   }, [tickerPeriod]);
 
   const handleTickerClick = (symbol: string) => {
-    navigate(`/app/explore?q=${encodeURIComponent('$' + symbol)}`);
+    navigate(`/app/explore?q=${encodeURIComponent('$' + (isDhbSymbol(symbol) ? 'RIFT' : symbol))}`);
   };
 
   const handleMainTabChange = useCallback((tab: Tab) => {
@@ -447,7 +448,7 @@ export const WhatsHappening = memo(function WhatsHappening({ showCountrySelector
                         <div className="flex items-center gap-1.5 min-w-0">
                           <TickerLogo symbol={ticker.symbol} size={16} />
                           <span className="text-sm text-zinc-200 font-medium truncate group-hover:text-white transition-colors">
-                            {/^(?:DHB|DEHUB)$/i.test(ticker.symbol) ? 'RIFT' : ticker.symbol}
+                            {isDhbSymbol(ticker.symbol) ? 'RIFT' : ticker.symbol}
                           </span>
                         </div>
                       </div>

@@ -1,3 +1,4 @@
+import { tokenLabel } from '@/lib/token-label';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation as _useCopy } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -103,7 +104,7 @@ export function CashOutDrawer({ open, onOpenChange, config }: CashOutDrawerProps
           >
             <ArrowDownUp className="w-4 h-4 text-white/60 shrink-0" />
             <div className="flex-1">
-              <span className="text-sm text-white">{_copy("copy.da5aa0780a2b", { defaultValue: "Earnings in DHB? Sell for USDC first" })}</span>
+              <span className="text-sm text-white">{_copy("copy.da5aa0780a2b", { defaultValue: "Earnings in tokens? Sell for USDC first" })}</span>
               <p className="text-xs text-white/40">{_copy("copy.f058c8af001b", { defaultValue: "Cash out pays out USDC. Open the exchange to convert." })}</p>
             </div>
           </button>
@@ -126,7 +127,7 @@ export function CashOutDrawer({ open, onOpenChange, config }: CashOutDrawerProps
                     onClick={() => setNetwork(item.id)}
                     className={`flex-1 py-2 rounded-xl text-xs border transition-colors ${network === item.id ? 'bg-white/[0.12] border-white/30 text-white' : 'bg-white/[0.04] border-white/10 text-white/50'}`}
                   >
-                    {item.currency} · {item.label}
+                    {tokenLabel(item.currency)} · {item.label}
                   </button>
                 ))}
               </div>
@@ -164,7 +165,7 @@ export function CashOutDrawer({ open, onOpenChange, config }: CashOutDrawerProps
               <div key={order.id} className="flex items-center justify-between p-3 rounded-xl bg-white/[0.04] border border-white/10">
                 <div>
                   <p className="text-sm text-white">
-                    {Number(order.crypto_amount).toLocaleString()} {order.crypto_currency}
+                    {Number(order.crypto_amount).toLocaleString()} {tokenLabel(order.crypto_currency)}
                     {order.fiat_amount && order.fiat_currency ? <span className="text-white/50"> → {Number(order.fiat_amount).toLocaleString(undefined, { maximumFractionDigits: 2 })} {order.fiat_currency}</span> : null}
                   </p>
                   <p className="text-[11px] text-white/40">
