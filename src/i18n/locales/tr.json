@@ -13509,7 +13509,7 @@
       "tapVideo": "İzlemek için dokun",
       "goneAfter": "Açtıktan {{time}} sonra kaybolur",
       "left": "{{n}} sn",
-      "replayAllowed": "Bir kez tekrar izin var",
+      "replayAllowed": "Bir kez tekrar açılabilir",
       "tapReplay": "Tekrar açmak için dokun",
       "lastView": "Son bakış, {{time}}",
       "goneAfterReplay": "Açtıktan {{time}} sonra kaybolur. Bir kez tekrar açılabilir.",
