@@ -4933,6 +4933,7 @@ export type Database = {
           created_at: string
           description: string
           dislike_count: number
+          early_access_until: string | null
           id: string
           image_url: string | null
           image_urls: string[] | null
@@ -4954,6 +4955,7 @@ export type Database = {
           created_at?: string
           description: string
           dislike_count?: number
+          early_access_until?: string | null
           id?: string
           image_url?: string | null
           image_urls?: string[] | null
@@ -4975,6 +4977,7 @@ export type Database = {
           created_at?: string
           description?: string
           dislike_count?: number
+          early_access_until?: string | null
           id?: string
           image_url?: string | null
           image_urls?: string[] | null
@@ -11491,6 +11494,7 @@ export type Database = {
           created_at: string
           description: string
           dislike_count: number
+          early_access_until: string | null
           id: string
           image_url: string | null
           image_urls: string[] | null
