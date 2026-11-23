@@ -22,12 +22,29 @@
 
 import { createLogger } from '@/lib/logger';
 import { ICE_SERVERS, waitForIceGathering, resolveSessionResource } from './ice';
+import { whepHangUpUrl } from '@/lib/live-ingest';
+import { NO_RELAY_CANDIDATE } from '@/lib/live/whep-memory';
 
 const logger = createLogger('WHEP');
 
 /** Overridable so a self-hosted catalyst can be pointed at without a rebuild. */
 const WHEP_BASE_URL =
   import.meta.env.VITE_LIVEPEER_WHEP_URL || 'https://livepeer.studio/webrtc';
+
+/**
+ * How long a viewer's offer waits for its candidates.
+ *
+ * Direct: the ingest has a public address, so the viewer's own (host)
+ * candidates are all it needs; it learns the rest from the first packet. A
+ * reflexive one is worth a moment, not the three seconds a network with STUN
+ * shut used to cost before the offer even left.
+ *
+ * Relayed: the relay candidate is the whole point, and it sits behind a TLS
+ * handshake. None by the cap means the relay is not reachable from here, and
+ * an offer without it only repeats the direct attempt.
+ */
+const DIRECT_GATHER_CAP_MS = 600;
+const RELAY_GATHER_CAP_MS = 2000;
 
 export type WhepState = 'connecting' | 'playing' | 'reconnecting' | 'failed' | 'closed';
 
@@ -94,7 +111,7 @@ export async function subscribeToWhep({
     }
     if (resourceUrl) {
       try {
-        await fetch(resourceUrl, { method: 'DELETE', keepalive: true });
+        await fetch(whepHangUpUrl(resourceUrl), { method: 'DELETE', keepalive: true });
       } catch {
         // The server times the session out on its own; this is tidiness.
       }
@@ -134,7 +151,9 @@ export async function subscribeToWhep({
     const offer = await pc.createOffer();
     await pc.setLocalDescription(offer);
     // A relayed run is only worth anything with its TURN candidate in the offer.
-    await waitForIceGathering(pc, extraIceServers?.length ? 'relay' : 'srflx');
+    const relayed = !!extraIceServers?.length;
+    await waitForIceGathering(pc, relayed ? 'relay' : 'srflx', relayed ? RELAY_GATHER_CAP_MS : DIRECT_GATHER_CAP_MS);
+    if (relayed && !/ typ relay/.test(pc.localDescription?.sdp ?? '')) throw new Error(NO_RELAY_CANDIDATE);
 
     const endpoint =
       endpointOverride || `${WHEP_BASE_URL.replace(/\/$/, '')}/${playbackId}`;

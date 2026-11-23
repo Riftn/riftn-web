@@ -236,6 +236,28 @@ export function edgeWhepEndpointFor(stream: LiveStreamRef): string | undefined {
 }
 
 /**
+ * Where a viewer's hang-up goes.
+ *
+ * A session's own URL on the ingest host answers the browser's preflight
+ * with a bare 404, so a DELETE sent there never leaves the browser: every
+ * viewer who left logged a CORS error and the server kept the session until
+ * it timed out. The signaling edge fronts the same server and takes the
+ * hang-up for a session wherever it was opened.
+ */
+export function whepHangUpUrl(resource: string): string {
+  if (!MEDIAMTX_HOST) return resource;
+  try {
+    const url = new URL(resource);
+    if (url.host === MEDIAMTX_HOST && /^\/[^/]+\/whep\/[^/]+$/.test(url.pathname)) {
+      return `${EDGE_SIGNALING_BASE}${url.pathname}`;
+    }
+  } catch {
+    // Not an absolute URL: leave it as given.
+  }
+  return resource;
+}
+
+/**
  * TURN relay servers for the media leg, or [] when no relay is deployed.
  *
  * The API answers with coturn REST credentials (expiry-stamp username, HMAC
