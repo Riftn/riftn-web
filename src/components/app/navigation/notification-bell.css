@@ -84,3 +84,9 @@ html.reduce-motion .notification-bell :is(.notification-bell__swing, .notificati
   box-shadow: 0 0 0 1.5px rgba(0, 0, 0, 0.35);
   pointer-events: none;
 }
+
+/* Phones: the bell sits at the screen's right edge (top bar and island), so the
+   number tucks onto the bell instead of hanging past it and off the screen. */
+@media (max-width: 1023px) {
+  .notification-bell__count { right: calc(var(--bell-size) * -0.08); }
+}
