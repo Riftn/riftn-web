@@ -202,8 +202,7 @@ html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-chat
     min-height: 88px;
     padding: 14px 16px 14px 14px !important;
     gap: 12px !important;
-    -webkit-backdrop-filter: var(--nav-glass-blur, blur(24px) saturate(1.8));
-    backdrop-filter: var(--nav-glass-blur, blur(24px) saturate(1.8));
+    /* Let the card tint and rim paint without a separate backdrop layer per row. */
   }
   html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-chat-list-scroll] :is([data-chat-list-row], [data-chat-list-body] > button):hover {
     box-shadow: var(--mc-rim), inset 0 0 0 100px var(--mc-hover) !important;

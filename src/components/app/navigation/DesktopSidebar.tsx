@@ -599,7 +599,7 @@ export function DesktopSidebar({ onPostClick }: DesktopSidebarProps) {
             aria-hidden={!showSearch}
           >
             <div className="overflow-hidden">
-              <div className={cn(isCollapsed ? "p-2 pb-0" : "p-1 pb-0 lg:px-2.5 lg:pt-2.5")}>
+              <div data-sidebar-search-inset className={cn(isCollapsed ? "p-2 pb-0" : "p-1 pb-0 lg:px-2.5 lg:pt-2.5")}>
                 {isCollapsed ? (
                   <button
                     type="button"
@@ -886,7 +886,7 @@ export function DesktopSidebar({ onPostClick }: DesktopSidebarProps) {
               aria-hidden={!showBottomSearch}
             >
               <div className="overflow-hidden">
-                <div className="p-1 pt-0 lg:px-2.5 lg:pb-2.5">
+                <div data-sidebar-search-inset className="p-1 pt-0 lg:px-2.5 lg:pb-2.5">
                   <div className="relative">
                     <Search className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                     <input

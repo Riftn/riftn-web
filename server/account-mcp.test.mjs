@@ -104,6 +104,163 @@ test('expanded post controls declare the right access and reject untrusted input
   const wrongScope = await callAccountTool('dehub_delete_post', { token_id: '42' }, { token: 'one', scopes: ['dehub:read'] });
   assert.equal(wrongScope.isError, true);
 });
+test('the feature guide covers the tool catalogue and uses Riftn links for app workflows', async () => {
+  const { structuredContent: guide } = await callAccountTool('dehub_features', {}, {});
+  const listed = guide.features.flatMap(feature => feature.tools);
+  const registered = accountTools.map(tool => tool.name).filter(name => name !== 'dehub_features');
+  assert.deepEqual(listed.sort(), registered.sort());
+  for (const { url } of guide.in_app) assert.equal(new URL(url).origin, ORIGIN);
+  assert.ok(guide.in_app.some(({ url }) => url === `${ORIGIN}/app/messages`));
+  assert.ok(guide.in_app.some(({ url }) => url === `${ORIGIN}/app/wallet`));
+});
+test('bookmark changes use the authenticated folder routes and retry creation only once', async () => {
+  const seen = [];
+  const f = fixture((url, init) => {
+    seen.push({ url: new URL(url), method: init.method, body: init.body && JSON.parse(init.body), token: new Headers(init.headers).get('Authorization') });
+    return Response.json({ status: true, result: { id: 'folder-1' } });
+  });
+  const social = await connect(f, { scope: 'dehub:social' });
+  const read = await connect(f, { scope: 'dehub:read' }, 'two');
+  const args = { request_id: jobId, name: 'Watch later' };
+  const call = async (name, input, token = social.access_token) => (await (await rpc(f, name, input, token)).json()).result;
+  assert.equal((await call('dehub_create_bookmark_folder', args, read.access_token)).isError, true);
+  await Promise.all([call('dehub_create_bookmark_folder', args), call('dehub_create_bookmark_folder', args)]);
+  assert.equal((await call('dehub_create_bookmark_folder', args)).structuredContent.result.id, 'folder-1');
+  assert.equal((await call('dehub_update_bookmark_folder', { folder_id: '.', is_public: true })).isError, true);
+  assert.equal((await call('dehub_update_bookmark_folder', { folder_id: 'folder-1' })).isError, true);
+  await call('dehub_update_bookmark_folder', { folder_id: 'folder-1', description: '', is_public: false });
+  await call('dehub_add_bookmarks', { folder_id: 'folder-1', token_ids: ['42', '43', '42'] });
+  await call('dehub_remove_bookmark', { folder_id: 'folder-1', token_id: '42' });
+  await call('dehub_delete_bookmark_folder', { folder_id: 'folder-1' });
+  await call('dehub_public_playlists', { owner_wallet: A, playlist_id: 'folder-1', cursor: 'a+b' });
+  assert.deepEqual(seen.map(row => [row.method, row.url.pathname, row.body, row.token]), [
+    ['POST', '/api/bookmark-folders', { name: 'Watch later', isPublic: false }, 'Bearer one'],
+    ['PUT', '/api/bookmark-folders/folder-1', { description: '', isPublic: false }, 'Bearer one'],
+    ['POST', '/api/bookmark-folders/folder-1/items/bulk', { tokenIds: [42, 43] }, 'Bearer one'],
+    ['DELETE', '/api/bookmark-folders/folder-1/items/42', undefined, 'Bearer one'],
+    ['DELETE', '/api/bookmark-folders/folder-1', undefined, 'Bearer one'],
+    ['GET', `/api/users/${A}/playlists/folder-1`, undefined, null],
+  ]);
+  assert.equal(seen.at(-1).url.searchParams.get('cursor'), 'a+b');
+});
+test('custom profile fields can only be set by a connected account with profile access', async () => {
+  const f = fixture((url, init) => {
+    assert.ok(url.endsWith('/api/profile-fields'));
+    assert.equal(init.method, 'PUT');
+    assert.equal(new Headers(init.headers).get('Authorization'), 'Bearer one');
+    return Response.json({ result: JSON.parse(init.body).fields });
+  });
+  const read = await connect(f, { scope: 'dehub:read' }, 'two');
+  const owner = await connect(f, { scope: 'dehub:profile' });
+  const fields = [{ name: 'Location', value: 'London' }];
+  const call = async (input, grant) => (await (await rpc(f, 'dehub_set_profile_fields', input, grant.access_token)).json()).result;
+  assert.equal((await call({ fields }, read)).isError, true);
+  assert.equal((await call({ fields: Array(5).fill(fields[0]) }, owner)).isError, true);
+  assert.deepEqual((await call({ fields }, owner)).structuredContent.fields, fields);
+  assert.deepEqual((await call({ fields: [] }, owner)).structuredContent.fields, []);
+});
+test('notifications and follow requests use the existing Riftn routes and require the correct scopes', async () => {
+  const seen = [];
+  const f = fixture((url, init) => {
+    const path = new URL(url);
+    seen.push([init.method, path.pathname + path.search]);
+    if (path.pathname === '/api/follow-requests') {
+      return Response.json({ items: [{ requestId: 'request-1', user: { username: 'friend', address: B }, requestedAt: '2026-01-01' }] });
+    }
+    return Response.json({ status: true });
+  });
+  const read = await connect(f, { scope: 'dehub:read' });
+  const full = await connect(f, { scope: 'dehub:read dehub:social' });
+  const call = async (name, input, grant) => (await (await rpc(f, name, input, grant.access_token)).json()).result;
+  assert.equal((await call('dehub_decide_follow_request', { request_id: 'request-1', decision: 'accept' }, read)).isError, true);
+  assert.equal((await call('dehub_decide_all_follow_requests', { decision: 'accept' }, read)).isError, true);
+  assert.equal((await call('dehub_set_followed_tag', { tag: 'news', follow: true }, read)).isError, true);
+  assert.equal((await call('dehub_set_followed_tag', { tag: '../../news', follow: false }, full)).isError, true);
+  assert.equal((await call('dehub_mark_notifications_read', {}, read)).isError, true);
+  const requests = await call('dehub_follow_requests', {}, read);
+  assert.equal(requests.structuredContent.requests[0].request_id, 'request-1');
+  await call('dehub_decide_follow_request', { request_id: 'request-1', decision: 'accept' }, full);
+  await call('dehub_decide_all_follow_requests', { decision: 'reject' }, full);
+  await call('dehub_followed_tags', {}, read);
+  await call('dehub_set_followed_tag', { tag: '#Music', follow: true }, full);
+  await call('dehub_set_followed_tag', { tag: '#Música', follow: false }, full);
+  await call('dehub_notifications', { category: 'social', unread_only: true, filtered: true }, read);
+  await call('dehub_unread_notifications', {}, read);
+  await call('dehub_mark_notifications_read', { category: 'social' }, full);
+  assert.deepEqual(seen, [
+    ['GET', '/api/follow-requests'],
+    ['POST', '/api/follow-requests/request-1/accept'],
+    ['POST', '/api/follow-requests/reject-all'],
+    ['GET', '/api/followed-tags'],
+    ['POST', '/api/followed-tags'],
+    ['DELETE', '/api/followed-tags/m%C3%BAsica'],
+    ['GET', '/api/notification?page=1&limit=20&unreadOnly=true&category=social&filtered=true'],
+    ['GET', '/api/notification/unread-count'],
+    ['POST', '/api/notification/mark-all-read?category=social'],
+  ]);
+});
+test('block and mute tools require newly granted moderation access and use the connected session', async () => {
+  const seen = [];
+  const f = fixture((url, init) => {
+    seen.push([init.method, new URL(url).pathname, init.body && JSON.parse(init.body), new Headers(init.headers).get('Authorization')]);
+    return Response.json({ status: true });
+  });
+  const existing = await connect(f, { scope: 'dehub:read dehub:social' });
+  const full = await connect(f, { scope: 'dehub:moderation' }, 'two');
+  const call = async (name, input, grant) => (await (await rpc(f, name, input, grant.access_token)).json()).result;
+  const denied = await call('dehub_moderation_list', { type: 'mute' }, existing);
+  assert.equal(denied.isError, true);
+  assert.match(denied._meta['mcp/www_authenticate'][0], /scope="dehub:moderation"/);
+  assert.equal((await call('dehub_set_moderation', { target_wallet: B, type: 'block', enabled: true }, full)).isError, true);
+  await call('dehub_moderation_list', { type: 'block' }, full);
+  await call('dehub_set_moderation', { target_wallet: A, type: 'block', enabled: true }, full);
+  await call('dehub_set_moderation', { target_wallet: A, type: 'mute', enabled: false }, full);
+  assert.deepEqual(seen, [
+    ['GET', '/api/block', undefined, 'Bearer two'],
+    ['POST', '/api/block', { address: A }, 'Bearer two'],
+    ['DELETE', `/api/mute/${A}`, undefined, 'Bearer two'],
+  ]);
+});
+test('signed-in feed, comments and co-authors go through Riftn access checks', async () => {
+  const seen = [];
+  const f = fixture((url, init) => {
+    const endpoint = new URL(url);
+    const token = new Headers(init.headers).get('Authorization');
+    seen.push([init.method, endpoint.pathname + endpoint.search, init.body && JSON.parse(init.body), token]);
+    if (endpoint.pathname === '/api/nft_info/42' && token !== 'Bearer one') {
+      return Response.json({ error: 'Post not available to this viewer' }, { status: 404 });
+    }
+    return Response.json({ status: true });
+  });
+  const owner = await connect(f, { scope: 'dehub:read dehub:social' });
+  const other = await connect(f, { scope: 'dehub:read' }, 'two');
+  const call = async (name, input, grant = owner) => (await (await rpc(f, name, input, grant.access_token)).json()).result;
+  assert.notEqual((await call('dehub_read_post_as_me', { token_id: '42' })).isError, true);
+  assert.equal((await call('dehub_read_post_as_me', { token_id: '42' }, other)).isError, true);
+  await call('dehub_my_feed', { following_only: true });
+  assert.equal((await call('dehub_watch_history', { address: B })).isError, true);
+  await call('dehub_watch_history', { page: 2 });
+  await call('dehub_saved_posts', { page: 2 });
+  await call('dehub_edit_comment', { comment_id: '123', content: 'Updated comment' });
+  await call('dehub_delete_comment', { comment_id: '123' });
+  await call('dehub_coauthors', { token_id: '42' });
+  await call('dehub_invite_coauthor', { token_id: '42', user: '@friend' });
+  await call('dehub_answer_coauthor_invite', { token_id: '42', accept: false });
+  await call('dehub_remove_coauthor', { token_id: '42', target_wallet: B });
+  assert.deepEqual(seen, [
+    ['GET', '/api/nft_info/42', undefined, 'Bearer one'],
+    ['GET', '/api/nft_info/42', undefined, 'Bearer two'],
+    ['GET', '/api/feed?page=1&limit=20&sortBy=createdAt&sortOrder=desc&status=all&followingOnly=true', undefined, 'Bearer one'],
+    ['GET', `/api/my_watched_nfts?page=2&limit=20&address=${A}`, undefined, 'Bearer one'],
+    ['GET', '/api/savedPosts?page=2&limit=20', undefined, 'Bearer one'],
+    ['POST', '/api/edit_comment', { commentId: '123', content: 'Updated comment' }, 'Bearer one'],
+    ['DELETE', '/api/delete_comment', { commentId: 123 }, 'Bearer one'],
+    ['GET', '/api/nft/42/co-authors', undefined, 'Bearer one'],
+    ['POST', '/api/nft/42/co-authors', { user: '@friend' }, 'Bearer one'],
+    ['POST', '/api/nft/42/co-authors/respond', { accept: false }, 'Bearer one'],
+    ['DELETE', `/api/nft/42/co-authors/${B}`, undefined, 'Bearer one'],
+  ]);
+});
 test('post drafts stay private to the connected account and can be edited or deleted', async () => {
   const f = fixture();
   const one = await connect(f, { scope: 'dehub:read dehub:social' });
