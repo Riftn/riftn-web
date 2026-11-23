@@ -23345,6 +23345,9 @@
   },
   "badgeMuseum": {
     "title": "Museo de insignias",
+    "showSetting": "Mostrar el Museo de insignias en mi perfil",
+    "showSettingHint": "Si lo desactivas, los demás no verán tus insignias. Tú sí seguirás viéndolas.",
+    "hiddenNote": "Oculto para los demás",
     "open": "Abrir el Museo de insignias",
     "summary": "{{earned}} de {{total}} insignias conseguidas",
     "loading": "Cargando insignias…",

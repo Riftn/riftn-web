@@ -49,7 +49,7 @@ import { BadgeIcon } from '@/components/app/BadgeIcon';
 import { NewMemberChip } from '@/components/app/NewMemberChip';
 import { OnboardingCompleteChip } from '@/components/app/OnboardingCompleteChip';
 import { EarlySupporterChip } from '@/components/app/EarlySupporterChip';
-import { MilestoneChips } from '@/components/app/profile/BadgeMuseum';
+import { BadgeMuseumPanel, MilestoneChips } from '@/components/app/profile/BadgeMuseum';
 import { BadgePatronChip } from '@/components/app/BadgePatronChip';
 import { toast } from 'sonner';
 import { DISPLAY_WALLET_OVERRIDES, getDefaultBanner, type TabValue } from './ProfileConstants';
@@ -649,6 +649,10 @@ export function ProfileHeader({
               <ProfileLinksPill customs={profile.customs} githubLogin={profile.githubLogin} fields={profile.profileFields} className="shrink-0 mt-2" />
             )}
           </div>
+
+          {/* Badge Museum: every earned badge in a framed grid under the
+              counts. Nothing until one is earned, or when the owner hides it. */}
+          {profile.walletAddress && <BadgeMuseumPanel address={profile.walletAddress} own={!!isViewingOwnProfile} />}
 
           {isViewingOwnProfile && profile.walletAddress && <MomentArchive key={profile.walletAddress} profileAddress={profile.walletAddress} />}
 

@@ -23319,6 +23319,9 @@
   },
   "badgeMuseum": {
     "title": "Badge Museum",
+    "showSetting": "Show Badge Museum on my profile",
+    "showSettingHint": "Off, other people won't see your badges. You still see them.",
+    "hiddenNote": "Hidden from others",
     "open": "Open Badge Museum",
     "summary": "{{earned}} of {{total}} badges earned",
     "loading": "Loading badges…",
