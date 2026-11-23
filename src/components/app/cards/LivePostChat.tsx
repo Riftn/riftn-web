@@ -251,6 +251,17 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
   const [newMessage, setNewMessage] = useDraft(streamId ? `live:${streamId}` : null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  // The box grows with the message (up to 128px, like the other chat boxes)
+  // so everything typed stays in view; a fixed one-line box scrolled the
+  // start of a long message out of sight while you were still typing it.
+  // Over the picture only (the phone's full-screen live); the desktop panel
+  // keeps its two-line box.
+  useLayoutEffect(() => {
+    const el = textareaRef.current;
+    if (!el || !overlay) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(el.scrollHeight + (el.offsetHeight - el.clientHeight), 128)}px`;
+  }, [newMessage, overlay]);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messageRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const { isAuthenticated, walletAddress, openLoginModal } = useAuth();
