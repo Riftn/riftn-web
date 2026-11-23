@@ -2741,7 +2741,9 @@
       "bountySubmittedNamed": "{{name}} heeft werk ingediend voor uw bounty \"{{title}}\"",
       "bountySubmitted": "{{name}} heeft werk ingediend voor je bounty",
       "sentNotification": "{{name}} heeft je een melding gestuurd",
-      "fractionGift": "{{name}} heeft je fracties gestuurd"
+      "fractionGift": "{{name}} heeft je fracties gestuurd",
+      "storyLiked": "{{name}} vindt je moment leuk",
+      "storyMention": "{{name}} noemde je in hun moment"
     }
   },
   "leaderboard": {
@@ -7979,6 +7981,8 @@
     "moreActions": "Verhaalopties",
     "remixing": "Remix van het verhaal van {{name}}",
     "watchOriginal": "Oorspronkelijk verhaal bekijken",
+    "hiddenCount": "Verborgen ({{count}})",
+    "showHidden": "Verborgen tonen ({{count}})",
     "translate": "Vertalen",
     "seeOriginal": "Origineel bekijken",
     "translating": "Vertalen…",
@@ -8036,7 +8040,8 @@
     "fromYourPost": "Uit je bericht",
     "fromAPost": "Uit een bericht",
     "postNotPublic": "Alleen openbare berichten kunnen als Moment worden gedeeld.",
-    "postNotMedia": "Alleen foto- en videoberichten kunnen als Moment worden gedeeld."
+    "postNotMedia": "Alleen foto- en videoberichten kunnen als Moment worden gedeeld.",
+    "mentionedYou": "Noemde je in hun moment"
   },
   "subscriptions": {
     "subscribersOnly": "Alleen voor abonnees",

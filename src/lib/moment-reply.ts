@@ -20,3 +20,23 @@ export function parseMomentReply(content?: string | null, localOrigin?: string) 
     return null;
   }
 }
+
+/**
+ * "Mentioned you in their moment" + the permalink with ?mention=1: the DM the
+ * server sends a person tagged on a moment. Shown as a preview card.
+ */
+export function parseMomentMention(content?: string | null, localOrigin?: string) {
+  if (!content?.includes('/moment/')) return null;
+  const lines = content.trim().split(/\r?\n/);
+  if (lines.length > 3) return null;
+  try {
+    const url = new URL(lines[lines.length - 1].trim());
+    if (url.username || url.password || (url.origin !== localOrigin
+      && !/^https?:\/\/(?:www\.)?(?:riftn\.com|dehub\.io)$/i.test(url.origin))) return null;
+    const path = /^\/(?:app\/)?moment\/([a-f0-9]{24})\/?$/i.exec(url.pathname);
+    if (!path || url.searchParams.get('mention') !== '1') return null;
+    return { id: path[1], mention: true as const };
+  } catch {
+    return null;
+  }
+}

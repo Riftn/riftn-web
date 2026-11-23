@@ -60,7 +60,7 @@ import { useChatPrefs } from '@/hooks/use-chat-prefs';
 import { DehubLinkEmbed } from '@/components/app/cards/DehubLinkEmbed';
 import { AssetRefCards, useAssetRefsInText } from '@/components/app/cards/AssetRefCards';
 import { MomentReplyPreview } from './MomentReplyPreview';
-import { parseMomentReply } from '@/lib/moment-reply';
+import { parseMomentMention, parseMomentReply } from '@/lib/moment-reply';
 import { findDehubLinks, stripDehubLinkMatches } from '@/lib/dehub-links';
 import { conversationIdentity } from '@/lib/conversation-identity';
 import { useTranslation, renderChatTextWithLinks } from '../TranslatableText';
@@ -700,8 +700,12 @@ const MessageBubble = memo(function MessageBubble({
     : assistantActions.length > 0
       ? withoutAssistantActionLinks(message.content || '')
       : message.content;
-  const momentReply = useMemo(() => message.msgType === 'msg' && !message.isDeleted
-    ? parseMomentReply(message.content, typeof window === 'undefined' ? undefined : window.location.origin) : null, [message.msgType, message.isDeleted, message.content]);
+  const momentReply = useMemo(() => {
+    if (message.msgType !== 'msg' || message.isDeleted) return null;
+    const origin = typeof window === 'undefined' ? undefined : window.location.origin;
+    const mention = parseMomentMention(message.content, origin);
+    return mention ? { id: mention.id, text: '', mention: true } : parseMomentReply(message.content, origin);
+  }, [message.msgType, message.isDeleted, message.content]);
   const sharedLink = useMemo(
     () => (message.msgType === 'msg' && !momentReply ? findDehubLinks(bodyContent)[0] ?? null : null),
     [message.msgType, bodyContent, momentReply],
@@ -1159,7 +1163,7 @@ const MessageBubble = memo(function MessageBubble({
                 </div>
               ) : momentReply ? (
                 <div className="flex w-52 max-w-full flex-col gap-2 text-start">
-                  <MomentReplyPreview id={momentReply.id} />
+                  <MomentReplyPreview id={momentReply.id} mention={'mention' in momentReply} />
                   {textContent && <p dir="auto" className="whitespace-pre-wrap break-words text-sm">{renderChatTextWithLinks(isTranslated ? translatedText : textContent)}</p>}
                 </div>
               ) : isPostShare && sharedLink!.kind !== 'post' ? (

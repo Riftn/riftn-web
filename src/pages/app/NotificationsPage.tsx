@@ -18,7 +18,7 @@ import { notificationHasComment } from '@/lib/notification-comment';
 import { NotificationRequestCard } from '@/components/app/notifications/NotificationRequestCard';
 import { notificationHasRequestCard } from '@/lib/notification-request';
 import { useFollow } from '@/hooks/use-follow';
-import { AtSign, Loader2, AlertTriangle, Zap, Star, ShoppingBag, Scale, Siren, Award, ChevronDown, Filter as FilterIcon } from "lucide-react";
+import { AtSign, Heart, Loader2, AlertTriangle, Zap, Star, ShoppingBag, Scale, Siren, Award, ChevronDown, Filter as FilterIcon } from "lucide-react";
 import MessageSquareText from "@/components/ui/cut-icons/messages";
 import Users from "@/components/ui/cut-icons/communities";
 import Check from "@/components/ui/cut-icons/check";
@@ -300,9 +300,9 @@ const tabs: { value: NotificationTypeFilter; icon: React.ElementType }[] = [
 // unfiltered feed.
 const filterTypeMap: Record<NotificationTypeFilter, string[] | null> = {
   all: null,
-  likes: ['generation_like', 'generation_comment_like', 'like', 'comment_like', 'feature_request_like', 'feature_request_comment_like', 'governance_vote', 'governance_comment_like'],
+  likes: ['generation_like', 'generation_comment_like', 'like', 'comment_like', 'story_like', 'feature_request_like', 'feature_request_comment_like', 'governance_vote', 'governance_comment_like'],
   follows: ['following', 'follow_request', 'follow_request_accepted', 'followRequest', 'follow-request'],
-  comments: ['generation_comment', 'generation_reply', 'comment', 'comment_reply', 'mention', 'community_mention', 'feature_request_comment', 'feature_request_reply', 'feature_request_mention', 'feature_request_activity', 'governance_comment', 'governance_reply', 'work_application_reply'],
+  comments: ['generation_comment', 'generation_reply', 'comment', 'comment_reply', 'mention', 'story_mention', 'community_mention', 'feature_request_comment', 'feature_request_reply', 'feature_request_mention', 'feature_request_activity', 'governance_comment', 'governance_reply', 'work_application_reply'],
   reposts: ['repost', 'quote', 'remix'],
   features: ['feature_request_like', 'feature_request_comment', 'feature_request_reply', 'feature_request_mention', 'feature_request_activity', 'feature_request_new', 'feature_request_comment_like', 'feature_request_status'],
   communities: ['community_chat', 'community_mention', 'community_here', 'community_join'],
@@ -321,7 +321,7 @@ const filterTypeMap: Record<NotificationTypeFilter, string[] | null> = {
  * quietly undo the narrowing for any tab that mixes the two sources.
  */
 const API_BACKED_TYPES = new Set([
-  'like', 'comment_like', 'comment', 'comment_reply', 'mention',
+  'like', 'comment_like', 'comment', 'comment_reply', 'mention', 'story_like', 'story_mention',
   'following', 'follow_request', 'follow_request_accepted',
   'repost', 'quote',
   'tip', 'bounty_available', 'bounty_claimed',
@@ -389,6 +389,8 @@ function getNotificationIcon(type: string, reaction?: PostReaction) {
         return <span className="text-sm leading-none" aria-hidden="true">{reactionMeta(reaction).emoji}</span>;
       }
       return <ThumbsUp className="w-4 h-4 text-white/70" />;
+    case 'story_like':
+      return <Heart className="w-4 h-4 text-white/70" />;
     case 'comment_like':
     case 'feature_request_like':
     case 'feature_request_comment_like':
@@ -399,6 +401,7 @@ function getNotificationIcon(type: string, reaction?: PostReaction) {
     case 'comment':
     case 'comment_reply':
     case 'mention':
+    case 'story_mention':
     case 'feature_request_comment':
     case 'feature_request_reply':
     case 'feature_request_mention':
@@ -828,7 +831,7 @@ function getNotificationContent(
   const aggCount = (notification as any).aggregatedCount || 1;
   const aggNames = (notification as any).latestActorNames as string[] | undefined;
   const typeStr = notification.type as string;
-  if (aggCount > 1 && ['like', 'comment', 'repost'].includes(typeStr)) {
+  if (aggCount > 1 && ['like', 'comment', 'repost', 'story_like'].includes(typeStr)) {
     const canonical = (canonicalActors && canonicalActors.length > 0)
       ? canonicalActors
       : buildCanonicalActors(aggNames, undefined, undefined);
@@ -836,6 +839,7 @@ function getNotificationContent(
     if (canonical.length <= 1) {
       const name = canonical[0]?.display || actorName;
       const postCount = aggCount;
+      if (typeStr === 'story_like') return tr('notifications.custom.storyLiked', { name });
       if (typeStr === 'like') return tr('notifications.likedPosts', { name, count: postCount });
       if (typeStr === 'comment') return tr('notifications.commentedPosts', { name, count: postCount });
       if (typeStr === 'repost') return tr('notifications.custom.repostedPosts', { name, count: postCount });
@@ -851,6 +855,7 @@ function getNotificationContent(
       ) : othersText;
 
       const key = typeStr === 'like' ? 'notifications.likedPost'
+        : typeStr === 'story_like' ? 'notifications.custom.storyLiked'
         : typeStr === 'comment' ? 'notifications.commentedPost' : 'reactionInfo.repostedPost';
       const [before, after] = tr(key, { name: '\uFFFC' }).split('\uFFFC');
       return <>{before}{first}, {othersSpan}{after}</>;
@@ -1054,6 +1059,12 @@ function getNavigationLink(notification: DeHubNotification): string | null {
         ? profilePath(notification.actorAddress)
         : notification.actorUsername ? profilePath(notification.actorUsername) : null;
     }
+  }
+
+  // A moment opens on its own page, which plays it.
+  if ((notification.type as string) === 'story_like' || (notification.type as string) === 'story_mention') {
+    const storyId = notification.metadata?.storyId;
+    return typeof storyId === 'string' && /^[a-f0-9]{24}$/i.test(storyId) ? `/moment/${storyId}` : null;
   }
 
   switch (notification.type) {
@@ -1305,6 +1316,10 @@ export const NotificationItem = memo(function NotificationItem({
   // actor — even one whose picture fails to load — keeps its own avatar.
   const isPlatformNotice = !notification.actorAddress && !notification.actorUsername && !avatarUrl;
     
+  const isMomentRow = (notification.type as string) === 'story_like' || (notification.type as string) === 'story_mention';
+  const momentLink = isMomentRow ? getNavigationLink(notification) : null;
+  const momentPosterRaw = isMomentRow ? notification.metadata?.storyPoster : undefined;
+  const momentPoster = typeof momentPosterRaw === 'string' && momentPosterRaw.startsWith('https://') ? momentPosterRaw : null;
   const postThumbnail = notification.tokenThumbnail 
     ? (notification.tokenThumbnail.startsWith('http') ? notification.tokenThumbnail : `${DEHUB_CDN_BASE}${notification.tokenThumbnail}`)
     : null;
@@ -1792,6 +1807,13 @@ export const NotificationItem = memo(function NotificationItem({
           />
         )}
       </div>
+
+      {/* The moment a like or mention is about: a small upright frame. */}
+      {momentLink && momentPoster && (
+        <Link to={momentLink} onClick={(e) => { e.stopPropagation(); markEngaged(); }} className="flex-shrink-0">
+          <img src={momentPoster} alt="" className="h-12 w-9 rounded-[8px] object-cover" loading="lazy" />
+        </Link>
+      )}
 
       {/* Post thumbnail if applicable */}
       {postThumbnail && bundle.bundleType !== 'same-actor' && !bigPostPicture && (

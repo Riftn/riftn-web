@@ -30,6 +30,8 @@ export interface TextLayer {
   rotation?: number;
   /** Mentions: whose profile the words open. */
   address?: string;
+  /** Dragged off the picture: not drawn. A hidden mention is still told. */
+  hidden?: boolean;
 }
 
 export const TEXT_COLORS = ['#ffffff', '#000000', '#ff5c7a', '#ffb34d', '#ffe14d', '#5ce08a', '#4dc3ff', '#a391fc'];
@@ -90,13 +92,15 @@ function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: numbe
 }
 
 /** The tap target of each @mention, in 0..1 of the frame. */
-export function mentionBoxes(layers: TextLayer[]): { address: string; x: number; y: number; w: number; h: number }[] {
+export function mentionBoxes(layers: TextLayer[]): { address: string; x: number; y: number; w: number; h: number; hidden?: boolean }[] {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   if (!ctx) return [];
   return layers
     .filter(l => l.kind === 'mention' && l.address)
     .map(l => {
+      // Off the picture: no tap target, but the person still hears about it.
+      if (l.hidden) return { address: l.address!, x: 0, y: 0, w: 0, h: 0, hidden: true };
       const m = measureText(ctx, l);
       return {
         address: l.address!,

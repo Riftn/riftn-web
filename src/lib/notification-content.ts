@@ -79,6 +79,8 @@ export function localizedNotificationContent(
     signal_flare: 'reactionInfo.signalFlare',
     coauthor_invite: 'notifications.coAuthorInvite',
     coauthor_accepted: 'notifications.coAuthorAccepted',
+    story_like: 'notifications.custom.storyLiked',
+    story_mention: 'notifications.custom.storyMention',
   };
   // Badge lending. Four sentences from three types, because one of them — a
   // loan ending — is the same event read from opposite ends, and a loan that

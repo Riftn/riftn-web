@@ -2552,7 +2552,9 @@
       "bountySubmittedNamed": "{{name}} submitted work on your bounty “{{title}}”",
       "bountySubmitted": "{{name}} submitted work on your bounty",
       "sentNotification": "{{name}} sent you a notification",
-      "fractionGift": "{{name}} sent you fractions"
+      "fractionGift": "{{name}} sent you fractions",
+      "storyLiked": "{{name}} liked your moment",
+      "storyMention": "{{name}} mentioned you in their moment"
     }
   },
   "leaderboard": {
@@ -7789,6 +7791,8 @@
     "moreActions": "Moment options",
     "remixing": "Remixing {{name}}'s moment",
     "watchOriginal": "Watch original moment",
+    "hiddenCount": "Hidden ({{count}})",
+    "showHidden": "Show hidden ({{count}})",
     "translate": "Translate",
     "seeOriginal": "See original",
     "translating": "Translating…",
@@ -7846,7 +7850,8 @@
     "fromYourPost": "From your post",
     "fromAPost": "From a post",
     "postNotPublic": "Only public posts can be shared to a Moment.",
-    "postNotMedia": "Only photo and video posts can be shared to a Moment."
+    "postNotMedia": "Only photo and video posts can be shared to a Moment.",
+    "mentionedYou": "Mentioned you in their moment"
   },
   "subscriptions": {
     "subscribersOnly": "Subscribers only",

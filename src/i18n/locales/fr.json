@@ -2552,7 +2552,9 @@
       "bountySubmittedNamed": "{{name}} a soumis des travaux sur votre prime « {{title}} »",
       "bountySubmitted": "{{name}} a soumis des travaux sur votre prime",
       "sentNotification": "{{name}} vous a envoyé une notification",
-      "fractionGift": "{{name}} t'a envoyé des fractions"
+      "fractionGift": "{{name}} t'a envoyé des fractions",
+      "storyLiked": "{{name}} a aimé votre moment",
+      "storyMention": "{{name}} vous a mentionné dans son moment"
     }
   },
   "leaderboard": {
@@ -7794,6 +7796,8 @@
     "moreActions": "Options de la story",
     "remixing": "Remix de la story de {{name}}",
     "watchOriginal": "Voir la story originale",
+    "hiddenCount": "Masqués ({{count}})",
+    "showHidden": "Afficher les masqués ({{count}})",
     "translate": "Traduire",
     "seeOriginal": "Voir l'original",
     "translating": "Traduction…",
@@ -7851,7 +7855,8 @@
     "fromYourPost": "De ta publication",
     "fromAPost": "D'une publication",
     "postNotPublic": "Seules les publications publiques peuvent être partagées en Moment.",
-    "postNotMedia": "Seules les publications photo et vidéo peuvent être partagées en Moment."
+    "postNotMedia": "Seules les publications photo et vidéo peuvent être partagées en Moment.",
+    "mentionedYou": "Vous a mentionné dans son moment"
   },
   "subscriptions": {
     "subscribersOnly": "Abonnés uniquement",
