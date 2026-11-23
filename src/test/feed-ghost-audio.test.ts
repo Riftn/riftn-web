@@ -83,6 +83,26 @@ describe('a second copy of a post cannot keep the first one playing out of sight
     expect(a.el.paused).toBe(false);
   });
 
+  it('pauses an unclaimed video immediately and reuses its source on return', () => {
+    const key = 'ghost-parked';
+    const { el, token } = claimHandoffVideo(key, slot());
+    makePlayable(el);
+    el.src = 'https://example.test/parked.mp4';
+    el.currentTime = 12;
+    void el.play();
+
+    releaseHandoffVideo(key, token);
+    expect(el.paused).toBe(true);
+    expect(el.isConnected).toBe(false);
+
+    const reclaimed = claimHandoffVideo(key, slot());
+    tokens.push([key, reclaimed.token]);
+    expect(reclaimed.el).toBe(el);
+    expect(el.currentTime).toBe(12);
+    expect(el.getAttribute('src')).toBe('https://example.test/parked.mp4');
+    expect(el.load).not.toHaveBeenCalled();
+  });
+
   it('an unknown claim takes nothing', () => {
     const s = slot();
     const a = claimHandoffVideo('ghost-3', s);

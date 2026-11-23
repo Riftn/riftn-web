@@ -141,6 +141,9 @@ function park(key: string) {
     });
     return;
   }
+  // Stop playback while there is no surface to show it. Keep the source so a
+  // reclaim can play from the same time without downloading it again.
+  if (!entry.el.paused) entry.el.pause();
   // Detached, not destroyed: currentTime and the buffered ranges survive, so a
   // reclaim inside PARK_MS resumes where it left off instead of refetching.
   entry.el.remove();
