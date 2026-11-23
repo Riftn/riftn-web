@@ -2,7 +2,7 @@ import { useTranslation as _useCopy } from 'react-i18next';
 import { useSurfaceDraft, draftIdentity } from '@/hooks/use-surface-draft';
 import { BrandIcon, ThemedIcon } from '@/components/app/war/WarHudIcon';
 import { AppState } from '@/components/app/AppState';
-import { useState, useMemo, useEffect, useCallback, useRef, useLayoutEffect, memo, startTransition, type CSSProperties } from 'react';
+import { useContext, useState, useMemo, useEffect, useCallback, useRef, useLayoutEffect, memo, startTransition, type CSSProperties } from 'react';
 import { getDocumentScrollTop } from '@/lib/document-scroll';
 import { SEOHead } from '@/components/SEOHead';
 import { HUB_ROUTE_META } from '@/lib/seo/route-meta';
@@ -39,6 +39,7 @@ import { applySorting, filterByDate, filterByContentType } from '@/lib/feed-util
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
+import { CachedPageActiveContext } from '@/contexts/CachedPageActiveContext';
 import { useAppTheme } from '@/contexts/ThemeContext';
 import { AuthGate } from '@/components/app/AuthGate';
 import { 
@@ -182,6 +183,7 @@ export default function ExplorePage() {
   const { walletAddress, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const isPageActive = useContext(CachedPageActiveContext);
   
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
@@ -378,26 +380,25 @@ export default function ExplorePage() {
   // If a contract address resolved to a ticker, use that instead
   const effectiveQuery = resolvedTicker || baseEffectiveQuery;
 
-  // Save scroll position only when there's an active search
-  useEffect(() => {
+  // Explore stays mounted on other routes. Their scroll events and scrolls
+  // inside a panel must never overwrite the position of these search results.
+  useLayoutEffect(() => {
+    if (!isPageActive) return;
     if (!isSearching) {
       sessionStorage.removeItem('EXPLORE_SCROLL_POSITION');
       return;
     }
 
-    // Both halves of this used to be no-ops, which is why returning to a
-    // search always landed at the top however far you had scrolled.
-    // `window.scrollY` is permanently 0 here — body is the scrolling element —
-    // so the position written was always "0"; and a scroll on body does not
-    // bubble, so the window listener that wrote it never ran either. The
-    // capture listener on document sees the event whatever element scrolled.
-    const handleScroll = () => {
+    const handleScroll = ({ target }: Event) => {
+      // Body scroll does not bubble, so listen in capture and accept only
+      // page scrolling, including browsers that scroll the document itself.
+      if (target !== document && target !== document.body && target !== document.documentElement) return;
       sessionStorage.setItem('EXPLORE_SCROLL_POSITION', String(getDocumentScrollTop()));
     };
 
     document.addEventListener('scroll', handleScroll, { passive: true, capture: true });
     return () => document.removeEventListener('scroll', handleScroll, { capture: true });
-  }, [isSearching]);
+  }, [isPageActive, isSearching]);
 
   // `/app/explore#new-members` is where the Live Stats heading sends people.
   // The browser's own anchor jump never happens here: this page is a cached
