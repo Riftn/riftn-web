@@ -1,3 +1,4 @@
+import { canShareToMoment } from '@/lib/moment-share';
 import { useTranslation as _useCopy } from 'react-i18next';
 import { useSurfaceDraft, draftIdentity } from '@/hooks/use-surface-draft';
 /**
@@ -1276,6 +1277,7 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
                 postId={post.id}
                 tokenId={postTokenId}
                 isOwnPost={isOwnPost}
+                canShareToMoment={canShareToMoment(post)}
                 onBeforeNavigate={() => setShowOptionsDrawer(false)}
                 linkText={[post.title, post.description].filter(Boolean).join('\n')}
                 onClose={() => setShowOptionsDrawer(false)}

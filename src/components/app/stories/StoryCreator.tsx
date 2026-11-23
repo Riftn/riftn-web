@@ -31,6 +31,7 @@ import type { StoryRemixSource } from '@/store/storiesStore';
 import { backdropCss, composeOverlay, composePhoto, grabFrame, mentionBoxes, OUT_H, OUT_W, PHOTO_BACKDROPS, PHOTO_LOOKS, TEXT_COLORS, type PhotoBackdrop, type PhotoLook, type TextLayer } from './story-compose';
 import { CAPTION_FONTS, captionFonts, captionFontStyle, type CaptionFont } from "./caption-fonts";
 import { shareMoment } from './story-upload';
+import { loadPostMoment, PostMomentError } from './post-moment';
 import '@/styles/stories.css';
 
 const MAX_VIDEO_S = 60;
@@ -44,7 +45,8 @@ function readCloseFriends(): DeHubUser[] {
   } catch { return []; }
 }
 
-type Media = { kind: 'photo' | 'video'; url: string; blob: Blob; duration?: number };
+/** `blob` is missing only for a video shared from a post: the server cuts it from the post's file. */
+type Media = { kind: 'photo' | 'video'; url: string; blob?: Blob; duration?: number; postTokenId?: number };
 type Tool = null | 'text' | 'draw' | 'mention' | 'trim' | 'timer' | 'lifetime' | 'audience' | 'sticker' | 'effects';
 
 /** Stickers are big glyph layers: emoji keep their own colours, the shapes take the text colour. */
@@ -53,7 +55,7 @@ const STICKER_SHAPES = ['→', '←', '↑', '↓', '↗', '↘', '➜', '○', 
 
 const uid = () => Math.random().toString(36).slice(2, 9);
 
-export function StoryCreator({ onClose, remixSource }: { onClose: () => void; remixSource?: StoryRemixSource }) {
+export function StoryCreator({ onClose, remixSource, postTokenId }: { onClose: () => void; remixSource?: StoryRemixSource; postTokenId?: number }) {
   const { t } = useTranslation();
   const refreshShelf = useRefreshStoryShelf();
   const { data: storyCapabilities } = useQuery({
@@ -63,7 +65,28 @@ export function StoryCreator({ onClose, remixSource }: { onClose: () => void; re
     retry: false,
   });
   const [media, setMedia] = useState<Media | null>(null);
-  const remixLabel = remixSource ? t('stories.remixing', { name: remixSource.name, defaultValue: "Remixing {{name}}'s moment" }) : undefined;
+  const remixLabel = remixSource
+    ? t('stories.remixing', { name: remixSource.name, defaultValue: "Remixing {{name}}'s moment" })
+    : postTokenId != null ? t('stories.fromYourPost', { defaultValue: 'From your post' }) : undefined;
+
+  // "Share to Moment": start in the editor with the post already in it.
+  useEffect(() => {
+    if (postTokenId == null) return;
+    let alive = true;
+    loadPostMoment(postTokenId)
+      .then(m => { if (alive) setMedia(m); else if (m.blob) URL.revokeObjectURL(m.url); })
+      .catch(err => {
+        if (!alive) return;
+        const reason = err instanceof PostMomentError ? err.reason : 'load';
+        toast.error(reason === 'gated'
+          ? t('stories.postNotPublic', { defaultValue: 'Only public posts can be shared to a Moment.' })
+          : reason === 'kind'
+            ? t('stories.postNotMedia', { defaultValue: 'Only photo and video posts can be shared to a Moment.' })
+            : t('stories.couldNotPrepare', { defaultValue: "Couldn't get your moment ready. Try again." }));
+        onClose();
+      });
+    return () => { alive = false; };
+  }, [postTokenId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const prev = document.body.style.overflow;
@@ -79,10 +102,20 @@ export function StoryCreator({ onClose, remixSource }: { onClose: () => void; re
           remixSourceId={remixSource?.id}
           remixLabel={remixLabel}
           customLifetime={!!storyCapabilities?.supportsCustomLifetime} customAudience={!!storyCapabilities?.supportsCustomAudience} customPhotoDuration={!!storyCapabilities?.supportsPhotoDuration}
-          onBack={() => { URL.revokeObjectURL(media.url); setMedia(null); }}
+          onBack={() => {
+            if (media.blob) URL.revokeObjectURL(media.url);
+            if (media.postTokenId != null) onClose(); else setMedia(null);
+          }}
           onClose={onClose}
           onShared={() => refreshShelf()}
         />
+      ) : postTokenId != null ? (
+        <div data-sc-stage data-sc-post-loading className="grid place-items-center">
+          <span className="w-8 h-8 rounded-full border-2 border-white/25 border-t-white animate-spin" aria-label={t('common.loading', { defaultValue: 'Loading' })} />
+          <div data-sc-top>
+            <button type="button" data-sc-btn data-sc-close onClick={onClose} aria-label={t('common.close', { defaultValue: 'Close' })}><Close className="w-5 h-5" /></button>
+          </div>
+        </div>
       ) : (
         <Capture onPicked={setMedia} onClose={onClose} remixLabel={remixLabel} />
       )}
@@ -482,7 +515,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
           };
         }
       }
-      const fields = { audience, audienceAddresses: restrictPeople ? audiencePeople.map(user => user.address!) : undefined, expiresInHours: customLifetime ? lifetime : undefined, mentions, song: songField, muted: media.kind === 'video' ? muted : false, remixSourceId };
+      const fields = { audience, audienceAddresses: restrictPeople ? audiencePeople.map(user => user.address!) : undefined, expiresInHours: customLifetime ? lifetime : undefined, mentions, song: songField, muted: media.kind === 'video' ? muted : false, remixSourceId, postTokenId: media.postTokenId };
       if (media.kind === 'photo') {
         const img = imgRef.current!;
         if (!img.complete) await new Promise(r => { img.onload = r; });
@@ -492,7 +525,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
         const overlay = await composeOverlay(drawRef.current, drew, visible);
         shareMoment({
           kind: 'video',
-          file: media.blob,
+          file: media.blob ?? null,
           overlay,
           preview: '',
           fields: { ...fields, trimStart: trim[0], trimEnd: trim[1] },

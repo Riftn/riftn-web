@@ -7836,7 +7836,12 @@
     "saySomething": "Di algo…",
     "replyTo": "Responder a {{name}}",
     "momentChat": "Chat del momento",
-    "upNext": "A continuación"
+    "upNext": "A continuación",
+    "shareToMoment": "Compartir en Momento",
+    "goToPost": "Ir a la publicación",
+    "fromYourPost": "De tu publicación",
+    "postNotPublic": "Solo las publicaciones públicas se pueden compartir en un Momento.",
+    "postNotMedia": "Solo las publicaciones con foto o video se pueden compartir en un Momento."
   },
   "subscriptions": {
     "subscribersOnly": "Solo suscriptores",

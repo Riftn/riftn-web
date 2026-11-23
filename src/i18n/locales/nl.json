@@ -8025,7 +8025,12 @@
     "saySomething": "Zeg iets…",
     "replyTo": "Reageer op {{name}}",
     "momentChat": "Momentchat",
-    "upNext": "Hierna"
+    "upNext": "Hierna",
+    "shareToMoment": "Delen als Moment",
+    "goToPost": "Naar bericht",
+    "fromYourPost": "Uit je bericht",
+    "postNotPublic": "Alleen openbare berichten kunnen als Moment worden gedeeld.",
+    "postNotMedia": "Alleen foto- en videoberichten kunnen als Moment worden gedeeld."
   },
   "subscriptions": {
     "subscribersOnly": "Alleen voor abonnees",

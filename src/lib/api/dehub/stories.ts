@@ -56,6 +56,8 @@ export interface StoryItem {
   isMature?: boolean;
   caption: string | null;
   remixSourceId?: string | null;
+  /** Shared from this post ("Share to Moment"): viewers get "Go to post". */
+  postTokenId?: number | null;
   shareable?: boolean;
   mentions: StoryMention[];
   song: StorySong | null;
@@ -119,6 +121,9 @@ export interface CreateStoryFields {
   muted?: boolean;
   caption?: string;
   remixSourceId?: string;
+  /** One of your own photo or video posts. A video post sends no clip: the server cuts it from the post. */
+  postTokenId?: number;
+  type?: 'photo' | 'video';
   mentions?: StoryMention[];
   song?: StorySong | null;
   /** Video moments. */
@@ -134,7 +139,7 @@ export function createStory(
   options: { onProgress?: (percent: number) => void; signal?: AbortSignal } = {},
 ): Promise<StoryItem> {
   const form = new FormData();
-  form.append('type', fields.draftVideoId ? 'video' : 'photo');
+  form.append('type', fields.type ?? (fields.draftVideoId ? 'video' : 'photo'));
   form.append('audience', fields.audience);
   const customAudience = fields.audience === 'selected' || fields.audience === 'except';
   if (customAudience) form.append('audienceAddresses', JSON.stringify(fields.audienceAddresses ?? []));
@@ -144,10 +149,11 @@ export function createStory(
   form.append('muted', String(!!fields.muted));
   if (fields.caption) form.append('caption', fields.caption);
   if (fields.remixSourceId) form.append('remixSourceId', fields.remixSourceId);
+  if (fields.postTokenId != null) form.append('postTokenId', String(fields.postTokenId));
   if (fields.mentions?.length) form.append('mentions', JSON.stringify(fields.mentions));
   if (fields.song) form.append('song', JSON.stringify(fields.song));
-  if (fields.draftVideoId) {
-    form.append('draftVideoId', fields.draftVideoId);
+  if (fields.draftVideoId || (fields.type === 'video' && fields.postTokenId != null)) {
+    if (fields.draftVideoId) form.append('draftVideoId', fields.draftVideoId);
     if (fields.trimStart != null) form.append('trimStart', String(fields.trimStart));
     if (fields.trimEnd != null) form.append('trimEnd', String(fields.trimEnd));
   }
