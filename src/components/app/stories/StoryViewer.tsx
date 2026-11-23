@@ -133,6 +133,10 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
   const [itemIdx, setItemIdx] = useState(() => (startItem >= 0 ? startItem : startIndex(initial[startAuthor])));
   const [progress, setProgress] = useState(0);
   const [held, setHeld] = useState(false);
+  // A Moment made from a post keeps its "Go to post" button out of the way
+  // until the viewer taps the post in the middle of the screen; that tap
+  // also holds the Moment so there is time to press it.
+  const [postPeekId, setPostPeekId] = useState<string | null>(null);
   const [typing, setTyping] = useState(false);
   const [sheet, setSheet] = useState<null | 'viewers' | 'comments' | 'more' | 'report' | 'delete' | 'share' | 'share-dm'>(null);
   const [muted, setMuted] = useState(false);
@@ -174,7 +178,8 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
   const loaded = !!item && loadedId === item.id;
   const setLoaded = useCallback(() => setLoadedId(item?.id ?? null), [item?.id]);
   const own = !!entry && !!me && entry.author.address === me;
-  const paused = held || typing || sheet !== null || openingOriginal || !loaded;
+  const postPeek = item?.postTokenId != null && postPeekId === item.id;
+  const paused = held || postPeek || typing || sheet !== null || openingOriginal || !loaded;
   const room = useMomentComments(item?.id, isAuthenticated, !!item && (item.commentCount ?? 1) > 0);
   const roomComments = room.data?.comments ?? [];
 
@@ -368,6 +373,11 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const page = (e.currentTarget as HTMLElement).querySelector('[data-sv-page]')?.getBoundingClientRect() ?? rect;
     const rel = (e.clientX - page.left) / page.width;
+    if (item?.postTokenId != null && rel >= 0.33 && rel <= 0.67) {
+      const id = item.id;
+      setPostPeekId(prev => (prev === id ? null : id));
+      return;
+    }
     goItem(rel < 0.33 ? -1 : 1);
   };
 
@@ -714,7 +724,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
           )}
         </div>
 
-        {(item.caption || item.remixSourceId || item.postTokenId != null) && (
+        {(item.caption || item.remixSourceId || postPeek) && (
           <div data-sv-caption data-with-room={roomComments.length > 0 && !docked ? 'true' : undefined}>
             {item.remixSourceId && (
               <button type="button" data-sv-original data-st-dark-glass onClick={openOriginal} disabled={openingOriginal}>
@@ -722,9 +732,10 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
                 {t('stories.watchOriginal', { defaultValue: 'Watch original moment' })}
               </button>
             )}
-            {item.postTokenId != null && (
+            {postPeek && (
               <button type="button" data-sv-original data-sv-go-post data-st-dark-glass onClick={() => openPost(item.postTokenId!)}>
                 {t('stories.goToPost', { defaultValue: 'Go to post' })}
+                {item.postAuthorName && <span data-sv-post-author dir="ltr">@{item.postAuthorName}</span>}
                 <ArrowUpRight className="w-4 h-4" />
               </button>
             )}

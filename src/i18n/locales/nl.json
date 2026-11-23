@@ -5543,6 +5543,8 @@
     "shopAllowanceUsed": "{{allowance}} van {{allowance}} gebruikt. Stake meer Riftn tokens voor een hogere badge en een extra slot."
   },
   "stages": {
+    "showChat": "Chat tonen",
+    "hideChat": "Chat verbergen",
     "radioShow": {
       "toggle": "Radioshow",
       "hint": "Muziek eerst: speel je eigen nummers of een playlist, praat wanneer je wilt. Luisteraars komen wanneer ze willen, en hij staat in de rij Radio op Verkennen.",
@@ -8032,6 +8034,7 @@
     "shareToMoment": "Delen als Moment",
     "goToPost": "Naar bericht",
     "fromYourPost": "Uit je bericht",
+    "fromAPost": "Uit een bericht",
     "postNotPublic": "Alleen openbare berichten kunnen als Moment worden gedeeld.",
     "postNotMedia": "Alleen foto- en videoberichten kunnen als Moment worden gedeeld."
   },

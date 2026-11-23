@@ -6,15 +6,20 @@
  */
 import { useTranslation } from 'react-i18next';
 import { RotateCw } from 'lucide-react';
+import MessageSquare from '@/components/ui/cut-icons/messages';
+import { cn } from '@/lib/utils';
 
 interface Props {
   onRestore: () => void;
   onRotate: () => void;
   onTouchStart?: (e: React.TouchEvent) => void;
   onTouchEnd?: (e: React.TouchEvent) => void;
+  /** Shows the room over the cleared picture, YouTube style. */
+  onToggleChat?: () => void;
+  chatOpen?: boolean;
 }
 
-export function LiveClearedLayer({ onRestore, onRotate, onTouchStart, onTouchEnd }: Props) {
+export function LiveClearedLayer({ onRestore, onRotate, onTouchStart, onTouchEnd, onToggleChat, chatOpen = false }: Props) {
   const { t } = useTranslation();
   return (
     <>
@@ -30,6 +35,19 @@ export function LiveClearedLayer({ onRestore, onRotate, onTouchStart, onTouchEnd
         onClick={(e) => { e.stopPropagation(); onRestore(); }}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') onRestore(); }}
       />
+      {onToggleChat && (
+        <button
+          type="button"
+          data-no-navigate
+          data-live-cleared-chat-toggle
+          aria-pressed={chatOpen}
+          aria-label={chatOpen ? t('stages.hideChat', 'Hide chat') : t('stages.showChat', 'Show chat')}
+          onClick={(e) => { e.stopPropagation(); onToggleChat(); }}
+          className={cn('absolute bottom-[calc(max(1rem,env(safe-area-inset-bottom))+3.25rem)] right-4 z-50 flex h-10 w-10 items-center justify-center rounded-full border border-white/25 text-white backdrop-blur-md', chatOpen ? 'bg-white/25' : 'bg-black/45')}
+        >
+          <MessageSquare className="h-[18px] w-[18px]" />
+        </button>
+      )}
       <button
         type="button"
         data-no-navigate

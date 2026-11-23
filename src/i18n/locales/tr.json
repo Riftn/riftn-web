@@ -5354,6 +5354,8 @@
     "shopAllowanceUsed": "{{allowance}} / {{allowance}} kullanıldı. Daha yüksek bir rozet ve başka bir yuva için daha fazla Riftn jetonu stake edin."
   },
   "stages": {
+    "showChat": "Sohbeti göster",
+    "hideChat": "Sohbeti gizle",
     "radioShow": {
       "toggle": "Radyo yayını",
       "hint": "Önce müzik: kendi şarkılarını veya bir çalma listesini çal, istediğinde konuş. Dinleyiciler istedikleri zaman katılır ve yayın Keşfet'teki Radyo satırında görünür.",
@@ -7843,6 +7845,7 @@
     "shareToMoment": "An'a paylaş",
     "goToPost": "Gönderiye git",
     "fromYourPost": "Gönderinden",
+    "fromAPost": "Bir gönderiden",
     "postNotPublic": "Yalnızca herkese açık gönderiler An'a paylaşılabilir.",
     "postNotMedia": "Yalnızca fotoğraf ve video gönderileri An'a paylaşılabilir."
   },

@@ -5353,6 +5353,8 @@
     "shopAllowanceUsed": "{{allowance}} of {{allowance}} used. Stake more Riftn tokens for a higher badge and another slot."
   },
   "stages": {
+    "showChat": "Show chat",
+    "hideChat": "Hide chat",
     "radioShow": {
       "toggle": "Radio show",
       "hint": "Music first: play your own songs or a playlist, talk when you like. Listeners drop in any time, and it shows in Explore's Radio row.",
@@ -7842,6 +7844,7 @@
     "shareToMoment": "Share to Moment",
     "goToPost": "Go to post",
     "fromYourPost": "From your post",
+    "fromAPost": "From a post",
     "postNotPublic": "Only public posts can be shared to a Moment.",
     "postNotMedia": "Only photo and video posts can be shared to a Moment."
   },

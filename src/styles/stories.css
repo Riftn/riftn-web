@@ -361,6 +361,10 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-st-glass] {
   border-radius: 18px;
   pointer-events: auto;
 }
+/* Shown once the viewer taps the shared post, so it arrives with a small pop. */
+[data-sv-go-post] { animation: sv-go-post-in 180ms ease-out; }
+@keyframes sv-go-post-in { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: none; } }
+[data-sv-post-author] { opacity: 0.75; font-weight: 500; }
 /* Translate / See original under a caption in another language. */
 [data-sv-translate] {
   display: inline-flex;

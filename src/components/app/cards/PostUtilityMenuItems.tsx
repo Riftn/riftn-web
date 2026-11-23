@@ -143,7 +143,8 @@ export function PostUtilityMenuItems({
         </button>
       )}
 
-      {isOwnPost && canShareToMoment && !!tokenId && (
+      {/* Any public post can go on a Moment; the server refuses private accounts' posts. */}
+      {canShareToMoment && !!tokenId && (
         <button
           onClick={() => {
             onClose?.();
