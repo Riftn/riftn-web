@@ -22076,6 +22076,9 @@
   "notes": {
     "add": "Notitie",
     "yourNote": "Jouw notitie",
+    "count": "Notities {{count}}",
+    "hide": "Verbergen",
+    "inGroup": "Notities uit deze groep",
     "shared": "Je notitie staat 24 uur online",
     "failed": "Je notitie is niet geplaatst. Probeer het opnieuw.",
     "placeholder": "Deel een gedachte…",

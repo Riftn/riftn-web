@@ -21828,6 +21828,9 @@
   "notes": {
     "add": "Not",
     "yourNote": "Notun",
+    "count": "Notlar {{count}}",
+    "hide": "Gizle",
+    "inGroup": "Bu gruptan notlar",
     "shared": "Notun 24 saat boyunca görünür",
     "failed": "Notun paylaşılamadı. Tekrar dene.",
     "placeholder": "Bir düşünce paylaş…",
