@@ -31,6 +31,10 @@ import type { DeHubConversation } from '@/lib/api/dehub';
 import { GroupChatRow } from '@/components/app/chat/GroupChatRow';
 import { CommunityKindChip } from '@/components/app/communities/CommunityKindChip';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
+import { CollectorPanel } from '@/components/app/collect/CollectorPanel';
+import { DropsTab } from '@/components/app/collect/DropsTab';
+import { AuctionBox } from '@/components/app/nft-market/AuctionBox';
+import type { Auction, Drop, MarketStats, Unlockable } from '@/lib/api/dehub/collect';
 import { MintChainSheet } from '@/components/app/mint/MintChainSheet';
 import PayWithCoinSheet from '@/components/app/credits/PayWithCoinSheet';
 import { VoiceStripPlayer } from '@/components/app/audio/VoiceStripPlayer';
@@ -1587,6 +1591,68 @@ function CoinPayGallery() {
 }
 
 /** Mint chain picker: Mint on an off-chain post, with each chain's live price. */
+const GALLERY_IMG = 'https://picsum.photos/seed/riftn-drop';
+const galleryUnlockable = (isCreator: boolean, canOpen: boolean): Unlockable => ({
+  has: true,
+  isCreator,
+  canOpen,
+  summary: { files: 3, kinds: ['image', 'audio', 'file'], hasText: true },
+  text: canOpen ? 'Thanks for collecting. Full-size artwork, the song stem and the project file are below.' : null,
+  files: canOpen
+    ? [
+        { id: 'a', name: 'artwork-4k.png', kind: 'image', size: 8_400_000, mimeType: 'image/png', url: `${GALLERY_IMG}-1/200/200` },
+        { id: 'b', name: 'stem-vocals.mp3', kind: 'audio', size: 5_100_000, mimeType: 'audio/mpeg', url: '#' },
+        { id: 'c', name: 'project.zip', kind: 'file', size: 42_000_000, mimeType: 'application/zip', url: '#' },
+      ]
+    : [],
+});
+const galleryAuction = (topBid: boolean): Auction => ({
+  id: 'g1', chainId: 8453, contract: '0x9f8012074d27f8596c0e5038477acb52057bc934', tokenId: '1201', amount: '1',
+  seller: '0x' + 'a'.repeat(40), currency: '0x' + 'd'.repeat(40), currencySymbol: 'DHB', currencyDecimals: 18,
+  startPrice: '100000000000000000000', startsAt: new Date(Date.now() - 3_600_000).toISOString(),
+  endsAt: new Date(Date.now() + 2 * 86_400_000 + 4 * 3_600_000).toISOString(), status: 'live', buyNowOrderHash: null,
+  winner: null, soldPrice: null, nftName: 'Neon harbour', nftImage: `${GALLERY_IMG}-2/400/400`,
+  bidCount: topBid ? 4 : 0, topBid: topBid ? '260000000000000000000' : null, minimumBid: topBid ? '273000000000000000000' : '100000000000000000000',
+});
+const galleryDrop: Drop = {
+  number: 1, title: "This week's drop", startsAt: new Date().toISOString(), endsAt: new Date(Date.now() + 5 * 86_400_000).toISOString(),
+  items: [1, 2, 3, 4, 5, 6].map((i) => ({
+    tokenId: 1200 + i, chainId: 8453, contract: null, name: ['Neon harbour', 'Quiet field', 'Night bus', 'Paper moon', 'Glass city', 'Low tide'][i - 1],
+    image: `${GALLERY_IMG}-${i}/400/400`, creator: null, creatorProfile: { username: ['mal', 'aaron', 'arnoud', 'destan', 'araf', 'jesse'][i - 1], displayName: null, avatarImageUrl: null },
+    supply: i === 2 ? 1 : 1000 * i, minted: true, note: null,
+    floor: i % 2 ? { price: String(25n * 10n ** 18n * BigInt(i)), currencySymbol: 'DHB', currencyDecimals: 18, orderHash: 'x' } : null,
+    auctionId: i === 1 ? 'g1' : null,
+  })),
+};
+const galleryStats: MarketStats = {
+  sales: 1243, volume: [{ symbol: 'DHB', amount: 182450 }, { symbol: 'BNB', amount: 3.25 }], activeListings: 380, liveAuctions: 12, minted: 5600, collectors: 2870,
+  topSellers: [{ address: '0x' + 'b'.repeat(40), profile: { username: 'aaron', displayName: null, avatarImageUrl: null }, sales: 1500, volume: [] }],
+};
+
+function CollectGallery() {
+  return (
+    <section data-page-bento className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4" data-collect-gallery>
+      <h2 className="mb-3 text-sm font-semibold">Collector extras, auctions and drops</h2>
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div data-collect-state="creator"><CollectorPanel tokenId={1201} chainId={8453} preview={{ unlockable: galleryUnlockable(true, true), supply: 25000, royaltyBps: 750 }} /></div>
+        <div data-collect-state="owner"><CollectorPanel tokenId={1202} chainId={8453} preview={{ unlockable: galleryUnlockable(false, true), supply: 1, royaltyBps: 500 }} /></div>
+        <div data-collect-state="locked"><CollectorPanel tokenId={1203} chainId={8453} preview={{ unlockable: galleryUnlockable(false, false), supply: 1000, royaltyBps: 1000 }} /></div>
+      </div>
+      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+        <div data-collect-state="auction">
+          <AuctionBox target={{ chainId: 8453, contract: '0x9f8012074d27f8596c0e5038477acb52057bc934', tokenId: '1201' }} me={'0x' + 'c'.repeat(40)} isAuthenticated held={0n} standard="erc1155" dhb={undefined} offers={[]} name="Neon harbour" image={null} preview={galleryAuction(true)} />
+        </div>
+        <div data-collect-state="auction-new">
+          <AuctionBox target={{ chainId: 8453, contract: '0x9f8012074d27f8596c0e5038477acb52057bc934', tokenId: '1202' }} me={'0x' + 'c'.repeat(40)} isAuthenticated held={0n} standard="erc1155" dhb={undefined} offers={[]} name="Quiet field" image={null} preview={galleryAuction(false)} />
+        </div>
+      </div>
+      <div className="mt-4" data-collect-state="drops">
+        <DropsTab preview={{ drop: galleryDrop, stats: galleryStats, auctions: [galleryAuction(true), { ...galleryAuction(false), id: 'g2', nftName: 'Quiet field', nftImage: `${GALLERY_IMG}-3/400/400` }] }} />
+      </div>
+    </section>
+  );
+}
+
 function MintChainGallery() {
   const [open, setOpen] = useState<null | 'dehub' | 'own'>(null);
   return (
@@ -1596,7 +1662,7 @@ function MintChainGallery() {
         <Button variant="glass" size="sm" data-open-mint-sheet="dehub" onClick={() => setOpen('dehub')}>Riftn wallet</Button>
         <Button variant="glass" size="sm" data-open-mint-sheet="own" onClick={() => setOpen('own')}>Own wallet</Button>
       </div>
-      <MintChainSheet open={open !== null} onOpenChange={(o) => { if (!o) setOpen(null); }} defaultChainId={8453} sponsored={open === 'dehub'} homeAllowance={{ mintsPerDay: 3, homeMintsRemaining: 2 }} onConfirm={() => setOpen(null)} />
+      <MintChainSheet editionOpen open={open !== null} onOpenChange={(o) => { if (!o) setOpen(null); }} defaultChainId={8453} sponsored={open === 'dehub'} homeAllowance={{ mintsPerDay: 3, homeMintsRemaining: 2 }} onConfirm={() => setOpen(null)} />
     </section>
   );
 }
@@ -2470,6 +2536,7 @@ export default function StateGalleryPage() {
         <LockedDmGallery />
         <UnlockRevealGallery />
         <MintChainGallery />
+        <CollectGallery />
         <CoinPayGallery />
         <WhenSheetGallery />
         <ScheduledDmGallery />

@@ -1,3 +1,4 @@
+import { useEdition } from '@/hooks/use-edition';
 import { useTranslation as _useCopy } from 'react-i18next';
 import { tokenLabel } from '@/lib/token-label';
 /**
@@ -64,6 +65,7 @@ export function FractionMarketPanel({ tokenId, chainId = 8453, post }: FractionM
   // Who bought into this post: every paid or settled trade, newest first.
   const buys = trades;
   const { data: balance } = useFractionBalance(tokenId, chainId);
+  const { data: edition } = useEdition(tokenId);
   const { data: sellerStats = {} } = useSellerStatsBatch(listings.map(l => l.seller_address));
   const cancelListing = useCancelListing();
   const cancelOffer = useCancelOffer();
@@ -71,7 +73,8 @@ export function FractionMarketPanel({ tokenId, chainId = 8453, post }: FractionM
 
   const held = balance ?? 0;
   const holdsFractions = held > 0;
-  const holdsEverything = held >= TOTAL_FRACTIONS;
+  const totalCopies = edition?.supply ?? TOTAL_FRACTIONS;
+  const holdsEverything = held >= totalCopies;
 
   const handleCancelListing = async (listing: FractionListing) => {
     try {
@@ -184,11 +187,11 @@ export function FractionMarketPanel({ tokenId, chainId = 8453, post }: FractionM
                           <p className="text-white font-medium">{t('fractions.fractionCount', { count: available })}</p>
                           <p className="text-xs text-white/60">
                             {free ? (
-                              t('fractions.freeShare', { pct: ((available / TOTAL_FRACTIONS) * 100).toFixed(1) })
+                              t('fractions.freeShare', { pct: ((available / totalCopies) * 100).toFixed(1) })
                             ) : (
                               <>
                                 {listing.price_per_fraction} <DhbCoin /> {t('fractions.eachDot')}{' '}
-                                {t('fractions.pctOfPost', { pct: ((available / TOTAL_FRACTIONS) * 100).toFixed(1) })}
+                                {t('fractions.pctOfPost', { pct: ((available / totalCopies) * 100).toFixed(1) })}
                               </>
                             )}
                           </p>

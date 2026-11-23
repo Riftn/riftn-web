@@ -40,6 +40,18 @@ import { findCachedFeedPost } from '@/hooks/use-unified-feed';
 import { loadPostData } from '@/lib/post-warm';
 import { useMintExistingPost } from '@/hooks/use-mint-existing-post';
 import { MintChainSheet } from '@/components/app/mint/MintChainSheet';
+import type { EditionChoice } from '@/lib/api/dehub/content';
+import { CollectorPanel } from '@/components/app/collect/CollectorPanel';
+import { useEdition } from '@/hooks/use-edition';
+import { getChainConfig } from '@/lib/contracts/dhb-token';
+
+const collectionFor = (chainId: number) => {
+  try {
+    return getChainConfig(chainId as Parameters<typeof getChainConfig>[0]).streamCollection ?? null;
+  } catch {
+    return null;
+  }
+};
 import { buildAvatarUrl } from '@/lib/media-url';
 import { getTokenHolders, TOTAL_FRACTIONS, truncateAddress as truncateAddr } from '@/lib/api/token-holders';
 import { Progress } from '@/components/ui/progress';
@@ -133,6 +145,7 @@ export default function PostInfoPage() {
   // is no NFT behind it — every on-chain section below renders a placeholder
   // instead, and the holders read is skipped (there is nothing to hold).
   const isUnminted = nftInfo?.status === 'signed';
+  const editionSupply = useEdition(nftInfo?.status === 'minted' ? nftInfo.tokenId : null).data?.supply ?? TOTAL_FRACTIONS;
 
   // Fetch token holders with React Query (cached for 5 minutes)
   const {
@@ -158,9 +171,9 @@ export default function PostInfoPage() {
   // real on-chain sections in place.
   const { mint: mintExisting, isMinting } = useMintExistingPost();
   const [showMintSheet, setShowMintSheet] = useState(false);
-  const handleMintNow = async (chosenChainId: number) => {
+  const handleMintNow = async (chosenChainId: number, edition?: EditionChoice) => {
     if (!nftInfo?.tokenId) return;
-    const ok = await mintExisting(nftInfo.tokenId, nftInfo.chainId, chosenChainId);
+    const ok = await mintExisting(nftInfo.tokenId, nftInfo.chainId, chosenChainId, edition);
     if (ok) {
       setShowMintSheet(false);
       queryClient.invalidateQueries({ queryKey: ['nft-info', postId] });
@@ -628,6 +641,12 @@ export default function PostInfoPage() {
               for all of it. */}
           {!isUnminted && (
           <>
+          <CollectorPanel
+            tokenId={nftInfo.tokenId}
+            chainId={nftInfo.chainId || 8453}
+            contract={collectionFor(nftInfo.chainId || 8453)}
+          />
+
           <FractionMarketPanel
             tokenId={String(nftInfo.tokenId)}
             chainId={nftInfo.chainId || 8453}
@@ -644,7 +663,7 @@ export default function PostInfoPage() {
           <section className="bg-white/5 rounded-xl p-4 border border-white/10">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-medium text-white/60">{t('postInfo.fractionOwnership')}</h2>
-              <span className="text-xs font-mono text-white/40">{t('postInfo.total', { count: TOTAL_FRACTIONS })}</span>
+              <span className="text-xs font-mono text-white/40">{t('postInfo.total', { count: editionSupply })}</span>
             </div>
             
             {/* Distribution Progress */}
@@ -711,7 +730,7 @@ export default function PostInfoPage() {
                           {truncateAddr(holder.address)}
                         </p>
                         <p className="text-xs text-white/60">
-                          {holder.balance}/{TOTAL_FRACTIONS}{_copy("copy.854cbbb4f34f", { defaultValue: " fractions (" })}{holder.percentage}%)
+                          {holder.balance}/{editionSupply}{_copy("copy.854cbbb4f34f", { defaultValue: " fractions (" })}{Math.round((Number(holder.balance) / editionSupply) * 100)}%)
                         </p>
                       </div>
                       <button
@@ -903,6 +922,7 @@ export default function PostInfoPage() {
           onOpenChange={setShowMintSheet}
           defaultChainId={nftInfo.chainId}
           isMinting={isMinting}
+          hideEdition={!!nftInfo.streamInfo?.isAddBounty}
           onConfirm={handleMintNow}
         />
       )}

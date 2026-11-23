@@ -1155,9 +1155,10 @@ const PostCardBody = memo(function PostCard({ post, threadSlot, onOpenComments }
             onOpenChange={setShowMintSheet}
             defaultChainId={post.chainId}
             isMinting={isMinting}
-            onConfirm={(chainId) => {
+            hideEdition={!!(post as { streamInfo?: { isAddBounty?: boolean } }).streamInfo?.isAddBounty}
+            onConfirm={(chainId, edition) => {
               if (!postTokenId) return;
-              mintExisting(postTokenId, post.chainId, chainId).then((ok) => {
+              mintExisting(postTokenId, post.chainId, chainId, edition).then((ok) => {
                 if (ok) setShowMintSheet(false);
               });
             }}
