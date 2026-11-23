@@ -188,12 +188,12 @@ export function useExplainCannotVote(): (lent: boolean) => void {
     toast.error(
       lent
         ? i18n.t('governance.lentBadgeCantVote', {
-          defaultValue: "Your badge is lent to you, and lent badges can't vote. Buy DHB to earn your own badge.",
+          defaultValue: "Your badge is lent to you, and lent badges can't vote. Buy tokens to earn your own badge.",
         })
         : i18n.t('governance.mustHoldTokens'),
       {
         id: 'governance-cannot-vote',
-        action: { label: i18n.t('governance.buyDhb', { defaultValue: 'Buy DHB' }), onClick: () => navigate('/app/buy') },
+        action: { label: i18n.t('governance.buyDhb', { defaultValue: 'Buy tokens' }), onClick: () => navigate('/app/buy') },
       },
     );
   }, [navigate]);

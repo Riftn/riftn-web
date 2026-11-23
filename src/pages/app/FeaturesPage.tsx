@@ -1249,11 +1249,10 @@ export default function FeaturesPage() {
             onClick={handleSubmitClick}
             aria-label={t('features.promptNew', 'New prompt')}
             variant="glass"
-            className="rounded-xl font-semibold text-sm"
-            size="sm"
+            className="h-9 w-9 shrink-0 rounded-xl"
+            size="icon"
           >
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('features.promptNew', 'New prompt')}</span>
+            <Plus className="h-4 w-4" aria-hidden="true" />
           </Button>
         </div>
 

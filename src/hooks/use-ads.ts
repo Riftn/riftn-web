@@ -481,7 +481,7 @@ export function useAdsTopUpQuote(enabled = true) {
       } catch { /* fall through to the direct read */ }
 
       const price = await fetchDhbCreditPrice();
-      if (!price) throw new Error('DHB price unavailable');
+      if (!price) throw new Error('Token price unavailable');
       return { dhbPriceUsd: price, minTopupUsd: DEFAULT_MIN_TOPUP_USD };
     },
   });

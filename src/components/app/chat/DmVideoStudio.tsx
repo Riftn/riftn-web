@@ -418,7 +418,7 @@ export function DmMediaStudio({
               {destruct && <DestructChip choice={destruct} replay={destructReplay} />}
               {lockPrice != null && (
                 <span className="absolute bottom-2 left-1/2 inline-flex -translate-x-1/2 items-center gap-1 whitespace-nowrap rounded-full bg-black/60 px-2.5 py-1 text-xs font-bold">
-                  <Lock className="h-3.5 w-3.5" /> {_copy('dmVideo.lockedFor', { defaultValue: 'Unlock for {{value1}} DHB', value1: lockPrice })}
+                  <Lock className="h-3.5 w-3.5" /> {_copy('dmVideo.lockedFor', { defaultValue: 'Unlock for {{value1}} tokens', value1: lockPrice })}
                 </span>
               )}
             </div>

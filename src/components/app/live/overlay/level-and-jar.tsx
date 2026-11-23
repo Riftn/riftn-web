@@ -1,3 +1,4 @@
+import { tokenLabel } from '@/lib/token-label';
 /**
  * Two creator widgets: the streamer's level and weekly streak (from the same
  * progress the profile card shows), and a tip jar that fills with paid gifts.
@@ -76,7 +77,7 @@ export function TipJar({ settings, stats }: { settings: Record<string, unknown>;
       </div>
       <div data-ow-jar-caption>
         <span>{title}</span>
-        <span>{`${Math.floor(value).toLocaleString()} / ${target.toLocaleString()} DHB`}</span>
+        <span>{`${Math.floor(value).toLocaleString()} / ${target.toLocaleString()} ${tokenLabel()}`}</span>
       </div>
     </div>
   );
