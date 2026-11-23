@@ -1797,7 +1797,14 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
                       emoji tray (hover or hold), on the picture itself, as on
                       the phone. In fullscreen the share sheet can't draw
                       over the player, so share reposts straight away there. */}
-                  <div data-no-navigate data-live-player-actions onClick={(e) => e.stopPropagation()}>
+                  <div
+                    data-no-navigate
+                    data-live-player-actions
+                    onClick={(e) => e.stopPropagation()}
+                    // The bar's own size: the composer-sized 46px squares read as
+                    // a second, heavier control row next to mute and fullscreen.
+                    className="[&>div>button]:!h-9 [&>div>button]:!w-9 [&>div>span>button]:!h-9 [&>div>span>button]:!w-9"
+                  >
                     <ActionBar
                       compact
                       quickRepost={isFullscreen}
@@ -1927,7 +1934,7 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
             data-live-fullscreen-chat
             data-keep-dark
             onClick={(e) => e.stopPropagation()}
-            className="absolute inset-y-0 right-0 z-30 flex w-[min(380px,40%)] flex-col overflow-y-auto overscroll-contain border-l border-white/10 bg-black/75 p-3 backdrop-blur-xl"
+            className="absolute inset-y-0 right-0 z-30 flex w-[min(380px,40%)] flex-col justify-end overflow-y-auto overscroll-contain border-l border-white/10 bg-black/75 p-3 backdrop-blur-xl"
           >
             {chatSlot}
           </div>
@@ -2018,6 +2025,10 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
         >
           <LiveViewerActionsProvider
             value={
+              // Chat opened over a cleared screen sits beside the round chat and
+              // rotate buttons: the gift/share/thumb row would squeeze the
+              // message box to a few letters there, so it is left out.
+              chromeHidden && clearedChat ? null : (
               <div className="flex items-center gap-2">
               <ActionBar
                 compact
@@ -2036,6 +2047,7 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
                 nativeShare={{ title: stream.title }}
               />
               </div>
+              )
             }
           >
             {chatSlot}

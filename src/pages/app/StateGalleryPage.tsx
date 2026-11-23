@@ -2034,8 +2034,14 @@ function ShareToMomentGallery() {
     <AuthContext.Provider value={GALLERY_AUTH}>
     <section data-page-bento data-share-to-moment-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
       <h2 className="mb-3 text-sm font-semibold">MOMENTS · {t('stories.shareToMoment', 'Share to Moment')}</h2>
-      <div data-keep-dark className="max-w-[360px] rounded-2xl bg-zinc-900/90 p-2 flex flex-col gap-1">
-        <PostUtilityMenuItems postId="990030" tokenId={990030} isOwnPost canShareToMoment />
+      {/* Your own post, and someone else's public post: both offer the row. */}
+      <div className="flex flex-wrap gap-3">
+        <div data-keep-dark data-share-to-moment-own className="w-full max-w-[360px] rounded-2xl bg-zinc-900/90 p-2 flex flex-col gap-1">
+          <PostUtilityMenuItems postId="990030" tokenId={990030} isOwnPost canShareToMoment />
+        </div>
+        <div data-keep-dark data-share-to-moment-other className="w-full max-w-[360px] rounded-2xl bg-zinc-900/90 p-2 flex flex-col gap-1">
+          <PostUtilityMenuItems postId="990031" tokenId={990031} canShareToMoment />
+        </div>
       </div>
     </section>
     </AuthContext.Provider>
