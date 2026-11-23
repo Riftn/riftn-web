@@ -161,7 +161,7 @@ export function AssistantActionCard({ actionId, initial }: { actionId: string; i
         : kind === 'unfollow'
           ? t('assistantCards.confirmUnfollow', { defaultValue: 'Unfollow' })
           : kind === 'request_post'
-            ? t('assistantCards.postRequest', { defaultValue: 'Post to Requests' })
+            ? t('assistantCards.postRequest', { defaultValue: 'Post to Build' })
             : preview.allow
             ? t('assistantCards.confirmAllow', { defaultValue: 'Allow' })
             : t('assistantCards.confirmStop', { defaultValue: 'Stop' });

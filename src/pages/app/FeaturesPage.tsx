@@ -479,7 +479,7 @@ function FeatureCard({
                         disabled={statusMutation.isPending}
                         className="flex items-center gap-2 w-full px-3 py-2.5 text-sm text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
                       >
-                        <BackToRequestsIcon className="w-3.5 h-3.5" />{_copy("copy.3ee050a08bfa", { defaultValue: "Back to Requests" })}</button>
+                        <BackToRequestsIcon className="w-3.5 h-3.5" />{_copy("copy.3ee050a08bfa", { defaultValue: "Back to Build" })}</button>
                     )}
                   </>
                 )}
@@ -1227,8 +1227,8 @@ export default function FeaturesPage() {
 
   return (
     <div data-requests-page className="min-h-screen">
-      <SEOHead title={_copy("copy.5d2d9bc248a3", { defaultValue: "Feature Requests & Bug Reporting | Riftn" })} description={_copy("copy.2c94a53da07c", { defaultValue: "Submit feature requests, report bugs, and vote on community ideas to shape Riftn's roadmap. Track open, in-progress, and shipped features." })} url="https://riftn.com/app/features" jsonLd={{ '@context': 'https://schema.org', '@type': 'WebPage', name: 'Riftn Feature Requests & Bug Reporting', url: 'https://riftn.com/app/features', description: _copy("copy.d2c76d7df46f", { defaultValue: "Submit feature requests, report bugs, and vote on community ideas to shape Riftn's roadmap." }), isPartOf: { '@type': 'WebSite', name: 'Riftn', url: 'https://riftn.com' } }} />
-      <h1 className="sr-only">{_copy("copy.64ce9ca9f7d1", { defaultValue: "Riftn Features — Feature Requests, Bug Reporting & Community Roadmap" })}</h1>
+      <SEOHead title={_copy("copy.5d2d9bc248a3", { defaultValue: "Build Riftn by talking to it | Riftn" })} description={_copy("copy.2c94a53da07c", { defaultValue: "Build Riftn by talking to it. Post ideas and bug reports as prompts, vote on what others asked for, and follow them from Queued to Shipped." })} url="https://riftn.com/app/features" jsonLd={{ '@context': 'https://schema.org', '@type': 'WebPage', name: 'Build Riftn', url: 'https://riftn.com/app/features', description: _copy("copy.d2c76d7df46f", { defaultValue: "Build Riftn by talking to it. Post ideas and bug reports as prompts and vote on what gets built next." }), isPartOf: { '@type': 'WebSite', name: 'Riftn', url: 'https://riftn.com' } }} />
+      <h1 className="sr-only">{_copy("copy.64ce9ca9f7d1", { defaultValue: "Build: shape Riftn by talking to it" })}</h1>
       {/* Sticky nav pill. `data-feed-nav-outer` already rides the scroll on
           mobile; `data-nav-hide-desktop` opts this one into the same thing on
           desktop too. Because this header is a full bento — title, search,
@@ -1241,8 +1241,8 @@ export default function FeaturesPage() {
           <div className="flex items-center gap-3">
             <BrandIcon src={featuresLightbulb} alt={_copy("copy.5697d03daef4", { defaultValue: "Features" })} className="w-12 h-12 object-contain" />
             <div>
-              <h1 className="text-xl font-bold text-white">{t('features.promptPageTitle', 'Requests')}</h1>
-              <p className="text-zinc-500 text-sm">{t('features.promptSubtitle', 'Build Riftn with a prompt')}</p>
+              <h1 className="text-xl font-bold text-white">{t('features.promptPageTitle', 'Build')}</h1>
+              <p className="text-zinc-500 text-sm">{t('features.promptSubtitle', 'Build Riftn by talking to it.')}</p>
             </div>
           </div>
           <Button
@@ -1272,13 +1272,13 @@ export default function FeaturesPage() {
             <Button type="button" variant="glass" aria-pressed={mineOnly}
               onClick={() => setMineOnly(previous => !previous)}
               className={cn("max-w-[48%] rounded-xl", mineOnly && "bg-white/20 border-white/30")}>
-              <span className="truncate">{t('features.myRequests', 'My Requests')}</span>
+              <span className="truncate">{t('features.myRequests', 'My prompts')}</span>
             </Button>
           )}
         </div>
 
         {/* Page Tabs: Requests / Shipping / Shipped */}
-        <div ref={pageTabLayerRef} role="tablist" aria-label={t('features.promptPageTitle', 'Requests')} className="relative flex gap-1 bg-zinc-800/40 rounded-xl p-1 mb-3">
+        <div ref={pageTabLayerRef} role="tablist" aria-label={t('features.promptPageTitle', 'Build')} className="relative flex gap-1 bg-zinc-800/40 rounded-xl p-1 mb-3">
           {/* Measured from the active tab, so the glass hugs it however wide
               the labels and counts render (iPhone Safari draws them wider). */}
           <GlassIndicator rect={pageTabRect} borderRadius="0.5rem" className="left-0 top-0" enableTransition />
