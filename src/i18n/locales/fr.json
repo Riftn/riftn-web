@@ -23188,6 +23188,9 @@
     "hoursStreamed_other": "{{formatted}} heures de live",
     "toNext_one": "{{formatted}} en-cas avant {{stage}}",
     "toNext_other": "{{formatted}} en-cas avant {{stage}}",
+    "requestsToday_one": "Demandes en attente : {{formatted}} en-cas aujourd'hui",
+    "requestsToday_other": "Demandes en attente : {{formatted}} en-cas aujourd'hui",
+    "requestsTomorrow": "Demandes en attente : premier en-cas demain",
     "open": "Ouvrir {{pet}}",
     "feed": "Donner un en-cas",
     "fed": "{{pet}} a mangé ton en-cas",
@@ -23218,6 +23221,7 @@
       "feeding": "Les spectateurs peuvent le nourrir avec leurs points de chaîne",
       "cost": "Points par en-cas",
       "rules": "Chaque spectateur peut lui donner jusqu'à 20 en-cas par jour. Les points n'ont aucune valeur en argent.",
+      "requests": "Tes demandes encore en attente sur le tableau des Demandes le nourrissent aussi : 1 en-cas par jour chacune, jusqu'à 3 par jour, une fois éclos.",
       "feeders": "L'ont le plus nourri"
     }
   },

@@ -23158,6 +23158,9 @@
     "hoursStreamed_other": "{{formatted}} hours streamed",
     "toNext_one": "{{formatted}} snack to {{stage}}",
     "toNext_other": "{{formatted}} snacks to {{stage}}",
+    "requestsToday_one": "Requests waiting: {{formatted}} snack today",
+    "requestsToday_other": "Requests waiting: {{formatted}} snacks today",
+    "requestsTomorrow": "Requests waiting: first snack tomorrow",
     "open": "Open {{pet}}",
     "feed": "Feed a snack",
     "fed": "{{pet}} ate your snack",
@@ -23188,6 +23191,7 @@
       "feeding": "Viewers can feed it with channel points",
       "cost": "Points per snack",
       "rules": "Each viewer can feed it up to 20 snacks a day. Points have no cash value.",
+      "requests": "Your requests still waiting on the Requests board feed it too: 1 snack a day each, up to 3 a day, once it has hatched.",
       "feeders": "Fed it the most"
     }
   },
