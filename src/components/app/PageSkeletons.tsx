@@ -21,6 +21,7 @@ import { cn } from '@/lib/utils';
 import { DeHubPageLoader } from '@/components/app/DeHubLoader';
 import { FeedCardSkeletonList } from '@/components/app/cards/FeedCardSkeleton';
 import { FEED_TABS } from '@/constants/app.constants';
+import { isShelfPath, shelfSeatExpected } from '@/lib/story-shelf-seat';
 import { useShortsEnabled } from '@/contexts/ShortsEnabledContext';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -116,6 +117,22 @@ export function FeedTabBarSkeleton() {
 }
 
 /**
+ * The Moments row's seat on phones, same size and place as the real row
+ * (stories.css [data-story-shelf]), so the posts do not drop when it lands.
+ * Only on Home's own feed, and only when the row was there last visit.
+ */
+export function ShelfSeatSkeleton() {
+  if (typeof window === 'undefined' || !isShelfPath(window.location.pathname) || !shelfSeatExpected()) return null;
+  return (
+    <div data-shelf-seat aria-hidden="true" className="lg:hidden flex gap-2 overflow-hidden py-[2px] mb-[10px]">
+      {[0, 1, 2, 3, 4].map(index => (
+        <div key={index} className="home-skeleton-block flex-none w-[86px] h-[118px] rounded-2xl" />
+      ))}
+    </div>
+  );
+}
+
+/**
  * In-page home feed skeleton (center column).
  * Includes the sticky feed tab bar so the nav placeholder NEVER disappears
  * between boot HTML, Suspense fallback, and the real HomePage mounting.
@@ -125,6 +142,7 @@ export function FeedSkeleton() {
     <div className="min-w-0 flex-1">
       <FeedTabBarSkeleton />
       <div data-feed-root className="home-skeleton-body p-2 sm:p-3 pt-0 sm:pt-0">
+        <ShelfSeatSkeleton />
         <FeedCardSkeletonList />
       </div>
     </div>

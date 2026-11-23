@@ -194,6 +194,9 @@
           // LCP element — paints with the first frame instead of after the
           // bundle. Hide it exactly when HomeIntro itself would return null.
           if (location.pathname !== '/' || introDismissed || introSignedIn) d.dataset.homeIntro = 'off';
+          // The Moments row's seat (src/lib/story-shelf-seat.ts): held unless
+          // Home had no row last visit, so the posts do not drop when it lands.
+          if (!/^\/(app)?\/?$/.test(location.pathname) || localStorage.getItem('dehub.shelfShown') === '0') d.dataset.bootShelf = 'off';
 
           if (location.pathname === '/' && window.innerWidth > 767) {
             var skip = localStorage.getItem('dehub.introFrostSeen') === '1' || introDismissed || introSignedIn;
@@ -608,6 +611,8 @@
       .bskel-tabs span { width: 16px; height: 16px; }
       html[data-shorts-enabled="false"] .bskel-shorts { display: none; }
       .bskel-island { display: none; }
+      .bskel-shelf { display: none; gap: 8px; overflow: hidden; padding: 2px 0; margin: 0 0 10px; }
+      .bskel-shelf > div { flex: none; width: 86px; height: 118px; border-radius: 16px; }
       .bskel-card { height: 300px; margin: 0 8px 12px; border-radius: 16px;
                     background: var(--bskel, rgba(255,255,255,.06));
                     border: 1px solid var(--bskel-b, rgba(255,255,255,.08)); }
@@ -638,6 +643,7 @@
         @keyframes bskel-pulse { 50% { opacity: .5; } }
       }
       @media (max-width: 1023px) {
+        html:not([data-boot-shelf="off"]):not([data-boot-chat]) .bskel-shelf { display: flex; }
         html[data-theme="immersive"] .bskel-main { padding-top: 0; }
         html[data-theme="immersive"] .bskel-tabs { display: none; }
         html[data-theme="immersive"] .bskel-island { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 6px); left: 50%; transform: translateX(-50%); width: 148px; height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; border: 1px solid rgba(255,255,255,.12); border-radius: 16px; background: rgba(16,16,18,.9); z-index: 120; }
@@ -720,6 +726,7 @@
         </div>
         <div class="bskel-card" data-home-intro-slot></div>
         <div class="bskel-feed">
+          <div class="bskel-shelf" aria-hidden="true"><div class="bskel-wash"></div><div class="bskel-wash"></div><div class="bskel-wash"></div><div class="bskel-wash"></div><div class="bskel-wash"></div></div>
           <div class="bskel-feed-card" data-feed-item>
             <div class="bskel-header"><div class="bskel-wash bskel-avatar"></div><div class="bskel-identity"><div class="bskel-wash"></div><div class="bskel-wash"></div></div><div class="bskel-wash bskel-menu"></div></div>
             <div class="bskel-wash bskel-media"></div>
