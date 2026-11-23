@@ -154,6 +154,8 @@ import '@/styles/live-frame-ios.css';
 
 import { formatCount } from '@/lib/format-count';
 const logger = createLogger('LiveStreamCard');
+/** Width the picture keeps beside the fullscreen chat column (w-[min(380px,40%)]). */
+const CHAT_BESIDE_STYLE: React.CSSProperties = { width: 'calc(100% - min(380px, 40%))' };
 
 /**
  * How long a negotiated WebRTC session gets to actually deliver a frame.
@@ -492,6 +494,9 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
   const liveClip = useLiveClip(stream.id, getReplayTime);
   const containerRef = useRef<HTMLDivElement>(null);
   const { isFullscreen, toggleFullscreen } = useVideoFullscreen(videoRef, containerRef, { escapeAncestors: true });
+  // Fullscreen chat open: the picture steps left to sit beside the chat
+  // column instead of running under it.
+  const chatBeside = !immersive && isFullscreen && fullscreenChat && !!chatSlot;
   // Records the view once the player has been on screen long enough to mean it.
   const viewRef = useFeedViewTracking(stream.tokenId || stream.id);
   // Read here rather than below the presence hook: whether this viewer is the
@@ -1619,6 +1624,7 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
             <video
               ref={replayRef}
               className="w-full h-full object-contain"
+              style={chatBeside ? CHAT_BESIDE_STYLE : undefined}
               src={stream.replayUrl}
               /* Controlled, like the live element beside it. Without this the
                  button could flip `isMuted` all day and the recording would
@@ -1719,7 +1725,7 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
             <video
               ref={videoRef}
               className={cropToVertical ? 'object-cover' : 'w-full h-full object-contain'}
-              style={cropToVertical ? verticalCropStyle(cropToVertical) : undefined}
+              style={cropToVertical ? verticalCropStyle(cropToVertical) : chatBeside ? CHAT_BESIDE_STYLE : undefined}
               autoPlay
               playsInline
               {...{"webkit-playsinline": ""}}
