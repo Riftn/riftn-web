@@ -2738,7 +2738,7 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
             }} />
         )}
         <div data-page-bento data-kit-section data-notification-list className="overflow-hidden">
-          {isLoading ? (
+          {isLoading || (notifications.length === 0 && (customLoading || isPlaceholderData)) ? (
             // Row skeletons that mirror the real list layout — a lone spinner
             // reads as "empty page" instead of "content on the way".
             <div className="pt-3">
