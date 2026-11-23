@@ -476,7 +476,7 @@ export function useGroupNotes(groupIds: string[], me: string | null): Record<str
 }
 
 /** A span that acts as a button, for use inside a chat card (itself a button). */
-function cardPress(onPress: () => void) {
+export function cardPress(onPress: () => void) {
   return {
     role: 'button' as const,
     tabIndex: 0,

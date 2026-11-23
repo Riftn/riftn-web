@@ -9,7 +9,7 @@ import { IslandAction, PageIsland, usePhonePill } from '@/components/app/page-ki
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
 import { PULL_REFRESH_THRESHOLD } from '@/lib/pill-pull-motion';
 import { DhbCoin } from '@/components/app/DhbAmount';
-import { lazy, Suspense, useState, useEffect, useRef, useCallback, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react';
+import { lazy, Suspense, useState, useEffect, useRef, useCallback, useMemo, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react';
 import CloseIcon from '@/components/ui/cut-icons/close';
 import { useTranslation } from 'react-i18next';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
@@ -80,7 +80,7 @@ import dehubLogo from '@/assets/dehub-logo.png';
 import { SEOHead } from '@/components/SEOHead';
 import { blockUser } from '@/lib/api/dehub/blocks';
 import { toast } from 'sonner';
-import { GroupChatNotesRow, NoteFaceRing, NoteTag, NotesSheetHost, openNotesSheet, useGroupNotes, useNotesByAuthor } from '@/components/app/chat/NotesRow';
+import { cardPress, GroupChatNotesRow, NoteFaceRing, NoteTag, NotesSheetHost, openNotesSheet, useGroupNotes, useNotesByAuthor } from '@/components/app/chat/NotesRow';
 import type { NoteEntry } from '@/lib/api/dehub/notes';
 import { LiveRipple } from '@/components/app/LiveRipple';
 import { NewGroupChannelSheet, type NewChatKind } from '@/components/app/chat/NewGroupChannelSheet';
@@ -235,7 +235,8 @@ export function ConversationItem({
           {checked && <span className="block h-[6px] w-[10px] -translate-y-px -rotate-45 border-b-2 border-l-2" style={{ borderColor: 'hsl(var(--background))' }} />}
         </span>
       )}
-      <span className="relative shrink-0">
+      {/* A face with a note ring opens the note, not the chat. */}
+      <span className="relative shrink-0" {...(note && !selecting ? { ...cardPress(() => openNotesSheet(note)), 'aria-label': note.note.text || 'Note' } : {})}>
       <LiveRipple ids={[otherUser?.address, otherUser?.username]} className="relative rounded-lg">
         <Avatar className="w-12 h-12">
           {avatarUrl && <AvatarImage src={avatarUrl} />}
@@ -633,7 +634,14 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const roomSummaries = useRoomChatSummaries(groupChats.map(c => c.id), isAuthenticated ? walletAddress : null);
   // Notes ride in the chat cards: a person's in their chat, members' in a group's.
   const notesByAuthor = useNotesByAuthor();
-  const groupNotes = useGroupNotes(isAuthenticated ? groupChats.map(c => c.id) : [], isAuthenticated ? walletAddress : null);
+  const allGroupNotes = useGroupNotes(isAuthenticated ? groupChats.map(c => c.id) : [], isAuthenticated ? walletAddress : null);
+  // Each note shows once in the list: someone you DM shows it on their own card, so their group cards skip it.
+  const groupNotes = useMemo(() => {
+    const dm = new Set(conversations.map(c => (c.otherUser || c.participants?.[0])?.address?.toLowerCase()).filter(Boolean) as string[]);
+    const out: Record<string, NoteEntry[]> = {};
+    for (const [id, list] of Object.entries(allGroupNotes)) out[id] = list.filter(e => !dm.has(e.author.address.toLowerCase()));
+    return out;
+  }, [allGroupNotes, conversations]);
   const publicLastLine = usePublicChatLastLine(isAuthenticated);
   const publicPreview = publicLastLine ? roomPreviewLine(publicLastLine, walletAddress || '', (key, options) => _copy(key, options)) : '';
   // Computer tabs: Unread keeps chats with something new (or marked unread),
