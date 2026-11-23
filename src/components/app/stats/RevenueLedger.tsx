@@ -1,3 +1,4 @@
+import { tokenLabel } from '@/lib/token-label';
 /**
  * Revenue ledger
  * ==============
@@ -50,7 +51,7 @@ function formatUsd(n: number): string {
 function formatAmount(item: LedgerItem): string | null {
   if (item.amount == null || !item.unit) return null;
   const digits = item.unit === 'BNB' ? 4 : item.unit === 'DHB' ? 0 : 2;
-  return `${item.amount.toLocaleString('en-US', { maximumFractionDigits: digits })} ${item.unit}`;
+  return `${item.amount.toLocaleString('en-US', { maximumFractionDigits: digits })} ${tokenLabel(item.unit)}`;
 }
 
 function shortHash(value: string): string {
@@ -412,7 +413,7 @@ export function RevenueLedger({
               <p className="text-[11px] text-zinc-500 leading-relaxed">
                 {!tax && t(
                   'stats.ledger.footnote',
-                  'On-chain entries link to the transaction itself. Card payments and plan invoices have no public record, so they appear as each day’s total and how many payments made it up. Amounts in USD use the price on the day for history and today’s price for live DHB payments, as described under “What is counted”.',
+                  'On-chain entries link to the transaction itself. Card payments and plan invoices have no public record, so they appear as each day’s total and how many payments made it up. Amounts in USD use the price on the day for history and today’s price for live token payments, as described under “What is counted”.',
                 )}{' '}
                 {view.unavailable.length > 0 &&
                   t('stats.ledger.missing', 'Not in this ledger right now because they could not be read: {{sources}}.', {

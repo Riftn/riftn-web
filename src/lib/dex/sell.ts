@@ -47,7 +47,7 @@ export async function detectDhbChain(walletAddress: string): Promise<{ chainId: 
     readWithTimeout(new Contract(DEX_CHAINS[BNB_CHAIN_ID].dhb, ERC20, await dexProvider(BNB_CHAIN_ID)).balanceOf(walletAddress) as Promise<bigint>, 'BNB balance'),
   ]);
   if (baseRead.status === 'rejected' && bnbRead.status === 'rejected') {
-    throw new Error('Could not read DHB balances on Base or BNB Chain');
+    throw new Error('Could not read token balances on Base or BNB Chain');
   }
   const base = baseRead.status === 'fulfilled' ? baseRead.value : 0n;
   const bnb = bnbRead.status === 'fulfilled' ? bnbRead.value : 0n;
@@ -150,7 +150,7 @@ export async function quoteSellPosition(input: SellInput): Promise<SellQuote> {
     : input.chainId === BASE_CHAIN_ID ? currentTick <= tickLower : currentTick >= tickUpper;
   if (!oneSided) {
     throw new Error(input.side === 'sell'
-      ? 'This range overlaps the pool price. Move the range above the market price to list DHB alone.'
+      ? 'This range overlaps the pool price. Move the range above the market price to list tokens alone.'
       : 'This range overlaps the pool price. Move the range below the market price to list USDC alone.');
   }
   const pool = new Pool(dhb, usdc, FEE, TICK_SPACING, ZeroAddress,
@@ -219,7 +219,7 @@ export async function mintSellPosition(input: SellInput, progress: (stage: Order
   if (signer) {
     const accounts = await readWithTimeout(signer.request({ method: 'eth_accounts' }) as Promise<string[]>, 'Wallet account');
     if (!accounts[0] || accounts[0].toLowerCase() !== input.walletAddress.toLowerCase()) {
-      throw new Error(_translateCopy("copy.f3809982d30a", { defaultValue: "The connected signing wallet does not match this DHB address" }));
+      throw new Error(_translateCopy("copy.f3809982d30a", { defaultValue: "The connected signing wallet does not match this token address" }));
     }
   }
   if (!signer && getAccount(wagmiConfig).address?.toLowerCase() !== input.walletAddress.toLowerCase()) {

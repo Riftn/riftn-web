@@ -45,7 +45,7 @@ import {
 } from '@/lib/attachments';
 import { dragHasFiles } from '@/lib/comment-attachments';
 import { cleanVideoOptions, type DmVideoOptions } from '@/lib/dm-video-options';
-import type { DmDestructChoice } from '@/lib/dm-destruct';
+import { withReplay, type DmDestructChoice } from '@/lib/dm-destruct';
 import { DmMediaStudio, type DmStudioItem } from './DmVideoStudio';
 import { PhotoStudio, type StudioResult } from '@/features/post/components/PhotoStudio';
 import { LockPriceControl } from './LockPriceControl';
@@ -362,7 +362,7 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
           type: 'media',
           mediaFile: it.file,
           ...(it.kind === 'video' ? { mediaOptions: cleanVideoOptions(it.options, it.duration) } : {}),
-          ...(it.destruct && allowDocuments ? { destruct: it.destruct } : {}),
+          ...(it.destruct && allowDocuments ? { destruct: withReplay(it.destruct, it.destructReplay) } : {}),
           ...(allowLock && it.lockPrice ? { lockPrice: it.lockPrice } : {}),
         });
         if (!sent) {

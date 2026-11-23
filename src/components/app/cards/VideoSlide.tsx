@@ -12,6 +12,8 @@ import { useRef, useEffect, useState, useCallback, useContext, memo, lazy, Suspe
 import { useFeedPlaybackAllowed } from '@/lib/visual-activity';
 import { usePlaybackRecovery } from '@/hooks/use-playback-recovery';
 import { requestVideoPlayback } from '@/lib/video-start';
+import { useMediaVolume } from '@/lib/video-preferences';
+import { applyVideoVolume } from '@/lib/dub-volume';
 import { visualActivity } from '@/lib/visual-activity';
 import { usePictureInPicture } from '@/hooks/use-picture-in-picture';
 import { isVideoInPictureInPicture, releaseAfterPictureInPicture } from '@/lib/picture-in-picture';
@@ -314,6 +316,12 @@ const VideoSlideBody = memo(function VideoSlideBody({
       videoRef.current.muted = isMuted;
     }
   }, [isMuted]);
+
+  // The viewer's saved level, the same one feed and post videos play at.
+  const volume = useMediaVolume();
+  useEffect(() => {
+    if (videoRef.current) applyVideoVolume(videoRef.current, volume);
+  }, [volume, isActive]);
 
   // Update playback rate. The default rate is set too: loading a source (the
   // HLS ladder attaching after the handoff) puts playbackRate back to the

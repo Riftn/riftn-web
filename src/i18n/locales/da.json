@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Rediger video", "hiddenTag": "Skjult", "tapToEdit": "Tryk for at redigere", "cover": "Dæksel", "trim": "Beskær", "mirror": "Spejlvend", "rotate": "Roter", "hide": "Skjul", "timer": "Timer", "sheetTitleAny": "Rediger før afsendelse", "close": "Luk", "replace": "Erstat", "hiddenUntilTap": "Skjult, indtil de trykker på det", "pause": "Pause", "play": "Afspil video", "mute": "Slå lyd fra", "unmute": "Slå lyd til", "scrub": "Gå frem og tilbage i videoen", "addMore": "Tilføj billeder eller videoer", "trimAria": "Træk i enderne for at trimme", "coverAria": "Tryk på et billede for at vælge det som forsidebillede", "coverHint": "Tryk på et billede for at vælge det som forsidebillede", "coverOwn": "Dit billede", "coverAuto": "Auto", "uploadCover": "Upload et forsidebillede", "mirrored": "Spejlet", "original": "Original", "rotate90": "Roter 90°", "showNormally": "Vis normalt", "showNormallyBody": "De ser det med det samme", "hideUntilTap": "Skjul, indtil der trykkes på det", "hideUntilTapBody": "Sløret, indtil de trykker på det", "hidePrice": "Skjul bag en pris", "hidePriceBody": "Sløret, indtil de betaler dig", "priceUnavailable": "Ikke i denne chat", "timerOff": "Slået fra", "timerOffBody": "Det forbliver i chatten.", "timerViewBody": "Forsvinder for jer begge, når de har set det.", "confirm": "Bekræft", "lockedFor": "Lås op for {{value1}} DHB", "lockedForUsd": "Lås op for {{value1}}", "editItem": "Rediger element {{value1}}", "kept": "{{time}} beholdt", "timerTimeBody": "Forsvinder for jer begge {{value1}}, når du har sendt det."},
+  "dmVideo": {"edit": "Rediger video", "hiddenTag": "Skjult", "tapToEdit": "Tryk for at redigere", "cover": "Dæksel", "trim": "Beskær", "mirror": "Spejlvend", "rotate": "Roter", "hide": "Skjul", "timer": "Timer", "sheetTitleAny": "Rediger før afsendelse", "close": "Luk", "replace": "Erstat", "hiddenUntilTap": "Skjult, indtil de trykker på det", "pause": "Pause", "play": "Afspil video", "mute": "Slå lyd fra", "unmute": "Slå lyd til", "scrub": "Gå frem og tilbage i videoen", "addMore": "Tilføj billeder eller videoer", "trimAria": "Træk i enderne for at trimme", "coverAria": "Tryk på et billede for at vælge det som forsidebillede", "coverHint": "Tryk på et billede for at vælge det som forsidebillede", "coverOwn": "Dit billede", "coverAuto": "Auto", "uploadCover": "Upload et forsidebillede", "mirrored": "Spejlet", "original": "Original", "rotate90": "Roter 90°", "showNormally": "Vis normalt", "showNormallyBody": "De ser det med det samme", "hideUntilTap": "Skjul, indtil der trykkes på det", "hideUntilTapBody": "Sløret, indtil de trykker på det", "hidePrice": "Skjul bag en pris", "hidePriceBody": "Sløret, indtil de betaler dig", "priceUnavailable": "Ikke i denne chat", "timerOff": "Slået fra", "timerOffBody": "Det forbliver i chatten.", "timerViewBody": "Forsvinder for jer begge, når de har set det.", "confirm": "Bekræft", "lockedFor": "Lås op for {{value1}} tokens", "lockedForUsd": "Lås op for {{value1}}", "editItem": "Rediger element {{value1}}", "kept": "{{time}} beholdt", "timerTimeBody": "Forsvinder for jer begge {{value1}}, når du har sendt det."},
   "postBg": {
     "addMedia": "Tilføj et billede, en GIF eller en video",
     "changeMedia": "Skift billede, GIF eller video",
@@ -2120,7 +2120,7 @@
     "ogHolders_one": "{{count}} OG-indehaver",
     "ogHolders_other": "{{count}} OG-indehavere",
     "ogChallengeTitle": "Få OG-indehaverne tilbage",
-    "ogChallengeBody": "Inviter folk, der stadig har DHB. Når de tilmelder sig med dit invitationslink og beholder deres DHB i deres Riftn-tegnebog, tæller de for dig her.",
+    "ogChallengeBody": "Inviter folk, der stadig har tokens. Når de tilmelder sig med dit invitationslink og beholder deres tokens i deres Riftn-tegnebog, tæller de for dig her.",
     "ogChallengeCta": "Få dit invitationslink"
   },
   "dhbListing": {
@@ -12227,7 +12227,7 @@
           "4": "For å ta opp en talemelding, klikk på mikrofonikonet.",
           "5": "For å legge til en GIF, klikk på GIF-ikonet og søk etter en.",
           "6": "Bruk #hashtags for å kategorisere innlegget ditt (f.eks. #crypto, #defi).",
-          "7": "Bruk $cashtags for å referere til tokens (f.eks. $RIFT, $ETH).",
+          "7": "Bruk $cashtags for å referere til tokens (f.eks. $BTC, $ETH).",
           "8": "Bruk @mentions for å tagge andre brukere (f.eks. @brukernavn).",
           "9": "Klikk 'Innlegg' for å publisere. Innlegget ditt vises i feedet umiddelbart."
         },

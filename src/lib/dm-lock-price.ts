@@ -1,3 +1,4 @@
+import { tokenLabel } from '@/lib/token-label';
 /**
  * Locked DM photos and videos are priced in USD, like subscriptions. The
  * buyer pays that many dollars in DHB at the live rate, so the seller's price
@@ -30,7 +31,7 @@ export function lockDhbForUsd(usd: number, rate = DHB_PRELISTING_USD): number {
 }
 
 export function formatLockDhb(dhb: number): string {
-  return `${dhb.toLocaleString(undefined, { maximumFractionDigits: 2 })} DHB`;
+  return `${dhb.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${tokenLabel()}`;
 }
 
 /** The lock's USD price; locks made before dollar pricing were set at the fixed DHB price. */

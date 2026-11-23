@@ -1,4 +1,5 @@
 import { tokenLabel } from '@/lib/token-label';
+import { isDhbSymbol } from '@/lib/market/dhb-symbols';
 /**
  * An amount denominated in DHB, rendered with the gold coin in place of the
  * ticker text.
@@ -28,8 +29,7 @@ interface DhbAmountProps {
 
 /** Absent currency means DHB — every caller's fallback was `|| 'DHB'` already. */
 export function isDhb(currency?: string | null): boolean {
-  const symbol = (currency ?? 'DHB').trim().toUpperCase().replace(/^\$/, '');
-  return symbol === '' || symbol === 'DHB' || symbol === 'DEHUB';
+  return !currency?.trim() || isDhbSymbol(currency);
 }
 
 export function DhbAmount({ amount, currency, iconClassName, className }: DhbAmountProps) {
