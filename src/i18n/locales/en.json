@@ -199,7 +199,9 @@
     "destructSecs": "{{n}} sec",
     "destructShortSecs": "{{n}}s",
     "revealAria": "Reveal hidden video",
-    "tapToReveal": "Tap to reveal"
+    "tapToReveal": "Tap to reveal",
+    "timerReplay": "Allow one replay",
+    "timerReplayBody": "They can open it one more time. The countdown starts again."
   },
   "assistantCards": {
     "requestDraft": "Public request draft",
@@ -3753,6 +3755,7 @@
     "anonymousLikes_other": "{{count}} likes from anonymous badge holders"
   },
   "mintChain": {
+    "homeAllowance": "{{left}} of {{total}} mints today reach Home. Extra mints go to your profile and the market.",
     "title": "Mint post",
     "subtitle": "Choose a chain. Prices are live and update every minute.",
     "free": "Free",
@@ -12719,6 +12722,8 @@
     "intro": "Each tier costs a fixed amount in dollars. The token figure beside it is what that costs at the $0.001 reference price — the app asks for that figure scaled to the live price, and never for more than it, so a falling price cannot raise the bar or take back a tier you have already earned."
   },
   "postingAllowance": {
+    "mintsLabel": "mints",
+    "mintNote": "Mints use the same numbers as text posts: that many mints a day reach the home feed. Extra mints still go through and show on your profile, in Following and in the fractions market. Minting is never blocked.",
     "footnote": "Badge tier is your Riftn tokens held plus staked on BNB Chain and Base — the same balance your badge is drawn from. The ladder is priced in dollars, so the token figures above are what each tier costs at the $0.001 sale price and the requirement falls as the token price rises; a tier you have already earned is never taken back by the price. A badge lent to you by a patron shows on your profile but does not raise your posting allowance — that comes from what you hold yourself. Allowances reset at 00:00 UTC, and a gigabyte here is 1,024 MB."
   },
   "postComposer": {
@@ -13122,7 +13127,8 @@
           "3": "Media is one shared pool of data per day across video, images and audio, so lots of small posts all fit.",
           "4": "Once you pass either allowance, new posts of that kind go to your profile and your followers' Following feed.",
           "5": "Nothing is hidden: everything you post stays on your profile.",
-          "6": "Both allowances reset at midnight UTC."
+          "6": "Both allowances reset at midnight UTC.",
+          "7": "Mints work the same way: your badge sets how many mints a day reach the home feed, the same number as your text posts. Extra mints still go through and show on your profile, in Following and in the fractions market."
         },
         "tips": {
           "1": "A higher staking badge puts more of your posts on the home feed each day.",
@@ -13504,7 +13510,13 @@
       "opened": "Opened",
       "tapPhoto": "Tap to view",
       "tapVideo": "Tap to watch",
-      "goneAfter": "Disappears {{time}} after you open it"
+      "goneAfter": "Disappears {{time}} after you open it",
+      "left": "{{n}}s",
+      "replayAllowed": "One replay allowed",
+      "tapReplay": "Tap to replay",
+      "lastView": "Last view, {{time}}",
+      "goneAfterReplay": "Disappears {{time}} after you open it. One replay.",
+      "replaying": "Replay"
     },
     "shareKindGroup": "Group",
     "shareKindChannel": "Channel",
@@ -23242,5 +23254,30 @@
     "open": "Open chat",
     "encrypted": "Encrypted message",
     "sentAttachment": "Sent an attachment"
+  },
+  "badgeMuseum": {
+    "title": "Badge Museum",
+    "open": "Open Badge Museum",
+    "summary": "{{earned}} of {{total}} badges earned",
+    "loading": "Loading badges…",
+    "earned": "Earned",
+    "progress": "{{value}} / {{goal}}",
+    "footer": "Badges unlock on their own as milestones are reached.",
+    "name": {
+      "views": "{{value}} views",
+      "videos": "{{value}} videos",
+      "followers": "{{value}} followers",
+      "likes": "{{value}} likes",
+      "firstLive": "First live",
+      "liveHours": "{{value}} hours live"
+    },
+    "hint": {
+      "views": "Views across all posts",
+      "videos": "Videos uploaded",
+      "followers": "Followers",
+      "likes": "Likes received",
+      "firstLive": "Go live once",
+      "liveHours": "Hours streamed live"
+    }
   }
 }

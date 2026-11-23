@@ -199,7 +199,9 @@
     "destructSecs": "{{n}} seg",
     "destructShortSecs": "{{n}}s",
     "revealAria": "Revelar video oculto",
-    "tapToReveal": "Toca para revelar"
+    "tapToReveal": "Toca para revelar",
+    "timerReplay": "Permitir una repetición",
+    "timerReplayBody": "Pueden abrirlo una vez más. La cuenta atrás vuelve a empezar."
   },
   "assistantCards": {
     "requestDraft": "Borrador de solicitud pública",
@@ -3753,6 +3755,7 @@
     "anonymousLikes_other": "{{count}} me gusta de titulares de insignias anónimos"
   },
   "mintChain": {
+    "homeAllowance": "{{left}} de {{total}} minteos de hoy llegan a Inicio. Los minteos extra van a tu perfil y al mercado.",
     "title": "Publicación de menta",
     "subtitle": "Elige una cadena. Los precios están disponibles y se actualizan cada minuto.",
     "free": "Gratis",
@@ -12720,6 +12723,8 @@
     "intro": "Cada nivel cuesta una cantidad fija en dólares. La cantidad de tokens que aparece al lado es lo que cuesta al precio de referencia de $0.001; la aplicación solicita esa cantidad escalada al precio en vivo, y nunca más que eso, por lo que un precio decreciente no puede elevar la barra ni retirar un nivel que ya hayas ganado."
   },
   "postingAllowance": {
+    "mintsLabel": "minteos",
+    "mintNote": "Los minteos usan los mismos números que las publicaciones de texto: esa cantidad de minteos al día llega al feed de Inicio. Los minteos extra se completan igual y aparecen en tu perfil, en Siguiendo y en el mercado de fracciones. Nunca se bloquea el minteo.",
     "footnote": "El nivel de insignia es la cantidad de tokens de Riftn que tienes en posesión y en staking en BNB Chain y Base; el mismo saldo del que se extrae tu insignia. La escala se cotiza en dólares, por lo que las cantidades de tokens anteriores son lo que cuesta cada nivel al precio de venta de $0.001 y el requisito disminuye a medida que aumenta el precio del token; un nivel que ya has ganado nunca se retira por el precio. Una insignia que te presta un patrocinador se muestra en tu perfil pero no aumenta tu asignación de publicación; esa proviene de lo que posees tú mismo. Las asignaciones se restablecen a las 00:00 UTC, y un gigabyte aquí es 1024 MB."
   },
   "postComposer": {
@@ -13123,7 +13128,8 @@
           "3": "Cuando una publicación excede el límite, la aplicación la valora primero y verifica si tu billetera puede cubrirla antes de que se suba nada.",
           "4": "La publicación se muestra exactamente como lo haría dentro de la asignación; la publicación nunca espera un pago.",
           "5": "Luego, apruebas una transferencia solo para esa publicación, liquidada en la cadena Base o BNB que tenga suficientes tokens de Riftn.",
-          "6": "Ambos grupos se reinician a medianoche UTC."
+          "6": "Ambos grupos se reinician a medianoche UTC.",
+          "7": "Los minteos funcionan igual: tu insignia fija cuántos minteos al día llegan al feed de Inicio, el mismo número que tus publicaciones de texto. Los minteos extra se completan igual y aparecen en tu perfil, en Siguiendo y en el mercado de fracciones."
         },
         "tips": {
           "1": "El exceso es prorrateado: 200 MB por encima de tu asignación cuestan 200 MB, no un gigabyte completo.",
@@ -13505,7 +13511,13 @@
       "opened": "Abierto",
       "tapPhoto": "Toca para ver",
       "tapVideo": "Toca para reproducir",
-      "goneAfter": "Desaparece {{time}} después de abrirlo"
+      "goneAfter": "Desaparece {{time}} después de abrirlo",
+      "left": "{{n}} s",
+      "replayAllowed": "Se permite una repetición",
+      "tapReplay": "Toca para volver a ver",
+      "lastView": "Última vez, {{time}}",
+      "goneAfterReplay": "Desaparece {{time}} después de abrirlo. Una repetición.",
+      "replaying": "Repetición"
     },
     "shareKindGroup": "Grupo",
     "shareKindChannel": "Canal",
@@ -23268,5 +23280,30 @@
     "open": "Abrir chat",
     "encrypted": "Mensaje cifrado",
     "sentAttachment": "Envió un archivo"
+  },
+  "badgeMuseum": {
+    "title": "Museo de insignias",
+    "open": "Abrir el Museo de insignias",
+    "summary": "{{earned}} de {{total}} insignias conseguidas",
+    "loading": "Cargando insignias…",
+    "earned": "Conseguida",
+    "progress": "{{value}} / {{goal}}",
+    "footer": "Las insignias se desbloquean solas al alcanzar cada hito.",
+    "name": {
+      "views": "{{value}} visualizaciones",
+      "videos": "{{value}} vídeos",
+      "followers": "{{value}} seguidores",
+      "likes": "{{value}} me gusta",
+      "firstLive": "Primer directo",
+      "liveHours": "{{value}} horas en directo"
+    },
+    "hint": {
+      "views": "Visualizaciones en todas las publicaciones",
+      "videos": "Vídeos subidos",
+      "followers": "Seguidores",
+      "likes": "Me gusta recibidos",
+      "firstLive": "Haz un directo una vez",
+      "liveHours": "Horas emitidas en directo"
+    }
   }
 }

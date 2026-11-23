@@ -5,13 +5,15 @@ import { useTranslation } from 'react-i18next';
 import { DhbCoin } from '@/components/app/DhbAmount';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { badgeImage } from '@/lib/staking-badges';
+import { formatCount } from '@/lib/format-count';
 
 /**
  * The daily home-feed allowance, drawn as a ladder.
  *
  * Posting is never limited or charged; a badge decides how many text posts and
  * how much media reach the public home feed each day, and anything past that
- * goes to the creator's profile. A table alone hides the shape of the ladder — the apex tiers break away rather than continuing the
+ * goes to the creator's profile. Mints reaching Home use the same numbers as
+ * text posts (`mintsPerDay` in the backend). A table alone hides the shape of the ladder — the apex tiers break away rather than continuing the
  * straight line — so the bar is the point of this component and the numbers sit
  * beside it rather than replacing it.
  *
@@ -57,7 +59,24 @@ const gbLabel = (gb: number) => (Number.isInteger(gb) ? `${gb} GB` : `${gb.toFix
 
 const AllowanceFootnote = () => {
   const { t } = useTranslation();
-  return <p className="text-xs text-muted-foreground mt-4 font-exo">{t('postingAllowance.footnote')}</p>;
+  return (
+    <>
+      <p className="text-sm text-foreground/80 mt-4 font-exo">{t('postingAllowance.mintNote')}</p>
+      <p className="text-xs text-muted-foreground mt-2 font-exo">{t('postingAllowance.footnote')}</p>
+    </>
+  );
+};
+
+/** Mints a day that reach Home: the same ladder as text posts. */
+const MintsPerDay = ({ value }: { value: number }) => {
+  const { t } = useTranslation();
+  return (
+    <>
+      <span className="text-muted-foreground"> · </span>
+      <strong className="font-semibold">{formatCount(value)}</strong>
+      <span className="text-muted-foreground"> {t('postingAllowance.mintsLabel')}</span>
+    </>
+  );
 };
 
 const PostingAllowanceChart = () => (
@@ -112,6 +131,7 @@ const PostingAllowanceChart = () => (
                     <span className="text-muted-foreground"> · </span>
                     <strong className="font-semibold">{tier.postsPerDay}</strong>
                     <span className="text-muted-foreground"><TranslationText name="copy.a092b4b19981" fallback={" text posts"} /></span>
+                    <MintsPerDay value={tier.postsPerDay} />
                   </span>
                 </div>
               </div>
