@@ -144,6 +144,8 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-story-shelf] {
 }
 /* Watched moments fade to grey so new ones stand out. */
 [data-story-tile][data-kind='person'][data-seen='true'] { filter: grayscale(1); opacity: 0.6; }
+/* Settings > Blur Moment previews: nothing shows until the tile is opened. */
+[data-story-tile][data-blur='true'] > [data-st-bg] { filter: blur(22px) saturate(0.8); transform: scale(1.25); }
 [data-story-tile] [data-st-live] {
   background: #bf303b;
   border: 1px solid #d56e78;

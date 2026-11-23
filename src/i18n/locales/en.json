@@ -1750,7 +1750,9 @@
     "menuLayoutFolders": "Folders",
     "menuLayoutFoldersDesc": "Your main pages, then a folder for each group",
     "publicChatInBar": "Public Chat in the bottom bar",
-    "publicChatInBarDesc": "One tap into Public Chat from the bar at the bottom of the screen"
+    "publicChatInBarDesc": "One tap into Public Chat from the bar at the bottom of the screen",
+    "blurMoments": "Blur Moment previews",
+    "blurMomentsDesc": "Other people's Moments stay blurred on Home until you open them."
   },
   "common": {
     "notNow": "Not now",

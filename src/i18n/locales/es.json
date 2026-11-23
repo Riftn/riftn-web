@@ -1750,7 +1750,9 @@
     "menuLayoutFolders": "Carpetas",
     "menuLayoutFoldersDesc": "Tus páginas principales y una carpeta por grupo",
     "publicChatInBar": "Chat público en la barra inferior",
-    "publicChatInBarDesc": "Entra al Chat público con un toque desde la barra inferior de la pantalla"
+    "publicChatInBarDesc": "Entra al Chat público con un toque desde la barra inferior de la pantalla",
+    "blurMoments": "Difuminar vistas previas de Momentos",
+    "blurMomentsDesc": "Los Momentos de otras personas se ven difuminados en Inicio hasta que los abras."
   },
   "common": {
     "notNow": "Ahora no",

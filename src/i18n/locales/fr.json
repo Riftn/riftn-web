@@ -1750,7 +1750,9 @@
     "menuLayoutFolders": "Dossiers",
     "menuLayoutFoldersDesc": "Vos pages principales, puis un dossier par groupe",
     "publicChatInBar": "Chat public dans la barre du bas",
-    "publicChatInBarDesc": "Ouvre le Chat public d'un seul geste depuis la barre en bas de l'écran"
+    "publicChatInBarDesc": "Ouvre le Chat public d'un seul geste depuis la barre en bas de l'écran",
+    "blurMoments": "Flouter les aperçus des Moments",
+    "blurMomentsDesc": "Les Moments des autres restent floutés sur l'accueil jusqu'à ce que tu les ouvres."
   },
   "common": {
     "notNow": "Pas maintenant",
