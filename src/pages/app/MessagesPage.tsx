@@ -1224,6 +1224,15 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     </div>
   ) : null;
 
+  // The Notes sheet is mounted in every view, so a note tapped in an open group chat opens too.
+  const notesSheetHost = !guest && walletAddress ? (
+    <NotesSheetHost onMessage={(author, reply) => {
+      // A reply to a note is sent as soon as the chat with them is ready.
+      if (reply) pendingAutoSendRef.current = { peerAddress: author.address.toLowerCase(), body: reply };
+      handleSelectSearchUser({ ...author, _id: author.address } as unknown as DeHubUser);
+    }} />
+  ) : null;
+
   const roomPane = fullscreen && selectedRoom ? (
     <div className="h-full overflow-hidden pt-1">
       <Suspense fallback={null}><RoomChatPane key={selectedRoom.id} community={selectedRoom} onBack={closeChat} /></Suspense>
@@ -1233,6 +1242,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     return (
       <div style={keyboardStyle} className={`${mobileChatHeight} lg:h-[calc(100dvh-32px)] pt-1 pb-0 sm:pt-1 sm:pb-3 lg:pt-2 overflow-hidden`}>
         <Suspense fallback={null}><RoomChatPane key={selectedRoom.id} community={selectedRoom} onBack={closeChat} /></Suspense>
+        {notesSheetHost}
       </div>
     );
   }
@@ -1935,13 +1945,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
         onSelectChannel={() => setNewChatKind('channel')}
       />
 
-      {!guest && walletAddress && (
-        <NotesSheetHost onMessage={(author, reply) => {
-          // A reply to a note is sent as soon as the chat with them is ready.
-          if (reply) pendingAutoSendRef.current = { peerAddress: author.address.toLowerCase(), body: reply };
-          handleSelectSearchUser({ ...author, _id: author.address } as unknown as DeHubUser);
-        }} />
-      )}
+      {notesSheetHost}
 
       <NewGroupChannelSheet
         kind={newChatKind ?? 'group'}
