@@ -1656,7 +1656,7 @@ function CollectGallery() {
           <AuctionBox target={{ chainId: 8453, contract: '0x9f8012074d27f8596c0e5038477acb52057bc934', tokenId: '1202' }} me={'0x' + 'c'.repeat(40)} isAuthenticated held={0n} standard="erc1155" dhb={undefined} offers={[]} name="Quiet field" image={null} preview={galleryAuction(false)} />
         </div>
       </div>
-      <div className="mt-4 max-w-md" data-collect-state="create-making">
+      <div className="mt-4" data-collect-state="create-making">
         <CreateNftPanel
           onOpen={() => undefined}
           preview={{

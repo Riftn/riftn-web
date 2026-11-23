@@ -252,8 +252,8 @@ export function CreateNftPanel({ onOpen, preview }: Props) {
 
   const tileName = name.trim() || t('nftCreate.untitled', { defaultValue: 'Untitled' });
   return (
-    <div data-page-bento data-nft-create data-nft-create-making className="rounded-xl bg-zinc-900 p-3 lg:grid lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)] lg:gap-5 lg:p-4">
-      <div className="mb-3 lg:mb-0">
+    <div data-page-bento data-nft-create data-nft-create-making className="mx-auto w-full max-w-[560px] rounded-xl bg-zinc-900 p-3 sm:p-4">
+      <div className="mb-4">
         <button
           type="button"
           onClick={() => { if (!busy) { reset(); setMaking(false); } }}
