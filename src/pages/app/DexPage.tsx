@@ -61,7 +61,7 @@ const listingPrice = (item: VerifiedPosition) => item.side === 'buy' ? item.maxP
 /** What was deposited, not what the position currently holds after partial conversion. */
 const listingSize = (item: VerifiedPosition) => item.side === 'buy'
   ? `${formatSize(Number(item.usdc_amount ?? item.amountUsdc))} USDC`
-  : `${formatSize(Number(item.dhb_amount ?? item.amountDhb))} DHB`;
+  : `${formatSize(Number(item.dhb_amount ?? item.amountDhb))} ${tokenLabel()}`;
 function formatWhen(iso: string) {
   const date = new Date(iso);
   if (date.toDateString() === new Date().toDateString()) return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });

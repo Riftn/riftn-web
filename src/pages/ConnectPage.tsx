@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { SEOHead } from "@/components/SEOHead";
 import { toast } from "sonner";
 import PersonalKeys, { MCP_URL } from "@/components/PersonalKeys";
+import ConnectChatGPTLink from "@/components/ConnectChatGPTLink";
 import AgentsIcon from "@/components/ui/cut-icons/agents";
 
 const CLAUDE_CODE = `claude mcp add --transport http riftn ${MCP_URL}`;
@@ -58,6 +59,14 @@ export default function ConnectPage() {
         <h1 className="text-3xl md:text-5xl font-semibold tracking-tight mb-3">{g('title')}</h1>
         <p className="text-white/60 text-base md:text-lg mb-10">{g('desc')}</p>
 
+        <section className="mb-12">
+          <h2 className="mb-3 text-2xl font-semibold">ChatGPT</h2>
+          <ConnectChatGPTLink />
+          <p className="mt-3 text-sm text-white/70">
+            {t('accountConnect.chatgptInstructions', { defaultValue: 'Choose Connect in ChatGPT, then sign in to Riftn and approve access.' })}
+          </p>
+        </section>
+
         {/* MCP URL card */}
         <div className="bg-black/60 backdrop-blur-[24px] border border-white/10 rounded-2xl p-5 md:p-6 mb-3">
           <div className="text-xs uppercase tracking-wider text-white/40 mb-2">{g('urlLabel')}</div>
@@ -89,16 +98,6 @@ export default function ConnectPage() {
           <p className="text-white/60 text-sm mb-3">{g('agentsBody')}</p>
           <p className="text-white/80 text-sm italic mb-4">{g('agentsExample')}</p>
           <Link to="/app/agents" className="inline-flex items-center gap-1.5 text-sm text-white underline hover:opacity-80">{g('agentLink')}</Link>
-        </section>
-
-        {/* ChatGPT */}
-        <section className="mb-12">
-          <div className="flex items-center justify-between gap-3 mb-4">
-            <h2 className="text-2xl font-semibold">ChatGPT</h2>
-            <a href="https://chatgpt.com/#settings/Connectors" target="_blank" rel="noreferrer" className="text-sm text-white underline hover:opacity-80">{g('openSettings')}</a>
-          </div>
-          {steps(['chatgpt1', 'chatgpt2', 'chatgpt3', 'chatgpt4', 'chatgpt5'])}
-          <Link to="/connect/chatgpt" className="inline-block mt-4 text-sm text-white underline hover:opacity-80">{t("copy.e27b8c5f9d13")}</Link>
         </section>
 
         {/* Claude */}

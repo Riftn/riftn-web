@@ -21,6 +21,8 @@
  */
 
 import { DHB_TOTAL_SUPPLY } from '@/lib/contracts/dhb-token';
+import { isDhbSymbol } from './dhb-symbols';
+export { isDhbSymbol } from './dhb-symbols';
 
 /** The shape both callers share — a partial view of the function's response. */
 interface DhbCorrectable {
@@ -31,18 +33,6 @@ interface DhbCorrectable {
   circulatingSupply?: number | null;
   totalSupply?: number | null;
   maxSupply?: number | null;
-}
-
-/**
- * Every cashtag that means our token. $RIFT and $RIFTN are the new brand
- * (Riftn is becoming Riftn), so they resolve to DHB's card, logo and numbers
- * rather than to whatever unrelated coin also uses that ticker.
- */
-const DHB_SYMBOLS = new Set(['DHB', 'DEHUB', 'RIFT', 'RIFTN']);
-
-export function isDhbSymbol(symbol?: string | null): boolean {
-  const s = symbol?.trim().replace(/^\$/, '').toUpperCase();
-  return !!s && DHB_SYMBOLS.has(s);
 }
 
 /**

@@ -6,6 +6,7 @@ import { useTranslation as _useCopy } from 'react-i18next';
 import { useVideoDownload } from "@/hooks/use-video-download";
 import { cdnImageSrcSet } from '@/lib/media-url';
 import { applyVideoVolume } from '@/lib/dub-volume';
+import { VideoVolumeControl } from '@/components/app/video/VideoVolumeControl';
 import { MediaControlIcon } from '@/components/app/video/MediaControlIcon';
 import { useFeedPlaybackAllowed, visualActivity } from '@/lib/visual-activity';
 import { isVideoOutsideFeed } from '@/lib/video-background-playback';
@@ -974,32 +975,9 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
   // bottom row with play and remaining time.
   const bareControls = !video.isAudio && !(video.isLivePost && video.isLiveNow) && !!video.videoUrl;
   const [dubAvailable, setDubAvailable] = useState(false);
+  // The speaker's slider (see VideoVolumeControl): hover on desktop, press
+  // and hold on a phone. Open counts as activity so the controls stay up.
   const [volumeOpen, setVolumeOpen] = useState(false);
-  // Hover volume: close on a short delay so the pointer can travel from the
-  // speaker icon to the slider, and never while the slider is being dragged.
-  const volumeCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const volumeDragging = useRef(false);
-  const openVolume = useCallback(() => {
-    if (volumeCloseTimer.current) { clearTimeout(volumeCloseTimer.current); volumeCloseTimer.current = null; }
-    setVolumeOpen(true);
-  }, []);
-  const closeVolumeSoon = useCallback(() => {
-    if (volumeDragging.current) return;
-    if (volumeCloseTimer.current) clearTimeout(volumeCloseTimer.current);
-    volumeCloseTimer.current = setTimeout(() => { volumeCloseTimer.current = null; setVolumeOpen(false); }, 350);
-  }, []);
-  const startVolumeDrag = useCallback(() => {
-    volumeDragging.current = true;
-    const end = () => {
-      volumeDragging.current = false;
-      window.removeEventListener('pointerup', end);
-      window.removeEventListener('pointercancel', end);
-      if (!document.querySelector('[data-volume-hover]:hover')) closeVolumeSoon();
-    };
-    window.addEventListener('pointerup', end);
-    window.addEventListener('pointercancel', end);
-  }, [closeVolumeSoon]);
-  useEffect(() => () => { if (volumeCloseTimer.current) clearTimeout(volumeCloseTimer.current); }, []);
   const [seekIndicator, setSeekIndicator] = useState<'left' | 'right' | null>(null);
   const [showPlayIndicator, setShowPlayIndicator] = useState<'play' | 'pause' | null>(null);
   // This creator's own rate if they have one, otherwise the global default.
@@ -1539,8 +1517,11 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
     setVolumeTo(volume + delta);
   }, [volume, setVolumeTo]);
 
-  /** Slider position. Muted reads as zero so the icon and the track agree. */
-  const volumePct = Math.round((isMuted ? 0 : volume) * 100);
+  /** A tap on the speaker. A level dragged down to nothing comes back up, or unmuting would stay silent. */
+  const handleSpeakerClick = useCallback((event: React.MouseEvent) => {
+    if (volume === 0) { event.stopPropagation(); setVolumeTo(0.8); }
+    else toggleMute(event);
+  }, [volume, setVolumeTo, toggleMute]);
 
   // A menu or slider open over the player counts as activity: the row must not
   // vanish out from under the thing the pointer is already inside.
@@ -3087,19 +3068,20 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
 
         {!isContentGated && <>
         {feedPreview && (
-          <button
-            type="button"
-            data-video-controls data-video-bare data-preview-mute
-            aria-label={isMuted ? _copy("copy.ce4ee4efc5e3", { defaultValue: "Unmute" }) : _copy("copy.8dd6857baf02", { defaultValue: "Mute" })}
-            onPointerDown={(event) => event.stopPropagation()}
-            onPointerUp={(event) => event.stopPropagation()}
-            onTouchStart={(event) => event.stopPropagation()}
-            onTouchEnd={(event) => event.stopPropagation()}
-            onClick={toggleMute}
-            className="absolute right-1.5 top-1.5 z-20 flex h-9 w-9 items-center justify-center text-white"
+          <VideoVolumeControl
+            layout="below"
+            volume={volume} muted={isMuted || volume === 0}
+            onToggleMute={handleSpeakerClick} onVolume={setVolumeTo}
+            open={volumeOpen} onOpenChange={setVolumeOpen}
+            label={isMuted ? _copy("copy.ce4ee4efc5e3", { defaultValue: "Unmute" }) : _copy("copy.8dd6857baf02", { defaultValue: "Mute" })}
+            sliderLabel={t('videoPlayer.volume')}
+            wrapperData={{ 'data-video-controls': true, 'data-preview-mute': true }}
+            className="absolute right-1.5 top-1.5 z-20"
+            buttonData={{ 'data-video-bare': true }}
+            buttonClassName="flex h-9 w-9 items-center justify-center text-white"
           >
-            <MediaControlIcon icon={isMuted ? VolumeX : Volume2} plain />
-          </button>
+            <MediaControlIcon icon={isMuted || volume === 0 ? VolumeX : Volume2} plain />
+          </VideoVolumeControl>
         )}
         {liveFeedPreview && (
           <button
@@ -3128,58 +3110,17 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
                 onToggleMute={(event) => { if (volume === 0) setVolumeTo(0.8); else toggleMute(event); }}
                 onUnmute={() => { if (isMuted || volume === 0) setVolumeTo(volume || 0.8); }} />
               </Suspense>
-            ) : <div
-              className="relative"
-              data-volume-hover
-              onPointerEnter={(e) => { if (e.pointerType === 'mouse') openVolume(); }}
-              onPointerLeave={(e) => { if (e.pointerType === 'mouse') closeVolumeSoon(); }}
-              onTouchStart={() => setVolumeOpen(false)}
+            ) : <VideoVolumeControl
+              layout="below"
+              volume={volume} muted={isMuted || volume === 0}
+              onToggleMute={handleSpeakerClick} onVolume={setVolumeTo}
+              open={volumeOpen} onOpenChange={setVolumeOpen}
+              label={t('videoPlayer.volume')}
+              sliderLabel={t('videoPlayer.volume')}
+              buttonClassName="h-8 w-8 text-white flex items-center justify-center"
             >
-              <button
-                className="h-8 w-8 text-white flex items-center justify-center"
-                onClick={toggleMute}
-                aria-label={t('videoPlayer.volume')}
-              >
-                {isMuted ? <MediaControlIcon icon={VolumeX} /> : <MediaControlIcon icon={Volume2} />}
-              </button>
-              {volumeOpen && (
-                <div data-volume-pop className="absolute top-full right-0 pt-1.5" onClick={(e) => e.stopPropagation()}>
-                  <div className="h-[104px] w-8 bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] rounded-xl border border-white/10 flex items-center justify-center">
-                    <input
-                      type="range"
-                      min={0}
-                      max={100}
-                      step={1}
-                      value={volumePct}
-                      onChange={(e) => setVolumeTo(Number(e.target.value) / 100)}
-                      onClick={(e) => e.stopPropagation()}
-                      onPointerDown={startVolumeDrag}
-                      aria-label={t('videoPlayer.volume')}
-                      className="h-8 w-[84px] shrink-0 -rotate-90 appearance-none cursor-pointer bg-transparent
-                        [&::-webkit-slider-runnable-track]:h-1
-                        [&::-webkit-slider-thumb]:-mt-1
-                        [&::-webkit-slider-thumb]:appearance-none
-                        [&::-webkit-slider-thumb]:w-3
-                        [&::-webkit-slider-thumb]:h-3
-                        [&::-webkit-slider-thumb]:bg-white
-                        [&::-webkit-slider-thumb]:rounded-full
-                        [&::-webkit-slider-thumb]:shadow-md
-                        [&::-moz-range-thumb]:w-3
-                        [&::-moz-range-thumb]:h-3
-                        [&::-moz-range-thumb]:bg-white
-                        [&::-moz-range-thumb]:rounded-full
-                        [&::-moz-range-thumb]:border-0"
-                      style={{
-                        backgroundImage: 'linear-gradient(to right, white ' + volumePct + '%, rgba(255,255,255,0.3) ' + volumePct + '%)',
-                        backgroundPosition: 'center',
-                        backgroundRepeat: 'no-repeat',
-                        backgroundSize: '100% 4px',
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>}
+              {isMuted || volume === 0 ? <MediaControlIcon icon={VolumeX} /> : <MediaControlIcon icon={Volume2} />}
+            </VideoVolumeControl>}
 
           </div>
         )}
@@ -3221,60 +3162,18 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
                 onToggleMute={(event) => { if (volume === 0) setVolumeTo(0.8); else toggleMute(event); }}
                 onUnmute={() => { if (isMuted || volume === 0) setVolumeTo(volume || 0.8); }} />
               </Suspense>
-            ) : <div
-              className="relative"
-              data-volume-hover
-              onPointerEnter={(e) => { if (e.pointerType === 'mouse') openVolume(); }}
-              onPointerLeave={(e) => { if (e.pointerType === 'mouse') closeVolumeSoon(); }}
-              onTouchStart={() => setVolumeOpen(false)}
+            ) : <VideoVolumeControl
+              layout="beside"
+              volume={volume} muted={isMuted || volume === 0}
+              onToggleMute={handleSpeakerClick} onVolume={setVolumeTo}
+              open={volumeOpen} onOpenChange={setVolumeOpen}
+              label={isMuted ? _copy("copy.ce4ee4efc5e3", { defaultValue: "Unmute" }) : _copy("copy.8dd6857baf02", { defaultValue: "Mute" })}
+              sliderLabel={t('videoPlayer.volume')}
+              buttonData={{ 'data-video-bare': true }}
+              buttonClassName="h-8 w-8 text-white flex items-center justify-center"
             >
-              <button
-                type="button"
-                data-video-bare
-                className="h-8 w-8 text-white flex items-center justify-center"
-                onClick={toggleMute}
-                aria-label={isMuted ? _copy("copy.ce4ee4efc5e3", { defaultValue: "Unmute" }) : _copy("copy.8dd6857baf02", { defaultValue: "Mute" })}
-              >
-                {isMuted ? <MediaControlIcon icon={VolumeX} plain={splitControls} /> : <MediaControlIcon icon={Volume2} plain={splitControls} />}
-              </button>
-              {volumeOpen && (
-                <div data-volume-pop className="absolute bottom-full left-0 pb-1.5" onClick={(e) => e.stopPropagation()}>
-                  <div className="h-[104px] w-8 bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] rounded-xl border border-white/10 flex items-center justify-center">
-                    <input
-                      type="range"
-                      min={0}
-                      max={100}
-                      step={1}
-                      value={volumePct}
-                      onChange={(e) => setVolumeTo(Number(e.target.value) / 100)}
-                      onClick={(e) => e.stopPropagation()}
-                      onPointerDown={startVolumeDrag}
-                      aria-label={t('videoPlayer.volume')}
-                      className="h-8 w-[84px] shrink-0 -rotate-90 appearance-none cursor-pointer bg-transparent
-                        [&::-webkit-slider-runnable-track]:h-1
-                        [&::-webkit-slider-thumb]:-mt-1
-                        [&::-webkit-slider-thumb]:appearance-none
-                        [&::-webkit-slider-thumb]:w-3
-                        [&::-webkit-slider-thumb]:h-3
-                        [&::-webkit-slider-thumb]:bg-white
-                        [&::-webkit-slider-thumb]:rounded-full
-                        [&::-webkit-slider-thumb]:shadow-md
-                        [&::-moz-range-thumb]:w-3
-                        [&::-moz-range-thumb]:h-3
-                        [&::-moz-range-thumb]:bg-white
-                        [&::-moz-range-thumb]:rounded-full
-                        [&::-moz-range-thumb]:border-0"
-                      style={{
-                        backgroundImage: 'linear-gradient(to right, white ' + volumePct + '%, rgba(255,255,255,0.3) ' + volumePct + '%)',
-                        backgroundPosition: 'center',
-                        backgroundRepeat: 'no-repeat',
-                        backgroundSize: '100% 4px',
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>}
+              {isMuted || volume === 0 ? <MediaControlIcon icon={VolumeX} plain={splitControls} /> : <MediaControlIcon icon={Volume2} plain={splitControls} />}
+            </VideoVolumeControl>}
                 </div>}
                 <span data-video-bare data-video-time data-keep-dark={!splitControls || undefined} className="min-w-[36px] text-center text-xs font-medium tabular-nums text-white">{formatTime(Math.max(0, Math.ceil(duration - currentTime)))}</span>
               </div>

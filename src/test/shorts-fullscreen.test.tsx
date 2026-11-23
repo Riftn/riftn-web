@@ -270,7 +270,7 @@ describe('the two players share one fullscreen implementation', () => {
     // …and the chrome is inside that same container, below its opening tag and
     // above its close.
     const container = VIEWER.slice(VIEWER.indexOf('ref={attachVideoContainer}'));
-    expect(container).toMatch(/aria-label=\{isMuted \? _copy\([^\n]+defaultValue: "Unmute"[^\n]+defaultValue: "Mute"/);
+    expect(container).toMatch(/label=\{speakerSilent \? _copy\([^\n]+defaultValue: "Unmute"[^\n]+defaultValue: "Mute"/);
     expect(container.indexOf('{/* Creator + description, fullscreen only.')).toBeGreaterThan(-1);
   });
 
