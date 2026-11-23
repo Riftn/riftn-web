@@ -2,7 +2,7 @@ import { useTranslation as _useCopy } from 'react-i18next';
 import { NotificationsDrawer } from './NotificationsDrawer';
 import { MagneticDockEntry } from './MagneticDockEntry';
 import React, { Suspense, useState, useEffect, useRef, useLayoutEffect, type ReactNode } from 'react';
-import { Outlet, useLocation, useMatch } from 'react-router-dom';
+import { Outlet, useLocation, useMatch, useNavigationType } from 'react-router-dom';
 import { AppSidebar } from './AppSidebar';
 import { MobileBottomNav } from './MobileBottomNav';
 import { useIsDesktopViewport } from '@/hooks/use-is-desktop';
@@ -118,6 +118,7 @@ import { RetainedPostDock } from '@/components/app/feeds/RetainedPostSurface';
 import { QuietPostLoading } from '@/components/app/QuietPostLoading';
 import { getDocumentScrollTop, scrollDocumentTo } from '@/lib/document-scroll';
 import { rememberScroll, restoreDocumentScroll, savedScroll } from '@/lib/back-scroll';
+import { revealNavChrome } from '@/hooks/use-scroll-direction';
 import { GlobalFeedNav } from './GlobalFeedNav';
 import { ProfileRimColors } from './ProfileRimColors';
 import { GlobalFeedNavProvider } from '@/contexts/GlobalFeedNavContext';
@@ -255,6 +256,7 @@ function AppLayoutContent({ children }: AppLayoutContentProps) {
   // Before any route matching below: /<your username> is your cached profile.
   useOwnProfileUrl();
   const location = useLocation();
+  const navigationType = useNavigationType();
   const mainRef = useRef<HTMLElement | null>(null);
   // Gate for the corner player's chunk — see its lazy import above.
   const hasPoppedOutAudio = useAudioPostPoppedOut();
@@ -434,6 +436,12 @@ function AppLayoutContent({ children }: AppLayoutContentProps) {
     const prev = prevScrollPathRef.current;
     const curr = location.pathname;
     prevScrollPathRef.current = curr;
+
+    // Arriving on a page always shows the header, bottom nav and page pill
+    // (phones only): Back or a swipe back to the feed after a profile used to
+    // keep them hidden from the scroll on the page you left. A query-only
+    // push or replace (a feed filter, a picture id) is the same page.
+    if (prev !== curr || navigationType === 'POP') revealNavChrome();
 
     // The overlay is its own scroller: never move the feed beneath it.
     if (showHomePagePersisted) return;
