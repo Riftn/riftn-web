@@ -23420,6 +23420,9 @@
     "hoursStreamed_other": "{{formatted}} uur gestreamd",
     "toNext_one": "Nog {{formatted}} snack tot {{stage}}",
     "toNext_other": "Nog {{formatted}} snacks tot {{stage}}",
+    "requestsToday_one": "Wachtende verzoeken: {{formatted}} snack vandaag",
+    "requestsToday_other": "Wachtende verzoeken: {{formatted}} snacks vandaag",
+    "requestsTomorrow": "Wachtende verzoeken: eerste snack morgen",
     "open": "{{pet}} openen",
     "feed": "Geef een snack",
     "fed": "{{pet}} heeft je snack opgegeten",
@@ -23450,6 +23453,7 @@
       "feeding": "Kijkers kunnen het voeren met kanaalpunten",
       "cost": "Punten per snack",
       "rules": "Elke kijker kan het tot 20 snacks per dag geven. Punten hebben geen geldwaarde.",
+      "requests": "Je verzoeken die nog wachten op het Verzoekenbord voeren het ook: 1 snack per dag per verzoek, tot 3 per dag, zodra het is uitgekomen.",
       "feeders": "Heeft het het meest gevoerd"
     }
   },

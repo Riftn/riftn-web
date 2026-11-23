@@ -23172,6 +23172,9 @@
     "hoursStreamed_other": "{{formatted}} saat yayın",
     "toNext_one": "{{stage}} için {{formatted}} atıştırmalık",
     "toNext_other": "{{stage}} için {{formatted}} atıştırmalık",
+    "requestsToday_one": "Bekleyen istekler: bugün {{formatted}} atıştırmalık",
+    "requestsToday_other": "Bekleyen istekler: bugün {{formatted}} atıştırmalık",
+    "requestsTomorrow": "Bekleyen istekler: ilk atıştırmalık yarın",
     "open": "{{pet}} aç",
     "feed": "Atıştırmalık ver",
     "fed": "{{pet}} atıştırmalığını yedi",
@@ -23202,6 +23205,7 @@
       "feeding": "İzleyiciler kanal puanlarıyla besleyebilir",
       "cost": "Atıştırmalık başına puan",
       "rules": "Her izleyici günde en fazla 20 atıştırmalık verebilir. Puanların parasal değeri yoktur.",
+      "requests": "İstekler panosunda hâlâ bekleyen isteklerin de onu besler: yumurtadan çıktıktan sonra her biri günde 1 atıştırmalık, günde en fazla 3.",
       "feeders": "En çok besleyenler"
     }
   },

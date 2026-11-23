@@ -23172,6 +23172,9 @@
     "hoursStreamed_other": "{{formatted}} horas en directo",
     "toNext_one": "{{formatted}} bocado para {{stage}}",
     "toNext_other": "{{formatted}} bocados para {{stage}}",
+    "requestsToday_one": "Solicitudes en espera: {{formatted}} bocado hoy",
+    "requestsToday_other": "Solicitudes en espera: {{formatted}} bocados hoy",
+    "requestsTomorrow": "Solicitudes en espera: primer bocado mañana",
     "open": "Abrir {{pet}}",
     "feed": "Dar un bocado",
     "fed": "{{pet}} se comió tu bocado",
@@ -23202,6 +23205,7 @@
       "feeding": "Los espectadores pueden alimentarla con puntos del canal",
       "cost": "Puntos por bocado",
       "rules": "Cada espectador puede darle hasta 20 bocados al día. Los puntos no tienen valor en dinero.",
+      "requests": "Tus solicitudes que siguen esperando en el tablero de Solicitudes también lo alimentan: 1 bocado al día cada una, hasta 3 al día, una vez que haya nacido.",
       "feeders": "Quién más la alimentó"
     }
   },
