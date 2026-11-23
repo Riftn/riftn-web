@@ -24,7 +24,7 @@ const DHB_ADDRESSES = new Set(
 
 /**
  * Whether an explore query is asking about $DHB: the cashtag (`$DHB`,
- * `$DEHUB`), the bare ticker `DHB`, or a DHB contract address. Bare "dehub"
+ * `$DEHUB`), the bare tickers `RIFT` and `DHB`, or a DHB contract address. Bare "dehub"
  * stays a brand search for the @d account.
  */
 export function isDhbListingQuery(query: string): boolean {
@@ -32,7 +32,7 @@ export function isDhbListingQuery(query: string): boolean {
   if (!q) return false;
   if (DHB_ADDRESSES.has(q.toLowerCase())) return true;
   if (q.startsWith('$')) return isDhbSymbol(q);
-  return q.toUpperCase() === 'DHB';
+  return /^(?:RIFT|DHB)$/i.test(q);
 }
 
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;

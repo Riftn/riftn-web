@@ -168,13 +168,13 @@ export async function planFee(asset: FeeAsset, feeDhb: number, assetUsd: number,
   const dhb = CHAIN_CONFIGS[BASE_CHAIN_ID].dhbToken;
   if (asset.symbol === 'DHB') {
     const balance = await getERC20Balance(dhb, walletAddress, BASE_CHAIN_ID);
-    if (balance < dhbUnits) throw new Error(_translateCopy("copy.296fa7255dc3", { defaultValue: "Not enough DHB on Base: {{value1}} needed", value1: formatUnits(dhbUnits, 18) }));
+    if (balance < dhbUnits) throw new Error(_translateCopy("copy.296fa7255dc3", { defaultValue: "Not enough tokens on Base: {{value1}} needed", value1: formatUnits(dhbUnits, 18) }));
     return { asset, feeDhb: dhbUnits, swapIn: null, swap: null };
   }
   if (!(assetUsd > 0)) throw new Error(_translateCopy("copy.d7de421562cb", { defaultValue: "No {{value1}} price is available right now", value1: asset.symbol }));
   const swapIn = parseUnits((POOL_FEE_USD * SWAP_HEADROOM / assetUsd).toFixed(asset.decimals === 6 ? 6 : 12), asset.decimals);
   const swap = await quoteSwap({ chainId: BASE_CHAIN_ID, tokenIn: asset.address, tokenOut: dhb, amountIn: swapIn, recipient: walletAddress, slippageBps: 100 });
-  if (swap.minAmountOut < dhbUnits) throw new Error(_translateCopy("copy.2d34f6196636", { defaultValue: "That {{value1}} does not swap into enough DHB right now", value1: asset.symbol }));
+  if (swap.minAmountOut < dhbUnits) throw new Error(_translateCopy("copy.2d34f6196636", { defaultValue: "That {{value1}} does not swap into enough tokens right now", value1: asset.symbol }));
   return { asset, feeDhb: dhbUnits, swapIn, swap };
 }
 

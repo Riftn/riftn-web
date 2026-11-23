@@ -211,7 +211,7 @@
     "timerOffBody": "Het blijft in de chat.",
     "timerViewBody": "Weg voor jullie beiden zodra ze het hebben gezien.",
     "confirm": "Bevestigen",
-    "lockedFor": "Ontgrendelen voor {{value1}} DHB",
+    "lockedFor": "Ontgrendelen voor {{value1}} tokens",
     "lockedForUsd": "Ontgrendelen voor {{value1}}",
     "editItem": "Item bewerken {{value1}}",
     "kept": "{{time}} behouden",
@@ -2749,7 +2749,7 @@
     "ogHolders_one": "{{count}} OG-holder",
     "ogHolders_other": "{{count}} OG-holders",
     "ogChallengeTitle": "Haal de OG-holders terug",
-    "ogChallengeBody": "Nodig mensen uit die nog DHB hebben. Als ze via jouw uitnodigingslink lid worden en hun DHB in hun Riftn-wallet houden, tellen ze hier voor jou.",
+    "ogChallengeBody": "Nodig mensen uit die nog tokens hebben. Als ze via je uitnodigingslink lid worden en hun tokens in hun Riftn-wallet houden, tellen ze hier voor je mee.",
     "ogChallengeCta": "Haal je uitnodigingslink op",
     "directReferrals_one": "{{count}} rechtstreeks",
     "directReferrals_other": "{{count}} rechtstreeks",
@@ -12837,7 +12837,7 @@
       },
       "dhb": {
         "term": "tokens",
-        "definition": "De native token van het DHB netwerk, gebruikt voor governance, staking en het belonen van deelnemers."
+        "definition": "De native token van het Riftn-netwerk, gebruikt voor governance, staking en het belonen van deelnemers."
       },
       "defi": {
         "term": "DeFi",
@@ -13181,7 +13181,7 @@
           "4": "Om een spraakmemo op te nemen, klikt u op het microfoonicoon.",
           "5": "Om een GIF toe te voegen, klikt u op het GIF-icoon en zoekt u er een.",
           "6": "Gebruik #hashtags om uw bericht te categoriseren (bijv. #crypto, #defi).",
-          "7": "Gebruik $cashtags om naar tokens te verwijzen (bijv. $RIFT, $ETH).",
+          "7": "Gebruik $cashtags om naar tokens te verwijzen (bijv. $BTC, $ETH).",
           "8": "Gebruik @vermeldingen om andere gebruikers te taggen (bijv. @gebruikersnaam).",
           "9": "Klik op 'Post' om te publiceren. Uw bericht verschijnt onmiddellijk in de feed."
         },

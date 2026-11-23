@@ -2122,7 +2122,7 @@
     "ogHolders_one": "Mmiliki {{count}} wa OG",
     "ogHolders_other": "Wamiliki {{count}} wa OG",
     "ogChallengeTitle": "Warudishe wamiliki wa OG",
-    "ogChallengeBody": "Alika watu ambao bado wanamiliki DHB. Wakijiunga kwa kiungo chako cha mwaliko na kuweka DHB yao kwenye pochi yao ya Riftn, wanahesabiwa kwako hapa.",
+    "ogChallengeBody": "Alika watu ambao bado wanamiliki tokeni. Wakijiunga kwa kiungo chako cha mwaliko na kuweka tokeni yao kwenye pochi yao ya Riftn, wanahesabiwa kwako hapa.",
     "ogChallengeCta": "Pata kiungo chako cha mwaliko"
   },
   "dhbListing": {
@@ -12235,7 +12235,7 @@
           "4": "Ili kurekodi noti ya sauti, bofya ikoni ya kipaza sauti.",
           "5": "Ili kuongeza GIF, bofya ikoni ya GIF na utafute moja.",
           "6": "Tumia #hashtags kuainisha chapisho lako (k.w.m., #crypto, #defi).",
-          "7": "Tumia $cashtags kurejelea tokeni (k.w.m., $RIFT, $ETH).",
+          "7": "Tumia $cashtags kurejelea tokeni (k.w.m., $BTC, $ETH).",
           "8": "Tumia @mentions kuweka alama watumiaji wengine (k.w.m., @username).",
           "9": "Bofya 'Chapisha' ili kuchapisha. Chapisho lako linaonekana kwenye malisho mara moja."
         },
