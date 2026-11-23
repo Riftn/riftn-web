@@ -55,6 +55,7 @@ import type { DmDestruct, DmDestructChoice } from '@/lib/dm-destruct';
 import { markDmMessageViewed } from '@/lib/api/dehub/dm';
 import { DmTimeLeft } from './DmTimeLeft';
 import { DmOpenTimerMedia } from './DmOpenTimerMedia';
+import { DmViewOncePhoto } from './DmViewOncePhoto';
 import { DmUndecryptableMessages } from './DmLockedState';
 import { useChatPrefs } from '@/hooks/use-chat-prefs';
 import { DehubLinkEmbed } from '@/components/app/cards/DehubLinkEmbed';
@@ -337,13 +338,37 @@ function EncryptedMediaBody({
   onOpenImage?: (url: string) => void;
 }) {
   const { t: _copy } = _useCopy();
-  const eager = media.kind === 'image' || media.kind === 'audio';
+  // A view-once photo sent to me is only opened on a tap, never drawn in the chat.
+  const viewOnce = destruct?.mode === 'view' && !isOwn && media.kind === 'image';
+  const eager = (media.kind === 'image' && !viewOnce) || media.kind === 'audio';
   const { url, status, load, retry } = useDecryptedMedia(mediaUrl, media, { messageId, enabled: eager });
+  const [viewOnceWaiting, setViewOnceWaiting] = useState(false);
+  useEffect(() => {
+    if (viewOnceWaiting && url) {
+      setViewOnceWaiting(false);
+      onOpenImage?.(url);
+    }
+  }, [viewOnceWaiting, url, onOpenImage]);
   const [fileBusy, setFileBusy] = useState(false);
   const [fileFailed, setFileFailed] = useState(false);
   // A video only starts by itself once the viewer has tapped it.
   const [requested, setRequested] = useState(false);
   const uploading = !mediaUrl && !url;
+
+  if (viewOnce) {
+    return (
+      <DmViewOncePhoto
+        messageId={messageId}
+        resolveUrl={() => {
+          if (url) return url;
+          setViewOnceWaiting(true);
+          load();
+          return null;
+        }}
+        onOpenImage={onOpenImage}
+      />
+    );
+  }
 
   // Gone a few seconds after the first open: a closed tile until tapped.
   if (destruct?.mode === 'open' && !isOwn && (media.kind === 'image' || media.kind === 'video')) {
@@ -1339,6 +1364,12 @@ const MessageBubble = memo(function MessageBubble({
                         audioUrl={getMediaUrl(primaryMediaUrl) || primaryMediaUrl}
                         duration={message.voiceDuration}
                         isPending={false}
+                      />
+                    ) : message.destruct?.mode === 'view' && !isOwnMessage ? (
+                      <DmViewOncePhoto
+                        messageId={message._id}
+                        resolveUrl={() => getMediaUrl(primaryMediaUrl)}
+                        onOpenImage={onOpenImage}
                       />
                     ) : (
                     <DmTimeLeft destruct={message.destruct}>
