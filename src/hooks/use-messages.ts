@@ -415,8 +415,9 @@ export function useMessages(conversationId: string | null) {
     },
     getNextPageParam: (_lastPage, allPages) => nextMessagePage(allPages),
     initialPageParam: 0,
-    enabled: isAuthenticated && !!conversationId,
+    enabled: isAuthenticated && !!conversationId && !isVirtual,
     staleTime: 10 * 1000,
+    gcTime: 15 * 60 * 1000,
     // Routine recovery belongs to the bounded head query below. Explicit
     // retries and encryption-identity changes can still refresh the history.
     refetchOnMount: false,
@@ -871,8 +872,9 @@ export function useMessages(conversationId: string | null) {
 
   return {
     messages,
-    isLoading: query.isLoading,
-    isError: query.isError,
+    hasHistory: query.data !== undefined,
+    isLoading: !isVirtual && !!conversationId && query.isPending,
+    isError: query.isLoadingError,
     error: query.error,
     fetchNextPage: query.fetchNextPage,
     hasNextPage: query.hasNextPage,
