@@ -1813,6 +1813,10 @@
     "tokensUnit": "توكن"
   },
   "postOptions": {
+    "copyImage": "نسخ الصورة",
+    "copyGif": "نسخ GIF",
+    "copyVideo": "نسخ الفيديو",
+    "videoLinkCopied": "تم نسخ رابط الفيديو",
     "notInterestedDone": "تم. سترى منشورات أقل مثل هذا.",
     "notInterested": "غير مهتم",
     "liveAlertsOn": "أنت الآن تتابع {{name}}. سيصلك إشعار عندما يبدأ البث المباشر.",
@@ -2262,7 +2266,9 @@
     "receiveEvm": "قاعدة · BNB · ETH",
     "receiveSolanaDescription": "لا ترسل سوى رموز SOL و SPL هنا. يتم فقدان أي شيء يتم إرساله من شبكة أخرى.",
     "solanaSendUnavailable": "الإرسال على سولانا غير متاح بعد",
-    "solanaSendUnavailableHint": "استخدم Phantom مباشرةً لنقل هذا الرصيد."
+    "solanaSendUnavailableHint": "استخدم Phantom مباشرةً لنقل هذا الرصيد.",
+    "showBalance": "إظهار الرصيد",
+    "hideBalance": "إخفاء الرصيد"
   },
   "bookmarks": {
     "title": "الإشارات المرجعية",

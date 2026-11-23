@@ -1813,6 +1813,10 @@
     "tokensUnit": "jetons"
   },
   "postOptions": {
+    "copyImage": "Copier l'image",
+    "copyGif": "Copier le GIF",
+    "copyVideo": "Copier la vidéo",
+    "videoLinkCopied": "Lien de la vidéo copié",
     "notInterestedDone": "Compris. Vous verrez moins de publications comme celle-ci.",
     "notInterested": "Pas intéressé",
     "liveAlertsOn": "Vous suivez désormais {{name}}. Vous recevrez une notification dès le début du direct.",
@@ -2262,7 +2266,9 @@
     "receiveEvm": "Base · BNB · ETH",
     "receiveSolanaDescription": "N'envoyez que des jetons SOL et SPL ici. Tout ce qui est envoyé à partir d'un autre réseau est perdu.",
     "solanaSendUnavailable": "Les envois sur Solana ne sont pas encore disponibles",
-    "solanaSendUnavailableHint": "Utilisez Phantom directement pour déplacer ce solde."
+    "solanaSendUnavailableHint": "Utilisez Phantom directement pour déplacer ce solde.",
+    "showBalance": "Afficher le solde",
+    "hideBalance": "Masquer le solde"
   },
   "bookmarks": {
     "title": "Vos signets",

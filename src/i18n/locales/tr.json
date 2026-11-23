@@ -1813,6 +1813,10 @@
     "tokensUnit": "token"
   },
   "postOptions": {
+    "copyImage": "Görseli kopyala",
+    "copyGif": "GIF'i kopyala",
+    "copyVideo": "Videoyu kopyala",
+    "videoLinkCopied": "Video bağlantısı kopyalandı",
     "notInterestedDone": "Anlaşıldı. Bunun gibi daha az gönderi göreceksin.",
     "notInterested": "İlgilenmiyorum",
     "liveAlertsOn": "Artık {{name}} kullanıcısını takip ediyorsunuz. Canlı yayına geçtiğinde bildirim alacaksınız.",
@@ -2262,7 +2266,9 @@
     "receiveEvm": "Matrah · BNB · ETH",
     "receiveSolanaDescription": "Buraya sadece SOL ve SPL jetonları gönderin. Başka bir ağdan gönderilen her şey kaybolur.",
     "solanaSendUnavailable": "Solana'da gönderme henüz mevcut değil",
-    "solanaSendUnavailableHint": "Bu bakiyeyi doğrudan Phantom kullanarak hareket ettirin."
+    "solanaSendUnavailableHint": "Bu bakiyeyi doğrudan Phantom kullanarak hareket ettirin.",
+    "showBalance": "Bakiyeyi göster",
+    "hideBalance": "Bakiyeyi gizle"
   },
   "bookmarks": {
     "title": "Yer İmleriniz",

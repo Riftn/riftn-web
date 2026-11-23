@@ -110,6 +110,8 @@ import type { ShortVideo } from '@/types/feed.types';
 import { useQueryClient } from '@tanstack/react-query';
 import { asViewerSlide } from '@/lib/short-video';
 import { VideoSlide } from './VideoSlide';
+import { postTileMenuProps } from '@/lib/post-menu';
+import { shortMenuTarget } from '@/lib/post-menu-targets';
 import { LiveSwipeSlide } from './LiveSwipeSlide';
 import { PostSwipeSlide } from './PostSwipeSlide';
 import { pauseMediaIn, resumeMedia } from '@/lib/pause-media-in';
@@ -2215,7 +2217,12 @@ export function ShortsViewer({ shorts: entries, initialIndex, onClose, onLoadMor
                     transition={isMobile ? SMOOTH_TRANSITION : PAGE_SPRING}
                     style={{ zIndex: isActive ? 2 : 1 }}
                   >
-                    <motion.div className="absolute inset-0" style={{ y: dragOffset }}>
+                    <motion.div
+                      className="absolute inset-0"
+                      style={{ y: dragOffset }}
+                      // Right-click a short: the post menu, with Copy video.
+                      {...(short.live || short.reelPost ? {} : postTileMenuProps(() => shortMenuTarget(short), { touch: false }))}
+                    >
                     {short.live ? (
                       <LiveSwipeSlide stream={short.live} isActive={isActive} onClose={onClose} />
                     ) : short.reelPost ? (

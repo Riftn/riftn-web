@@ -1813,6 +1813,10 @@
     "tokensUnit": "tokens"
   },
   "postOptions": {
+    "copyImage": "Copy image",
+    "copyGif": "Copy GIF",
+    "copyVideo": "Copy video",
+    "videoLinkCopied": "Video link copied",
     "notInterestedDone": "Got it. You'll see fewer posts like this.",
     "notInterested": "Not interested",
     "liveAlertsOn": "Following {{name}}. You'll get a notification when they go live.",
@@ -2262,7 +2266,9 @@
     "receiveEvm": "Base · BNB · ETH",
     "receiveSolanaDescription": "Only send SOL and SPL tokens here. Anything sent from another network is lost.",
     "solanaSendUnavailable": "Sending on Solana is not available yet",
-    "solanaSendUnavailableHint": "Use Phantom directly to move this balance."
+    "solanaSendUnavailableHint": "Use Phantom directly to move this balance.",
+    "showBalance": "Show balance",
+    "hideBalance": "Hide balance"
   },
   "bookmarks": {
     "title": "Your Bookmarks",
