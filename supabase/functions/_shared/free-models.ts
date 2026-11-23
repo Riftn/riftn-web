@@ -193,6 +193,8 @@ export interface FreeOptions {
    */
   publicContent?: boolean;
   expectToolCall?: string;
+  /** Feature-specific validation before a completed response is accepted. */
+  acceptOutput?: (payload: unknown) => boolean;
   label?: string;
   signal?: AbortSignal;
   /** Internal server accounting shared with the paid fallback routes. */
@@ -276,7 +278,7 @@ export async function tryFree(
       const text = await res.text();
       let payload: unknown;
       try { payload = JSON.parse(text); } catch { /* Invalid output is counted below. */ }
-      if (!answered(text, opts.expectToolCall)) {
+      if (!answered(text, opts.expectToolCall) || (opts.acceptOutput && !opts.acceptOutput(payload))) {
         opts.meter?.record(attempt(res.status, 'unusable_output'), payload);
         console.log(`${tag} ${p.name} answered without usable output, trying next`);
         continue;
