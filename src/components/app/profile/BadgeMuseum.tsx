@@ -190,8 +190,8 @@ export function BadgeMuseumPanel({ address, own, className }: BadgeMuseumPanelPr
         className={cn(
           'relative rounded-2xl border px-2.5 pb-3 pt-5 sm:px-4',
           'bg-white/[0.03] backdrop-blur-sm',
-          'border-[color-mix(in_srgb,var(--tint-accent,rgb(161_161_170))_45%,transparent)]',
-          'shadow-[0_0_18px_-4px_color-mix(in_srgb,var(--tint-accent,rgb(161_161_170))_55%,transparent),inset_0_0_14px_-6px_color-mix(in_srgb,var(--tint-accent,rgb(161_161_170))_45%,transparent)]',
+          'border-[color-mix(in_srgb,var(--tint-accent,rgb(161_161_170))_60%,transparent)]',
+          'shadow-[0_0_18px_-4px_color-mix(in_srgb,var(--tint-accent,rgb(161_161_170))_70%,transparent),inset_0_0_14px_-6px_color-mix(in_srgb,var(--tint-accent,rgb(161_161_170))_45%,transparent)]',
         )}
       >
         <ul className="flex flex-wrap justify-center gap-y-2.5 [--gap:0.375rem] gap-x-[var(--gap)] sm:[--gap:0.75rem]">
