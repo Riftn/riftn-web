@@ -17,7 +17,7 @@
 import { Suspense, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ShoppingBag, Activity, Gem, Loader2 } from "lucide-react";
+import { ShoppingBag, Activity, Gem, Loader2, Sparkles } from "lucide-react";
 import Wallet from "@/components/ui/cut-icons/wallet";
 
 import { SEOHead } from '@/components/SEOHead';
@@ -25,6 +25,7 @@ import { PageBody, PageIsland, PageTabs } from '@/components/app/page-kit/PageKi
 import { BrowseFractionsTab } from '@/components/app/fractions/BrowseFractionsTab';
 import { PortfolioTab } from '@/components/app/fractions/PortfolioTab';
 import { ActivityTab } from '@/components/app/fractions/ActivityTab';
+import { DropsTab } from '@/components/app/collect/DropsTab';
 import { useOpenTrades } from '@/hooks/use-fraction-marketplace';
 import { useAuth } from '@/contexts/AuthContext';
 import { BrandIcon } from '@/components/app/war/WarHudIcon';
@@ -33,8 +34,8 @@ import { lazyWithRetry } from '@/lib/lazy-with-retry';
 // The market is the heavier half (Seaport builder, viem); load it on first visit.
 const NftMarket = lazyWithRetry(() => import('@/pages/app/NftMarketPage'));
 
-type Tab = 'browse' | 'nfts' | 'portfolio' | 'activity';
-const TABS: Tab[] = ['browse', 'nfts', 'portfolio', 'activity'];
+type Tab = 'browse' | 'nfts' | 'drops' | 'portfolio' | 'activity';
+const TABS: Tab[] = ['browse', 'nfts', 'drops', 'portfolio', 'activity'];
 
 const NFT_JSON_LD = {
   '@context': 'https://schema.org',
@@ -72,7 +73,16 @@ export default function FractionsPage() {
 
   return (
     <div className="min-h-screen">
-      {tab === 'nfts' ? (
+      {tab === 'drops' ? (
+        <SEOHead
+          title={t('collect.seoTitle', { defaultValue: 'Weekly NFT drop: hand-picked Riftn posts to collect | Riftn' })}
+          description={t('collect.seoDescription', {
+            defaultValue: 'A fresh set of minted Riftn posts every Monday, live auctions and this week\'s market numbers. Collect a copy and unlock what the creator left for owners.',
+          })}
+          url="https://riftn.com/fractions?tab=drops"
+          image="https://riftn.com/og/nfts.jpg"
+        />
+      ) : tab === 'nfts' ? (
         <SEOHead
           title={t('nftMarket.seoTitle', { defaultValue: 'NFT Market: buy and sell NFTs on BNB and Base | Riftn' })}
           description={t('nftMarket.seoDescription', {
@@ -109,6 +119,7 @@ export default function FractionsPage() {
             tabs={[
               { id: 'browse', label: t('fractions.title'), icon: <ShoppingBag className="h-4 w-4" /> },
               { id: 'nfts', label: t('nftMarket.shortTitle', { defaultValue: 'NFTs' }), icon: <Gem className="h-4 w-4" /> },
+              { id: 'drops', label: t('collect.dropsTab', { defaultValue: 'Drops' }), icon: <Sparkles className="h-4 w-4" /> },
               {
                 id: 'portfolio',
                 label: needsAction > 0 ? t('fractions.tabPortfolioCount', { count: needsAction }) : t('fractions.tabPortfolio'),
@@ -129,6 +140,7 @@ export default function FractionsPage() {
             <NftMarket embedded islandSlot={slot} />
           </Suspense>
         )}
+        {tab === 'drops' && <DropsTab />}
         {tab === 'portfolio' && <PortfolioTab />}
         {tab === 'activity' && <ActivityTab />}
       </PageBody>

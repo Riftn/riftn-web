@@ -13,6 +13,8 @@ import { isSmartWalletSession } from '@/lib/connection-source';
 import { cn } from '@/lib/utils';
 import { MintHomeAllowance, MintHomeAllowanceLine } from './MintHomeAllowance';
 import type { PostQuotaStatus } from '@/lib/api/dehub';
+import type { EditionChoice } from '@/lib/api/dehub/content';
+import { EditionOptions } from '@/components/app/collect/EditionOptions';
 
 /**
  * Chains a post that is already published can be minted on. Solana is left
@@ -65,7 +67,12 @@ interface MintChainSheetProps {
   /** The chain the post was published on; picked first. */
   defaultChainId?: number;
   isMinting?: boolean;
-  onConfirm: (chainId: ChainId) => void;
+  /** `edition` is the creator's copies and resale royalties. */
+  onConfirm: (chainId: ChainId, edition: EditionChoice) => void;
+  /** Hide the copies and royalties box (posts with a reward pool mint the default). */
+  hideEdition?: boolean;
+  /** Open the copies and royalties box (state gallery). */
+  editionOpen?: boolean;
   /** Override for the state gallery; otherwise read from the session. */
   sponsored?: boolean;
   /** Override for the state gallery; otherwise read from the creator's allowance. */
@@ -77,12 +84,13 @@ interface MintChainSheetProps {
  * now. Prices come from GET /api/mint_fee, the same quote the mint charges, so
  * the number on the button is the number taken.
  */
-export function MintChainSheet({ open, onOpenChange, defaultChainId, isMinting, onConfirm, sponsored: sponsoredOverride, homeAllowance }: MintChainSheetProps) {
+export function MintChainSheet({ open, onOpenChange, defaultChainId, isMinting, onConfirm, sponsored: sponsoredOverride, homeAllowance, hideEdition, editionOpen }: MintChainSheetProps) {
   const { t } = useTranslation();
   const sponsored = sponsoredOverride ?? isSmartWalletSession();
   const fallback = MINT_LATER_CHAINS.some((c) => c.id === defaultChainId) ? (defaultChainId as ChainId) : (getDefaultChainId() as ChainId);
   const [selected, setSelected] = useState<ChainId>(fallback);
   useEffect(() => { if (open) setSelected(fallback); }, [open, fallback]);
+  const [edition, setEdition] = useState<{ value: EditionChoice; valid: boolean }>({ value: {}, valid: true });
 
   const quotes = useQueries({
     queries: MINT_LATER_CHAINS.map((chain) => ({
@@ -144,6 +152,14 @@ export function MintChainSheet({ open, onOpenChange, defaultChainId, isMinting, 
               </button>
             );
           })}
+          {!hideEdition && open && (
+            <EditionOptions
+              value={edition.value}
+              onChange={(value, valid) => setEdition({ value, valid })}
+              disabled={isMinting}
+              defaultOpen={editionOpen}
+            />
+          )}
         </div>
         <div className="px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
           {homeAllowance ? (
@@ -153,8 +169,8 @@ export function MintChainSheet({ open, onOpenChange, defaultChainId, isMinting, 
           )}
           <button
             type="button"
-            disabled={isMinting}
-            onClick={() => onConfirm(selected)}
+            disabled={isMinting || (!hideEdition && !edition.valid)}
+            onClick={() => onConfirm(selected, hideEdition ? {} : edition.value)}
             className="w-full py-3 rounded-xl bg-white text-black font-semibold text-sm inline-flex items-center justify-center gap-2 disabled:opacity-60"
           >
             {isMinting && <Loader2 className="w-4 h-4 animate-spin" />}

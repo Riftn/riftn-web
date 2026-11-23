@@ -213,6 +213,20 @@ export interface MintResponse {
     tier: string | null;
     recipient?: string | null;
   };
+  /** Copies the signature allows (the creator's pick, 1000 by default). */
+  supply?: number;
+  /** v1 chains: resale royalties written into the mint, in basis points. */
+  fees?: { recipient: string; value: number }[];
+  /** v3 chains: one EIP-712 signature plus its expiry. */
+  signature?: string;
+  deadline?: number;
+  sigVersion?: number;
+}
+
+/** What the creator chose for a mint: copies and who earns on resales. */
+export interface EditionChoice {
+  supply?: number;
+  royalties?: { address: string; bps: number }[];
 }
 
 export async function mintPost(
@@ -457,10 +471,15 @@ export async function resolveNewPost(n: number | string): Promise<NewPostResolut
  * The post already has its token ID, so this returns the same shape as
  * mintPost's signature fields and feeds straight into mintOnChain.
  */
-export async function mintExistingPost(tokenId: number | string, chainId?: number): Promise<MintResponse> {
+export async function mintExistingPost(tokenId: number | string, chainId?: number, edition?: EditionChoice): Promise<MintResponse> {
   return apiCall<MintResponse>('/api/mint_existing', {
     method: 'POST',
-    body: { tokenId: Number(tokenId), ...(chainId ? { chainId } : {}) },
+    body: {
+      tokenId: Number(tokenId),
+      ...(chainId ? { chainId } : {}),
+      ...(edition?.supply ? { supply: edition.supply } : {}),
+      ...(edition?.royalties?.length ? { royalties: edition.royalties } : {}),
+    },
     requiresAuth: true,
   });
 }

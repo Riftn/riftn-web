@@ -30,9 +30,13 @@ export function ProfileFractionsPanel({ profileAddress }: ProfileFractionsPanelP
   const { walletAddress } = useAuth();
   const navigate = useNavigate();
   const [selling, setSelling] = useState<PortfolioPosition | null>(null);
+  const [shelf, setShelf] = useState<'all' | 'created' | 'collected'>('all');
 
   const { data: allPositions = [], isLoading } = useFractionPortfolio(profileAddress);
-  const positions = livePositions(allPositions);
+  const everything = livePositions(allPositions);
+  const created = everything.filter((p) => p.isCreator);
+  const collected = everything.filter((p) => !p.isCreator);
+  const positions = shelf === 'created' ? created : shelf === 'collected' ? collected : everything;
   const isOwnProfile =
     !!profileAddress && profileAddress.toLowerCase() === walletAddress?.toLowerCase();
 
@@ -44,7 +48,7 @@ export function ProfileFractionsPanel({ profileAddress }: ProfileFractionsPanelP
     );
   }
 
-  if (positions.length === 0) {
+  if (everything.length === 0) {
     return (
       <div className="text-center py-16 px-4">
         <img src={fractions3dIcon} alt={t('fractions.title')} className="w-16 h-16 mx-auto mb-3 opacity-60" />
@@ -80,6 +84,29 @@ export function ProfileFractionsPanel({ profileAddress }: ProfileFractionsPanelP
           open
           onOpenChange={(v) => { if (!v) setSelling(null); }}
         />
+      )}
+
+      {created.length > 0 && collected.length > 0 && (
+        <div className="flex gap-2" role="tablist" data-fraction-shelves>
+          {([
+            ['all', t('collect.shelfAll', { defaultValue: 'All' })],
+            ['created', t('collect.shelfCreated', { defaultValue: 'Created' })],
+            ['collected', t('collect.shelfCollected', { defaultValue: 'Collected' })],
+          ] as const).map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              aria-selected={shelf === id}
+              data-kit-chip
+              data-size="sm"
+              data-active={shelf === id ? 'true' : undefined}
+              onClick={() => setShelf(id)}
+            >
+              <span>{label}</span>
+            </button>
+          ))}
+        </div>
       )}
 
       <p className="text-xs text-white/40">
