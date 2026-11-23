@@ -58,6 +58,7 @@ import type { ProfileData } from '@/hooks/use-dehub-profile';
 import { useNavigate } from 'react-router-dom';
 import { openDmDock } from '@/hooks/use-dm-dock';
 import { LiveRipple } from '@/components/app/LiveRipple';
+import { MomentFace, useFaceMoment } from '@/components/app/stories/MomentFace';
 import { viewerShareUrl } from '@/lib/share-url';
 import { trackShare } from '@/lib/analytics';
 
@@ -251,11 +252,14 @@ export function ProfileHeader({
     onFile: (file) => saveImage('cover', file),
     onRemove: () => saveImage('cover', null),
   });
+  // With a Moment up, a tap on the picture plays it; the full-size photo moves to the hold menu.
+  const avatarMoment = useFaceMoment(apiProfile?.walletAddress ?? profile.walletAddress);
   const avatarMenu = useProfileImageMenu({
     kind: 'avatar',
     canEdit: ownsImages,
     imageUrl: profile.avatarUrl,
     hasImage: !!profile.avatarUrl,
+    onView: avatarMoment && profile.avatarUrl ? () => setFullscreenImage(profile.avatarUrl!) : undefined,
     onFile: (file) => saveImage('avatar', file),
     onRemove: () => saveImage('avatar', null),
   });
@@ -306,6 +310,7 @@ export function ProfileHeader({
                 <rect x="2" y="2" width="96" height="96" rx="15" pathLength="100" />
               </svg>
               <LiveRipple ids={[apiProfile?.walletAddress ?? profile.walletAddress, profile.handle]} size="lg" className="rounded-xl">
+                <MomentFace address={apiProfile?.walletAddress ?? profile.walletAddress} size={96} big name={profile.name} className="rounded-xl">
                 <button 
                   data-keep-dark
                   data-pull-through
@@ -314,7 +319,7 @@ export function ProfileHeader({
                   onClick={() => profile.avatarUrl && setFullscreenImage(profile.avatarUrl)}
                   // Kept clickable for the owner with no picture yet, so the
                   // right-click / hold menu (Change, Paste) still reaches it.
-                  disabled={!profile.avatarUrl && !ownsImages}
+                  disabled={!profile.avatarUrl && !ownsImages && !avatarMoment}
                   {...avatarMenu.targetProps}
                 >
                   {profile.avatarUrl && !avatarCdnFailed ? (
@@ -334,6 +339,7 @@ export function ProfileHeader({
                   )}
                   {savingImage === 'avatar' && <span className="contents [&>span]:rounded-[10px]">{savingSpinner}</span>}
                 </button>
+                </MomentFace>
               </LiveRipple>
           </div>
           <div data-profile-actions className="-mr-1 sm:-mr-3 mt-[60px] sm:mt-[68px] self-start flex items-center gap-2">

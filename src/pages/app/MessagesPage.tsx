@@ -82,6 +82,7 @@ import { blockUser } from '@/lib/api/dehub/blocks';
 import { toast } from 'sonner';
 import { NotesSheetHost, openNotesSheet } from '@/components/app/chat/NotesRow';
 import { LiveRipple } from '@/components/app/LiveRipple';
+import { MomentFace } from '@/components/app/stories/MomentFace';
 import { NewGroupChannelSheet, type NewChatKind } from '@/components/app/chat/NewGroupChannelSheet';
 import { GroupChatRow } from '@/components/app/chat/GroupChatRow';
 import { ChatPinStrip } from '@/components/app/chat/ChatPinStrip';
@@ -233,12 +234,14 @@ export function ConversationItem({
       )}
       <span className="relative shrink-0">
       <LiveRipple ids={[otherUser?.address, otherUser?.username]} className="relative rounded-lg">
-        <Avatar className="w-12 h-12">
-          {avatarUrl && <AvatarImage src={avatarUrl} />}
-          <AvatarFallback className="bg-zinc-700 text-white font-medium">
-            {(fallbackName.startsWith('0x') ? fallbackName.charAt(2) : fallbackName.charAt(0)).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
+        <MomentFace address={otherUser?.address} size={48} name={displayName || fallbackName} className="rounded-lg">
+          <Avatar className="w-12 h-12">
+            {avatarUrl && <AvatarImage src={avatarUrl} />}
+            <AvatarFallback className="bg-zinc-700 text-white font-medium">
+              {(fallbackName.startsWith('0x') ? fallbackName.charAt(2) : fallbackName.charAt(0)).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+        </MomentFace>
       </LiveRipple>
       </span>
 
