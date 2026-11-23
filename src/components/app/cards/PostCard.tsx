@@ -1155,7 +1155,9 @@ const PostCardBody = memo(function PostCard({ post, threadSlot, onOpenComments }
             onOpenChange={setShowMintSheet}
             defaultChainId={post.chainId}
             isMinting={isMinting}
-            hideEdition={!!(post as { streamInfo?: { isAddBounty?: boolean } }).streamInfo?.isAddBounty}
+            // A post mints its 1,000 fractions. Copies and royalties are for
+            // NFTs made in the market's Create tab.
+            hideEdition
             onConfirm={(chainId, edition) => {
               if (!postTokenId) return;
               mintExisting(postTokenId, post.chainId, chainId, edition).then((ok) => {

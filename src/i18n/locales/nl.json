@@ -7711,7 +7711,8 @@
     "spotlight": "Uitgelicht",
     "spotlightBuyNote": "De NFT en de betaling wisselen in één stap.",
     "spotlightOfferNote": "Nog niet te koop. Doe een bod en de eigenaar kan het altijd accepteren.",
-    "signInToTradeCta": "Log in om te handelen"
+    "signInToTradeCta": "Log in om te handelen",
+    "tabCreate": "Maken"
   },
   "usernames": {
     "swap": {
@@ -23720,5 +23721,27 @@
     "shelfAll": "Alles",
     "shelfCreated": "Gemaakt",
     "shelfCollected": "Verzameld"
+  },
+  "nftCreate": {
+    "eyebrow": "Maken",
+    "title": "Maak een NFT",
+    "intro": "Een NFT is geen post. Hij staat hier op de markt: kies hoeveel exemplaren, wie verdient bij doorverkoop en extra's die alleen eigenaren kunnen openen.",
+    "pickArt": "Kies de afbeelding",
+    "pickArtHint": "Afbeelding of GIF, max. 42 MB",
+    "removeArt": "Verwijderen",
+    "name": "Titel",
+    "namePlaceholder": "Geef je NFT een naam",
+    "description": "Beschrijving (optioneel)",
+    "next": "Kies exemplaren en mint",
+    "yours": "Jouw NFT's",
+    "none": "Nog niets. Je NFT's verschijnen hier.",
+    "minting": "Bezig met minten…",
+    "finish": "Minten afronden",
+    "sheetTitle": "NFT minten",
+    "signIn": "Log in om een NFT te maken",
+    "imageOnly": "Kies een afbeelding of GIF. Voeg video, muziek of bestanden na het minten toe als extra's voor eigenaren.",
+    "tooBig": "Dat bestand is groter dan 42 MB",
+    "minted": "NFT gemint. Hij staat binnen een minuut op de markt.",
+    "failed": "Kon de NFT niet maken"
   }
 }

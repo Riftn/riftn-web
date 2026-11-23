@@ -77,6 +77,12 @@ interface MintChainSheetProps {
   sponsored?: boolean;
   /** Override for the state gallery; otherwise read from the creator's allowance. */
   homeAllowance?: Pick<PostQuotaStatus, 'mintsPerDay' | 'homeMintsRemaining'>;
+  /** Sheet title; "Mint post" when left out. */
+  title?: string;
+  /** Not a post (NFT market Create): no home-feed mint allowance line. */
+  hideAllowance?: boolean;
+  /** Only these chains (the NFT market trades on a few). */
+  onlyChains?: readonly number[];
 }
 
 /**
@@ -84,16 +90,21 @@ interface MintChainSheetProps {
  * now. Prices come from GET /api/mint_fee, the same quote the mint charges, so
  * the number on the button is the number taken.
  */
-export function MintChainSheet({ open, onOpenChange, defaultChainId, isMinting, onConfirm, sponsored: sponsoredOverride, homeAllowance, hideEdition, editionOpen }: MintChainSheetProps) {
+export function MintChainSheet({ open, onOpenChange, defaultChainId, isMinting, onConfirm, sponsored: sponsoredOverride, homeAllowance, hideEdition, editionOpen, title, hideAllowance, onlyChains }: MintChainSheetProps) {
   const { t } = useTranslation();
+  const chains = onlyChains ? MINT_LATER_CHAINS.filter((c) => onlyChains.includes(c.id as number)) : MINT_LATER_CHAINS;
   const sponsored = sponsoredOverride ?? isSmartWalletSession();
-  const fallback = MINT_LATER_CHAINS.some((c) => c.id === defaultChainId) ? (defaultChainId as ChainId) : (getDefaultChainId() as ChainId);
+  const fallback = chains.some((c) => c.id === defaultChainId)
+    ? (defaultChainId as ChainId)
+    : chains.some((c) => c.id === getDefaultChainId()) || !chains.length
+      ? (getDefaultChainId() as ChainId)
+      : (chains[0].id as ChainId);
   const [selected, setSelected] = useState<ChainId>(fallback);
   useEffect(() => { if (open) setSelected(fallback); }, [open, fallback]);
   const [edition, setEdition] = useState<{ value: EditionChoice; valid: boolean }>({ value: {}, valid: true });
 
   const quotes = useQueries({
-    queries: MINT_LATER_CHAINS.map((chain) => ({
+    queries: chains.map((chain) => ({
       queryKey: ['mint-fee', chain.id],
       queryFn: () => getMintFee(chain.id as number),
       enabled: open,
@@ -102,8 +113,8 @@ export function MintChainSheet({ open, onOpenChange, defaultChainId, isMinting, 
     })),
   });
 
-  const selectedIndex = MINT_LATER_CHAINS.findIndex((c) => c.id === selected);
-  const selectedChain = MINT_LATER_CHAINS[selectedIndex];
+  const selectedIndex = chains.findIndex((c) => c.id === selected);
+  const selectedChain = chains[selectedIndex];
   const selectedQuote = quotes[selectedIndex]?.data;
   const selectedCost = selectedQuote ? describeCost(selectedQuote, sponsored, t) : null;
 
@@ -111,11 +122,11 @@ export function MintChainSheet({ open, onOpenChange, defaultChainId, isMinting, 
     <Drawer open={open} onOpenChange={(next) => { if (!isMinting) onOpenChange(next); }}>
       <DrawerContent column glass className="border-t border-white/10" hideHandle data-mint-chain-sheet>
         <DrawerHeader className="border-b border-white/10 text-left">
-          <DrawerTitle className="text-white">{t('mintChain.title', { defaultValue: 'Mint post' })}</DrawerTitle>
+          <DrawerTitle className="text-white">{title ?? t('mintChain.title', { defaultValue: 'Mint post' })}</DrawerTitle>
           <p className="text-white/50 text-sm">{t('mintChain.subtitle', { defaultValue: 'Choose a chain. Prices are live and update every minute.' })}</p>
         </DrawerHeader>
         <div className="p-4 space-y-2" role="radiogroup" aria-label={t('mintChain.title', { defaultValue: 'Mint post' })}>
-          {MINT_LATER_CHAINS.map((chain, i) => {
+          {chains.map((chain, i) => {
             const q = quotes[i];
             const cost = q.data ? describeCost(q.data, sponsored, t) : null;
             const isSelected = chain.id === selected;
@@ -162,7 +173,7 @@ export function MintChainSheet({ open, onOpenChange, defaultChainId, isMinting, 
           )}
         </div>
         <div className="px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-          {homeAllowance ? (
+          {hideAllowance ? null : homeAllowance ? (
             <MintHomeAllowanceLine quota={homeAllowance} className="mb-3 text-center" />
           ) : (
             <MintHomeAllowance enabled={open} className="mb-3 text-center" />

@@ -41,6 +41,8 @@ export interface MintPostParams {
   files?: File[];
   thumbnail?: Blob;
   minterAddress: string;
+  /** Made in the NFT market's Create tab: an NFT, never shown as a post. */
+  nftOnly?: boolean;
   /**
    * Live posts only. 'livepeer' reports that this browser probed the
    * self-hosted ingest and could not reach it (some ISPs null-route the
@@ -255,6 +257,9 @@ export async function mintPost(
 
   if (params.mintOptOut) {
     formData.append('mintOptOut', 'true');
+  }
+  if (params.nftOnly) {
+    formData.append('nftOnly', 'true');
   }
 
   if (params.ingestPreference) {

@@ -7526,7 +7526,8 @@
     "spotlight": "À la une",
     "spotlightBuyNote": "Le NFT et le paiement s'échangent en une seule étape.",
     "spotlightOfferNote": "Pas encore en vente. Envoie une offre et le détenteur pourra l'accepter à tout moment.",
-    "signInToTradeCta": "Se connecter pour échanger"
+    "signInToTradeCta": "Se connecter pour échanger",
+    "tabCreate": "Créer"
   },
   "usernames": {
     "swap": {
@@ -23476,5 +23477,27 @@
     "shelfAll": "Tout",
     "shelfCreated": "Créés",
     "shelfCollected": "Collectionnés"
+  },
+  "nftCreate": {
+    "eyebrow": "Créer",
+    "title": "Créer un NFT",
+    "intro": "Un NFT n'est pas une publication. Il vit ici sur le marché : choisis le nombre d'exemplaires, qui gagne à la revente et des extras que seuls les propriétaires peuvent ouvrir.",
+    "pickArt": "Choisir l'image",
+    "pickArtHint": "Image ou GIF, 42 Mo max",
+    "removeArt": "Retirer",
+    "name": "Titre",
+    "namePlaceholder": "Nomme ton NFT",
+    "description": "Description (facultatif)",
+    "next": "Choisir les exemplaires et minter",
+    "yours": "Tes NFT",
+    "none": "Rien pour l'instant. Tes NFT apparaîtront ici.",
+    "minting": "Mint en cours…",
+    "finish": "Terminer le mint",
+    "sheetTitle": "Minter le NFT",
+    "signIn": "Connecte-toi pour créer un NFT",
+    "imageOnly": "Choisis une image ou un GIF. Ajoute vidéo, musique ou fichiers en extras pour les propriétaires après le mint.",
+    "tooBig": "Ce fichier dépasse 42 Mo",
+    "minted": "NFT minté. Il apparaît sur le marché d'ici une minute.",
+    "failed": "Impossible de créer le NFT"
   }
 }

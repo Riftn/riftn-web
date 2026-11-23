@@ -7522,7 +7522,8 @@
     "spotlight": "Destacado",
     "spotlightBuyNote": "El NFT y el pago se intercambian en un solo paso.",
     "spotlightOfferNote": "Aún no está en venta. Envía una oferta y el dueño podrá aceptarla cuando quiera.",
-    "signInToTradeCta": "Inicia sesión para operar"
+    "signInToTradeCta": "Inicia sesión para operar",
+    "tabCreate": "Crear"
   },
   "usernames": {
     "swap": {
@@ -23472,5 +23473,27 @@
     "shelfAll": "Todo",
     "shelfCreated": "Creados",
     "shelfCollected": "Coleccionados"
+  },
+  "nftCreate": {
+    "eyebrow": "Crear",
+    "title": "Crea un NFT",
+    "intro": "Un NFT no es una publicación. Vive aquí en el mercado: elige cuántas copias, quién gana en las reventas y extras que solo pueden abrir los dueños.",
+    "pickArt": "Elige la imagen",
+    "pickArtHint": "Imagen o GIF, 42 MB como máximo",
+    "removeArt": "Quitar",
+    "name": "Título",
+    "namePlaceholder": "Ponle nombre a tu NFT",
+    "description": "Descripción (opcional)",
+    "next": "Elegir copias y acuñar",
+    "yours": "Tus NFTs",
+    "none": "Nada todavía. Tus NFTs aparecerán aquí.",
+    "minting": "Acuñando…",
+    "finish": "Terminar de acuñar",
+    "sheetTitle": "Acuñar NFT",
+    "signIn": "Inicia sesión para crear un NFT",
+    "imageOnly": "Elige una imagen o GIF. Añade vídeo, música o archivos como extras para dueños después de acuñar.",
+    "tooBig": "Ese archivo pasa de 42 MB",
+    "minted": "NFT acuñado. Aparecerá en el mercado en un minuto.",
+    "failed": "No se pudo crear el NFT"
   }
 }
