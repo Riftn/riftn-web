@@ -20,6 +20,7 @@ import { useStoriesStore } from '@/store/storiesStore';
 import { buildAvatarUrl, buildAvatarCdnFallbackUrl, deviceWidth } from '@/lib/media-url';
 import type { ShelfEntry } from '@/lib/api/dehub/stories';
 import { ageLabel, coverOf, handleOf, nameOf, playable } from './story-utils';
+import { rememberShelfSeat } from '@/lib/story-shelf-seat';
 import '@/styles/stories.css';
 
 const bg = (url?: string | null) => (url ? { backgroundImage: `url("${url.replace(/"/g, '%22')}")` } : undefined);
@@ -56,7 +57,14 @@ export function StoryShelf() {
     return () => window.clearTimeout(id);
   }, [storiesEnabled, hasMoments]);
 
-  if ((!storiesEnabled || (!isAuthenticated && others.length === 0)) && eligibleLive.length === 0) return null;
+  // While the first load is out the row keeps its seat with loading tiles,
+  // signed in or not, so the feed under it never jumps down when it lands.
+  const hidden = (!storiesEnabled || (!isAuthenticated && others.length === 0 && !isLoading)) && eligibleLive.length === 0;
+  // The loading skeletons read this to hold the row's seat on the next visit.
+  useEffect(() => {
+    if (!isLoading) rememberShelfSeat(!hidden);
+  }, [isLoading, hidden]);
+  if (hidden) return null;
 
   const openEntry = (entry: ShelfEntry, el: HTMLElement) => {
     const index = watchable.findIndex(e => e.author.address === entry.author.address);
@@ -81,7 +89,7 @@ export function StoryShelf() {
       {eligibleLive.map(item => (
         <LiveTile key={`${item.kind}-${item.id}`} item={item} onOpen={() => openLive(item)} />
       ))}
-      {storiesEnabled && isAuthenticated && isLoading && [0, 1, 2, 3].map(index => (
+      {storiesEnabled && isLoading && [0, 1, 2, 3].map(index => (
         <div key={index} data-story-tile aria-hidden="true" className="!bg-foreground/[0.04]">
           <span data-st-avatar className="!border-0 !bg-foreground/10" />
           <span className="absolute bottom-2 left-2 h-2 w-10 rounded bg-foreground/10" />

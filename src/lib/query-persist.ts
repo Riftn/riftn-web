@@ -37,7 +37,9 @@ const PERSIST_INTERVAL = 45_000; // at most one background write per 45s
  * either cheap to refetch or must never be rendered from stale storage.
  * Feed key shape: ['unified-feed', params, limit] (see use-unified-feed.ts).
  */
-const PERSIST_ROOTS = new Set(['unified-feed', 'single-post', 'dehub-profile']);
+// 'story-shelf': the Moments row at the top of Home. Without it the feed
+// painted from storage and the row dropped in a beat later, pushing it down.
+const PERSIST_ROOTS = new Set(['unified-feed', 'single-post', 'dehub-profile', 'story-shelf']);
 
 function isPersistable(queryKey: readonly unknown[]): boolean {
   const root = queryKey[0];
