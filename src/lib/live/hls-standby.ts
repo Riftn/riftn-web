@@ -21,6 +21,8 @@
 
 import type Hls from 'hls.js';
 import type { HlsConfig } from 'hls.js';
+import { isAacCopyUrl, isBigEventPlayback, liveSourceFromHlsUrl } from '@/lib/live-ingest';
+import { peekLiveSession } from '@/lib/live-handoff';
 
 type HlsCtor = typeof Hls;
 
@@ -39,6 +41,14 @@ interface Entry {
   /** Stops the standby's own listeners once a player owns the instance. */
   release: () => void;
 }
+
+/** hls.js settings for a live, shared by the standby and the player. */
+export const LIVE_HLS_CONFIG = { enableWorker: true, lowLatencyMode: true, backBufferLength: 60 } as const;
+
+/** Safari and iOS play these themselves; everything else goes through hls.js. */
+export const playsNativeHls = (video: HTMLVideoElement, url: string | undefined) =>
+  (liveSourceFromHlsUrl(url)?.provider !== 'mediamtx' || isAacCopyUrl(url)) &&
+  !!video.canPlayType('application/vnd.apple.mpegurl');
 
 /** A standby nobody takes is closed: it is a rolling download while it lives. */
 const UNCLAIMED_MS = 12_000;
@@ -71,6 +81,10 @@ export function warmLiveHls(
   if (!url || typeof window === 'undefined') return;
   const existing = entries.get(url);
   if (existing) {
+    // A second caller is the player arriving at a standby started ahead of
+    // it: its wait for a taker starts over.
+    clearTimeout(existing.timer);
+    existing.timer = setTimeout(() => close(url, existing), UNCLAIMED_MS);
     if (onTargetDuration) {
       if (existing.targetDuration != null) onTargetDuration(existing.targetDuration);
       else existing.listeners.add(onTargetDuration);
@@ -154,3 +168,41 @@ export function dropWarmLiveHls(url: string | undefined): void {
  * sends one every two seconds; OBS left on "auto" sends one about every eight.
  */
 export const SLOW_KEYFRAME_SEC = 4;
+
+/** What the head start below needs to know about a live. */
+interface LiveToWarm {
+  isLive?: boolean;
+  playbackUrl?: string;
+  playbackUrls?: Array<string | undefined>;
+  isPPV?: boolean;
+  isLocked?: boolean;
+  subscriberPlans?: unknown[] | null;
+  contentRating?: string;
+}
+
+/**
+ * Start a live's HLS loading before its player has been drawn.
+ *
+ * On a link straight to a live the post's answer is in hand well before the
+ * page has rendered its way down to the player: half a second on a fast
+ * machine, two or three on a busy laptop or a phone. Loading the playlists
+ * and the first piece of video in that gap means a stream that plays over HLS
+ * (long keyframes, Android, a network that drops WebRTC) has its picture ready
+ * when the player appears, and WebRTC knows the keyframe spacing before it
+ * starts. The player takes over this same instance; one nobody claims closes
+ * itself.
+ *
+ * Skipped wherever the player would not use it: a stream that is over, paid
+ * or gated, a big event (it plays with its own settings), Livepeer, a session
+ * handed over by a feed card, and browsers that play HLS themselves.
+ */
+export function warmLiveStandbyFor(stream: LiveToWarm | null | undefined): void {
+  if (!stream?.isLive || typeof document === 'undefined') return;
+  if (stream.isPPV || stream.isLocked || stream.subscriberPlans?.length || stream.contentRating === 'mature') return;
+  const url = [stream.playbackUrl, ...(stream.playbackUrls || [])].find((u): u is string => !!u && u.includes('.m3u8'));
+  const source = liveSourceFromHlsUrl(url);
+  if (!url || source?.provider !== 'mediamtx' || isBigEventPlayback(url)) return;
+  if (peekLiveSession(source.playbackId)) return;
+  if (playsNativeHls(document.createElement('video'), url)) return;
+  warmLiveHls(url, LIVE_HLS_CONFIG);
+}

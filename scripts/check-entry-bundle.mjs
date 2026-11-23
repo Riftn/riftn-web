@@ -43,7 +43,7 @@
  * only showing up as "the app feels slower on a phone" months later.
  */
 
-import { readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 const DIST = 'dist';
@@ -235,6 +235,33 @@ if (walletClosure > WALLET_CLOSURE_CEILING) {
     `blocks first paint — check what new static import reached it.`
   );
   failed = true;
+}
+
+// ── Post link code lists ────────────────────────────────────────────────
+// postLinkCodePlugin (vite.config.ts) writes the post page's and the live
+// player's files into the first inline script, which asks for them at the
+// start of a post link. A marker left in place, or a listed file that was not
+// built, means post links are back to loading their code one piece at a time
+// (or asking for files that 404), and nothing else would say so.
+const postLinkCode = html.match(/var code = (\{"r":\[[^;]*\]\});/);
+if (html.includes('"__POST_LINK_CODE__"') || !postLinkCode) {
+  console.error('[check-entry-bundle] FAIL: the post link code lists were not written into index.html.');
+  failed = true;
+} else {
+  const lists = JSON.parse(postLinkCode[1]);
+  const missing = [...lists.r, ...lists.l].filter((f) => !existsSync(join(DIST, f)));
+  if (!lists.r.length || !lists.l.length || missing.length) {
+    console.error(
+      `[check-entry-bundle] FAIL: post link code lists are wrong ` +
+      `(post page ${lists.r.length} files, live ${lists.l.length} files, missing: ${missing.join(', ') || 'none'}).`
+    );
+    failed = true;
+  } else {
+    console.log(
+      `[check-entry-bundle] post link: ${lists.r.length} post page files ${kb(sum(lists.r))}, ` +
+      `${lists.l.length} live player files ${kb(sum(lists.l))}, asked for at the start of the page`
+    );
+  }
 }
 
 if (failed) {

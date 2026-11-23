@@ -60,6 +60,7 @@ const DmMessageBanner = lazyWithRetry(() => import("@/components/app/chat/DmMess
 const DesktopWordmarkPreview = React.lazy(() => import("@/pages/DesktopWordmarkPreview"));
 const DexPoolPage = React.lazy(() => import("@/pages/app/DexPoolPage"));
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { loadPostPage } from "@/lib/preload-post-page";
 import { SurfaceTransition } from "@/components/transitions/SurfaceTransition";
 
 // Update notices can load after the app paints; their watcher starts on mount.
@@ -210,7 +211,12 @@ const ProfilePage = React.lazy(() => import("./pages/app/ProfilePage"));
 const PostInfoPage = React.lazy(() => import("@/lib/preload-post-page").then(module => module.loadPostInfoPage()));
 const StoryPermalinkPage = React.lazy(() => import("./pages/app/StoryPermalinkPage"));
 const PostReactionsPage = React.lazy(() => import("./pages/app/PostReactionsPage"));
-const SinglePostPage = React.lazy(() => import('@/lib/preload-post-page').then(module => module.loadPostPage()));
+// lazyWithRetry, so that once the page's code is in hand (main.tsx waits a
+// moment for it on a post link) the post is part of the first render instead
+// of a second pass behind a loading state.
+const SinglePostPage = lazyWithRetry(loadPostPage);
+// Resolve the post page's code without rendering it.
+export const preloadPostPage = (): Promise<unknown> => SinglePostPage.preload();
 const NewPostPage = React.lazy(() => import("./pages/app/NewPostPage"));
 const UploadPage = React.lazy(() => import("./pages/app/UploadPage"));
 const YoutubeMigratePage = React.lazy(() => import("./pages/app/YoutubeMigratePage"));

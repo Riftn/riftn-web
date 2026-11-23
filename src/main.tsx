@@ -22,14 +22,13 @@ import { installWalletSessionFetch } from "./lib/wallet-session";
 import { installRecentErrorBuffer } from "./lib/device-info";
 import { installTranslatorDomGuard } from "./i18n/translator-dom-guard";
 import { finishMultipostPopup } from "./lib/multipost-popup";
-import { warmPostPage } from "./lib/preload-post-page";
 import { prepareSharedVideoLanding } from "./lib/shared-video-landing";
 import "./lib/toast-i18n-interceptor";
 // NOTE: auth-toast translations are no longer imported here — English lives in
 // locales/en.json and other languages are merged lazily by loadLanguage()
 // (see src/i18n/index.ts). The old static import evaluated a 600-line
 // all-language map on the main thread at boot.
-import App, { preloadWalletProviders } from "./App.tsx";
+import App, { preloadPostPage, preloadWalletProviders } from "./App.tsx";
 import { loadThemeCss } from "./lib/theme-css";
 import "./i18n";
 import "./index.css";
@@ -76,12 +75,29 @@ installImageOriginFallback();
 // First-touch attribution. The URL is read now, before a redirect such as
 // /r/CODE -> /app?ref=CODE can replace it; the module itself loads lazily.
 const landing = { path: location.pathname, search: location.search, referrer: document.referrer };
-// A post link: fetch the post page's code now, alongside the boot waits below,
-// rather than once the router reaches the route. The post itself is already
-// on its way (index.html).
 // A post link opened on a phone: Home goes in under it before the router starts.
 prepareSharedVideoLanding();
-if (/^\/(?:app\/)?(?:post|video|posts)\/\d/.test(location.pathname)) warmPostPage();
+// A post link: the post page's code is taken up now, alongside the boot waits
+// below, rather than once the router reaches the route. index.html asked for
+// the files, and for the post itself, at the start of the page.
+const POST_LINK = /^\/(?:app\/)?(?:post|video|posts)\/\d/.test(location.pathname);
+const SAVE_DATA = !!(navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
+/**
+ * How long the first render waits for the post page on a post link.
+ *
+ * Rendering without it draws the whole shell around a loading state first; the
+ * page's code is then run only after that long render, drawn in a second pass,
+ * and a live player's in a third. With the page in the first render the post
+ * and its player follow straight on. Capped, so a slow or lost file holds the
+ * app back by this much at most and then loads the way it always has.
+ */
+const POST_PAGE_WAIT_MS = 1000;
+const postPageReady = POST_LINK && !SAVE_DATA
+  ? Promise.race([
+      preloadPostPage().catch(() => undefined),
+      new Promise<void>((resolve) => { setTimeout(resolve, POST_PAGE_WAIT_MS); }),
+    ])
+  : undefined;
 void import("./lib/first-touch").then((m) => m.captureFirstTouch(landing)).catch(() => undefined);
 // Signs wallet-scoped REST and storage requests; see src/lib/wallet-session.ts.
 installWalletSessionFetch();
@@ -145,6 +161,9 @@ window.addEventListener('vite:preloadError', (event) => {
 //   and its download is kicked at App's module evaluation, so this wait is
 //   normally a few milliseconds; a failure still renders (the retry / reload
 //   handling inside lazyWithRetry and the ErrorBoundary take it from there).
+//
+// On a post link the post page's code is waited for too, briefly: see
+// POST_PAGE_WAIT_MS above.
 // A fresh session opens on the viewer's default feed tab (Settings > Appearance).
 seedDefaultFeedTab();
 applyChatTextSize();
@@ -160,7 +179,7 @@ const finishMobileBootWait = beginMobileBootWait();
 const bootThemeCss = loadThemeCss(document.documentElement.dataset.theme);
 const bootDependencies = import.meta.env.DEV && location.pathname === '/app/state-gallery'
   ? [bootThemeCss]
-  : [bootThemeCss, preloadWalletProviders()];
+  : [bootThemeCss, preloadWalletProviders(), postPageReady];
 const renderReadyApp = () => { finishMobileBootWait(); render(); };
 Promise.all(bootDependencies).then(renderReadyApp, renderReadyApp);
 
