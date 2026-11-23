@@ -14,15 +14,17 @@ import { useGroupCallRoster, GROUP_CALL_MAX_RING } from '@/lib/group-call';
  * while one is going. Starting rings every member; joining just steps into
  * the room.
  */
-export function GroupCallButtons({ groupId, groupName, canStart = true }: { groupId: string; groupName: string; canStart?: boolean }) {
+export function GroupCallButtons({ groupId, groupName, canStart = true, ring = true }: { groupId: string; groupName: string; canStart?: boolean; ring?: boolean }) {
   // Context reads, not the throwing hooks: the chat also renders in previews with no call or auth provider.
   const call = useContext(CallContext);
   const walletAddress = useContext(AuthContext)?.walletAddress ?? null;
-  return call && walletAddress ? <GroupCallControls groupId={groupId} groupName={groupName} walletAddress={walletAddress} call={call} canStart={canStart} /> : null;
+  return call && walletAddress ? <GroupCallControls groupId={groupId} groupName={groupName} walletAddress={walletAddress} call={call} canStart={canStart} ring={ring} /> : null;
 }
 
-function GroupCallControls({ groupId, groupName, walletAddress, call, canStart }: {
+function GroupCallControls({ groupId, groupName, walletAddress, call, canStart, ring }: {
   groupId: string; groupName: string; walletAddress: string; call: NonNullable<ContextType<typeof CallContext>>; canStart: boolean;
+  /** false for an open room (Public Chat): starting opens the room without ringing anyone, others join from the pill. */
+  ring: boolean;
 }) {
   const { t } = useTranslation();
   const { startGroupCall, joinGroupCall, currentCall } = call;
@@ -37,6 +39,10 @@ function GroupCallControls({ groupId, groupName, walletAddress, call, canStart }
     if (busy) return;
     setStarting(true);
     try {
+      if (!ring) {
+        await joinGroupCall({ id: groupId, name: groupName }, callType);
+        return;
+      }
       const { data, error } = await withWalletHeader(
         supabase.from('community_members').select('wallet_address').eq('community_id', groupId).eq('status', 'active')
           .order('joined_at', { ascending: true }).limit(GROUP_CALL_MAX_RING + 1),
