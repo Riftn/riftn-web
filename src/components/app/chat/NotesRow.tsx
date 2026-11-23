@@ -350,7 +350,9 @@ let sheetOpen = false;
 let hosts = 0;
 const sheetListeners = new Set<() => void>();
 const emitSheet = () => sheetListeners.forEach(l => l());
-export function openNotesSheet(): void { sheetOpen = true; emitSheet(); }
+// A tile in the Messages strip opens the sheet straight onto that note.
+let pendingView: NoteEntry | null = null;
+export function openNotesSheet(entry?: NoteEntry): void { pendingView = entry ?? null; sheetOpen = true; emitSheet(); }
 /** True while a host is mounted, so callers only offer Notes where it can open. */
 export function useNotesSheetAvailable(): boolean {
   return useSyncExternalStore(
@@ -394,13 +396,37 @@ function NoteReply({ note, name, onSend }: { note: Note; name: string; onSend: (
   );
 }
 
+/**
+ * The strip at the top of Messages. It shows only for people who use Notes:
+ * your own note, or notes from people you follow. Nobody else sees anything,
+ * and Notes still open from the + for them.
+ */
+export function NotesStrip() {
+  const { t } = useTranslation();
+  const data = useNotes();
+  const mine = data?.mine ?? null;
+  const notes = data?.notes ?? [];
+  if (!mine && notes.length === 0) return null;
+  return (
+    <div data-notes-row data-kit-section className="flex gap-1 overflow-x-auto px-3 pb-2 pt-1 [scrollbar-width:none]">
+      {mine && <NoteTile own author={mine.author} note={mine.note} label={t('notes.yourNote', { defaultValue: 'Your note' })} onClick={() => openNotesSheet()} />}
+      {notes.map(entry => (
+        <NoteTile key={entry.note.id} author={entry.author} note={entry.note} label={nameOf(entry.author)} onClick={() => openNotesSheet(entry)} />
+      ))}
+    </div>
+  );
+}
+
 export function NotesSheetHost({ onMessage }: { onMessage: (author: StoryAuthor, reply?: string) => void }) {
   const { t } = useTranslation();
   const open = useSheetOpen();
   const data = useNotes();
   const [viewing, setViewing] = useState<NoteEntry | null>(null);
   useEffect(() => { hosts += 1; emitSheet(); return () => { hosts -= 1; emitSheet(); }; }, []);
-  useEffect(() => { if (open) refreshNotes(); else setViewing(null); }, [open]);
+  useEffect(() => {
+    if (open) { refreshNotes(); if (pendingView) setViewing(pendingView); pendingView = null; }
+    else setViewing(null);
+  }, [open]);
   const close = () => { sheetOpen = false; emitSheet(); };
   const mine = data?.mine?.note ?? null;
   const notes = data?.notes ?? [];

@@ -80,7 +80,7 @@ import dehubLogo from '@/assets/dehub-logo.png';
 import { SEOHead } from '@/components/SEOHead';
 import { blockUser } from '@/lib/api/dehub/blocks';
 import { toast } from 'sonner';
-import { NotesSheetHost, openNotesSheet } from '@/components/app/chat/NotesRow';
+import { NotesSheetHost, NotesStrip, openNotesSheet } from '@/components/app/chat/NotesRow';
 import { LiveRipple } from '@/components/app/LiveRipple';
 import { NewGroupChannelSheet, type NewChatKind } from '@/components/app/chat/NewGroupChannelSheet';
 import { GroupChatRow } from '@/components/app/chat/GroupChatRow';
@@ -1728,6 +1728,9 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
               />
             )}
 
+            {/* Notes strip, only for people who have a note or see one */}
+            {!guest && walletAddress && !inRequests && !showArchived && tabFilter === 'all' && !searchQuery.trim() && !isError && <NotesStrip />}
+
             {/* Message requests: people you don't follow */}
             {inRequests && <MessageRequestsHeader onBack={() => { setShowRequests(false); if (activeTab === 'requests') setActiveTab('all'); }} />}
             {!inRequests && !showArchived && tabFilter === 'all' && !searchQuery.trim() && !isLoading && !isError && requestConversations.length > 0 && (!tabsOn || !requestsTabShown) && (
@@ -1916,7 +1919,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
         open={showMessageSelector}
         onOpenChange={setShowMessageSelector}
         onSelectDM={() => setShowNewConversation(true)}
-        onSelectNote={openNotesSheet}
+        onSelectNote={() => openNotesSheet()}
         onSelectGroup={() => setNewChatKind('group')}
         onSelectChannel={() => setNewChatKind('channel')}
       />

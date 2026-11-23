@@ -3696,7 +3696,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
         onCancelReply={() => setReplyTarget.complete(replyTarget, null)}
         onTipClick={feeRequired ? undefined : openTipDialog}
         onPollClick={isVirtualConv ? undefined : () => setShowPollDialog(true)}
-        onNoteClick={notesAvailable ? openNotesSheet : undefined}
+        onNoteClick={notesAvailable ? () => openNotesSheet() : undefined}
         canSend={planAllowsSend}
         sendDisabled={accountBanned || !!feeSendDisabled || (initError && isVirtualConv)}
         sendDisabledReason={
