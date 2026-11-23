@@ -71,6 +71,8 @@ export interface UnifiedFeedParams {
   maxPerCreator?: number;
   /** When true, only returns content from accounts the authenticated user follows. Requires JWT. */
   followingOnly?: boolean;
+  /** Trending's PPV / Tips tabs: rank by what posts earned; only posts that earned something. */
+  earned?: 'tips' | 'ppv';
 }
 
 export interface UnifiedFeedItem {
@@ -218,6 +220,8 @@ export interface UnifiedFeedItem {
   /** Backend-computed total DHB tipped on this post — absent (not 0) on posts
    *  with no tips yet; see usePostTipCount for why this matters as a floor. */
   totalTips?: number;
+  /** What PPV unlocks of the post paid; sent only on the `earned=ppv` ranking. */
+  ppvEarnings?: number;
 }
 
 export interface UnifiedFeedResponse {
@@ -695,6 +699,7 @@ async function fetchUnifiedFeedFromAPI(
   if (params.shuffleSeed) url.searchParams.set('shuffleSeed', params.shuffleSeed);
   if (params.maxPerCreator !== undefined) url.searchParams.set('maxPerCreator', String(params.maxPerCreator));
   if (params.followingOnly) url.searchParams.set('followingOnly', 'true');
+  if (params.earned) url.searchParams.set('earned', params.earned);
   
   // /api/feed never 401s — an expired or revoked token is answered with 200 and
   // a body stripped of every per-viewer field. Nothing downstream can tell that
