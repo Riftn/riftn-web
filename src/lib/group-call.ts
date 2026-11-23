@@ -16,6 +16,14 @@
 import { useEffect, useState } from 'react';
 import { leaseChannel } from '@/lib/realtime-channel-lease';
 
+/**
+ * The Public Chat's call room. Public Chat is the Riftn community's chat
+ * (RIFTN_COMMUNITY_ID in community-kinds), so its call is that community's
+ * group room. Anyone signed in and not banned from it may talk there
+ * (is_active_group_member), and nobody is rung: people join from the pill.
+ */
+export const PUBLIC_CHAT_CALL_ID = '03826b47-f2ff-4707-b76c-818791a9b632';
+
 /** Most members one start rings. The room itself takes more; a bigger group joins from the bar. */
 export const GROUP_CALL_MAX_RING = 31;
 

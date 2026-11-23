@@ -14,7 +14,7 @@ import { callBackgroundSettings, loadCallBackground, loadCallBackgroundPhoto, sa
 import type { BackgroundStage } from '@/lib/studio/background';
 import type { FaceFilterId, FaceFilterStage } from '@/lib/studio/face-filters';
 import { loadCallFaceFilter, saveCallFaceFilter } from '@/lib/calls/call-background';
-import { groupCallChannel, groupCallPresenceTopic, groupCallUid, presenceList, GROUP_CALL_MAX_RING, type GroupCallPresence } from '@/lib/group-call';
+import { PUBLIC_CHAT_CALL_ID, groupCallChannel, groupCallPresenceTopic, groupCallUid, presenceList, GROUP_CALL_MAX_RING, type GroupCallPresence } from '@/lib/group-call';
 
 export interface CallSession {
   id: string; caller_address: string; recipient_address: string;
@@ -571,7 +571,8 @@ export const useCall = (): UseCallReturn => {
       const joined = await joinAgoraChannel(call, generation);
       if (generationRef.current !== generation) return;
       if (!joined) { await endCall(); return; }
-      if (startedAtRef.current == null) armGroupTimeout(generation, 'no_answer');
+      // The Public Chat room is open to everyone and nobody is rung, so it stays up while you wait for people to join.
+      if (startedAtRef.current == null && group.id !== PUBLIC_CHAT_CALL_ID) armGroupTimeout(generation, 'no_answer');
     } catch (error) {
       if (generationRef.current === generation) {
         console.warn('Group call start failed', error); setCallFailureReason('technical_error'); await endCall();

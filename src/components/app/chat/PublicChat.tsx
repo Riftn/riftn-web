@@ -51,6 +51,8 @@ import { useFocusChatMessage, chatMessageDomId } from '@/hooks/use-focus-chat-me
 import { bringIntoViewAndFlash } from '@/lib/focus-scroll';
 import { canLinkMessage, copyChatMessageLink, peekPendingChatLink, useLinkedMessage } from '@/lib/chat-message-link';
 import { useStickToBottom } from '@/hooks/use-stick-to-bottom';
+import { GroupCallButtons } from './calls/GroupCallButtons';
+import { PUBLIC_CHAT_CALL_ID } from '@/lib/group-call';
 import { ChatSearchBar, ChatSearchPanel, ChatSearchPill, rememberChatSearch, useChatSearch, type ChatSearchPerson } from './ChatSearch';
 import {
   DropdownMenu,
@@ -834,6 +836,9 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
         </div>
         
         <div data-live-chat-toolbar className="flex shrink-0 items-center gap-3">
+          {!embedded && !isBanned && (
+            <GroupCallButtons groupId={PUBLIC_CHAT_CALL_ID} groupName={t('publicChat.title')} ring={false} />
+          )}
           {selectedRoomId && <LiveChatOnlineCount count={onlineCount} />}
           <ChatTextSizeButton />
           {/* Translate all toggle */}

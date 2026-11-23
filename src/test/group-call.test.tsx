@@ -50,7 +50,7 @@ vi.mock('agora-rtc-sdk-ng', () => ({ default: {
   createCameraVideoTrack: () => Promise.resolve({ play: vi.fn(), stop: vi.fn(), close: vi.fn(), setMuted: vi.fn() }),
 } }));
 import { useCall } from '@/hooks/use-call';
-import { groupCallUid } from '@/lib/group-call';
+import { PUBLIC_CHAT_CALL_ID, groupCallUid } from '@/lib/group-call';
 import { visualActivity } from '@/lib/visual-activity';
 
 const flush = async () => { for (let i = 0; i < 12; i++) await Promise.resolve(); };
@@ -109,5 +109,17 @@ describe('group calls', () => {
     expect(result.current.currentCall).toBeNull();
     expect(result.current.callSummary).toMatchObject({ outcome: 'no_answer' });
     expect(mocks.update).toHaveBeenCalledWith({ status: 'ended' }, ['ring-1', 'ring-2']);
+  });
+
+  it('opens the Public Chat room without ringing anyone and keeps it up while you wait', async () => {
+    const { result } = renderHook(useCall);
+    await act(async () => {
+      void result.current.joinGroupCall({ id: PUBLIC_CHAT_CALL_ID, name: 'Public Chat' }, 'audio');
+      await flush();
+    });
+    expect(mocks.insert).not.toHaveBeenCalled();
+    expect(mocks.join).toHaveBeenCalledWith('app', `group-call-${PUBLIC_CHAT_CALL_ID}`, 'token', groupCallUid(ME));
+    await act(async () => { vi.advanceTimersByTime(120_000); await flush(); });
+    expect(result.current.currentCall).not.toBeNull();
   });
 });
