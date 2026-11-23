@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Wideony redaktirle", "hiddenTag": "Gizlin", "tapToEdit": "Redaktirlemek üçin basyň", "trim": "Kesmek", "mirror": "Aýna", "rotate": "Öwüriň", "hide": "Gizle", "timer": "Sagat", "sheetTitleAny": "Ibermezden ozal redaktirle", "replace": "Çalyş", "hiddenUntilTap": "Üstüne basylýança gizlin", "pause": "Pauza", "play": "Wideo oýnat", "mute": "Sesini öçür", "unmute": "Sesini aç", "scrub": "Wideo boýunça öňe-yza geçiň", "addMore": "Suratlary ýa-da wideolary goşuň", "trimAria": "Kesmek üçin uçlary süýşüriň", "coverAria": "Daşlygy bellemek üçin çarçuwa basyň", "coverHint": "Daşlygy bellemek üçin çarçuwa basyň", "coverOwn": "Suratyňyz", "coverAuto": "Awto", "uploadCover": "Mugap suratyny ýükle", "original": "Original", "rotate90": "90° döwreňde döwretmek", "showNormally": "Show normally", "showNormallyBody": "Olarak görürler, anında bilerler.", "hideUntilTap": "Basylýança gizle", "hideUntilTapBody": "Basylýança bulanyk görkezilýär", "hidePrice": "Bahanyň arkasyna gizlenmek", "hidePriceBody": "Olar saňa töleg edýänçä bulanyk", "priceUnavailable": "Bu söhbetde däl", "timerOff": "Çyk", "timerOffBody": "Ol çatda galýar.", "timerViewBody": "Olar ony görenden soň, ikisiňiz üçin hem ýok bolýar.", "confirm": "Tassykla", "lockedFor": "{{value1}} DHB üçin açyň", "lockedForUsd": "{{value1}} üçin gulpuny aç", "editItem": "Elementi redaktirle {{value1}}", "kept": "{{time}} saklandy", "timerTimeBody": "Ibereniňizden soň {{value1}} ikisiňiz üçin hem ýok bolýar."},
+  "dmVideo": {"edit": "Wideony redaktirle", "hiddenTag": "Gizlin", "tapToEdit": "Redaktirlemek üçin basyň", "trim": "Kesmek", "mirror": "Aýna", "rotate": "Öwüriň", "hide": "Gizle", "timer": "Sagat", "sheetTitleAny": "Ibermezden ozal redaktirle", "replace": "Çalyş", "hiddenUntilTap": "Üstüne basylýança gizlin", "pause": "Pauza", "play": "Wideo oýnat", "mute": "Sesini öçür", "unmute": "Sesini aç", "scrub": "Wideo boýunça öňe-yza geçiň", "addMore": "Suratlary ýa-da wideolary goşuň", "trimAria": "Kesmek üçin uçlary süýşüriň", "coverAria": "Daşlygy bellemek üçin çarçuwa basyň", "coverHint": "Daşlygy bellemek üçin çarçuwa basyň", "coverOwn": "Suratyňyz", "coverAuto": "Awto", "uploadCover": "Mugap suratyny ýükle", "original": "Original", "rotate90": "90° döwreňde döwretmek", "showNormally": "Show normally", "showNormallyBody": "Olarak görürler, anında bilerler.", "hideUntilTap": "Basylýança gizle", "hideUntilTapBody": "Basylýança bulanyk görkezilýär", "hidePrice": "Bahanyň arkasyna gizlenmek", "hidePriceBody": "Olar saňa töleg edýänçä bulanyk", "priceUnavailable": "Bu söhbetde däl", "timerOff": "Çyk", "timerOffBody": "Ol çatda galýar.", "timerViewBody": "Olar ony görenden soň, ikisiňiz üçin hem ýok bolýar.", "confirm": "Tassykla", "lockedFor": "{{value1}} tokenlar üçin açyň", "lockedForUsd": "{{value1}} üçin gulpuny aç", "editItem": "Elementi redaktirle {{value1}}", "kept": "{{time}} saklandy", "timerTimeBody": "Ibereniňizden soň {{value1}} ikisiňiz üçin hem ýok bolýar."},
   "postBg": {
     "addMedia": "Surat, GIF ýa-da wideo goş",
     "changeMedia": "Suraty, GIF-i ýa-da wideony üýtget",
@@ -568,7 +568,7 @@
     "wallet": "Gapjyk",
     "docs": "Resminamalar",
     "roadmap": "Ýol kartasy",
-    "featureRequests": "Haýyşlar",
+    "featureRequests": "Gurnamak",
     "staking": "Goýum",
     "governance": "Dolandyryş",
     "dao": "DAO",
@@ -2120,7 +2120,7 @@
     "ogHolders_one": "{{count}} OG eýesi",
     "ogHolders_other": "{{count}} OG eýesi",
     "ogChallengeTitle": "OG eýelerini yzyna getiriň",
-    "ogChallengeBody": "Henizem DHB saklaýan adamlary çagyryň. Olar siziň çakylyk baglanyşygyňyz bilen goşulyp, DHB-ni Riftn gapjygynda saklasalar, bu ýerde siziň hasabyňyza sanalýar.",
+    "ogChallengeBody": "Henizem tokenlar saklaýan adamlary çagyryň. Olar siziň çakylyk baglanyşygyňyz bilen goşulyp, tokenlar-ni Riftn gapjygynda saklasalar, bu ýerde siziň hasabyňyza sanalýar.",
     "ogChallengeCta": "Çakylyk baglanyşygyňyzy alyň"
   },
   "dhbListing": {
@@ -2196,8 +2196,8 @@
   "features": {
     "prompts": "Sözler",
     "queued": "Sırada",
-    "promptPageTitle": "Talepler",
-    "promptSubtitle": "Riftn’ı sözle qur",
+    "promptPageTitle": "Gurnamak",
+    "promptSubtitle": "Onuň bilen gürleşip, Riftn-i gurnap başla.",
     "promptNew": "Yeni söz",
     "promptSearch": "Sözleri izle…",
     "promptHeading": "Neyi qurmaly myndy?",
@@ -3244,11 +3244,11 @@
     "requestPromptShort": "Entek bu ýerde ýokmy?",
     "requestDraftMenu": "{{query}} Riftn-e goş",
     "requestDraftSettings": "{{query}} üçin sazlama",
-    "requestPostsTo": "Haýyşlara goýýar",
-    "requestHint": "Siziň adyňyzdan Haýyşlara goýýar. Ol taýýar bolanda size habar bereris.",
-    "requestSent": "Haýyşlara iberildi",
+    "requestPostsTo": "Gurnamak üçin ýazgylar",
+    "requestHint": "Siziň adyňyzdan gurnamak üçin ýazgylar. Ol taýýar bolanda size habar bereris.",
+    "requestSent": "Gurnamaga iberildi",
     "requestSentHint": "Ol taýýar bolanda size habar bereris.",
-    "requestSeeIt": "Ony Haýyşlarda görüň"
+    "requestSeeIt": "Ony Gurnamak sahypasynda görüň"
   },
   "comments": {
     "reportComment": "Komentary habar beriň",
@@ -11913,7 +11913,7 @@
     "settings": "Ayarlar",
     "settingsDesc": "Səhifənizə məlumatları, dil, gizlilik qaydalarını və görünüşü idarə edin.",
     "governance": "Hökümranlıq",
-    "featureRequests": "Qarşılıqlı əlaqə",
+    "featureRequests": "Gurnamak",
     "featureRequestsDesc": "Yeni xüsusiyyətlərə tövsiyə verin və cəmiyyətin fikirlərini səsləndirin. Populyar istifadəçilərin fikirləri inkişaf üçün prioritet alır.",
     "upvote": "Yüksək",
     "upvoteDesc": "Hökümranlıq təklifinə ya xüsusiyyətə qarşı səs verin. Cəmiyyətin dəstəyini göstərir.",
@@ -12230,7 +12230,7 @@
           "4": "Ses ýazgysyny ýazmak üçin mikrofon ikonkasyna basyň.",
           "5": "GIF goşmak üçin GIF ikonkasyna basyň we ony gözläň.",
           "6": "Ýazgyňyzy kategoriýalaşdyrmak üçin #ýazgylaryny ulanyň (mysal üçin, #kripto, #defi).",
-          "7": "Tokenlara salgylanmak üçin $pul ýazgylaryny ulanyň (mysal üçin, $RIFT, $ETH).",
+          "7": "Tokenlara salgylanmak üçin $pul ýazgylaryny ulanyň (mysal üçin, $BTC, $ETH).",
           "8": "Beýleki ulanyjylary bellik etmek üçin @bellikleri ulanyň (mysal üçin, @ulanyjy).",
           "9": "Ýazgyňyzy çap etmek üçin \"Ýazgy\" düwmesine basyň. Ýazgyňyz derrew içeri sahypada peýda bolar."
         },
@@ -17378,9 +17378,9 @@
     "72a478ec65bf": "Enjam we OS jikme-jiklikleri (meýletin)",
     "cbf32246775e": "Suratlary ýa-da wideolary goşuň (meýletin)",
     "ea3a3da9b73e": "— çenli",
-    "5d2d9bc248a3": "Funksiýa talaplary we näsazlyklar barada hasabat | Riftn",
-    "2c94a53da07c": "Funksiýa talaplaryny iberiň, näsazlyklar barada habar beriň we Riftn-yň ösüş ýoluny kesgitlemek üçin jemgyýetçilik pikirlerine ses beriň. Açyk, işlenilýän we taýýar bolan funksiýalary yzarlaň.",
-    "64ce9ca9f7d1": "Riftn funksiýalary — Funksiýa talaplary, näsazlyklar barada hasabat we jemgyýetçilik ösüş ýoly",
+    "5d2d9bc248a3": "Onuň bilen gürleşip, Riftn-i gurnap başla | Riftn",
+    "2c94a53da07c": "Onuň bilen gürleşip, Riftn-i gurnap başla. Pikirleriňizi we näsazlyk baradaky hasabatlaryňyzy sorag hökmünde ýerleşdiriň, başgalaryň haýyşlaryna ses beriň we olaryň \"Nobatda\" durşundan \"Taýýar\" bolýança yzarlaň.",
+    "64ce9ca9f7d1": "Gurnamak: onuň bilen gürleşip, Riftn-i şekillendiriň",
     "5697d03daef4": "Funksiýalar",
     "c46c50e9cf58": "Heniz hiç hili funksiýa ýok",
     "b98adf20f5f3": "Gapjyk: Kripto aktiwleriňizi dolandyryň",
@@ -18594,7 +18594,7 @@
     "68f66b1f5bba": "Riftn-da trendli mähelläni, ýaradyjylary we temalary tapyň.",
     "fd274232d93a": "Ýüklemek üçin basyň",
     "d7246da527c1": "Ýene birini goş",
-    "d2c76d7df46f": "Riftn-yň ýol kartasyny düzmek üçin funksiýa tekliplerini iberiň, näsazlyklary habar beriň we jemgyýetçilik pikirlerine ses beriň.",
+    "d2c76d7df46f": "Onuň bilen gürleşip, Riftn-i gurnap başla. Pikirleriňizi we näsazlyk baradaky hasabatlaryňyzy sorag hökmünde ýerleşdiriň we nämäniň indiki gurnaljakdygyna ses beriň.",
     "90d6f4c823a9": "Salgyny göçürip bolmady",
     "15e17712534d": "Tokeniň zarb salgysy",
     "b4c1cebc35f6": "bu tor",

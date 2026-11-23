@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Vîdyoyê biguherîne", "hiddenTag": "Veşartî", "tapToEdit": "Ji bo guherandinê bitikîne", "cover": "Berg", "trim": "Jêkirin", "mirror": "Neynik", "rotate": "Zivirandin", "hide": "Veşartin", "timer": "Demjimêr", "sheetTitleAny": "Berî şandinê biguherîne", "close": "Girtin", "replace": "Biguherîne", "hiddenUntilTap": "Heya lê nexin veşartî ye", "pause": "Rawestandin", "play": "Vîdyoyê bilîze", "mute": "Bêdeng bike", "unmute": "Dengê wê veke", "scrub": "Di nav vîdyoyê de bigere", "addMore": "Wêne an vîdyoyan lê zêde bike", "trimAria": "Ji bo jêkirinê dawiyan bikişîne", "coverAria": "Ji bo danîna bergê li çarçoveyekê bixe", "coverHint": "Ji bo danîna bergê li çarçoveyekê bixe", "coverOwn": "Wêneyê te", "coverAuto": "Xweber", "uploadCover": "Wêneyekî bergê bar bike", "mirrored": "Neynikkirî", "original": "Orjînal", "rotate90": "90 pileyî bizivirîne", "showNormally": "Bi awayekî normal nîşan bide", "showNormallyBody": "Ew tavilê dibînin", "hideUntilTap": "Heya lê neyê xistin veşêre", "hideUntilTapBody": "Heya lê nexin şêlû ye", "hidePrice": "Li pişt bihayekî veşêre", "hidePriceBody": "Heya drav nedin şêlû ye", "priceUnavailable": "Di vê chatê de nîne", "timerOff": "Girtî", "timerOffBody": "Di chatê de dimîne.", "timerViewBody": "Gava dîtin, ji bo her duyan jî winda dibe.", "confirm": "Piştrast bike", "lockedFor": "Ji bo {{value1}} DHB veke", "lockedForUsd": "Ji bo {{value1}} veke", "editItem": "Tiştê {{value1}} biguherîne", "kept": "{{time}} hat parastin", "timerTimeBody": "Piştî ku te şand, di nav {{value1}} de ji bo her duyan jî winda dibe."},
+  "dmVideo": {"edit": "Vîdyoyê biguherîne", "hiddenTag": "Veşartî", "tapToEdit": "Ji bo guherandinê bitikîne", "cover": "Berg", "trim": "Jêkirin", "mirror": "Neynik", "rotate": "Zivirandin", "hide": "Veşartin", "timer": "Demjimêr", "sheetTitleAny": "Berî şandinê biguherîne", "close": "Girtin", "replace": "Biguherîne", "hiddenUntilTap": "Heya lê nexin veşartî ye", "pause": "Rawestandin", "play": "Vîdyoyê bilîze", "mute": "Bêdeng bike", "unmute": "Dengê wê veke", "scrub": "Di nav vîdyoyê de bigere", "addMore": "Wêne an vîdyoyan lê zêde bike", "trimAria": "Ji bo jêkirinê dawiyan bikişîne", "coverAria": "Ji bo danîna bergê li çarçoveyekê bixe", "coverHint": "Ji bo danîna bergê li çarçoveyekê bixe", "coverOwn": "Wêneyê te", "coverAuto": "Xweber", "uploadCover": "Wêneyekî bergê bar bike", "mirrored": "Neynikkirî", "original": "Orjînal", "rotate90": "90 pileyî bizivirîne", "showNormally": "Bi awayekî normal nîşan bide", "showNormallyBody": "Ew tavilê dibînin", "hideUntilTap": "Heya lê neyê xistin veşêre", "hideUntilTapBody": "Heya lê nexin şêlû ye", "hidePrice": "Li pişt bihayekî veşêre", "hidePriceBody": "Heya drav nedin şêlû ye", "priceUnavailable": "Di vê chatê de nîne", "timerOff": "Girtî", "timerOffBody": "Di chatê de dimîne.", "timerViewBody": "Gava dîtin, ji bo her duyan jî winda dibe.", "confirm": "Piştrast bike", "lockedFor": "Ji bo {{value1}} token veke", "lockedForUsd": "Ji bo {{value1}} veke", "editItem": "Tiştê {{value1}} biguherîne", "kept": "{{time}} hat parastin", "timerTimeBody": "Piştî ku te şand, di nav {{value1}} de ji bo her duyan jî winda dibe."},
   "postBg": {
     "addMedia": "Wêne, GIF an vîdyoyek zêde bike",
     "changeMedia": "Wêne, GIF an vîdyoyê biguherîne",
@@ -568,7 +568,7 @@
     "wallet": "Berîk",
     "docs": "Belge",
     "roadmap": "Nexşeya rê",
-    "featureRequests": "Daxwaz",
+    "featureRequests": "Ava bike",
     "staking": "Staking",
     "governance": "Rêveberî",
     "dao": "DAO",
@@ -2120,7 +2120,7 @@
     "ogHolders_one": "{{count}} xwediyê OG",
     "ogHolders_other": "{{count}} xwediyên OG",
     "ogChallengeTitle": "Xwediyên OG vegerîne",
-    "ogChallengeBody": "Kesên ku hêj DHB digirin vexwîne. Dema ew bi girêdana vexwendina te tevlî dibin û DHB-ya xwe di berîka xwe ya Riftn de dihêlin, li vir ji bo te tên hejmartin.",
+    "ogChallengeBody": "Kesên ku hêj token digirin vexwîne. Dema ew bi girêdana vexwendina te tevlî dibin û token-ya xwe di berîka xwe ya Riftn de dihêlin, li vir ji bo te tên hejmartin.",
     "ogChallengeCta": "Girêdana xwe ya vexwendinê bistîne"
   },
   "dhbListing": {
@@ -2196,8 +2196,8 @@
   "features": {
     "prompts": "Prompt",
     "queued": "Di rêzê de ye",
-    "promptPageTitle": "Daxwaz",
-    "promptSubtitle": "Riftn bi promptekê ava bike",
+    "promptPageTitle": "Ava bike",
+    "promptSubtitle": "Bi axaftina li gel wê, Riftn ava bike.",
     "promptNew": "Prompta nû",
     "promptSearch": "Li promptan bigere…",
     "promptHeading": "Divê em paşê çi ava bikin?",
@@ -3244,11 +3244,11 @@
     "requestPromptShort": "Hêj ne li vir e?",
     "requestDraftMenu": "{{query}} li Riftn zêde bike",
     "requestDraftSettings": "Mîhengek ji bo {{query}}",
-    "requestPostsTo": "Diçe Daxwazan",
-    "requestHint": "Wek te diçe Daxwazan. Em ê ji te re bibêjin dema ku derkeve.",
-    "requestSent": "Ji Daxwazan re hat şandin",
+    "requestPostsTo": "Postên ji bo avakirinê",
+    "requestHint": "Wekî tu postên ji bo avakirinê çêdike. Dema ku derket em ê ji te re bibêjin.",
+    "requestSent": "Ji bo avakirinê hat şandin",
     "requestSentHint": "Em ê ji te re bibêjin dema ku derkeve.",
-    "requestSeeIt": "Li Daxwazan bibîne"
+    "requestSeeIt": "Li ser Buildê bibîne"
   },
   "comments": {
     "reportComment": "Şîroveyê ragihîne",
@@ -11913,7 +11913,7 @@
     "settings": "Mîheng",
     "settingsDesc": "Vebijarkên hesabê xwe, ziman, mîhengên nepenîtiyê û xuyangê birêve bibe.",
     "governance": "Rêveberî",
-    "featureRequests": "Daxwazên taybetmendiyê",
+    "featureRequests": "Ava bike",
     "featureRequestsDesc": "Taybetmendiyên nû pêşniyar bike û deng bide ramanên civakê. Daxwazên populer ji bo pêşxistinê pêşîn tên girtin.",
     "upvote": "Dengê erênî bide",
     "upvoteDesc": "Dengê erê bide pêşniyareke rêveberiyê an daxwazeke taybetmendiyê. Alîkariya nîşandana piştgiriya civakê dike.",
@@ -12233,7 +12233,7 @@
           "4": "Ji bo tomarkirina nîşeyeke dengî, li ser îkona mîkrofonê bitikîne.",
           "5": "Ji bo zêdekirina GIF-ekê, li îkona GIF bitikîne û li yekê bigere.",
           "6": "#Haştagan bikar bîne da ku şandiya xwe kategorîze bikî (mînak #crypto, #defi).",
-          "7": "$Cashtagan bikar bîne da ku behsa tokenan bikî (mînak $RIFT, $ETH).",
+          "7": "$Cashtagan bikar bîne da ku behsa tokenan bikî (mînak $BTC, $ETH).",
           "8": "@Behskirinan bikar bîne da ku bikarhênerên din etîket bikî (mînak @username).",
           "9": "Ji bo weşandinê li 'Biweşîne' bitikîne. Şandiya te yekser di herikê de xuya dibe."
         },
@@ -17395,9 +17395,9 @@
     "72a478ec65bf": "Hûrguliyên cîhaz û OS (vebijarkî)",
     "cbf32246775e": "Wêne an vîdyoyan pêve bike (vebijarkî)",
     "ea3a3da9b73e": " — heta ",
-    "5d2d9bc248a3": "Daxwazên taybetmendiyan û ragihandina çewtiyan | Riftn",
-    "2c94a53da07c": "Daxwazên taybetmendiyan bişîne, çewtiyan ragihîne û li ser ramanên civakê deng bide da ku nexşerêya Riftn şekil bidî. Taybetmendiyên vekirî, di pêvajoyê de û weşandî bişopîne.",
-    "64ce9ca9f7d1": "Taybetmendiyên Riftn — Daxwazên taybetmendiyan, ragihandina çewtiyan û nexşerêya civakê",
+    "5d2d9bc248a3": "Bi axaftina li gel wê, Riftn ava bike | Riftn",
+    "2c94a53da07c": "Bi axaftina li gel wê, Riftn ava bike. Fikran û raporên xeletiyan wekî pêşniyar biweşîne, li ser tiştên ku yên din xwestine deng bide, û wan ji Rêzê heta Şandinê bişopîne.",
+    "64ce9ca9f7d1": "Build: bi axaftina li gel wê, Riftn şekil bide",
     "5697d03daef4": "Taybetmendî",
     "c46c50e9cf58": "Hîn taybetmendî tune ne",
     "b98adf20f5f3": "Berîk: Hebûnên xwe yên krîpto birêve bibe",
@@ -18617,7 +18617,7 @@
     "68f66b1f5bba": "Li ser Riftn naverok, afirîner û mijarên trend keşf bike.",
     "fd274232d93a": "Ji bo barkirinê bitikîne",
     "d7246da527c1": "Yekî din zêde bike",
-    "d2c76d7df46f": "Daxwazên taybetmendiyan bişîne, çewtiyan ragihîne, û deng bide ramanên civakê da ku nexşeya rê ya Riftn teşe bidî.",
+    "d2c76d7df46f": "Bi axaftina li gel wê, Riftn ava bike. Fikran û raporên xeletiyan wekî pêşniyar biweşîne û li ser tiştên ku dê paşê bên avakirin deng bide.",
     "90d6f4c823a9": "Navnîşan nehat kopîkirin",
     "15e17712534d": "Navnîşana mint a tokenê",
     "b4c1cebc35f6": "ev tor",

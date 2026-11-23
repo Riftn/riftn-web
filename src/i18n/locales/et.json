@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Muuda videot", "hiddenTag": "Peidetud", "tapToEdit": "Puuduta muutmiseks", "cover": "Kaane", "trim": "Lõikamine", "mirror": "Peegel", "rotate": "Pööra", "hide": "Peida", "timer": "Taimer", "sheetTitleAny": "Muuda enne saatmist", "close": "Sulge", "replace": "Asenda", "hiddenUntilTap": "Peidetud kuni nad selle puudutavad", "pause": "Paus", "play": "Mängi video", "mute": "Vaigista", "unmute": "Tühista vaigistus", "scrub": "Käi läbi video", "addMore": "Lisa fotosid või videoid", "trimAria": "Lõhenda lõpusid lõikamiseks", "coverAria": "Puuduta kaadrit kaane määramiseks", "coverHint": "Puuduta kaadrit kaane määramiseks", "coverOwn": "Sinu pilt", "coverAuto": "Automaatne", "uploadCover": "Laadi üles kaanepilt", "mirrored": "Peegeldatud", "original": "Algne", "rotate90": "Pööra 90°", "showNormally": "Näita tavaliselt", "showNormallyBody": "Nad näevad seda kohe", "hideUntilTap": "Peida kuni puudutatakse", "hideUntilTapBody": "Sume kuni nad seda puudutavad", "hidePrice": "Peida hinna taga", "hidePriceBody": "Sume kuni nad maksavad", "priceUnavailable": "Ei ole selles vestluses", "timerOff": "Lülita välja", "timerOffBody": "See jääb vestlusesse.", "timerViewBody": "See on kaotanud mõlemale, kui nad seda näevad.", "confirm": "Kinnita", "lockedFor": "Ava {{value1}} DHB eest", "lockedForUsd": "Lukustamata {{value1}}", "editItem": "Muuda üksus {{value1}}", "kept": "{{time}} säilitatud", "timerTimeBody": "Kaotanud mõlemale {{value1}} pärast saatmist."},
+  "dmVideo": {"edit": "Muuda videot", "hiddenTag": "Peidetud", "tapToEdit": "Puuduta muutmiseks", "cover": "Kaane", "trim": "Lõikamine", "mirror": "Peegel", "rotate": "Pööra", "hide": "Peida", "timer": "Taimer", "sheetTitleAny": "Muuda enne saatmist", "close": "Sulge", "replace": "Asenda", "hiddenUntilTap": "Peidetud kuni nad selle puudutavad", "pause": "Paus", "play": "Mängi video", "mute": "Vaigista", "unmute": "Tühista vaigistus", "scrub": "Käi läbi video", "addMore": "Lisa fotosid või videoid", "trimAria": "Lõhenda lõpusid lõikamiseks", "coverAria": "Puuduta kaadrit kaane määramiseks", "coverHint": "Puuduta kaadrit kaane määramiseks", "coverOwn": "Sinu pilt", "coverAuto": "Automaatne", "uploadCover": "Laadi üles kaanepilt", "mirrored": "Peegeldatud", "original": "Algne", "rotate90": "Pööra 90°", "showNormally": "Näita tavaliselt", "showNormallyBody": "Nad näevad seda kohe", "hideUntilTap": "Peida kuni puudutatakse", "hideUntilTapBody": "Sume kuni nad seda puudutavad", "hidePrice": "Peida hinna taga", "hidePriceBody": "Sume kuni nad maksavad", "priceUnavailable": "Ei ole selles vestluses", "timerOff": "Lülita välja", "timerOffBody": "See jääb vestlusesse.", "timerViewBody": "See on kaotanud mõlemale, kui nad seda näevad.", "confirm": "Kinnita", "lockedFor": "Ava {{value1}} märki eest", "lockedForUsd": "Lukustamata {{value1}}", "editItem": "Muuda üksus {{value1}}", "kept": "{{time}} säilitatud", "timerTimeBody": "Kaotanud mõlemale {{value1}} pärast saatmist."},
   "postBg": {
     "addMedia": "Lisa pilt, GIF või video",
     "changeMedia": "Muuda pilti, GIF-i või videot",
@@ -630,7 +630,7 @@
     "wallet": "Rahakott",
     "docs": "Dokumendid",
     "roadmap": "Tegevuskava",
-    "featureRequests": "Funktsioonisoovid",
+    "featureRequests": "Ehita",
     "staking": "Panustamine",
     "governance": "Valitsemine",
     "dao": "DAO",
@@ -2120,7 +2120,7 @@
     "ogHolders_one": "{{count}} OG omanik",
     "ogHolders_other": "{{count}} OG omanikku",
     "ogChallengeTitle": "Too OG omanikud tagasi",
-    "ogChallengeBody": "Kutsu inimesi, kellel on endiselt DHB. Kui nad liituvad sinu kutselingiga ja hoiavad oma DHB-d Riftni rahakotis, loetakse nad siin sinu arvele.",
+    "ogChallengeBody": "Kutsu inimesi, kellel on endiselt märki. Kui nad liituvad sinu kutselingiga ja hoiavad oma märki-d Riftni rahakotis, loetakse nad siin sinu arvele.",
     "ogChallengeCta": "Hangi oma kutselink"
   },
   "dhbListing": {
@@ -2196,8 +2196,8 @@
   "features": {
     "prompts": "Viibad",
     "queued": "Järjekorras",
-    "promptPageTitle": "Taotlused",
-    "promptSubtitle": "Ehita Riftn kiirelt",
+    "promptPageTitle": "Ehita",
+    "promptSubtitle": "Ehita Riftn, rääkides sellega.",
     "promptNew": "Uus viip",
     "promptSearch": "Otsinguviibad...",
     "promptHeading": "Mida peaksime järgmiseks ehitama?",
@@ -3244,11 +3244,11 @@
     "requestPromptShort": "Pole veel siin?",
     "requestDraftMenu": "Lisa {{query}} Riftni",
     "requestDraftSettings": "Seade: {{query}}",
-    "requestPostsTo": "Postitab soovidesse",
-    "requestHint": "Postitab soovidesse sinu nimel. Anname teada, kui see valmib.",
-    "requestSent": "Saadetud soovidesse",
+    "requestPostsTo": "Postitused, mida koostada",
+    "requestHint": "Postitused, mida koostada sinu moodi. Anname teada, kui see teele pannakse.",
+    "requestSent": "ehitama",
     "requestSentHint": "Anname teada, kui see valmib.",
-    "requestSeeIt": "Vaata seda soovides"
+    "requestSeeIt": "Vaadake seda Buildis"
   },
   "comments": {
     "reportComment": "Teata kommentaarist",
@@ -11913,7 +11913,7 @@
     "settings": "Seaded",
     "settingsDesc": "Hallake oma konto eelistusi, keelt, privaatsusseadeid ja välimust.",
     "governance": "Juhtimine",
-    "featureRequests": "Funktsioonide taotlused",
+    "featureRequests": "Ehita",
     "featureRequestsDesc": "Soovita uusi funktsioone ja hääleta kogukonna ideede üle. Populaarsed taotlused seatakse arendamisel esikohale.",
     "upvote": "Hääleta üles",
     "upvoteDesc": "Hääletage haldusettepaneku või funktsioonitaotluse poolt. Aitab anda märku kogukonna toetusest.",
@@ -12233,7 +12233,7 @@
           "4": "Helimärkmiku salvestamiseks klõpsake mikrofoniikooni.",
           "5": "GIF-i lisamiseks klõpsake GIF-i ikooni ja otsige seda.",
           "6": "Kasutage oma postituse kategoriseerimiseks #hashtage (nt #crypto, #defi).",
-          "7": "Tokenite viitamiseks kasutage $cashtage (nt $RIFT, $ETH).",
+          "7": "Tokenite viitamiseks kasutage $cashtage (nt $BTC, $ETH).",
           "8": "Teiste kasutajate märkimiseks kasutage @mainimisi (nt @kasutajanimi).",
           "9": "Klõpsake avaldamiseks nuppu \"Postita\". Teie postitus ilmub kohe voogu."
         },
@@ -17395,9 +17395,9 @@
     "72a478ec65bf": "Seadme & OS Andmed (võimalik)",
     "cbf32246775e": "Lubatud üleslaadida pildid või video (võimalik)",
     "ea3a3da9b73e": "— kuni",
-    "5d2d9bc248a3": "Funktsioonide taotlused ja veast teatamine | Riftn",
-    "2c94a53da07c": "Esita funktsioonitaotlusi, teata vigadest ja hääleta kogukonna ideede üle, et kujundada Riftni tegevuskava. Jälgi avatud, pooleliolevaid ja saadetud funktsioone.",
-    "64ce9ca9f7d1": "Riftni funktsioonid — funktsioonide taotlused, veast teatamine ja kogukonna teekaart",
+    "5d2d9bc248a3": "Ehita Riftn, rääkides sellega | Riftn",
+    "2c94a53da07c": "Ehitage Riftni sellega rääkides. Postitage ideid ja veateateid vihjetena, hääletage teiste soovide üle ja jälgige nende liikumist olekust „Järjekorras“ olekusse „Väljastatud“.",
+    "64ce9ca9f7d1": "Ehita: kujunda Riftni, sellega rääkides",
     "5697d03daef4": "Omadused",
     "c46c50e9cf58": "Funktsioone veel pole",
     "b98adf20f5f3": "Kriptovaluta: Halla oma kriptovaluutaasjat",
@@ -18614,7 +18614,7 @@
     "68f66b1f5bba": "Leia populaarsemaid sisu, looja ja teemasid Riftnil.",
     "fd274232d93a": "Klikka, üleslaadi",
     "d7246da527c1": "Lisa veel",
-    "d2c76d7df46f": "Esita soovitusi, raporteeri vigu ja hääleta ühiskonna ideed, et mõjutada Riftni arendusplaan.",
+    "d2c76d7df46f": "Ehitage Riftnit sellega rääkides. Postitage ideid ja veateateid vihjetena ning hääletage selle poolt, mida järgmisena luuakse.",
     "90d6f4c823a9": "Ei saanud kopeerida aadressi",
     "15e17712534d": "Tokeni mõõdukas aadress",
     "b4c1cebc35f6": "see võrgustik",

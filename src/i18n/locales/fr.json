@@ -1,4 +1,42 @@
 {
+  "painting": {
+    "title": "Peinture",
+    "close": "Fermer",
+    "undo": "Annuler",
+    "redo": "Rétablir",
+    "done": "OK",
+    "clear": "Tout effacer",
+    "size": "Taille",
+    "colour": "Couleur",
+    "customColour": "Couleur personnalisée",
+    "fillShape": "Remplir la forme",
+    "shape": "Format de la toile",
+    "discardTitle": "Abandonner cette peinture ?",
+    "discard": "Abandonner",
+    "keep": "Continuer à peindre",
+    "saveFailed": "Impossible d'enregistrer la peinture. Réessayez.",
+    "tools": {
+      "pencil": "Crayon",
+      "brush": "Pinceau",
+      "eraser": "Gomme",
+      "fill": "Remplissage",
+      "line": "Ligne",
+      "rect": "Rectangle",
+      "ellipse": "Ellipse",
+      "oil": "Huile",
+      "pastel": "Pastel",
+      "watercolor": "Aquarelle",
+      "charcoal": "Fusain"
+    },
+    "aspect": {
+      "portrait": "Portrait",
+      "square": "Carré",
+      "wide": "Paysage"
+    },
+    "hue": "Teinte",
+    "saturation": "Saturation",
+    "brightness": "Luminosité"
+  },
   "ownKeys": {
     "working": "En cours",
     "invalid": "Rejeté, remplacez-le",
@@ -173,7 +211,7 @@
     "timerOffBody": "Il reste dans le chat.",
     "timerViewBody": "Parti pour vous deux une fois qu’ils l’ont vu.",
     "confirm": "Confirmer",
-    "lockedFor": "Déverrouiller pour {{value1}} DHB",
+    "lockedFor": "Déverrouiller pour {{value1}} jetons",
     "lockedForUsd": "Déverrouiller pour {{value1}}",
     "editItem": "Modifier l’élément {{value1}}",
     "kept": "{{time}} conservé",
@@ -199,11 +237,13 @@
     "destructSecs": "{{n}} sec",
     "destructShortSecs": "{{n}}s",
     "revealAria": "Révéler la vidéo masquée",
-    "tapToReveal": "Appuyez pour révéler"
+    "tapToReveal": "Appuyez pour révéler",
+    "timerReplay": "Autoriser une relecture",
+    "timerReplayBody": "Ils peuvent l’ouvrir une fois de plus. Le compte à rebours repart."
   },
   "assistantCards": {
     "requestDraft": "Brouillon de demande publique",
-    "postRequest": "Publier dans Demandes",
+    "postRequest": "Publier dans Construire",
     "possibleDuplicates": "Doublons possibles",
     "viewPostedRequest": "Voir la demande publiée",
     "fitting": "Adaptée",
@@ -961,7 +1001,7 @@
     "wallet": "Portefeuille",
     "docs": "Documentation",
     "roadmap": "Feuille de Route",
-    "featureRequests": "Demandes",
+    "featureRequests": "Construire",
     "staking": "Staking",
     "governance": "Gouvernance",
     "dao": "DAO",
@@ -2527,7 +2567,7 @@
     "ogHolders_one": "{{count}} holder OG",
     "ogHolders_other": "{{count}} holders OG",
     "ogChallengeTitle": "Faites revenir les holders OG",
-    "ogChallengeBody": "Invitez les personnes qui détiennent encore du DHB. Quand elles rejoignent avec votre lien d'invitation et gardent leur DHB dans leur portefeuille Riftn, elles comptent pour vous ici.",
+    "ogChallengeBody": "Invitez les personnes qui détiennent encore des jetons. Si elles rejoignent Riftn via votre lien d’invitation et conservent leurs jetons dans leur portefeuille Riftn, elles compteront pour vous ici.",
     "ogChallengeCta": "Obtenir votre lien d'invitation",
     "directReferrals_one": "{{count}} directs",
     "directReferrals_other": "{{count}} directs",
@@ -2607,6 +2647,17 @@
     "noResultsFor": "Aucun résultat pour \"{{query}}\"",
     "tryDifferent": "Essayez une autre recherche",
     "tipRemoveAt": "Astuce : Retirez le @ pour rechercher du contenu au lieu de noms d'utilisateur exacts",
+    "trendingWeekTitle": "Tendances cette semaine",
+    "trendReactions": "Réactions",
+    "trendPpv": "PPV",
+    "trendTips": "Pourboires",
+    "trendSortLabel": "Classer les vidéos tendance par",
+    "earnedTipped": "en pourboires",
+    "earnedUnlocks_one": "{{count}} déblocage",
+    "earnedUnlocks_other": "{{count}} déblocages",
+    "noEarnedTips": "Aucune vidéo n’a reçu de pourboire cette semaine. Donnes-en un à une vidéo que tu aimes et elle apparaîtra ici.",
+    "noEarnedPpv": "Aucune vidéo PPV n’a été débloquée cette semaine. Reviens bientôt.",
+    "noTrendingWeek": "Rien de tendance cette semaine pour l’instant. Reviens bientôt.",
     "noRecentSearches": "Aucune recherche récente. Commencez à explorer !",
     "nothingTrending": "Rien en tendance pour le moment ! Revenez bientôt.",
     "viewAllPeople": "Voir les {{count}} personnes",
@@ -2635,7 +2686,7 @@
     "followBack": "Suivre en retour"
   },
   "features": {
-    "myRequests": "Mes demandes",
+    "myRequests": "Mes prompts",
     "cropDraw": "Rogner et dessiner",
     "crop": "Rogner",
     "cropHint": "Tracez un cadre sur la partie à garder. Faites-le glisser de l'intérieur pour le déplacer.",
@@ -2643,8 +2694,8 @@
     "resetCrop": "Réinitialiser le rognage",
     "prompts": "Propositions",
     "queued": "En attente",
-    "promptPageTitle": "Demandes",
-    "promptSubtitle": "Construisez Riftn avec une proposition",
+    "promptPageTitle": "Construire",
+    "promptSubtitle": "Construisez Riftn en lui parlant.",
     "promptNew": "Nouvelle proposition",
     "promptSearch": "Rechercher des propositions…",
     "promptHeading": "Que devrions-nous créer ensuite ?",
@@ -3645,11 +3696,11 @@
     "requestDraftMenu": "Ajouter {{query}} à Riftn",
     "requestDraftSettings": "Un réglage pour {{query}}",
     "requestSend": "Envoyer la demande",
-    "requestPostsTo": "Publié dans Demandes",
-    "requestHint": "Publié dans Demandes en ton nom. On te prévient quand c'est en ligne.",
-    "requestSent": "Envoyé dans Demandes",
+    "requestPostsTo": "Publié dans Construire",
+    "requestHint": "Publié dans Construire en votre nom. On vous prévient dès que c’est en ligne.",
+    "requestSent": "Envoyé dans Construire",
     "requestSentHint": "On te prévient quand c'est en ligne.",
-    "requestSeeIt": "Voir dans Demandes"
+    "requestSeeIt": "Voir dans Construire"
   },
   "comments": {
     "reportComment": "Signaler un commentaire",
@@ -3762,6 +3813,7 @@
     "anonymousLikes_other": "{{count}} j'aime de détenteurs de badges anonymes"
   },
   "mintChain": {
+    "homeAllowance": "{{left}} mints sur {{total}} aujourd'hui atteignent l'Accueil. Les mints en plus vont sur ton profil et sur le marché.",
     "title": "Poste de menthe",
     "subtitle": "Choisissez une chaîne. Les prix sont en direct et mis à jour toutes les minutes.",
     "free": "Gratuit",
@@ -7737,6 +7789,10 @@
     "moreActions": "Options de la story",
     "remixing": "Remix de la story de {{name}}",
     "watchOriginal": "Voir la story originale",
+    "translate": "Traduire",
+    "seeOriginal": "Voir l'original",
+    "translating": "Traduction…",
+    "alreadyYourLanguage": "Déjà dans votre langue",
     "originalUnavailable": "La story originale n'est plus disponible.",
     "copyLinkFailed": "Impossible de copier le lien de la story.",
     "whoWatched": "Qui a regardé",
@@ -12582,7 +12638,7 @@
     "settings": "Paramètres",
     "settingsDesc": "Gérez les préférences de votre compte, la langue, les paramètres de confidentialité et l'apparence.",
     "governance": "Gouvernance",
-    "featureRequests": "Demandes de fonctionnalités",
+    "featureRequests": "Construire",
     "featureRequestsDesc": "Suggérer de nouvelles fonctionnalités et voter sur les idées de la communauté. Les demandes populaires sont priorisées pour le développement.",
     "upvote": "👍 Appuyez sur \"J'aime\"",
     "upvoteDesc": "Votez en faveur d'une proposition de gouvernance ou d'une demande de fonctionnalité. Aide à signaler le soutien de la communauté.",
@@ -12729,6 +12785,8 @@
     "intro": "Chaque niveau coûte un montant fixe en dollars. Le nombre de tokens qui l'accompagne représente ce que cela coûte au prix de référence de 0,001 $ — l'application demande ce montant mis à l'échelle du prix en direct, et jamais plus que cela, donc une baisse de prix ne peut pas relever la barre ou reprendre un niveau que vous avez déjà gagné."
   },
   "postingAllowance": {
+    "mintsLabel": "mints",
+    "mintNote": "Les mints suivent les mêmes chiffres que les posts texte : ce nombre de mints par jour atteint le fil d'Accueil. Les mints en plus passent quand même et apparaissent sur ton profil, dans Abonnements et sur le marché des fractions. Le mint n'est jamais bloqué.",
     "footnote": "Le niveau de badge correspond à vos tokens Riftn détenus et stakés sur BNB Chain et Base — le même solde à partir duquel votre badge est tiré. L'échelle est tarifée en dollars, donc les chiffres des tokens ci-dessus représentent ce que chaque niveau coûte au prix de vente de 0,001 $ et l'exigence diminue à mesure que le prix du token augmente ; un niveau que vous avez déjà gagné n'est jamais repris par le prix. Un badge qui vous est prêté par un mécène s'affiche sur votre profil mais n'augmente pas votre allocation de publication — celle-ci provient de ce que vous détenez vous-même. Les allocations sont réinitialisées à 00h00 UTC, et un gigaoctet ici équivaut à 1 024 Mo."
   },
   "postComposer": {
@@ -12904,7 +12962,7 @@
           "4": "Pour enregistrer une note vocale, cliquez sur l'icône microphone.",
           "5": "Pour ajouter un GIF, cliquez sur l'icône GIF et recherchez-en un.",
           "6": "Utilisez des #hashtags pour catégoriser votre publication (par exemple, #crypto, #defi).",
-          "7": "Utilisez des $cashtags pour référencer des jetons (par exemple, $RIFT, $ETH).",
+          "7": "Utilisez des $cashtags pour référencer des jetons (par exemple, $BTC, $ETH).",
           "8": "Utilisez des @mentions pour taguer d'autres utilisateurs (par exemple, @username).",
           "9": "Cliquez sur 'Publier' pour publier. Votre publication apparaît immédiatement dans le flux."
         },
@@ -13132,7 +13190,8 @@
           "3": "Lorsqu'une publication dépasse le quota, l'application la tarifie d'abord et vérifie si votre portefeuille peut la couvrir avant toute téléversement.",
           "4": "La publication s'effectue exactement comme si elle était dans le quota — la publication n'attend jamais un paiement.",
           "5": "Ensuite, vous approuvez un transfert pour cette publication uniquement, réglé sur la chaîne Base ou BNB qui détient suffisamment de jetons Riftn.",
-          "6": "Les deux pools sont réinitialisés à minuit UTC."
+          "6": "Les deux pools sont réinitialisés à minuit UTC.",
+          "7": "Les mints fonctionnent pareil : ton badge fixe combien de mints par jour atteignent le fil d'Accueil, le même nombre que tes posts texte. Les mints en plus passent quand même et apparaissent sur ton profil, dans Abonnements et sur le marché des fractions."
         },
         "tips": {
           "1": "Le dépassement est au prorata : 200 Mo au-delà de votre quota coûtent 200 Mo, pas un gigaoctet entier.",
@@ -13514,7 +13573,13 @@
       "opened": "Ouvert",
       "tapPhoto": "Appuyez pour voir",
       "tapVideo": "Appuyez pour regarder",
-      "goneAfter": "Disparaît {{time}} après l’ouverture"
+      "goneAfter": "Disparaît {{time}} après l’ouverture",
+      "left": "{{n}} s",
+      "replayAllowed": "Une relecture autorisée",
+      "tapReplay": "Appuyez pour revoir",
+      "lastView": "Dernière vue, {{time}}",
+      "goneAfterReplay": "Disparaît {{time}} après l’ouverture. Une relecture.",
+      "replaying": "Relecture"
     },
     "shareKindGroup": "Groupe",
     "shareKindChannel": "Canal",
@@ -18159,9 +18224,9 @@
     "72a478ec65bf": "Détails de l'appareil et de l'OS (facultatif)",
     "cbf32246775e": "Joindre des images ou vidéos (facultatif)",
     "ea3a3da9b73e": " — jusqu'à ",
-    "5d2d9bc248a3": "Demandes de fonctionnalités et rapports de bogues | Riftn",
-    "2c94a53da07c": "Soumettez des demandes de fonctionnalités, signalez des bugs et votez sur les idées de la communauté pour façonner la feuille de route de Riftn. Suivez les fonctionnalités ouvertes, en cours et expédiées.",
-    "64ce9ca9f7d1": "Fonctionnalités Riftn — Demandes de fonctionnalités, rapports de bogues et feuille de route de la communauté",
+    "5d2d9bc248a3": "Construire Riftn en lui parlant | Riftn",
+    "2c94a53da07c": "Construire Riftn en lui parlant. Publiez des idées et des rapports de bugs comme invites, votez sur ce que les autres demandent, et suivez-les de la file d’attente à l’expédition.",
+    "64ce9ca9f7d1": "Construire : façonner Riftn en lui parlant",
     "5697d03daef4": "Fonctionnalités",
     "c46c50e9cf58": "Aucune fonctionnalité pour le moment",
     "b98adf20f5f3": "Portefeuille: Gérer vos actifs cryptographiques",
@@ -19381,7 +19446,7 @@
     "68f66b1f5bba": "Découvrez le contenu, les créateurs et les sujets en tendance sur Riftn.",
     "fd274232d93a": "Cliquez pour télécharger",
     "d7246da527c1": "Ajouter un autre",
-    "d2c76d7df46f": "Soumettez des demandes de fonctionnalités, signalez des bugs et votez pour les idées communautaires afin de façonner la feuille de route de Riftn.",
+    "d2c76d7df46f": "Construire Riftn en lui parlant. Publiez des idées et des rapports de bugs comme invites et votez sur ce qui sera construit ensuite.",
     "90d6f4c823a9": "Impossible de copier l'adresse",
     "15e17712534d": "Adresse du mint du token",
     "b4c1cebc35f6": "ce réseau",
@@ -23049,7 +23114,49 @@
       "label": "Cours du marché",
       "gold": "Or (oz)"
     },
-    "withFriends": "Jouer entre amis"
+    "withFriends": "Jouer entre amis",
+    "sillycoin": {
+      "title": "SillyCoin",
+      "cardBlurb": "Touchez pour miner, achetez des améliorations, envoyez des pièces à vos amis. Juste pour le fun, sans valeur.",
+      "intro": "Touchez pour miner, améliorez, envoyez des pièces à vos amis.",
+      "seoTitle": "Simulateur de minage SillyCoin | Riftn Arcade",
+      "seoDescription": "Touchez pour miner des SillyCoins, achetez une plus grosse pioche et des mineurs automatiques, et envoyez des pièces à vos amis. Juste pour le fun : les SillyCoins n’ont aucune valeur. Gratuit sur Riftn.",
+      "balanceLabel": "Vos SillyCoins",
+      "rates": "{{tap}} par touche · {{second}} par seconde",
+      "tapLabel": "Touchez pour miner",
+      "tapHint": "Touchez la pièce pour miner. Jusqu’à 15 touches par seconde comptent.",
+      "signInPrompt": "Connectez-vous pour garder vos SillyCoins, acheter des améliorations et envoyer des pièces à vos amis.",
+      "upgradesTitle": "Améliorations",
+      "upgrade": {
+        "pick": "Plus grosse pioche",
+        "miner": "Mineur automatique",
+        "rig": "Foreuse"
+      },
+      "bought": {
+        "pick": "Plus grosse pioche achetée",
+        "miner": "Mineur automatique acheté",
+        "rig": "Foreuse achetée"
+      },
+      "level": "Niv {{level}}",
+      "effectTap": "+{{n}} par touche",
+      "effectSecond": "+{{n}} par seconde",
+      "maxed": "Max",
+      "idleNote": "Les mineurs automatiques continuent de creuser pendant votre absence, jusqu’à 8 heures.",
+      "awayToast": "Vos mineurs ont creusé {{coins}} SillyCoins pendant votre absence ({{hours}} h).",
+      "sendTitle": "Envoyer des SillyCoins",
+      "toPlaceholder": "@nomutilisateur",
+      "amountPlaceholder": "Combien",
+      "notePlaceholder": "Note (facultatif)",
+      "sendButton": "Envoyer",
+      "sendMissing": "Choisissez à qui envoyer et combien.",
+      "sent": "{{coins}} SillyCoins envoyées à {{name}}",
+      "sendNote": "Les pièces arrivent tout de suite. Les SillyCoins restent dans le jeu : pas de portefeuille, pas de jeton.",
+      "fromLine": "De {{name}}",
+      "toLine": "À {{name}}",
+      "boardTitle": "Meilleurs mineurs",
+      "boardEmpty": "Personne n’a encore miné. Soyez le premier.",
+      "disclaimer": "Les SillyCoins sont juste pour le fun et n’ont aucune valeur. Ce n’est pas une cryptomonnaie, elles ne touchent jamais votre portefeuille et ne peuvent être ni achetées, ni vendues, ni encaissées."
+    }
   },
   "hideReply": {
     "hide": "Masquer la réponse",
@@ -23181,6 +23288,9 @@
     "hoursStreamed_other": "{{formatted}} heures de live",
     "toNext_one": "{{formatted}} en-cas avant {{stage}}",
     "toNext_other": "{{formatted}} en-cas avant {{stage}}",
+    "requestsToday_one": "Demandes en attente : {{formatted}} en-cas aujourd'hui",
+    "requestsToday_other": "Demandes en attente : {{formatted}} en-cas aujourd'hui",
+    "requestsTomorrow": "Demandes en attente : premier en-cas demain",
     "open": "Ouvrir {{pet}}",
     "feed": "Donner un en-cas",
     "fed": "{{pet}} a mangé ton en-cas",
@@ -23211,6 +23321,7 @@
       "feeding": "Les spectateurs peuvent le nourrir avec leurs points de chaîne",
       "cost": "Points par en-cas",
       "rules": "Chaque spectateur peut lui donner jusqu'à 20 en-cas par jour. Les points n'ont aucune valeur en argent.",
+      "requests": "Tes demandes encore en attente sur le tableau des Demandes le nourrissent aussi : 1 en-cas par jour chacune, jusqu'à 3 par jour, une fois éclos.",
       "feeders": "L'ont le plus nourri"
     }
   },
@@ -23235,5 +23346,30 @@
     "open": "Ouvrir le chat",
     "encrypted": "Message chiffré",
     "sentAttachment": "A envoyé une pièce jointe"
+  },
+  "badgeMuseum": {
+    "title": "Musée des badges",
+    "open": "Ouvrir le Musée des badges",
+    "summary": "{{earned}} badges obtenus sur {{total}}",
+    "loading": "Chargement des badges…",
+    "earned": "Obtenu",
+    "progress": "{{value}} / {{goal}}",
+    "footer": "Les badges se débloquent tout seuls à chaque palier atteint.",
+    "name": {
+      "views": "{{value}} vues",
+      "videos": "{{value}} vidéos",
+      "followers": "{{value}} abonnés",
+      "likes": "{{value}} j'aime",
+      "firstLive": "Premier live",
+      "liveHours": "{{value}} heures de live"
+    },
+    "hint": {
+      "views": "Vues sur toutes les publications",
+      "videos": "Vidéos publiées",
+      "followers": "Abonnés",
+      "likes": "J'aime reçus",
+      "firstLive": "Faire un live une fois",
+      "liveHours": "Heures diffusées en live"
+    }
   }
 }

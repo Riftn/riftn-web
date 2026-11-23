@@ -152,6 +152,8 @@ export interface PostFormActions {
   setReplyPolicy: (value: import('@/lib/api/dehub/types').ReplyPolicy) => void;
   setVisibility: (value: import('@/lib/api/dehub/types').PostVisibility) => void;
   handleImageSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  /** Add image files to the post (a painting from the Painting canvas, say). */
+  addImageFiles: (files: File[]) => void;
   handleVideoSelect: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
   handleAudioSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleFileDrop: (files: FileList) => void;

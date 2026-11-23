@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Edito videon", "hiddenTag": "E fshehur", "tapToEdit": "Prek për të edituar", "cover": "Mbulesa", "trim": "Shkurto", "mirror": "Pasqyro", "rotate": "Rrotullo", "hide": "Fshih", "timer": "Kohëmatësi", "sheetTitleAny": "Edito përpara dërgimit", "close": "Mbyll", "replace": "Zëvendëso", "hiddenUntilTap": "E fshehur derisa ta prekin", "pause": "Pauzë", "play": "Luaj videon", "mute": "Fik zërin", "unmute": "Ndiz zërin", "scrub": "Lëviz përmes videos", "addMore": "Shto foto ose video", "trimAria": "Zvarrit skajet për të shkurtuar", "coverAria": "Prek një kornizë për të vendosur mbulesën", "coverHint": "Prek një kornizë për të vendosur mbulesën", "coverOwn": "Fotoja jote", "coverAuto": "Auto", "uploadCover": "Ngarko një foto mbulese", "mirrored": "E pasqyruar", "original": "Origjinale", "rotate90": "Rrotullo 90°", "showNormally": "Shfaq normalisht", "showNormallyBody": "Ata e shohin menjëherë", "hideUntilTap": "Fshih derisa të preket", "hideUntilTapBody": "E turbullt derisa ta prekin", "hidePrice": "Fshih pas një çmimi", "hidePriceBody": "E turbullt derisa të të paguajnë", "priceUnavailable": "Jo në këtë bisedë", "timerOff": "Fikur", "timerOffBody": "Qëndron në bisedë.", "timerViewBody": "Zhduket për të dy pasi ta kenë parë.", "confirm": "Konfirmo", "lockedFor": "Zhblloko për {{value1}} DHB", "lockedForUsd": "Zhblloko për {{value1}}", "editItem": "Edito artikullin {{value1}}", "kept": "{{time}} u mbajt", "timerTimeBody": "Zhduket për të dy {{value1}} pasi ta dërgosh."},
+  "dmVideo": {"edit": "Edito videon", "hiddenTag": "E fshehur", "tapToEdit": "Prek për të edituar", "cover": "Mbulesa", "trim": "Shkurto", "mirror": "Pasqyro", "rotate": "Rrotullo", "hide": "Fshih", "timer": "Kohëmatësi", "sheetTitleAny": "Edito përpara dërgimit", "close": "Mbyll", "replace": "Zëvendëso", "hiddenUntilTap": "E fshehur derisa ta prekin", "pause": "Pauzë", "play": "Luaj videon", "mute": "Fik zërin", "unmute": "Ndiz zërin", "scrub": "Lëviz përmes videos", "addMore": "Shto foto ose video", "trimAria": "Zvarrit skajet për të shkurtuar", "coverAria": "Prek një kornizë për të vendosur mbulesën", "coverHint": "Prek një kornizë për të vendosur mbulesën", "coverOwn": "Fotoja jote", "coverAuto": "Auto", "uploadCover": "Ngarko një foto mbulese", "mirrored": "E pasqyruar", "original": "Origjinale", "rotate90": "Rrotullo 90°", "showNormally": "Shfaq normalisht", "showNormallyBody": "Ata e shohin menjëherë", "hideUntilTap": "Fshih derisa të preket", "hideUntilTapBody": "E turbullt derisa ta prekin", "hidePrice": "Fshih pas një çmimi", "hidePriceBody": "E turbullt derisa të të paguajnë", "priceUnavailable": "Jo në këtë bisedë", "timerOff": "Fikur", "timerOffBody": "Qëndron në bisedë.", "timerViewBody": "Zhduket për të dy pasi ta kenë parë.", "confirm": "Konfirmo", "lockedFor": "Zhblloko për {{value1}} tokena", "lockedForUsd": "Zhblloko për {{value1}}", "editItem": "Edito artikullin {{value1}}", "kept": "{{time}} u mbajt", "timerTimeBody": "Zhduket për të dy {{value1}} pasi ta dërgosh."},
   "postBg": {
     "addMedia": "Shto një foto, GIF ose video",
     "changeMedia": "Ndrysho foton, GIF-in ose videon",
@@ -630,7 +630,7 @@
     "wallet": "Portofoli",
     "docs": "Dokumentet",
     "roadmap": "Harta e Rrugës",
-    "featureRequests": "Kërkesat",
+    "featureRequests": "Ndërto",
     "staking": "Pushtimi",
     "governance": "Qeverisja",
     "dao": "DAO",
@@ -2120,7 +2120,7 @@
     "ogHolders_one": "{{count}} mbajtës OG",
     "ogHolders_other": "{{count}} mbajtës OG",
     "ogChallengeTitle": "Rikthe mbajtësit OG",
-    "ogChallengeBody": "Fto njerëz që ende mbajnë DHB. Kur bashkohen me linkun tënd të ftesës dhe e mbajnë DHB-në në portofolin e tyre Riftn, ata llogariten për ty këtu.",
+    "ogChallengeBody": "Fto njerëz që ende mbajnë tokena. Kur bashkohen me linkun tënd të ftesës dhe e mbajnë tokena-në në portofolin e tyre Riftn, ata llogariten për ty këtu.",
     "ogChallengeCta": "Merr linkun tënd të ftesës"
   },
   "dhbListing": {
@@ -2196,8 +2196,8 @@
   "features": {
     "prompts": "Përshëritës",
     "queued": "Në listë",
-    "promptPageTitle": "Kërkesat",
-    "promptSubtitle": "Ndërto Riftn me një përshëritës",
+    "promptPageTitle": "Ndërto",
+    "promptSubtitle": "Ndërto Riftn duke biseduar me të.",
     "promptNew": "Përshëritës e re",
     "promptSearch": "Kërko përshëritës…",
     "promptHeading": "Çfarë do të ndërtojmë tjetër?",
@@ -3244,11 +3244,11 @@
     "requestPromptShort": "Nuk është ende këtu?",
     "requestDraftMenu": "Shto {{query}} në Riftn",
     "requestDraftSettings": "Një cilësim për {{query}}",
-    "requestPostsTo": "Postohet te Kërkesat",
-    "requestHint": "Postohet te Kërkesat në emrin tënd. Do të të njoftojmë kur të dalë.",
-    "requestSent": "U dërgua te Kërkesat",
+    "requestPostsTo": "Postimet për Ndërtim",
+    "requestHint": "Postimet për Ndërtim si ti. Ne do të të njoftojmë kur të publikohen.",
+    "requestSent": "Dërguar për Ndërtim",
     "requestSentHint": "Do të të njoftojmë kur të dalë.",
-    "requestSeeIt": "Shikoje te Kërkesat"
+    "requestSeeIt": "Shihe te Ndërtimi"
   },
   "comments": {
     "reportComment": "Raporto komentin",
@@ -11913,7 +11913,7 @@
     "settings": "Preferencat",
     "settingsDesc": "Menaxho preferencat e profilit tuaj, gjuhën, preferencat e privatësisë dhe pamjen.",
     "governance": "Governanca",
-    "featureRequests": "Kërkesa për Featurre",
+    "featureRequests": "Ndërto",
     "featureRequestsDesc": "Shtoni kërkesa për feautre të reja dhe votoni për ide të komunitetit. Kërkesat më të popullarizuara do të marrin prioritet për zhvillim.",
     "upvote": "Votimi për lart",
     "upvoteDesc": "Votoni në favor të një propozimi të qeverisë ose kërkesës për feautre. Ai ndihmon në shenjën e mbështetjes së komunitetit.",
@@ -12233,7 +12233,7 @@
           "4": "Për të regjistruar një shënim zanor, klikoni ikonën e mikrofonit.",
           "5": "Për të shtuar një GIF, klikoni ikonën e GIF dhe kërkoni për një.",
           "6": "Përdorni #hashtags për të kategorizuar postimin tuaj (p.sh., #crypto, #defi).",
-          "7": "Përdorni $cashtags për t'iu referuar tokeneve (p.sh., $RIFT, $ETH).",
+          "7": "Përdorni $cashtags për t'iu referuar tokeneve (p.sh., $BTC, $ETH).",
           "8": "Përdorni @mentions për të etiketuar përdorues të tjerë (p.sh., @username).",
           "9": "Klikoni 'Post' për të publikuar. Postimi juaj shfaqet në feed menjëherë."
         },
@@ -17394,9 +17394,9 @@
     "72a478ec65bf": "Detaje i Aparatit dhe Sistemit Operativ (optional)",
     "cbf32246775e": "Shtoj imazhe ose video (optional)",
     "ea3a3da9b73e": "— deri në",
-    "5d2d9bc248a3": "Kërkesat për funksione dhe raportimi i defekteve | Riftn",
-    "2c94a53da07c": "Dërgo kërkesa për veçori, raporto defekte dhe voto idetë e komunitetit për të formësuar udhërrëfyesin e Riftn. Gjurmo veçoritë e hapura, në proces dhe ato të dërguara.",
-    "64ce9ca9f7d1": "Karakteristikat e Riftn — Kërkesat për veçori, Raportimi i defekteve dhe Udhërrëfyesi i komunitetit",
+    "5d2d9bc248a3": "Ndërto Riftn duke biseduar me të | Riftn",
+    "2c94a53da07c": "Ndërto Riftn duke biseduar me të. Posto ide dhe raportime për gabime si kërkesa, voto për atë që kanë kërkuar të tjerët dhe ndiqji ato nga \"Në pritje\" deri te \"Publikuar\".",
+    "64ce9ca9f7d1": "Ndërto: formëso Riftn duke biseduar me të",
     "5697d03daef4": "Funksionet",
     "c46c50e9cf58": "Nuk ka ende veçori",
     "b98adf20f5f3": "Portofoli: Menaxho Aktiva të Kriptokurritave",
@@ -18609,7 +18609,7 @@
     "68f66b1f5bba": "Zbuloni përmbajtjen e popullarizuar, krijuesit dhe temat në Riftn.",
     "fd274232d93a": "Kliko për të ngarkuar",
     "d7246da527c1": "Shto një tjetër",
-    "d2c76d7df46f": "Përmbajti përmbajtjen e kërkesave, raporte për bugjet dhe votime për ide të komunitetit për të shprehur rrugën e Riftn.",
+    "d2c76d7df46f": "Ndërto Riftn duke biseduar me të. Posto ide dhe raportime për gabime si kërkesa dhe voto për atë që do të ndërtohet më pas.",
     "90d6f4c823a9": "Nuk mund të kopjohej adresë",
     "15e17712534d": "Adresa e mintimit të tokenit",
     "b4c1cebc35f6": "kjo rrjet",

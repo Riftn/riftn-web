@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "剪辑视频", "hiddenTag": "隱藏", "tapToEdit": "點擊編輯", "cover": "封面", "trim": "裁剪", "mirror": "镜像", "rotate": "旋转", "hide": "隐藏", "timer": "计时器", "sheetTitleAny": "發送前編輯", "close": "关闭", "replace": "替換", "hiddenUntilTap": "点击前隐藏", "pause": "暂停", "play": "播放视频", "mute": "靜音", "unmute": "解靜音", "scrub": "拖动视频进度", "addMore": "添加照片或视频", "trimAria": "拖动两端进行裁剪", "coverAria": "点击画面设置封面", "coverHint": "点击画面设置封面", "coverOwn": "你的照片", "coverAuto": "自動", "uploadCover": "上传封面图片", "mirrored": "已镜像", "original": "原图", "rotate90": "旋转 90°", "showNormally": "正常显示", "showNormallyBody": "立即显示", "hideUntilTap": "点击前隐藏", "hideUntilTapBody": "点击前模糊", "hidePrice": "隐藏并设置价格", "hidePriceBody": "付款前模糊", "priceUnavailable": "不在本聊天中", "timerOff": "关闭", "timerOffBody": "伊会留底在聊天记录里。", "timerViewBody": "等𫧃看过了，两边就都无了。", "confirm": "确认", "lockedFor": "解鎖給 {{value1}} DHB", "lockedForUsd": "解锁需 {{value1}}", "editItem": "编辑物件 {{value1}}", "kept": "{{time}} 保留", "timerTimeBody": "发出去 {{value1}} 后，两边就都无了。"},
+  "dmVideo": {"edit": "剪辑视频", "hiddenTag": "隱藏", "tapToEdit": "點擊編輯", "cover": "封面", "trim": "裁剪", "mirror": "镜像", "rotate": "旋转", "hide": "隐藏", "timer": "计时器", "sheetTitleAny": "發送前編輯", "close": "关闭", "replace": "替換", "hiddenUntilTap": "点击前隐藏", "pause": "暂停", "play": "播放视频", "mute": "靜音", "unmute": "解靜音", "scrub": "拖动视频进度", "addMore": "添加照片或视频", "trimAria": "拖动两端进行裁剪", "coverAria": "点击画面设置封面", "coverHint": "点击画面设置封面", "coverOwn": "你的照片", "coverAuto": "自動", "uploadCover": "上传封面图片", "mirrored": "已镜像", "original": "原图", "rotate90": "旋转 90°", "showNormally": "正常显示", "showNormallyBody": "立即显示", "hideUntilTap": "点击前隐藏", "hideUntilTapBody": "点击前模糊", "hidePrice": "隐藏并设置价格", "hidePriceBody": "付款前模糊", "priceUnavailable": "不在本聊天中", "timerOff": "关闭", "timerOffBody": "伊会留底在聊天记录里。", "timerViewBody": "等𫧃看过了，两边就都无了。", "confirm": "确认", "lockedFor": "解鎖給 {{value1}} 代币", "lockedForUsd": "解锁需 {{value1}}", "editItem": "编辑物件 {{value1}}", "kept": "{{time}} 保留", "timerTimeBody": "发出去 {{value1}} 后，两边就都无了。"},
   "postBg": {
     "addMedia": "添加图片、GIF 或视频",
     "changeMedia": "更换图片、GIF 或视频",
@@ -630,7 +630,7 @@
     "wallet": "钱包",
     "docs": "文档",
     "roadmap": "路线图",
-    "featureRequests": "功能请求",
+    "featureRequests": "起造",
     "staking": "存款",
     "governance": "治理",
     "dao": "DAO",
@@ -2120,7 +2120,7 @@
     "ogHolders_one": "{{count}} 位 OG 持有者",
     "ogHolders_other": "{{count}} 位 OG 持有者",
     "ogChallengeTitle": "召回 OG 持有者",
-    "ogChallengeBody": "邀请仍持有 DHB 的人。当他们通过你的邀请链接加入并把 DHB 保留在 Riftn 钱包中时，就会在这里计入你的成绩。",
+    "ogChallengeBody": "邀请仍持有 代币 的人。当他们通过你的邀请链接加入并把 代币 保留在 Riftn 钱包中时，就会在这里计入你的成绩。",
     "ogChallengeCta": "获取你的邀请链接"
   },
   "dhbListing": {
@@ -2196,8 +2196,8 @@
   "features": {
     "prompts": "提示",
     "queued": "排隊中",
-    "promptPageTitle": "請求",
-    "promptSubtitle": "用提示建造 Riftn",
+    "promptPageTitle": "起造",
+    "promptSubtitle": "透過對話起造 Riftn。",
     "promptNew": "新提示",
     "promptSearch": "搜尋提示…",
     "promptHeading": "下一個要建造甚麼？",
@@ -3244,11 +3244,11 @@
     "requestPromptShort": "还没有？",
     "requestDraftMenu": "把 {{query}} 加到 Riftn",
     "requestDraftSettings": "{{query}} 的设置项",
-    "requestPostsTo": "发布到请求",
-    "requestHint": "以你的身份发布到请求。上线时我们会通知你。",
-    "requestSent": "已发送到请求",
+    "requestPostsTo": "發佈到起造",
+    "requestHint": "以汝个名義發佈到起造。等伊做出來个時陣，阮會通知汝。",
+    "requestSent": "已傳送到起造",
     "requestSentHint": "上线时我们会通知你。",
-    "requestSeeIt": "在请求中查看"
+    "requestSeeIt": "佇起造看著伊"
   },
   "comments": {
     "reportComment": "報告評論",
@@ -11913,7 +11913,7 @@
     "settings": "设置",
     "settingsDesc": "管理您的账号偏好、语言、隐私设置和外观。",
     "governance": "治理",
-    "featureRequests": "功能请求",
+    "featureRequests": "起造",
     "featureRequestsDesc": "推荐新功能，并对社区创意进行投票。热门请求优先用于开发。",
     "upvote": "点赞",
     "upvoteDesc": "支持治理提案或功能请求。有助于表明社区支持。",
@@ -12236,7 +12236,7 @@
           "4": "要录制语音笔记，请点击麦克风图标。",
           "5": "要加GIF，按GIF图标，搜一个。",
           "6": "用#话题标签来分类你的帖子（例如，#加密货币，#去中心化金融）。",
-          "7": "用 $cashtags 来引用代币（例如，$RIFT，$ETH）。",
+          "7": "用 $cashtags 来引用代币（例如，$BTC，$ETH）。",
           "8": "用 @用户名 来标记其他用户 (例如，@username)。",
           "9": "點擊「發布」發布。你的帖子會立即顯示在動態消息中。"
         },
@@ -17174,9 +17174,9 @@
     "72a478ec65bf": "设备跟OS细节（可选）",
     "cbf32246775e": "附加图片或视频（可选）",
     "ea3a3da9b73e": "— 最多",
-    "5d2d9bc248a3": "功能请求跟错误报告 | Riftn",
-    "2c94a53da07c": "提交功能要求、報告錯誤、投票參與社群想法，來塑造Riftn的路線圖。追蹤開放、進行中、已發布的功能。",
-    "64ce9ca9f7d1": "Riftn功能 — 功能要求、錯誤報告與社群路線圖",
+    "5d2d9bc248a3": "透過對話起造 Riftn | Riftn",
+    "2c94a53da07c": "透過對話起造 Riftn。發佈點子佮錯誤報告做提示，對別人要求个物件投票，並追蹤伊對「佇列中」到「已發佈」。",
+    "64ce9ca9f7d1": "起造：透過對話塑造 Riftn",
     "5697d03daef4": "功能",
     "c46c50e9cf58": "尚未有功能",
     "b98adf20f5f3": "錢包: 管理您的加密資產",
@@ -18262,7 +18262,7 @@
     "68f66b1f5bba": "發現 Riftn 上的流行內容、創作者和話題。",
     "fd274232d93a": "點擊上傳",
     "d7246da527c1": "再添蜀个",
-    "d2c76d7df46f": "提交功能需求、報告錯誤，並投票決定Riftn的路線圖。",
+    "d2c76d7df46f": "透過對話起造 Riftn。發佈點子佮錯誤報告做提示，並對下蜀步欲起造个物件投票。",
     "90d6f4c823a9": "地址无法复制",
     "15e17712534d": "代币铸造地址",
     "b4c1cebc35f6": "这个网络",

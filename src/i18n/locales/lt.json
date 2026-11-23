@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Redaguoti vaizdo įrašą", "hiddenTag": "Paslėpta", "tapToEdit": "Bakstelėkite, kad redaguotumėte", "cover": "Viršelis", "trim": "Apkirpti", "mirror": "Veidrodinis vaizdas", "rotate": "Pasukti", "hide": "Slėpti", "timer": "Laikmatis", "sheetTitleAny": "Redaguoti prieš siunčiant", "close": "Uždaryti", "replace": "Pakeisti", "hiddenUntilTap": "Paslėpta, kol palies", "pause": "Pristabdyti", "play": "Leisti vaizdo įrašą", "mute": "Nutildyti", "unmute": "Įjungti garsą", "scrub": "Slinkti per vaizdo įrašą", "addMore": "Pridėti nuotraukų ar vaizdo įrašų", "trimAria": "Tempkite galus, kad apkirptumėte", "coverAria": "Palieskite kadrą, kad nustatytumėte viršelį", "coverHint": "Palieskite kadrą, kad nustatytumėte viršelį", "coverOwn": "Jūsų nuotrauka", "coverAuto": "Automatinis", "uploadCover": "Įkelti viršelio nuotrauką", "mirrored": "Veidrodinis", "original": "Originalas", "rotate90": "Pasukti 90°", "showNormally": "Rodyti įprastai", "showNormallyBody": "Jie mato iškart", "hideUntilTap": "Slėpti, kol palies", "hideUntilTapBody": "Sulietas, kol palies", "hidePrice": "Slėpti už kainos", "hidePriceBody": "Sulietas, kol sumokės", "priceUnavailable": "Ne šiame pokalbyje", "timerOff": "Išjungta", "timerOffBody": "Tai lieka pokalbyje.", "timerViewBody": "Išnyksta abiem pusėms, kai jie tai pamato.", "confirm": "Patvirtinti", "lockedFor": "Atrakinti už {{value1}} DHB", "lockedForUsd": "Atrakinti už {{value1}}", "editItem": "Redaguoti elementą {{value1}}", "kept": "{{time}} pasiliko", "timerTimeBody": "Išnyksta abiem pusėms {{value1}} po to, kai išsiunčiate."},
+  "dmVideo": {"edit": "Redaguoti vaizdo įrašą", "hiddenTag": "Paslėpta", "tapToEdit": "Bakstelėkite, kad redaguotumėte", "cover": "Viršelis", "trim": "Apkirpti", "mirror": "Veidrodinis vaizdas", "rotate": "Pasukti", "hide": "Slėpti", "timer": "Laikmatis", "sheetTitleAny": "Redaguoti prieš siunčiant", "close": "Uždaryti", "replace": "Pakeisti", "hiddenUntilTap": "Paslėpta, kol palies", "pause": "Pristabdyti", "play": "Leisti vaizdo įrašą", "mute": "Nutildyti", "unmute": "Įjungti garsą", "scrub": "Slinkti per vaizdo įrašą", "addMore": "Pridėti nuotraukų ar vaizdo įrašų", "trimAria": "Tempkite galus, kad apkirptumėte", "coverAria": "Palieskite kadrą, kad nustatytumėte viršelį", "coverHint": "Palieskite kadrą, kad nustatytumėte viršelį", "coverOwn": "Jūsų nuotrauka", "coverAuto": "Automatinis", "uploadCover": "Įkelti viršelio nuotrauką", "mirrored": "Veidrodinis", "original": "Originalas", "rotate90": "Pasukti 90°", "showNormally": "Rodyti įprastai", "showNormallyBody": "Jie mato iškart", "hideUntilTap": "Slėpti, kol palies", "hideUntilTapBody": "Sulietas, kol palies", "hidePrice": "Slėpti už kainos", "hidePriceBody": "Sulietas, kol sumokės", "priceUnavailable": "Ne šiame pokalbyje", "timerOff": "Išjungta", "timerOffBody": "Tai lieka pokalbyje.", "timerViewBody": "Išnyksta abiem pusėms, kai jie tai pamato.", "confirm": "Patvirtinti", "lockedFor": "Atrakinti už {{value1}} ženklai", "lockedForUsd": "Atrakinti už {{value1}}", "editItem": "Redaguoti elementą {{value1}}", "kept": "{{time}} pasiliko", "timerTimeBody": "Išnyksta abiem pusėms {{value1}} po to, kai išsiunčiate."},
   "postBg": {
     "addMedia": "Pridėti nuotrauką, GIF ar vaizdo įrašą",
     "changeMedia": "Keisti nuotrauką, GIF ar vaizdo įrašą",
@@ -630,7 +630,7 @@
     "wallet": "Piniginė",
     "docs": "Dokumentai",
     "roadmap": "Veiksmų planas",
-    "featureRequests": "Užklausos",
+    "featureRequests": "Kurti",
     "staking": "Stakingas",
     "governance": "Valdymas",
     "dao": "DAO",
@@ -2120,7 +2120,7 @@
     "ogHolders_one": "{{count}} OG turėtojas",
     "ogHolders_other": "OG turėtojų: {{count}}",
     "ogChallengeTitle": "Sugrąžinkite OG turėtojus",
-    "ogChallengeBody": "Pakvieskite žmones, kurie vis dar turi DHB. Kai jie prisijungs per jūsų pakvietimo nuorodą ir laikys DHB savo „Riftn“ piniginėje, jie čia bus įskaityti jums.",
+    "ogChallengeBody": "Pakvieskite žmones, kurie vis dar turi ženklai. Kai jie prisijungs per jūsų pakvietimo nuorodą ir laikys ženklai savo „Riftn“ piniginėje, jie čia bus įskaityti jums.",
     "ogChallengeCta": "Gauti pakvietimo nuorodą"
   },
   "dhbListing": {
@@ -2196,8 +2196,8 @@
   "features": {
     "prompts": "Užduotys",
     "queued": "Įeina į eilę",
-    "promptPageTitle": "Reikalavimai",
-    "promptSubtitle": "Sukurkite Riftn su užduotimi",
+    "promptPageTitle": "Kurti",
+    "promptSubtitle": "Kurkite „Riftn“ su ja bendraudami.",
     "promptNew": "Nauja užduotis",
     "promptSearch": "Šeimininko prašymai…",
     "promptHeading": "Ką turėtume sukurti toliau?",
@@ -3244,11 +3244,11 @@
     "requestPromptShort": "Dar nėra?",
     "requestDraftMenu": "Pridėti {{query}} į „Riftn“",
     "requestDraftSettings": "Nustatymas, skirtas {{query}}",
-    "requestPostsTo": "Skelbiama skiltyje Užklausos",
-    "requestHint": "Skelbiama skiltyje Užklausos jūsų vardu. Pranešime, kai tai bus įgyvendinta.",
-    "requestSent": "Išsiųsta į Užklausas",
+    "requestPostsTo": "Įrašai skirti kurti",
+    "requestHint": "Įrašai, skirti kurti jūsų vardu. Pranešime, kai jie bus išleisti.",
+    "requestSent": "Išsiųsta kurti",
     "requestSentHint": "Pranešime, kai tai bus įgyvendinta.",
-    "requestSeeIt": "Žiūrėti Užklausose"
+    "requestSeeIt": "Peržiūrėti „Build“"
   },
   "comments": {
     "reportComment": "Pranešti apie komentarą",
@@ -11913,7 +11913,7 @@
     "settings": "Nustatymai",
     "settingsDesc": "Tvarkykite paskyros nuostatas, kalbą, privatumo nustatymus ir išvaizdą.",
     "governance": "Valdymas",
-    "featureRequests": "Funkcijų užklausos",
+    "featureRequests": "Kurti",
     "featureRequestsDesc": "Siūlykite naujas funkcijas ir balsuokite už bendruomenės idėjas. Populiarioms užklausoms teikiama pirmenybė vystymui.",
     "upvote": "Papildomas balsavimas",
     "upvoteDesc": "Balsuokite už valdymo pasiūlymą ar funkcijos užklausą. Padeda pranešti apie bendruomenės palaikymą.",
@@ -12233,7 +12233,7 @@
           "4": "Norėdami įrašyti balso įrašą, spustelėkite mikrofono piktogramą.",
           "5": "Norėdami pridėti GIF, spustelėkite GIF piktogramą ir ieškokite jo.",
           "6": "Naudokite #Hashtagus, kad suskirstytumėte savo įrašą į kategorijas (pvz., #crypto, #defi).",
-          "7": "Naudokite $cashtagus, kad nurodytumėte žetonus (pvz., $RIFT, $ETH).",
+          "7": "Naudokite $cashtagus, kad nurodytumėte žetonus (pvz., $BTC, $ETH).",
           "8": "Naudokite @paminėjimus, kad pažymėtumėte kitus vartotojus (pvz., @vartotojo vardas).",
           "9": "Spustelėkite „Įrašas“, kad paskelbtumėte. Jūsų įrašas iškart pasirodys kanale."
         },
@@ -17393,9 +17393,9 @@
     "72a478ec65bf": "Įrenginio ir operacinės sistemos informacija (neprivaloma)",
     "cbf32246775e": "Pridėti Nuotraukas ar Vaizdo Įrašus (išvengiamas)",
     "ea3a3da9b73e": "— iki",
-    "5d2d9bc248a3": "Priemonės ir Klaidų Raportavimas | Riftn",
-    "2c94a53da07c": "Pateikite priemonių prašymus, praneškite apie klaidas ir balsuokite už bendruomenės idėjas, kad nustatytumėte Riftn kelią. Trakinkite atviri, vykdomi ir išleisti priemonės.",
-    "64ce9ca9f7d1": "Riftn Priemonės — Priemonių Prašymai, Klaidų Raportavimas ir Bendruomenės Kelių Planas",
+    "5d2d9bc248a3": "Kurkite „Riftn“ su ja bendraudami | „Riftn“",
+    "2c94a53da07c": "Kurkite „Riftn“ su ja bendraudami. Skelbkite idėjas ir klaidų pranešimus kaip užklausas, balsuokite už kitų prašymus ir stebėkite jų eigą nuo „Laukia“ iki „Išleista“.",
+    "64ce9ca9f7d1": "„Build“: formuokite „Riftn“ su ja bendraudami",
     "5697d03daef4": "Priemonės",
     "c46c50e9cf58": "Šiandien nėra priemonių",
     "b98adf20f5f3": "Žetūnas: Valdykite Savo Kriptovaliutas",
@@ -18612,7 +18612,7 @@
     "68f66b1f5bba": "Atrask populiarų turinį, kūrėjus ir temas Riftn.",
     "fd274232d93a": "Spusti mygtuką, kad įkelti",
     "d7246da527c1": "Pridėti kitą",
-    "d2c76d7df46f": "Pateikite užklausas dėl funkcijų, praneškite apie klaidas ir balsuokite apie bendruomenės idėjas, kad suformuotumėte „Riftn“ planą.",
+    "d2c76d7df46f": "Kurkite „Riftn“ su ja bendraudami. Skelbkite idėjas ir klaidų pranešimus kaip užklausas ir balsuokite už tai, kas bus sukurta toliau.",
     "90d6f4c823a9": "Nepavyko nukopijuoti adreso",
     "15e17712534d": "Žetono monetos adresas",
     "b4c1cebc35f6": "šis tinklas",

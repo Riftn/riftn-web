@@ -223,8 +223,8 @@ export default function FullWalletPage() {
 
   const filteredGrouped = useMemo(() => {
     if (!searchQuery.trim()) return groupedTokens;
-    const q = searchQuery.toLowerCase();
-    return groupedTokens.filter(g => g.symbol.toLowerCase().includes(q) || g.name.toLowerCase().includes(q));
+    const q = searchQuery.trim().toLowerCase();
+    return groupedTokens.filter(g => `${g.symbol} ${g.name} ${tokenLabel(g.symbol)}`.toLowerCase().includes(q));
   }, [groupedTokens, searchQuery]);
 
   // Use raw balances so even holdings below the display precision remain visible.
@@ -488,11 +488,11 @@ export default function FullWalletPage() {
           </div>
         ) : (
           <>
-            {appTokensOn && !searchQuery.trim() && <AppTokensRow onSend={() => setAppSendOpen(true)} />}
+            {appTokensOn && `dhb dehub rift riftn tokens ${tokenLabel()}`.toLowerCase().includes(searchQuery.trim().toLowerCase()) && <AppTokensRow onSend={() => setAppSendOpen(true)} />}
             {withBalance.map(grouped => (
               <GroupedTokenRow key={grouped.symbol} grouped={grouped} onClick={() => handleGroupedTokenClick(grouped)} price={prices[grouped.symbol]} />
             ))}
-            {!isLoading && !withBalance.length && !failedChains.length && !(appTokensOn && !searchQuery.trim()) && (
+            {!isLoading && !withBalance.length && !failedChains.length && !(appTokensOn && `dhb dehub rift riftn tokens ${tokenLabel()}`.toLowerCase().includes(searchQuery.trim().toLowerCase())) && (
               <p className="py-8 text-center text-sm text-zinc-400">{t(searchQuery.trim() ? 'common.noResults' : 'wallet.zeroBalance')}</p>
             )}
             <SubscriptionTokensRow />
@@ -539,7 +539,7 @@ export default function FullWalletPage() {
         <DrawerContent column glass data-wallet-page>
           <DrawerHeader>
             <DrawerTitle className="text-white">
-              {t('wallet.selectChain', { symbol: sendChainPickerGrouped?.symbol })}
+              {t('wallet.selectChain', { symbol: tokenLabel(sendChainPickerGrouped?.symbol) })}
             </DrawerTitle>
           </DrawerHeader>
           <div className="px-4 pb-6 space-y-2">
@@ -683,7 +683,7 @@ function GroupedTokenRow({ grouped, onClick, price }: { grouped: GroupedToken; o
     >
       <div className="flex items-center gap-3 min-w-0">
         {icon ? (
-          <img src={icon} alt={grouped.symbol} className="w-9 h-9 rounded-full shrink-0" />
+          <img src={icon} alt={tokenLabel(grouped.symbol)} className="w-9 h-9 rounded-full shrink-0" />
         ) : (
           <div className="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center shrink-0">
             <span className="text-xs font-bold text-zinc-400">{grouped.symbol.slice(0, 2)}</span>
@@ -691,7 +691,7 @@ function GroupedTokenRow({ grouped, onClick, price }: { grouped: GroupedToken; o
         )}
         <div className="min-w-0">
           <div className="flex items-center gap-1.5">
-            <span className="text-sm font-medium text-white">{grouped.symbol}</span>
+            <span className="text-sm font-medium text-white">{tokenLabel(grouped.symbol)}</span>
             {grouped.isCustom && <span className="text-[10px] bg-violet-500/20 text-violet-400 px-1.5 py-0.5 rounded">{t('wallet.custom')}</span>}
           </div>
           <span className="text-xs text-zinc-500 truncate block">{fmtPrice(price) || grouped.name}</span>
@@ -752,16 +752,16 @@ function GroupedActionDrawer({ open, onOpenChange, grouped, onSend, onReceive, o
         <DrawerHeader>
           <DrawerTitle className="flex items-center gap-3 text-white">
             {icon ? (
-              <img src={icon} alt={grouped.symbol} className="w-8 h-8 rounded-full" />
+              <img src={icon} alt={tokenLabel(grouped.symbol)} className="w-8 h-8 rounded-full" />
             ) : (
               <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center">
                 <span className="text-xs font-bold text-zinc-400">{grouped.symbol.slice(0, 2)}</span>
               </div>
             )}
             <div>
-              <span className="block">{grouped.symbol}</span>
+              <span className="block">{tokenLabel(grouped.symbol)}</span>
               <span className="text-xs text-zinc-500 font-normal">
-                {fmtBal(grouped.totalFormattedBalance)} {grouped.symbol}
+                {fmtBal(grouped.totalFormattedBalance)} {tokenLabel(grouped.symbol)}
               </span>
             </div>
           </DrawerTitle>
@@ -807,7 +807,7 @@ function GroupedActionDrawer({ open, onOpenChange, grouped, onSend, onReceive, o
       <Drawer open={buyMethodOpen} onOpenChange={setBuyMethodOpen}>
         <DrawerContent column glass hideHandle={false} data-wallet-page>
           <div className="p-5 pb-8 space-y-2">
-            <h3 className="text-white font-semibold text-base mb-4">{_copy("copy.e8c84f1c82bf", { defaultValue: "Buy " })}{grouped?.symbol}</h3>
+            <h3 className="text-white font-semibold text-base mb-4">{_copy("copy.e8c84f1c82bf", { defaultValue: "Buy " })}{tokenLabel(grouped?.symbol)}</h3>
             {grouped?.symbol !== 'DHB' && (
               <>
                 {(['ETH', 'USDT', 'USDC'].includes(grouped?.symbol || '')) && walletAddress ? (
@@ -933,7 +933,7 @@ function SendDialog({ open, onOpenChange, token, chainId, onSuccess, allTokens, 
     }
     const maxBal = tokenAmount(token);
     if (numAmount > maxBal) {
-      toast.error(t('wallet.insufficientBalance', { symbol: token.symbol }));
+      toast.error(t('wallet.insufficientBalance', { symbol: tokenLabel(token.symbol) }));
       return;
     }
 
@@ -948,7 +948,7 @@ function SendDialog({ open, onOpenChange, token, chainId, onSuccess, allTokens, 
         result = await sendERC20Token(token.address, trimmedTo, amount, token.decimals, chainId);
       }
 
-      toast.success(t('wallet.sent', { amount, symbol: token.symbol }), {
+      toast.success(t('wallet.sent', { amount, symbol: tokenLabel(token.symbol) }), {
         description: `TX: ${result.hash.slice(0, 10)}...`,
         action: {
           label: t('wallet.view'),
@@ -984,7 +984,7 @@ function SendDialog({ open, onOpenChange, token, chainId, onSuccess, allTokens, 
     <Dialog open={open} onOpenChange={v => { if (!sending) onOpenChange(v); }}>
       <DialogContent data-wallet-page className="bg-black/60 backdrop-blur-[24px] backdrop-saturate-[180%] border-white/10 sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-white">{t('wallet.sendToken', { symbol: token?.symbol || 'Token' })}</DialogTitle>
+          <DialogTitle className="text-white">{t('wallet.sendToken', { symbol: token?.symbol ? tokenLabel(token.symbol) : 'Token' })}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 pt-2">
           {/* Token selector */}
@@ -1000,8 +1000,8 @@ function SendDialog({ open, onOpenChange, token, chainId, onSuccess, allTokens, 
                       token?.address === tk.address ? 'bg-white/15 text-white' : 'bg-white/5 text-zinc-400 hover:text-white'
                     }`}
                   >
-                    {icon ? <img src={icon} alt={tk.symbol} className="w-4 h-4 rounded-full" /> : null}
-                    {tk.symbol}
+                    {icon ? <img src={icon} alt={tokenLabel(tk.symbol)} className="w-4 h-4 rounded-full" /> : null}
+                    {tokenLabel(tk.symbol)}
                   </button>
                 );
               })}
@@ -1105,7 +1105,7 @@ function SendDialog({ open, onOpenChange, token, chainId, onSuccess, allTokens, 
             onClick={handleSend}
           >
             {sending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
-            {sending ? t('wallet.sending') : t('wallet.sendToken', { symbol: token?.symbol || '' })}
+            {sending ? t('wallet.sending') : t('wallet.sendToken', { symbol: tokenLabel(token?.symbol) })}
           </Button>
         </div>
       </DialogContent>
@@ -1183,7 +1183,7 @@ function ImportTokenDialog({ open, onOpenChange, chainId: initialChainId, onImpo
   const handleImport = () => {
     if (!tokenInfo) return;
     saveCustomToken(chainId, { address: address.trim(), ...tokenInfo });
-    toast.success(t('wallet.imported', { symbol: tokenInfo.symbol }));
+    toast.success(t('wallet.imported', { symbol: tokenLabel(tokenInfo.symbol) }));
     setAddress.complete(address, '');
     setTokenInfo(null);
     onImported();
@@ -1196,7 +1196,7 @@ function ImportTokenDialog({ open, onOpenChange, chainId: initialChainId, onImpo
       name: token.name,
       decimals: token.decimals,
     });
-    toast.success(t('wallet.imported', { symbol: token.symbol }));
+    toast.success(t('wallet.imported', { symbol: tokenLabel(token.symbol) }));
     onImported();
   };
 
@@ -1249,7 +1249,7 @@ function ImportTokenDialog({ open, onOpenChange, chainId: initialChainId, onImpo
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-zinc-400">{t('wallet.symbol')}</span>
-                    <span className="text-sm text-white font-medium">{tokenInfo.symbol}</span>
+                    <span className="text-sm text-white font-medium">{tokenLabel(tokenInfo.symbol)}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-zinc-400">{t('wallet.decimals')}</span>
@@ -1258,7 +1258,7 @@ function ImportTokenDialog({ open, onOpenChange, chainId: initialChainId, onImpo
                 </div>
                 <Button variant="glass" className="w-full rounded-xl" onClick={handleImport}>
                   <Plus className="w-4 h-4 mr-2" />
-                  {t('wallet.importToken', { symbol: tokenInfo.symbol })}
+                  {t('wallet.importToken', { symbol: tokenLabel(tokenInfo.symbol) })}
                 </Button>
               </>
             )}

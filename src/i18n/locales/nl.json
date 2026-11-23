@@ -1,4 +1,42 @@
 {
+  "painting": {
+    "title": "Schilderen",
+    "close": "Sluiten",
+    "undo": "Ongedaan maken",
+    "redo": "Opnieuw",
+    "done": "Klaar",
+    "clear": "Wissen",
+    "size": "Grootte",
+    "colour": "Kleur",
+    "customColour": "Eigen kleur",
+    "fillShape": "Vorm vullen",
+    "shape": "Vorm van het doek",
+    "discardTitle": "Dit schilderij weggooien?",
+    "discard": "Weggooien",
+    "keep": "Verder schilderen",
+    "saveFailed": "Het schilderij kon niet worden opgeslagen. Probeer het opnieuw.",
+    "tools": {
+      "pencil": "Potlood",
+      "brush": "Penseel",
+      "eraser": "Gum",
+      "fill": "Vullen",
+      "line": "Lijn",
+      "rect": "Rechthoek",
+      "ellipse": "Ellips",
+      "oil": "Olieverf",
+      "pastel": "Pastel",
+      "watercolor": "Waterverf",
+      "charcoal": "Houtskool"
+    },
+    "aspect": {
+      "portrait": "Staand",
+      "square": "Vierkant",
+      "wide": "Breed"
+    },
+    "hue": "Tint",
+    "saturation": "Verzadiging",
+    "brightness": "Helderheid"
+  },
   "ownKeys": {
     "working": "Werkt",
     "invalid": "Geweigerd, vervang het",
@@ -173,7 +211,7 @@
     "timerOffBody": "Het blijft in de chat.",
     "timerViewBody": "Weg voor jullie beiden zodra ze het hebben gezien.",
     "confirm": "Bevestigen",
-    "lockedFor": "Ontgrendelen voor {{value1}} DHB",
+    "lockedFor": "Ontgrendelen voor {{value1}} tokens",
     "lockedForUsd": "Ontgrendelen voor {{value1}}",
     "editItem": "Item bewerken {{value1}}",
     "kept": "{{time}} behouden",
@@ -199,11 +237,13 @@
     "destructSecs": "{{n}} sec",
     "destructShortSecs": "{{n}}s",
     "revealAria": "Verborgen video onthullen",
-    "tapToReveal": "Tik om te onthullen"
+    "tapToReveal": "Tik om te onthullen",
+    "timerReplay": "Eén keer opnieuw toestaan",
+    "timerReplayBody": "Ze kunnen het nog één keer openen. De teller begint opnieuw."
   },
   "assistantCards": {
     "requestDraft": "Concept voor openbaar verzoek",
-    "postRequest": "Plaatsen bij Verzoeken",
+    "postRequest": "Plaatsen op Bouwen",
     "possibleDuplicates": "Mogelijke duplicaten",
     "viewPostedRequest": "Geplaatst verzoek bekijken",
     "fitting": "Passend",
@@ -961,7 +1001,7 @@
     "wallet": "Portemonnee",
     "docs": "Documentatie",
     "roadmap": "Routekaart",
-    "featureRequests": "Verzoeken",
+    "featureRequests": "Bouwen",
     "staking": "Uitzetten",
     "governance": "Bestuur",
     "dao": "DAO",
@@ -2716,7 +2756,7 @@
     "ogHolders_one": "{{count}} OG-holder",
     "ogHolders_other": "{{count}} OG-holders",
     "ogChallengeTitle": "Haal de OG-holders terug",
-    "ogChallengeBody": "Nodig mensen uit die nog DHB hebben. Als ze via jouw uitnodigingslink lid worden en hun DHB in hun Riftn-wallet houden, tellen ze hier voor jou.",
+    "ogChallengeBody": "Nodig mensen uit die nog tokens hebben. Als ze via je uitnodigingslink lid worden en hun tokens in hun Riftn-wallet houden, tellen ze hier voor je mee.",
     "ogChallengeCta": "Haal je uitnodigingslink op",
     "directReferrals_one": "{{count}} rechtstreeks",
     "directReferrals_other": "{{count}} rechtstreeks",
@@ -2796,6 +2836,17 @@
     "noResultsFor": "Geen resultaten gevonden voor \"{{query}}\"",
     "tryDifferent": "Probeer iets anders te zoeken",
     "tipRemoveAt": "Tip: Verwijder het @-teken om inhoud te zoeken in plaats van exacte gebruikersnamen",
+    "trendingWeekTitle": "Populair deze week",
+    "trendReactions": "Reacties",
+    "trendPpv": "PPV",
+    "trendTips": "Fooien",
+    "trendSortLabel": "Populaire video's sorteren op",
+    "earnedTipped": "aan fooien",
+    "earnedUnlocks_one": "{{count}} ontgrendeling",
+    "earnedUnlocks_other": "{{count}} ontgrendelingen",
+    "noEarnedTips": "Nog geen video kreeg deze week een fooi. Geef er een aan een video die je leuk vindt en hij verschijnt hier.",
+    "noEarnedPpv": "Deze week is nog geen PPV-video ontgrendeld. Kom snel terug.",
+    "noTrendingWeek": "Deze week is er nog niets populair. Kom snel terug.",
     "noRecentSearches": "Nog geen recente zoekopdrachten. Begin met ontdekken!",
     "nothingTrending": "Nog niets trending! Kom snel terug.",
     "viewAllPeople": "Alle {{count}} mensen bekijken",
@@ -2824,7 +2875,7 @@
     "followBack": "Volg terug"
   },
   "features": {
-    "myRequests": "Mijn verzoeken",
+    "myRequests": "Mijn prompts",
     "cropDraw": "Bijsnijden en tekenen",
     "crop": "Bijsnijden",
     "cropHint": "Sleep een kader over het deel dat je wilt houden. Sleep erin om het te verplaatsen.",
@@ -2832,8 +2883,8 @@
     "resetCrop": "Bijsnijden herstellen",
     "prompts": "Voorstellen",
     "queued": "In de wachtrij",
-    "promptPageTitle": "Verzoeken",
-    "promptSubtitle": "Bouw mee aan Riftn met een voorstel",
+    "promptPageTitle": "Bouwen",
+    "promptSubtitle": "Bouw Riftn door ermee te praten.",
     "promptNew": "Nieuw voorstel",
     "promptSearch": "Voorstellen zoeken…",
     "promptHeading": "Wat moeten we hierna bouwen?",
@@ -3830,11 +3881,11 @@
     "requestDraftMenu": "Voeg {{query}} toe aan Riftn",
     "requestDraftSettings": "Een instelling voor {{query}}",
     "requestSend": "Verzoek sturen",
-    "requestPostsTo": "Komt op Verzoeken",
-    "requestHint": "Komt op Verzoeken onder jouw naam. We laten het weten zodra het live is.",
-    "requestSent": "Verstuurd naar Verzoeken",
+    "requestPostsTo": "Plaatst op Bouwen",
+    "requestHint": "Plaatst op Bouwen namens jou. We laten het je weten als het live is.",
+    "requestSent": "Verstuurd naar Bouwen",
     "requestSentHint": "We laten het weten zodra het live is.",
-    "requestSeeIt": "Bekijk het op Verzoeken"
+    "requestSeeIt": "Bekijk op Bouwen"
   },
   "comments": {
     "reportComment": "Opmerking melden",
@@ -3947,6 +3998,7 @@
     "anonymousLikes_other": "{{count}} likes van anonieme badgehouders"
   },
   "mintChain": {
+    "homeAllowance": "{{left}} van {{total}} mints vandaag bereiken Home. Extra mints gaan naar je profiel en de markt.",
     "title": "Muntpaal",
     "subtitle": "Kies een keten. Prijzen zijn live en worden elke minuut bijgewerkt.",
     "free": "Gratis",
@@ -7922,6 +7974,10 @@
     "moreActions": "Verhaalopties",
     "remixing": "Remix van het verhaal van {{name}}",
     "watchOriginal": "Oorspronkelijk verhaal bekijken",
+    "translate": "Vertalen",
+    "seeOriginal": "Origineel bekijken",
+    "translating": "Vertalen…",
+    "alreadyYourLanguage": "Staat al in je taal",
     "originalUnavailable": "Het oorspronkelijke verhaal is niet meer beschikbaar.",
     "copyLinkFailed": "De link naar het verhaal kon niet worden gekopieerd.",
     "whoWatched": "Wie heeft gekeken",
@@ -12769,7 +12825,7 @@
     "settings": "Instellingen",
     "settingsDesc": "Beheer je accountvoorkeuren, taal, privacyinstellingen en uiterlijk.",
     "governance": "Bestuur",
-    "featureRequests": "Functieverzoeken",
+    "featureRequests": "Bouwen",
     "featureRequestsDesc": "Stel nieuwe functies voor en stem op community-ideeën. Populaire aanvragen krijgen prioriteit voor ontwikkeling.",
     "upvote": "Upvote",
     "upvoteDesc": "Stem voor een governancevoorstel of functieverzoek. Helpt bij het signaleren van community-ondersteuning.",
@@ -12804,7 +12860,7 @@
       },
       "dhb": {
         "term": "tokens",
-        "definition": "De native token van het DHB netwerk, gebruikt voor governance, staking en het belonen van deelnemers."
+        "definition": "De native token van het Riftn-netwerk, gebruikt voor governance, staking en het belonen van deelnemers."
       },
       "defi": {
         "term": "DeFi",
@@ -12973,6 +13029,8 @@
     "intro": "Elke laag kost een vast bedrag in dollars. Het tokenbedrag ernaast is wat dat kost tegen de referentieprijs van $0,001 — de app vraagt om dat bedrag geschaald naar de live prijs, en nooit meer dan dat, dus een dalende prijs kan de lat niet hoger leggen of een laag die je al hebt verdiend terugnemen."
   },
   "postingAllowance": {
+    "mintsLabel": "mints",
+    "mintNote": "Mints volgen dezelfde aantallen als tekstposts: zoveel mints per dag bereiken de Home-feed. Extra mints gaan gewoon door en staan op je profiel, in Volgend en op de fractiemarkt. Minten wordt nooit geblokkeerd.",
     "footnote": "Badge-niveau is je Riftn-tokens die je hebt vastgehouden en gestaked op BNB Chain en Base — dezelfde balans waaruit je badge wordt getrokken. De ladder is geprijsd in dollars, dus de bovenstaande tokenbedragen zijn wat elke laag kost tegen de verkoopprijs van $0,001 en de vereiste daalt naarmate de tokendaling stijgt; een laag die je al hebt verdiend, wordt nooit teruggenomen door de prijs. Een badge die je door een sponsor is verleend, wordt weergegeven op je profiel, maar verhoogt je postlimiet niet — die komt van wat je zelf vasthoudt. Limieten worden gereset om 00:00 UTC, en een gigabyte hier is 1.024 MB."
   },
   "postComposer": {
@@ -13148,7 +13206,7 @@
           "4": "Om een spraakmemo op te nemen, klikt u op het microfoonicoon.",
           "5": "Om een GIF toe te voegen, klikt u op het GIF-icoon en zoekt u er een.",
           "6": "Gebruik #hashtags om uw bericht te categoriseren (bijv. #crypto, #defi).",
-          "7": "Gebruik $cashtags om naar tokens te verwijzen (bijv. $RIFT, $ETH).",
+          "7": "Gebruik $cashtags om naar tokens te verwijzen (bijv. $BTC, $ETH).",
           "8": "Gebruik @vermeldingen om andere gebruikers te taggen (bijv. @gebruikersnaam).",
           "9": "Klik op 'Post' om te publiceren. Uw bericht verschijnt onmiddellijk in de feed."
         },
@@ -13376,7 +13434,8 @@
           "3": "Wanneer een bericht de limiet zou overschrijden, berekent de app eerst de prijs en controleert of uw portemonnee dit kan dekken voordat er iets wordt geüpload.",
           "4": "Het bericht wordt exact gepubliceerd zoals het binnen de limiet zou zijn — publicatie wacht nooit op een betaling.",
           "5": "Vervolgens keurt u één overboeking goed voor dat specifieke bericht, afgerekend op de Base of BNB Chain die voldoende Riftn tokens bevat.",
-          "6": "Beide pools worden om middernacht UTC gereset."
+          "6": "Beide pools worden om middernacht UTC gereset.",
+          "7": "Mints werken hetzelfde: je badge bepaalt hoeveel mints per dag de Home-feed bereiken, hetzelfde aantal als je tekstposts. Extra mints gaan gewoon door en staan op je profiel, in Volgend en op de fractiemarkt."
         },
         "tips": {
           "1": "Overschrijding is pro rata: 200 MB boven uw limiet kost 200 MB, niet een hele gigabyte.",
@@ -13758,7 +13817,13 @@
       "opened": "Geopend",
       "tapPhoto": "Tik om te bekijken",
       "tapVideo": "Tik om te kijken",
-      "goneAfter": "Verdwijnt {{time}} nadat je het opent"
+      "goneAfter": "Verdwijnt {{time}} nadat je het opent",
+      "left": "{{n}} s",
+      "replayAllowed": "Eén keer opnieuw toegestaan",
+      "tapReplay": "Tik om opnieuw te bekijken",
+      "lastView": "Laatste keer, {{time}}",
+      "goneAfterReplay": "Verdwijnt {{time}} nadat je het opent. Eén keer opnieuw.",
+      "replaying": "Opnieuw"
     },
     "shareKindGroup": "Groep",
     "shareKindChannel": "Kanaal",
@@ -18403,9 +18468,9 @@
     "72a478ec65bf": "Apparaat- en OS-gegevens (optioneel)",
     "cbf32246775e": "Afbeeldingen of video's bijvoegen (optioneel)",
     "ea3a3da9b73e": " — tot ",
-    "5d2d9bc248a3": "Functieverzoeken & Bugmeldingen | Riftn",
-    "2c94a53da07c": "Stuur functieverzoeken in, meld bugs en stem over gemeenschapsideeën om de roadmap van Riftn te beïnvloeden. Volg openstaande, lopende en geleverde functies.",
-    "64ce9ca9f7d1": "Riftn-functies - Functieverzoeken, bugrapportage en routekaart voor de community",
+    "5d2d9bc248a3": "Build Riftn door er met te praten | Riftn",
+    "2c94a53da07c": "Build Riftn door er met te praten. Post ideeën en bugrapporten als prompts, stem op wat anderen hebben gevraagd, en volg ze van Queued tot Shipped.",
+    "64ce9ca9f7d1": "Build: vorm Riftn door er met te praten",
     "5697d03daef4": "Kenmerken",
     "c46c50e9cf58": "Nog geen functies",
     "b98adf20f5f3": "Portemonnee: Beheer uw crypto-activa",
@@ -19625,7 +19690,7 @@
     "68f66b1f5bba": "Ontdek trending content, creators en onderwerpen op Riftn.",
     "fd274232d93a": "Klik om te uploaden",
     "d7246da527c1": "Nog een toevoegen",
-    "d2c76d7df46f": "Stuur functieverzoeken in, meld bugs en stem op gemeenschapsideeën om de roadmap van Riftn te vormen.",
+    "d2c76d7df46f": "Build Riftn door er met te praten. Post ideeën en bugrapporten als prompts en stem op wat er als volgende wordt gebouwd.",
     "90d6f4c823a9": "Kon adres niet kopiëren",
     "15e17712534d": "Token mint adres",
     "b4c1cebc35f6": "dit netwerk",
@@ -23293,7 +23358,49 @@
       "label": "Marktprijzen",
       "gold": "Goud (oz)"
     },
-    "withFriends": "Speel met vrienden"
+    "withFriends": "Speel met vrienden",
+    "sillycoin": {
+      "title": "SillyCoin",
+      "cardBlurb": "Tik om te minen, koop upgrades en stuur munten naar vrienden. Gewoon voor de lol, zonder waarde.",
+      "intro": "Tik om te minen, upgrade en stuur munten naar vrienden.",
+      "seoTitle": "SillyCoin mijnsimulator | Riftn Arcade",
+      "seoDescription": "Tik om SillyCoins te minen, koop een grotere houweel en automatische miners, en stuur munten naar vrienden. Gewoon voor de lol: SillyCoins hebben geen waarde. Gratis op Riftn.",
+      "balanceLabel": "Jouw SillyCoins",
+      "rates": "{{tap}} per tik · {{second}} per seconde",
+      "tapLabel": "Tik om te minen",
+      "tapHint": "Tik op de munt om te minen. Tot 15 tikken per seconde tellen mee.",
+      "signInPrompt": "Log in om je SillyCoins te bewaren, upgrades te kopen en munten naar vrienden te sturen.",
+      "upgradesTitle": "Upgrades",
+      "upgrade": {
+        "pick": "Grotere houweel",
+        "miner": "Automatische miner",
+        "rig": "Boorinstallatie"
+      },
+      "bought": {
+        "pick": "Grotere houweel gekocht",
+        "miner": "Automatische miner gekocht",
+        "rig": "Boorinstallatie gekocht"
+      },
+      "level": "Lv {{level}}",
+      "effectTap": "+{{n}} per tik",
+      "effectSecond": "+{{n}} per seconde",
+      "maxed": "Max",
+      "idleNote": "Automatische miners blijven graven als je weg bent, tot 8 uur lang.",
+      "awayToast": "Je miners groeven {{coins}} SillyCoins terwijl je weg was ({{hours}} u).",
+      "sendTitle": "SillyCoins sturen",
+      "toPlaceholder": "@gebruikersnaam",
+      "amountPlaceholder": "Hoeveel",
+      "notePlaceholder": "Notitie (optioneel)",
+      "sendButton": "Versturen",
+      "sendMissing": "Kies naar wie en hoeveel.",
+      "sent": "{{coins}} SillyCoins gestuurd naar {{name}}",
+      "sendNote": "Ze krijgen de munten meteen. SillyCoins blijven in het spel: geen wallet, geen token.",
+      "fromLine": "Van {{name}}",
+      "toLine": "Aan {{name}}",
+      "boardTitle": "Beste miners",
+      "boardEmpty": "Nog niemand heeft gemined. Wees de eerste.",
+      "disclaimer": "SillyCoins zijn gewoon voor de lol en hebben geen waarde. Het is geen cryptomunt, ze komen nooit aan je wallet en je kunt ze niet kopen, verkopen of uitbetalen."
+    }
   },
   "hideReply": {
     "hide": "Hide reply",
@@ -23425,6 +23532,9 @@
     "hoursStreamed_other": "{{formatted}} uur gestreamd",
     "toNext_one": "Nog {{formatted}} snack tot {{stage}}",
     "toNext_other": "Nog {{formatted}} snacks tot {{stage}}",
+    "requestsToday_one": "Wachtende verzoeken: {{formatted}} snack vandaag",
+    "requestsToday_other": "Wachtende verzoeken: {{formatted}} snacks vandaag",
+    "requestsTomorrow": "Wachtende verzoeken: eerste snack morgen",
     "open": "{{pet}} openen",
     "feed": "Geef een snack",
     "fed": "{{pet}} heeft je snack opgegeten",
@@ -23455,6 +23565,7 @@
       "feeding": "Kijkers kunnen het voeren met kanaalpunten",
       "cost": "Punten per snack",
       "rules": "Elke kijker kan het tot 20 snacks per dag geven. Punten hebben geen geldwaarde.",
+      "requests": "Je verzoeken die nog wachten op het Verzoekenbord voeren het ook: 1 snack per dag per verzoek, tot 3 per dag, zodra het is uitgekomen.",
       "feeders": "Heeft het het meest gevoerd"
     }
   },
@@ -23479,5 +23590,30 @@
     "open": "Chat openen",
     "encrypted": "Versleuteld bericht",
     "sentAttachment": "Heeft een bijlage gestuurd"
+  },
+  "badgeMuseum": {
+    "title": "Badgemuseum",
+    "open": "Badgemuseum openen",
+    "summary": "{{earned}} van {{total}} badges verdiend",
+    "loading": "Badges laden…",
+    "earned": "Verdiend",
+    "progress": "{{value}} / {{goal}}",
+    "footer": "Badges worden vanzelf vrijgespeeld zodra een mijlpaal is bereikt.",
+    "name": {
+      "views": "{{value}} weergaven",
+      "videos": "{{value}} video's",
+      "followers": "{{value}} volgers",
+      "likes": "{{value}} likes",
+      "firstLive": "Eerste livestream",
+      "liveHours": "{{value}} uur live"
+    },
+    "hint": {
+      "views": "Weergaven op alle posts",
+      "videos": "Geüploade video's",
+      "followers": "Volgers",
+      "likes": "Ontvangen likes",
+      "firstLive": "Ga één keer live",
+      "liveHours": "Uren live gestreamd"
+    }
   }
 }

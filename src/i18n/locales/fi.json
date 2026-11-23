@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Muokkaa videota", "hiddenTag": "Piilotettu", "tapToEdit": "Napauta muokataksesi", "cover": "Kansikuva", "trim": "Leikkaa", "mirror": "Peili", "rotate": "Käännä", "hide": "Piilota", "timer": "Ajastin", "sheetTitleAny": "Muokkaa ennen lähettämistä", "close": "Sulje", "replace": "Korvaa", "hiddenUntilTap": "Piilotettu, kunnes he napauttavat sitä", "pause": "Tauko", "play": "Toista video", "mute": "Mykistä", "unmute": "Poista mykistys", "scrub": "Selaa videota", "addMore": "Lisää valokuvia tai videoita", "trimAria": "Vedä päät leikkääksesi", "coverAria": "Napauta kuvaa asettaaksesi sen kansikuvaksi", "coverHint": "Napauta kuvaa asettaaksesi sen kansikuvaksi", "coverOwn": "Kuvasi", "coverAuto": "Automaattinen", "uploadCover": "Lataa kansikuva", "mirrored": "Peilattu", "original": "Alkuperäinen", "rotate90": "Käännä 90°", "showNormally": "Näytä normaalisti", "showNormallyBody": "He näkevät sen heti", "hideUntilTap": "Piilota, kunnes napautetaan", "hideUntilTapBody": "Sumennettu, kunnes he napauttavat sitä", "hidePrice": "Piilota hintan takana", "hidePriceBody": "Sumennettu, kunnes maksat", "priceUnavailable": "Ei tässä keskustelussa", "timerOff": "Pois", "timerOffBody": "Se pysyy chatissa.", "timerViewBody": "Kuin pois molemmille teille, kun he ovat nähneet sen.", "confirm": "Vahvista", "lockedFor": "Avaa lukitus {{value1}} DHB", "lockedForUsd": "Avaa lukitus käyttäjälle {{value1}}", "editItem": "Muokkaa kohdetta {{value1}}", "kept": "{{time}} säilytetty", "timerTimeBody": "Poistunut molemmille teille {{value1}} lähettämisen jälkeen."},
+  "dmVideo": {"edit": "Muokkaa videota", "hiddenTag": "Piilotettu", "tapToEdit": "Napauta muokataksesi", "cover": "Kansikuva", "trim": "Leikkaa", "mirror": "Peili", "rotate": "Käännä", "hide": "Piilota", "timer": "Ajastin", "sheetTitleAny": "Muokkaa ennen lähettämistä", "close": "Sulje", "replace": "Korvaa", "hiddenUntilTap": "Piilotettu, kunnes he napauttavat sitä", "pause": "Tauko", "play": "Toista video", "mute": "Mykistä", "unmute": "Poista mykistys", "scrub": "Selaa videota", "addMore": "Lisää valokuvia tai videoita", "trimAria": "Vedä päät leikkääksesi", "coverAria": "Napauta kuvaa asettaaksesi sen kansikuvaksi", "coverHint": "Napauta kuvaa asettaaksesi sen kansikuvaksi", "coverOwn": "Kuvasi", "coverAuto": "Automaattinen", "uploadCover": "Lataa kansikuva", "mirrored": "Peilattu", "original": "Alkuperäinen", "rotate90": "Käännä 90°", "showNormally": "Näytä normaalisti", "showNormallyBody": "He näkevät sen heti", "hideUntilTap": "Piilota, kunnes napautetaan", "hideUntilTapBody": "Sumennettu, kunnes he napauttavat sitä", "hidePrice": "Piilota hintan takana", "hidePriceBody": "Sumennettu, kunnes maksat", "priceUnavailable": "Ei tässä keskustelussa", "timerOff": "Pois", "timerOffBody": "Se pysyy chatissa.", "timerViewBody": "Kuin pois molemmille teille, kun he ovat nähneet sen.", "confirm": "Vahvista", "lockedFor": "Avaa lukitus {{value1}} tokenia", "lockedForUsd": "Avaa lukitus käyttäjälle {{value1}}", "editItem": "Muokkaa kohdetta {{value1}}", "kept": "{{time}} säilytetty", "timerTimeBody": "Poistunut molemmille teille {{value1}} lähettämisen jälkeen."},
   "postBg": {
     "addMedia": "Lisää kuva, GIF tai video",
     "changeMedia": "Vaihda kuva, GIF tai video",
@@ -630,7 +630,7 @@
     "wallet": "Lompakko",
     "docs": "Dokumentit",
     "roadmap": "Tiekartta",
-    "featureRequests": "Ominaisuuspyynnöt",
+    "featureRequests": "Rakenne",
     "staking": "Panostus",
     "governance": "Hallinto",
     "dao": "DAO",
@@ -2120,7 +2120,7 @@
     "ogHolders_one": "{{count}} OG-haltija",
     "ogHolders_other": "{{count}} OG-haltijaa",
     "ogChallengeTitle": "Tuo OG-haltijat takaisin",
-    "ogChallengeBody": "Kutsu ihmisiä, joilla on yhä DHB:tä. Kun he liittyvät kutsulinkilläsi ja pitävät DHB:nsä Riftn-lompakossaan, heidät lasketaan sinulle täällä.",
+    "ogChallengeBody": "Kutsu ihmisiä, joilla on yhä tokenia:tä. Kun he liittyvät kutsulinkilläsi ja pitävät tokenia:nsä Riftn-lompakossaan, heidät lasketaan sinulle täällä.",
     "ogChallengeCta": "Hanki kutsulinkkisi"
   },
   "dhbListing": {
@@ -2196,8 +2196,8 @@
   "features": {
     "prompts": "Kehotteet",
     "queued": "Jonossa",
-    "promptPageTitle": "Pyyntöjä",
-    "promptSubtitle": "Luo Riftnin käyttämällä pyynnöt",
+    "promptPageTitle": "Rakenne",
+    "promptSubtitle": "Rakenna Riftn puhumalla sille.",
     "promptNew": "Uusi pyynnön",
     "promptSearch": "Etsi pyynnöt…",
     "promptHeading": "Mitä seuraavaa pitäisi rakentaa?",
@@ -3244,11 +3244,11 @@
     "requestPromptShort": "Eikö löydy vielä?",
     "requestDraftMenu": "Lisää {{query}} Riftniin",
     "requestDraftSettings": "Asetus kohteelle {{query}}",
-    "requestPostsTo": "Julkaistaan Pyyntöihin",
-    "requestHint": "Julkaistaan Pyyntöihin sinun nimissäsi. Kerromme, kun se julkaistaan.",
-    "requestSent": "Lähetetty Pyyntöihin",
+    "requestPostsTo": "Luotavat julkaisut",
+    "requestHint": "Julkaisut, jotka rakennetaan sinun näköisiksi. Kerromme sinulle, kun se lähetetään.",
+    "requestSent": "Lähetetty valmistettavaksi",
     "requestSentHint": "Kerromme, kun se julkaistaan.",
-    "requestSeeIt": "Katso se Pyynnöissä"
+    "requestSeeIt": "Katso se Buildissa"
   },
   "comments": {
     "reportComment": "Ilmoita kommentista",
@@ -11913,7 +11913,7 @@
     "settings": "Asetukset",
     "settingsDesc": "Hallinnoi tilisi asetuksia, kieltä, tietosuoja-asetuksia ja ulkoasua.",
     "governance": "Hallinto",
-    "featureRequests": "Ominaisuuspyynnöt",
+    "featureRequests": "Rakenne",
     "featureRequestsDesc": "Ehdota uusia ominaisuuksia ja äänestä yhteisöideoista. Suosittuja pyyntöjä priorisoidaan kehittämisessä.",
     "upvote": "Äänestä ylös",
     "upvoteDesc": "Äänestä hallintoehdotuksen tai ominaisuuspyynnön puolesta. Auttaa viestimään yhteisön tuesta.",
@@ -12233,7 +12233,7 @@
           "4": "Tallentaaksesi äänimuistion, napsauta mikrofonikuvaketta.",
           "5": "Lisätäksesi GIF-tiedoston, napsauta GIF-kuvaketta ja etsi sellainen.",
           "6": "Käytä #hashtageja julkaisusi luokittelemiseen (esim. #crypto, #defi).",
-          "7": "Käytä $cashtageja viitataksesi tokeneihin (esim. $RIFT, $ETH).",
+          "7": "Käytä $cashtageja viitataksesi tokeneihin (esim. $BTC, $ETH).",
           "8": "Käytä @mainintoja merkitäksesi muita käyttäjiä (esim. @käyttäjänimi).",
           "9": "Napsauta 'Julkaise' julkaistaksesi. Julkaisusi ilmestyy syötteeseen välittömästi."
         },
@@ -17395,9 +17395,9 @@
     "72a478ec65bf": "Laite & Käyttöjärjestelmä (vapaaehtoinen)",
     "cbf32246775e": "Liitä kuvia tai videoita (vapaaehtoinen)",
     "ea3a3da9b73e": "— enintään",
-    "5d2d9bc248a3": "Toimintoehdotukset & Virheilmoitukset | Riftn",
-    "2c94a53da07c": "Lähetä toimintoehdotuksia, raportoi virheitä ja äänestä yhteisön ideoita muokkaamaan Riftnin kehityskarttaa. Seuraa avoimia, käynnissä olevia ja toimitettuja toimintoja.",
-    "64ce9ca9f7d1": "Riftn Toiminnot — Toimintoehdotukset, Virheilmoitukset & Yhteisön Kehityskartta",
+    "5d2d9bc248a3": "Rakenna Riftn keskustelemalla sen kanssa | Riftn",
+    "2c94a53da07c": "Rakenna Riftn keskustelemalla sen kanssa. Julkaise ideoita ja virheilmoituksia kehotteina, äänestä muiden toiveista ja seuraa niiden etenemistä jonossa olevasta vaiheesta toteutettuun vaiheeseen.",
+    "64ce9ca9f7d1": "Rakenna: Muokkaa Riftniä keskustelemalla sen kanssa",
     "5697d03daef4": "Toiminnot",
     "c46c50e9cf58": "Ei vielä toimintoja",
     "b98adf20f5f3": "Pankki: Hallitse Kryptorahoja",
@@ -18614,7 +18614,7 @@
     "68f66b1f5bba": "Löydä trendikästä sisältöä, luojia ja aiheita Riftnilla.",
     "fd274232d93a": "Napsauta lataamista",
     "d7246da527c1": "Lisää toinen",
-    "d2c76d7df46f": "Lähetä toiveita, ilmoita virheitä ja äänestä yhteisön ideat muokkaamaan Riftnin ohjelmaa.",
+    "d2c76d7df46f": "Rakenna Riftn keskustelemalla sen kanssa. Julkaise ideoita ja virheilmoituksia kehotteina ja äänestä siitä, mitä seuraavaksi rakennetaan.",
     "90d6f4c823a9": "Ei voitu kopioi osoitetta",
     "15e17712534d": "Tokenin mintausosoite",
     "b4c1cebc35f6": "Tätä verkkoa",

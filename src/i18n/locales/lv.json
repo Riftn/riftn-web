@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Rediģēt video", "hiddenTag": "Paslēpts", "tapToEdit": "Pieskarieties, lai rediģētu", "cover": "Vāks", "trim": "Apgriezt", "mirror": "Spogulis", "rotate": "Pagriezt", "hide": "Paslēpt", "timer": "Taimeris", "sheetTitleAny": "Rediģēt pirms nosūtīšanas", "close": "Aizvērt", "replace": "Aizstāt", "hiddenUntilTap": "Paslēpts, līdz uz tā uzspiež", "pause": "Pauze", "play": "Atskaņot video", "mute": "Izslēgt skaņu", "unmute": "Ieslēgt skaņu", "scrub": "Pārvietoties pa video", "addMore": "Pievienot fotoattēlus vai video", "trimAria": "Velc galus, lai apgrieztu", "coverAria": "Uzspied uz kadra, lai iestatītu vāku", "coverHint": "Uzspied uz kadra, lai iestatītu vāku", "coverOwn": "Jūsu attēls", "coverAuto": "Automātiski", "uploadCover": "Augšupielādēt vāka attēlu", "mirrored": "Spoguļattēls", "original": "Oriģināls", "rotate90": "Pagriezt par 90°", "showNormally": "Rādīt parasti", "showNormallyBody": "Viņi to redz uzreiz", "hideUntilTap": "Paslēpt, līdz uzspiež", "hideUntilTapBody": "Aizmiglots, līdz uz tā uzspiež", "hidePrice": "Paslēpt aiz cenas", "hidePriceBody": "Aizmiglots, līdz samaksā", "priceUnavailable": "Nav šajā čatā", "timerOff": "Izslēgts", "timerOffBody": "Tas paliek čatā.", "timerViewBody": "Pazūd abiem, tiklīdz viņi to ir redzējuši.", "confirm": "Apstiprināt", "lockedFor": "Atbloķēt par {{value1}} DHB", "lockedForUsd": "Atbloķēt par {{value1}}", "editItem": "Rediģēt vienumu {{value1}}", "kept": "{{time}} paturēts", "timerTimeBody": "Pazūd abiem {{value1}} pēc tam, kad to nosūtīji."},
+  "dmVideo": {"edit": "Rediģēt video", "hiddenTag": "Paslēpts", "tapToEdit": "Pieskarieties, lai rediģētu", "cover": "Vāks", "trim": "Apgriezt", "mirror": "Spogulis", "rotate": "Pagriezt", "hide": "Paslēpt", "timer": "Taimeris", "sheetTitleAny": "Rediģēt pirms nosūtīšanas", "close": "Aizvērt", "replace": "Aizstāt", "hiddenUntilTap": "Paslēpts, līdz uz tā uzspiež", "pause": "Pauze", "play": "Atskaņot video", "mute": "Izslēgt skaņu", "unmute": "Ieslēgt skaņu", "scrub": "Pārvietoties pa video", "addMore": "Pievienot fotoattēlus vai video", "trimAria": "Velc galus, lai apgrieztu", "coverAria": "Uzspied uz kadra, lai iestatītu vāku", "coverHint": "Uzspied uz kadra, lai iestatītu vāku", "coverOwn": "Jūsu attēls", "coverAuto": "Automātiski", "uploadCover": "Augšupielādēt vāka attēlu", "mirrored": "Spoguļattēls", "original": "Oriģināls", "rotate90": "Pagriezt par 90°", "showNormally": "Rādīt parasti", "showNormallyBody": "Viņi to redz uzreiz", "hideUntilTap": "Paslēpt, līdz uzspiež", "hideUntilTapBody": "Aizmiglots, līdz uz tā uzspiež", "hidePrice": "Paslēpt aiz cenas", "hidePriceBody": "Aizmiglots, līdz samaksā", "priceUnavailable": "Nav šajā čatā", "timerOff": "Izslēgts", "timerOffBody": "Tas paliek čatā.", "timerViewBody": "Pazūd abiem, tiklīdz viņi to ir redzējuši.", "confirm": "Apstiprināt", "lockedFor": "Atbloķēt par {{value1}} žetoni", "lockedForUsd": "Atbloķēt par {{value1}}", "editItem": "Rediģēt vienumu {{value1}}", "kept": "{{time}} paturēts", "timerTimeBody": "Pazūd abiem {{value1}} pēc tam, kad to nosūtīji."},
   "postBg": {
     "addMedia": "Pievienot attēlu, GIF vai video",
     "changeMedia": "Mainīt attēlu, GIF vai video",
@@ -630,7 +630,7 @@
     "wallet": "Maks",
     "docs": "Dokumenti",
     "roadmap": "Ceļvedis",
-    "featureRequests": "Funkciju pieprasījumi",
+    "featureRequests": "Izveido",
     "staking": "Steikings",
     "governance": "Pārvaldība",
     "dao": "DAO",
@@ -2120,7 +2120,7 @@
     "ogHolders_one": "{{count}} OG turētājs",
     "ogHolders_other": "{{count}} OG turētāji",
     "ogChallengeTitle": "Atgrieziet OG turētājus",
-    "ogChallengeBody": "Uzaiciniet cilvēkus, kuriem joprojām ir DHB. Kad viņi pievienojas ar jūsu uzaicinājuma saiti un tur savu DHB savā Riftn makā, viņi šeit tiek ieskaitīti jums.",
+    "ogChallengeBody": "Uzaiciniet cilvēkus, kuriem joprojām ir žetoni. Kad viņi pievienojas ar jūsu uzaicinājuma saiti un tur savu žetoni savā Riftn makā, viņi šeit tiek ieskaitīti jums.",
     "ogChallengeCta": "Saņemt uzaicinājuma saiti"
   },
   "dhbListing": {
@@ -2196,8 +2196,8 @@
   "features": {
     "prompts": "Ieteikumi",
     "queued": "Iekārtots",
-    "promptPageTitle": "Pieprasījumi",
-    "promptSubtitle": "Būvēt Riftn ar ieteikumu",
+    "promptPageTitle": "Izveido",
+    "promptSubtitle": "Izveido Riftn, ar to sarunājoties.",
     "promptNew": "Jauna ieteikuma",
     "promptSearch": "Apskatīt ieteikumus...",
     "promptHeading": "Kādus nākamās lietas būvēt?",
@@ -3244,11 +3244,11 @@
     "requestPromptShort": "Vēl nav šeit?",
     "requestDraftMenu": "Pievienot {{query}} Riftn",
     "requestDraftSettings": "Iestatījums priekš {{query}}",
-    "requestPostsTo": "Publicē sadaļā Pieprasījumi",
-    "requestHint": "Publicē sadaļā Pieprasījumi jūsu vārdā. Mēs jums paziņosim, kad tas būs ieviests.",
-    "requestSent": "Nosūtīts uz Pieprasījumiem",
+    "requestPostsTo": "Ziņas sadaļai Izveidot",
+    "requestHint": "Ziņas sadaļai Izveidot kā tu. Mēs paziņosim, kad tas būs gatavs.",
+    "requestSent": "Nosūtīts uz Izveidot",
     "requestSentHint": "Mēs jums paziņosim, kad tas būs ieviests.",
-    "requestSeeIt": "Skatīt to Pieprasījumos"
+    "requestSeeIt": "Skatīt sadaļā Izveidot"
   },
   "comments": {
     "reportComment": "Ziņot par komentāru",
@@ -11913,7 +11913,7 @@
     "settings": "Iestatījumi",
     "settingsDesc": "Pārvaldiet konta preferences, valodu, konfidencialitātes iestatījumus un izskatu.",
     "governance": "Valsts pārvalde vai pārziņas pārvalde.",
-    "featureRequests": "Funkciju pieprasījumi",
+    "featureRequests": "Izveido",
     "featureRequestsDesc": "Iesakiet jaunas funkcijas un balsojiet par kopienas idejām. Izstrādei tiek piešķirta prioritāte populārākajiem pieprasījumiem.",
     "upvote": "Upvote",
     "upvoteDesc": "Balsojiet par pārvaldības priekšlikumu vai funkcijas pieprasījumu. Palīdz signalizēt par kopienas atbalstu.",
@@ -12233,7 +12233,7 @@
           "4": "Lai ierakstītu balss piezīmi, noklikšķiniet uz mikrofona ikonas.",
           "5": "Lai pievienotu GIF, noklikšķiniet uz GIF ikonas un meklējiet to.",
           "6": "Izmantojiet #hashtags, lai kategorizētu savu ziņu (piemēram, #crypto, #defi).",
-          "7": "Izmantojiet $cashtags, lai atsauktos uz žetoniem (piemēram, $RIFT, $ETH).",
+          "7": "Izmantojiet $cashtags, lai atsauktos uz žetoniem (piemēram, $BTC, $ETH).",
           "8": "Izmantojiet @mentions, lai atzīmētu citus lietotājus (piemēram, @lietotājvārds).",
           "9": "Noklikšķiniet uz \"Ziņa\", lai publicētu. Jūsu ziņa nekavējoties parādīsies plūsmā."
         },
@@ -17395,9 +17395,9 @@
     "72a478ec65bf": "Informācija par ierīci un operētājsistēmu (neobligāti)",
     "cbf32246775e": "Attēlu vai videoklipu pievienošana (neobligāti)",
     "ea3a3da9b73e": "— līdz",
-    "5d2d9bc248a3": "Līdzekļu pieprasījumi un ziņošana par kļūdām | Riftn",
-    "2c94a53da07c": "Iesniedziet funkciju pieprasījumus, ziņojiet par kļūdām un balsojiet par kopienas idejām, lai veidotu Riftn ceļvedi. Sekojiet līdzi atvērtajām, notiekošajām un piegādātajām funkcijām.",
-    "64ce9ca9f7d1": "Riftn funkcijas — funkciju pieprasījumi, ziņošana par kļūdām un kopienas ceļvedis",
+    "5d2d9bc248a3": "Izveido Riftn, ar to sarunājoties | Riftn",
+    "2c94a53da07c": "Izveido Riftn, ar to sarunājoties. Publicē idejas un kļūdu ziņojumus kā uzvednes, balso par to, ko lūguši citi, un seko tiem no rindas līdz izstrādei.",
+    "64ce9ca9f7d1": "Izveidot: veido Riftn, ar to sarunājoties",
     "5697d03daef4": "Funkcijas",
     "c46c50e9cf58": "Pagaidām nav funkciju",
     "b98adf20f5f3": "Maks: pārvaldiet savus kriptogrāfiskos materiālus",
@@ -18612,7 +18612,7 @@
     "68f66b1f5bba": "Atklājiet tendencējošo saturu, autorus un tēmas Riftn.",
     "fd274232d93a": "Klikšķiniet, lai augšupielādētu",
     "d7246da527c1": "Pievienot vēl",
-    "d2c76d7df46f": "Ieteikt iespējas, paziņot kļūdas un balsot par komūnijas idejām, lai veidotu Riftn plānu.",
+    "d2c76d7df46f": "Izveido Riftn, ar to sarunājoties. Publicē idejas un kļūdu ziņojumus kā uzvednes un balso par to, kas tiks izveidots nākamais.",
     "90d6f4c823a9": "Nevarēja kopēt adresi",
     "15e17712534d": "Tokena mints adrese",
     "b4c1cebc35f6": "šis tīkls",

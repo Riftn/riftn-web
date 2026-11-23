@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "ቪድዮ ኣርትዕ", "hiddenTag": "ተሓቢኡ", "tapToEdit": "ንምዕራይ ጠውቕ", "cover": "ሽፋን", "trim": "ቁረጽ", "mirror": "መስትያት", "rotate": "አዙር", "hide": "ኽደን", "timer": "ሰዓት መቁጠሪ", "sheetTitleAny": "ቅድሚ ምልኣኽካ ኣርትዕ", "close": "ዕጸው", "replace": "ተክእ", "hiddenUntilTap": "ክሳብ ዝተንክፍዎ ተኸዲኑ ይጸንሕ", "pause": "ኣቋርጽ", "play": "ቪድዮ ኣጻውት", "mute": "ድምጺ ኣጥፍእ", "unmute": "ድምጺ ወልዕ", "scrub": "ኣብ ውሽጢ ቪድዮ ተመላለስ", "addMore": "ስእልታት ወይ ቪድዮታት ወስኽ", "trimAria": "ንኽትቁርጾ መወዳእታታቱ ሰሓብ", "coverAria": "ሽፋን ንምግባር ፍሬም ተንክፍ", "coverHint": "ሽፋን ንምግባር ፍሬም ተንክፍ", "coverOwn": "ስእልኻ", "coverAuto": "ባዕሉ (Auto)", "uploadCover": "ሽፋን ስእሊ ኣውርድ", "mirrored": "ተመሰለ", "original": "ኦሪጅናል", "rotate90": "90° ኣዙር", "showNormally": "ብቡሩህ ኣርኢ", "showNormallyBody": "ብኡንብኡ ይርእይዎ", "hideUntilTap": "ክሳብ ዝተንክፍዎ ተኸዲኑ ይጸንሕ", "hideUntilTapBody": "ክሳብ ዝተንክፍዎ ብድብዘዛ ይጸንሕ", "hidePrice": "ብዋጋ ተኸዲኑ ይጸንሕ", "hidePriceBody": "ክሳብ ዝኸፍሉልካ ብድብዘዛ ይጸንሕ", "priceUnavailable": "ኣብዚ ቻት የለን", "timerOff": "ኣጥፍእ", "timerOffBody": "ኣብቲ ቻት ይጸንሕ።", "timerViewBody": "ምስ ረኣይዎ ንኽልቴኹም ይጠፍእ።", "confirm": "ኣረጋግጽ", "lockedFor": "ን {{value1}} DHB ክፈቶ", "lockedForUsd": "ክፈቶ ን {{value1}}", "editItem": "ንብረት ኣስተኻኽል {{value1}}", "kept": "{{time}} ተታሒዙ", "timerTimeBody": "ካብ ዝለኣኽካዮ ንደሓር ንኽልቴኹም ይጠፍእ {{value1}}።"},
+  "dmVideo": {"edit": "ቪድዮ ኣርትዕ", "hiddenTag": "ተሓቢኡ", "tapToEdit": "ንምዕራይ ጠውቕ", "cover": "ሽፋን", "trim": "ቁረጽ", "mirror": "መስትያት", "rotate": "አዙር", "hide": "ኽደን", "timer": "ሰዓት መቁጠሪ", "sheetTitleAny": "ቅድሚ ምልኣኽካ ኣርትዕ", "close": "ዕጸው", "replace": "ተክእ", "hiddenUntilTap": "ክሳብ ዝተንክፍዎ ተኸዲኑ ይጸንሕ", "pause": "ኣቋርጽ", "play": "ቪድዮ ኣጻውት", "mute": "ድምጺ ኣጥፍእ", "unmute": "ድምጺ ወልዕ", "scrub": "ኣብ ውሽጢ ቪድዮ ተመላለስ", "addMore": "ስእልታት ወይ ቪድዮታት ወስኽ", "trimAria": "ንኽትቁርጾ መወዳእታታቱ ሰሓብ", "coverAria": "ሽፋን ንምግባር ፍሬም ተንክፍ", "coverHint": "ሽፋን ንምግባር ፍሬም ተንክፍ", "coverOwn": "ስእልኻ", "coverAuto": "ባዕሉ (Auto)", "uploadCover": "ሽፋን ስእሊ ኣውርድ", "mirrored": "ተመሰለ", "original": "ኦሪጅናል", "rotate90": "90° ኣዙር", "showNormally": "ብቡሩህ ኣርኢ", "showNormallyBody": "ብኡንብኡ ይርእይዎ", "hideUntilTap": "ክሳብ ዝተንክፍዎ ተኸዲኑ ይጸንሕ", "hideUntilTapBody": "ክሳብ ዝተንክፍዎ ብድብዘዛ ይጸንሕ", "hidePrice": "ብዋጋ ተኸዲኑ ይጸንሕ", "hidePriceBody": "ክሳብ ዝኸፍሉልካ ብድብዘዛ ይጸንሕ", "priceUnavailable": "ኣብዚ ቻት የለን", "timerOff": "ኣጥፍእ", "timerOffBody": "ኣብቲ ቻት ይጸንሕ።", "timerViewBody": "ምስ ረኣይዎ ንኽልቴኹም ይጠፍእ።", "confirm": "ኣረጋግጽ", "lockedFor": "ን {{value1}} ቶክንስ ክፈቶ", "lockedForUsd": "ክፈቶ ን {{value1}}", "editItem": "ንብረት ኣስተኻኽል {{value1}}", "kept": "{{time}} ተታሒዙ", "timerTimeBody": "ካብ ዝለኣኽካዮ ንደሓር ንኽልቴኹም ይጠፍእ {{value1}}።"},
   "postBg": {
     "addMedia": "ስእሊ፣ GIF ወይ ቪድዮ ወስኽ",
     "changeMedia": "ስእሊ፣ GIF ወይ ቪድዮ ቀይር",
@@ -630,7 +630,7 @@
     "wallet": "ዋሌት",
     "docs": "ሰነዳት",
     "roadmap": "ካርታ መንገዲ",
-    "featureRequests": "ጠለባት",
+    "featureRequests": "ቀይጽ",
     "staking": "ምቕማጥ",
     "governance": "ምሕደራ",
     "dao": "ዳኦ",
@@ -2120,7 +2120,7 @@
     "ogHolders_one": "{{count}} OG ወናኒ",
     "ogHolders_other": "{{count}} OG ወነንቲ",
     "ogChallengeTitle": "ነቶም OG ወነንቲ መልሶም",
-    "ogChallengeBody": "ገና DHB ዝሓዙ ሰባት ዕደም። ብሊንክ ዕድመኻ ምስ ተጸንበሩን DHB ኣብ ዋሌት Riftn ምስ ሓዙን፡ ኣብዚ ንዓኻ ይቝጸሩ።",
+    "ogChallengeBody": "ገና ቶክንስ ዝሓዙ ሰባት ዕደም። ብሊንክ ዕድመኻ ምስ ተጸንበሩን ቶክንስ ኣብ ዋሌት Riftn ምስ ሓዙን፡ ኣብዚ ንዓኻ ይቝጸሩ።",
     "ogChallengeCta": "ሊንክ ዕድመኻ ውሰድ"
   },
   "dhbListing": {
@@ -2196,8 +2196,8 @@
   "features": {
     "prompts": "መዘኻኸሪታት",
     "queued": "ኣብ መስርዕ ዘለዉ",
-    "promptPageTitle": "ሕቶታት",
-    "promptSubtitle": "Riftn ብመዘኻኸሪ ግበር",
+    "promptPageTitle": "ቀይጽ",
+    "promptSubtitle": "ብምዝራብ ምስኡ Riftn ቀይጽ።",
     "promptNew": "ሓድሽ መዘኻኸሪ",
     "promptSearch": "መዘኻኸሪታት ድለ…",
     "promptHeading": "ቀጺልና እንታይ ንስራሕ?",
@@ -3244,11 +3244,11 @@
     "requestPromptShort": "ገና ኣብዚ የለን?",
     "requestDraftMenu": "{{query}} ናብ Riftn ወስኽ",
     "requestDraftSettings": "ቅጥዒ ን {{query}}",
-    "requestPostsTo": "ናብ ጠለባት ይልጠፍ",
-    "requestHint": "ብስምካ ናብ ጠለባት ይልጠፍ። ምስ ተፈጸመ ክንሕብረካ ኢና።",
-    "requestSent": "ናብ ጠለባት ተላኢኹ",
+    "requestPostsTo": "ናብ ቀይጽ ዝለኣኹ",
+    "requestHint": "ከም ንስኻ ኮንካ ናብ ቀይጽ ይልእኽ። ምስ ተወድአ ክንሕብረካ ኢና።",
+    "requestSent": "ናብ ቀይጽ ተላኢኹ",
     "requestSentHint": "ምስ ተፈጸመ ክንሕብረካ ኢና።",
-    "requestSeeIt": "ኣብ ጠለባት ርአዮ"
+    "requestSeeIt": "ኣብ ቀይጽ ርኣዮ"
   },
   "comments": {
     "reportComment": "ርእይቶታት ኣቕርብ",
@@ -11913,7 +11913,7 @@
     "settings": "ቅጥዕታት",
     "settingsDesc": "ናይ መለያ ምርጫታትካ ፣ ቋንቋኻ ፣ ናይ ግላዊነት ኣቀማምጣኻን መልክዕካን ተቖጻጸሮ ።",
     "governance": "ምምሕዳር",
-    "featureRequests": "ጠለባት ባህሪ",
+    "featureRequests": "ቀይጽ",
     "featureRequestsDesc": "ሓድሽ ባህርያት ኣቕርብ ፡ ኣብ ማሕበረሰብ ሓሳባት ድማ ድምጺ ሃብ ። ህዝባዊ ጠለባት ንማዕቀብ ቀዳምነት ተዋሂቡ እዩ ።",
     "upvote": "ተንስእ",
     "upvoteDesc": "ነቲ ናይ ምምሕዳር ሓሳብ ወይ ናይ ባህሪ ሕቶ ንምድጋፍ ድምጺ ምሃብ ። ንማሕበረሰብ ናይ ምልክት ደገፍ ይሕግዝ ።",
@@ -12231,7 +12231,7 @@
           "4": "ድምጺ ንምምዝጋብ ፡ ነቲ ማይክሮፎን ኣዶ ጠውቑ ።",
           "5": "GIF ንምእታው ፡ ነቲ GIF ኣዶ ጠውቑ ፡ ሓደ ድማ ድለዩ ።",
           "6": "ንፖስታኻ ንምምዝጋብ # ሃሽታግታት ተጠቐም (ምሳሌ # crypto, #defi).",
-          "7": "ብ$cashtags ንቶከናት ይጥቀሱ (ብኣብነት $RIFT, $ETH)።",
+          "7": "ብ$cashtags ንቶከናት ይጥቀሱ (ብኣብነት $BTC, $ETH)።",
           "8": "ንካልኦት ተጠቀምቲ (ምሳሌ ፡ @username) ንምምልካት @ ጠውቑ ።",
           "9": "ንምትብባዕ 'ፖስት' ጠውቑ ። እቲ ቦታኻ ኣብ ምግቢ ብኡብኡ ይርአ ።"
         },
@@ -17360,9 +17360,9 @@
     "72a478ec65bf": "ናይ መሳርሒን OS ዝርዝራት (ብምርጫ)",
     "cbf32246775e": "ስእልታት ወይ ቪድዮታት ኣተሓሒዝ (ብምርጫ)",
     "ea3a3da9b73e": "— እስከ",
-    "5d2d9bc248a3": "ባህሪ ጥያቄዎች እና ስህተት ሪፖርት | Riftn",
-    "2c94a53da07c": "ባህሪ ጥያቄዎች ያስገቡ፣ ስህተቶች ሪፖርት ያድርጉ፣ እና Riftn ን ለመቅረጽ ማህበረሰብ ሀሳቦች ላይ ድምጽ ይስጡ። ክፍት፣ በሂደት ላይ ያሉ፣ እና የተላከ ባህሪዎች ይከታተሉ።",
-    "64ce9ca9f7d1": "Riftn ባህሪዎች — ባህሪ ጥያቄዎች፣ ስህተት ሪፖርት እና ማህበረሰብ መንገድ",
+    "5d2d9bc248a3": "ብምዝራብ ምስኡ Riftn ቀይጽ | Riftn",
+    "2c94a53da07c": "ብምዝራብ ምስኡ Riftn ቀይጽ። ሓሳባትን ጸብጻብ ጌጋታትን ከም ሓሳባት ልኣኽ፣ ካልኦት ዝሓተትዎ ድምጺ ሃበሉ፣ ካብ ተሰሪዑ ክሳብ ዝተወድአ ድማ ተኸታተሎ።",
+    "64ce9ca9f7d1": "ቀይጽ፡ ብምዝራብ ምስኡ Riftn ቅርጺ ሃቦ",
     "5697d03daef4": "ባህርያት",
     "c46c50e9cf58": "ገና ባህሪ የለም",
     "b98adf20f5f3": "ዋሌት: ክሪፕቶ ንብረቶችህን አስተዳድር",
@@ -18558,7 +18558,7 @@
     "68f66b1f5bba": "ተወዳጅ ይዘት፣ ፈጣሪዎች እና ርዕሰ ጉዳዮች በ Riftn ላይ ይፈልጉ።",
     "fd274232d93a": "ለመስቀል ጠቅ ያድርጉ",
     "d7246da527c1": "ካልእ ወስኽ",
-    "d2c76d7df46f": "ባህሪ ጥያቄዎችን ያስገቡ፣ ስህተቶችን ሪፖርት ያድርጉ፣ እና Riftn ን መንገድ ለመቅረጽ ማህበረሰብ ሀሳቦችን ድምጽ ይስጡ።",
+    "d2c76d7df46f": "ብምዝራብ ምስኡ Riftn ቀይጽ። ሓሳባትን ጸብጻብ ጌጋታትን ከም ሓሳባት ልኣኽን ቀጺሉ እንታይ ክስራሕ ከም ዘለዎ ድምጺ ሃበሉን።",
     "90d6f4c823a9": "አድራሻ መቅዳት አልተቻለም",
     "15e17712534d": "ኣድራሻ ፊደላቱ mint",
     "b4c1cebc35f6": "ይህ ኔትወርክ",

@@ -23,6 +23,15 @@ export function petMoodLine(t: (k: string, o?: Record<string, unknown>) => strin
   return t('streamPet.mood.happy');
 }
 
+/** What the owner's waiting Requests board requests fed it today. Null when there is nothing to say. */
+export function petRequestLine(t: (k: string, o?: Record<string, unknown>) => string, pet: StreamPet, own: boolean): string | null {
+  if (pet.requestFoodToday > 0) {
+    return t('streamPet.requestsToday', { count: pet.requestFoodToday, formatted: formatCount(pet.requestFoodToday) });
+  }
+  if (own && pet.mood !== 'egg' && pet.requestsWaiting > 0) return t('streamPet.requestsTomorrow');
+  return null;
+}
+
 export function PetCard({ pet, own = false, className }: { pet: StreamPet; own?: boolean; className?: string }) {
   const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
@@ -30,6 +39,7 @@ export function PetCard({ pet, own = false, className }: { pet: StreamPet; own?:
   const toNext = pet.nextStageFood == null ? 0 : Math.max(0, pet.nextStageFood - pet.food);
   const nextStage = pet.nextStageFood == null ? null : ['egg', 'baby', 'kid', 'teen', 'grown', 'legend'][pet.stageIndex + 1];
   const hours = Math.floor(pet.streamedMinutes / 60);
+  const requestLine = petRequestLine(t, pet, own);
 
   return (
     <div
@@ -58,6 +68,11 @@ export function PetCard({ pet, own = false, className }: { pet: StreamPet; own?:
               </>
             )}
           </p>
+          {requestLine && (
+            <p data-pet-requests className="mt-0.5 text-[11px] text-white/45">
+              {requestLine}
+            </p>
+          )}
         </div>
       </div>
       {nextStage && (

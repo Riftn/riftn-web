@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "I-edit ang video", "hiddenTag": "Nakatago", "tapToEdit": "I-tap para i-edit", "cover": "Cover", "trim": "Trim", "mirror": "Mirror", "rotate": "Rotate", "hide": "Hide", "timer": "Timer", "sheetTitleAny": "I-edit bago ipadala", "close": "Close", "replace": "Palitan", "hiddenUntilTap": "Nakatago hanggang sa i-tap nila ito", "pause": "Pause", "play": "Play video", "mute": "I-mute", "unmute": "I-unmute", "scrub": "Mag-scrub sa video", "addMore": "Magdagdag ng mga larawan o video", "trimAria": "I-drag ang mga dulo para i-trim", "coverAria": "I-tap ang frame para gawing cover", "coverHint": "I-tap ang frame para gawing cover", "coverOwn": "Ang iyong larawan", "coverAuto": "Auto", "uploadCover": "Mag-upload ng cover picture", "mirrored": "Naka-mirror", "original": "Orihinal", "rotate90": "I-rotate nang 90°", "showNormally": "Ipakita nang normal", "showNormallyBody": "Nakikita nila ito agad", "hideUntilTap": "Itago hanggang sa i-tap", "hideUntilTapBody": "Blurred hanggang sa i-tap nila ito", "hidePrice": "Itago sa likod ng presyo", "hidePriceBody": "Blurred hanggang sa magbayad sila sa iyo", "priceUnavailable": "Hindi sa chat na ito", "timerOff": "Off", "timerOffBody": "Mananatili ito sa chat.", "timerViewBody": "Mawawala para sa inyong dalawa kapag nakita na nila ito.", "confirm": "Kumpirmahin", "lockedFor": "I-unlock para sa {{value1}} DHB", "lockedForUsd": "I-unlock para sa {{value1}}", "editItem": "I-edit ang item {{value1}}", "kept": "{{time}} napanatili", "timerTimeBody": "Mawawala para sa inyong dalawa {{value1}} pagkatapos mong ipadala ito."},
+  "dmVideo": {"edit": "I-edit ang video", "hiddenTag": "Nakatago", "tapToEdit": "I-tap para i-edit", "cover": "Cover", "trim": "Trim", "mirror": "Mirror", "rotate": "Rotate", "hide": "Hide", "timer": "Timer", "sheetTitleAny": "I-edit bago ipadala", "close": "Close", "replace": "Palitan", "hiddenUntilTap": "Nakatago hanggang sa i-tap nila ito", "pause": "Pause", "play": "Play video", "mute": "I-mute", "unmute": "I-unmute", "scrub": "Mag-scrub sa video", "addMore": "Magdagdag ng mga larawan o video", "trimAria": "I-drag ang mga dulo para i-trim", "coverAria": "I-tap ang frame para gawing cover", "coverHint": "I-tap ang frame para gawing cover", "coverOwn": "Ang iyong larawan", "coverAuto": "Auto", "uploadCover": "Mag-upload ng cover picture", "mirrored": "Naka-mirror", "original": "Orihinal", "rotate90": "I-rotate nang 90°", "showNormally": "Ipakita nang normal", "showNormallyBody": "Nakikita nila ito agad", "hideUntilTap": "Itago hanggang sa i-tap", "hideUntilTapBody": "Blurred hanggang sa i-tap nila ito", "hidePrice": "Itago sa likod ng presyo", "hidePriceBody": "Blurred hanggang sa magbayad sila sa iyo", "priceUnavailable": "Hindi sa chat na ito", "timerOff": "Off", "timerOffBody": "Mananatili ito sa chat.", "timerViewBody": "Mawawala para sa inyong dalawa kapag nakita na nila ito.", "confirm": "Kumpirmahin", "lockedFor": "I-unlock para sa {{value1}} token", "lockedForUsd": "I-unlock para sa {{value1}}", "editItem": "I-edit ang item {{value1}}", "kept": "{{time}} napanatili", "timerTimeBody": "Mawawala para sa inyong dalawa {{value1}} pagkatapos mong ipadala ito."},
   "postBg": {
     "addMedia": "Magdagdag ng larawan, GIF, o video",
     "changeMedia": "Palitan ang larawan, GIF, o video",
@@ -630,7 +630,7 @@
     "wallet": "Pitaka",
     "docs": "Dokumento",
     "roadmap": "Roadmap",
-    "featureRequests": "Kahilingan",
+    "featureRequests": "Bumuo",
     "staking": "Pag-stake",
     "governance": "Pamamahala",
     "dao": "DAO",
@@ -2166,7 +2166,7 @@
     "ogHolders_one": "{{count}} OG holder",
     "ogHolders_other": "{{count}} OG holder",
     "ogChallengeTitle": "Ibalik ang mga OG holder",
-    "ogChallengeBody": "Imbitahan ang mga taong may hawak pang DHB. Kapag sumali sila gamit ang invite link mo at itinago ang DHB nila sa kanilang Riftn wallet, mabibilang sila para sa iyo rito.",
+    "ogChallengeBody": "Imbitahan ang mga taong may hawak pang token. Kapag sumali sila gamit ang invite link mo at itinago ang token nila sa kanilang Riftn wallet, mabibilang sila para sa iyo rito.",
     "ogChallengeCta": "Kunin ang invite link mo"
   },
   "dhbListing": {
@@ -2242,8 +2242,8 @@
   "features": {
     "prompts": "Mga Prompt",
     "queued": "Naka-antay",
-    "promptPageTitle": "Mga Hiling",
-    "promptSubtitle": "Gumawa ng Riftn gamit ang isang prompt",
+    "promptPageTitle": "Bumuo",
+    "promptSubtitle": "Bumuo ng Riftn sa pamamagitan ng pakikipag-usap dito.",
     "promptNew": "Bagong prompt",
     "promptSearch": "Tingnan ang mga prompt…",
     "promptHeading": "Anong susunod na gagawin natin?",
@@ -3290,11 +3290,11 @@
     "requestPromptShort": "Wala pa rito?",
     "requestDraftMenu": "Idagdag ang {{query}} sa Riftn",
     "requestDraftSettings": "Isang setting para sa {{query}}",
-    "requestPostsTo": "Ipo-post sa Requests",
-    "requestHint": "Ipo-post sa Requests bilang ikaw. Sasabihan ka namin kapag nailabas na ito.",
-    "requestSent": "Naipadala sa Requests",
+    "requestPostsTo": "Mga post para sa Build",
+    "requestHint": "Mga post para sa Build bilang ikaw. Sasabihan ka namin kapag na-ship na ito.",
+    "requestSent": "Ipinadala sa Build",
     "requestSentHint": "Sasabihan ka namin kapag nailabas na ito.",
-    "requestSeeIt": "Tingnan ito sa Requests"
+    "requestSeeIt": "Tingnan ito sa Build"
   },
   "comments": {
     "reportComment": "Mag - ulat ng komento",
@@ -11959,7 +11959,7 @@
     "settings": "Mga Setting",
     "settingsDesc": "Pamamahala ng mga preferensiya ng iyong account, wika, mga setting ng pagkakakilanlan, at pagtingin.",
     "governance": "Pamamahala",
-    "featureRequests": "Mga Kahilingan sa Feature",
+    "featureRequests": "Bumuo",
     "featureRequestsDesc": "Magmungkahi ng mga bagong tampok at bumoto sa mga ideya ng komunidad. Ang mga popular na kahilingan ay bibigyan ng priyoridad para sa pag - unlad.",
     "upvote": "Magbigay ng suporta",
     "upvoteDesc": "Bumoto pabor sa isang panukala sa pamamahala o kahilingan sa tampok. Tumutulong sa pag - sign ng suporta sa komunidad.",
@@ -12357,7 +12357,7 @@
           "4": "Para mag-record ng voice note, i-click ang microphone icon.",
           "5": "Para magdagdag ng GIF, i-click ang GIF icon at maghanap ng isa.",
           "6": "Gumamit ng #hashtags para ikategorya ang iyong post (hal., #crypto, #defi).",
-          "7": "Gumamit ng $cashtags para tukuyin ang mga token (hal., $RIFT, $ETH).",
+          "7": "Gumamit ng $cashtags para tukuyin ang mga token (hal., $BTC, $ETH).",
           "8": "Gumamit ng @mentions para i-tag ang ibang mga user (hal., @username).",
           "9": "I-click ang 'Post' para i-publish. Ang iyong post ay agad na lalabas sa feed."
         },
@@ -17494,9 +17494,9 @@
     "72a478ec65bf": "Detalye ng device at OS (opsyonal)",
     "cbf32246775e": "Ilagay ang mga Larawan o Video (optional)",
     "ea3a3da9b73e": "— hanggang",
-    "5d2d9bc248a3": "Feature Requests & Bug Reporting | Riftn",
-    "2c94a53da07c": "Magsumite ng mga feature requests, magreport ng mga bug, at magboto sa mga ideya ng komunidad upang magtayo ng roadmap ng Riftn. Tukuyin ang mga bukas, nasa proseso, at naipatupad na mga feature.",
-    "64ce9ca9f7d1": "Riftn Features — Feature Requests, Bug Reporting & Community Roadmap",
+    "5d2d9bc248a3": "Bumuo ng Riftn sa pamamagitan ng pakikipag-usap dito | Riftn",
+    "2c94a53da07c": "Bumuo ng Riftn sa pamamagitan ng pakikipag-usap dito. Mag-post ng mga ideya at ulat ng bug bilang mga prompt, bumoto sa mga hiniling ng iba, at subaybayan ang mga ito mula Queued hanggang Shipped.",
+    "64ce9ca9f7d1": "Build: hubugin ang Riftn sa pamamagitan ng pakikipag-usap dito",
     "5697d03daef4": "Mga Feature",
     "c46c50e9cf58": "Walang feature pa",
     "b98adf20f5f3": "Wallet: Pangasiwaan ang Mga Asset ng Crypto",
@@ -18707,7 +18707,7 @@
     "68f66b1f5bba": "Magdiscovery ng mga trending na kontento, mga lumikha at mga paksa sa Riftn.",
     "fd274232d93a": "Klik sa pag-uupload",
     "d7246da527c1": "I-add ang iba",
-    "d2c76d7df46f": "Magsumite ng mga pangangailangan ng feature, magreport ng mga bug, at magboto sa mga ideya ng komunidad upang magpasiya ng roadmap ng Riftn.",
+    "d2c76d7df46f": "Bumuo ng Riftn sa pamamagitan ng pakikipag-usap dito. Mag-post ng mga ideya at ulat ng bug bilang mga prompt at bumoto sa kung ano ang susunod na gagawin.",
     "90d6f4c823a9": "Hindi maaaring kopyahin ang address",
     "15e17712534d": "Ang address ng pagmimint ng token",
     "b4c1cebc35f6": "ang network na ito",

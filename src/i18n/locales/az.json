@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Videonu redaktə et", "hiddenTag": "Gizli", "tapToEdit": "Redaktə etmək üçün toxun", "cover": "Qapaq", "trim": "Kəsin", "mirror": "Güzgü", "rotate": "Fırlat", "hide": "Gizlət", "timer": "Taimer", "sheetTitleAny": "Göndərməzdən əvvəl redaktə et", "close": "Bağla", "replace": "Əvəz et", "hiddenUntilTap": "Üzərinə toxunana qədər gizli qalır", "pause": "Fasilə ver", "play": "Videonu göstər", "mute": "Səsi bağla", "unmute": "Səsi aç", "scrub": "Videonu sürüşdürün", "addMore": "Fotolar və ya videolar əlavə edin", "trimAria": "Kəsmək üçün ucları sürüşdürün", "coverAria": "Kapağı təyin etmək üçün kadra basın", "coverHint": "Kapağı təyin etmək üçün kadra basın", "coverOwn": "Şəkiliniz", "coverAuto": "Avtomatik", "uploadCover": "Əsas foto yükləyin", "mirrored": "Güzgülü", "original": "Orijinal", "rotate90": "90° fırladın", "showNormally": "Normal şəkildə göstər", "showNormallyBody": "Onlar bunu dərhal görürlər", "hideUntilTap": "Üzərinə toxunulana qədər gizlət", "hideUntilTapBody": "Üzərinə toxunana qədər bulanıq olacaq", "hidePrice": "Qiymətin arxasında gizlədin", "hidePriceBody": "Sizə ödəniş edənə qədər bulanıq olacaq", "priceUnavailable": "Bu söhbətdə deyil", "timerOff": "Qeyri-aktiv", "timerOffBody": "Söhbətdə qalır.", "timerViewBody": "O, bunu gördükdən sonra hər ikiniz üçün silinəcək.", "confirm": "Təsdiqlə", "lockedFor": "{{value1}} DHB üçün kilidi aç", "lockedForUsd": "{{value1}} üçün kilidi aç", "editItem": "{{value1}} elementini redaktə et", "kept": "{{time}} saxlanıldı", "timerTimeBody": "Siz onu göndərdikdən sonra hər ikiniz üçün {{value1}} yox olacaq."},
+  "dmVideo": {"edit": "Videonu redaktə et", "hiddenTag": "Gizli", "tapToEdit": "Redaktə etmək üçün toxun", "cover": "Qapaq", "trim": "Kəsin", "mirror": "Güzgü", "rotate": "Fırlat", "hide": "Gizlət", "timer": "Taimer", "sheetTitleAny": "Göndərməzdən əvvəl redaktə et", "close": "Bağla", "replace": "Əvəz et", "hiddenUntilTap": "Üzərinə toxunana qədər gizli qalır", "pause": "Fasilə ver", "play": "Videonu göstər", "mute": "Səsi bağla", "unmute": "Səsi aç", "scrub": "Videonu sürüşdürün", "addMore": "Fotolar və ya videolar əlavə edin", "trimAria": "Kəsmək üçün ucları sürüşdürün", "coverAria": "Kapağı təyin etmək üçün kadra basın", "coverHint": "Kapağı təyin etmək üçün kadra basın", "coverOwn": "Şəkiliniz", "coverAuto": "Avtomatik", "uploadCover": "Əsas foto yükləyin", "mirrored": "Güzgülü", "original": "Orijinal", "rotate90": "90° fırladın", "showNormally": "Normal şəkildə göstər", "showNormallyBody": "Onlar bunu dərhal görürlər", "hideUntilTap": "Üzərinə toxunulana qədər gizlət", "hideUntilTapBody": "Üzərinə toxunana qədər bulanıq olacaq", "hidePrice": "Qiymətin arxasında gizlədin", "hidePriceBody": "Sizə ödəniş edənə qədər bulanıq olacaq", "priceUnavailable": "Bu söhbətdə deyil", "timerOff": "Qeyri-aktiv", "timerOffBody": "Söhbətdə qalır.", "timerViewBody": "O, bunu gördükdən sonra hər ikiniz üçün silinəcək.", "confirm": "Təsdiqlə", "lockedFor": "{{value1}} token üçün kilidi aç", "lockedForUsd": "{{value1}} üçün kilidi aç", "editItem": "{{value1}} elementini redaktə et", "kept": "{{time}} saxlanıldı", "timerTimeBody": "Siz onu göndərdikdən sonra hər ikiniz üçün {{value1}} yox olacaq."},
   "postBg": {
     "addMedia": "Şəkil, GIF və ya video əlavə et",
     "changeMedia": "Şəkli, GIF-i və ya videonu dəyiş",
@@ -630,7 +630,7 @@
     "wallet": "Cüzdan",
     "docs": "Sənədlər",
     "roadmap": "Yol Xəritəsi",
-    "featureRequests": "Sorğular",
+    "featureRequests": "Seçənəklər",
     "staking": "Mərc",
     "governance": "İdarəetmə",
     "dao": "DAO",
@@ -2120,7 +2120,7 @@
     "ogHolders_one": "{{count}} OG sahibi",
     "ogHolders_other": "{{count}} OG sahibi",
     "ogChallengeTitle": "OG sahiblərini geri qaytarın",
-    "ogChallengeBody": "Hələ də DHB saxlayan insanları dəvət edin. Onlar sizin dəvət keçidinizlə qoşulub DHB-lərini Riftn cüzdanında saxlayanda burada sizin hesabınıza sayılırlar.",
+    "ogChallengeBody": "Hələ də token saxlayan insanları dəvət edin. Onlar sizin dəvət keçidinizlə qoşulub token-lərini Riftn cüzdanında saxlayanda burada sizin hesabınıza sayılırlar.",
     "ogChallengeCta": "Dəvət keçidinizi alın"
   },
   "dhbListing": {
@@ -2196,8 +2196,8 @@
   "features": {
     "prompts": "Sorğular",
     "queued": "Növbəli",
-    "promptPageTitle": "Sorğular",
-    "promptSubtitle": "Tez bir zamanda Riftn yaradın",
+    "promptPageTitle": "Seçənəklər",
+    "promptSubtitle": "Riftn ilə danışaraq onu qurun.",
     "promptNew": "Yeni cəld",
     "promptSearch": "Axtarış üzrə göstərişlər...",
     "promptHeading": "Növbəti mərhələdə nə qurmalıyıq?",
@@ -3244,11 +3244,11 @@
     "requestPromptShort": "Hələ burada yoxdur?",
     "requestDraftMenu": "{{query}} Riftn-ə əlavə edilsin",
     "requestDraftSettings": "{{query}} üçün parametr",
-    "requestPostsTo": "Sorğulara paylaşır",
-    "requestHint": "Sizin adınızdan Sorğulara paylaşır. Hazır olanda sizə xəbər verəcəyik.",
-    "requestSent": "Sorğulara göndərildi",
+    "requestPostsTo": "Yaradılacaq postlar",
+    "requestHint": "Sizin kimi qurulacaq postlar. Göndərildiyi zaman sizə bildirəcəyik.",
+    "requestSent": "Yaradılmağa göndərildi",
     "requestSentHint": "Hazır olanda sizə xəbər verəcəyik.",
-    "requestSeeIt": "Sorğularda bax"
+    "requestSeeIt": "Bunu Build-də görün"
   },
   "comments": {
     "reportComment": "Şərh bildir",
@@ -11913,7 +11913,7 @@
     "settings": "Ayarlar",
     "settingsDesc": "Hesabınızın istifadəçi təcrübəsi, dil, gizlilik və görünüşünə dair qarşılıqlı əlaqə.",
     "governance": "Hökümranlıq",
-    "featureRequests": "Qeydlər",
+    "featureRequests": "Seçənəklər",
     "featureRequestsDesc": "Yeni xüsusiyyətlərə təklif et və cəmiyyətin fikirlərinə səs verin. Populyar təkliflər inkişaf üçün prioritet alır.",
     "upvote": "Səs ver",
     "upvoteDesc": "Hökümranlıq təklifinə və ya xüsusiyyətə səs verin. Cəmiyyətin dəstəyini göstərir.",
@@ -12233,7 +12233,7 @@
           "4": "Səsli qeyd yazmaq üçün mikrofon ikonunu klikləyin.",
           "5": "GIF əlavə etmək üçün GIF ikonunu klikləyin və birini axtarın.",
           "6": "Postunuzu kateqoriyalara ayırmaq üçün #hashtaglarından istifadə edin (məsələn, #crypto, #defi).",
-          "7": "Tokenlara istinad etmək üçün $cashtaglarından istifadə edin (məsələn, $RIFT, $ETH).",
+          "7": "Tokenlara istinad etmək üçün $cashtaglarından istifadə edin (məsələn, $BTC, $ETH).",
           "8": "Digər istifadəçiləri etiketləmək üçün @mentionlarından istifadə edin (məsələn, @username).",
           "9": "Yayınlamaq üçün 'Post' düyməsini klikləyin. Postunuz dərhal yeməkdə görünür."
         },
@@ -17379,9 +17379,9 @@
     "72a478ec65bf": "Cihaz və ƏS təfərrüatları (isteğe bağlı)",
     "cbf32246775e": "Şəkil və ya Video əlavə edin (qeyri-məcburi)",
     "ea3a3da9b73e": "— qədər",
-    "5d2d9bc248a3": "Xüsusiyyət Sorğusu və Xəta Hesabatı | Riftn",
-    "2c94a53da07c": "Riftn-un yol xəritəsini formalaşdırmaq üçün xüsusiyyət sorğuları təqdim edin, xətalar haqqında məlumat verin və icma ideyalarına səs verin. Açıq, davamsız və göndərilmiş xüsusiyyətləri izləyin.",
-    "64ce9ca9f7d1": "Riftn Features — Feature Tələblər, Xətələrin Rəsmi Raporlaşdırılması və Kommunitənin Planı",
+    "5d2d9bc248a3": "Riftn ilə danışaraq onu qurun | Riftn",
+    "2c94a53da07c": "Riftn ilə danışaraq onu qurun. Fikirləri və baq hesabatlarını sorğular kimi dərc edin, başqalarının istədiklərinə səs verin və onları Növbədə gözləyir vəziyyətindən Təhvil verilib vəziyyətinə qədər izləyin.",
+    "64ce9ca9f7d1": "Qurun: Riftn ilə danışaraq onu formalaşdırın",
     "5697d03daef4": "Xüsusiyyətlər",
     "c46c50e9cf58": "Hələ heç bir xüsusiyyət yoxdur",
     "b98adf20f5f3": "Pul kisəsi: Kriptovalyuta aktivlərinizi idarə edin",
@@ -18599,7 +18599,7 @@
     "68f66b1f5bba": "Riftn-da trend məzmun, yaradıcılar və mövzuları kəşf et.",
     "fd274232d93a": "Yüklə",
     "d7246da527c1": "Yeni əlavə et",
-    "d2c76d7df46f": "Riftn-in planlaşdırma xəritəsini formalaşdırmaq üçün icbarət, səhvləri bildirmək və icbarətlərin səs vermək.",
+    "d2c76d7df46f": "Riftn ilə danışaraq onu qurun. Fikirləri və səhv hesabatlarını göstərişlər kimi dərc edin və növbəti yaradılacaq şeyə səs verin.",
     "90d6f4c823a9": "Üzərindən kopyalamaq mümkün deyil",
     "15e17712534d": "Token mint ünvanı",
     "b4c1cebc35f6": "bu şəbəkə",

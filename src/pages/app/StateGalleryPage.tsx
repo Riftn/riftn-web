@@ -985,7 +985,7 @@ const SAMPLE_DISLIKED_REACTIONS: ReactionCounts = { like: 2, love: 1, dislike: 9
  */
 const SAMPLE_LIVE_NOW: LiveNowItem[] = [
   { kind: 'stream', id: '1', title: 'Late night beat making', wallet: '0xmaya', username: 'maya', avatar: galleryAvatar, count: '214', followed: true, size: 214, cover: pillArtA, displayName: 'Maya', badgeBalance: 140000 },
-  { kind: 'stage', id: '2', title: 'DHB weekly AMA', wallet: '0xdehub', username: 'dehub', avatar: null, count: '88', followed: true, size: 88 },
+  { kind: 'stage', id: '2', title: 'Tokens weekly AMA', wallet: '0xdehub', username: 'dehub', avatar: null, count: '88', followed: true, size: 88 },
   { kind: 'stream', id: '3', title: 'Ranked grind to Diamond', wallet: '0xkai', username: 'kai', avatar: null, count: '41', followed: false, size: 41, cover: pillArtB, displayName: 'Kai', badgeBalance: 2500000 },
   { kind: 'stage', id: '4', title: 'Builders hangout', wallet: '0xsora', username: 'sora', avatar: null, count: '12', followed: false, size: 12 },
   { kind: 'stream', id: '5', title: 'Painting a city at dusk', wallet: '0xjun', username: 'jun', avatar: null, count: '9', followed: false, size: 9 },
@@ -1514,7 +1514,7 @@ function UnlockRevealGallery() {
         sub="All of it goes to angela"
         previewUrl={GALLERY_LOCK_BLUR}
         priceLabel="$5"
-        dhbLabel="≈ 5,000 DHB"
+        dhbLabel="≈ 5,000 tokens"
         phase={phase ?? 'idle'}
         doneLabel="Opening your photo…"
         onPay={() => setPhase('paying')}
@@ -1532,7 +1532,7 @@ const GALLERY_COINS = [
   { symbol: 'USDFC', chainId: 314, address: '0x80b98d3aa09ffff255c3ba4a241111ff1262f045', decimals: 18, priceUsd: 1, treasuryAddress: '0x0' },
 ] as const;
 
-/** Not enough DHB: Create pressed short of DHB, pay the same amount in another coin. */
+/** Not enough tokens: Create pressed short of DHB, pay the same amount in another coin. */
 const GALLERY_ANY_COINS = [
   { assetId: 'nep141:btc.omft.near', symbol: 'BTC', blockchain: 'btc', decimals: 8, price: 101200 },
   { assetId: 'nep141:sol.omft.near', symbol: 'SOL', blockchain: 'sol', decimals: 9, price: 88 },
@@ -1556,8 +1556,8 @@ function CoinPayGallery() {
   const [anyView, setAnyView] = useState<null | 'list' | 'send'>(null);
   return (
     <section data-page-bento className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4" data-coin-pay-gallery>
-      <h2 className="mb-3 text-sm font-semibold">Not enough DHB</h2>
-      <Button variant="glass" size="sm" data-open-coin-pay onClick={() => setOpen(true)}>Create (1,890 DHB)</Button>
+      <h2 className="mb-3 text-sm font-semibold">Not enough tokens</h2>
+      <Button variant="glass" size="sm" data-open-coin-pay onClick={() => setOpen(true)}>Create (1,890 tokens)</Button>
       <PayWithCoinSheet
         open={open}
         onOpenChange={setOpen}
@@ -1603,7 +1603,7 @@ function MintChainGallery() {
         <Button variant="glass" size="sm" data-open-mint-sheet="dehub" onClick={() => setOpen('dehub')}>Riftn wallet</Button>
         <Button variant="glass" size="sm" data-open-mint-sheet="own" onClick={() => setOpen('own')}>Own wallet</Button>
       </div>
-      <MintChainSheet open={open !== null} onOpenChange={(o) => { if (!o) setOpen(null); }} defaultChainId={8453} sponsored={open === 'dehub'} onConfirm={() => setOpen(null)} />
+      <MintChainSheet open={open !== null} onOpenChange={(o) => { if (!o) setOpen(null); }} defaultChainId={8453} sponsored={open === 'dehub'} homeAllowance={{ mintsPerDay: 3, homeMintsRemaining: 2 }} onConfirm={() => setOpen(null)} />
     </section>
   );
 }
@@ -2799,8 +2799,11 @@ const GALLERY_PET: StreamPet = {
   stage: 'teen',
   stageIndex: 3,
   food: 96,
-  streamFood: 88,
+  streamFood: 86,
   viewerFood: 8,
+  requestFood: 2,
+  requestFoodToday: 2,
+  requestsWaiting: 2,
   stageFood: 60,
   nextStageFood: 240,
   progress: 36 / 180,
@@ -2852,7 +2855,7 @@ function StreamPetGallery() {
           <PetCard pet={{ ...GALLERY_PET, streamingNow: false }} />
         </div>
         <div data-stream-pet-profile-asleep>
-          <PetCard pet={{ ...GALLERY_PET, name: 'Pip', color: 'coral', stage: 'kid', stageIndex: 2, food: 30, stageFood: 12, nextStageFood: 60, progress: 18 / 48, mood: 'asleep', streamingNow: false, sleepsAt: null }} own />
+          <PetCard pet={{ ...GALLERY_PET, name: 'Pip', color: 'coral', stage: 'kid', stageIndex: 2, food: 30, stageFood: 12, nextStageFood: 60, progress: 18 / 48, mood: 'asleep', streamingNow: false, sleepsAt: null, requestFoodToday: 0, requestsWaiting: 1 }} own />
         </div>
       </div>
       <AuthContext.Provider value={GALLERY_POINTS_AUTH}>

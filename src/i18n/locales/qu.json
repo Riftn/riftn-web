@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Video qillqay", "hiddenTag": "Pakasqa", "tapToEdit": "Qillqanapaq ñit'iy", "cover": "Qallariy", "trim": "Kuchuy", "mirror": "Espejo", "rotate": "Muyuchiy", "hide": "Pakay", "timer": "Pacha tupuy", "sheetTitleAny": "Manaraq kachashaspa qillqay", "close": "Wichqay", "replace": "Aylluy", "hiddenUntilTap": "Taqaykama pakay", "pause": "Sayachiy", "play": "Videota pukllachiy", "mute": "Upallachiy", "unmute": "Upallachiyta qichuy", "scrub": "Videota qhawariy", "addMore": "Fotokunata utaq videokunata yapay", "trimAria": "Kuchunankupaq qillqata aysay", "coverAria": "Qallariynin kananpaq huk fotota akllay", "coverHint": "Qallariynin kananpaq huk fotota akllay", "coverOwn": "Sut'iyki", "coverAuto": "Kikinmanta", "uploadCover": "Qallariynin fotota churay", "mirrored": "Espejoman tikrasqa", "original": "Kikin", "rotate90": "90° muyuchiy", "showNormally": "Sapaqllata rikuchiy", "showNormallyBody": "Chaylla rikunkuman", "hideUntilTap": "Taqaykama pakay", "hideUntilTapBody": "Taqaykama llimp'iy", "hidePrice": "Qullqillawan rikuy", "hidePriceBody": "Qullqita qunankukama llimp'iy", "priceUnavailable": "Kay rimanakuypiqa manan", "timerOff": "Paskay", "timerOffBody": "Chayqa rimanakuy ukhupin qepan.", "timerViewBody": "Paykuna rikuqtinkuqa iskayniykichismantan chinkanqa.", "confirm": "Aswan allin", "lockedFor": "{{value1}} DHB kaqpaq kicharimuy", "lockedForUsd": "Kichay {{value1}}", "editItem": "Imatapas allichay {{value1}}", "kept": "{{time}} waqaychasqa", "timerTimeBody": "Kachasqayki qhepaman {{value1}} iskayniykichismantan chinkanqa."},
+  "dmVideo": {"edit": "Video qillqay", "hiddenTag": "Pakasqa", "tapToEdit": "Qillqanapaq ñit'iy", "cover": "Qallariy", "trim": "Kuchuy", "mirror": "Espejo", "rotate": "Muyuchiy", "hide": "Pakay", "timer": "Pacha tupuy", "sheetTitleAny": "Manaraq kachashaspa qillqay", "close": "Wichqay", "replace": "Aylluy", "hiddenUntilTap": "Taqaykama pakay", "pause": "Sayachiy", "play": "Videota pukllachiy", "mute": "Upallachiy", "unmute": "Upallachiyta qichuy", "scrub": "Videota qhawariy", "addMore": "Fotokunata utaq videokunata yapay", "trimAria": "Kuchunankupaq qillqata aysay", "coverAria": "Qallariynin kananpaq huk fotota akllay", "coverHint": "Qallariynin kananpaq huk fotota akllay", "coverOwn": "Sut'iyki", "coverAuto": "Kikinmanta", "uploadCover": "Qallariynin fotota churay", "mirrored": "Espejoman tikrasqa", "original": "Kikin", "rotate90": "90° muyuchiy", "showNormally": "Sapaqllata rikuchiy", "showNormallyBody": "Chaylla rikunkuman", "hideUntilTap": "Taqaykama pakay", "hideUntilTapBody": "Taqaykama llimp'iy", "hidePrice": "Qullqillawan rikuy", "hidePriceBody": "Qullqita qunankukama llimp'iy", "priceUnavailable": "Kay rimanakuypiqa manan", "timerOff": "Paskay", "timerOffBody": "Chayqa rimanakuy ukhupin qepan.", "timerViewBody": "Paykuna rikuqtinkuqa iskayniykichismantan chinkanqa.", "confirm": "Aswan allin", "lockedFor": "{{value1}} simikuna kaqpaq kicharimuy", "lockedForUsd": "Kichay {{value1}}", "editItem": "Imatapas allichay {{value1}}", "kept": "{{time}} waqaychasqa", "timerTimeBody": "Kachasqayki qhepaman {{value1}} iskayniykichismantan chinkanqa."},
   "postBg": {
     "addMedia": "Siq'iyta, GIF-ta utaq videota yapay",
     "changeMedia": "Siq'iyta, GIF-ta utaq videota tikray",
@@ -630,7 +630,7 @@
     "wallet": "Qullqi Wasi",
     "docs": "Qillqa",
     "roadmap": "Ñan Mapa",
-    "featureRequests": "Mañakuy",
+    "featureRequests": "Ruway",
     "staking": "Billetera",
     "governance": "Kamachiy",
     "dao": "DAO",
@@ -2121,7 +2121,7 @@
     "ogHolders_one": "{{count}} OG kapuq",
     "ogHolders_other": "{{count}} OG kapuqkuna",
     "ogChallengeTitle": "OG kapuqkunata kutichimuy",
-    "ogChallengeBody": "DHB kapuqraq runakunata qayay. Qayana t'inkiykiwan yaykuptinku, DHB-nkuta Riftn qullqi wasinkupi waqaychaptinku, kaypi qampaq yupakunku.",
+    "ogChallengeBody": "simikuna kapuqraq runakunata qayay. Qayana t'inkiykiwan yaykuptinku, simikuna-nkuta Riftn qullqi wasinkupi waqaychaptinku, kaypi qampaq yupakunku.",
     "ogChallengeCta": "Qayana t'inkiykita hap'iy"
   },
   "dhbListing": {
@@ -2197,8 +2197,8 @@
   "features": {
     "prompts": "Imaymana mañakuykuna",
     "queued": "Churanapi kachkan",
-    "promptPageTitle": "Mañakuykuna",
-    "promptSubtitle": "Riftn-ta ruway mañakuywan",
+    "promptPageTitle": "Ruway",
+    "promptSubtitle": "Riftn nisqata rimaywan ruway.",
     "promptNew": "Musuq mañakuy",
     "promptSearch": "Mañakuykunata maskay…",
     "promptHeading": "Imatataq qatiqninpi ruwasaqku?",
@@ -3275,11 +3275,11 @@
     "requestPromptShort": "Manaraqchu kaypi?",
     "requestDraftMenu": "{{query}}-ta Riftnman yapay",
     "requestDraftSettings": "{{query}}-paq huk churana",
-    "requestPostsTo": "Mañakuykunaman churan",
-    "requestHint": "Qam hina Mañakuykunaman churan. Lluqsiptin willasqaykiku.",
-    "requestSent": "Mañakuykunaman apachisqa",
+    "requestPostsTo": "Ruwanapaq qillqakuna",
+    "requestHint": "Qam hina ruwanapaq qillqakuna. Imaynachus purichkan chayta willasaykiku.",
+    "requestSent": "Ruwanapaq kachasqa",
     "requestSentHint": "Lluqsiptin willasqaykiku.",
-    "requestSeeIt": "Mañakuykunapi qhaway"
+    "requestSeeIt": "Ruwanapi qaway"
   },
   "comments": {
     "reportComment": "Commentario nisqamanta willakuy",
@@ -11944,7 +11944,7 @@
     "settings": "Churanakuna",
     "settingsDesc": "Yupayniyki munasqaykita, simiykita, sapalla willayniykipaq ruwanakunata chaymanta rikch'ayninta kamachiy.",
     "governance": "Kamachiy",
-    "featureRequests": "Rasgo Mañakuykuna",
+    "featureRequests": "Ruway",
     "featureRequestsDesc": "Musuq ruwaykunata yuyaychaspa llaqta yuyaykunata votay. Popular mañakuykuna wiñariypaq ñawpaqman churasqa kanku.",
     "upvote": "Upvote nisqa",
     "upvoteDesc": "Huk kamachiy propuesta utaq característica mañakuypa favorninpi voto. Ayllu yanapayta señalayta yanapan.",
@@ -12264,7 +12264,7 @@
           "4": "Nota de voz grabanaykipaqqa micrófono nisqapi ñit’iy.",
           "5": "GIF yapanaykipaqqa GIF nisqapi ñitiy hinaspa hukninta maskay.",
           "6": "#hashtags nisqawan qillqasqaykita categorizanaykipaq (kayhina, #crypto, #defi).",
-          "7": "$cashtags llamk'achiy tokenkunata riqsichinapaq (kayhina, $RIFT, $ETH).",
+          "7": "$cashtags llamk'achiy tokenkunata riqsichinapaq (kayhina, $BTC, $ETH).",
           "8": "@mentions nisqawan llamk'achiy huk ruraqkunata etiquetanaykipaq (ahinataq, @username).",
           "9": "'Post' nisqapi ñit'iy qillqanaykipaq. Qillqasqaykiqa chaylla feed nisqapi rikurin."
         },
@@ -17416,9 +17416,9 @@
     "72a478ec65bf": "Antawan OS willakuykuna (munaspa)",
     "cbf32246775e": "Rikchakunata icha video kunata yapay (munaspa)",
     "ea3a3da9b73e": "— kama",
-    "5d2d9bc248a3": "Feature Requests & Bug Reporting | Riftn",
-    "2c94a53da07c": "Feature request-ta apachiy, bug-ta willay, ayllu idea-ta votu nispa Riftn roadmap-ta ruray. Abierto, trabaju-pi, enviadu feature-ta rikuy.",
-    "64ce9ca9f7d1": "Riftn Features — Feature Requests, Bug Reporting & Ayllu Roadmap",
+    "5d2d9bc248a3": "Riftn nisqata rimaywan ruway | Riftn",
+    "2c94a53da07c": "Riftn nisqata rimaywan ruway. Yuyaykunata, pantaykunatapas mañakuy hina qillqay, wakpa mañakusqankutapas akllay, hinallataq \"Queued\" nisqamanta \"Shipped\" nisqakama qatiy.",
+    "64ce9ca9f7d1": "Ruway: Riftn nisqata rimaywan kamay",
     "5697d03daef4": "Ruraykuna",
     "c46c50e9cf58": "Mana feature kachu",
     "b98adf20f5f3": "Wallet: Rikuy Crypto Activo-ta",
@@ -18635,7 +18635,7 @@
     "68f66b1f5bba": "Trending content, creators y topics-ta Riftn-pi taripay.",
     "fd274232d93a": "Suquy upload-nayki",
     "d7246da527c1": "Huktawan yapay",
-    "d2c76d7df46f": "Feature requests-ta apachiy, bugs-ta willay, y community ideas-pi vota Riftn-pa roadmap-ta shapiy.",
+    "d2c76d7df46f": "Riftn nisqata rimaywan ruway. Yuyaykunata, pantaykunatapas mañakuy hina qillqay, hinallataq imachus qatiqninpi ruwakunanta akllay.",
     "90d6f4c823a9": "Address-ta copynayta atipanchu",
     "15e17712534d": "Token mint adresi",
     "b4c1cebc35f6": "kay network",

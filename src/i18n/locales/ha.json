@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Gyara bidiyo", "hiddenTag": "A ɓoye", "tapToEdit": "Danna don gyarawa", "cover": "Cover", "trim": "Trim", "mirror": "Mirror", "rotate": "Rotate", "hide": "Hide", "timer": "Timer", "sheetTitleAny": "Gyara kafin a tura", "close": "Close", "replace": "Sauya", "hiddenUntilTap": "An ɓoye har sai sun danna shi", "pause": "Pause", "play": "Play video", "mute": "Kashe sauti", "unmute": "Kunna sauti", "scrub": "Duba bidiyon gaba-gaba", "addMore": "Ƙara hoto ko bidiyo", "trimAria": "Ja ƙarshe don yanke", "coverAria": "Danna fuskoki don saita rufin", "coverHint": "Danna fuskoki don saita rufin", "coverOwn": "Hotonka", "coverAuto": "Ta atomatik", "mirrored": "Mirrored", "original": "Original", "rotate90": "Rotate 90°", "showNormally": "Show normally", "showNormallyBody": "Suna ganin shi nan da nan", "hideUntilTap": "Hide until tapped", "hideUntilTapBody": "An ɓoye har sai sun danna shi", "hidePrice": "Boye a bayan farashi", "hidePriceBody": "An ɓata hoton har sai sun biya ka", "priceUnavailable": "Ba a cikin wannan hira ba", "timerOff": "Off", "timerOffBody": "Yana nan a cikin hira.", "timerViewBody": "Zai ɓace ga ku duka biyun da zarar sun gani.", "confirm": "Tabbatar", "lockedFor": "Buɗe don {{value1}} DHB", "lockedForUsd": "Buɗe don {{value1}}", "editItem": "Gyara abu {{value1}}", "kept": "{{time}} an ajiye", "timerTimeBody": "Zai ɓace ga ku duka biyun {{value1}} bayan ka tura shi."},
+  "dmVideo": {"edit": "Gyara bidiyo", "hiddenTag": "A ɓoye", "tapToEdit": "Danna don gyarawa", "cover": "Cover", "trim": "Trim", "mirror": "Mirror", "rotate": "Rotate", "hide": "Hide", "timer": "Timer", "sheetTitleAny": "Gyara kafin a tura", "close": "Close", "replace": "Sauya", "hiddenUntilTap": "An ɓoye har sai sun danna shi", "pause": "Pause", "play": "Play video", "mute": "Kashe sauti", "unmute": "Kunna sauti", "scrub": "Duba bidiyon gaba-gaba", "addMore": "Ƙara hoto ko bidiyo", "trimAria": "Ja ƙarshe don yanke", "coverAria": "Danna fuskoki don saita rufin", "coverHint": "Danna fuskoki don saita rufin", "coverOwn": "Hotonka", "coverAuto": "Ta atomatik", "mirrored": "Mirrored", "original": "Original", "rotate90": "Rotate 90°", "showNormally": "Show normally", "showNormallyBody": "Suna ganin shi nan da nan", "hideUntilTap": "Hide until tapped", "hideUntilTapBody": "An ɓoye har sai sun danna shi", "hidePrice": "Boye a bayan farashi", "hidePriceBody": "An ɓata hoton har sai sun biya ka", "priceUnavailable": "Ba a cikin wannan hira ba", "timerOff": "Off", "timerOffBody": "Yana nan a cikin hira.", "timerViewBody": "Zai ɓace ga ku duka biyun da zarar sun gani.", "confirm": "Tabbatar", "lockedFor": "Buɗe don {{value1}} isassun", "lockedForUsd": "Buɗe don {{value1}}", "editItem": "Gyara abu {{value1}}", "kept": "{{time}} an ajiye", "timerTimeBody": "Zai ɓace ga ku duka biyun {{value1}} bayan ka tura shi."},
   "postBg": {
     "addMedia": "Ƙara hoto, GIF ko bidiyo",
     "changeMedia": "Canza hoto, GIF ko bidiyo",
@@ -630,7 +630,7 @@
     "wallet": "Walat",
     "docs": "Takardu",
     "roadmap": "Tsarin aiki",
-    "featureRequests": "Buƙatun",
+    "featureRequests": "Build",
     "staking": "Zuba jari",
     "governance": "Mulki",
     "dao": "DAO",
@@ -2120,7 +2120,7 @@
     "ogHolders_one": "Mai riƙe OG {{count}}",
     "ogHolders_other": "Masu riƙe OG {{count}}",
     "ogChallengeTitle": "Dawo da masu riƙe OG",
-    "ogChallengeBody": "Gayyaci mutanen da har yanzu ke riƙe da DHB. Idan suka shiga da hanyar haɗin gayyatarka kuma suka ajiye DHB ɗinsu a walat ɗin Riftn, ana ƙidaya su a gare ka a nan.",
+    "ogChallengeBody": "Gayyaci mutanen da har yanzu ke riƙe da isassun. Idan suka shiga da hanyar haɗin gayyatarka kuma suka ajiye isassun ɗinsu a walat ɗin Riftn, ana ƙidaya su a gare ka a nan.",
     "ogChallengeCta": "Samu hanyar haɗin gayyatarka"
   },
   "dhbListing": {
@@ -2196,8 +2196,8 @@
   "features": {
     "prompts": "Ƙaddamarwa",
     "queued": "An saka a jerin gwano",
-    "promptPageTitle": "Bukatun",
-    "promptSubtitle": "Gina Riftn tare da hanzari",
+    "promptPageTitle": "Build",
+    "promptSubtitle": "Build Riftn ta hanyar magana da shi.",
     "promptNew": "Sabon hanzari",
     "promptSearch": "Bincike prompts...",
     "promptHeading": "Menene ya kamata mu gina gaba?",
@@ -3244,11 +3244,11 @@
     "requestPromptShort": "Babu a nan tukuna?",
     "requestDraftMenu": "Ƙara {{query}} zuwa Riftn",
     "requestDraftSettings": "Saiti don {{query}}",
-    "requestPostsTo": "Ana wallafawa zuwa Buƙatu",
-    "requestHint": "Ana wallafawa zuwa Buƙatu da sunanka. Za mu sanar da kai lokacin da aka kammala.",
-    "requestSent": "An aika zuwa Buƙatu",
+    "requestPostsTo": "Rubutun zuwa Build",
+    "requestHint": "Rubutun zuwa Build kamar kai. Za mu gaya maka lokacin da ya tura.",
+    "requestSent": "An aika zuwa Build",
     "requestSentHint": "Za mu sanar da kai lokacin da aka kammala.",
-    "requestSeeIt": "Duba shi a Buƙatu"
+    "requestSeeIt": "Kalli shi a Build"
   },
   "comments": {
     "reportComment": "Rahoto sharhi",
@@ -11911,7 +11911,7 @@
     "settings": "Saituna",
     "settingsDesc": "Gudanar da abubuwan da kake so na asusu, harshe, saitunan sirri, da bayyanar.",
     "governance": "Gudanarwa",
-    "featureRequests": "Bukatar Fasalulluka",
+    "featureRequests": "Build",
     "featureRequestsDesc": "Ba da shawarar sabbin fasalulluka kuma ka jefa ƙuri'a kan ra'ayoyin al'umma. Ana ba da fifiko ga shahararrun buƙatun don haɓakawa.",
     "upvote": "Ƙuri'ar amincewa (Upvote)",
     "upvoteDesc": "Jefa ƙuri'a don goyon bayan shawarar gudanarwa ko buƙatar fasali. Yana taimakawa wajen nuna goyon bayan al'umma.",
@@ -12233,7 +12233,7 @@
           "4": "Don yin rikodin bayanin murya, danna gunkin makirfo.",
           "5": "Don ƙara GIF, danna gunkin GIF kuma bincika ɗaya.",
           "6": "Yi amfani da #hashtags don rarraba sakonka (misali, #crypto, #defi).",
-          "7": "Yi amfani da $cashtags don nuna alamun kuɗi (misali, $RIFT, $ETH).",
+          "7": "Yi amfani da $cashtags don nuna alamun kuɗi (misali, $BTC, $ETH).",
           "8": "Yi amfani da @mentions don yiwa wasu masu amfani alama (misali, @username).",
           "9": "Danna 'Sako' don bugawa. Sakonka ya bayyana a cikin abincin nan take."
         },
@@ -17306,9 +17306,9 @@
     "72a478ec65bf": "Cikakkun bayanai na Na'ura & OS (na zaɓi)",
     "cbf32246775e": "Makala Hotuna ko Bidiyo (na zaɓi)",
     "ea3a3da9b73e": "— har zuwa",
-    "5d2d9bc248a3": "Buƙatun Siffa & Bayar da Rahoton Kuskure | Riftn",
-    "2c94a53da07c": "Gabatar da buƙatun siffa, bayar da rahoton kuskure, kuma ka kada ƙuri'a kan ra'ayoyin al'umma don tsara tsarin aikin Riftn. Bibiyi siffofin da suke a buɗe, waɗanda ake kai, da kuma waɗanda aka fitar.",
-    "64ce9ca9f7d1": "Siffofin Riftn — Buƙatun Siffa, Bayar da Rahoton Kuskure & Taswirar Aikin Al'umma",
+    "5d2d9bc248a3": "Build Riftn ta hanyar magana da shi | Riftn",
+    "2c94a53da07c": "Build Riftn ta hanyar magana da shi. Rubuta ra'ayoyi da rahotannin kurakurai a matsayin tambayoyi, ka zaɓi abin da sauran suka nema, kuma ka bi su daga An Adana zuwa An Tura.",
+    "64ce9ca9f7d1": "Build: tsara Riftn ta hanyar magana da shi",
     "5697d03daef4": "Siffofi",
     "c46c50e9cf58": "Babu siffofi tukuna",
     "b98adf20f5f3": "Wallet: Gudanar da Kadarorin Crypto Ɗinka",
@@ -18521,7 +18521,7 @@
     "68f66b1f5bba": "Gano abubuwan da ke faruwa, masu ƙirƙira da batutuwa akan Riftn.",
     "fd274232d93a": "Danna don ɗorawa",
     "d7246da527c1": "Ƙara wani",
-    "d2c76d7df46f": "Gabatar da buƙatun fasali, bayar da rahoton kurakurai, da jefa ƙuri'a kan ra'ayoyin al'umma don tsara taswirar Riftn.",
+    "d2c76d7df46f": "Build Riftn ta hanyar magana da shi. Rubuta ra'ayoyi da rahotannin kurakurai a matsayin tambayoyi kuma ka zaɓi abin da za a gina gaba.",
     "90d6f4c823a9": "Ba a iya kwafin adireshin ba",
     "15e17712534d": "Adireshin ƙirƙirar alama",
     "b4c1cebc35f6": "wannan hanyar sadarwa",

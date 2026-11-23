@@ -13,7 +13,7 @@ vi.mock('@/lib/thumbnail-fallback', () => ({ useResolvedThumbnail: (url: string)
 vi.mock('@/hooks/use-tap-gestures', () => ({ useTapGestures: () => ({}) }));
 vi.mock('@/components/app/cards/TapReactionBurst', () => ({ TapReactionBurst: () => null }));
 vi.mock('@/hooks/use-video-processing-status', () => ({ useVideoProcessingStatus: (_: string, status: string) => status }));
-vi.mock('@/lib/video-preferences', () => ({ useMediaLooping: () => true }));
+vi.mock('@/lib/video-preferences', () => ({ useMediaLooping: () => true, useMediaVolume: () => 1 }));
 vi.mock('@/lib/video-start', () => ({ requestVideoPlayback: (video: HTMLVideoElement) => video.play() }));
 
 const short = { id: 'handoff-short', videoUrl: 'https://example.test/clip.mp4', username: 'creator' } as ShortVideo;

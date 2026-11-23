@@ -1,3 +1,4 @@
+import { tokenLabel } from '@/lib/token-label';
 /**
  * Asset Reference Cards
  * =====================
@@ -40,7 +41,6 @@ import { isDhbListingQuery } from '@/lib/market/dhb-listing';
 import riftnCoin from '@/assets/dehub-coin.png';
 
 const CARD_HEIGHT = 'min-h-[92px]';
-const OWN_TOKEN = /^(?:DHB|DEHUB|RIFT)$/i;
 
 function formatPrice(value: number | null, currency = 'USD'): string {
   if (value == null) return '—';
@@ -211,8 +211,8 @@ function AssetCard({ asset }: { asset: ResolvedAsset }) {
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline gap-2">
             {/* Our own token reads as Riftn; the market feed still calls it DHB / Dehub. */}
-            <span className="text-white font-bold text-sm">${OWN_TOKEN.test(asset.symbol) ? 'RIFT' : asset.symbol}</span>
-            <span className="text-white/50 text-xs truncate">{OWN_TOKEN.test(asset.symbol) ? 'Riftn' : asset.name}</span>
+            <span className="text-white font-bold text-sm">{isDhbSymbol(asset.symbol) ? tokenLabel() : `$${asset.symbol}`}</span>
+            <span className="text-white/50 text-xs truncate">{isDhbSymbol(asset.symbol) ? 'Riftn' : asset.name}</span>
           </div>
           {meta.length > 0 && (
             <p className="text-white/40 text-[11px] mt-0.5 truncate">{meta.join(' · ')}</p>
@@ -301,7 +301,7 @@ function OwnTokenComingSoonCard() {
       <img src={riftnCoin} alt="" className="w-9 h-9 rounded-full bg-white/10 object-cover shrink-0" />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-white font-bold text-sm">$RIFT</span>
+          <span className="text-white font-bold text-sm">{tokenLabel()}</span>
           <span className="text-white/50 text-xs">Riftn</span>
           <span className="text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded-full bg-white/10 text-white/70">
             {t('tokenLaunch.eyebrow', 'Coming soon')}

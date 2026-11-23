@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Sunting video", "hiddenTag": "Didhelikake", "tapToEdit": "Tutul kanggo nyunting", "cover": "Sampul", "trim": "Potong", "mirror": "Cermin", "rotate": "Rotasi", "hide": "Singidake", "timer": "Timer", "sheetTitleAny": "Sunting sadurunge ngirim", "close": "Tutup", "replace": "Ganti", "hiddenUntilTap": "Singidake nganti diklik", "pause": "Jeda", "play": "Puter video", "mute": "Bisu", "unmute": "Swara", "scrub": "Geser video", "addMore": "Tambah foto utawa video", "trimAria": "Seret pucuk kanggo motong", "coverAria": "Klik pigura kanggo nyetel sampul", "coverHint": "Klik pigura kanggo nyetel sampul", "coverOwn": "Gambar sampeyan", "coverAuto": "Otomatis", "uploadCover": "Unggah gambar sampul", "mirrored": "Dicermin", "original": "Asli", "rotate90": "Rotasi 90°", "showNormally": "Tampilake kaya biasane", "showNormallyBody": "Langsung katon", "hideUntilTap": "Singidake nganti diklik", "hideUntilTapBody": "Blur nganti diklik", "hidePrice": "Singidake ing mburi rega", "hidePriceBody": "Blur nganti mbayar", "priceUnavailable": "Ora ing obrolan iki", "timerOff": "Mati", "timerOffBody": "Tetep ana ing obrolan.", "timerViewBody": "Ilang kanggo sampeyan sakloron sawise dideleng.", "confirm": "Konfirmasi", "lockedFor": "Bukak kunci kanggo {{value1}} DHB", "lockedForUsd": "Bukak kunci kanggo {{value1}}", "editItem": "Sunting barang {{value1}}", "kept": "{{time}} disimpen", "timerTimeBody": "Ilang kanggo sampeyan sakloron {{value1}} sawise dikirim."},
+  "dmVideo": {"edit": "Sunting video", "hiddenTag": "Didhelikake", "tapToEdit": "Tutul kanggo nyunting", "cover": "Sampul", "trim": "Potong", "mirror": "Cermin", "rotate": "Rotasi", "hide": "Singidake", "timer": "Timer", "sheetTitleAny": "Sunting sadurunge ngirim", "close": "Tutup", "replace": "Ganti", "hiddenUntilTap": "Singidake nganti diklik", "pause": "Jeda", "play": "Puter video", "mute": "Bisu", "unmute": "Swara", "scrub": "Geser video", "addMore": "Tambah foto utawa video", "trimAria": "Seret pucuk kanggo motong", "coverAria": "Klik pigura kanggo nyetel sampul", "coverHint": "Klik pigura kanggo nyetel sampul", "coverOwn": "Gambar sampeyan", "coverAuto": "Otomatis", "uploadCover": "Unggah gambar sampul", "mirrored": "Dicermin", "original": "Asli", "rotate90": "Rotasi 90°", "showNormally": "Tampilake kaya biasane", "showNormallyBody": "Langsung katon", "hideUntilTap": "Singidake nganti diklik", "hideUntilTapBody": "Blur nganti diklik", "hidePrice": "Singidake ing mburi rega", "hidePriceBody": "Blur nganti mbayar", "priceUnavailable": "Ora ing obrolan iki", "timerOff": "Mati", "timerOffBody": "Tetep ana ing obrolan.", "timerViewBody": "Ilang kanggo sampeyan sakloron sawise dideleng.", "confirm": "Konfirmasi", "lockedFor": "Bukak kunci kanggo {{value1}} token", "lockedForUsd": "Bukak kunci kanggo {{value1}}", "editItem": "Sunting barang {{value1}}", "kept": "{{time}} disimpen", "timerTimeBody": "Ilang kanggo sampeyan sakloron {{value1}} sawise dikirim."},
   "postBg": {
     "addMedia": "Tambah gambar, GIF, utawa video",
     "changeMedia": "Ganti gambar, GIF, utawa video",
@@ -630,7 +630,7 @@
     "wallet": "Dompet",
     "docs": "Dokumen",
     "roadmap": "Peta Jalan",
-    "featureRequests": "Panjalukan Fitur",
+    "featureRequests": "Build",
     "staking": "Saking",
     "governance": "Tata Kelola",
     "dao": "DAO",
@@ -2120,7 +2120,7 @@
     "ogHolders_one": "{{count}} pemegang OG",
     "ogHolders_other": "{{count}} pemegang OG",
     "ogChallengeTitle": "Balekake para pemegang OG",
-    "ogChallengeBody": "Undang wong sing isih nyekel DHB. Yen dheweke gabung nganggo link undhangan sampeyan lan nyimpen DHB ing dompet Riftn, dheweke diitung kanggo sampeyan ing kene.",
+    "ogChallengeBody": "Undang wong sing isih nyekel token. Yen dheweke gabung nganggo link undhangan sampeyan lan nyimpen token ing dompet Riftn, dheweke diitung kanggo sampeyan ing kene.",
     "ogChallengeCta": "Entuk link undhangan sampeyan"
   },
   "dhbListing": {
@@ -2196,8 +2196,8 @@
   "features": {
     "prompts": "Prompt",
     "queued": "Antrean",
-    "promptPageTitle": "Panjalukan",
-    "promptSubtitle": "Bangun Riftn nganggo prompt",
+    "promptPageTitle": "Build",
+    "promptSubtitle": "Build Riftn kanthi ngobrol karo iku.",
     "promptNew": "Usulan anyar",
     "promptSearch": "Panggona panggona…",
     "promptHeading": "Apa sing kudu kita bangun sabanjure?",
@@ -3244,11 +3244,11 @@
     "requestPromptShort": "Durung ana ing kene?",
     "requestDraftMenu": "Tambahake {{query}} menyang Riftn",
     "requestDraftSettings": "Setelan kanggo {{query}}",
-    "requestPostsTo": "Dikirim menyang Panjaluk",
-    "requestHint": "Dikirim menyang Panjaluk atas jeneng sampeyan. Kita bakal ngabari yen wis dirilis.",
-    "requestSent": "Dikirim menyang Panjaluk",
+    "requestPostsTo": "Postingan kanggo Build",
+    "requestHint": "Postingan kanggo Build kaya sampeyan. Kita bakal ngandhani kapan dikirim.",
+    "requestSent": "Dikirim menyang Build",
     "requestSentHint": "Kita bakal ngabari yen wis dirilis.",
-    "requestSeeIt": "Deleng ing Panjaluk"
+    "requestSeeIt": "Delengen ing Build"
   },
   "comments": {
     "reportComment": "Laporaen komentar",
@@ -11912,7 +11912,7 @@
     "settings": "Setelan",
     "settingsDesc": "Kelola preferensi akunmu, bahasa, pengaturan privasi, dan penampilan.",
     "governance": "Tata Kelola",
-    "featureRequests": "Panjalukan Fitur",
+    "featureRequests": "Build",
     "featureRequestsDesc": "Saranake fitur anyar lan voting ide komunitas. Panjalukan populer bakal diprioritasake kanggo pangembangan.",
     "upvoteDesc": "Milih sarujuk marang usulan tata kelola utawa panyuwunan fitur. Mbantu nuduhake dhukungan saka komunitas.",
     "downvoteDesc": "Kanggo ngawakili akeh proposal governance lan/ngawi panggih fitur. Nganti-anti nganti-anti wong wedhok lan wong wedhok.",
@@ -12234,7 +12234,7 @@
           "4": "Kanggo ngrekam cathetan swara, klik ikon mikropon.",
           "5": "Kanggo nambah GIF, klik ikon GIF lan goleki.",
           "6": "Gunakake #hashtag kanggo ngategorikake kiriman sampeyan (contone, #crypto, #defi).",
-          "7": "Gunakake $cashtag kanggo nyebutake token (contone, $RIFT, $ETH).",
+          "7": "Gunakake $cashtag kanggo nyebutake token (contone, $BTC, $ETH).",
           "8": "Gunakake @sebutan kanggo menehi tag pangguna liyane (contone, @username).",
           "9": "Klik 'Kirim' kanggo nerbitake. Kiriman sampeyan katon ing feed langsung."
         },
@@ -17336,9 +17336,9 @@
     "72a478ec65bf": "Rincian piranti lan OS (opsional)",
     "cbf32246775e": "Gambar atau Video (opsional) nyuwun.",
     "ea3a3da9b73e": "— sampun nganti",
-    "5d2d9bc248a3": "Panyuwun lan Laporan Bug | Riftn",
-    "2c94a53da07c": "Kanggo ngarani saran fitur, ngarani bug, lan ngarani suara ngembar-ngembaran ide komunitas kanggo ngembar-ngembar roadmap Riftn. Traking fitur lan ide lané ngalor, ngawit, lan udah dikirim.",
-    "64ce9ca9f7d1": "Fitur Riftn — Panyuwun, Laporan Bug, lan Rencana Komunitas",
+    "5d2d9bc248a3": "Build Riftn kanthi ngobrol karo iku | Riftn",
+    "2c94a53da07c": "Build Riftn kanthi ngobrol karo iku. Post ide lan laporan bug minangka prompt, pilih apa sing dikarepake wong liya, lan tindakake saka Queued nganti Shipped.",
+    "64ce9ca9f7d1": "Build: bentuk Riftn kanthi ngobrol karo iku",
     "5697d03daef4": "Fitur-fitur",
     "c46c50e9cf58": "Gak ada fitur lanpis.",
     "b98adf20f5f3": "Kantong: Kelola Aset Kripto Kamu",
@@ -18511,7 +18511,7 @@
     "68f66b1f5bba": "Kanggo ngelmuji kontén trending, kreator, dan topik di Riftn.",
     "fd274232d93a": "Klik gunae ngisor nglaku",
     "d7246da527c1": "Tambah siji maneh",
-    "d2c76d7df46f": "Ngajukaké tuntutan fitur, nanggapi bug, lan ngomongake karo warga kanggo ngarancang roadmap Riftn.",
+    "d2c76d7df46f": "Build Riftn kanthi ngobrol karo iku. Post ide lan laporan bug minangka prompt lan pilih apa sing bakal dibangun sabanjure.",
     "90d6f4c823a9": "Ora bisa ngrampungake alamat",
     "15e17712534d": "Alamat Token",
     "b4c1cebc35f6": "sajagane jaringan",

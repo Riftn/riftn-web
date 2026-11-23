@@ -188,7 +188,7 @@ export default function TipPayWith({ amountDhb, value, onChange, requireSource =
             ? <TokenBadge symbol={selectedRow.symbol} logo={selectedRow.logo} chainId={selectedRow.chainId} />
             : <img src={dehubCoin} alt="" className="h-6 w-6" />}
           <span className="truncate text-sm font-medium text-white">
-            {selectedRow ? `${selectedRow.symbol} · ${TIP_CHAIN_NAMES[selectedRow.chainId] ?? ''}` : 'DHB'}
+            {selectedRow ? `${selectedRow.symbol} · ${TIP_CHAIN_NAMES[selectedRow.chainId] ?? ''}` : tokenLabel()}
           </span>
           <ChevronDown className={`h-4 w-4 shrink-0 text-white/50 transition-transform ${open ? 'rotate-180' : ''}`} />
         </span>

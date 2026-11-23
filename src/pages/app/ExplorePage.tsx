@@ -86,6 +86,7 @@ import type { VideoItem, ImagePost } from '@/types/feed.types';
 import { recordTickerSearch } from '@/lib/ticker-search-tracker';
 import { scrollDocumentTo } from '@/lib/document-scroll';
 import { ExploreCategoryWords, ExplorePhoneHome } from '@/components/app/explore/ExplorePhoneHome';
+import { TrendingEarned } from '@/components/app/explore/TrendingEarned';
 import { ExploreRadioShows } from '@/components/app/explore/ExploreRadioShows';
 import { orderByInterests, useFeedInterests } from '@/lib/feed-interests';
 
@@ -1132,6 +1133,7 @@ export default function ExplorePage() {
                   )}
                 </div>
               ) : phonePill ? (
+                <>
                 <ExplorePhoneHome
                   categories={exploreCategories}
                   onCategory={(id) => {
@@ -1143,6 +1145,9 @@ export default function ExplorePage() {
                   onRemoveSearch={removeFromHistory}
                   onClearSearches={clearHistory}
                 />
+                {/* The week's top videos by reactions, PPV or tips. */}
+                <TrendingEarned phone />
+                </>
               ) : (
                 <>
                   {/* Recent Searches Bento — only once there is a search to
@@ -1211,6 +1216,9 @@ export default function ExplorePage() {
 
                   {/* Trending Bento — same component as sidebar */}
                   <WhatsHappening showCountrySelector surface="explore" />
+
+                  {/* The week's top videos by reactions, PPV or tips. */}
+                  <TrendingEarned phone={false} />
 
                   {/* Radio shows on air and coming up, with a way to start one. */}
                   <ExploreRadioShows boxed />

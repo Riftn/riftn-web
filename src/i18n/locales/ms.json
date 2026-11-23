@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Edit video", "hiddenTag": "Tersembunyi", "tapToEdit": "Ketik untuk edit", "cover": "Kulit", "trim": "Potong", "mirror": "Cermin", "rotate": "Putar", "hide": "Sembunyi", "timer": "Pemasa", "sheetTitleAny": "Edit sebelum menghantar", "close": "Tutup", "replace": "Ganti", "hiddenUntilTap": "Disembunyikan sehingga mereka mengetuknya", "pause": "Jeda", "play": "Mainkan video", "mute": "Nyahaktifkan bunyi", "unmute": "Aktifkan bunyi", "scrub": "Tatal video", "addMore": "Tambah foto atau video", "trimAria": "Seret hujung untuk memotong", "coverAria": "Ketuk bingkai untuk menetapkan kulit", "coverHint": "Ketuk bingkai untuk menetapkan kulit", "coverOwn": "Gambar anda", "coverAuto": "Auto", "uploadCover": "Muat naik gambar kulit", "mirrored": "Dicerminkan", "original": "Asal", "rotate90": "Putar 90°", "showNormally": "Tunjuk seperti biasa", "showNormallyBody": "Mereka melihatnya serta-merta", "hideUntilTap": "Sembunyi sehingga diketuk", "hideUntilTapBody": "Dikaburkan sehingga mereka mengetuknya", "hidePrice": "Sembunyi di sebalik harga", "hidePriceBody": "Dikaburkan sehingga mereka membayar anda", "priceUnavailable": "Tiada dalam sembang ini", "timerOff": "Mati", "timerOffBody": "Ia kekal dalam sembang.", "timerViewBody": "Hilang untuk anda berdua sebaik sahaja mereka melihatnya.", "confirm": "Sahkan", "lockedFor": "Buka kunci untuk {{value1}} DHB", "lockedForUsd": "Buka kunci untuk {{value1}}", "editItem": "Edit item {{value1}}", "kept": "{{time}} disimpan", "timerTimeBody": "Hilang untuk anda berdua {{value1}} selepas anda menghantarnya."},
+  "dmVideo": {"edit": "Edit video", "hiddenTag": "Tersembunyi", "tapToEdit": "Ketik untuk edit", "cover": "Kulit", "trim": "Potong", "mirror": "Cermin", "rotate": "Putar", "hide": "Sembunyi", "timer": "Pemasa", "sheetTitleAny": "Edit sebelum menghantar", "close": "Tutup", "replace": "Ganti", "hiddenUntilTap": "Disembunyikan sehingga mereka mengetuknya", "pause": "Jeda", "play": "Mainkan video", "mute": "Nyahaktifkan bunyi", "unmute": "Aktifkan bunyi", "scrub": "Tatal video", "addMore": "Tambah foto atau video", "trimAria": "Seret hujung untuk memotong", "coverAria": "Ketuk bingkai untuk menetapkan kulit", "coverHint": "Ketuk bingkai untuk menetapkan kulit", "coverOwn": "Gambar anda", "coverAuto": "Auto", "uploadCover": "Muat naik gambar kulit", "mirrored": "Dicerminkan", "original": "Asal", "rotate90": "Putar 90°", "showNormally": "Tunjuk seperti biasa", "showNormallyBody": "Mereka melihatnya serta-merta", "hideUntilTap": "Sembunyi sehingga diketuk", "hideUntilTapBody": "Dikaburkan sehingga mereka mengetuknya", "hidePrice": "Sembunyi di sebalik harga", "hidePriceBody": "Dikaburkan sehingga mereka membayar anda", "priceUnavailable": "Tiada dalam sembang ini", "timerOff": "Mati", "timerOffBody": "Ia kekal dalam sembang.", "timerViewBody": "Hilang untuk anda berdua sebaik sahaja mereka melihatnya.", "confirm": "Sahkan", "lockedFor": "Buka kunci untuk {{value1}} token", "lockedForUsd": "Buka kunci untuk {{value1}}", "editItem": "Edit item {{value1}}", "kept": "{{time}} disimpan", "timerTimeBody": "Hilang untuk anda berdua {{value1}} selepas anda menghantarnya."},
   "postBg": {
     "addMedia": "Tambah gambar, GIF atau video",
     "changeMedia": "Tukar gambar, GIF atau video",
@@ -630,7 +630,7 @@
     "wallet": "Dompet",
     "docs": "Dokumentasi",
     "roadmap": "Peta Hala Tuju",
-    "featureRequests": "Permintaan",
+    "featureRequests": "Bina",
     "staking": "Memasang",
     "governance": "Tadbir Urus",
     "dao": "DAO",
@@ -2377,7 +2377,7 @@
     "ogHolders_one": "{{count}} pemegang OG",
     "ogHolders_other": "{{count}} pemegang OG",
     "ogChallengeTitle": "Bawa kembali pemegang OG",
-    "ogChallengeBody": "Jemput orang yang masih memegang DHB. Apabila mereka menyertai dengan pautan jemputan anda dan menyimpan DHB dalam dompet Riftn mereka, mereka dikira untuk anda di sini.",
+    "ogChallengeBody": "Jemput orang yang masih memegang token. Apabila mereka menyertai dengan pautan jemputan anda dan menyimpan token dalam dompet Riftn mereka, mereka dikira untuk anda di sini.",
     "ogChallengeCta": "Dapatkan pautan jemputan anda"
   },
   "dhbListing": {
@@ -2453,8 +2453,8 @@
   "features": {
     "prompts": "Promp",
     "queued": "Ditangguhkan",
-    "promptPageTitle": "Minta",
-    "promptSubtitle": "Bina Riftn dengan promp",
+    "promptPageTitle": "Bina",
+    "promptSubtitle": "Bina Riftn dengan bercakap dengannya.",
     "promptNew": "Promp baru",
     "promptSearch": "Cari promp…",
     "promptHeading": "Apa yang harus kita bina seterusnya?",
@@ -3501,11 +3501,11 @@
     "requestPromptShort": "Belum ada di sini?",
     "requestDraftMenu": "Tambah {{query}} ke Riftn",
     "requestDraftSettings": "Tetapan untuk {{query}}",
-    "requestPostsTo": "Disiarkan ke Permintaan",
-    "requestHint": "Disiarkan ke Permintaan atas nama anda. Kami akan memberitahu anda apabila ia dilancarkan.",
-    "requestSent": "Dihantar ke Permintaan",
+    "requestPostsTo": "Siaran untuk Dibina",
+    "requestHint": "Siaran untuk Dibina sebagai anda. Kami akan memberitahu anda apabila ia dilancarkan.",
+    "requestSent": "Dihantar ke Bina",
     "requestSentHint": "Kami akan memberitahu anda apabila ia dilancarkan.",
-    "requestSeeIt": "Lihat di Permintaan"
+    "requestSeeIt": "Lihat ia di Bina"
   },
   "comments": {
     "reportComment": "Laporkan komen",
@@ -12170,7 +12170,7 @@
     "settings": "Pengaturcaraan",
     "settingsDesc": "Pengaturcaraan akaun, pilihan bahasa, pengaturcaraan privasi, dan penampilan.",
     "governance": "Penggubalan",
-    "featureRequests": "Saranan Ciri",
+    "featureRequests": "Bina",
     "featureRequestsDesc": "Saranan ciri-ciri baru dan undi idea komuniti. Permintaan yang popular mendapat prioriti untuk pembangunan.",
     "upvote": "Mengundi",
     "upvoteDesc": "Undi dalam bantuan cadangan penggubalan atau saranan ciri. Membantu menandakan sokongan komuniti.",
@@ -12490,7 +12490,7 @@
           "4": "Untuk merakam nota suara, klik ikon mikrofon.",
           "5": "Untuk menambah GIF, klik ikon GIF dan cari satu.",
           "6": "Gunakan #hashtag untuk mengkategorikan siaran anda (cth., #kripto, #defi).",
-          "7": "Gunakan $cashtag untuk merujuk token (cth., $RIFT, $ETH).",
+          "7": "Gunakan $cashtag untuk merujuk token (cth., $BTC, $ETH).",
           "8": "Gunakan @sebutan untuk menandai pengguna lain (cth., @nama pengguna).",
           "9": "Klik 'Siaran' untuk menerbitkan. Siaran anda muncul dalam suapan dengan segera."
         },
@@ -17651,9 +17651,9 @@
     "72a478ec65bf": "Butiran Peranti & OS (pilihan)",
     "cbf32246775e": "Lampirkan Imej atau Video (pilihan)",
     "ea3a3da9b73e": "— sehingga",
-    "5d2d9bc248a3": "Permintaan Ciri & Pelaporan Pepijat | Riftn",
-    "2c94a53da07c": "Hantar permintaan ciri, laporkan pepijat, dan undian idea komuniti untuk membentuk peta jalan Riftn. Jejak ciri terbuka, sedang berlangsung, dan dihantar.",
-    "64ce9ca9f7d1": "Ciri Riftn — Permintaan Ciri, Pelaporan Pepijat & Peta Jalan Komuniti",
+    "5d2d9bc248a3": "Bina Riftn dengan bercakap dengannya | Riftn",
+    "2c94a53da07c": "Bina Riftn dengan bercakap dengannya. Siarkan idea dan laporan pepijat sebagai gesaan, undi perkara yang diminta oleh orang lain, dan ikuti mereka daripada Beratur ke Dihantar.",
+    "64ce9ca9f7d1": "Bina: bentuk Riftn dengan bercakap dengannya",
     "5697d03daef4": "Ciri",
     "c46c50e9cf58": "Tiada ciri lagi",
     "b98adf20f5f3": "Dompet: Urus Aset Kripto Anda",
@@ -18871,7 +18871,7 @@
     "68f66b1f5bba": "Temui kandungan, pencipta dan topik yang sedang berkembang di Riftn.",
     "fd274232d93a": "Klik untuk memuat naik",
     "d7246da527c1": "Tambah satu lagi",
-    "d2c76d7df46f": "Hantar permintaan ciri, laporkan pepijat, dan undi idea komuniti untuk membentuk peta jalan Riftn.",
+    "d2c76d7df46f": "Bina Riftn dengan bercakap dengannya. Siarkan idea dan laporan pepijat sebagai gesaan dan undi perkara yang akan dibina seterusnya.",
     "90d6f4c823a9": "Tidak dapat menyalin alamat",
     "15e17712534d": "Alamat mint token",
     "b4c1cebc35f6": "rangkaian ini",

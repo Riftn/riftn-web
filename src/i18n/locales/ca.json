@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Edita el vídeo", "hiddenTag": "Ocult", "tapToEdit": "Toca per editar", "cover": "Coberta", "trim": "Retalla", "mirror": "Reflecteix", "rotate": "Gira", "hide": "Amaga", "timer": "Temporitzador", "sheetTitleAny": "Edita abans d'enviar", "close": "Tanca", "replace": "Substitueix", "hiddenUntilTap": "Ocult fins que hi toquin", "pause": "Pausa", "play": "Reprodueix el vídeo", "mute": "Silencia", "unmute": "Activa el so", "scrub": "Fes un recorregut pel vídeo", "addMore": "Afegeix fotos o vídeos", "trimAria": "Arrossega els extrems per retallar", "coverAria": "Toca un fotograma per establir-lo com a portada", "coverHint": "Toca un fotograma per establir-lo com a portada", "coverOwn": "La teva foto", "coverAuto": "Automàtic", "uploadCover": "Puja una imatge de portada", "mirrored": "Reflectit", "original": "Original", "rotate90": "Gira 90°", "showNormally": "Mostra normalment", "showNormallyBody": "Ho veuen de seguida", "hideUntilTap": "Amaga fins que s’hi toqui", "hideUntilTapBody": "Es veurà borrosa fins que hi toquin", "hidePrice": "Amaga-ho darrere d'un preu", "hidePriceBody": "Es mostra borrosa fins que et paguin", "priceUnavailable": "No en aquest xat", "timerOff": "Desactivat", "timerOffBody": "Es queda al xat.", "timerViewBody": "Desapareixerà per a tots dos un cop l'hagin vist.", "confirm": "Confirma", "lockedFor": "Desbloqueja per {{value1}} DHB", "lockedForUsd": "Desbloqueja per a {{value1}}", "editItem": "Modifica l'element {{value1}}", "kept": "{{time}} mantingut", "timerTimeBody": "Desapareixerà per a tots dos {{value1}} després d'enviar-ho."},
+  "dmVideo": {"edit": "Edita el vídeo", "hiddenTag": "Ocult", "tapToEdit": "Toca per editar", "cover": "Coberta", "trim": "Retalla", "mirror": "Reflecteix", "rotate": "Gira", "hide": "Amaga", "timer": "Temporitzador", "sheetTitleAny": "Edita abans d'enviar", "close": "Tanca", "replace": "Substitueix", "hiddenUntilTap": "Ocult fins que hi toquin", "pause": "Pausa", "play": "Reprodueix el vídeo", "mute": "Silencia", "unmute": "Activa el so", "scrub": "Fes un recorregut pel vídeo", "addMore": "Afegeix fotos o vídeos", "trimAria": "Arrossega els extrems per retallar", "coverAria": "Toca un fotograma per establir-lo com a portada", "coverHint": "Toca un fotograma per establir-lo com a portada", "coverOwn": "La teva foto", "coverAuto": "Automàtic", "uploadCover": "Puja una imatge de portada", "mirrored": "Reflectit", "original": "Original", "rotate90": "Gira 90°", "showNormally": "Mostra normalment", "showNormallyBody": "Ho veuen de seguida", "hideUntilTap": "Amaga fins que s’hi toqui", "hideUntilTapBody": "Es veurà borrosa fins que hi toquin", "hidePrice": "Amaga-ho darrere d'un preu", "hidePriceBody": "Es mostra borrosa fins que et paguin", "priceUnavailable": "No en aquest xat", "timerOff": "Desactivat", "timerOffBody": "Es queda al xat.", "timerViewBody": "Desapareixerà per a tots dos un cop l'hagin vist.", "confirm": "Confirma", "lockedFor": "Desbloqueja per {{value1}} fitxes", "lockedForUsd": "Desbloqueja per a {{value1}}", "editItem": "Modifica l'element {{value1}}", "kept": "{{time}} mantingut", "timerTimeBody": "Desapareixerà per a tots dos {{value1}} després d'enviar-ho."},
   "postBg": {
     "addMedia": "Afegeix una imatge, un GIF o un vídeo",
     "changeMedia": "Canvia la imatge, el GIF o el vídeo",
@@ -623,7 +623,7 @@
     "wallet": "Cartera",
     "docs": "Documents",
     "roadmap": "Full de ruta",
-    "featureRequests": "Sol·licituds",
+    "featureRequests": "Construcció",
     "staking": "Revestiment",
     "governance": "Governança",
     "dao": "DAO",
@@ -2113,7 +2113,7 @@
     "ogHolders_one": "{{count}} titular OG",
     "ogHolders_other": "{{count}} titulars OG",
     "ogChallengeTitle": "Fes tornar els titulars OG",
-    "ogChallengeBody": "Convida persones que encara tenen DHB. Quan s'uneixin amb el teu enllaç d'invitació i mantinguin el seu DHB a la cartera de Riftn, compten per a tu aquí.",
+    "ogChallengeBody": "Convida persones que encara tenen fitxes. Quan s'uneixin amb el teu enllaç d'invitació i mantinguin el seu fitxes a la cartera de Riftn, compten per a tu aquí.",
     "ogChallengeCta": "Obtén el teu enllaç d'invitació"
   },
   "dhbListing": {
@@ -2189,8 +2189,8 @@
   "features": {
     "prompts": "Prompts",
     "queued": "En col·la",
-    "promptPageTitle": "Solicituds",
-    "promptSubtitle": "Construeix Riftn amb un prompt",
+    "promptPageTitle": "Construcció",
+    "promptSubtitle": "Construeix Riftn parlant-hi.",
     "promptNew": "Cerca prompts…",
     "promptSearch": "Sol·licituds de cerca...",
     "promptHeading": "¿Qué hem de construir a continuació?",
@@ -3237,11 +3237,11 @@
     "requestPromptShort": "Encara no és aquí?",
     "requestDraftMenu": "Afegeix {{query}} a Riftn",
     "requestDraftSettings": "Una opció de configuració per a {{query}}",
-    "requestPostsTo": "Es publica a Sol·licituds",
-    "requestHint": "Es publica a Sol·licituds en el teu nom. T'avisarem quan estigui llest.",
-    "requestSent": "Enviat a Sol·licituds",
+    "requestPostsTo": "Publicacions per crear",
+    "requestHint": "Publicacions per crear com tu. T’avisarem quan s’enviï.",
+    "requestSent": "S’ha enviat per crear-lo",
     "requestSentHint": "T'avisarem quan estigui llest.",
-    "requestSeeIt": "Mira-ho a Sol·licituds"
+    "requestSeeIt": "Consulta-ho a Build"
   },
   "comments": {
     "reportComment": "Denuncia el comentari",
@@ -11896,7 +11896,7 @@
     "settings": "Configuració",
     "settingsDesc": "Gestiona les preferències del teu compte, l'idioma, la configuració de privadesa i l'aspecte.",
     "governance": "Governança",
-    "featureRequests": "Sol·licituds de funcions",
+    "featureRequests": "Construcció",
     "featureRequestsDesc": "Suggerir novetats i votar les idees de la comunitat. Les sol·licituds populars tenen prioritat per al desenvolupament.",
     "upvote": "Vota així",
     "upvoteDesc": "Vota a favor d'una proposta de governança o sol·licitud de funcions. Ajuda a assenyalar el suport de la comunitat.",
@@ -12216,7 +12216,7 @@
           "4": "Per gravar una nota de veu, fes clic a la icona del micròfon.",
           "5": "Per afegir un GIF, fes clic a la icona del GIF i cerca'n un.",
           "6": "Utilitza #hashtags per categoritzar la teva publicació (per exemple, #crypto, #defi).",
-          "7": "Utilitza $cashtags per fer referència a tokens (per exemple, $RIFT, $ETH).",
+          "7": "Utilitza $cashtags per fer referència a tokens (per exemple, $BTC, $ETH).",
           "8": "Utilitza @mentions per etiquetar altres usuaris (per exemple, @nomdusuari).",
           "9": "Fes clic a 'Publicar' per publicar. La teva publicació apareix al feed immediatament."
         },
@@ -17374,9 +17374,9 @@
     "72a478ec65bf": "Detalls del dispositiu i del sistema operatiu (opcional)",
     "cbf32246775e": "Adjunta imatges o vídeos (opcional)",
     "ea3a3da9b73e": "— fins a",
-    "5d2d9bc248a3": "Solicitudes de Característiques i Informes de Bug | Riftn",
-    "2c94a53da07c": "Solicita característiques, informa errors i vota les idees de la comunitat per definir el roadmap de Riftn. Segueix les característiques obertes, en curs i implementades.",
-    "64ce9ca9f7d1": "Característiques de Riftn — Solicitudes de Característiques, Informes de Bug & Roadmap de la Comunitat",
+    "5d2d9bc248a3": "Construeix Riftn parlant-hi | Riftn",
+    "2c94a53da07c": "Creeu Riftn parlant-hi. Publiqueu idees i informes d'errors com a suggeriments, voteu les sol·licituds d'altres usuaris i feu-ne el seguiment des de l'estat En cua fins a Enviat.",
+    "64ce9ca9f7d1": "Construcció: dona forma a Riftn parlant-hi",
     "5697d03daef4": "Característiques",
     "c46c50e9cf58": "Cap característica encara",
     "b98adf20f5f3": "Billetera: Gestiona els teus Actius Criptogràfics",
@@ -18592,7 +18592,7 @@
     "68f66b1f5bba": "Descobreix continguts, creadors i temes tendents a Riftn.",
     "fd274232d93a": "Clic per carregar",
     "d7246da527c1": "Afegir un altre",
-    "d2c76d7df46f": "Presenteu les vostres propostes, informeu sobre errors i voteu les idees de la comunitat per definir el roadmap de Riftn.",
+    "d2c76d7df46f": "Construeix Riftn parlant-hi. Publica idees i informes d'errors com a suggeriments i vota què es desenvoluparà a continuació.",
     "90d6f4c823a9": "No s'ha pogut copiar l'adreça",
     "15e17712534d": "Adreça de la impressió de tokens",
     "b4c1cebc35f6": "aquesta xarxa",

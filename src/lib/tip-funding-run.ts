@@ -31,8 +31,8 @@ export async function fundTipFromSource(
     bridge: t('tip.stageBridge', 'Sending {{symbol}} from {{chain}}…', vars),
     arriving: t('tip.stageArriving', 'Arriving on Base, usually a few seconds…'),
     pay: t('tip.stagePay', 'Paying Riftn Pay with {{symbol}}…', vars),
-    delivering: t('tip.stageDelivering', 'Riftn Pay is sending your DHB…'),
-    swap: t('tip.stageSwap', 'Buying DHB on Uniswap…'),
+    delivering: t('tip.stageDelivering', 'Riftn Pay is sending your tokens…'),
+    swap: t('tip.stageSwap', 'Buying tokens on Uniswap…'),
   };
   try {
     const { fundTip } = await import('@/lib/tip-funding');
@@ -50,7 +50,7 @@ export async function fundTipFromSource(
       return false;
     }
     const message = fundingErrorText(t, error);
-    toast.error(message || t('tip.payFailed', 'Could not convert {{symbol}} to DHB', vars), { id: toastId, duration: 8000 });
+    toast.error(message || t('tip.payFailed', 'Could not convert {{symbol}} to tokens', vars), { id: toastId, duration: 8000 });
     return false;
   }
 }

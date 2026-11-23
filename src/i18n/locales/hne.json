@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "वीडियो एडिट करव", "hiddenTag": "लुकाय गे हे", "tapToEdit": "एडिट करे बर टैप करव", "cover": "कवर", "mirror": "मिरर", "rotate": "घुमाव", "sheetTitleAny": "भेजे के पहिली एडिट करव", "close": "बंद", "replace": "बदलाव", "hiddenUntilTap": "छिपा हे जब तक वो मन टैप नहीं करथें", "pause": "रोक", "mute": "म्यूट करव", "unmute": "अनम्यूट करव", "scrub": "वीडियो ला साफ़ करके देखव", "addMore": "फोटो या वीडियो जोड़व", "trimAria": "अंत ला खींच के ट्रिम कर", "coverAria": "कवर सेट करे बर फ्रेम ला टैप करव", "coverHint": "कवर सेट करे बर फ्रेम ला टैप करव", "coverOwn": "तोर फोटो", "coverAuto": "ऑटो", "mirrored": "परछाईं जइसन", "original": "मूल", "rotate90": "90° घुमा", "showNormally": "साधारण रूप से देखाव", "showNormallyBody": "ओमन ओला तुरंत देख लेथें", "hideUntilTap": "टैप करे तक लुका के राखा", "hideUntilTapBody": "जब तक ओमन क्लिक न कर ले तब तक धुंधला रही", "hidePrice": "कीमत के आड़ में छिपना", "hidePriceBody": "धुंधला जब तक ओमन तोर पैसा न दे दें", "priceUnavailable": "ए चैट में नइ हे", "timerOff": "बन्द", "timerOffBody": "ए चैट में ही रहिथे।", "timerViewBody": "ओमन के देख ले के बाद दुनों झन बर गायब हो जाथे।", "confirm": "पक्का करव", "lockedFor": "{{value1}} DHB बर अनलॉक करव", "lockedForUsd": "{{value1}} बर अनलॉक करव", "editItem": "सामान ला एडिट करव {{value1}}", "kept": "{{time}} रखे गे हे", "timerTimeBody": "भेजे के {{value1}} बाद दुनों झन बर गायब हो जाथे।"},
+  "dmVideo": {"edit": "वीडियो एडिट करव", "hiddenTag": "लुकाय गे हे", "tapToEdit": "एडिट करे बर टैप करव", "cover": "कवर", "mirror": "मिरर", "rotate": "घुमाव", "sheetTitleAny": "भेजे के पहिली एडिट करव", "close": "बंद", "replace": "बदलाव", "hiddenUntilTap": "छिपा हे जब तक वो मन टैप नहीं करथें", "pause": "रोक", "mute": "म्यूट करव", "unmute": "अनम्यूट करव", "scrub": "वीडियो ला साफ़ करके देखव", "addMore": "फोटो या वीडियो जोड़व", "trimAria": "अंत ला खींच के ट्रिम कर", "coverAria": "कवर सेट करे बर फ्रेम ला टैप करव", "coverHint": "कवर सेट करे बर फ्रेम ला टैप करव", "coverOwn": "तोर फोटो", "coverAuto": "ऑटो", "mirrored": "परछाईं जइसन", "original": "मूल", "rotate90": "90° घुमा", "showNormally": "साधारण रूप से देखाव", "showNormallyBody": "ओमन ओला तुरंत देख लेथें", "hideUntilTap": "टैप करे तक लुका के राखा", "hideUntilTapBody": "जब तक ओमन क्लिक न कर ले तब तक धुंधला रही", "hidePrice": "कीमत के आड़ में छिपना", "hidePriceBody": "धुंधला जब तक ओमन तोर पैसा न दे दें", "priceUnavailable": "ए चैट में नइ हे", "timerOff": "बन्द", "timerOffBody": "ए चैट में ही रहिथे।", "timerViewBody": "ओमन के देख ले के बाद दुनों झन बर गायब हो जाथे।", "confirm": "पक्का करव", "lockedFor": "{{value1}} टोकन बर अनलॉक करव", "lockedForUsd": "{{value1}} बर अनलॉक करव", "editItem": "सामान ला एडिट करव {{value1}}", "kept": "{{time}} रखे गे हे", "timerTimeBody": "भेजे के {{value1}} बाद दुनों झन बर गायब हो जाथे।"},
   "postBg": {
     "addMedia": "फोटू, GIF या वीडियो जोड़व",
     "changeMedia": "फोटू, GIF या वीडियो बदलव",
@@ -630,7 +630,7 @@
     "wallet": "बटुआ",
     "docs": "दस्तावेज",
     "roadmap": "रोडमैप",
-    "featureRequests": "फीचर अनुरोध",
+    "featureRequests": "Build",
     "staking": "स्टेकिंग",
     "governance": "शासन",
     "dao": "डीएओ",
@@ -2120,7 +2120,7 @@
     "ogHolders_one": "{{count}} OG होल्डर",
     "ogHolders_other": "{{count}} OG होल्डर",
     "ogChallengeTitle": "OG होल्डर मन ला वापस लानव",
-    "ogChallengeBody": "वो मनखे मन ला बलावव जेमन करा अभी घलो DHB हे। जब वो मन तोर इनवाइट लिंक ले जुड़थें अउ अपन DHB ला Riftn बटुआ म रखथें, त वो मन इहाँ तोर बर गिने जाथें।",
+    "ogChallengeBody": "वो मनखे मन ला बलावव जेमन करा अभी घलो टोकन हे। जब वो मन तोर इनवाइट लिंक ले जुड़थें अउ अपन टोकन ला Riftn बटुआ म रखथें, त वो मन इहाँ तोर बर गिने जाथें।",
     "ogChallengeCta": "अपन इनवाइट लिंक पाव"
   },
   "dhbListing": {
@@ -2196,8 +2196,8 @@
   "features": {
     "prompts": "प्रॉम्प्ट्स",
     "queued": "क्यूड (रोड में)",
-    "promptPageTitle": "रिक्वेस्ट्स",
-    "promptSubtitle": "बनाएं Riftn एक प्रॉम्प्ट के साथ",
+    "promptPageTitle": "Build",
+    "promptSubtitle": "Build Riftn by talking to it.",
     "promptNew": "नई प्रॉम्प्ट",
     "promptSearch": "प्रॉम्प्ट्स सर्च करें…",
     "promptHeading": "अगला क्या बनाएं?",
@@ -3244,11 +3244,11 @@
     "requestPromptShort": "अभी इहां नइ हे?",
     "requestDraftMenu": "{{query}} ल Riftn म जोड़व",
     "requestDraftSettings": "{{query}} बर एक ठन सेटिंग",
-    "requestPostsTo": "रिक्वेस्ट म पोस्ट होही",
-    "requestHint": "तुंहर नाम ले रिक्वेस्ट म पोस्ट होही। जब ए आ जाही त हमन बताबो।",
-    "requestSent": "रिक्वेस्ट म भेज दे गे",
+    "requestPostsTo": "Posts to Build",
+    "requestHint": "Posts to Build as you. We will tell you when it ships.",
+    "requestSent": "Sent to Build",
     "requestSentHint": "जब ए आ जाही त हमन बताबो।",
-    "requestSeeIt": "रिक्वेस्ट म देखव"
+    "requestSeeIt": "See it on Build"
   },
   "comments": {
     "reportComment": "टिप्पनी रिपोट करव",
@@ -11915,7 +11915,7 @@
     "settings": "सेटिंग",
     "settingsDesc": "अपन खाता के पसंद, भाषा, गोपनीयता सेटिंग्स अउ उपस्थिति के प्रबंधन करव ।",
     "governance": "गवर्नेंस",
-    "featureRequests": "विसेसता निवेदन",
+    "featureRequests": "Build",
     "featureRequestsDesc": "नई सुविधाओं का सुझाव दें अउ सामुदायिक विचारों म वोट दें । जनता के मांग ल विकास बर प्राथमिकता दी जात हवय ।",
     "upvote": "अपवोट",
     "upvoteDesc": "एक शासन प्रस्ताव या एक विशेषता अनुरोध के पक्ष म मतदान करे । हमन ला सामुदायिक सहायता के जरूरत हवय ।",
@@ -12236,7 +12236,7 @@
           "4": "वॉयस नोट रिकॉर्ड करने के लिए, माइक्रोफ़ोन आइकन पर क्लिक करें।",
           "5": "जीआईएफ जोड़ने के लिए, जीआईएफ आइकन पर क्लिक करें और एक खोजें।",
           "6": "अपनी पोस्ट को वर्गीकृत करने के लिए #हैशटैग का उपयोग करें (जैसे, #crypto, #defi)।",
-          "7": "टोकन का संदर्भ देने के लिए $कैशटैग का उपयोग करें (जैसे, $RIFT, $ETH)।",
+          "7": "टोकन का संदर्भ देने के लिए $कैशटैग का उपयोग करें (जैसे, $BTC, $ETH)।",
           "8": "अन्य उपयोगकर्ताओं को टैग करने के लिए @उल्लेखों का उपयोग करें (जैसे, @username)।",
           "9": "प्रकाशित करने के लिए 'पोस्ट' पर क्लिक करें। आपकी पोस्ट तुरंत फ़ीड में दिखाई देती है।"
         },
@@ -17375,9 +17375,9 @@
     "72a478ec65bf": "डिवाइस & ओएस डिटेल्स (वैकल्पिक)",
     "cbf32246775e": "अटैच इमेजेज या वीडियोज (वैकल्पिक)",
     "ea3a3da9b73e": "— तक",
-    "5d2d9bc248a3": "फीचर रिक्वेस्ट्स & बग रिपोर्टिंग: डीहब",
-    "2c94a53da07c": "फीचर रिक्वेस्ट सबमिट करें, बग रिपोर्ट करें, और वोट करें ताकि आप डीहब के रोडमैप को आकार दे सकें। ओपन, इन-प्रोग्रेस, और शिप्ड फीचर्स को ट्रैक करें।",
-    "64ce9ca9f7d1": "डीहब फीचर्स — फीचर रिक्वेस्ट, बग रिपोर्टिंग & कम्युनिटी रोडमैप",
+    "5d2d9bc248a3": "Build Riftn by talking to it | Riftn",
+    "2c94a53da07c": "Build Riftn by talking to it. Post ideas and bug reports as prompts, vote on what others asked for, and follow them from Queued to Shipped.",
+    "64ce9ca9f7d1": "Build: shape Riftn by talking to it",
     "5697d03daef4": "फीचर्स",
     "c46c50e9cf58": "अब तक कोई फीचर नहीं",
     "b98adf20f5f3": "वॉलेट: अपने क्रिप्टो एसेट्स को मैनेज करें",
@@ -18583,7 +18583,7 @@
     "68f66b1f5bba": "Riftn म ट्रेंडिंग सामग्री, रचनाकार अउ विषय खोजें ।",
     "fd274232d93a": "ऊपर जाय बर किलिक करव",
     "d7246da527c1": "कहानी को दो",
-    "d2c76d7df46f": "फीचर अनुरोध, रिपोर्टिंग बग्स, अउ Riftn के रोडमैप ल आकार दे बर सामुदायिक विचारों म वोट डाले ।",
+    "d2c76d7df46f": "Build Riftn by talking to it. Post ideas and bug reports as prompts and vote on what gets built next.",
     "90d6f4c823a9": "पता नकल नइ कर सकिस",
     "15e17712534d": "टोकन मिन्ट पता",
     "b4c1cebc35f6": "ए जाल म",

@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Rediger video", "hiddenTag": "Skjult", "tapToEdit": "Trykk for å redigere", "cover": "Omslag", "trim": "Trim", "mirror": "Speilvend", "rotate": "Roter", "hide": "Skjul", "timer": "Tidtaker", "sheetTitleAny": "Rediger før sending", "close": "Lukk", "replace": "Erstatt", "hiddenUntilTap": "Skjult til de trykker på den", "pause": "Pause", "play": "Spill av video", "mute": "Demp", "unmute": "Slå på lyd", "scrub": "Skroll gjennom videoen", "addMore": "Legg til bilder eller videoer", "trimAria": "Dra i endene for å trimme", "coverAria": "Trykk på en ramme for å velge omslag", "coverHint": "Trykk på en ramme for å velge omslag", "coverOwn": "Ditt bilde", "coverAuto": "Auto", "uploadCover": "Last opp et omslagsbilde", "mirrored": "Speilvendt", "original": "Original", "rotate90": "Roter 90°", "showNormally": "Vis normalt", "showNormallyBody": "De ser det med en gang", "hideUntilTap": "Skjul til det trykkes på", "hideUntilTapBody": "Uskarpt til de trykker på det", "hidePrice": "Skjul bak en pris", "hidePriceBody": "Uskarpt til de betaler deg", "priceUnavailable": "Ikke i denne chatten", "timerOff": "Av", "timerOffBody": "Det blir værende i chatten.", "timerViewBody": "Borte for dere begge når de har sett det.", "confirm": "Bekreft", "lockedFor": "Lås opp for {{value1}} DHB", "lockedForUsd": "Lås opp for {{value1}}", "editItem": "Rediger element {{value1}}", "kept": "{{time}} beholdt", "timerTimeBody": "Borte for dere begge {{value1}} etter at du har sendt det."},
+  "dmVideo": {"edit": "Rediger video", "hiddenTag": "Skjult", "tapToEdit": "Trykk for å redigere", "cover": "Omslag", "trim": "Trim", "mirror": "Speilvend", "rotate": "Roter", "hide": "Skjul", "timer": "Tidtaker", "sheetTitleAny": "Rediger før sending", "close": "Lukk", "replace": "Erstatt", "hiddenUntilTap": "Skjult til de trykker på den", "pause": "Pause", "play": "Spill av video", "mute": "Demp", "unmute": "Slå på lyd", "scrub": "Skroll gjennom videoen", "addMore": "Legg til bilder eller videoer", "trimAria": "Dra i endene for å trimme", "coverAria": "Trykk på en ramme for å velge omslag", "coverHint": "Trykk på en ramme for å velge omslag", "coverOwn": "Ditt bilde", "coverAuto": "Auto", "uploadCover": "Last opp et omslagsbilde", "mirrored": "Speilvendt", "original": "Original", "rotate90": "Roter 90°", "showNormally": "Vis normalt", "showNormallyBody": "De ser det med en gang", "hideUntilTap": "Skjul til det trykkes på", "hideUntilTapBody": "Uskarpt til de trykker på det", "hidePrice": "Skjul bak en pris", "hidePriceBody": "Uskarpt til de betaler deg", "priceUnavailable": "Ikke i denne chatten", "timerOff": "Av", "timerOffBody": "Det blir værende i chatten.", "timerViewBody": "Borte for dere begge når de har sett det.", "confirm": "Bekreft", "lockedFor": "Lås opp for {{value1}} tokens", "lockedForUsd": "Lås opp for {{value1}}", "editItem": "Rediger element {{value1}}", "kept": "{{time}} beholdt", "timerTimeBody": "Borte for dere begge {{value1}} etter at du har sendt det."},
   "postBg": {
     "addMedia": "Legg til et bilde, en GIF eller en video",
     "changeMedia": "Bytt bilde, GIF eller video",
@@ -630,7 +630,7 @@
     "wallet": "Lommebok",
     "docs": "Dokumentasjon",
     "roadmap": "Veikart",
-    "featureRequests": "Funksjonsforespørsler",
+    "featureRequests": "Bygg",
     "staking": "Staking",
     "governance": "Styring",
     "dao": "DAO",
@@ -2120,7 +2120,7 @@
     "ogHolders_one": "{{count}} OG-innehaver",
     "ogHolders_other": "{{count}} OG-innehavere",
     "ogChallengeTitle": "Hent tilbake OG-innehaverne",
-    "ogChallengeBody": "Inviter folk som fortsatt har DHB. Når de blir med via invitasjonslenken din og beholder DHB i Riftn-lommeboken, teller de for deg her.",
+    "ogChallengeBody": "Inviter folk som fortsatt har tokens. Når de blir med via invitasjonslenken din og beholder tokens i Riftn-lommeboken, teller de for deg her.",
     "ogChallengeCta": "Hent invitasjonslenken din"
   },
   "dhbListing": {
@@ -2196,8 +2196,8 @@
   "features": {
     "prompts": "Prompter",
     "queued": "I kø",
-    "promptPageTitle": "Anmodninger",
-    "promptSubtitle": "Bygg Riftn med en prompt",
+    "promptPageTitle": "Bygg",
+    "promptSubtitle": "Bygg Riftn ved å snakke med den.",
     "promptNew": "Ny prompt",
     "promptSearch": "Søk på prompter…",
     "promptHeading": "Hva skal vi bygge neste?",
@@ -3244,11 +3244,11 @@
     "requestPromptShort": "Ikke her ennå?",
     "requestDraftMenu": "Legg til {{query}} i Riftn",
     "requestDraftSettings": "En innstilling for {{query}}",
-    "requestPostsTo": "Publiseres i Forespørsler",
-    "requestHint": "Publiseres i Forespørsler som deg. Vi sier fra når det lanseres.",
-    "requestSent": "Sendt til Forespørsler",
+    "requestPostsTo": "Innlegg til Bygg",
+    "requestHint": "Innlegg til Bygg som deg. Vi vil fortelle deg når det blir sendt.",
+    "requestSent": "Sendt til Bygg",
     "requestSentHint": "Vi sier fra når det lanseres.",
-    "requestSeeIt": "Se den i Forespørsler"
+    "requestSeeIt": "Se det på Bygg"
   },
   "comments": {
     "reportComment": "Rapportkommentar",
@@ -11903,7 +11903,7 @@
     "settings": "Innstillinger",
     "settingsDesc": "Administrer dine konto-innstillinger, språk, privatetsinstillinger og utseende.",
     "governance": "Styring",
-    "featureRequests": "Funksjonskrav",
+    "featureRequests": "Bygg",
     "featureRequestsDesc": "Forslag på nye funksjoner og stemme på samfunnets idéer. Populære forespørsler får prioritet i utviklingen.",
     "upvote": "Oppstem",
     "upvoteDesc": "Stemme for et styrepropos eller en funksjonsforspørsel. Hjelper å signalere samfunnets støtte.",
@@ -12223,7 +12223,7 @@
           "4": "For å ta opp en talemelding, klikk på mikrofonikonet.",
           "5": "For å legge til en GIF, klikk på GIF-ikonet og søk etter en.",
           "6": "Bruk #hashtags for å kategorisere innlegget ditt (f.eks. #krypto, #defi).",
-          "7": "Bruk $cashtags for å referere til tokens (f.eks. $RIFT, $ETH).",
+          "7": "Bruk $cashtags for å referere til tokens (f.eks. $BTC, $ETH).",
           "8": "Bruk @mentions for å tagge andre brukere (f.eks. @brukernavn).",
           "9": "Klikk 'Innlegg' for å publisere. Innlegget ditt vises i feeden umiddelbart."
         },
@@ -17383,9 +17383,9 @@
     "72a478ec65bf": "Ustyr og OS- detaljer (valgfritt)",
     "cbf32246775e": "Legg til bilder eller videoer (valgfritt)",
     "ea3a3da9b73e": "— opp til",
-    "5d2d9bc248a3": "Ønske om nye funksjoner & feilrapportering | Riftn",
-    "2c94a53da07c": "Søk etter nye funksjoner, rapporter feil og stem på community-ideer for å forme Riftns roadmap. Følg åpne, i gang, og implementerte funksjoner.",
-    "64ce9ca9f7d1": "Riftn-funksjoner — Ønske om nye funksjoner, feilrapportering & community-roadmap",
+    "5d2d9bc248a3": "Bygg Riftn ved å snakke med den | Riftn",
+    "2c94a53da07c": "Bygg Riftn ved å snakke med den. Post ideer og feilrapporter som forespørsler, stem på hva andre har spurt om, og følg dem fra Køet til Sendt.",
+    "64ce9ca9f7d1": "Bygg: form Riftn ved å snakke med den",
     "5697d03daef4": "Funksjoner",
     "c46c50e9cf58": "Ingen funksjoner ennå",
     "b98adf20f5f3": "Veksel: Håndtere Ditt Krypto-verdier",
@@ -18602,7 +18602,7 @@
     "68f66b1f5bba": "Oppdagende trender, skaper og emner på Riftn.",
     "fd274232d93a": "Klikk for å laste opp",
     "d7246da527c1": "Legg til en annen",
-    "d2c76d7df46f": "Send inn forespørsler om nye funksjoner, rapporter feil og stem på fellesskapets idéer for å forme Riftns roadmap.",
+    "d2c76d7df46f": "Bygg Riftn ved å snakke med den. Post ideer og feilrapporter som forespørsler og stem på hva som bygges neste.",
     "90d6f4c823a9": "Kunne ikke kopiere adresse",
     "15e17712534d": "Token-mint-adresse",
     "b4c1cebc35f6": "Dette nettverket",

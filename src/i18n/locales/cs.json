@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Upravit video", "hiddenTag": "Skrytý", "tapToEdit": "Klepněte pro editaci", "cover": "Kryt", "trim": "Oříznout", "mirror": "Zrcadlit", "rotate": "Otočit", "hide": "Skrýt", "timer": "Časovač", "sheetTitleAny": "Upravit před odesláním", "close": "Zavřít", "replace": "Vyměnit", "hiddenUntilTap": "Skryté, dokud na to neklepnou", "pause": "Pozastavit", "play": "Přehrát video", "mute": "Ztlumit", "unmute": "Ozvuk", "scrub": "Procházet video", "addMore": "Přidat fotky nebo videa", "trimAria": "Přetažením konců video zkrať", "coverAria": "Klepnutím na snímek nastavíš titulní obrázek", "coverHint": "Klepnutím na snímek nastavíš titulní obrázek", "coverOwn": "Vaše foto", "coverAuto": "Automaticky", "uploadCover": "Nahrát úvodní obrázek", "mirrored": "Zrcadlově obrácené", "original": "Původní", "rotate90": "Otočit o 90°", "showNormally": "Zobrazit normálně", "showNormallyBody": "Uvidí to hned", "hideUntilTap": "Skrýt, dokud se na něj neklepne", "hideUntilTapBody": "Rozmazané, dokud na něj neklepnou", "hidePrice": "Skrýt za cenou", "hidePriceBody": "Rozmazané, dokud ti nezaplatí", "priceUnavailable": "Ne v tomto chatu", "timerOff": "Vypnuto", "timerOffBody": "Zůstane v chatu.", "timerViewBody": "Jakmile si to prohlédnou, zmizí to pro vás oba.", "confirm": "Potvrdit", "lockedFor": "Odemknout pro {{value1}} DHB", "lockedForUsd": "Odemknout pro {{value1}}", "editItem": "Upravit položku {{value1}}", "kept": "{{time}} zachoval", "timerTimeBody": "Po odeslání zmizí pro vás oba {{value1}}."},
+  "dmVideo": {"edit": "Upravit video", "hiddenTag": "Skrytý", "tapToEdit": "Klepněte pro editaci", "cover": "Kryt", "trim": "Oříznout", "mirror": "Zrcadlit", "rotate": "Otočit", "hide": "Skrýt", "timer": "Časovač", "sheetTitleAny": "Upravit před odesláním", "close": "Zavřít", "replace": "Vyměnit", "hiddenUntilTap": "Skryté, dokud na to neklepnou", "pause": "Pozastavit", "play": "Přehrát video", "mute": "Ztlumit", "unmute": "Ozvuk", "scrub": "Procházet video", "addMore": "Přidat fotky nebo videa", "trimAria": "Přetažením konců video zkrať", "coverAria": "Klepnutím na snímek nastavíš titulní obrázek", "coverHint": "Klepnutím na snímek nastavíš titulní obrázek", "coverOwn": "Vaše foto", "coverAuto": "Automaticky", "uploadCover": "Nahrát úvodní obrázek", "mirrored": "Zrcadlově obrácené", "original": "Původní", "rotate90": "Otočit o 90°", "showNormally": "Zobrazit normálně", "showNormallyBody": "Uvidí to hned", "hideUntilTap": "Skrýt, dokud se na něj neklepne", "hideUntilTapBody": "Rozmazané, dokud na něj neklepnou", "hidePrice": "Skrýt za cenou", "hidePriceBody": "Rozmazané, dokud ti nezaplatí", "priceUnavailable": "Ne v tomto chatu", "timerOff": "Vypnuto", "timerOffBody": "Zůstane v chatu.", "timerViewBody": "Jakmile si to prohlédnou, zmizí to pro vás oba.", "confirm": "Potvrdit", "lockedFor": "Odemknout pro {{value1}} tokeny", "lockedForUsd": "Odemknout pro {{value1}}", "editItem": "Upravit položku {{value1}}", "kept": "{{time}} zachoval", "timerTimeBody": "Po odeslání zmizí pro vás oba {{value1}}."},
   "postBg": {
     "addMedia": "Přidat obrázek, GIF nebo video",
     "changeMedia": "Změnit obrázek, GIF nebo video",
@@ -623,7 +623,7 @@
     "wallet": "Peněženka",
     "docs": "Dokumenty",
     "roadmap": "Plán",
-    "featureRequests": "Požadavky na funkce",
+    "featureRequests": "Verze",
     "staking": "Staking",
     "governance": "Správa",
     "dao": "DAO",
@@ -2114,7 +2114,7 @@
     "ogHolders_one": "{{count}} OG držitel",
     "ogHolders_other": "{{count}} OG držitelů",
     "ogChallengeTitle": "Přiveďte zpět OG držitele",
-    "ogChallengeBody": "Pozvěte lidi, kteří stále drží DHB. Když se připojí přes váš zvací odkaz a ponechají si DHB ve své peněžence Riftn, započítají se vám zde.",
+    "ogChallengeBody": "Pozvěte lidi, kteří stále drží tokeny. Když se připojí přes váš zvací odkaz a ponechají si tokeny ve své peněžence Riftn, započítají se vám zde.",
     "ogChallengeCta": "Získat zvací odkaz"
   },
   "dhbListing": {
@@ -2190,8 +2190,8 @@
   "features": {
     "prompts": "Dotazy",
     "queued": "V čekací řadě",
-    "promptPageTitle": "Požadavky",
-    "promptSubtitle": "Stvořte Riftn s promptem",
+    "promptPageTitle": "Verze",
+    "promptSubtitle": "Postavte Riftna tak, že s ním budete mluvit.",
     "promptNew": "Nový prompt",
     "promptSearch": "Hledat prompty…",
     "promptHeading": "Co bychom měli stavět dál?",
@@ -3242,11 +3242,11 @@
     "requestPromptShort": "Ještě tu není?",
     "requestDraftMenu": "Přidat {{query}} do Riftn",
     "requestDraftSettings": "Nastavení pro {{query}}",
-    "requestPostsTo": "Zveřejní se v Žádostech",
-    "requestHint": "Zveřejní se v Žádostech pod vaším jménem. Dáme vám vědět, až to bude hotové.",
-    "requestSent": "Odesláno do Žádostí",
+    "requestPostsTo": "Příspěvky k vytvoření",
+    "requestHint": "Příspěvky, které si můžete sestavit podle sebe. Dáme vám vědět, až bude odesláno.",
+    "requestSent": "Odesláno k výrobě",
     "requestSentHint": "Dáme vám vědět, až to bude hotové.",
-    "requestSeeIt": "Zobrazit v Žádostech"
+    "requestSeeIt": "Podívejte se na to na Buildu"
   },
   "comments": {
     "reportComment": "Nahlásit komentář",
@@ -11910,7 +11910,7 @@
     "settings": "Nastavení",
     "settingsDesc": "Spravuj předvolby účtu, jazyk, nastavení ochrany osobních údajů a vzhled.",
     "governance": "Správa",
-    "featureRequests": "Požadavky na funkce",
+    "featureRequests": "Verze",
     "featureRequestsDesc": "Navrhni nové funkce a hlasuj o návrzích komunity. Populární žádosti jsou pro vývoj upřednostňovány.",
     "upvote": "Hlasuj nahoru",
     "upvoteDesc": "Hlasujte pro návrh správy nebo žádost o funkci. Pomáhá signalizovat podporu komunity.",
@@ -12231,7 +12231,7 @@
           "4": "Chcete-li nahrát hlasovou poznámku, klikněte na ikonu mikrofonu.",
           "5": "Chcete-li přidat GIF, klikněte na ikonu GIF a vyhledejte jej.",
           "6": "Použijte #hashtagy k zařazení svého příspěvku (např. #crypto, #defi).",
-          "7": "Použijte $cashtagy k odkazu na tokeny (např. $RIFT, $ETH).",
+          "7": "Použijte $cashtagy k odkazu na tokeny (např. $BTC, $ETH).",
           "8": "Použijte @zmínky k označení ostatních uživatelů (např. @uživatelské_jméno).",
           "9": "Klikněte na 'Příspěvek' pro publikování. Váš příspěvek se okamžitě zobrazí ve feedu."
         },
@@ -17389,9 +17389,9 @@
     "72a478ec65bf": "Podrobnosti o zařízení a OS (volitelné)",
     "cbf32246775e": "Připojte obrázky nebo videa (volitelné)",
     "ea3a3da9b73e": "— až",
-    "5d2d9bc248a3": "Požadavky na funkce & hlášení chyb | Riftn",
-    "2c94a53da07c": "Odeslat požadavky na funkce, hlásit chyby a hlasovat pro komunitní nápady, aby se určily priority pro Riftn. Monitorujte otevřené, v procesu vypracování a implementované funkce.",
-    "64ce9ca9f7d1": "Funkce Riftn — Požadavky na funkce, hlášení chyb & komunitní roadmap",
+    "5d2d9bc248a3": "Postavte Riftn tak, že s ním budete mluvit | Riftn",
+    "2c94a53da07c": "Vytvořte Riftn tak, že s ním budete mluvit. Zveřejňujte nápady a hlášení chyb jako podněty, hlasujte o tom, o co požádali ostatní, a sledujte je od fáze Ve frontě až po Odesláno.",
+    "64ce9ca9f7d1": "Tvoření: Formujte Riftn tím, že s ním budete mluvit",
     "5697d03daef4": "Funkce",
     "c46c50e9cf58": "Žádné funkce zatím",
     "b98adf20f5f3": "Kryptoměnový portál: Spravujte své kryptoměny",
@@ -18609,7 +18609,7 @@
     "68f66b1f5bba": "Objevujte trendy obsah, tvůrce a témata na Riftn.",
     "fd274232d93a": "Klikněte na nahrání",
     "d7246da527c1": "Přidat další",
-    "d2c76d7df46f": "Odeslat požadavky na nové funkce, hlásit chyby a hlasovat o komunitních nápadech pro formování směru Riftn.",
+    "d2c76d7df46f": "Vytvořte Riftn tím, že s ním budete mluvit. Zveřejňujte nápady a hlášení chyb jako podněty a hlasujte o tom, co se bude vytvářet dál.",
     "90d6f4c823a9": "Nelze zkopírovat adresu",
     "15e17712534d": "Adresa pro mincovnictví tokenů",
     "b4c1cebc35f6": "tento síť",

@@ -291,8 +291,8 @@ function FinanceDefinitions({ stats }: { stats: FinanceStats }) {
             <span className="text-zinc-300">{t('stats.money.conversionTerm', 'Prices')}</span> —{' '}
             {stats.provenance.conversion}{' '}
             {stats.dhb.priceSource === 'market'
-              ? t('stats.money.dhbMarket', 'DHB was ${{price}} at this read.', { price: stats.dhb.priceUsd.toPrecision(3) })
-              : t('stats.money.dhbPeg', 'No market price was available at this read, so DHB is at the peg.')}
+              ? t('stats.money.dhbMarket', 'Tokens were ${{price}} at this read.', { price: stats.dhb.priceUsd.toPrecision(3) })
+              : t('stats.money.dhbPeg', 'No market price was available at this read, so tokens are at the peg.')}
           </li>
           {stats.provenance.excluded.map((line) => (
             <li key={line}>{line}</li>

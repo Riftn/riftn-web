@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Bearbeite Video", "hiddenTag": "Versteckt", "tapToEdit": "Tippe zum Bearbeiten", "cover": "Cover", "trim": "Trim", "mirror": "Mirror", "rotate": "Rotate", "hide": "Hide", "timer": "Timer", "sheetTitleAny": "Bearbeite vor dem Senden", "close": "Close", "replace": "Ersetzen", "hiddenUntilTap": "Versteckt bis sie es antippen.", "pause": "Pause", "play": "Play video", "mute": "Stumm", "unmute": "Laut", "scrub": "Durch das Video wische", "addMore": "Bilder oder Videos hänge", "trimAria": "Zieht d'Ende zum trimme", "coverAria": "Tippe e Frame, um d'Cover z'stelle", "coverHint": "Tippe e Frame, um d'Cover z'stelle", "coverOwn": "Dein Bild", "coverAuto": "Auto", "mirrored": "Mirrored", "original": "Original", "rotate90": "Rotate 90°", "showNormally": "Show normally", "showNormallyBody": "Sie merke es gleich.", "hideUntilTap": "Hide until tapped", "hideUntilTapBody": "Verschwumme bis sie druf tippid", "hidePrice": "Hinder emene Priis verstecke", "hidePriceBody": "Verschwumme bis sie dich zahle", "priceUnavailable": "Nöd in däm Chat", "timerOff": "Off", "timerOffBody": "Es blibt im Chat.", "timerViewBody": "Es isch für beidi vo dir verglügt, sobald sie es gseh händ.", "confirm": "Bestätige", "lockedFor": "Entsperre für {{value1}} DHB", "lockedForUsd": "Entsperre für {{value1}}", "editItem": "Bearbeite Gschäft {{value1}}", "kept": "{{time}} behalten", "timerTimeBody": "Verglügt für beidi vo dir {{value1}} nach em Versand."},
+  "dmVideo": {"edit": "Bearbeite Video", "hiddenTag": "Versteckt", "tapToEdit": "Tippe zum Bearbeiten", "cover": "Cover", "trim": "Trim", "mirror": "Mirror", "rotate": "Rotate", "hide": "Hide", "timer": "Timer", "sheetTitleAny": "Bearbeite vor dem Senden", "close": "Close", "replace": "Ersetzen", "hiddenUntilTap": "Versteckt bis sie es antippen.", "pause": "Pause", "play": "Play video", "mute": "Stumm", "unmute": "Laut", "scrub": "Durch das Video wische", "addMore": "Bilder oder Videos hänge", "trimAria": "Zieht d'Ende zum trimme", "coverAria": "Tippe e Frame, um d'Cover z'stelle", "coverHint": "Tippe e Frame, um d'Cover z'stelle", "coverOwn": "Dein Bild", "coverAuto": "Auto", "mirrored": "Mirrored", "original": "Original", "rotate90": "Rotate 90°", "showNormally": "Show normally", "showNormallyBody": "Sie merke es gleich.", "hideUntilTap": "Hide until tapped", "hideUntilTapBody": "Verschwumme bis sie druf tippid", "hidePrice": "Hinder emene Priis verstecke", "hidePriceBody": "Verschwumme bis sie dich zahle", "priceUnavailable": "Nöd in däm Chat", "timerOff": "Off", "timerOffBody": "Es blibt im Chat.", "timerViewBody": "Es isch für beidi vo dir verglügt, sobald sie es gseh händ.", "confirm": "Bestätige", "lockedFor": "Entsperre für {{value1}} Tokens", "lockedForUsd": "Entsperre für {{value1}}", "editItem": "Bearbeite Gschäft {{value1}}", "kept": "{{time}} behalten", "timerTimeBody": "Verglügt für beidi vo dir {{value1}} nach em Versand."},
   "postBg": {
     "addMedia": "Bild, GIF oder Video derzuetue",
     "changeMedia": "Bild, GIF oder Video ändere",
@@ -630,7 +630,7 @@
     "wallet": "Portmoneé",
     "docs": "Doks",
     "roadmap": "Fahrplan",
-    "featureRequests": "Aafrage",
+    "featureRequests": "Build",
     "staking": "Staking",
     "governance": "Verwaltig",
     "dao": "DAO",
@@ -2120,7 +2120,7 @@
     "ogHolders_one": "{{count}} OG-Holder",
     "ogHolders_other": "{{count}} OG-Holder",
     "ogChallengeTitle": "Hol d OG-Holder zrugg",
-    "ogChallengeBody": "Lad Lüüt ii, wo no DHB händ. Wenn si mit dim Iiladigslink beitrete und ihri DHB i ihrem Riftn-Wallet bhalted, zelled si da für dich.",
+    "ogChallengeBody": "Lad Lüüt ii, wo no Tokens händ. Wenn si mit dim Iiladigslink beitrete und ihri Tokens i ihrem Riftn-Wallet bhalted, zelled si da für dich.",
     "ogChallengeCta": "Hol din Iiladigslink"
   },
   "dhbListing": {
@@ -2196,8 +2196,8 @@
   "features": {
     "prompts": "Prompts",
     "queued": "In Warteschleef",
-    "promptPageTitle": "Aafrage",
-    "promptSubtitle": "Bau Riftn mit einer Prompt.",
+    "promptPageTitle": "Build",
+    "promptSubtitle": "Build Riftn, indem du mit em redsch.",
     "promptNew": "Neue Eingabeaufforderung",
     "promptSearch": "Suchprompte",
     "promptHeading": "Was bauten wir nächstes Mal?",
@@ -3274,11 +3274,11 @@
     "requestPromptShort": "No nöd da?",
     "requestDraftMenu": "{{query}} zu Riftn hinzuefüege",
     "requestDraftSettings": "E Istellig für {{query}}",
-    "requestPostsTo": "Postet i Aafroge",
-    "requestHint": "Postet i Aafroge als du. Mir säged dir Bscheid, wenn's live gaht.",
-    "requestSent": "A Aafroge gschickt",
+    "requestPostsTo": "Posts zum Build",
+    "requestHint": "Posts zum Build als du. Mir säge dir, wenn's verschickt wird.",
+    "requestSent": "Gschickt zum Build",
     "requestSentHint": "Mir säged dir Bscheid, wenn's live gaht.",
-    "requestSeeIt": "Uf Aafroge aaluege"
+    "requestSeeIt": "Lueg das uf Build"
   },
   "comments": {
     "reportComment": "Kommentar melde",
@@ -11933,7 +11933,7 @@
     "settings": "Einstellungen",
     "settingsDesc": "Verwalte deine Kontopräferenzen, Sprache, Datenschutz-Einstellungen und Aussehen.",
     "governance": "Regierung",
-    "featureRequests": "Feature-Aafrage",
+    "featureRequests": "Build",
     "featureRequestsDesc": "Schiess neue Features vor und stimms über Gemeinschaftsideen ab. Beliebte Anfragen werden für die Entwicklung priorisiert.",
     "upvote": "Upvote",
     "upvoteDesc": "Stimm ab für en Governance-Vorschlag oder Feature-Anfrage. Hilft, dass die Community Support signalisiert.",
@@ -12253,7 +12253,7 @@
           "4": "Zum e Stimmnotiz ufnäh, klick uf s Mikrofon-Symbol.",
           "5": "Zum es GIF dezue füege, klick uf s GIF-Symbol und sueche nach öpis.",
           "6": "Bruuch #Hashtags zum din Post kategorisiere (z.B. #crypto, #defi).",
-          "7": "Bruuch $Cashtags zum Tokens erwähne (z.B. $RIFT, $ETH).",
+          "7": "Bruuch $Cashtags zum Tokens erwähne (z.B. $BTC, $ETH).",
           "8": "Bruuch @Mentions zum anderi User markiere (z.B. @username).",
           "9": "Klick uf 'Post' zum veröffentliche. Din Post erscheint sofort i de Feed."
         },
@@ -17390,9 +17390,9 @@
     "72a478ec65bf": "Gerät & Betriebssystem (optional)",
     "cbf32246775e": "Bilder oder Videos anhängen (optional)",
     "ea3a3da9b73e": "bis zu",
-    "5d2d9bc248a3": "Funktionswünsche & Fehlerbericht | Riftn",
-    "2c94a53da07c": "Biete Fächerforderungen, berichte Bugs und stimme ab, um Riftns Roadmap zu prägen. Führe offene, in Arbeit befindliche und abgeschlossene Fächer nach.",
-    "64ce9ca9f7d1": "Funktionsmerkmol — Funktionswünsche, Fehlertexte un d'Community-Roadmap",
+    "5d2d9bc248a3": "Build Riftn, indem du mit em redsch | Riftn",
+    "2c94a53da07c": "Build Riftn, indem du mit em redsch. Teil Idee und Bug-Report als Prompt, stimm ab, was anderi wölle, und verfolg sie vom Queued bis zum Shipped.",
+    "64ce9ca9f7d1": "Build: Formi Riftn, indem du mit em redsch",
     "5697d03daef4": "Funktione",
     "c46c50e9cf58": "Käne Fähigkeitä noch nit.",
     "b98adf20f5f3": "Wältli: Deiiniere Deiini Crypto-Währige",
@@ -18604,7 +18604,7 @@
     "68f66b1f5bba": "Entdecke aktuelle Inhalte, Kreative und Themen auf Riftn.",
     "fd274232d93a": "Klicke zum Hochladen",
     "d7246da527c1": "Chöme no!",
-    "d2c76d7df46f": "Biete Vorschläge für Funktionen, melde Fehler und stimme ab, um die Richtlinie für Riftns Roadmap mitzubestimmen.",
+    "d2c76d7df46f": "Build Riftn, indem du mit em redsch. Teil Idee und Bug-Report als Prompt und stimm ab, was als Nächstes gebaut wird.",
     "90d6f4c823a9": "Könnt nützlich kopiere a d'Adress.",
     "15e17712534d": "Token-Prüfschlüssel-Adresse",
     "b4c1cebc35f6": "dä Netzwerk",

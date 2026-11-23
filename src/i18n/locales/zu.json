@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Hlela ividiyo", "hiddenTag": "Kufihliwe", "tapToEdit": "Thepha ukuze uhlele", "cover": "Ikhava", "trim": "Sika", "mirror": "Isibuko", "rotate": "Phendula", "hide": "Fihla", "timer": "Isikhathi", "sheetTitleAny": "Hlela ngaphambi kokuthumela", "close": "Vala", "replace": "Faka esikhundleni", "hiddenUntilTap": "Ifihliwe kuze kube yilapho beyithinta", "pause": "Misa isikhashana", "play": "Dlala ividiyo", "mute": "Thulisa", "unmute": "Susa ukuthula", "scrub": "Skrola kuvidiyo", "addMore": "Engeza izithombe noma amavidiyo", "trimAria": "Hudula imiphetho ukuze usike", "coverAria": "Thinta ifreyimu ukuze usethe ikhava", "coverHint": "Thinta ifreyimu ukuze usethe ikhava", "coverOwn": "Isithombe sakho", "coverAuto": "Okuzenzakalelayo", "uploadCover": "Layisha isithombe sekhava", "mirrored": "Isibuko", "original": "Okokuqala", "rotate90": "Phendula ngo-90°", "showNormally": "Bonisa ngokujwayelekile", "showNormallyBody": "Bayibona ngokushesha", "hideUntilTap": "Fihla kuze kube yilapho ithintiwe", "hideUntilTapBody": "Ifiphele kuze kube yilapho beyithinta", "hidePrice": "Fihla ngemuva kwentengo", "hidePriceBody": "Ifiphele kuze kube yilapho bakukhokhela", "priceUnavailable": "Akukho kule ngxoxo", "timerOff": "Valiwe", "timerOffBody": "Ihlala engxoxweni.", "timerViewBody": "Iyanyamalala kini nobabili uma beyibonile.", "confirm": "Qinisekisa", "lockedFor": "Vula ukuze uthole {{value1}} DHB", "lockedForUsd": "Vula ukuze uthole {{value1}}", "editItem": "Hlela into {{value1}}", "kept": "{{time}} kugciniwe", "timerTimeBody": "Iyanyamalala kini nobabili {{value1}} ngemva kokuba uyithumile."},
+  "dmVideo": {"edit": "Hlela ividiyo", "hiddenTag": "Kufihliwe", "tapToEdit": "Thepha ukuze uhlele", "cover": "Ikhava", "trim": "Sika", "mirror": "Isibuko", "rotate": "Phendula", "hide": "Fihla", "timer": "Isikhathi", "sheetTitleAny": "Hlela ngaphambi kokuthumela", "close": "Vala", "replace": "Faka esikhundleni", "hiddenUntilTap": "Ifihliwe kuze kube yilapho beyithinta", "pause": "Misa isikhashana", "play": "Dlala ividiyo", "mute": "Thulisa", "unmute": "Susa ukuthula", "scrub": "Skrola kuvidiyo", "addMore": "Engeza izithombe noma amavidiyo", "trimAria": "Hudula imiphetho ukuze usike", "coverAria": "Thinta ifreyimu ukuze usethe ikhava", "coverHint": "Thinta ifreyimu ukuze usethe ikhava", "coverOwn": "Isithombe sakho", "coverAuto": "Okuzenzakalelayo", "uploadCover": "Layisha isithombe sekhava", "mirrored": "Isibuko", "original": "Okokuqala", "rotate90": "Phendula ngo-90°", "showNormally": "Bonisa ngokujwayelekile", "showNormallyBody": "Bayibona ngokushesha", "hideUntilTap": "Fihla kuze kube yilapho ithintiwe", "hideUntilTapBody": "Ifiphele kuze kube yilapho beyithinta", "hidePrice": "Fihla ngemuva kwentengo", "hidePriceBody": "Ifiphele kuze kube yilapho bakukhokhela", "priceUnavailable": "Akukho kule ngxoxo", "timerOff": "Valiwe", "timerOffBody": "Ihlala engxoxweni.", "timerViewBody": "Iyanyamalala kini nobabili uma beyibonile.", "confirm": "Qinisekisa", "lockedFor": "Vula ukuze uthole {{value1}} amathokheni", "lockedForUsd": "Vula ukuze uthole {{value1}}", "editItem": "Hlela into {{value1}}", "kept": "{{time}} kugciniwe", "timerTimeBody": "Iyanyamalala kini nobabili {{value1}} ngemva kokuba uyithumile."},
   "postBg": {
     "addMedia": "Engeza isithombe, i-GIF noma ividiyo",
     "changeMedia": "Shintsha isithombe, i-GIF noma ividiyo",
@@ -568,7 +568,7 @@
     "wallet": "Isikhwama",
     "docs": "Dokhumenti",
     "roadmap": "Imephu Yendlela",
-    "featureRequests": "Zicelo",
+    "featureRequests": "Yakha",
     "staking": "Ukubeka",
     "governance": "Ukuphatha",
     "dao": "I-DAO",
@@ -2121,7 +2121,7 @@
     "ogHolders_one": "Umnikazi we-OG ongu-{{count}}",
     "ogHolders_other": "Abanikazi be-OG abangu-{{count}}",
     "ogChallengeTitle": "Buyisa abanikazi be-OG",
-    "ogChallengeBody": "Mema abantu abasaphethe i-DHB. Uma bejoyina ngesixhumanisi sakho sesimemo futhi bagcine i-DHB yabo ku-wallet yabo ye-Riftn, babalelwa wena lapha.",
+    "ogChallengeBody": "Mema abantu abasaphethe i-amathokheni. Uma bejoyina ngesixhumanisi sakho sesimemo futhi bagcine i-amathokheni yabo ku-wallet yabo ye-Riftn, babalelwa wena lapha.",
     "ogChallengeCta": "Thola isixhumanisi sakho sesimemo"
   },
   "dhbListing": {
@@ -2197,8 +2197,8 @@
   "features": {
     "prompts": "Imibuzo",
     "queued": "Ilindile",
-    "promptPageTitle": "Izicelo",
-    "promptSubtitle": "Yakha i-Riftn nge-prompt",
+    "promptPageTitle": "Yakha",
+    "promptSubtitle": "Yakha iRiftn ngokukhuluma nayo.",
     "promptNew": "I-prompt entsha",
     "promptSearch": "Sesha amaprompt…",
     "promptHeading": "Yini okumele sikhele okulandelayo?",
@@ -3275,11 +3275,11 @@
     "requestPromptShort": "Akukafiki lapha?",
     "requestDraftMenu": "Engeza i-{{query}} ku-Riftn",
     "requestDraftSettings": "Isilungiselelo se-{{query}}",
-    "requestPostsTo": "Kuthunyelwa ku-Zicelo",
-    "requestHint": "Kuthunyelwa ku-Zicelo njengawe. Sizokwazisa uma sekuphumile.",
-    "requestSent": "Kuthunyelwe ku-Zicelo",
+    "requestPostsTo": "Imibhalo kuYakha",
+    "requestHint": "Imibhalo kuYakha njengokuthi. Sizokutshela ukuthi ishipha nini.",
+    "requestSent": "Ithunyelwe kuYakha",
     "requestSentHint": "Sizokwazisa uma sekuphumile.",
-    "requestSeeIt": "Kubone ku-Zicelo"
+    "requestSeeIt": "Bheka kuyo kuYakha"
   },
   "comments": {
     "reportComment": "Bika ukuphawula",
@@ -11944,7 +11944,7 @@
     "settings": "Izilungiselelo",
     "settingsDesc": "Lawula izinketho ze-akhawunti yakho, ulimi, izilungiselelo zokuvikela umuntu, kanye nokuonakala.",
     "governance": "Ukulawula",
-    "featureRequests": "Izicelo Zesici",
+    "featureRequests": "Yakha",
     "featureRequestsDesc": "Phakamisa izici ezintsha bese uvota emibonweni yomphakathi. Izicelo ezithandwayo zibekwa kuqala ekuthuthukisweni.",
     "upvote": "Ukuvota",
     "upvoteDesc": "Votela isiphakamiso sokubusa noma isicelo sesici. Isiza ukuphawula ukusekelwa komphakathi.",
@@ -12264,7 +12264,7 @@
           "4": "Ukuze urekhode inothi lezwi, chofoza isithonjana semakrofoni.",
           "5": "Ukuze ungeze i-GIF, chofoza isithonjana se-GIF bese uyifuna.",
           "6": "Sebenzisa ama-#hashtag ukuze ukategorise okuthunyelwe kwakho (isb., #crypto, #defi).",
-          "7": "Sebenzisa ama-$cashtag ukuze ubhekise kumathokheni (isb., $RIFT, $ETH).",
+          "7": "Sebenzisa ama-$cashtag ukuze ubhekise kumathokheni (isb., $BTC, $ETH).",
           "8": "Sebenzisa ama-@mention ukuze umake abanye abasebenzisi (isb., @username).",
           "9": "Chofoza u-'Thumela' ukuze ushicilele. Okuthunyelwe kwakho kuvela kokuphakelayo ngokushesha."
         },
@@ -17425,9 +17425,9 @@
     "72a478ec65bf": "Imininingwane ye-Device & OS (opsiyonal)",
     "cbf32246775e": "Namathisela Izithombe noma Amavidiyo (opsiyonal)",
     "ea3a3da9b73e": "— kuze kube",
-    "5d2d9bc248a3": "Feature Requests & Bug Reporting | Riftn",
-    "2c94a53da07c": "Thumela izicelo zezici, mbalise iziphazamiso, futhi vota izindlela zekhomyunithi ukuze ubheke indlela ye-Riftn. Landelela izici ezivulekile, ezisebenzeni, nezezithunywe.",
-    "64ce9ca9f7d1": "Riftn Features — Feature Requests, Bug Reporting & Community Roadmap",
+    "5d2d9bc248a3": "Yakha iRiftn ngokukhuluma nayo | Riftn",
+    "2c94a53da07c": "Yakha iRiftn ngokukhuluma nayo. Thumela imibono nezibiko zephutha njengemiyalelo, khetha okunye abantu abaceli, bese uwulandela kusuka kuQueued kuya kuShipped.",
+    "64ce9ca9f7d1": "Yakha: hlela iRiftn ngokukhuluma nayo",
     "5697d03daef4": "Izici",
     "c46c50e9cf58": "Azikho izici okwamanje",
     "b98adf20f5f3": "Wallet: Phatha Izimpahla Zakho Zokucwaninga",
@@ -18643,7 +18643,7 @@
     "68f66b1f5bba": "Tafuta habari zinazokuwa zikiangazwa, wakili wa kumbukumbu na mada kwenye Riftn.",
     "fd274232d93a": "Kuweka picha",
     "d7246da527c1": "Zidisha",
-    "d2c76d7df46f": "Piga maombi ya kufanya maamuzi, ripoti vifaa vya kujitambulisha, na kuchagua maoni ya jamii kufanya mwelekeo wa njia ya kuweka njalo ya Riftn.",
+    "d2c76d7df46f": "Yakha iRiftn ngokukhuluma nayo. Thumela imibono nezibiko zephutha njengemiyalelo bese ukhetha okuzokwakhiwa okulandelayo.",
     "90d6f4c823a9": "Hakuna uwezo wa kuchukua alama",
     "15e17712534d": "Alama ya kuweka njalo ya token",
     "b4c1cebc35f6": "hii",

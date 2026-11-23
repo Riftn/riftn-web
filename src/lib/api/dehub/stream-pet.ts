@@ -5,7 +5,9 @@ import { acquireStreamSocket, releaseStreamSocket, type StreamPresence } from '.
  * Stream pets on the stream API. A creator hatches one in Live Studio; it eats
  * a snack for every five minutes they stream, grows with what it ate, falls
  * asleep after a hungry day and never dies. While they are live, viewers can
- * buy it a snack with their channel points.
+ * buy it a snack with their channel points. Once it hatched, the owner's
+ * requests still waiting on the Requests board give it a snack a day each
+ * (up to 3 a day).
  */
 
 function unwrap<T>(res: T | { result: T }): T {
@@ -41,6 +43,11 @@ export interface StreamPet {
   food: number;
   streamFood: number;
   viewerFood: number;
+  /** Snacks from the owner's waiting Requests board requests, all time and today (UTC). */
+  requestFood: number;
+  requestFoodToday: number;
+  /** The owner's waiting requests that can still feed it. */
+  requestsWaiting: number;
   stageFood: number;
   nextStageFood: number | null;
   progress: number;
@@ -79,6 +86,9 @@ export function parsePet(raw: any): StreamPet | null {
     food: num(raw.food),
     streamFood: num(raw.streamFood),
     viewerFood: num(raw.viewerFood),
+    requestFood: num(raw.requestFood),
+    requestFoodToday: num(raw.requestFoodToday),
+    requestsWaiting: num(raw.requestsWaiting),
     stageFood: num(raw.stageFood),
     nextStageFood: raw.nextStageFood == null ? null : num(raw.nextStageFood),
     progress: Math.min(1, Math.max(0, num(raw.progress))),
