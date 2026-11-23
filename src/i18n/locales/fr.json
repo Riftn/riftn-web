@@ -23242,5 +23242,30 @@
     "open": "Ouvrir le chat",
     "encrypted": "Message chiffré",
     "sentAttachment": "A envoyé une pièce jointe"
+  },
+  "badgeMuseum": {
+    "title": "Musée des badges",
+    "open": "Ouvrir le Musée des badges",
+    "summary": "{{earned}} badges obtenus sur {{total}}",
+    "loading": "Chargement des badges…",
+    "earned": "Obtenu",
+    "progress": "{{value}} / {{goal}}",
+    "footer": "Les badges se débloquent tout seuls à chaque palier atteint.",
+    "name": {
+      "views": "{{value}} vues",
+      "videos": "{{value}} vidéos",
+      "followers": "{{value}} abonnés",
+      "likes": "{{value}} j'aime",
+      "firstLive": "Premier live",
+      "liveHours": "{{value}} heures de live"
+    },
+    "hint": {
+      "views": "Vues sur toutes les publications",
+      "videos": "Vidéos publiées",
+      "followers": "Abonnés",
+      "likes": "J'aime reçus",
+      "firstLive": "Faire un live une fois",
+      "liveHours": "Heures diffusées en live"
+    }
   }
 }
