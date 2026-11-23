@@ -1935,7 +1935,12 @@
     "resetFilters": "Restablecer filtros",
     "prompt": "Solicitar",
     "for-you": "Para ti",
-    "everyone": "Todos"
+    "everyone": "Todos",
+    "namedFeeds": "Feeds",
+    "namedPulse": "Leer y debatir",
+    "namedMotion": "Ver",
+    "namedEcho": "Escuchar",
+    "namedClear": "Quitar {{name}}"
   },
   "drawers": {
     "ppvTitle": "Contenido de pago por ver",

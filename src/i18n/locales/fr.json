@@ -1935,7 +1935,12 @@
     "resetFilters": "Réinitialiser les filtres",
     "prompt": "Invite",
     "for-you": "Pour vous",
-    "everyone": "Tout le monde"
+    "everyone": "Tout le monde",
+    "namedFeeds": "Fils",
+    "namedPulse": "Lire et discuter",
+    "namedMotion": "Regarder",
+    "namedEcho": "Écouter",
+    "namedClear": "Retirer {{name}}"
   },
   "drawers": {
     "ppvTitle": "Contenu à la carte",

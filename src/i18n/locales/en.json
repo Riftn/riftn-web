@@ -1935,7 +1935,12 @@
     "resetFilters": "Reset filters",
     "prompt": "Prompt",
     "for-you": "For You",
-    "everyone": "Everyone"
+    "everyone": "Everyone",
+    "namedFeeds": "Feeds",
+    "namedPulse": "Read & discuss",
+    "namedMotion": "Watch",
+    "namedEcho": "Listen",
+    "namedClear": "Clear {{name}}"
   },
   "drawers": {
     "ppvTitle": "Pay-Per-View Content",

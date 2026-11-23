@@ -1935,7 +1935,12 @@
     "resetFilters": "Filtreleri sıfırla",
     "prompt": "Yönlendir",
     "for-you": "Sizin İçin",
-    "everyone": "Herkes"
+    "everyone": "Herkes",
+    "namedFeeds": "Akışlar",
+    "namedPulse": "Oku ve tartış",
+    "namedMotion": "İzle",
+    "namedEcho": "Dinle",
+    "namedClear": "{{name}} kaldır"
   },
   "drawers": {
     "ppvTitle": "İzle-Öde İçeriği",

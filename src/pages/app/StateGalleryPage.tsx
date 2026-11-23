@@ -897,6 +897,8 @@ const GALLERY_AUTH = {
 
 import { ComicDeck } from '@/components/app/comic/ComicDeck';
 import { FeedPresetsRow } from '@/components/app/feeds/FeedFilterLine';
+import { NamedFeedsRow } from '@/components/app/feeds/NamedFeedsRow';
+import type { HomePostTypeValue } from '@/lib/feed-utils';
 import { NewPostsBead as FeedDrawer } from '@/components/app/navigation/NewPostsBead';
 import { UsernameReserve } from '@/components/app/profile/UsernameReserve';
 import { ComicPagesEditor } from '@/features/post/components/ComicPagesEditor';
@@ -1178,6 +1180,7 @@ function FeedFilterLineGallery() {
   const [labels, setLabels] = useState(['Articles', '1w', 'Most liked', 'PPV']);
   const [following, setFollowing] = useState(false);
   const [newCount, setNewCount] = useState(4);
+  const [named, setNamed] = useState<HomePostTypeValue>('motion');
   const pill = (
     <div data-feed-nav className="relative z-10 flex h-9 items-center justify-center rounded-xl text-xs text-zinc-400">
       <span data-nav-glass-backdrop aria-hidden="true" />
@@ -1203,6 +1206,10 @@ function FeedFilterLineGallery() {
         {slot(<FeedDrawer count={0} authors={[]} onShow={() => {}} filters={filters({ onClearAll: () => setLabels((l) => l.slice(1)) })} />)}
         {slot(<FeedDrawer count={0} authors={[]} onShow={() => {}} filters={{ ...filters(), labels: ['#music'], follow: { following, pending: false, onToggle: () => setFollowing((v) => !v) } }} />)}
         {slot(<FeedDrawer count={newCount} authors={[]} onShow={() => setNewCount(0)} filters={filters({ presetName: 'Long reads' })} />)}
+        {slot(<FeedDrawer count={0} authors={[]} onShow={() => {}} filters={{ ...filters(), labels: ['Motion · Watch'] }} />)}
+        <div data-named-feeds-gallery className="rounded-2xl border border-white/10 bg-black/60 p-4">
+          <NamedFeedsRow value={named} onSelect={setNamed} />
+        </div>
         <div className="rounded-2xl border border-white/10 bg-black/60 p-4">
           <FeedPresetsRow
             presets={[{ name: 'Long reads' }, { name: 'Music this week' }, { name: 'Bounties' }]}
