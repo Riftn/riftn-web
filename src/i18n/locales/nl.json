@@ -6251,7 +6251,26 @@
     "giftButton": "{{count}} naar {{name}} versturen",
     "giftSent": "{{count}} naar {{name}} verstuurd",
     "giftFailed": "Versturen mislukt. Probeer het opnieuw.",
-    "giftNotSubmitted": "De overdracht is niet verstuurd"
+    "giftNotSubmitted": "De overdracht is niet verstuurd",
+    "freeBadge": "Gratis",
+    "modeSell": "Verkopen voor DHB",
+    "modeFree": "Gratis weggeven",
+    "freeListNote": "Mensen tikken op Claimen. Jij keurt elke claim goed door de fracties vanuit je wallet te sturen, of je wijst hem af.",
+    "giveNFree": "{{count}} gratis weggeven",
+    "giveawayListed": "{{count}} gratis weggegeven",
+    "freeShare": "Gratis · {{pct}}% van de post",
+    "claim": "Claimen",
+    "claimNFree": "{{count}} gratis claimen",
+    "claimNote": "Gratis. De eigenaar keurt elke claim goed en stuurt de fracties vanuit zijn wallet.",
+    "claiming": "Claimen…",
+    "claimSent": "Claim verstuurd. De eigenaar is gevraagd hem goed te keuren.",
+    "signInToClaim": "Log in om te claimen",
+    "approveClaim": "Goedkeuren",
+    "declineClaim": "Afwijzen",
+    "claimDeclined": "Claim afgewezen",
+    "claimApproved": "Goedgekeurd. De fracties zijn onderweg.",
+    "waitingOnOwner": "Wacht op de eigenaar",
+    "freeClaim": "Gratis claim"
   },
   "creator": {
     "gallery": {

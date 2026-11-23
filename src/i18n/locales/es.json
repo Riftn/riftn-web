@@ -6062,7 +6062,26 @@
     "giftButton": "Enviar {{count}} a {{name}}",
     "giftSent": "Enviaste {{count}} a {{name}}",
     "giftFailed": "No se pudo enviar. Inténtalo de nuevo.",
-    "giftNotSubmitted": "La transferencia no se envió"
+    "giftNotSubmitted": "La transferencia no se envió",
+    "freeBadge": "Gratis",
+    "modeSell": "Vender por DHB",
+    "modeFree": "Regalar",
+    "freeListNote": "La gente toca Reclamar. Apruebas cada reclamo enviando las fracciones desde tu billetera, o lo rechazas.",
+    "giveNFree": "Regalar {{count}}",
+    "giveawayListed": "Regalando {{count}}",
+    "freeShare": "Gratis · {{pct}}% de la publicación",
+    "claim": "Reclamar",
+    "claimNFree": "Reclamar {{count}} gratis",
+    "claimNote": "Gratis. El dueño aprueba cada reclamo y envía las fracciones desde su billetera.",
+    "claiming": "Reclamando…",
+    "claimSent": "Reclamo enviado. Se pidió al dueño que lo apruebe.",
+    "signInToClaim": "Inicia sesión para reclamar",
+    "approveClaim": "Aprobar",
+    "declineClaim": "Rechazar",
+    "claimDeclined": "Reclamo rechazado",
+    "claimApproved": "Aprobado. Las fracciones van en camino.",
+    "waitingOnOwner": "Esperando al dueño",
+    "freeClaim": "Reclamo gratis"
   },
   "creator": {
     "gallery": {

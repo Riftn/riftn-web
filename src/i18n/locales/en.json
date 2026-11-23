@@ -6061,7 +6061,26 @@
     "giftButton": "Send {{count}} to {{name}}",
     "giftSent": "Sent {{count}} to {{name}}",
     "giftFailed": "Couldn't send. Try again.",
-    "giftNotSubmitted": "The transfer was not sent"
+    "giftNotSubmitted": "The transfer was not sent",
+    "freeBadge": "Free",
+    "modeSell": "Sell for DHB",
+    "modeFree": "Give away free",
+    "freeListNote": "People tap Claim. You approve each claim by sending the fractions from your wallet, or decline it.",
+    "giveNFree": "Give {{count}} away free",
+    "giveawayListed": "Giving away {{count}} free",
+    "freeShare": "Free · {{pct}}% of the post",
+    "claim": "Claim",
+    "claimNFree": "Claim {{count}} free",
+    "claimNote": "Free. The owner approves each claim and sends the fractions from their wallet.",
+    "claiming": "Claiming…",
+    "claimSent": "Claim sent. The owner has been asked to approve it.",
+    "signInToClaim": "Sign in to claim",
+    "approveClaim": "Approve",
+    "declineClaim": "Decline",
+    "claimDeclined": "Claim declined",
+    "claimApproved": "Approved. The fractions are on their way.",
+    "waitingOnOwner": "Waiting on the owner",
+    "freeClaim": "Free claim"
   },
   "creator": {
     "gallery": {

@@ -28,7 +28,7 @@ import Send from "@/components/ui/cut-icons/send";
 import { DhbAmount } from '@/components/app/DhbAmount';
 import { useAuth } from '@/contexts/AuthContext';
 import { useOpenTrades } from '@/hooks/use-fraction-marketplace';
-import { useSettleTrade } from '@/hooks/use-fraction-checkout';
+import { useSettleTrade, isFreeClaim } from '@/hooks/use-fraction-checkout';
 import { getChainConfig } from '@/lib/contracts/dhb-token';
 import type { ChainId } from '@/components/app/ChainSelector';
 
@@ -43,7 +43,7 @@ export function NotificationSettleAction({ type, tokenId }: NotificationSettleAc
   const { t } = useTranslation();
   const { walletAddress } = useAuth();
   const { data: open } = useOpenTrades(walletAddress);
-  const { deliver, pay } = useSettleTrade();
+  const { deliver, pay, decline } = useSettleTrade();
 
   const isSale = type === 'fraction_sold';
   const isDelivery = type === 'fraction_delivered';
@@ -69,6 +69,10 @@ export function NotificationSettleAction({ type, tokenId }: NotificationSettleAc
     );
   }
 
+  // A free claim: Send approves it, and the owner may also say no.
+  const free = isSale && isFreeClaim(trade);
+  const declining = free && decline.isPending && decline.variables?.id === trade.id;
+
   const busy =
     (isSale && deliver.isPending && deliver.variables?.id === trade.id) ||
     (isDelivery && pay.isPending && pay.variables?.trade.id === trade.id);
@@ -88,7 +92,7 @@ export function NotificationSettleAction({ type, tokenId }: NotificationSettleAc
     <div className="flex items-center gap-1.5 mt-2" onClick={(e) => e.stopPropagation()}>
       <button
         onClick={handle}
-        disabled={busy}
+        disabled={busy || declining}
         className="h-7 px-2.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-medium flex items-center gap-1 transition-colors disabled:opacity-50"
       >
         {busy ? (
@@ -98,7 +102,9 @@ export function NotificationSettleAction({ type, tokenId }: NotificationSettleAc
         ) : (
           <Coins className="w-3 h-3" />
         )}
-        {isSale
+        {free
+          ? t('fractions.approveClaim')
+          : isSale
           ? t('fractions.sendFractionsCount', { count: trade.quantity })
           : (
             <>
@@ -106,6 +112,16 @@ export function NotificationSettleAction({ type, tokenId }: NotificationSettleAc
             </>
           )}
       </button>
+      {free && (
+        <button
+          onClick={() => decline.mutate(trade)}
+          disabled={busy || declining}
+          className="h-7 px-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/70 text-xs font-medium flex items-center gap-1 transition-colors disabled:opacity-50"
+        >
+          {declining && <Loader2 className="w-3 h-3 animate-spin" />}
+          {t('fractions.declineClaim')}
+        </button>
+      )}
     </div>
   );
 }
