@@ -450,32 +450,32 @@ function StatusTile({ author, note, own, label, onClick }: { author: StoryAuthor
       <span className="flex h-[58px] w-full flex-col items-center justify-end">
         {words && (
           <>
-            <span style={CLOUD_STYLE} className="max-w-[86px] rounded-[16px] px-2.5 py-[7px]">
+            <span style={{ ...CLOUD_STYLE, borderRadius: 16 }} className="max-w-[86px] px-2.5 py-[7px]">
               <span className="line-clamp-2 break-words text-[11.5px] font-semibold leading-[1.25]" style={{ color: own && !note ? '#71717a' : '#0b0b0c' }}>{words}</span>
             </span>
             <span aria-hidden className="flex w-full flex-col items-start pl-[26px]">
-              <span style={CLOUD_STYLE} className="mt-0.5 h-2 w-2 rounded-full" />
-              <span style={CLOUD_STYLE} className="ml-1.5 mt-px h-1 w-1 rounded-full" />
+              <span style={{ ...CLOUD_STYLE, borderRadius: 9999 }} className="mt-0.5 h-2 w-2" />
+              <span style={{ ...CLOUD_STYLE, borderRadius: 9999 }} className="ml-1.5 mt-px h-1 w-1" />
             </span>
           </>
         )}
       </span>
       <span className="relative mt-0.5 block">
         {gif ? (
-          <img src={gif} alt="" loading="lazy" className="h-[60px] w-[60px] rounded-[17px] object-cover" />
+          <img src={gif} alt="" loading="lazy" style={{ borderRadius: 17 }} className="h-[60px] w-[60px] object-cover" />
         ) : (
-          <Avatar className="h-[60px] w-[60px] rounded-[17px]">
-            {avatar && <AvatarImage src={avatar} className="rounded-[17px] object-cover" />}
-            <AvatarFallback className="rounded-[17px] bg-zinc-700 text-white">{nameOf(author).charAt(0).toUpperCase()}</AvatarFallback>
+          <Avatar style={{ borderRadius: 17 }} className="h-[60px] w-[60px]">
+            {avatar && <AvatarImage src={avatar} style={{ borderRadius: 17 }} className="object-cover" />}
+            <AvatarFallback style={{ borderRadius: 17 }} className="bg-zinc-700 text-white">{nameOf(author).charAt(0).toUpperCase()}</AvatarFallback>
           </Avatar>
         )}
         {own && (
-          <span aria-hidden data-keep-dark className="absolute -bottom-1 -right-1 grid h-[22px] w-[22px] place-items-center rounded-[8px] text-[16px] font-extrabold leading-none" style={{ background: '#fff', color: '#0b0b0c', boxShadow: '0 0 0 3px hsl(var(--background))' }}>
-            <Plus className="h-3.5 w-3.5" strokeWidth={3} />
+          <span aria-hidden data-keep-dark className="absolute -bottom-1 -right-1 grid h-[22px] w-[22px] place-items-center" style={{ borderRadius: 8, background: '#fff', color: '#0b0b0c', boxShadow: '0 0 0 3px hsl(var(--background)), 0 0 0 1px var(--kit-hairline)' }}>
+            <Plus className="h-3.5 w-3.5" strokeWidth={3} style={{ color: '#0b0b0c', stroke: '#0b0b0c' }} />
           </span>
         )}
       </span>
-      <span className={`mt-1.5 w-full truncate text-[11.5px] font-semibold ${own ? 'text-zinc-400' : 'text-zinc-200'}`}>{label}</span>
+      <span className="mt-1.5 w-full truncate text-[11.5px] font-semibold text-foreground" style={own ? { opacity: 0.6 } : undefined}>{label}</span>
     </button>
   );
 }
