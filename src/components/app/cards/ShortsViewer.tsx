@@ -119,7 +119,8 @@ import { useVideoFullscreen } from '@/hooks/use-video-fullscreen';
 import { useInAppVideoMini } from '@/hooks/use-in-app-video-mini';
 import '@/styles/shorts-mini.css';
 import { setVoteCache, getVoteCache } from '@/lib/vote-cache';
-import { getVideoPreferences, getPlaybackRateFor, setPlaybackRate as vpSetPlaybackRate, PLAYBACK_RATES, formatRate, useMediaMuted, useMediaLooping, setIsLooping as vpSetIsLooping } from '@/lib/video-preferences';
+import { getVideoPreferences, getPlaybackRateFor, setPlaybackRate as vpSetPlaybackRate, PLAYBACK_RATES, formatRate, useMediaMuted, useMediaLooping, setIsLooping as vpSetIsLooping, useMediaVolume, setVolume as vpSetVolume } from '@/lib/video-preferences';
+import { VideoVolumeControl } from '@/components/app/video/VideoVolumeControl';
 import { videoPlaybackManager } from '@/lib/video-playback-manager';
 import { createWheelPager } from '@/lib/wheel-pager';
 import { commitsDismiss } from '@/lib/video-hold-gestures';
@@ -447,6 +448,30 @@ export function ShortsViewer({ shorts: entries, initialIndex, onClose, onLoadMor
     }
     videoPlaybackManager.globalMuted = getVideoPreferences().mediaMuted !== true;
   }, [autoMuted, prefMuted]);
+  // The speaker's slider: the same saved level as feed and post videos.
+  // Down to nothing is muted; up off the bottom is sound again.
+  const shortsVolume = useMediaVolume();
+  const [volumeOpen, setVolumeOpen] = useState(false);
+  const setShortsVolume = useCallback((level: number) => {
+    vpSetVolume(level);
+    if (level === 0) {
+      if (!prefMuted) videoPlaybackManager.globalMuted = true;
+      return;
+    }
+    if (autoMuted) {
+      setAutoMuted(false);
+      document.querySelectorAll<HTMLVideoElement>('video.shorts-inline-video').forEach((v) => {
+        if (!v.paused) v.muted = false;
+      });
+    }
+    if (prefMuted) videoPlaybackManager.globalMuted = false;
+  }, [autoMuted, prefMuted]);
+  const speakerSilent = isMuted || shortsVolume === 0;
+  /** A level dragged down to nothing comes back up, or unmuting would stay silent. */
+  const handleSpeakerClick = useCallback(() => {
+    if (shortsVolume === 0) setShortsVolume(0.8);
+    else toggleMute();
+  }, [shortsVolume, setShortsVolume, toggleMute]);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const transitioningRef = useRef(false);
   const queuedStep = useRef<'next' | 'prev' | null>(null);
@@ -2032,17 +2057,22 @@ export function ShortsViewer({ shorts: entries, initialIndex, onClose, onLoadMor
                     {isFullscreen ? <Minimize className="w-5 h-5 text-white" /> : <Maximize className="w-5 h-5 text-white" />}
                   </button>}
 
-                  {/* Mute button */}
-                  <button
-                    onClick={toggleMute}
-                    className={VIEWER_CONTROL}
+                  {/* Mute: hover (or press and hold on a phone) for the volume slider. */}
+                  <VideoVolumeControl
+                    layout="above"
+                    volume={shortsVolume} muted={speakerSilent}
+                    onToggleMute={handleSpeakerClick} onVolume={setShortsVolume}
+                    open={volumeOpen} onOpenChange={setVolumeOpen}
+                    label={speakerSilent ? _copy("copy.ce4ee4efc5e3", { defaultValue: "Unmute" }) : _copy("copy.8dd6857baf02", { defaultValue: "Mute" })}
+                    sliderLabel={t('videoPlayer.volume')}
+                    buttonClassName={VIEWER_CONTROL}
                   >
-                    {isMuted ? (
+                    {speakerSilent ? (
                       <VolumeX className="w-5 h-5 text-white" />
                     ) : (
                       <Volume2 className="w-5 h-5 text-white" />
                     )}
-                  </button>
+                  </VideoVolumeControl>
                   </>}
 
                   {/* The owner's Boost bolt, beside options as on the feed card. */}
@@ -2352,21 +2382,27 @@ export function ShortsViewer({ shorts: entries, initialIndex, onClose, onLoadMor
                 )}
               </button>
 
-              <button
-                onClick={toggleMute}
+              <VideoVolumeControl
+                layout="below"
+                volume={shortsVolume} muted={speakerSilent}
+                onToggleMute={handleSpeakerClick} onVolume={setShortsVolume}
+                open={volumeOpen} onOpenChange={setVolumeOpen}
+                label={speakerSilent ? _copy("copy.ce4ee4efc5e3", { defaultValue: "Unmute" }) : _copy("copy.8dd6857baf02", { defaultValue: "Mute" })}
+                sliderLabel={t('videoPlayer.volume')}
+                // The corner look sits on the wrapper so the slider can hang below it.
                 className={cn(
                   CORNER_CONTROL,
                   "right-3",
                   chromeHidden && "opacity-0", chromeInert && "pointer-events-none",
                 )}
-                aria-label={isMuted ? _copy("copy.ce4ee4efc5e3", { defaultValue: "Unmute" }) : _copy("copy.8dd6857baf02", { defaultValue: "Mute" })}
+                buttonClassName="flex h-full w-full items-center justify-center rounded-xl text-white"
               >
-                {isMuted ? (
+                {speakerSilent ? (
                   <VolumeX className="w-5 h-5" />
                 ) : (
                   <Volume2 className="w-5 h-5" />
                 )}
-              </button>
+              </VideoVolumeControl>
 
               <div
                 className={cn(

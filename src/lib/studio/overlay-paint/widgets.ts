@@ -1,3 +1,4 @@
+import { tokenLabel } from '@/lib/token-label';
 /**
  * Every overlay widget kind, painted.
  *
@@ -1744,7 +1745,7 @@ class TipJar implements Widget {
     if (key !== this.key) {
       this.key = key;
       this.title = custom || sh.t('liveOverlay.tipJar');
-      this.line = `${Math.floor(value).toLocaleString()} / ${target.toLocaleString()} DHB`;
+      this.line = `${Math.floor(value).toLocaleString()} / ${target.toLocaleString()} ${tokenLabel()}`;
     }
     const accent = accentOf(this.settings, '#facc15');
     const w = box.w;

@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Muuda videot", "hiddenTag": "Peidetud", "tapToEdit": "Puuduta muutmiseks", "cover": "Kaane", "trim": "Lõikamine", "mirror": "Peegel", "rotate": "Pööra", "hide": "Peida", "timer": "Taimer", "sheetTitleAny": "Muuda enne saatmist", "close": "Sulge", "replace": "Asenda", "hiddenUntilTap": "Peidetud kuni nad selle puudutavad", "pause": "Paus", "play": "Mängi video", "mute": "Vaigista", "unmute": "Tühista vaigistus", "scrub": "Käi läbi video", "addMore": "Lisa fotosid või videoid", "trimAria": "Lõhenda lõpusid lõikamiseks", "coverAria": "Puuduta kaadrit kaane määramiseks", "coverHint": "Puuduta kaadrit kaane määramiseks", "coverOwn": "Sinu pilt", "coverAuto": "Automaatne", "uploadCover": "Laadi üles kaanepilt", "mirrored": "Peegeldatud", "original": "Algne", "rotate90": "Pööra 90°", "showNormally": "Näita tavaliselt", "showNormallyBody": "Nad näevad seda kohe", "hideUntilTap": "Peida kuni puudutatakse", "hideUntilTapBody": "Sume kuni nad seda puudutavad", "hidePrice": "Peida hinna taga", "hidePriceBody": "Sume kuni nad maksavad", "priceUnavailable": "Ei ole selles vestluses", "timerOff": "Lülita välja", "timerOffBody": "See jääb vestlusesse.", "timerViewBody": "See on kaotanud mõlemale, kui nad seda näevad.", "confirm": "Kinnita", "lockedFor": "Ava {{value1}} DHB eest", "lockedForUsd": "Lukustamata {{value1}}", "editItem": "Muuda üksus {{value1}}", "kept": "{{time}} säilitatud", "timerTimeBody": "Kaotanud mõlemale {{value1}} pärast saatmist."},
+  "dmVideo": {"edit": "Muuda videot", "hiddenTag": "Peidetud", "tapToEdit": "Puuduta muutmiseks", "cover": "Kaane", "trim": "Lõikamine", "mirror": "Peegel", "rotate": "Pööra", "hide": "Peida", "timer": "Taimer", "sheetTitleAny": "Muuda enne saatmist", "close": "Sulge", "replace": "Asenda", "hiddenUntilTap": "Peidetud kuni nad selle puudutavad", "pause": "Paus", "play": "Mängi video", "mute": "Vaigista", "unmute": "Tühista vaigistus", "scrub": "Käi läbi video", "addMore": "Lisa fotosid või videoid", "trimAria": "Lõhenda lõpusid lõikamiseks", "coverAria": "Puuduta kaadrit kaane määramiseks", "coverHint": "Puuduta kaadrit kaane määramiseks", "coverOwn": "Sinu pilt", "coverAuto": "Automaatne", "uploadCover": "Laadi üles kaanepilt", "mirrored": "Peegeldatud", "original": "Algne", "rotate90": "Pööra 90°", "showNormally": "Näita tavaliselt", "showNormallyBody": "Nad näevad seda kohe", "hideUntilTap": "Peida kuni puudutatakse", "hideUntilTapBody": "Sume kuni nad seda puudutavad", "hidePrice": "Peida hinna taga", "hidePriceBody": "Sume kuni nad maksavad", "priceUnavailable": "Ei ole selles vestluses", "timerOff": "Lülita välja", "timerOffBody": "See jääb vestlusesse.", "timerViewBody": "See on kaotanud mõlemale, kui nad seda näevad.", "confirm": "Kinnita", "lockedFor": "Ava {{value1}} märki eest", "lockedForUsd": "Lukustamata {{value1}}", "editItem": "Muuda üksus {{value1}}", "kept": "{{time}} säilitatud", "timerTimeBody": "Kaotanud mõlemale {{value1}} pärast saatmist."},
   "postBg": {
     "addMedia": "Lisa pilt, GIF või video",
     "changeMedia": "Muuda pilti, GIF-i või videot",
@@ -2120,7 +2120,7 @@
     "ogHolders_one": "{{count}} OG omanik",
     "ogHolders_other": "{{count}} OG omanikku",
     "ogChallengeTitle": "Too OG omanikud tagasi",
-    "ogChallengeBody": "Kutsu inimesi, kellel on endiselt DHB. Kui nad liituvad sinu kutselingiga ja hoiavad oma DHB-d Riftni rahakotis, loetakse nad siin sinu arvele.",
+    "ogChallengeBody": "Kutsu inimesi, kellel on endiselt märki. Kui nad liituvad sinu kutselingiga ja hoiavad oma märki-d Riftni rahakotis, loetakse nad siin sinu arvele.",
     "ogChallengeCta": "Hangi oma kutselink"
   },
   "dhbListing": {
@@ -12233,7 +12233,7 @@
           "4": "Helimärkmiku salvestamiseks klõpsake mikrofoniikooni.",
           "5": "GIF-i lisamiseks klõpsake GIF-i ikooni ja otsige seda.",
           "6": "Kasutage oma postituse kategoriseerimiseks #hashtage (nt #crypto, #defi).",
-          "7": "Tokenite viitamiseks kasutage $cashtage (nt $RIFT, $ETH).",
+          "7": "Tokenite viitamiseks kasutage $cashtage (nt $BTC, $ETH).",
           "8": "Teiste kasutajate märkimiseks kasutage @mainimisi (nt @kasutajanimi).",
           "9": "Klõpsake avaldamiseks nuppu \"Postita\". Teie postitus ilmub kohe voogu."
         },

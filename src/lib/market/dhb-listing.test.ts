@@ -1,3 +1,4 @@
+import { tokenLabel } from '@/lib/token-label';
 import { describe, expect, it } from 'vitest';
 import { isDhbListingQuery, isValidListingEmail } from './dhb-listing';
 
@@ -7,6 +8,7 @@ describe('isDhbListingQuery', () => {
     expect(isDhbListingQuery('$dhb')).toBe(true);
     expect(isDhbListingQuery('$DEHUB')).toBe(true);
     expect(isDhbListingQuery('$RIFT')).toBe(true);
+    expect(isDhbListingQuery('rift')).toBe(true);
     expect(isDhbListingQuery('$riftn')).toBe(true);
     expect(isDhbListingQuery('  dhb ')).toBe(true);
   });
@@ -30,5 +32,15 @@ describe('isValidListingEmail', () => {
     expect(isValidListingEmail(' Mal@Example.com ')).toBe(true);
     expect(isValidListingEmail('not-an-email')).toBe(false);
     expect(isValidListingEmail('x@phone.dehub.internal')).toBe(false);
+  });
+});
+
+describe('tokenLabel', () => {
+  it.each(['DHB', '$RIFT', 'DEHUB', ' RIFTN '])('labels %s as tokens', (symbol) => {
+    expect(tokenLabel(symbol)).toBe('tokens');
+  });
+
+  it('preserves other currency symbols', () => {
+    expect(tokenLabel('USDC')).toBe('USDC');
   });
 });
