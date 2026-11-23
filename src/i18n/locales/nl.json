@@ -2451,7 +2451,9 @@
     "receiveEvm": "Basis · BNB · ETH",
     "receiveSolanaDescription": "Stuur hier alleen SOL- en SPL-tokens naartoe. Alles wat vanuit een ander netwerk wordt verzonden, gaat verloren.",
     "solanaSendUnavailable": "Verzenden op Solana is nog niet beschikbaar",
-    "solanaSendUnavailableHint": "Gebruik Phantom direct om dit saldo te verplaatsen."
+    "solanaSendUnavailableHint": "Gebruik Phantom direct om dit saldo te verplaatsen.",
+    "showBalance": "Saldo tonen",
+    "hideBalance": "Saldo verbergen"
   },
   "bookmarks": {
     "title": "Jouw bladwijzers",

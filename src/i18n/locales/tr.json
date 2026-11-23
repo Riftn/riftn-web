@@ -2262,7 +2262,9 @@
     "receiveEvm": "Matrah · BNB · ETH",
     "receiveSolanaDescription": "Buraya sadece SOL ve SPL jetonları gönderin. Başka bir ağdan gönderilen her şey kaybolur.",
     "solanaSendUnavailable": "Solana'da gönderme henüz mevcut değil",
-    "solanaSendUnavailableHint": "Bu bakiyeyi doğrudan Phantom kullanarak hareket ettirin."
+    "solanaSendUnavailableHint": "Bu bakiyeyi doğrudan Phantom kullanarak hareket ettirin.",
+    "showBalance": "Bakiyeyi göster",
+    "hideBalance": "Bakiyeyi gizle"
   },
   "bookmarks": {
     "title": "Yer İmleriniz",

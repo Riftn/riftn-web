@@ -2262,7 +2262,9 @@
     "receiveEvm": "قاعدة · BNB · ETH",
     "receiveSolanaDescription": "لا ترسل سوى رموز SOL و SPL هنا. يتم فقدان أي شيء يتم إرساله من شبكة أخرى.",
     "solanaSendUnavailable": "الإرسال على سولانا غير متاح بعد",
-    "solanaSendUnavailableHint": "استخدم Phantom مباشرةً لنقل هذا الرصيد."
+    "solanaSendUnavailableHint": "استخدم Phantom مباشرةً لنقل هذا الرصيد.",
+    "showBalance": "إظهار الرصيد",
+    "hideBalance": "إخفاء الرصيد"
   },
   "bookmarks": {
     "title": "الإشارات المرجعية",
