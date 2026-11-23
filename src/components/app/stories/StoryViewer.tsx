@@ -47,6 +47,7 @@ import { sendStoryReply } from './story-reply';
 import { muteUser } from '@/lib/api/dehub/mutes';
 import { unfollowUser } from '@/lib/api/dehub/social';
 import { StoryComments } from './StoryComments';
+import { MomentCaption } from './MomentCaption';
 import { StoryRoomChat, StoryRoomRows, useMomentComments } from './StoryRoomChat';
 import { toggleFollowFor } from '@/hooks/use-follow';
 import '@/styles/live-audience.css';
@@ -716,7 +717,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
                 {t('stories.watchOriginal', { defaultValue: 'Watch original moment' })}
               </button>
             )}
-            {item.caption && <div>{item.caption}</div>}
+            {item.caption && <MomentCaption key={item.id} text={item.caption} publicContent={item.shareable === true} />}
           </div>
         )}
 
