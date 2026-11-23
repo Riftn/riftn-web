@@ -307,7 +307,7 @@ const createSearchIndex = (): SearchIndex[] => {
     {
       id: 'dev-developers',
       title: "Build on Riftn",
-      content: "Everything you need to build on Riftn: mini apps for the Riftn app store, Sign in with Riftn, payments in DHB, notifications, the REST and Mastodon APIs, and MCP for AI agents.",
+      content: "Everything you need to build on Riftn: mini apps for the Riftn app store, Sign in with Riftn, payments in tokens, notifications, the REST and Mastodon APIs, and MCP for AI agents.",
       path: '/docs/developers',
       category: 'Development',
       type: 'page',
@@ -316,7 +316,7 @@ const createSearchIndex = (): SearchIndex[] => {
     {
       id: 'dev-developers-mini-apps',
       title: "Mini apps",
-      content: "Build a mini app for the Riftn app store: the one-line SDK, every SDK method, the dehub.json manifest, ownership signing, payments in DHB and how review works.",
+      content: "Build a mini app for the Riftn app store: the one-line SDK, every SDK method, the dehub.json manifest, ownership signing, payments in tokens and how review works.",
       path: '/docs/developers/mini-apps',
       category: 'Development',
       type: 'page',
@@ -352,7 +352,7 @@ const createSearchIndex = (): SearchIndex[] => {
     {
       id: 'dev-examples',
       title: "Examples",
-      content: "Copy and paste examples for Riftn apps: a complete mini app page, server-side sign-in, a tip button paid in DHB, sharing to the feed, notifications and a Sign in with Riftn button.",
+      content: "Copy and paste examples for Riftn apps: a complete mini app page, server-side sign-in, a tip button paid in tokens, sharing to the feed, notifications and a Sign in with Riftn button.",
       path: '/docs/examples',
       category: 'Development',
       type: 'page',

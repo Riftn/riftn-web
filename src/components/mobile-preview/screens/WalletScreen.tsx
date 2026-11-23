@@ -56,7 +56,7 @@ export function WalletScreen() {
         <h3 className="text-white text-sm font-semibold mb-3">{_copy("copy.a039dfb9628b", { defaultValue: "Tokens" })}</h3>
         <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] divide-y divide-white/[0.04]">
           {[
-            { name: 'DHB', balance: '4,250.00', value: '$1,275.00' },
+            { name: 'Tokens', balance: '4,250.00', value: '$1,275.00' },
             { name: 'ETH', balance: '0.52', value: '$1,820.00' },
             { name: 'USDC', balance: '350.00', value: '$350.00' },
           ].map((token) => (

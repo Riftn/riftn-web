@@ -1,3 +1,4 @@
+import { tokenLabel } from '@/lib/token-label';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { TrendingDown, TrendingUp, Star, Loader2, Clock } from "lucide-react";
@@ -79,7 +80,7 @@ function SubscriptionRow({ sub, index }: { sub: Subscription; index: number }) {
       <td className="py-4">
         {price !== undefined ? (
           <span className="text-white text-sm">
-            {price.toLocaleString(undefined, { maximumFractionDigits: currency === 'DHB' ? 4 : 2 })} {currency}
+            {price.toLocaleString(undefined, { maximumFractionDigits: currency === 'DHB' ? 4 : 2 })} {tokenLabel(currency)}
           </span>
         ) : (
           <span className="text-zinc-500">—</span>
