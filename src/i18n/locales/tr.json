@@ -23226,5 +23226,30 @@
     "open": "Sohbeti aç",
     "encrypted": "Şifreli mesaj",
     "sentAttachment": "Bir ek gönderdi"
+  },
+  "badgeMuseum": {
+    "title": "Rozet Müzesi",
+    "open": "Rozet Müzesini aç",
+    "summary": "{{total}} rozetten {{earned}} tanesi kazanıldı",
+    "loading": "Rozetler yükleniyor…",
+    "earned": "Kazanıldı",
+    "progress": "{{value}} / {{goal}}",
+    "footer": "Rozetler, kilometre taşlarına ulaşıldıkça kendiliğinden açılır.",
+    "name": {
+      "views": "{{value}} görüntülenme",
+      "videos": "{{value}} video",
+      "followers": "{{value}} takipçi",
+      "likes": "{{value}} beğeni",
+      "firstLive": "İlk canlı yayın",
+      "liveHours": "{{value}} saat canlı yayın"
+    },
+    "hint": {
+      "views": "Tüm gönderilerdeki görüntülenmeler",
+      "videos": "Yüklenen videolar",
+      "followers": "Takipçiler",
+      "likes": "Alınan beğeniler",
+      "firstLive": "Bir kez canlı yayın yap",
+      "liveHours": "Canlı yayın saatleri"
+    }
   }
 }

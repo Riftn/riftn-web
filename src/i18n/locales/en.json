@@ -23200,5 +23200,30 @@
     "open": "Open chat",
     "encrypted": "Encrypted message",
     "sentAttachment": "Sent an attachment"
+  },
+  "badgeMuseum": {
+    "title": "Badge Museum",
+    "open": "Open Badge Museum",
+    "summary": "{{earned}} of {{total}} badges earned",
+    "loading": "Loading badges…",
+    "earned": "Earned",
+    "progress": "{{value}} / {{goal}}",
+    "footer": "Badges unlock on their own as milestones are reached.",
+    "name": {
+      "views": "{{value}} views",
+      "videos": "{{value}} videos",
+      "followers": "{{value}} followers",
+      "likes": "{{value}} likes",
+      "firstLive": "First live",
+      "liveHours": "{{value}} hours live"
+    },
+    "hint": {
+      "views": "Views across all posts",
+      "videos": "Videos uploaded",
+      "followers": "Followers",
+      "likes": "Likes received",
+      "firstLive": "Go live once",
+      "liveHours": "Hours streamed live"
+    }
   }
 }

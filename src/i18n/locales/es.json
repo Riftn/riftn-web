@@ -23226,5 +23226,30 @@
     "open": "Abrir chat",
     "encrypted": "Mensaje cifrado",
     "sentAttachment": "Envió un archivo"
+  },
+  "badgeMuseum": {
+    "title": "Museo de insignias",
+    "open": "Abrir el Museo de insignias",
+    "summary": "{{earned}} de {{total}} insignias conseguidas",
+    "loading": "Cargando insignias…",
+    "earned": "Conseguida",
+    "progress": "{{value}} / {{goal}}",
+    "footer": "Las insignias se desbloquean solas al alcanzar cada hito.",
+    "name": {
+      "views": "{{value}} visualizaciones",
+      "videos": "{{value}} vídeos",
+      "followers": "{{value}} seguidores",
+      "likes": "{{value}} me gusta",
+      "firstLive": "Primer directo",
+      "liveHours": "{{value}} horas en directo"
+    },
+    "hint": {
+      "views": "Visualizaciones en todas las publicaciones",
+      "videos": "Vídeos subidos",
+      "followers": "Seguidores",
+      "likes": "Me gusta recibidos",
+      "firstLive": "Haz un directo una vez",
+      "liveHours": "Horas emitidas en directo"
+    }
   }
 }
