@@ -728,16 +728,6 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
           ))}
         </div>
 
-        {typing && !own && isAuthenticated && item.allowReplies && (
-          <div data-sv-to role="radiogroup" aria-label={t('stories.sendTo', { defaultValue: 'Send to' })} onPointerDown={e => e.preventDefault()}>
-            <button type="button" role="radio" aria-checked={replyTo === 'everyone'} data-on={replyTo === 'everyone'} onClick={() => setReplyTo('everyone')}>
-              {t('stories.toEveryone', { defaultValue: 'Everyone' })}
-            </button>
-            <button type="button" role="radio" aria-checked={replyTo === 'author'} data-on={replyTo === 'author'} onClick={() => setReplyTo('author')}>
-              {t('stories.toOnly', { name: nameOf(a), defaultValue: 'Only {{name}}' })}
-            </button>
-          </div>
-        )}
 
         <div data-sv-reply style={sheet ? { visibility: 'hidden' } : undefined}>
           {own ? (
