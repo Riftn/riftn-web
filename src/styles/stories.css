@@ -358,6 +358,23 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-st-glass] {
   border-radius: 18px;
   pointer-events: auto;
 }
+/* Translate / See original under a caption in another language. */
+[data-sv-translate] {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 10px;
+  margin-top: 6px;
+  border-radius: 13px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  text-shadow: none;
+  pointer-events: auto;
+  cursor: pointer;
+}
+[data-sv-translate]:disabled { cursor: default; opacity: 0.85; }
 [data-sv-mention-frame] {
   position: absolute;
   left: 50%;
