@@ -23109,7 +23109,49 @@
       "label": "Cours du marché",
       "gold": "Or (oz)"
     },
-    "withFriends": "Jouer entre amis"
+    "withFriends": "Jouer entre amis",
+    "sillycoin": {
+      "title": "SillyCoin",
+      "cardBlurb": "Touchez pour miner, achetez des améliorations, envoyez des pièces à vos amis. Juste pour le fun, sans valeur.",
+      "intro": "Touchez pour miner, améliorez, envoyez des pièces à vos amis.",
+      "seoTitle": "Simulateur de minage SillyCoin | Riftn Arcade",
+      "seoDescription": "Touchez pour miner des SillyCoins, achetez une plus grosse pioche et des mineurs automatiques, et envoyez des pièces à vos amis. Juste pour le fun : les SillyCoins n’ont aucune valeur. Gratuit sur Riftn.",
+      "balanceLabel": "Vos SillyCoins",
+      "rates": "{{tap}} par touche · {{second}} par seconde",
+      "tapLabel": "Touchez pour miner",
+      "tapHint": "Touchez la pièce pour miner. Jusqu’à 15 touches par seconde comptent.",
+      "signInPrompt": "Connectez-vous pour garder vos SillyCoins, acheter des améliorations et envoyer des pièces à vos amis.",
+      "upgradesTitle": "Améliorations",
+      "upgrade": {
+        "pick": "Plus grosse pioche",
+        "miner": "Mineur automatique",
+        "rig": "Foreuse"
+      },
+      "bought": {
+        "pick": "Plus grosse pioche achetée",
+        "miner": "Mineur automatique acheté",
+        "rig": "Foreuse achetée"
+      },
+      "level": "Niv {{level}}",
+      "effectTap": "+{{n}} par touche",
+      "effectSecond": "+{{n}} par seconde",
+      "maxed": "Max",
+      "idleNote": "Les mineurs automatiques continuent de creuser pendant votre absence, jusqu’à 8 heures.",
+      "awayToast": "Vos mineurs ont creusé {{coins}} SillyCoins pendant votre absence ({{hours}} h).",
+      "sendTitle": "Envoyer des SillyCoins",
+      "toPlaceholder": "@nomutilisateur",
+      "amountPlaceholder": "Combien",
+      "notePlaceholder": "Note (facultatif)",
+      "sendButton": "Envoyer",
+      "sendMissing": "Choisissez à qui envoyer et combien.",
+      "sent": "{{coins}} SillyCoins envoyées à {{name}}",
+      "sendNote": "Les pièces arrivent tout de suite. Les SillyCoins restent dans le jeu : pas de portefeuille, pas de jeton.",
+      "fromLine": "De {{name}}",
+      "toLine": "À {{name}}",
+      "boardTitle": "Meilleurs mineurs",
+      "boardEmpty": "Personne n’a encore miné. Soyez le premier.",
+      "disclaimer": "Les SillyCoins sont juste pour le fun et n’ont aucune valeur. Ce n’est pas une cryptomonnaie, elles ne touchent jamais votre portefeuille et ne peuvent être ni achetées, ni vendues, ni encaissées."
+    }
   },
   "hideReply": {
     "hide": "Masquer la réponse",

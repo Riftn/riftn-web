@@ -23105,7 +23105,49 @@
       "label": "Precios de mercado",
       "gold": "Oro (oz)"
     },
-    "withFriends": "Juega con amigos"
+    "withFriends": "Juega con amigos",
+    "sillycoin": {
+      "title": "SillyCoin",
+      "cardBlurb": "Toca para minar, compra mejoras y envía monedas a tus amigos. Solo por diversión, sin valor.",
+      "intro": "Toca para minar, mejora y envía monedas a tus amigos.",
+      "seoTitle": "Simulador de minería SillyCoin | Riftn Arcade",
+      "seoDescription": "Toca para minar SillyCoins, compra un pico más grande y mineros automáticos, y envía monedas a tus amigos. Solo por diversión: las SillyCoins no tienen valor. Gratis en Riftn.",
+      "balanceLabel": "Tus SillyCoins",
+      "rates": "{{tap}} por toque · {{second}} por segundo",
+      "tapLabel": "Toca para minar",
+      "tapHint": "Toca la moneda para minar. Cuentan hasta 15 toques por segundo.",
+      "signInPrompt": "Inicia sesión para guardar tus SillyCoins, comprar mejoras y enviar monedas a tus amigos.",
+      "upgradesTitle": "Mejoras",
+      "upgrade": {
+        "pick": "Pico más grande",
+        "miner": "Minero automático",
+        "rig": "Taladro"
+      },
+      "bought": {
+        "pick": "Pico más grande comprado",
+        "miner": "Minero automático comprado",
+        "rig": "Taladro comprado"
+      },
+      "level": "Nv {{level}}",
+      "effectTap": "+{{n}} por toque",
+      "effectSecond": "+{{n}} por segundo",
+      "maxed": "Máx",
+      "idleNote": "Los mineros automáticos siguen cavando mientras no estás, hasta 8 horas.",
+      "awayToast": "Tus mineros cavaron {{coins}} SillyCoins mientras no estabas ({{hours}} h).",
+      "sendTitle": "Enviar SillyCoins",
+      "toPlaceholder": "@usuario",
+      "amountPlaceholder": "Cuántas",
+      "notePlaceholder": "Nota (opcional)",
+      "sendButton": "Enviar",
+      "sendMissing": "Elige a quién enviar y cuántas.",
+      "sent": "Enviaste {{coins}} SillyCoins a {{name}}",
+      "sendNote": "Reciben las monedas al instante. Las SillyCoins se quedan en el juego: sin billetera, sin token.",
+      "fromLine": "De {{name}}",
+      "toLine": "Para {{name}}",
+      "boardTitle": "Mejores mineros",
+      "boardEmpty": "Nadie ha minado todavía. Sé el primero.",
+      "disclaimer": "Las SillyCoins son solo por diversión y no tienen valor. No son una criptomoneda, nunca tocan tu billetera y no se pueden comprar, vender ni cobrar."
+    }
   },
   "hideReply": {
     "hide": "Ocultar respuesta",

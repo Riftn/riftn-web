@@ -40,6 +40,14 @@ const FRIEND_GAMES = [
     blurbKey: 'games.okey.cardBlurb',
     blurb: 'Four seats for friends, bots fill the rest. Open tables or lock one with a password.',
   },
+  {
+    href: '/arcade/sillycoin',
+    art: '/og/arcade-sillycoin.jpg',
+    titleKey: 'games.sillycoin.title',
+    title: 'SillyCoin',
+    blurbKey: 'games.sillycoin.cardBlurb',
+    blurb: 'Tap to mine, buy upgrades, send coins to friends. Just for fun, no value.',
+  },
 ] as const;
 
 /** The games that are a competition, in registry order. */
