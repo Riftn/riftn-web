@@ -65,11 +65,11 @@ export function SearchRequestPrompt({ query, source, compact = false, onNavigate
       <div data-search-request data-sent className={cn('rounded-2xl border border-white/10 bg-white/5 p-3', className)} role="status">
         <div className="flex items-center gap-2 text-[13px] font-semibold text-white">
           <Check className="h-4 w-4 shrink-0 text-emerald-400" />
-          <span>{t('sidebar.requestSent', 'Sent to Requests')}</span>
+          <span>{t('sidebar.requestSent', 'Sent to Build')}</span>
         </div>
         <p className="mt-1 text-xs text-zinc-500">{t('sidebar.requestSentHint', 'We will tell you when it ships.')}</p>
         <Link to="/app/features" onClick={onNavigate} className="mt-2 inline-block text-xs font-semibold text-zinc-300 underline-offset-2 hover:underline">
-          {t('sidebar.requestSeeIt', 'See it on Requests')}
+          {t('sidebar.requestSeeIt', 'See it on Build')}
         </Link>
       </div>
     );
@@ -135,11 +135,11 @@ export function SearchRequestPrompt({ query, source, compact = false, onNavigate
           data-search-request-send
           className="mt-2 flex h-8 w-full items-center justify-center gap-1.5 rounded-xl bg-white px-3 text-xs font-semibold text-black transition-opacity disabled:opacity-40"
         >
-          <span className="truncate">{t('sidebar.requestPostsTo', 'Posts to Requests')}</span>
+          <span className="truncate">{t('sidebar.requestPostsTo', 'Posts to Build')}</span>
           <ArrowUp className="h-3.5 w-3.5 shrink-0" strokeWidth={2.6} />
         </button>
       ) : (
-        <p className="mt-2 text-xs text-zinc-500">{t('sidebar.requestHint', 'Posts to Requests as you. We will tell you when it ships.')}</p>
+        <p className="mt-2 text-xs text-zinc-500">{t('sidebar.requestHint', 'Posts to Build as you. We will tell you when it ships.')}</p>
       )}
     </div>
   );

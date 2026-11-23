@@ -1599,9 +1599,9 @@ ${DEHUB_APP_PAGE.faq.map(({ q, a }) => `<h3>${q}</h3>\n<p>${a}</p>`).join('\n')}
   // /creator, /prompt, /affiliate and /premium have no SEOHead of their own yet,
   // so those four keep the fn's wording until the pages grow one.
   'features': {
-    title: 'Feature Requests & Bug Reporting | Riftn',
-    description: "Submit feature requests, report bugs, and vote on community ideas to shape Riftn's roadmap. Track open, in-progress, and shipped features.",
-    heading: 'Riftn Feature Requests & Bug Reporting',
+    title: 'Build Riftn by talking to it | Riftn',
+    description: 'Build Riftn by talking to it. Post ideas and bug reports as prompts, vote on what others asked for, and follow them from Queued to Shipped.',
+    heading: 'Build: shape Riftn by talking to it',
     bodyHtml: `<p>The Riftn Features page is a community board: submit new feature ideas, report bugs, and vote on suggestions to help shape the roadmap.</p>
 <ul>
 <li><strong>Submit ideas &amp; bug reports</strong>: suggest features or report bugs with device details and attachments.</li>
@@ -4421,7 +4421,7 @@ function buildProposalHtml(proposal) {
 function buildFeatureRequestHtml(feature) {
   const canonicalUrl = `${APP_URL}/features?feature=${feature.id}`;
   const name = feature.title || 'Feature Request';
-  const title = `${name} | Riftn Feature Requests`;
+  const title = `${name} | Build on Riftn`;
   const description = truncate(
     feature.description || 'A community feature request or bug report on the Riftn roadmap board.',
     200,
@@ -4443,7 +4443,7 @@ function buildFeatureRequestHtml(feature) {
     // finished bounty: shareable by whoever holds the link, not crawlable.
     noindex: feature.status === 'declined',
     heading: name,
-    breadcrumb: `<a href="${APP_URL}">Riftn</a> › <a href="${APP_URL}/features">Feature Requests</a>`,
+    breadcrumb: `<a href="${APP_URL}">Riftn</a> › <a href="${APP_URL}/features">Build</a>`,
     bodyHtml: `<p>${escHtml(description)}</p>
 <p><strong>${escHtml(status)}</strong> · ${escHtml(category)}</p>
 <p>${Number(feature.vote_count) || 0} votes · ${Number(feature.comment_count) || 0} comments · posted by ${escHtml(authorName)}</p>`,
