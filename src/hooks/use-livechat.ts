@@ -408,6 +408,9 @@ export function useLiveChatMessages(roomId: string | null, options: LiveChatPagi
   const [isBanned, setIsBanned] = useState(false);
   /** This viewer moderates the room: a stream's creator, their moderators, staff. */
   const [isModerator, setIsModerator] = useState(false);
+  /** Platform chat staff, and whether this viewer is a super moderator: only they can ban, mute or kick staff. */
+  const [staff, setStaff] = useState<string[]>([]);
+  const [isSuperModerator, setIsSuperModerator] = useState(false);
   /** Until when a stream timeout keeps this viewer quiet here, if one does. */
   const [mutedUntil, setMutedUntil] = useState<number | null>(null);
   const { isAuthenticated, user, walletAddress } = useAuth();
@@ -725,6 +728,8 @@ export function useLiveChatMessages(roomId: string | null, options: LiveChatPagi
       console.log('[LiveChat] Room joined, banned:', data.isBanned);
       setIsBanned(data.isBanned || false);
       setIsModerator(!!(data.yourUser as { isModerator?: boolean } | null)?.isModerator);
+      setIsSuperModerator(!!(data.yourUser as { isSuperModerator?: boolean } | null)?.isSuperModerator);
+      setStaff(Array.isArray(data.staff) ? data.staff.map((a) => String(a).toLowerCase()) : []);
       initialLoadDone.current = true;
     });
 
@@ -1161,7 +1166,7 @@ export function useLiveChatMessages(roomId: string | null, options: LiveChatPagi
   const refetch = useCallback(() => fetchMessages(false), [fetchMessages]);
 
   return {
-    messages, isLoading, isSending, isConnected, isBanned, isModerator, mutedUntil,
+    messages, isLoading, isSending, isConnected, isBanned, isModerator, mutedUntil, staff, isSuperModerator,
     send, retrySend, discardSend, addReaction, removeReaction, editMessage, deleteMessage,
     refetch,
     hasOlder, loadingOlder, loadOlder, signInWall,

@@ -289,6 +289,8 @@ export function onRoomJoined(roomId: string | undefined, cb: (data: {
   room: unknown;
   messages: unknown[];
   yourUser: unknown;
+  /** Platform chat staff: only a super moderator can ban, mute or kick them. */
+  staff?: string[];
   isBanned: boolean;
   canSendMessages: boolean;
 }) => void): () => void {
