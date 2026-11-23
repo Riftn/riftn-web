@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DESTRUCT_CHOICES, destructFromChoice, destructLabel, destructLeft } from '@/lib/dm-destruct';
+import { DESTRUCT_CHOICES, countdownLabel, destructFromChoice, destructLabel, destructLeft, replaysLeft, withReplay } from '@/lib/dm-destruct';
 
 describe('dm-destruct', () => {
   it('offers the seven choices in order', () => {
@@ -20,5 +20,18 @@ describe('dm-destruct', () => {
     expect(destructFromChoice('view')).toEqual({ mode: 'view' });
     expect(destructFromChoice(60, 0)).toEqual({ mode: 'time', seconds: 60, expiresAt: new Date(60_000).toISOString() });
     expect(destructFromChoice(null)).toBeNull();
+  });
+
+  it('adds one replay only to the on-open timers', () => {
+    expect(withReplay('open:10', true)).toBe('open:10:r1');
+    expect(withReplay('open:10', false)).toBe('open:10');
+    expect(withReplay('view', true)).toBe('view');
+    expect(withReplay(60, true)).toBe(60);
+    expect(withReplay(null, true)).toBeUndefined();
+    expect(destructFromChoice('open:25:r1')).toEqual({ mode: 'open', seconds: 25, replaysAllowed: 1, replaysUsed: 0 });
+    expect(replaysLeft({ mode: 'open', replaysAllowed: 1, replaysUsed: 0 })).toBe(1);
+    expect(replaysLeft({ mode: 'open', replaysAllowed: 1, replaysUsed: 1 })).toBe(0);
+    expect(replaysLeft({ mode: 'open' })).toBe(0);
+    expect(countdownLabel(28.2)).toBe('29s');
   });
 });

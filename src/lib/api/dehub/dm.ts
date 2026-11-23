@@ -1152,7 +1152,7 @@ export async function getFreeDmAccessList(): Promise<FreeAccessUser[]> {
  * both), or opened an on-open one (its countdown starts; `expiresAt` says when
  * it goes).
  */
-export async function markDmMessageViewed(messageId: string): Promise<{ status?: string; expiresAt?: string }> {
-  const res = await apiCall<{ status?: string; expiresAt?: string }>(`/api/dm/message/${encodeURIComponent(messageId)}/viewed`, { method: 'POST', requiresAuth: true });
+export async function markDmMessageViewed(messageId: string): Promise<{ status?: string; expiresAt?: string; replaysLeft?: number }> {
+  const res = await apiCall<{ status?: string; expiresAt?: string; replaysLeft?: number }>(`/api/dm/message/${encodeURIComponent(messageId)}/viewed`, { method: 'POST', requiresAuth: true });
   return (res && typeof res === 'object') ? res : {};
 }

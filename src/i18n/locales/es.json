@@ -199,7 +199,9 @@
     "destructSecs": "{{n}} seg",
     "destructShortSecs": "{{n}}s",
     "revealAria": "Revelar video oculto",
-    "tapToReveal": "Toca para revelar"
+    "tapToReveal": "Toca para revelar",
+    "timerReplay": "Permitir una repetición",
+    "timerReplayBody": "Pueden abrirlo una vez más. La cuenta atrás vuelve a empezar."
   },
   "assistantCards": {
     "requestDraft": "Borrador de solicitud pública",
@@ -13505,7 +13507,13 @@
       "opened": "Abierto",
       "tapPhoto": "Toca para ver",
       "tapVideo": "Toca para reproducir",
-      "goneAfter": "Desaparece {{time}} después de abrirlo"
+      "goneAfter": "Desaparece {{time}} después de abrirlo",
+      "left": "{{n}} s",
+      "replayAllowed": "Se permite una repetición",
+      "tapReplay": "Toca para volver a ver",
+      "lastView": "Última vez, {{time}}",
+      "goneAfterReplay": "Desaparece {{time}} después de abrirlo. Una repetición.",
+      "replaying": "Repetición"
     },
     "shareKindGroup": "Grupo",
     "shareKindChannel": "Canal",

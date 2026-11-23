@@ -199,7 +199,9 @@
     "destructSecs": "{{n}} sec",
     "destructShortSecs": "{{n}}s",
     "revealAria": "Verborgen video onthullen",
-    "tapToReveal": "Tik om te onthullen"
+    "tapToReveal": "Tik om te onthullen",
+    "timerReplay": "Eén keer opnieuw toestaan",
+    "timerReplayBody": "Ze kunnen het nog één keer openen. De teller begint opnieuw."
   },
   "assistantCards": {
     "requestDraft": "Concept voor openbaar verzoek",
@@ -13753,7 +13755,13 @@
       "opened": "Geopend",
       "tapPhoto": "Tik om te bekijken",
       "tapVideo": "Tik om te kijken",
-      "goneAfter": "Verdwijnt {{time}} nadat je het opent"
+      "goneAfter": "Verdwijnt {{time}} nadat je het opent",
+      "left": "{{n}} s",
+      "replayAllowed": "Eén keer opnieuw toegestaan",
+      "tapReplay": "Tik om opnieuw te bekijken",
+      "lastView": "Laatste keer, {{time}}",
+      "goneAfterReplay": "Verdwijnt {{time}} nadat je het opent. Eén keer opnieuw.",
+      "replaying": "Opnieuw"
     },
     "shareKindGroup": "Groep",
     "shareKindChannel": "Kanaal",

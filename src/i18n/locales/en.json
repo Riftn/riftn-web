@@ -199,7 +199,9 @@
     "destructSecs": "{{n}} sec",
     "destructShortSecs": "{{n}}s",
     "revealAria": "Reveal hidden video",
-    "tapToReveal": "Tap to reveal"
+    "tapToReveal": "Tap to reveal",
+    "timerReplay": "Allow one replay",
+    "timerReplayBody": "They can open it one more time. The countdown starts again."
   },
   "assistantCards": {
     "requestDraft": "Public request draft",
@@ -13504,7 +13506,13 @@
       "opened": "Opened",
       "tapPhoto": "Tap to view",
       "tapVideo": "Tap to watch",
-      "goneAfter": "Disappears {{time}} after you open it"
+      "goneAfter": "Disappears {{time}} after you open it",
+      "left": "{{n}}s",
+      "replayAllowed": "One replay allowed",
+      "tapReplay": "Tap to replay",
+      "lastView": "Last view, {{time}}",
+      "goneAfterReplay": "Disappears {{time}} after you open it. One replay.",
+      "replaying": "Replay"
     },
     "shareKindGroup": "Group",
     "shareKindChannel": "Channel",
