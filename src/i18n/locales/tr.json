@@ -199,7 +199,9 @@
     "destructSecs": "{{n}} sn",
     "destructShortSecs": "{{n}}s",
     "revealAria": "Gizli videoyu göster",
-    "tapToReveal": "Göstermek için dokun"
+    "tapToReveal": "Göstermek için dokun",
+    "timerReplay": "Bir kez tekrara izin ver",
+    "timerReplayBody": "Bir kez daha açabilirler. Geri sayım yeniden başlar."
   },
   "assistantCards": {
     "requestDraft": "Herkese açık istek taslağı",
@@ -13505,7 +13507,13 @@
       "opened": "Açıldı",
       "tapPhoto": "Görmek için dokun",
       "tapVideo": "İzlemek için dokun",
-      "goneAfter": "Açtıktan {{time}} sonra kaybolur"
+      "goneAfter": "Açtıktan {{time}} sonra kaybolur",
+      "left": "{{n}} sn",
+      "replayAllowed": "Bir kez tekrar açılabilir",
+      "tapReplay": "Tekrar açmak için dokun",
+      "lastView": "Son bakış, {{time}}",
+      "goneAfterReplay": "Açtıktan {{time}} sonra kaybolur. Bir kez tekrar açılabilir.",
+      "replaying": "Tekrar"
     },
     "shareKindGroup": "Grup",
     "shareKindChannel": "Kanal",
