@@ -2014,6 +2014,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
 
   const {
     messages,
+    hasHistory,
     isLoading,
     isError: messagesError,
     refetch: refetchMessages,
@@ -3586,7 +3587,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
             />
           )}
 
-          {messages.length === 0 && !feeRequired && (
+          {hasHistory && messages.length === 0 && !feeRequired && (
             <AppState icon="messages" title={_copy("copy.f42e0f66017d", { defaultValue: "No messages yet" })} description={_copy("copy.e65ae0cd6a5a", { defaultValue: "Say hello to start the conversation." })} size="section" className="h-full" />
           )}
 
