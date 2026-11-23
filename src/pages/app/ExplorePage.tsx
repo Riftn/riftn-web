@@ -433,6 +433,7 @@ export default function ExplorePage() {
   const {
     data: searchData,
     isLoading: isSearchLoading,
+    isPlaceholderData: isSearchPlaceholder,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
@@ -451,6 +452,8 @@ export default function ExplorePage() {
   // Keep the larger people list rather than the combined endpoint's top five.
   const {
     data: allTabAccountData,
+    isLoading: isAllTabAccountLoading,
+    isPlaceholderData: isAllTabAccountPlaceholder,
   } = useDeHubSearch({
     query: effectiveQuery,
     type: 'accounts',
@@ -489,6 +492,7 @@ export default function ExplorePage() {
   // Always fetch @d specifically for brand queries (d, de, deh, dehu, dehub)
   const {
     data: brandUser,
+    isLoading: isBrandUserLoading,
   } = useDeHubUserSearch({
     query: 'd', // Always look up the actual @d account
     enabled: isSearching && isBrandQuery && (activeTab === 'all' || activeTab === 'people'),
@@ -664,7 +668,20 @@ export default function ExplorePage() {
 
   const showLoading = isSearchLoading || isUserLoading;
   const showResults = isSearching && !showLoading && (searchResults.users.length > 0 || searchResults.posts.length > 0);
-  const showNoResults = isSearching && !showLoading && searchResults.users.length === 0 && searchResults.posts.length === 0;
+  const hasPriceResult = !!stockData?.found || dexPairs.length > 0;
+  // Debounced queries, cached results and the separate People lookup can settle
+  // at different times. Keep existing results visible while the new term loads.
+  const isWaitingForSearch = trimmedQuery !== baseEffectiveQuery.trim()
+    || isResolvingContract
+    || isSearchPlaceholder
+    || isAllTabAccountLoading
+    || (activeTab === 'all' && !isShortSearch && isAllTabAccountPlaceholder)
+    || isBrandUserLoading
+    || isDexLoading
+    || isStockLoading;
+  const canShowEmptySearch = isSearching && !showLoading && !searchError
+    && !isDhbQuery && !hasPriceResult
+    && searchResults.users.length === 0 && searchResults.posts.length === 0;
 
   // Track ticker searches when cashtag results appear
   const trackedTickerRef = useRef<string>('');
@@ -887,7 +904,7 @@ export default function ExplorePage() {
                 {/* Stock / Crypto Cashtag Result Switcher */}
                 {isDhbQuery ? (
                   <DhbListingSoonCard source="explore" />
-                ) : (stockData?.found || dexPairs.length > 0) && (
+                ) : hasPriceResult && (
                   <CashtagResultSwitcher
                     stockData={stockData ?? null}
                     dexPairs={dexPairs}
@@ -897,7 +914,7 @@ export default function ExplorePage() {
                 )}
 
                 {/* Loading State */}
-                {showLoading && (
+                {(showLoading || (canShowEmptySearch && isWaitingForSearch)) && (
                   <div className="flex items-center justify-center py-12">
                     <div className="flex items-center gap-3 text-zinc-400">
                       <Loader2 className="w-5 h-5 animate-spin" />
@@ -991,7 +1008,7 @@ export default function ExplorePage() {
                 )}
 
                 {/* No Results */}
-                {showNoResults && !isDhbQuery && (
+                {canShowEmptySearch && !isWaitingForSearch && (
                   <div className="text-center py-8">
                     <p className="text-zinc-400">{t('explorePage.noResultsFor', { query: searchQuery })}</p>
                     <p className="text-zinc-500 text-sm mt-1">{t('explorePage.tryDifferent')}</p>
