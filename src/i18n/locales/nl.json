@@ -23750,7 +23750,14 @@
     "imageOnly": "Kies een afbeelding of GIF. Voeg video, muziek of bestanden na het minten toe als extra's voor eigenaren.",
     "tooBig": "Dat bestand is groter dan 42 MB",
     "minted": "NFT gemint. Hij staat binnen een minuut op de markt.",
-    "failed": "Kon de NFT niet maken"
+    "failed": "Kon de NFT niet maken",
+    "newNft": "Nieuwe NFT",
+    "untitled": "Zonder titel",
+    "addArt": "Voeg een afbeelding of GIF toe",
+    "tileEarn": "{{pct}} voor jou bij doorverkoop",
+    "otherCopies": "Anders",
+    "otherPlaceholder": "Elk getal, zoals 250 of 50000",
+    "chain": "Chain"
   },
   "profileImage": {
     "view": "Foto bekijken"

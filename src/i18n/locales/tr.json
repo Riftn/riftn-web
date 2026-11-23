@@ -23502,7 +23502,14 @@
     "imageOnly": "Bir resim veya GIF seç. Video, müzik veya dosyaları mint ettikten sonra sahiplere özel ekstra olarak ekle.",
     "tooBig": "Bu dosya 42 MB'tan büyük",
     "minted": "NFT mint edildi. Bir dakika içinde pazarda görünür.",
-    "failed": "NFT oluşturulamadı"
+    "failed": "NFT oluşturulamadı",
+    "newNft": "Yeni NFT",
+    "untitled": "Adsız",
+    "addArt": "Bir resim veya GIF ekle",
+    "tileEarn": "Yeniden satışlarda sana {{pct}}",
+    "otherCopies": "Diğer",
+    "otherPlaceholder": "Herhangi bir sayı, örneğin 250 veya 50000",
+    "chain": "Zincir"
   },
   "profileImage": {
     "view": "Fotoğrafı gör"

@@ -23506,7 +23506,14 @@
     "imageOnly": "Choisis une image ou un GIF. Ajoute vidéo, musique ou fichiers en extras pour les propriétaires après le mint.",
     "tooBig": "Ce fichier dépasse 42 Mo",
     "minted": "NFT minté. Il apparaît sur le marché d'ici une minute.",
-    "failed": "Impossible de créer le NFT"
+    "failed": "Impossible de créer le NFT",
+    "newNft": "Nouveau NFT",
+    "untitled": "Sans titre",
+    "addArt": "Ajoute une image ou un GIF",
+    "tileEarn": "{{pct}} pour toi à la revente",
+    "otherCopies": "Autre",
+    "otherPlaceholder": "N’importe quel nombre, comme 250 ou 50000",
+    "chain": "Chaîne"
   },
   "profileImage": {
     "view": "Voir la photo"

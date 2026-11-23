@@ -38,7 +38,7 @@ interface Cost {
  * it pays the quoted fee (gas is in it); an external wallet sends the mint
  * itself, so it pays the gas and nothing else.
  */
-function describeCost(quote: MintFeeQuoteResponse, sponsored: boolean, t: TFunction): Cost | null {
+export function describeCost(quote: MintFeeQuoteResponse, sponsored: boolean, t: TFunction): Cost | null {
   if (sponsored) {
     if (!quote.chargeable || !(quote.amount > 0)) {
       return { primary: t('mintChain.free', { defaultValue: 'Free' }), secondary: t('mintChain.gasCovered', { defaultValue: 'Gas covered by Riftn' }) };
