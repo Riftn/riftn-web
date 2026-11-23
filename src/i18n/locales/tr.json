@@ -1813,6 +1813,10 @@
     "tokensUnit": "token"
   },
   "postOptions": {
+    "copyImage": "Görseli kopyala",
+    "copyGif": "GIF'i kopyala",
+    "copyVideo": "Videoyu kopyala",
+    "videoLinkCopied": "Video bağlantısı kopyalandı",
     "notInterestedDone": "Anlaşıldı. Bunun gibi daha az gönderi göreceksin.",
     "notInterested": "İlgilenmiyorum",
     "liveAlertsOn": "Artık {{name}} kullanıcısını takip ediyorsunuz. Canlı yayına geçtiğinde bildirim alacaksınız.",

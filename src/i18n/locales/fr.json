@@ -1813,6 +1813,10 @@
     "tokensUnit": "jetons"
   },
   "postOptions": {
+    "copyImage": "Copier l'image",
+    "copyGif": "Copier le GIF",
+    "copyVideo": "Copier la vidéo",
+    "videoLinkCopied": "Lien de la vidéo copié",
     "notInterestedDone": "Compris. Vous verrez moins de publications comme celle-ci.",
     "notInterested": "Pas intéressé",
     "liveAlertsOn": "Vous suivez désormais {{name}}. Vous recevrez une notification dès le début du direct.",
