@@ -209,3 +209,16 @@ export const SOUND_SOURCE_NAMES: Record<Exclude<SoundSourceId, 'riftn'>, string>
   audius: 'Audius',
   commons: 'Wikimedia Commons',
 };
+
+/**
+ * Where a freshly picked song's part starts: about a third of the way in,
+ * where most songs reach their first chorus, rather than the quiet intro.
+ * Short songs, and songs that fit the part whole, start at the top. The
+ * person can still drag the part anywhere.
+ */
+export function suggestedSoundStart(duration: number | null | undefined, partLength: number): number {
+  if (!duration || !Number.isFinite(duration) || duration < 30) return 0;
+  const maxStart = duration - partLength;
+  if (maxStart <= 0.5) return 0;
+  return Math.max(0, Math.round(Math.min(duration * 0.3, maxStart)));
+}
