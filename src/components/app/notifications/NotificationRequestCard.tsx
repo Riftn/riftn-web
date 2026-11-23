@@ -109,7 +109,7 @@ export function NotificationRequestCard({ notification, onEngaged }: Props) {
 
   const stop = (e: React.SyntheticEvent) => e.stopPropagation();
   const open = () => {
-    const base = `/features?request=${encodeURIComponent(fid)}`;
+    const base = `/build?request=${encodeURIComponent(fid)}`;
     navigate(isNew ? base : `${base}&comments=1&comment=${encodeURIComponent(comment!.id)}`);
   };
 

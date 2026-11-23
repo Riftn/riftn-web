@@ -42,7 +42,7 @@ export function EarlySupporterChip({ address, username, className }: EarlySuppor
 
   return (
     <Link
-      to={data.latestId ? `/app/features?feature=${data.latestId}` : '/app/features'}
+      to={data.latestId ? `/build?feature=${data.latestId}` : '/build'}
       data-early-supporter-chip
       title={title}
       aria-label={title}

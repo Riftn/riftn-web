@@ -25,7 +25,7 @@ const extract = readFileSync(join(here, 'page-bones-extract.js'), 'utf8');
 /** Cached page key (PersistentPageCache) -> the path that opens it. */
 export const PAGES = {
   explore: '/explore', assistant: '/assistant', leaderboard: '/leaderboard', music: '/music', stages: '/stages',
-  tv: '/tv', buy: '/buy', agents: '/agents', features: '/features', governance: '/governance', dao: '/dao',
+  tv: '/tv', buy: '/buy', agents: '/agents', features: '/build', governance: '/governance', dao: '/dao',
   careers: '/jobs', glossary: '/glossary', stats: '/stats', feedback: '/feedback', stake: '/stake',
   bridge: '/bridge', 'top-100': '/top-100', communities: '/communities', events: '/events',
   fractions: '/fractions', usernames: '/usernames', accounts: '/accounts', work: '/work', arcade: '/arcade',

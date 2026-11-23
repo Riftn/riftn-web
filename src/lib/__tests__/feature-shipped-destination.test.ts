@@ -43,6 +43,6 @@ describe('getShippedFeatureDestination', () => {
     expect(getShippedFeatureDestination({
       id: 'request with spaces',
       title: 'Something entirely new',
-    })).toBe('/app/features?tab=shipped&feature=request%20with%20spaces');
+    })).toBe('/build?tab=shipped&feature=request%20with%20spaces');
   });
 });

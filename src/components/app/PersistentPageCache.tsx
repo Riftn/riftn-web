@@ -122,7 +122,7 @@ const CACHED_PAGES: CachedPageConfig[] = [
   { key: 'tv', path: ['/app/tv', '/tv'], component: TVPage, skeleton: withPageBones('tv', GridSkeleton) },
   { key: 'buy', path: BUY_PATHS, component: BuyCoinsPage, skeleton: withPageBones('buy', GenericPageSkeleton) },
   { key: 'agents', path: ['/app/agents', '/agents'], component: AgentsPage, skeleton: withPageBones('agents', GenericPageSkeleton) },
-  { key: 'features', path: ['/app/features', '/features'], component: FeaturesPage, skeleton: withPageBones('features', FeaturesSkeletonDesktop) },
+  { key: 'features', path: ['/build'], component: FeaturesPage, skeleton: withPageBones('features', FeaturesSkeletonDesktop) },
   { key: 'governance', path: ['/app/governance', '/governance'], component: GovernancePage, skeleton: withPageBones('governance', FeaturesSkeleton) },
   { key: 'dao', path: ['/app/dao', '/dao'], component: DaoPage, skeleton: withPageBones('dao', FeaturesSkeleton) },
   { key: 'careers', path: ['/app/jobs', '/jobs'], component: CareersPage, skeleton: withPageBones('careers', GenericPageSkeleton) },

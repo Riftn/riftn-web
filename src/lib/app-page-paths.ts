@@ -32,7 +32,7 @@ export const APP_PAGE_PATHS: readonly string[] = [
   '/app/events',
   '/app/leaderboard',
   '/leaderboard',
-  '/features',
+  '/build',
   '/feedback',
   '/app/stake',
   '/app/superpowers',
@@ -97,7 +97,9 @@ const KNOWN = new Set(APP_PAGE_PATHS);
  * null when it is not a page we know.
  */
 export function appPageFor(pathname: string): string | null {
-  const clean = (pathname.replace(/\/+$/, '') || '/').toLowerCase();
+  let clean = (pathname.replace(/\/+$/, '') || '/').toLowerCase();
+  // The Build board's older addresses still card as the board.
+  if (/^(?:\/app)?\/(?:features|requests|build)$/.test(clean)) clean = '/build';
   if (KNOWN.has(clean)) return clean;
   const swapped = clean.startsWith('/app/') ? clean.slice(4) : `/app${clean}`;
   if (KNOWN.has(swapped)) return swapped;
