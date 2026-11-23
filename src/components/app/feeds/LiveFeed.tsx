@@ -176,7 +176,7 @@ export function LiveFeed({ isRefreshing = false, showFilters = false }: LiveFeed
           <div className="space-y-3">
             <div className="flex items-center justify-between px-1">
               <h2 className="font-bold text-white flex items-center gap-2">
-                <span data-live-pulse className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />{game ? game.name : _copy("copy.bfd297afbf9e", { defaultValue: "Streams" })}</h2>
+                {shownStreams.some(s => s.isLive) && <span data-live-pulse className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />}{game ? game.name : _copy("copy.bfd297afbf9e", { defaultValue: "Streams" })}</h2>
               {game && (
                 <button onClick={() => setSelectedCategory(null)} className="text-red-400 text-sm hover:underline">{_copy("copy.e1c32645f2f8", { defaultValue: "Show All" })}</button>
               )}

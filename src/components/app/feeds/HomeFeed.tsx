@@ -1995,7 +1995,7 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
         if (posts === LIVE_INSERT_AFTER && liveNowStreams.length) inserts.push(
           <div key="live-now" className="space-y-2">
             <div className="flex items-center gap-2 px-1">
-              <span data-live-pulse className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+              {liveNowStreams.some(stream => stream.isLive) && <span data-live-pulse className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />}
               <h3 className="text-white font-semibold text-sm">{_copy("copy.e4629246c285", { defaultValue: "Livestreams" })}</h3>
             </div>
             <SwipeableCarousel>
