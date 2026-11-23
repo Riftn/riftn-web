@@ -80,7 +80,7 @@ import dehubLogo from '@/assets/dehub-logo.png';
 import { SEOHead } from '@/components/SEOHead';
 import { blockUser } from '@/lib/api/dehub/blocks';
 import { toast } from 'sonner';
-import { GroupChatNotesRow, NoteFaceRing, NoteTag, NotesSheetHost, openNotesSheet, useGroupNotes, useNotesByAuthor } from '@/components/app/chat/NotesRow';
+import { GroupChatNotesRow, NoteFaceRing, NotesSheetHost, openNotesSheet, useGroupNotes, useNotesByAuthor } from '@/components/app/chat/NotesRow';
 import type { NoteEntry } from '@/lib/api/dehub/notes';
 import { LiveRipple } from '@/components/app/LiveRipple';
 import { NewGroupChannelSheet, type NewChatKind } from '@/components/app/chat/NewGroupChannelSheet';
@@ -244,7 +244,7 @@ export function ConversationItem({
           </AvatarFallback>
         </Avatar>
       </LiveRipple>
-      {note && <NoteFaceRing note={note.note} />}
+      {note && <NoteFaceRing entry={note} />}
       </span>
 
       <div className="flex-1 min-w-0">
@@ -287,7 +287,6 @@ export function ConversationItem({
           <p data-reaction-alert-line className="text-sm truncate text-white font-bold">{reactionLine}</p>
         ) : (
           <p className={`text-sm truncate text-white ${conversation.unreadCount > 0 ? 'font-bold' : 'font-normal'}`}>
-            {note && <NoteTag entry={note} />}
             {conversation.lastMessage?.encMedia
               ? encryptedMediaLabel(conversation.lastMessage.encMedia, _copy) :
              conversation.lastMessage?.type === 'image' ? _copy("copy.1b13ff986443", { defaultValue: "📷 Photo" }) :
@@ -644,6 +643,21 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const tabFilter = tabsOn && activeTab === 'unread' && !showArchived && !inRequests ? 'unread' : 'all';
   const shownConversations = tabFilter === 'unread' ? listedConversations.filter(convHasUnread) : listedConversations;
   const shownRooms = tabFilter === 'unread' ? listedRooms.filter(roomHasUnread) : listedRooms;
+  // A note already riding on its author's own chat row needn't repeat on every
+  // group you share with them: one note, one place in the list. Keeps it on the
+  // group when that row is the only place the author shows up here.
+  const dmNoteAuthors = new Set(
+    shownConversations
+      .filter(convInTab)
+      .map(c => (c.otherUser || c.participants?.[0])?.address?.toLowerCase())
+      .filter((a): a is string => !!a),
+  );
+  const groupNotesFor = (id: string) => {
+    const all = groupNotes[id];
+    if (!all?.length) return all;
+    const kept = all.filter(e => !dmNoteAuthors.has(e.author.address.toLowerCase()));
+    return kept.length === all.length ? all : kept;
+  };
   // Glass, full screen on computers: pinned chats ride as bubbles above the list.
   const pinStrip = richList && fullscreen && !phonePill && !showArchived && !inRequests && !searchQuery.trim()
     ? listedConversations.filter(c => pinnedAt(c) > 0)
@@ -1704,7 +1718,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                   summary={roomSummaries[chat.id]}
                   me={walletAddress || ''}
                   reactions={selectedRoom?.id === chat.id ? null : roomPref(chat)?.reactions}
-                  notes={groupNotes[chat.id]}
+                  notes={groupNotesFor(chat.id)}
                   selected={fullscreen && selectedRoom?.id === chat.id}
                   onClick={() => {
                     if (picking) { toggleBulk(roomChatId(chat.id)); return; }

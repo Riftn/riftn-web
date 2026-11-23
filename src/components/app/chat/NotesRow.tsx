@@ -111,17 +111,18 @@ export function useNoteLeft(note: Note | null): number {
  * Countdown ring: a rounded-square line that drains as the 24 hours run out.
  * Drawn in currentColor (text-white), so light themes repaint it with the ink.
  */
-export function NoteRing({ left, size = 64, radius = 14 }: { left: number; size?: number; radius?: number }) {
+export function NoteRing({ left, size = 64, radius = 14, dim }: { left: number; size?: number; radius?: number; dim?: boolean }) {
   const stroke = 2.5;
   const side = size - stroke;
   const len = 4 * (side - 2 * radius) + 2 * Math.PI * radius;
   const box = { x: stroke / 2, y: stroke / 2, width: side, height: side, rx: radius, ry: radius, fill: 'none', strokeWidth: stroke };
   return (
     <svg data-note-ring width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white" aria-hidden>
-      <rect {...box} stroke="currentColor" strokeOpacity={0.16} />
+      <rect {...box} stroke="currentColor" strokeOpacity={dim ? 0.1 : 0.16} />
       <rect
         {...box}
         stroke="currentColor"
+        strokeOpacity={dim ? 0.55 : 1}
         strokeLinecap="round"
         strokeDasharray={`${len} ${len}`}
         strokeDashoffset={len * (1 - left)}
@@ -509,10 +510,27 @@ export function NoteTag({ entry }: { entry: NoteEntry }) {
   );
 }
 
-/** The 24h ring around a chat card's face (a 48px rounded square). */
-export function NoteFaceRing({ note }: { note: Note }) {
-  const left = useNoteLeft(note);
-  return <NoteRing left={left} size={58} radius={16} />;
+/**
+ * The 24h ring around a chat card's face (a 48px rounded square). The ring is
+ * the obvious thing to tap, so it carries the press that opens the note: the
+ * SVG takes no pointer events, hence the pad sitting over the face. With the
+ * face itself opening the note there is no tag on the preview line, which
+ * kept a 24h status looking like an unread message.
+ */
+export function NoteFaceRing({ entry }: { entry: NoteEntry }) {
+  const { t } = useTranslation();
+  const left = useNoteLeft(entry.note);
+  return (
+    <>
+      <NoteRing left={left} size={58} radius={16} dim />
+      <span
+        data-note-face-press
+        aria-label={t('notes.openFrom', { defaultValue: 'Note from {{name}}', name: nameOf(entry.author) })}
+        {...cardPress(() => openNotesSheet(entry))}
+        className="absolute left-1/2 top-1/2 h-[58px] w-[58px] -translate-x-1/2 -translate-y-1/2 rounded-[16px]"
+      />
+    </>
+  );
 }
 
 /**
