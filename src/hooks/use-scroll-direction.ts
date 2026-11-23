@@ -34,6 +34,15 @@ let lastScrollY = 0;
 let touchLastY = 0;
 /** The tagged element currently being scrolled, if any; null = the document. */
 let activeScroller: HTMLElement | null = null;
+/**
+ * Set when the reader lands on a page (Back, swipe back, a tab, a link): the
+ * chrome is shown and stays shown until the reader's own finger, wheel or key
+ * moves the page. Landing scrolls the page by itself (Back restores the old
+ * offset frame by frame while the page fills in), and those jumps read as a
+ * hard scroll down, which is why the bars stayed hidden after a swipe back
+ * from a profile to the feed.
+ */
+let holdUntilInput = false;
 const subscribers = new Set<() => void>();
 const stickyNavSubscribers = new Set<() => void>();
 let detach: (() => void) | null = null;
@@ -71,7 +80,7 @@ function updateStickyNavVisibility(y: number) {
   if (y <= STICKY_NAV_TOP_THRESHOLD) setStickyNavVisible(true);
   // Once hidden, only reaching the top can show it. Measuring it again on
   // every event cannot change the result and forces needless style/layout.
-  else if (stickyNavVisible && y >= getStickyNavHideThreshold()) setStickyNavVisible(false);
+  else if (!holdUntilInput && stickyNavVisible && y >= getStickyNavHideThreshold()) setStickyNavVisible(false);
 }
 
 function attachListeners(): () => void {
@@ -99,6 +108,7 @@ function attachListeners(): () => void {
     const y = getY();
     const diff = y - lastScrollY;
     lastScrollY = y;
+    if (holdUntilInput) return;
     updateStickyNavVisibility(y);
     if (y <= TOP_THRESHOLD) { setVisible(true); return; }
     if (diff > 4)  setVisible(false);
@@ -132,7 +142,13 @@ function attachListeners(): () => void {
 
   // ── touch events: most reliable on iOS/Android ──────────────────────────
   const onTouchStart = (e: TouchEvent) => {
+    holdUntilInput = false;
     touchLastY = e.touches[0].clientY;
+    lastScrollY = getY();
+  };
+  const onReaderInput = () => {
+    if (!holdUntilInput) return;
+    holdUntilInput = false;
     lastScrollY = getY();
   };
 
@@ -150,6 +166,9 @@ function attachListeners(): () => void {
     // up within the same touch never re-showed the nav (the stuck bug).
     const moved = touchLastY - currentY;
     touchLastY = currentY;
+    // The finger that swiped back is still down on the page it landed on;
+    // only a fresh touch counts as the reader scrolling here.
+    if (holdUntilInput) return;
     updateStickyNavVisibility(y);
     if (y <= TOP_THRESHOLD) { setVisible(true); return; }
     if (moved > 6)  setVisible(false);  // finger up   → scrolling down → hide
@@ -161,6 +180,8 @@ function attachListeners(): () => void {
   window.addEventListener('scroll', onCapturedScroll, { passive: true, capture: true });
   window.addEventListener('touchstart', onTouchStart, { passive: true });
   window.addEventListener('touchmove',  onTouchMove,  { passive: true });
+  window.addEventListener('wheel', onReaderInput, { passive: true, capture: true });
+  window.addEventListener('keydown', onReaderInput, true);
 
   return () => {
     window.removeEventListener('scroll', onCapturedScroll, { capture: true });
@@ -168,7 +189,26 @@ function attachListeners(): () => void {
     activeScroller = null;
     window.removeEventListener('touchstart', onTouchStart);
     window.removeEventListener('touchmove',  onTouchMove);
+    window.removeEventListener('wheel', onReaderInput, { capture: true });
+    window.removeEventListener('keydown', onReaderInput, true);
   };
+}
+
+/** Phones and tablets only: the chrome never hides from scroll at `lg` and up. */
+const PHONE_CHROME_QUERY = '(max-width: 1023.98px)';
+
+/**
+ * Bring the header, the bottom nav and every page pill back, and keep them
+ * there until the reader scrolls again. Called on every page change (Back,
+ * swipe back, Forward, a tab, a link), so arriving anywhere — the feed after a
+ * profile, a profile after a post — always shows where you are. Desktop is
+ * left alone.
+ */
+export function revealNavChrome(): void {
+  if (typeof window === 'undefined' || !window.matchMedia?.(PHONE_CHROME_QUERY).matches) return;
+  holdUntilInput = true;
+  setVisible(true);
+  setStickyNavVisible(true);
 }
 
 function subscribe(cb: () => void): () => void {
