@@ -2552,7 +2552,9 @@
       "bountySubmittedNamed": "{{name}}, “{{title}}” ödülünüz için çalışma gönderdi",
       "bountySubmitted": "{{name}} ödülünüz için çalışma gönderdi",
       "sentNotification": "{{name}} size bir bildirim gönderdi",
-      "fractionGift": "{{name}} sana parça gönderdi"
+      "fractionGift": "{{name}} sana parça gönderdi",
+      "storyLiked": "{{name}} Anını beğendi",
+      "storyMention": "{{name}} Anında senden bahsetti"
     }
   },
   "leaderboard": {
@@ -7790,6 +7792,8 @@
     "moreActions": "Hikâye seçenekleri",
     "remixing": "{{name}} adlı kişinin hikâyesi remiksleniyor",
     "watchOriginal": "Orijinal hikâyeyi izle",
+    "hiddenCount": "Gizli ({{count}})",
+    "showHidden": "Gizlileri göster ({{count}})",
     "translate": "Çevir",
     "seeOriginal": "Orijinali gör",
     "translating": "Çevriliyor…",
@@ -7848,6 +7852,7 @@
     "fromAPost": "Bir gönderiden",
     "postNotPublic": "Yalnızca herkese açık gönderiler An'a paylaşılabilir.",
     "postNotMedia": "Yalnızca fotoğraf ve video gönderileri An'a paylaşılabilir.",
+    "mentionedYou": "Anında senden bahsetti",
     "watchMomentsOf": "{{name}} kişisinin Anlarını izle",
     "momentEnded": "O An sona erdi",
     "momentOpenFailed": "O An açılamadı"

@@ -2552,7 +2552,9 @@
       "bountySubmittedNamed": "قدم {{name}} عملًا على مكافأتك \\\"{{title}}\\\"",
       "bountySubmitted": "قدم {{name}} عملًا على مكافأتك",
       "sentNotification": "أرسل لك {{name}} إشعارًا",
-      "fractionGift": "{{name}} أرسل لك حصصًا"
+      "fractionGift": "{{name}} أرسل لك حصصًا",
+      "storyLiked": "أعجب {{name}} بلحظتك",
+      "storyMention": "ذكرك {{name}} في لحظته"
     }
   },
   "leaderboard": {
@@ -7814,6 +7816,8 @@
     "moreActions": "خيارات القصة",
     "remixing": "إعادة مزج قصة {{name}}",
     "watchOriginal": "مشاهدة القصة الأصلية",
+    "hiddenCount": "مخفي ({{count}})",
+    "showHidden": "إظهار المخفي ({{count}})",
     "translate": "ترجمة",
     "seeOriginal": "عرض الأصل",
     "translating": "جارٍ الترجمة…",
@@ -7872,6 +7876,7 @@
     "fromAPost": "من منشور",
     "postNotPublic": "يمكن مشاركة المنشورات العامة فقط في لحظة.",
     "postNotMedia": "يمكن مشاركة منشورات الصور والفيديو فقط في لحظة.",
+    "mentionedYou": "ذكرك في لحظته",
     "watchMomentsOf": "شاهد لحظات {{name}}",
     "momentEnded": "انتهت تلك اللحظة",
     "momentOpenFailed": "تعذّر فتح تلك اللحظة"
