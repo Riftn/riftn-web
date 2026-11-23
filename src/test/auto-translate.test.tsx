@@ -97,6 +97,16 @@ describe('auto-translate', () => {
     await waitFor(() => expect(invoke).toHaveBeenCalledTimes(1));
   });
 
+  it('asks for Traditional Chinese when the source already uses Han characters', async () => {
+    localStorage.setItem('user-preferred-language', 'zh_tw');
+    const text = '欢迎大家来这里看看';
+    const traditional = '歡迎大家來這裡看看';
+    invoke.mockResolvedValue({ data: { translatedText: traditional }, error: null });
+    await renderTranslatable(text);
+    await waitFor(() => expect(screen.getByText(traditional)).toBeInTheDocument());
+    expect(invoke).toHaveBeenCalledWith('translate-text', { body: { text, targetLang: 'zh_tw', public: true } });
+  });
+
   it('discards an old language response without blocking the new language', async () => {
     let answerOld!: (value: unknown) => void;
     let answerNew!: (value: unknown) => void;

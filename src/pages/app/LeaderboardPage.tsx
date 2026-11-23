@@ -1,3 +1,4 @@
+import { tokenLabel } from '@/lib/token-label';
 import { useTranslation as _useCopy } from 'react-i18next';
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
 /**
@@ -330,7 +331,7 @@ export default function LeaderboardPage() {
   const ogValueParts = (entry: LeaderboardEntry): [string, string | null] => {
     const og = entry as OgChallengeEntry;
     const holders = String(t('leaderboard.ogHolders', { defaultValue: '{{count}} OG holders', count: og.directReferrals ?? 0 }));
-    return [holders, og.ogDhb ? formatLeaderboardNumber(og.ogDhb) + ' DHB' : null];
+    return [holders, og.ogDhb ? formatLeaderboardNumber(og.ogDhb) + ` ${tokenLabel()}` : null];
   };
 
   const formatDisplayValue = (entry: LeaderboardEntry): string => {
@@ -510,7 +511,7 @@ export default function LeaderboardPage() {
         {isOgChallenge && (
           <div data-og-challenge-note className={cn('mb-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-300', phone && 'mx-3')}>
             <p className="font-semibold text-white">{t('leaderboard.ogChallengeTitle', 'Bring back the OG holders')}</p>
-            <p className="mt-1">{t('leaderboard.ogChallengeBody', 'Invite people who still hold DHB. When they join with your invite link and keep their DHB in their Riftn wallet, they count for you here.')}</p>
+            <p className="mt-1">{t('leaderboard.ogChallengeBody', 'Invite people who still hold tokens. When they join with your invite link and keep their tokens in their Riftn wallet, they count for you here.')}</p>
             <Link to="/app/affiliate" className={cn('mt-2 inline-block font-semibold text-white underline underline-offset-4', FOCUS_RING)}>
               {t('leaderboard.ogChallengeCta', 'Get your invite link')}
             </Link>

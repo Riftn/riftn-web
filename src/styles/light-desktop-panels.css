@@ -112,8 +112,18 @@
   }
 
   html[data-system-tone='light']:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
+    [data-sidebar-glass-surface] [data-sidebar-search-inset] {
+    padding-inline: var(--desktop-pearl-inset) !important;
+  }
+
+  html[data-system-tone='light']:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
     [data-sidebar-glass-surface][data-rail-collapsed='true'] [data-desktop-nav-list] {
     padding: 8px !important;
+  }
+
+  html[data-system-tone='light']:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
+    [data-sidebar-glass-surface][data-rail-collapsed='true'] [data-sidebar-search-inset] {
+    padding-inline: 8px !important;
   }
 
   html[data-system-tone='light']:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)

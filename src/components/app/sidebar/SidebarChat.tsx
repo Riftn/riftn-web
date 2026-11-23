@@ -834,7 +834,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
             onSelect={mention.handleSelect}
             onClose={mention.handleClose}
           />
-          <div data-live-chat-toolbar className="flex items-center justify-end gap-2 pt-1">
+          <div data-live-chat-toolbar className="flex flex-wrap items-center justify-end gap-2 pt-1">
             {roomId && (
               <div className="mr-auto flex items-center gap-3">
                 <LiveChatOnlineCount count={onlineCount} />
@@ -853,34 +853,36 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
                 </button>
               </div>
             )}
-            <Button type="button" data-chat-composer-action variant="ghost" size="icon" disabled={uploadingImage || isSending} aria-label={_copy("copy.21298c62c8e5", { defaultValue: "Attach a file" })} title={_copy("copy.21298c62c8e5", { defaultValue: "Attach a file" })} onClick={() => {
-              if (!isAuthenticated) { openLoginModal(); return; }
-              imageInputRef.current?.click();
-            }} className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-700">
-              <Attach className="h-5 w-5" />
-            </Button>
-            <VoiceRecorder
-              onRecordingComplete={handleVoiceRecordingComplete}
-              disabled={isSending || uploadingImage}
-            />
-            <EmojiGifPicker
-              onEmojiSelect={handleEmojiSelect}
-              onGifSelect={handleGifSelect}
-            />
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleSend}
-              data-chat-composer-action
-              disabled={(!newMessage.trim() && !imageFile) || isSending || uploadingImage}
-              className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-700"
-            >
-              {isSending || uploadingImage ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <Send className="w-5 h-5" />
-              )}
-            </Button>
+            <div className="flex max-w-full flex-wrap items-center justify-end gap-2 [&>button]:shrink-0 [&>button]:rounded-lg">
+              <Button type="button" data-chat-composer-action variant="ghost" size="icon" disabled={uploadingImage || isSending} aria-label={_copy("copy.21298c62c8e5", { defaultValue: "Attach a file" })} title={_copy("copy.21298c62c8e5", { defaultValue: "Attach a file" })} onClick={() => {
+                if (!isAuthenticated) { openLoginModal(); return; }
+                imageInputRef.current?.click();
+              }} className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-700">
+                <Attach className="h-5 w-5" />
+              </Button>
+              <VoiceRecorder
+                onRecordingComplete={handleVoiceRecordingComplete}
+                disabled={isSending || uploadingImage}
+              />
+              <EmojiGifPicker
+                onEmojiSelect={handleEmojiSelect}
+                onGifSelect={handleGifSelect}
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleSend}
+                data-chat-composer-action
+                disabled={(!newMessage.trim() && !imageFile) || isSending || uploadingImage}
+                className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-700"
+              >
+                {isSending || uploadingImage ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Send className="w-5 h-5" />
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       </div>

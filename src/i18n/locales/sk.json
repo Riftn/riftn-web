@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Upraviť video", "hiddenTag": "Skryté", "tapToEdit": "Ťuknutím upravíte", "cover": "Obálka", "trim": "Orezať", "mirror": "Zrkadliť", "rotate": "Otočiť", "hide": "Skryť", "timer": "Časovač", "sheetTitleAny": "Upraviť pred odoslaním", "close": "Zavrieť", "replace": "Nahradiť", "hiddenUntilTap": "Skryté, kým na to neklepnú", "pause": "Pozastaviť", "play": "Prehrať video", "mute": "Stlmiť", "unmute": "Zrušiť stlmenie", "scrub": "Posúvať sa videom", "addMore": "Pridať fotky alebo videá", "trimAria": "Potiahnutím koncov orezáte", "coverAria": "Klepnite na snímku a nastavte ju ako obálku", "coverHint": "Klepnite na snímku a nastavte ju ako obálku", "coverOwn": "Váš obrázok", "coverAuto": "Automaticky", "uploadCover": "Nahrať obrázok obálky", "mirrored": "Zrkadlené", "original": "Pôvodné", "rotate90": "Otočiť o 90°", "showNormally": "Zobraziť normálne", "showNormallyBody": "Uvidia to hneď", "hideUntilTap": "Skryť, kým na to neklepnú", "hideUntilTapBody": "Rozmazané, kým na to neklepnú", "hidePrice": "Skryť za cenu", "hidePriceBody": "Rozmazané, kým vám nezaplatia", "priceUnavailable": "Nie v tomto chate", "timerOff": "Vypnuté", "timerOffBody": "Zostáva to v chate.", "timerViewBody": "Zmizne to pre oboch, akonáhle si to pozrú.", "confirm": "Potvrdiť", "lockedFor": "Odomknúť za {{value1}} DHB", "lockedForUsd": "Odomknúť za {{value1}}", "editItem": "Upraviť položku {{value1}}", "kept": "{{time}} ponechané", "timerTimeBody": "Zmizne to pre oboch {{value1}} po odoslaní."},
+  "dmVideo": {"edit": "Upraviť video", "hiddenTag": "Skryté", "tapToEdit": "Ťuknutím upravíte", "cover": "Obálka", "trim": "Orezať", "mirror": "Zrkadliť", "rotate": "Otočiť", "hide": "Skryť", "timer": "Časovač", "sheetTitleAny": "Upraviť pred odoslaním", "close": "Zavrieť", "replace": "Nahradiť", "hiddenUntilTap": "Skryté, kým na to neklepnú", "pause": "Pozastaviť", "play": "Prehrať video", "mute": "Stlmiť", "unmute": "Zrušiť stlmenie", "scrub": "Posúvať sa videom", "addMore": "Pridať fotky alebo videá", "trimAria": "Potiahnutím koncov orezáte", "coverAria": "Klepnite na snímku a nastavte ju ako obálku", "coverHint": "Klepnite na snímku a nastavte ju ako obálku", "coverOwn": "Váš obrázok", "coverAuto": "Automaticky", "uploadCover": "Nahrať obrázok obálky", "mirrored": "Zrkadlené", "original": "Pôvodné", "rotate90": "Otočiť o 90°", "showNormally": "Zobraziť normálne", "showNormallyBody": "Uvidia to hneď", "hideUntilTap": "Skryť, kým na to neklepnú", "hideUntilTapBody": "Rozmazané, kým na to neklepnú", "hidePrice": "Skryť za cenu", "hidePriceBody": "Rozmazané, kým vám nezaplatia", "priceUnavailable": "Nie v tomto chate", "timerOff": "Vypnuté", "timerOffBody": "Zostáva to v chate.", "timerViewBody": "Zmizne to pre oboch, akonáhle si to pozrú.", "confirm": "Potvrdiť", "lockedFor": "Odomknúť za {{value1}} tokenov", "lockedForUsd": "Odomknúť za {{value1}}", "editItem": "Upraviť položku {{value1}}", "kept": "{{time}} ponechané", "timerTimeBody": "Zmizne to pre oboch {{value1}} po odoslaní."},
   "postBg": {
     "addMedia": "Pridať obrázok, GIF alebo video",
     "changeMedia": "Zmeniť obrázok, GIF alebo video",
@@ -2170,7 +2170,7 @@
     "ogHolders_one": "{{count}} OG držiteľ",
     "ogHolders_other": "{{count}} OG držiteľov",
     "ogChallengeTitle": "Priveďte späť OG držiteľov",
-    "ogChallengeBody": "Pozvite ľudí, ktorí stále držia DHB. Keď sa pripoja cez váš pozývací odkaz a ponechajú si DHB vo svojej peňaženke Riftn, započítajú sa vám tu.",
+    "ogChallengeBody": "Pozvite ľudí, ktorí stále držia tokenov. Keď sa pripoja cez váš pozývací odkaz a ponechajú si tokenov vo svojej peňaženke Riftn, započítajú sa vám tu.",
     "ogChallengeCta": "Získať pozývací odkaz"
   },
   "dhbListing": {
@@ -12337,7 +12337,7 @@
           "4": "Ak chcete nahrať hlasovú poznámku, kliknite na ikonu mikrofónu.",
           "5": "Ak chcete pridať GIF, kliknite na ikonu GIF a vyhľadajte ho.",
           "6": "Použite #hashtagy na kategorizáciu svojho príspevku (napr. #crypto, #defi).",
-          "7": "Použite $cashtagy na odkazovanie na tokeny (napr. $RIFT, $ETH).",
+          "7": "Použite $cashtagy na odkazovanie na tokeny (napr. $BTC, $ETH).",
           "8": "Použite @zmienky na označenie iných používateľov (napr. @používateľské meno).",
           "9": "Kliknite na „Príspevok“ na publikovanie. Váš príspevok sa okamžite zobrazí v informačnom kanáli."
         },
