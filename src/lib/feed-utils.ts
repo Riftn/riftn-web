@@ -456,6 +456,45 @@ export const POST_TYPE_FILTERS = [
 export type PostTypeFilterOption = typeof POST_TYPE_FILTERS[number];
 export type PostTypeFilterValue = PostTypeFilterOption['value'];
 
+// ============================================================================
+// NAMED HOME FILTERS (Pulse, Motion, Echo)
+// ============================================================================
+
+/**
+ * One-tap Home filters with a name people can point to ("it's on Pulse").
+ * Each one is a set of post types, sent to /api/feed as a comma list.
+ * Names stay as they are in every language; the purpose line is translated.
+ * Same values in the app (riftn-mobile libs/feed-presets.ts), since the Home
+ * post type filter follows the account between web and app.
+ */
+export const NAMED_FEEDS = [
+  { value: 'pulse' as const, name: 'Pulse', purpose: 'Read & discuss', purposeKey: 'filters.namedPulse', apiPostType: 'feed-simple,feed-images' as const },
+  { value: 'motion' as const, name: 'Motion', purpose: 'Watch', purposeKey: 'filters.namedMotion', apiPostType: 'video,short' as const },
+  { value: 'echo' as const, name: 'Echo', purpose: 'Listen', purposeKey: 'filters.namedEcho', apiPostType: 'feed-audio' as const },
+] as const;
+
+export type NamedFeed = typeof NAMED_FEEDS[number];
+export type NamedFeedValue = NamedFeed['value'];
+/** What the Home post type filter can hold: one post type or a named filter. */
+export type HomePostTypeValue = PostTypeFilterValue | NamedFeedValue;
+
+export function namedFeedFor(value: string | null | undefined): NamedFeed | undefined {
+  return NAMED_FEEDS.find((f) => f.value === value);
+}
+
+/** The /api/feed postType for a Home filter value; undefined means every type. */
+export function homeApiPostType(value: HomePostTypeValue) {
+  if (value === 'all') return undefined;
+  return namedFeedFor(value)?.apiPostType ?? (value as PostTypeFilterValue);
+}
+
+/** A stored Home post type (session, account default, preset) read back safely. */
+export function toHomePostType(value: unknown): HomePostTypeValue {
+  if (typeof value !== 'string') return 'all';
+  if (namedFeedFor(value)) return value as NamedFeedValue;
+  return POST_TYPE_FILTERS.find((o) => o.value === value)?.value ?? 'all';
+}
+
 /**
  * Filter NFTs by content type (PPV, W2E/Bounty, Locked)
  * Uses OR logic - if multiple filters are active, show items matching ANY filter

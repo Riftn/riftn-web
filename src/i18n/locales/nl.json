@@ -2084,7 +2084,12 @@
     "resetFilters": "Filters resetten",
     "prompt": "Prompt",
     "for-you": "Voor Jou",
-    "everyone": "Iedereen"
+    "everyone": "Iedereen",
+    "namedFeeds": "Feeds",
+    "namedPulse": "Lezen & bespreken",
+    "namedMotion": "Kijken",
+    "namedEcho": "Luisteren",
+    "namedClear": "{{name}} wissen"
   },
   "drawers": {
     "ppvTitle": "Pay-per-view inhoud",

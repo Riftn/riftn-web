@@ -1895,7 +1895,12 @@
     "resetFilters": "إعادة تعيين الفلاتر",
     "prompt": "موجه",
     "for-you": "لك",
-    "everyone": "الجميع"
+    "everyone": "الجميع",
+    "namedFeeds": "الخلاصات",
+    "namedPulse": "اقرأ وناقش",
+    "namedMotion": "شاهد",
+    "namedEcho": "استمع",
+    "namedClear": "إلغاء {{name}}"
   },
   "drawers": {
     "ppvTitle": "محتوى الدفع لكل مشاهدة",

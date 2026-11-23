@@ -52,7 +52,8 @@ export interface UnifiedFeedParams {
   limit?: number;
   sortBy?: 'views' | 'likes' | 'createdAt' | 'tips' | 'comments' | 'random' | 'score';
   sortOrder?: 'asc' | 'desc';
-  postType?: 'all' | 'video' | 'short' | 'feed-images' | 'feed-simple' | 'live' | 'audio' | 'feed-audio' | 'article';
+  /** One type, or a comma list of them (the named Home filters). */
+  postType?: 'all' | 'video' | 'short' | 'feed-images' | 'feed-simple' | 'live' | 'audio' | 'feed-audio' | 'article' | `${string},${string}`;
   status?: 'minted' | 'signed' | 'all' | 'pending' | 'failed';
   search?: string;
   owner?: string;
