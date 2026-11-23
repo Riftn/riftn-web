@@ -6062,7 +6062,26 @@
     "giftButton": "{{name}} kişisine {{count}} gönder",
     "giftSent": "{{name}} kişisine {{count}} gönderildi",
     "giftFailed": "Gönderilemedi. Tekrar dene.",
-    "giftNotSubmitted": "Transfer gönderilmedi"
+    "giftNotSubmitted": "Transfer gönderilmedi",
+    "freeBadge": "Ücretsiz",
+    "modeSell": "DHB ile sat",
+    "modeFree": "Ücretsiz dağıt",
+    "freeListNote": "İnsanlar Talep Et'e dokunur. Her talebi kesirleri cüzdanından göndererek onaylarsın ya da reddedersin.",
+    "giveNFree": "{{count}} adet ücretsiz dağıt",
+    "giveawayListed": "{{count}} adet ücretsiz dağıtılıyor",
+    "freeShare": "Ücretsiz · gönderinin %{{pct}}'i",
+    "claim": "Talep et",
+    "claimNFree": "{{count}} adet ücretsiz talep et",
+    "claimNote": "Ücretsiz. Sahibi her talebi onaylar ve kesirleri kendi cüzdanından gönderir.",
+    "claiming": "Talep ediliyor…",
+    "claimSent": "Talep gönderildi. Sahibinden onaylaması istendi.",
+    "signInToClaim": "Talep etmek için giriş yap",
+    "approveClaim": "Onayla",
+    "declineClaim": "Reddet",
+    "claimDeclined": "Talep reddedildi",
+    "claimApproved": "Onaylandı. Kesirler yolda.",
+    "waitingOnOwner": "Sahibi bekleniyor",
+    "freeClaim": "Ücretsiz talep"
   },
   "creator": {
     "gallery": {

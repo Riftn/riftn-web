@@ -475,8 +475,10 @@ Deno.serve(async (req) => {
       if (!quantity || quantity > TOTAL_FRACTIONS) {
         return jsonResponse({ error: `Quantity must be between 1 and ${TOTAL_FRACTIONS}` }, 400);
       }
-      if (!Number.isFinite(price) || price <= 0 || price > MAX_PRICE_PER_FRACTION) {
-        return jsonResponse({ error: "Enter a price above zero" }, 400);
+      // Price 0 is a giveaway: people claim, the seller approves each claim by
+      // sending from their own wallet (the same delivery leg as a sale).
+      if (!Number.isFinite(price) || price < 0 || price > MAX_PRICE_PER_FRACTION) {
+        return jsonResponse({ error: "Enter a price, or 0 to give them away free" }, 400);
       }
 
       const balance = await fractionBalance(chainId, wallet, tokenId);
@@ -597,7 +599,8 @@ Deno.serve(async (req) => {
 
       const price = Number(listing.price_per_fraction);
       const dhbAmount = quantity * price;
-      if (!Number.isFinite(dhbAmount) || dhbAmount <= 0) {
+      const free = price === 0;
+      if (!Number.isFinite(dhbAmount) || (dhbAmount <= 0 && !free)) {
         return jsonResponse({ error: "This listing has no valid price" }, 409);
       }
 
@@ -614,10 +617,11 @@ Deno.serve(async (req) => {
         tokenAddress: CHAINS[chainId].dhb,
         collectionAddress: CHAINS[chainId].collection,
         settleWindowHours: SETTLE_WINDOW_HOURS,
+        free,
         // The client disables Buy on this rather than letting the wallet
         // discover the revert. Recomputed per quote, so it clears itself the
-        // moment the token is unpaused.
-        paymentsFrozen: await isDhbPaused(chainId),
+        // moment the token is unpaused. A free claim moves no DHB.
+        paymentsFrozen: free ? false : await isDhbPaused(chainId),
       });
     }
 
@@ -666,6 +670,9 @@ Deno.serve(async (req) => {
       }
 
       const expected = quantity * Number(listing.price_per_fraction);
+      if (!(expected > 0)) {
+        return jsonResponse({ error: "This listing is free — claim it instead" }, 400);
+      }
       const minUnits = dhbToUnits(expected * UNDERPAY_TOLERANCE);
       const paidUnits = dhbPaid(check.receipt, chainId, wallet, seller);
 
@@ -732,6 +739,137 @@ Deno.serve(async (req) => {
       }
 
       return jsonResponse({ success: true, trade });
+    }
+
+    // ── Claim: take fractions from a free listing ─────────────────────────
+    // A price-0 listing is a giveaway. Claiming reserves the fractions and
+    // writes an awaiting_delivery trade with nothing paid, so the seller is
+    // notified and approves it with the same "send" leg as a sale (verified
+    // on-chain by `deliver`), or declines it. No deadline: a giveaway the
+    // owner never approves is not a default, so it never counts as overdue.
+    if (action === "claim") {
+      const listingId = String(body.listingId || "");
+      const quantity = positiveInt(body.quantity);
+      if (!listingId) return jsonResponse({ error: "listingId is required" }, 400);
+      if (!quantity) return jsonResponse({ error: "Choose how many fractions to claim" }, 400);
+
+      const { data: listing } = await supabase
+        .from("fraction_listings")
+        .select("*")
+        .eq("id", listingId)
+        .maybeSingle();
+      if (!listing) return jsonResponse({ error: "Listing not found" }, 404);
+      if (listing.status !== "active") {
+        return jsonResponse({ error: "That giveaway has all been claimed" }, 400);
+      }
+      if (Number(listing.price_per_fraction) !== 0) {
+        return jsonResponse({ error: "This listing isn't free" }, 400);
+      }
+      const chainId = Number(listing.chain_id) || 8453;
+      const seller = String(listing.seller_address).toLowerCase();
+      if (seller === wallet) return jsonResponse({ error: "You can't claim your own giveaway" }, 400);
+
+      // One open claim per person per giveaway, so a single account cannot
+      // reserve the whole pile while the owner is away.
+      const { data: mine } = await supabase
+        .from("fraction_trades")
+        .select("id")
+        .eq("listing_id", listingId)
+        .ilike("buyer_address", wallet)
+        .eq("status", "awaiting_delivery")
+        .limit(1);
+      if (mine && mine.length) {
+        return jsonResponse({ error: "You already have a claim waiting on this giveaway" }, 409);
+      }
+
+      const available = Number(listing.quantity) - Number(listing.filled_quantity);
+      if (quantity > available) {
+        return jsonResponse({ error: `Only ${available} fractions left in this giveaway` }, 400);
+      }
+
+      const sellerBalance = await fractionBalance(chainId, seller, listing.token_id);
+      if (sellerBalance !== null && sellerBalance < quantity) {
+        return jsonResponse({
+          error: `The owner only holds ${sellerBalance} fraction${sellerBalance === 1 ? "" : "s"} right now — try a smaller amount`,
+          sellerBalance,
+          sellerShort: true,
+        }, 409);
+      }
+
+      const { error: reserveErr } = await supabase.rpc("reserve_fraction_listing", {
+        p_listing_id: listingId,
+        p_quantity: quantity,
+      });
+      if (reserveErr) {
+        return jsonResponse({ error: "Those fractions were just claimed — try a smaller amount" }, 409);
+      }
+
+      const { data: trade, error: tradeErr } = await supabase
+        .from("fraction_trades")
+        .insert({
+          token_id: listing.token_id,
+          chain_id: chainId,
+          seller_address: seller,
+          buyer_address: wallet,
+          quantity,
+          price_per_fraction: 0,
+          total_dhb: 0,
+          listing_id: listingId,
+          status: "awaiting_delivery",
+          verified_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+      if (tradeErr) {
+        await supabase.rpc("release_fraction_listing", {
+          p_listing_id: listingId,
+          p_quantity: quantity,
+        });
+        throw tradeErr;
+      }
+
+      return jsonResponse({ success: true, trade });
+    }
+
+    // ── Decline a claim: the owner says no, the fractions go back ─────────
+    // Only free claims can be declined. A paid trade has the buyer's DHB in
+    // the seller's wallet already, so walking away from it is not an option
+    // this endpoint offers.
+    if (action === "decline-claim") {
+      const tradeId = String(body.tradeId || "");
+      if (!tradeId) return jsonResponse({ error: "tradeId is required" }, 400);
+
+      const { data: trade } = await supabase
+        .from("fraction_trades")
+        .select("*")
+        .eq("id", tradeId)
+        .maybeSingle();
+      if (!trade) return jsonResponse({ error: "Claim not found" }, 404);
+      if (String(trade.seller_address).toLowerCase() !== wallet) {
+        return jsonResponse({ error: "That claim is not yours to decline" }, 403);
+      }
+      if (trade.status !== "awaiting_delivery" || Number(trade.total_dhb) !== 0 || trade.tx_hash) {
+        return jsonResponse({ error: "That claim is no longer waiting" }, 400);
+      }
+
+      const { data: declined, error: declineErr } = await supabase
+        .from("fraction_trades")
+        .update({ status: "declined" })
+        .eq("id", tradeId)
+        .eq("status", "awaiting_delivery")
+        .select()
+        .maybeSingle();
+      if (declineErr) throw declineErr;
+      if (!declined) return jsonResponse({ error: "That claim is no longer waiting" }, 400);
+
+      if (trade.listing_id) {
+        await supabase.rpc("release_fraction_listing", {
+          p_listing_id: trade.listing_id,
+          p_quantity: Number(trade.quantity),
+        });
+      }
+
+      return jsonResponse({ success: true, trade: declined });
     }
 
     // ── Deliver: seller sends the fractions they owe ──────────────────────

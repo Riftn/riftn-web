@@ -28,6 +28,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Loader2, ShoppingCart, AlertTriangle } from "lucide-react";
+import Gift from "@/components/ui/cut-icons/gifts";
 import Info from "@/components/ui/cut-icons/information";
 
 import { toast } from 'sonner';
@@ -51,7 +52,7 @@ export function BuyFractionDrawer({ listing, open, onOpenChange, onSuccess }: Bu
   const { walletAddress, openLoginModal } = useAuth();
   const [quantity, setQuantity] = useSurfaceDraft("src/components/app/fractions/BuyFractionDrawer.tsx:quantity", 1, listing?.id ?? null);
   const [quote, setQuote] = useState<FractionQuote | null>(null);
-  const { getQuote, buy } = useFractionPurchase();
+  const { getQuote, buy, claim } = useFractionPurchase();
   const { data: sellerStats } = useSellerStats(listing?.seller_address);
   const { data: prices } = useTokenPrices();
   const dhbUsd = prices?.DHB ?? 0;
@@ -83,6 +84,8 @@ export function BuyFractionDrawer({ listing, open, onOpenChange, onSuccess }: Bu
   if (!listing) return null;
 
   const isMine = walletAddress?.toLowerCase() === listing.seller_address.toLowerCase();
+  // A price-0 listing is a giveaway: Claim, and the owner approves it.
+  const free = Number(listing.price_per_fraction) === 0;
   const sharePct = (quantity / TOTAL_FRACTIONS) * 100;
   const displayTotal = quote?.dhbAmount ?? quantity * listing.price_per_fraction;
 
@@ -96,7 +99,8 @@ export function BuyFractionDrawer({ listing, open, onOpenChange, onSuccess }: Bu
     }
     if (!quote) return;
     try {
-      await buy.mutateAsync(quote);
+      if (free) await claim.mutateAsync({ listingId: listing.id, quantity });
+      else await buy.mutateAsync(quote);
       onOpenChange(false);
       onSuccess?.();
     } catch {
@@ -155,7 +159,7 @@ export function BuyFractionDrawer({ listing, open, onOpenChange, onSuccess }: Bu
             <div className="flex justify-between text-sm">
               <span className="text-white/60">{t('fractions.pricePerFraction')}</span>
               <span className="text-white">
-                {listing.price_per_fraction.toLocaleString(undefined, { maximumFractionDigits: 4 })} <DhbCoin />
+                {free ? t('fractions.freeBadge') : <>{listing.price_per_fraction.toLocaleString(undefined, { maximumFractionDigits: 4 })} <DhbCoin /></>}
               </span>
             </div>
             <div className="flex justify-between text-sm">
@@ -165,7 +169,9 @@ export function BuyFractionDrawer({ listing, open, onOpenChange, onSuccess }: Bu
             <div className="border-t border-white/10 pt-3 flex justify-between items-center">
               <span className="text-white font-medium">{t('fractions.total')}</span>
               <span className="text-white font-bold flex items-center gap-1.5">
-                {getQuote.isPending && !quote ? (
+                {free ? (
+                  t('fractions.freeBadge')
+                ) : getQuote.isPending && !quote ? (
                   <Loader2 className="w-4 h-4 animate-spin text-white/40" />
                 ) : (
                   <>
@@ -175,7 +181,7 @@ export function BuyFractionDrawer({ listing, open, onOpenChange, onSuccess }: Bu
                 )}
               </span>
             </div>
-            {dhbUsd > 0 && (
+            {dhbUsd > 0 && !free && (
               <p className="text-[11px] text-white/40 text-right -mt-1">
                 ≈ ${(displayTotal * dhbUsd).toLocaleString(undefined, { maximumFractionDigits: 2 })}
               </p>
@@ -187,7 +193,7 @@ export function BuyFractionDrawer({ listing, open, onOpenChange, onSuccess }: Bu
           <div className="flex items-start gap-2 bg-white/5 border border-white/10 rounded-xl p-3">
             <Info className="w-4 h-4 text-white/40 shrink-0 mt-0.5" />
             <p className="text-xs text-white/50">
-              {t('fractions.settlementNote', { hours: quote?.settleWindowHours ?? 24 })}
+              {free ? t('fractions.claimNote') : t('fractions.settlementNote', { hours: quote?.settleWindowHours ?? 24 })}
             </p>
           </div>
 
@@ -215,17 +221,23 @@ export function BuyFractionDrawer({ listing, open, onOpenChange, onSuccess }: Bu
               isMine ||
               !quote ||
               buy.isPending ||
+              claim.isPending ||
               quote.paymentsFrozen ||
               available === 0
             }
             className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/20 disabled:opacity-40"
           >
-            {buy.isPending ? (
-              <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t('fractions.paying')}</>
+            {buy.isPending || claim.isPending ? (
+              <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{free ? t('fractions.claiming') : t('fractions.paying')}</>
             ) : isMine ? (
               t('fractions.ownListing')
             ) : !walletAddress ? (
-              t('fractions.signInToBuy')
+              free ? t('fractions.signInToClaim') : t('fractions.signInToBuy')
+            ) : free ? (
+              <>
+                <Gift className="w-4 h-4 mr-2" />
+                {t('fractions.claimNFree', { count: quantity })}
+              </>
             ) : (
               <>
                 <ShoppingCart className="w-4 h-4 mr-2" />

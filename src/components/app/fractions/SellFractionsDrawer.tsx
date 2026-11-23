@@ -19,6 +19,8 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Loader2, Tag, AlertTriangle } from 'lucide-react';
+import Gift from '@/components/ui/cut-icons/gifts';
+import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useCreateListing, type PostSnapshot } from '@/hooks/use-fraction-checkout';
 import { useFractionBalance } from '@/hooks/use-fraction-balance';
@@ -49,6 +51,8 @@ export function SellFractionsDrawer({
   const [quantity, setQuantity] = useSurfaceDraft("src/components/app/fractions/SellFractionsDrawer.tsx:quantity", 0, `${chainId}:${tokenId}`);
   const [price, setPrice] = useSurfaceDraft("components/app/fractions/SellFractionsDrawer.tsx:price", '', `${chainId}:${tokenId}`);
   const createListing = useCreateListing();
+  // "Give away free" lists at price 0: people claim, you approve each one.
+  const [free, setFree] = useState(false);
 
   const { data: balance, isLoading: loadingBalance } = useFractionBalance(tokenId, chainId);
   const { data: listings = [] } = useFractionListings(tokenId);
@@ -73,7 +77,7 @@ export function SellFractionsDrawer({
   // against, and the closest thing this market has to a spot price.
   const floorPrice = useMemo(() => {
     const asks = listings
-      .filter(l => l.quantity - l.filled_quantity > 0)
+      .filter(l => l.quantity - l.filled_quantity > 0 && l.price_per_fraction > 0)
       .map(l => l.price_per_fraction);
     return asks.length ? Math.min(...asks) : null;
   }, [listings]);
@@ -84,15 +88,16 @@ export function SellFractionsDrawer({
     // silently dump someone's whole position because they dragged too far.
     setQuantity.initialize(sellable > 0 ? Math.max(1, Math.floor(sellable / 10)) : 0);
     setPrice.initialize(floorPrice ? String(floorPrice) : '');
+    setFree(false);
     // Only when the drawer opens; re-running on every balance tick would fight
     // the user's own edits.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, setPrice, setQuantity]);
 
-  const prc = parseFloat(price) || 0;
+  const prc = free ? 0 : parseFloat(price) || 0;
   const total = quantity * prc;
   const sharePct = (quantity / TOTAL_FRACTIONS) * 100;
-  const isValid = quantity > 0 && quantity <= sellable && prc > 0;
+  const isValid = quantity > 0 && quantity <= sellable && (free || prc > 0);
 
   const handleSubmit = async () => {
     if (!isValid) return;
@@ -104,7 +109,9 @@ export function SellFractionsDrawer({
         chainId,
         post,
       });
-      toast.success(t('fractions.listedToast', { count: quantity, price: prc }));
+      toast.success(free
+        ? t('fractions.giveawayListed', { count: quantity })
+        : t('fractions.listedToast', { count: quantity, price: prc }));
       onOpenChange(false);
       onSuccess?.();
     } catch {
@@ -175,13 +182,34 @@ export function SellFractionsDrawer({
                       onClick={() => setQuantity(Math.max(1, Math.floor(sellable * f)))}
                       className="flex-1 text-xs py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 hover:text-white border border-white/10 transition-colors"
                     >
-                      {f === 1 ? t('fractions.all') : `-e%`}
+                      {f === 1 ? t('fractions.all') : `${f * 100}%`}
                     </button>
                   ))}
                 </div>
               </div>
 
+              {/* Sell or give away */}
+              <div className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-white/5 border border-white/10" role="tablist">
+                {[false, true].map((isFree) => (
+                  <button
+                    key={String(isFree)}
+                    type="button"
+                    role="tab"
+                    aria-selected={free === isFree}
+                    onClick={() => setFree(isFree)}
+                    className={cn(
+                      'h-9 rounded-lg text-sm font-medium flex items-center justify-center gap-1.5 transition-colors',
+                      free === isFree ? 'bg-white/15 text-white' : 'text-white/50 hover:text-white/80',
+                    )}
+                  >
+                    {isFree ? <Gift className="w-4 h-4" /> : <Tag className="w-4 h-4" />}
+                    {isFree ? t('fractions.modeFree') : t('fractions.modeSell')}
+                  </button>
+                ))}
+              </div>
+
               {/* Price */}
+              {!free && (
               <div>
                 <div className="flex items-baseline justify-between mb-1.5">
                   <label className="text-sm text-white/60">{t('fractions.pricePerFraction')}</label>
@@ -209,6 +237,7 @@ export function SellFractionsDrawer({
                   </span>
                 </div>
               </div>
+              )}
 
               {/* Summary */}
               <div className="bg-white/5 rounded-xl p-4 border border-white/10 space-y-2">
@@ -218,10 +247,14 @@ export function SellFractionsDrawer({
                 </div>
                 <div className="flex justify-between text-sm border-t border-white/10 pt-2">
                   <span className="text-white font-medium">{t('fractions.youReceive')}</span>
-                  <span className="text-white font-bold flex items-center gap-1.5">
-                    <img src={dehubCoin} alt={tokenLabel()} className="w-4 h-4" />
-                    {total.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                  </span>
+                  {free ? (
+                    <span className="text-white font-bold">{t('fractions.freeBadge')}</span>
+                  ) : (
+                    <span className="text-white font-bold flex items-center gap-1.5">
+                      <img src={dehubCoin} alt={tokenLabel()} className="w-4 h-4" />
+                      {total.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                    </span>
+                  )}
                 </div>
                 {dhbUsd > 0 && total > 0 && (
                   <p className="text-[11px] text-white/40 text-right">
@@ -231,7 +264,7 @@ export function SellFractionsDrawer({
               </div>
 
               <p className="text-xs text-white/40 text-center">
-                {t('fractions.listingFreeNote')}
+                {free ? t('fractions.freeListNote') : t('fractions.listingFreeNote')}
               </p>
 
               <Button
@@ -242,7 +275,9 @@ export function SellFractionsDrawer({
                 {createListing.isPending ? (
                   <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t('fractions.listingInProgress')}</>
                 ) : (
-                  <><Tag className="w-4 h-4 mr-2" />{t('fractions.listNFractions', { count: quantity })}</>
+                  free
+                    ? <><Gift className="w-4 h-4 mr-2" />{t('fractions.giveNFree', { count: quantity })}</>
+                    : <><Tag className="w-4 h-4 mr-2" />{t('fractions.listNFractions', { count: quantity })}</>
                 )}
               </Button>
             </>

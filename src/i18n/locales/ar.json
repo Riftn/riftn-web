@@ -6086,7 +6086,26 @@
     "giftButton": "إرسال {{count}} إلى {{name}}",
     "giftSent": "تم إرسال {{count}} إلى {{name}}",
     "giftFailed": "تعذّر الإرسال. حاول مرة أخرى.",
-    "giftNotSubmitted": "لم يتم إرسال التحويل"
+    "giftNotSubmitted": "لم يتم إرسال التحويل",
+    "freeBadge": "مجاني",
+    "modeSell": "بيع مقابل DHB",
+    "modeFree": "توزيع مجاني",
+    "freeListNote": "يضغط الناس على مطالبة. توافق على كل مطالبة بإرسال الأجزاء من محفظتك، أو ترفضها.",
+    "giveNFree": "توزيع {{count}} مجانًا",
+    "giveawayListed": "يتم توزيع {{count}} مجانًا",
+    "freeShare": "مجاني · {{pct}}% من المنشور",
+    "claim": "مطالبة",
+    "claimNFree": "طالب بـ {{count}} مجانًا",
+    "claimNote": "مجاني. يوافق المالك على كل مطالبة ويرسل الأجزاء من محفظته.",
+    "claiming": "جارٍ الطلب…",
+    "claimSent": "أُرسلت المطالبة. طُلب من المالك الموافقة عليها.",
+    "signInToClaim": "سجّل الدخول للمطالبة",
+    "approveClaim": "موافقة",
+    "declineClaim": "رفض",
+    "claimDeclined": "تم رفض المطالبة",
+    "claimApproved": "تمت الموافقة. الأجزاء في الطريق.",
+    "waitingOnOwner": "بانتظار المالك",
+    "freeClaim": "مطالبة مجانية"
   },
   "creator": {
     "gallery": {

@@ -6066,7 +6066,26 @@
     "giftButton": "Envoyer {{count}} à {{name}}",
     "giftSent": "{{count}} envoyées à {{name}}",
     "giftFailed": "Envoi impossible. Réessaie.",
-    "giftNotSubmitted": "Le transfert n'a pas été envoyé"
+    "giftNotSubmitted": "Le transfert n'a pas été envoyé",
+    "freeBadge": "Gratuit",
+    "modeSell": "Vendre en DHB",
+    "modeFree": "Offrir gratuitement",
+    "freeListNote": "Les gens touchent Réclamer. Tu approuves chaque demande en envoyant les fractions depuis ton portefeuille, ou tu la refuses.",
+    "giveNFree": "Offrir {{count}}",
+    "giveawayListed": "{{count}} offertes",
+    "freeShare": "Gratuit · {{pct}}% de la publication",
+    "claim": "Réclamer",
+    "claimNFree": "Réclamer {{count}} gratuitement",
+    "claimNote": "Gratuit. Le propriétaire approuve chaque demande et envoie les fractions depuis son portefeuille.",
+    "claiming": "Demande en cours…",
+    "claimSent": "Demande envoyée. Le propriétaire doit l'approuver.",
+    "signInToClaim": "Connecte-toi pour réclamer",
+    "approveClaim": "Approuver",
+    "declineClaim": "Refuser",
+    "claimDeclined": "Demande refusée",
+    "claimApproved": "Approuvé. Les fractions arrivent.",
+    "waitingOnOwner": "En attente du propriétaire",
+    "freeClaim": "Demande gratuite"
   },
   "creator": {
     "gallery": {

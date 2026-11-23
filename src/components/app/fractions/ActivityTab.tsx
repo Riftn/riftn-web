@@ -72,10 +72,14 @@ function TradeRow({ trade, onOpen }: { trade: FractionTrade; onOpen: () => void 
           </p>
         </div>
         <div className="text-right shrink-0">
-          <p className="text-white font-semibold text-sm flex items-center gap-1 justify-end">
-            <img src={dehubCoin} alt={tokenLabel()} className="w-3.5 h-3.5" />
-            {total.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-          </p>
+          {total > 0 ? (
+            <p className="text-white font-semibold text-sm flex items-center gap-1 justify-end">
+              <img src={dehubCoin} alt={tokenLabel()} className="w-3.5 h-3.5" />
+              {total.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+            </p>
+          ) : (
+            <p className="text-white font-semibold text-sm">{t('fractions.freeBadge')}</p>
+          )}
           <p className={cn('text-[10px]', status.className)}>{t(status.key)}</p>
         </div>
       </div>
@@ -97,7 +101,10 @@ export function ActivityTab() {
     const settled = trades.filter(trade => trade.status === 'settled');
     if (!settled.length) return null;
     const volume = settled.reduce((sum, trade) => sum + trade.quantity * trade.price_per_fraction, 0);
-    const fractions = settled.reduce((sum, trade) => sum + trade.quantity, 0);
+    // Free giveaways are trades too, but they are not a price anyone paid.
+    const fractions = settled
+      .filter(trade => trade.price_per_fraction > 0)
+      .reduce((sum, trade) => sum + trade.quantity, 0);
     return {
       count: settled.length,
       volume,
