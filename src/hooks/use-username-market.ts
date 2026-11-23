@@ -64,10 +64,11 @@ export interface BrowseParams {
 }
 
 /** Price limits, token contracts and the current rate, refreshed every 30 seconds. */
-export function useUsernameMarketConfig() {
+export function useUsernameMarketConfig(enabled = true) {
   return useQuery({
     queryKey: ['username-market-config'],
     queryFn: getUsernameMarketConfig,
+    enabled,
     staleTime: 30 * 1000,
     refetchInterval: 30 * 1000,
     gcTime: 24 * 60 * 60 * 1000,

@@ -267,7 +267,7 @@ export default function ProfilePage() {
   const [followListType, setFollowListType] = useState<'followers' | 'following'>('followers');
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const createOffer = useCreateUsernameOffer();
-  const { data: usernameMarketConfig } = useUsernameMarketConfig();
+  const { data: usernameMarketConfig } = useUsernameMarketConfig(offerDrawerOpen);
   const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null);
   const [showTipModal, setShowTipModal] = useState(false);
   
