@@ -745,6 +745,7 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
       {pinnedMessage && (
         <button
           onClick={() => scrollToMessage(pinnedMessage.id)}
+          data-keep-dark={overlay ? '' : undefined}
           className={cn(
             'w-full flex items-center gap-2 mb-2 px-3 py-2 border-l-2 border-blue-400 text-left transition-colors group',
             overlay
@@ -776,6 +777,9 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
         ref={messagesContainerRef}
         // Scrolling the messages is not a swipe to the next short.
         data-shorts-scrollable
+        // Over the picture the lines stay white with their shadow in every
+        // theme; System Light turned them dark ink on the video.
+        data-keep-dark={overlay ? '' : undefined}
         {...messageHold}
         className={cn(
           'chat-text-zone overflow-y-auto overscroll-contain scrollbar-hide',
@@ -929,6 +933,7 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
                       reactions={msg.reactions}
                       viewer={viewer}
                       onChip={(emoji) => (isMine(msg) ? setReactorsFor(msg.id) : toggleReaction(msg, emoji))}
+                      overVideo={overlay}
                     />
                   </div>
                   {/* One "..." on hover: every action lives in the message menu, as in Public Chat. */}
@@ -1013,7 +1018,7 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
       />
 
       {replyTo && (
-        <div className={cn('mb-2 flex items-center gap-1.5 rounded-xl px-2.5 py-1.5', overlay ? 'bg-black/45 backdrop-blur-md' : 'bg-white/[0.06]')}>
+        <div data-keep-dark={overlay ? '' : undefined} className={cn('mb-2 flex items-center gap-1.5 rounded-xl px-2.5 py-1.5', overlay ? 'bg-black/45 backdrop-blur-md' : 'bg-white/[0.06]')}>
           <Reply className="h-3.5 w-3.5 shrink-0 text-white" />
           <div className="min-w-0 flex-1 text-[11px] leading-tight">
             <span className="font-semibold text-white">{replyTo.sender_display_name || replyTo.sender_username || replyTo.sender_address.slice(0, 8)}</span>
@@ -1143,8 +1148,10 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
  * A line's reactions, played in as they land (Fly, Pop or Burst from
  * Settings), the same moving emoji and rolling count as Public Chat.
  */
-function StreamReactionChips({ messageId, reactions, viewer, onChip }: {
+function StreamReactionChips({ messageId, reactions, viewer, onChip, overVideo }: {
   messageId: string;
+  /** Drawn over the picture: chips keep their dark glass and white count in every theme. */
+  overVideo?: boolean;
   reactions?: Record<string, string[]>;
   viewer?: string;
   onChip: (emoji: string) => void;
@@ -1161,6 +1168,7 @@ function StreamReactionChips({ messageId, reactions, viewer, onChip }: {
             key={emoji}
             type="button"
             data-chat-reaction-chip
+            data-keep-dark={overVideo ? '' : undefined}
             onClick={() => onChip(emoji)}
             className={cn(
               'inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] leading-none text-white',
