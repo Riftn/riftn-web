@@ -48,6 +48,7 @@ import { useDecryptedMedia } from '@/hooks/use-decrypted-media';
 import dehubCoin from '@/assets/dehub-coin.png';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { MomentFace } from '@/components/app/stories/MomentFace';
 import { ChatInput, type ChatInputSendArgs } from './ChatInput';
 import { DmVideoBubble } from './DmVideo';
 import type { DmVideoOptions } from '@/lib/dm-video-options';
@@ -1055,12 +1056,14 @@ const MessageBubble = memo(function MessageBubble({
       {!isOwnMessage && !cozyShowAvatar && <div aria-hidden className="w-8 flex-shrink-0" />}
       {!isOwnMessage && cozyShowAvatar && (() => {
         const avatar = (
-          <Avatar className="w-8 h-8 flex-shrink-0">
-            {avatarUrl && <AvatarImage src={avatarUrl} />}
-            <AvatarFallback className="bg-zinc-700 text-white text-xs font-medium">
-              {(displayName.startsWith('0x') ? displayName.charAt(2) : displayName.charAt(0)).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+          <MomentFace address={message.sender?.address} size={32} name={displayName} className="rounded-lg">
+            <Avatar className="w-8 h-8 flex-shrink-0">
+              {avatarUrl && <AvatarImage src={avatarUrl} />}
+              <AvatarFallback className="bg-zinc-700 text-white text-xs font-medium">
+                {(displayName.startsWith('0x') ? displayName.charAt(2) : displayName.charAt(0)).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          </MomentFace>
         );
         return senderProfilePath ? (
           <Link
@@ -3331,12 +3334,14 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
           )}
 
           <Link to={profileLink} className={`flex items-center min-w-0 ${dock ? 'gap-2' : 'gap-3'}`}>
-            <Avatar className={dock ? 'w-8 h-8 shrink-0' : 'w-10 h-10'}>
-              {avatarUrl && <AvatarImage src={avatarUrl} />}
-              <AvatarFallback className="bg-zinc-700 text-white font-medium">
-                {(displayName.startsWith('0x') ? displayName.charAt(2) : displayName.charAt(0)).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+            <MomentFace address={otherUser?.address} size={dock ? 32 : 40} name={displayName} className="rounded-lg">
+              <Avatar className={dock ? 'w-8 h-8 shrink-0' : 'w-10 h-10'}>
+                {avatarUrl && <AvatarImage src={avatarUrl} />}
+                <AvatarFallback className="bg-zinc-700 text-white font-medium">
+                  {(displayName.startsWith('0x') ? displayName.charAt(2) : displayName.charAt(0)).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </MomentFace>
 
             <div className="min-w-0">
               <h2 className={`font-semibold text-white flex items-center gap-1.5 truncate ${dock ? 'text-sm' : ''}`}>

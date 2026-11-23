@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ClipboardPaste, Copy, ImagePlus, Trash2 } from 'lucide-react';
+import { ClipboardPaste, Copy, ImagePlus, Maximize2, Trash2 } from 'lucide-react';
 import './profile-image-menu.css';
 import { BannerCropDialog } from './BannerCropDialog';
 import { toast } from 'sonner';
@@ -30,6 +30,8 @@ export interface ProfileImageMenuOptions {
   /** A new picture from Change, Paste (menu or Ctrl/Cmd+V) or a drop. */
   onFile: (file: File) => void | Promise<void>;
   onRemove?: () => void | Promise<void>;
+  /** Shown first when a tap on the picture does something else (plays their Moment). */
+  onView?: () => void;
 }
 
 /**
@@ -40,7 +42,7 @@ export interface ProfileImageMenuOptions {
  *
  * Spread `targetProps` on the picture's box and render `menu` anywhere.
  */
-export function useProfileImageMenu({ kind, canEdit, imageUrl, hasImage, onFile, onRemove }: ProfileImageMenuOptions) {
+export function useProfileImageMenu({ kind, canEdit, imageUrl, hasImage, onFile, onRemove, onView }: ProfileImageMenuOptions) {
   const { t } = useTranslation();
   const { point, openAt, close } = useMenuPoint();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -112,6 +114,9 @@ export function useProfileImageMenu({ kind, canEdit, imageUrl, hasImage, onFile,
   }, [imageUrl, t]);
 
   const actions: MessageMenuAction[] = [];
+  if (onView) {
+    actions.push({ key: 'view', label: t('profileImage.view', 'View photo'), icon: <Maximize2 />, onSelect: onView });
+  }
   if (canEdit) {
     actions.push({ key: 'change', label: t('profileImage.change', 'Change'), icon: <ImagePlus />, onSelect: () => inputRef.current?.click() });
     actions.push({ key: 'paste', label: t('profileImage.paste', 'Paste'), icon: <ClipboardPaste />, onSelect: () => { void pasteFromMenu(); } });

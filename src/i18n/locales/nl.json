@@ -8041,7 +8041,10 @@
     "fromAPost": "Uit een bericht",
     "postNotPublic": "Alleen openbare berichten kunnen als Moment worden gedeeld.",
     "postNotMedia": "Alleen foto- en videoberichten kunnen als Moment worden gedeeld.",
-    "mentionedYou": "Noemde je in hun moment"
+    "mentionedYou": "Noemde je in hun moment",
+    "watchMomentsOf": "Bekijk de Momenten van {{name}}",
+    "momentEnded": "Dat Moment is voorbij",
+    "momentOpenFailed": "Kon dat Moment niet openen"
   },
   "subscriptions": {
     "subscribersOnly": "Alleen voor abonnees",
@@ -23751,5 +23754,8 @@
     "tooBig": "Dat bestand is groter dan 42 MB",
     "minted": "NFT gemint. Hij staat binnen een minuut op de markt.",
     "failed": "Kon de NFT niet maken"
+  },
+  "profileImage": {
+    "view": "Foto bekijken"
   }
 }

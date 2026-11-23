@@ -7852,7 +7852,10 @@
     "fromAPost": "Bir gönderiden",
     "postNotPublic": "Yalnızca herkese açık gönderiler An'a paylaşılabilir.",
     "postNotMedia": "Yalnızca fotoğraf ve video gönderileri An'a paylaşılabilir.",
-    "mentionedYou": "Anında senden bahsetti"
+    "mentionedYou": "Anında senden bahsetti",
+    "watchMomentsOf": "{{name}} kişisinin Anlarını izle",
+    "momentEnded": "O An sona erdi",
+    "momentOpenFailed": "O An açılamadı"
   },
   "subscriptions": {
     "subscribersOnly": "Yalnızca aboneler",
@@ -23503,5 +23506,8 @@
     "tooBig": "Bu dosya 42 MB'tan büyük",
     "minted": "NFT mint edildi. Bir dakika içinde pazarda görünür.",
     "failed": "NFT oluşturulamadı"
+  },
+  "profileImage": {
+    "view": "Fotoğrafı gör"
   }
 }
