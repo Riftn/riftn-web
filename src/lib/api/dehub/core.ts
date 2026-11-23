@@ -843,7 +843,7 @@ export async function authedUpload<T>(
   // hold 500"), so it is carried through intact rather than wrapped in an HTTP
   // status the person reading it cannot act on.
   if (result.status === 402) {
-    throw new PaymentRequiredError(result.message || _translateCopy("copy.e6b09ed01f70", { defaultValue: "This post needs DHB you do not have." }));
+    throw new PaymentRequiredError(result.message || _translateCopy("copy.e6b09ed01f70", { defaultValue: "This post needs tokens you do not have." }));
   }
 
   throw new UploadHttpError(

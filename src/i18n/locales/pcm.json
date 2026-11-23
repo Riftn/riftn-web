@@ -2114,7 +2114,7 @@
     "ogHolders_one": "{{count}} OG holder",
     "ogHolders_other": "{{count}} OG holders",
     "ogChallengeTitle": "Bring di OG holders come back",
-    "ogChallengeBody": "Invite people wey still dey hold DHB. When dem join with your invite link and keep dia DHB for dia Riftn wallet, dem go count for you here.",
+    "ogChallengeBody": "Invite people wey still dey hold tokens. When dem join with your invite link and keep dia tokens for dia Riftn wallet, dem go count for you here.",
     "ogChallengeCta": "Collect your invite link"
   },
   "dhbListing": {
@@ -11908,7 +11908,7 @@
     "title": "Glossary",
     "subtitle": "Learn wetin every icon and feature mean",
     "listFractionsDesc": "If you own fractions of post, you fit list dem for sale for price wey you set (for tokens per fraction). Other users fit then buy the fractions wey you list.",
-    "dhbTokenDesc": "The native utility token of Riftn. $RIFT na the ticker symbol for Riftn tokens. Dem dey use am for tipping, pay-per-view content, governance voting, and staking.",
+    "dhbTokenDesc": "The native utility token of Riftn. Dem dey use am for tipping, pay-per-view content, governance voting, and staking.",
     "stakingBadgeDesc": "Badges wey dey show near your username based on all the Riftn tokens wey you hold (wallet + staked). E get 13 tiers — the more tokens you hold, the higher your badge rank. Higher tiers dey give more governance voting power and lower platform fees. Dem price tiers for dollars, so the number of tokens wey each one cost go reduce as token price dey rise — and once you don earn tier you go keep am as long as you hold wetin e cost you, no matter wetin price do after.",
     "translateButtonDesc": "E dey translate post text, bios, and comments to the language wey you like. The app dey detect your browser language automatically or you fit set one by hand for Settings.",
     "storyDesc": "Short video content wey go expire after 24 hours. Tap user avatar ring for home feed make you see dem story.",
@@ -12209,7 +12209,7 @@
           "4": "To record voice note, click di microphone icon.",
           "5": "To add GIF, click di GIF icon and search for one.",
           "6": "Use #hashtags to put your post for category (like #crypto, #defi).",
-          "7": "Use $cashtags to talk about tokens (like $RIFT, $ETH).",
+          "7": "Use $cashtags to talk about tokens (like $BTC, $ETH).",
           "8": "Use @mentions to tag other users (like @username).",
           "9": "Klik 'Post' don publish. Your post don show for feed immediately."
         },

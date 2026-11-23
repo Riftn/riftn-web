@@ -144,7 +144,7 @@ export function DhbListingSoonCard({ source = 'explore' }: { source?: string }) 
 
           {step === 'ask' && (
             <p className="text-xs text-zinc-500 mt-2">
-              {t('dhbListing.privacy', "We'll only use this to tell you when $DHB lists.")}
+              {t('dhbListing.privacy', "We'll only use this to tell you when the tokens are listed.")}
             </p>
           )}
         </>

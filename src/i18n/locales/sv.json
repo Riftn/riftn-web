@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Redigera video", "hiddenTag": "Dold", "tapToEdit": "Tappa för att redigera", "cover": "Omslag", "trim": "Trimma", "mirror": "Spegla", "rotate": "Rotera", "hide": "Dölj", "timer": "Timer", "sheetTitleAny": "Redigera innan du skickar", "close": "Stäng", "replace": "Ersätt", "hiddenUntilTap": "Dold tills de trycker på den", "pause": "Pausa", "play": "Spela upp video", "mute": "Tyst", "unmute": "Avtysta", "scrub": "Skrubba genom videon", "addMore": "Lägg till foton eller videor", "trimAria": "Dra i ändarna för att trimma", "coverAria": "Tryck på en bildruta för att välja omslag", "coverHint": "Tryck på en bildruta för att välja omslag", "coverOwn": "Ditt foto", "coverAuto": "Auto", "uploadCover": "Ladda upp en omslagsbild", "mirrored": "Spegvänd", "original": "Original", "rotate90": "Rotera 90°", "showNormally": "Visa normalt", "showNormallyBody": "De ser den direkt", "hideUntilTap": "Dölj tills den trycks på", "hideUntilTapBody": "Oskarp tills de trycker på den", "hidePrice": "Dölj bakom ett pris", "hidePriceBody": "Oskarp tills de betalar dig", "priceUnavailable": "Inte i den här chatten", "timerOff": "Av", "timerOffBody": "Den stannar i chatten.", "timerViewBody": "Borta för er båda när de har sett den.", "confirm": "Bekräfta", "lockedFor": "Lås upp för {{value1}} DHB", "lockedForUsd": "Lås upp för {{value1}}", "editItem": "Redigera objekt {{value1}}", "kept": "{{time}} behölls", "timerTimeBody": "Borta för er båda {{value1}} efter att du har skickat den."},
+  "dmVideo": {"edit": "Redigera video", "hiddenTag": "Dold", "tapToEdit": "Tappa för att redigera", "cover": "Omslag", "trim": "Trimma", "mirror": "Spegla", "rotate": "Rotera", "hide": "Dölj", "timer": "Timer", "sheetTitleAny": "Redigera innan du skickar", "close": "Stäng", "replace": "Ersätt", "hiddenUntilTap": "Dold tills de trycker på den", "pause": "Pausa", "play": "Spela upp video", "mute": "Tyst", "unmute": "Avtysta", "scrub": "Skrubba genom videon", "addMore": "Lägg till foton eller videor", "trimAria": "Dra i ändarna för att trimma", "coverAria": "Tryck på en bildruta för att välja omslag", "coverHint": "Tryck på en bildruta för att välja omslag", "coverOwn": "Ditt foto", "coverAuto": "Auto", "uploadCover": "Ladda upp en omslagsbild", "mirrored": "Spegvänd", "original": "Original", "rotate90": "Rotera 90°", "showNormally": "Visa normalt", "showNormallyBody": "De ser den direkt", "hideUntilTap": "Dölj tills den trycks på", "hideUntilTapBody": "Oskarp tills de trycker på den", "hidePrice": "Dölj bakom ett pris", "hidePriceBody": "Oskarp tills de betalar dig", "priceUnavailable": "Inte i den här chatten", "timerOff": "Av", "timerOffBody": "Den stannar i chatten.", "timerViewBody": "Borta för er båda när de har sett den.", "confirm": "Bekräfta", "lockedFor": "Lås upp för {{value1}} tokens", "lockedForUsd": "Lås upp för {{value1}}", "editItem": "Redigera objekt {{value1}}", "kept": "{{time}} behölls", "timerTimeBody": "Borta för er båda {{value1}} efter att du har skickat den."},
   "postBg": {
     "addMedia": "Lägg till en bild, GIF eller video",
     "changeMedia": "Byt bild, GIF eller video",
@@ -2114,7 +2114,7 @@
     "ogHolders_one": "{{count}} OG-innehavare",
     "ogHolders_other": "{{count}} OG-innehavare",
     "ogChallengeTitle": "Ta tillbaka OG-innehavarna",
-    "ogChallengeBody": "Bjud in personer som fortfarande har DHB. När de går med via din inbjudningslänk och behåller sina DHB i sin Riftn-plånbok räknas de för dig här.",
+    "ogChallengeBody": "Bjud in personer som fortfarande har tokens. När de går med via din inbjudningslänk och behåller sina tokens i sin Riftn-plånbok räknas de för dig här.",
     "ogChallengeCta": "Hämta din inbjudningslänk"
   },
   "dhbListing": {
@@ -12220,7 +12220,7 @@
           "4": "För att spela in ett röstmeddelande, klicka på mikrofonikonen.",
           "5": "För att lägga till en GIF, klicka på GIF-ikonen och sök efter en.",
           "6": "Använd #hashtags för att kategorisera ditt inlägg (t.ex. #crypto, #defi).",
-          "7": "Använd $cashtags för att referera till tokens (t.ex. $RIFT, $ETH).",
+          "7": "Använd $cashtags för att referera till tokens (t.ex. $BTC, $ETH).",
           "8": "Använd @mentions för att tagga andra användare (t.ex. @användarnamn).",
           "9": "Klicka på 'Inlägg' för att publicera. Ditt inlägg visas omedelbart i flödet."
         },

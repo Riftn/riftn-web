@@ -1,3 +1,4 @@
+import { tokenLabel } from '@/lib/token-label';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -99,7 +100,7 @@ export function AvatarVideoPaywall({ open, onOpenChange, onConfirm, avatarPrompt
       <label className="mb-3 block text-sm">{t('creator.avatarAudio')}<input className="mt-2 block w-full" type="file" accept="audio/wav,audio/x-wav,.wav" disabled={busy || pending} onChange={event => void pick(event.target.files?.[0], 'audio')} /></label>
       <label className="mb-4 flex gap-2 text-sm"><input type="checkbox" checked={input.rightsConfirmed} disabled={busy || pending} onChange={event => setInput(previous => ({ ...previous, rightsConfirmed: event.target.checked }))} />{t('creator.avatarPermission')}</label>
       {quote && <p className="mb-3 text-sm">{t('creator.avatarQuote', { seconds: quote.durationSeconds, amount: quote.priceDhb })}</p>}
-      <Button disabled={busy || isGenerating || !input.imageDataUrl || !input.audioDataUrl || !input.rightsConfirmed || !walletAddress} onClick={() => void (pending ? resume() : quote ? pay() : prepare())}>{busy ? t('work.paying') : pending ? t('creatorFlow.resumeRun') : quote ? t('work.payAmount', { amount: `${quote.priceDhb} DHB` }) : t('creator.avatarPrepare')}</Button>
+      <Button disabled={busy || isGenerating || !input.imageDataUrl || !input.audioDataUrl || !input.rightsConfirmed || !walletAddress} onClick={() => void (pending ? resume() : quote ? pay() : prepare())}>{busy ? t('work.paying') : pending ? t('creatorFlow.resumeRun') : quote ? t('work.payAmount', { amount: `${quote.priceDhb} ${tokenLabel()}` }) : t('creator.avatarPrepare')}</Button>
       {pending && <Button variant="outline" disabled={busy} onClick={() => void newRun()}>{t('creatorFlow.newRun')}</Button>}
     </DrawerContent>
   </Drawer>;

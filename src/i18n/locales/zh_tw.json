@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "編輯影片", "hiddenTag": "隱藏", "tapToEdit": "點擊以編輯", "cover": "封面", "trim": "裁剪", "mirror": "鏡像", "rotate": "旋轉", "hide": "隱藏", "timer": "計時器", "sheetTitleAny": "傳送前編輯", "close": "關閉", "replace": "取代", "hiddenUntilTap": "點擊前隱藏", "pause": "暫停", "play": "播放影片", "mute": "靜音", "unmute": "取消靜音", "scrub": "拖動影片進度條", "addMore": "新增照片或影片", "trimAria": "拖動兩端進行裁剪", "coverAria": "點擊影格以設定封面", "coverHint": "點擊影格以設定封面", "coverOwn": "你的圖片", "coverAuto": "自動", "uploadCover": "上傳封面圖片", "mirrored": "已鏡像", "original": "原始", "rotate90": "旋轉 90°", "showNormally": "正常顯示", "showNormallyBody": "對方會立即看到", "hideUntilTap": "點擊前隱藏", "hideUntilTapBody": "點擊前模糊顯示", "hidePrice": "隱藏在價格後方", "hidePriceBody": "付款前模糊顯示", "priceUnavailable": "不在本對話中", "timerOff": "關閉", "timerOffBody": "它會保留在對話中。", "timerViewBody": "對方看過後，雙方皆會消失。", "confirm": "確認", "lockedFor": "解鎖需 {{value1}} DHB", "lockedForUsd": "為 {{value1}} 解鎖", "editItem": "編輯項目 {{value1}}", "kept": "已保留 {{time}}", "timerTimeBody": "你們兩個都沒了 {{value1}} 等你傳送之後。"},
+  "dmVideo": {"edit": "編輯影片", "hiddenTag": "隱藏", "tapToEdit": "點擊以編輯", "cover": "封面", "trim": "裁剪", "mirror": "鏡像", "rotate": "旋轉", "hide": "隱藏", "timer": "計時器", "sheetTitleAny": "傳送前編輯", "close": "關閉", "replace": "取代", "hiddenUntilTap": "點擊前隱藏", "pause": "暫停", "play": "播放影片", "mute": "靜音", "unmute": "取消靜音", "scrub": "拖動影片進度條", "addMore": "新增照片或影片", "trimAria": "拖動兩端進行裁剪", "coverAria": "點擊影格以設定封面", "coverHint": "點擊影格以設定封面", "coverOwn": "你的圖片", "coverAuto": "自動", "uploadCover": "上傳封面圖片", "mirrored": "已鏡像", "original": "原始", "rotate90": "旋轉 90°", "showNormally": "正常顯示", "showNormallyBody": "對方會立即看到", "hideUntilTap": "點擊前隱藏", "hideUntilTapBody": "點擊前模糊顯示", "hidePrice": "隱藏在價格後方", "hidePriceBody": "付款前模糊顯示", "priceUnavailable": "不在本對話中", "timerOff": "關閉", "timerOffBody": "它會保留在對話中。", "timerViewBody": "對方看過後，雙方皆會消失。", "confirm": "確認", "lockedFor": "解鎖需 {{value1}} 代幣", "lockedForUsd": "為 {{value1}} 解鎖", "editItem": "編輯項目 {{value1}}", "kept": "已保留 {{time}}", "timerTimeBody": "你們兩個都沒了 {{value1}} 等你傳送之後。"},
   "postBg": {
     "addMedia": "新增圖片、GIF 或影片",
     "changeMedia": "更換圖片、GIF 或影片",
@@ -2098,7 +2098,7 @@
     "ogHolders_one": "{{count}} 位 OG 持有者",
     "ogHolders_other": "{{count}} 位 OG 持有者",
     "ogChallengeTitle": "把 OG 持有者帶回來",
-    "ogChallengeBody": "邀請仍持有 DHB 的人。他們通過你的邀請連結加入並把 DHB 保留在 Riftn 錢包中，就會在這裡計入你的成績。",
+    "ogChallengeBody": "邀請仍持有 代幣 的人。他們通過你的邀請連結加入並把 代幣 保留在 Riftn 錢包中，就會在這裡計入你的成績。",
     "ogChallengeCta": "獲取你的邀請連結",
     "directReferrals_one": "直接 {{count}} 人",
     "directReferrals_other": "直接 {{count}} 人",
@@ -12249,7 +12249,7 @@
           "4": "要錄製語音筆記，請點選麥克風圖示。",
           "5": "要新增 GIF，請點選 GIF 圖示並搜尋。",
           "6": "使用 #標籤對貼文進行分類（例如，#crypto、#defi）。",
-          "7": "使用 $現金標籤引用代幣（例如，$RIFT、$ETH）。",
+          "7": "使用 $現金標籤引用代幣（例如，$BTC、$ETH）。",
           "8": "使用 @提及來標記其他使用者（例如，@username）。",
           "9": "點選“發帖”進行發佈。您的貼文會立即顯示在資訊流中。"
         },

@@ -1,3 +1,4 @@
+import { tokenLabel } from '@/lib/token-label';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
@@ -74,7 +75,7 @@ export function AppTokensRow({ onSend }: { onSend: () => void }) {
       >
         <img src={dehubCoin} alt="" className="w-9 h-9 rounded-full shrink-0" />
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-white">DHB</p>
+          <p className="text-sm font-medium text-white capitalize">{tokenLabel()}</p>
           <p className="text-xs text-zinc-500 truncate">{t('appTokens.rowHint')}</p>
         </div>
         <span className="text-sm font-medium text-white">

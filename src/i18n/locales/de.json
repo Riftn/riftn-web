@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Video bearbeiten", "hiddenTag": "Ausgeblendet", "tapToEdit": "Zum Bearbeiten tippen", "cover": "Titelbild", "trim": "Zuschneiden", "mirror": "Spiegeln", "rotate": "Drehen", "hide": "Ausblenden", "timer": "Timer", "sheetTitleAny": "Vor dem Senden bearbeiten", "close": "Schließen", "replace": "Ersetzen", "hiddenUntilTap": "Versteckt, bis sie tippen", "pause": "Pause", "play": "Video abspielen", "mute": "Stummschalten", "unmute": "Stummschaltung aufheben", "scrub": "Durch das Video scrubbing", "addMore": "Fotos oder Videos hinzufügen", "trimAria": "Ziehe die Enden, um zuzuschneiden", "coverAria": "Tippe einen Frame, um das Titelbild festzulegen", "coverHint": "Tippe einen Frame, um das Titelbild festzulegen", "coverOwn": "Dein Bild", "coverAuto": "Auto", "uploadCover": "Titelbild hochladen", "mirrored": "Gespiegelt", "original": "Original", "rotate90": "90° drehen", "showNormally": "Normal anzeigen", "showNormallyBody": "Sie sehen es sofort", "hideUntilTap": "Ausblenden bis angetippt", "hideUntilTapBody": "Verschwommen, bis sie tippen", "hidePrice": "Hinter einem Preis ausblenden", "hidePriceBody": "Verschwommen, bis sie bezahlen", "priceUnavailable": "Nicht in diesem Chat", "timerOff": "Aus", "timerOffBody": "Es bleibt im Chat.", "timerViewBody": "Weg für euch beide, sobald sie es gesehen haben.", "confirm": "Bestätigen", "lockedFor": "Für {{value1}} DHB freischalten", "lockedForUsd": "Entsperren für {{value1}}", "editItem": "Element bearbeiten {{value1}}", "kept": "{{time}} behalten", "timerTimeBody": "Weg für euch beide {{value1}}, nachdem du es gesendet hast."},
+  "dmVideo": {"edit": "Video bearbeiten", "hiddenTag": "Ausgeblendet", "tapToEdit": "Zum Bearbeiten tippen", "cover": "Titelbild", "trim": "Zuschneiden", "mirror": "Spiegeln", "rotate": "Drehen", "hide": "Ausblenden", "timer": "Timer", "sheetTitleAny": "Vor dem Senden bearbeiten", "close": "Schließen", "replace": "Ersetzen", "hiddenUntilTap": "Versteckt, bis sie tippen", "pause": "Pause", "play": "Video abspielen", "mute": "Stummschalten", "unmute": "Stummschaltung aufheben", "scrub": "Durch das Video scrubbing", "addMore": "Fotos oder Videos hinzufügen", "trimAria": "Ziehe die Enden, um zuzuschneiden", "coverAria": "Tippe einen Frame, um das Titelbild festzulegen", "coverHint": "Tippe einen Frame, um das Titelbild festzulegen", "coverOwn": "Dein Bild", "coverAuto": "Auto", "uploadCover": "Titelbild hochladen", "mirrored": "Gespiegelt", "original": "Original", "rotate90": "90° drehen", "showNormally": "Normal anzeigen", "showNormallyBody": "Sie sehen es sofort", "hideUntilTap": "Ausblenden bis angetippt", "hideUntilTapBody": "Verschwommen, bis sie tippen", "hidePrice": "Hinter einem Preis ausblenden", "hidePriceBody": "Verschwommen, bis sie bezahlen", "priceUnavailable": "Nicht in diesem Chat", "timerOff": "Aus", "timerOffBody": "Es bleibt im Chat.", "timerViewBody": "Weg für euch beide, sobald sie es gesehen haben.", "confirm": "Bestätigen", "lockedFor": "Für {{value1}} Tokens freischalten", "lockedForUsd": "Entsperren für {{value1}}", "editItem": "Element bearbeiten {{value1}}", "kept": "{{time}} behalten", "timerTimeBody": "Weg für euch beide {{value1}}, nachdem du es gesendet hast."},
   "postBg": {
     "addMedia": "Bild, GIF oder Video hinzufügen",
     "changeMedia": "Bild, GIF oder Video ändern",
@@ -2084,7 +2084,7 @@
     "ogHolders_one": "{{count}} OG-Holder",
     "ogHolders_other": "{{count}} OG-Holder",
     "ogChallengeTitle": "Hol die OG-Holder zurück",
-    "ogChallengeBody": "Lade Leute ein, die noch DHB halten. Wenn sie über deinen Einladungslink beitreten und ihre DHB in ihrer Riftn-Wallet behalten, zählen sie hier für dich.",
+    "ogChallengeBody": "Lade Personen ein, die noch Tokens halten. Wenn sie über deinen Einladungslink beitreten und ihre Tokens in ihrer Riftn-Wallet behalten, zählen sie hier für dich.",
     "ogChallengeCta": "Einladungslink holen",
     "directReferrals_one": "{{count}} direkt",
     "directReferrals_other": "{{count}} direkt",
@@ -12224,7 +12224,7 @@
           "4": "Um eine Sprachnotiz aufzunehmen, klicken Sie auf das Mikrofon-Symbol.",
           "5": "Um ein GIF hinzuzufügen, klicken Sie auf das GIF-Symbol und suchen Sie nach einem.",
           "6": "Verwenden Sie #Hashtags, um Ihren Beitrag zu kategorisieren (z. B. #crypto, #defi).",
-          "7": "Verwenden Sie $Cashtags, um auf Token zu verweisen (z. B. $RIFT, $ETH).",
+          "7": "Verwenden Sie $Cashtags, um auf Token zu verweisen (z. B. $BTC, $ETH).",
           "8": "Verwenden Sie @Erwähnungen, um andere Benutzer zu markieren (z. B. @username).",
           "9": "Klicken Sie auf „Post“, um zu veröffentlichen. Ihr Beitrag erscheint sofort im Feed."
         },

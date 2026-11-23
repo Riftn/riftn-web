@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Tafatir muuqaalka", "hiddenTag": "Qarsan", "tapToEdit": "Taabo si aad u tafatirto", "cover": "Dabool", "mirror": "Muraayad", "rotate": "Wareeji", "hide": "Qari", "timer": "Saacad-joojiyaha", "sheetTitleAny": "Tafatir ka hor inta aadan dirin", "close": "Xir", "replace": "Beddel", "hiddenUntilTap": "Qari ilaa ay taabtaan", "pause": "Jooji", "play": "Daar muuqaalka", "mute": "Aamus", "unmute": "Aamuska ka qaad", "scrub": "Soo rog muuqaalka", "addMore": "Ku dar sawirro ama muuqaallo", "trimAria": "Jiid darafyada si aad u gooyso", "coverAria": "Taabo qaab si aad u dejiso daboolka", "coverHint": "Taabo qaab si aad u dejiso daboolka", "coverOwn": "Sawirkaaga", "coverAuto": "Auto", "uploadCover": "Soo geli sawirka daboolka", "mirrored": "Muraayadaysan", "original": "Asalka", "showNormally": "Muuji si caadi ah", "showNormallyBody": "Waxay u arkaan isla markiiba", "hideUntilTap": "Qari ilaa laga taabto", "hideUntilTapBody": "Waa la qariyey ilaa ay taabtaan", "hidePrice": "Ka dhuumo qiimo", "hidePriceBody": "Waa la qariyay ilaa ay ku siiyaan lacagta", "priceUnavailable": "Chat-kan kuma jiro", "timerOff": "Ka bax", "timerOffBody": "Waxay ku sii jiraysaa wada-hadalka.", "timerViewBody": "Way ka tirtirmaysaa labadiinaba marka ay arkaan.", "confirm": "Xaqiiji", "lockedFor": "Fur si aad u hesho {{value1}} DHB", "lockedForUsd": "Fur {{value1}}", "editItem": "Wax ka beddel shayga {{value1}}", "kept": "{{time}} ayaa la haystay", "timerTimeBody": "Way ka tirtirmaysaa labadiinaba {{value1}} marka aad dirto ka dib."},
+  "dmVideo": {"edit": "Tafatir muuqaalka", "hiddenTag": "Qarsan", "tapToEdit": "Taabo si aad u tafatirto", "cover": "Dabool", "mirror": "Muraayad", "rotate": "Wareeji", "hide": "Qari", "timer": "Saacad-joojiyaha", "sheetTitleAny": "Tafatir ka hor inta aadan dirin", "close": "Xir", "replace": "Beddel", "hiddenUntilTap": "Qari ilaa ay taabtaan", "pause": "Jooji", "play": "Daar muuqaalka", "mute": "Aamus", "unmute": "Aamuska ka qaad", "scrub": "Soo rog muuqaalka", "addMore": "Ku dar sawirro ama muuqaallo", "trimAria": "Jiid darafyada si aad u gooyso", "coverAria": "Taabo qaab si aad u dejiso daboolka", "coverHint": "Taabo qaab si aad u dejiso daboolka", "coverOwn": "Sawirkaaga", "coverAuto": "Auto", "uploadCover": "Soo geli sawirka daboolka", "mirrored": "Muraayadaysan", "original": "Asalka", "showNormally": "Muuji si caadi ah", "showNormallyBody": "Waxay u arkaan isla markiiba", "hideUntilTap": "Qari ilaa laga taabto", "hideUntilTapBody": "Waa la qariyey ilaa ay taabtaan", "hidePrice": "Ka dhuumo qiimo", "hidePriceBody": "Waa la qariyay ilaa ay ku siiyaan lacagta", "priceUnavailable": "Chat-kan kuma jiro", "timerOff": "Ka bax", "timerOffBody": "Waxay ku sii jiraysaa wada-hadalka.", "timerViewBody": "Way ka tirtirmaysaa labadiinaba marka ay arkaan.", "confirm": "Xaqiiji", "lockedFor": "Fur si aad u hesho {{value1}} calaamado", "lockedForUsd": "Fur {{value1}}", "editItem": "Wax ka beddel shayga {{value1}}", "kept": "{{time}} ayaa la haystay", "timerTimeBody": "Way ka tirtirmaysaa labadiinaba {{value1}} marka aad dirto ka dib."},
   "postBg": {
     "addMedia": "Ku dar sawir, GIF ama muuqaal",
     "changeMedia": "Beddel sawirka, GIF-ka ama muuqaalka",
@@ -2120,7 +2120,7 @@
     "ogHolders_one": "{{count}} haystaha OG",
     "ogHolders_other": "{{count}} haystayaal OG",
     "ogChallengeTitle": "Soo celi haystayaasha OG",
-    "ogChallengeBody": "Casuun dadka weli haysta DHB. Markay ku soo biiraan xiriiriyaha martiqaadkaaga oo ay DHB-gooda ku hayaan walletkooda Riftn, halkan adiga ayay kuu tirsanayaan.",
+    "ogChallengeBody": "Casuun dadka weli haysta calaamado. Markay ku soo biiraan xiriiriyaha martiqaadkaaga oo ay calaamado-gooda ku hayaan walletkooda Riftn, halkan adiga ayay kuu tirsanayaan.",
     "ogChallengeCta": "Hel xiriiriyaha martiqaadkaaga"
   },
   "dhbListing": {
@@ -12233,7 +12233,7 @@
           "4": "Si aad u duubto qoraal cod ah, guji astaanta makarafoonka.",
           "5": "Si aad ugu darto GIF, guji astaanta GIF oo ka raadi mid.",
           "6": "U isticmaal #hashtags si aad u kala saarto boostadaada (tusaale, #crypto, #defi).",
-          "7": "U isticmaal $cashtags si aad u tixraacdo tokens (tusaale, $RIFT, $ETH).",
+          "7": "U isticmaal $cashtags si aad u tixraacdo tokens (tusaale, $BTC, $ETH).",
           "8": "U isticmaal @mentions si aad u calaamadiso isticmaalayaal kale (tusaale, @username).",
           "9": "Guji 'Boostada' si aad u daabacdo. Boostadaada waxay si toos ah uga soo muuqataa quudinta."
         },

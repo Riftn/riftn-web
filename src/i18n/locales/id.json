@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Edit video", "hiddenTag": "Tersembunyi", "tapToEdit": "Ketuk untuk mengedit", "cover": "Cover", "trim": "Potong", "mirror": "Cermin", "rotate": "Putar", "hide": "Sembunyikan", "timer": "Timer", "sheetTitleAny": "Edit sebelum mengirim", "close": "Tutup", "replace": "Ganti", "hiddenUntilTap": "Tersembunyi sampai mereka sentuhnya", "pause": "Jeda", "play": "Main video", "mute": "Bisukan", "unmute": "Suarakan", "scrub": "Gesek melalui video", "addMore": "Tambahkan foto atau video", "trimAria": "Seret ujung untuk memotong", "coverAria": "Sentuh frame untuk menetapkan cover", "coverHint": "Sentuh frame untuk menetapkan cover", "coverOwn": "Foto Anda", "coverAuto": "Otomatis", "uploadCover": "Unggah gambar cover", "mirrored": "Dicerminkan", "original": "Asli", "rotate90": "Putar 90°", "showNormally": "Tampilkan secara normal", "showNormallyBody": "Mereka melihatnya langsung", "hideUntilTap": "Sembunyikan sampai disentuh", "hideUntilTapBody": "Kabur sampai mereka sentuh", "hidePrice": "Sembunyikan di belakang harga", "hidePriceBody": "Kabur sampai mereka membayar Anda", "priceUnavailable": "Bukan di obrolan ini", "timerOff": "Mati", "timerOffBody": "Itu tetap ada di obrolan.", "timerViewBody": "Habis untuk kalian berdua begitu mereka melihatnya.", "confirm": "Konfirmasi", "lockedFor": "Buka kunci untuk {{value1}} DHB", "lockedForUsd": "Buka kunci untuk {{value1}}", "editItem": "Edit item {{value1}}", "kept": "{{time}} disimpan", "timerTimeBody": "Hilang untuk kalian berdua {{value1}} setelah kamu mengirimnya."},
+  "dmVideo": {"edit": "Edit video", "hiddenTag": "Tersembunyi", "tapToEdit": "Ketuk untuk mengedit", "cover": "Cover", "trim": "Potong", "mirror": "Cermin", "rotate": "Putar", "hide": "Sembunyikan", "timer": "Timer", "sheetTitleAny": "Edit sebelum mengirim", "close": "Tutup", "replace": "Ganti", "hiddenUntilTap": "Tersembunyi sampai mereka sentuhnya", "pause": "Jeda", "play": "Main video", "mute": "Bisukan", "unmute": "Suarakan", "scrub": "Gesek melalui video", "addMore": "Tambahkan foto atau video", "trimAria": "Seret ujung untuk memotong", "coverAria": "Sentuh frame untuk menetapkan cover", "coverHint": "Sentuh frame untuk menetapkan cover", "coverOwn": "Foto Anda", "coverAuto": "Otomatis", "uploadCover": "Unggah gambar cover", "mirrored": "Dicerminkan", "original": "Asli", "rotate90": "Putar 90°", "showNormally": "Tampilkan secara normal", "showNormallyBody": "Mereka melihatnya langsung", "hideUntilTap": "Sembunyikan sampai disentuh", "hideUntilTapBody": "Kabur sampai mereka sentuh", "hidePrice": "Sembunyikan di belakang harga", "hidePriceBody": "Kabur sampai mereka membayar Anda", "priceUnavailable": "Bukan di obrolan ini", "timerOff": "Mati", "timerOffBody": "Itu tetap ada di obrolan.", "timerViewBody": "Habis untuk kalian berdua begitu mereka melihatnya.", "confirm": "Konfirmasi", "lockedFor": "Buka kunci untuk {{value1}} token", "lockedForUsd": "Buka kunci untuk {{value1}}", "editItem": "Edit item {{value1}}", "kept": "{{time}} disimpan", "timerTimeBody": "Hilang untuk kalian berdua {{value1}} setelah kamu mengirimnya."},
   "postBg": {
     "addMedia": "Tambahkan gambar, GIF, atau video",
     "changeMedia": "Ganti gambar, GIF, atau video",
@@ -2087,7 +2087,7 @@
     "ogHolders_one": "{{count}} holder OG",
     "ogHolders_other": "{{count}} holder OG",
     "ogChallengeTitle": "Ajak kembali holder OG",
-    "ogChallengeBody": "Undang orang yang masih memegang DHB. Saat mereka bergabung lewat tautan undanganmu dan menyimpan DHB di dompet Riftn, mereka dihitung untukmu di sini.",
+    "ogChallengeBody": "Undang orang yang masih memegang token. Saat mereka bergabung lewat tautan undanganmu dan menyimpan token di dompet Riftn, mereka dihitung untukmu di sini.",
     "ogChallengeCta": "Dapatkan tautan undanganmu",
     "directReferrals_one": "{{count}} langsung",
     "directReferrals_other": "{{count}} langsung",
@@ -12234,7 +12234,7 @@
           "4": "Untuk merekam catatan suara, klik ikon mikrofon.",
           "5": "Untuk menambahkan GIF, klik ikon GIF dan cari salah satunya.",
           "6": "Gunakan #tagar untuk mengkategorikan postingan Anda (misalnya, #kripto, #defi).",
-          "7": "Gunakan $tagkas untuk merujuk token (misalnya, $RIFT, $ETH).",
+          "7": "Gunakan $tagkas untuk merujuk token (misalnya, $BTC, $ETH).",
           "8": "Gunakan @sebutan untuk menandai pengguna lain (misalnya, @nama_pengguna).",
           "9": "Klik 'Postingan' untuk menerbitkan. Postingan Anda muncul di feed segera."
         },

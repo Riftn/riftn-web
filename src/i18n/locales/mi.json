@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Whakatika ataata", "hiddenTag": "Huna", "tapToEdit": "Paoa kia whakatika", "cover": "Uhi", "trim": "Tapahi", "mirror": "Whakaata", "rotate": "Whakataka", "hide": "Huna", "timer": "Taima", "sheetTitleAny": "Whakatika i mua i te tuku", "close": "Katia", "replace": "Whakakapi", "hiddenUntilTap": "Ka huna kia pato rano rātou", "pause": "Okioki", "play": "Whakatangi ataata", "mute": "Whakangū", "unmute": "Whakakore i te whakangū", "scrub": "Horoia te ataata", "addMore": "Tāpiri whakaahua, ataata rānei", "trimAria": "Tōia ngā pito hei tapahi", "coverAria": "Patoa tētahi anga hei uhi", "coverHint": "Patoa tētahi anga hei uhi", "coverOwn": "Tō pikitia", "coverAuto": "Aunoa", "uploadCover": "Tukuake he pikitia uhi", "mirrored": "Whakaata", "original": "Taketake", "rotate90": "Whakataka 90°", "showNormally": "Whakaatu noa", "showNormallyBody": "Ka kite tonu rātou", "hideUntilTap": "Huna kia pato rano", "hideUntilTapBody": "Whakangāueue kia pato rano rātou", "hidePrice": "Huna ki muri i te utu", "hidePriceBody": "Whakangāueue kia utu rano rātou", "priceUnavailable": "Kāore i tēnei kōrerorero", "timerOff": "Weto", "timerOffBody": "Ka noho tonu ki te kōrerorero.", "timerViewBody": "Ka ngaro mō kōrua tokorua ina kitea e rātou.", "confirm": "Whakaū", "lockedFor": "Wewete mō {{value1}} DHB", "lockedForUsd": "Wewete mō {{value1}}", "editItem": "Whakatika tūemi {{value1}}", "kept": "I pupuri a {{time}}", "timerTimeBody": "Ka ngaro mō kōrua tokorua {{value1}} i muri i tō tukunga."},
+  "dmVideo": {"edit": "Whakatika ataata", "hiddenTag": "Huna", "tapToEdit": "Paoa kia whakatika", "cover": "Uhi", "trim": "Tapahi", "mirror": "Whakaata", "rotate": "Whakataka", "hide": "Huna", "timer": "Taima", "sheetTitleAny": "Whakatika i mua i te tuku", "close": "Katia", "replace": "Whakakapi", "hiddenUntilTap": "Ka huna kia pato rano rātou", "pause": "Okioki", "play": "Whakatangi ataata", "mute": "Whakangū", "unmute": "Whakakore i te whakangū", "scrub": "Horoia te ataata", "addMore": "Tāpiri whakaahua, ataata rānei", "trimAria": "Tōia ngā pito hei tapahi", "coverAria": "Patoa tētahi anga hei uhi", "coverHint": "Patoa tētahi anga hei uhi", "coverOwn": "Tō pikitia", "coverAuto": "Aunoa", "uploadCover": "Tukuake he pikitia uhi", "mirrored": "Whakaata", "original": "Taketake", "rotate90": "Whakataka 90°", "showNormally": "Whakaatu noa", "showNormallyBody": "Ka kite tonu rātou", "hideUntilTap": "Huna kia pato rano", "hideUntilTapBody": "Whakangāueue kia pato rano rātou", "hidePrice": "Huna ki muri i te utu", "hidePriceBody": "Whakangāueue kia utu rano rātou", "priceUnavailable": "Kāore i tēnei kōrerorero", "timerOff": "Weto", "timerOffBody": "Ka noho tonu ki te kōrerorero.", "timerViewBody": "Ka ngaro mō kōrua tokorua ina kitea e rātou.", "confirm": "Whakaū", "lockedFor": "Wewete mō {{value1}} tohu", "lockedForUsd": "Wewete mō {{value1}}", "editItem": "Whakatika tūemi {{value1}}", "kept": "I pupuri a {{time}}", "timerTimeBody": "Ka ngaro mō kōrua tokorua {{value1}} i muri i tō tukunga."},
   "postBg": {
     "addMedia": "Tāpirihia he pikitia, he GIF, he ataata rānei",
     "changeMedia": "Hurihia te pikitia, te GIF, te ataata rānei",
@@ -2120,7 +2120,7 @@
     "ogHolders_one": "{{count}} kaipupuri OG",
     "ogHolders_other": "{{count}} kaipupuri OG",
     "ogChallengeTitle": "Whakahokia mai ngā kaipupuri OG",
-    "ogChallengeBody": "Pōwhiritia ngā tāngata e pupuri tonu ana i te DHB. Ina uru mai rātou mā tō hononga pōwhiri, ā, ka pupuri i tō rātou DHB i tō rātou pūkoro moni Riftn, ka tatauria rātou mōu i konei.",
+    "ogChallengeBody": "Pōwhiritia ngā tāngata e pupuri tonu ana i te tohu. Ina uru mai rātou mā tō hononga pōwhiri, ā, ka pupuri i tō rātou tohu i tō rātou pūkoro moni Riftn, ka tatauria rātou mōu i konei.",
     "ogChallengeCta": "Tikina tō hononga pōwhiri"
   },
   "dhbListing": {
@@ -11933,7 +11933,7 @@
     "viewOnExplorerDesc": "Whakatuwherahia te kaitirotiro blockchain (BaseScan) ki te tiro i nga taipitopito whakawhitiwhitinga i runga i te raka mo te pou, whakawhiti ranei.",
     "title": "Kupu Whakaahua",
     "subtitle": "Akohia he aha te tikanga o ia tohu me nga ahuatanga",
-    "dhbTokenDesc": "Te tohu whaipainga taketake o Riftn. Ko $RIFT te tohu hokohoko mō ngā tohu Riftn. Ka whakamahia mō te koha, mō ngā ihirangi utu-ia-mātakitaki, mō te pōti whakahaere, me te tāpui."
+    "dhbTokenDesc": "Te tohu whaipainga taketake o Riftn. Ka whakamahia mō te koha, mō ngā ihirangi utu-ia-mātakitaki, mō te pōti whakahaere, me te tāpui."
   },
   "tipFunding": {
     "noRoute": "Kaore he huarahi Uniswap ki nga tohu Riftn mo tenei tohu i tenei wa",
@@ -12233,7 +12233,7 @@
           "4": "Hei tuhi i tētahi reo-rongo, pāwhiritia te ata hopuoro.",
           "5": "Hei tāpiri i tētahi GIF, pāwhiritia te ata GIF ka rapu i tētahi.",
           "6": "Whakamahia ngā #hashtags hei whakarōpū i tō whakairinga (hei tauira, #crypto, #defi).",
-          "7": "Whakamahia ngā $cashtags hei tohutoro i ngā tohu (hei tauira, $RIFT, $ETH).",
+          "7": "Whakamahia ngā $cashtags hei tohutoro i ngā tohu (hei tauira, $BTC, $ETH).",
           "8": "Whakamahia ngā @mentions hei tohu i ētahi atu kaiwhakamahi (hei tauira, @username).",
           "9": "Pāwhiritia te 'Whakairinga' hei whakaputa. Ka puta tō whakairinga ki te pātaka tonu."
         },

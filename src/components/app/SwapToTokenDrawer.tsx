@@ -1,3 +1,4 @@
+import { tokenLabel } from '@/lib/token-label';
 import { useTranslation as _useCopy } from 'react-i18next';
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
 /**
@@ -188,7 +189,7 @@ export function SwapToTokenDrawer({
         targetAddress,
       );
       setSuccess(true);
-      toast.success(_copy("copy.f0e43aaa925d", { defaultValue: "Swapped for {{value1}} {{value2}}", value1: amt.toLocaleString(), value2: targetSymbol }), {
+      toast.success(_copy("copy.f0e43aaa925d", { defaultValue: "Swapped for {{value1}} {{value2}}", value1: amt.toLocaleString(), value2: tokenLabel(targetSymbol) }), {
         description: _copy("copy.ca56c9d369b9", { defaultValue: "TX: {{value1}}…", value1: receipt.hash.slice(0, 10) }),
       });
     } catch (err: any) {
@@ -239,7 +240,7 @@ export function SwapToTokenDrawer({
               <CheckCircle2 className="w-12 h-12 text-emerald-400" />
               <p className="text-white font-medium">{t('buyCoins.swapSuccess.title')}</p>
               <p className="text-sm text-zinc-400">
-                {t('buyCoins.swapSuccess.addedToWallet', { amount: parseFloat(amount).toLocaleString(), symbol: targetSymbol })}
+                {t('buyCoins.swapSuccess.addedToWallet', { amount: parseFloat(amount).toLocaleString(), symbol: tokenLabel(targetSymbol) })}
               </p>
               {canShareToFeed && (
                 <Button
@@ -264,7 +265,7 @@ export function SwapToTokenDrawer({
                 </div>
                 <div className="flex items-center gap-3">
                   {outIcon ? (
-                    <img src={outIcon} alt={targetSymbol} className="w-8 h-8 rounded-full" />
+                    <img src={outIcon} alt={tokenLabel(targetSymbol)} className="w-8 h-8 rounded-full" />
                   ) : (
                     <div className="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center">
                       <span className="text-[10px] font-bold text-zinc-400">{targetSymbol.slice(0, 2)}</span>
@@ -277,7 +278,7 @@ export function SwapToTokenDrawer({
                     onChange={e => setAmount(e.target.value)}
                     className="bg-transparent border-none text-white text-xl font-semibold p-0 h-auto focus-visible:ring-0"
                   />
-                  <span className="text-sm text-zinc-400 font-medium shrink-0">{targetSymbol}</span>
+                  <span className="text-sm text-zinc-400 font-medium shrink-0">{tokenLabel(targetSymbol)}</span>
                 </div>
               </div>
 
@@ -297,13 +298,13 @@ export function SwapToTokenDrawer({
                     className="flex items-center gap-2 shrink-0 px-2 py-1 rounded-lg bg-white/[0.08] hover:bg-white/[0.14] border border-white/10 transition-colors"
                   >
                     {tokenIcon ? (
-                      <img src={tokenIcon} alt={selectedToken.symbol} className="w-6 h-6 rounded-full" />
+                      <img src={tokenIcon} alt={tokenLabel(selectedToken.symbol)} className="w-6 h-6 rounded-full" />
                     ) : (
                       <div className="w-6 h-6 rounded-full bg-zinc-700 flex items-center justify-center">
                         <span className="text-[9px] font-bold text-zinc-400">{selectedToken.symbol.slice(0, 2)}</span>
                       </div>
                     )}
-                    <span className="text-sm font-medium text-white">{selectedToken.symbol}</span>
+                    <span className="text-sm font-medium text-white">{tokenLabel(selectedToken.symbol)}</span>
                     <ChevronDown className="w-3.5 h-3.5 text-zinc-400" />
                   </button>
                   <span className="text-white text-xl font-semibold flex-1 text-right">
@@ -349,7 +350,7 @@ export function SwapToTokenDrawer({
                 ) : insufficientBalance ? (
                   _copy("copy.c4097c4376ef", { defaultValue: "Insufficient {{value1}}", value1: selectedToken.symbol })
                 ) : (
-                  _copy("copy.9b5f8d89fc43", { defaultValue: "Buy {{value1}}", value1: targetSymbol })
+                  _copy("copy.9b5f8d89fc43", { defaultValue: "Buy {{value1}}", value1: tokenLabel(targetSymbol) })
                 )}
               </Button>
 
@@ -387,14 +388,14 @@ export function SwapToTokenDrawer({
                 }`}
               >
                 {icon ? (
-                  <img src={icon} alt={token.symbol} className="w-8 h-8 rounded-full" />
+                  <img src={icon} alt={tokenLabel(token.symbol)} className="w-8 h-8 rounded-full" />
                 ) : (
                   <div className="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center">
                     <span className="text-[10px] font-bold text-zinc-400">{token.symbol.slice(0, 2)}</span>
                   </div>
                 )}
                 <div className="text-left flex-1 min-w-0">
-                  <span className="text-sm font-medium text-white">{token.symbol}</span>
+                  <span className="text-sm font-medium text-white">{tokenLabel(token.symbol)}</span>
                   {isSelected && <span className="text-[10px] text-emerald-400 ml-2">{_copy("copy.57fd7a0cf33f", { defaultValue: "Selected" })}</span>}
                 </div>
                 <span className={`text-sm ${hasBalance ? 'text-white' : 'text-zinc-600'}`}>

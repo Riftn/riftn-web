@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Hlela ividiyo", "hiddenTag": "Kufihliwe", "tapToEdit": "Thepha ukuze uhlele", "cover": "Ikhava", "trim": "Sika", "mirror": "Isibuko", "rotate": "Phendula", "hide": "Fihla", "timer": "Isikhathi", "sheetTitleAny": "Hlela ngaphambi kokuthumela", "close": "Vala", "replace": "Faka esikhundleni", "hiddenUntilTap": "Ifihliwe kuze kube yilapho beyithinta", "pause": "Misa isikhashana", "play": "Dlala ividiyo", "mute": "Thulisa", "unmute": "Susa ukuthula", "scrub": "Skrola kuvidiyo", "addMore": "Engeza izithombe noma amavidiyo", "trimAria": "Hudula imiphetho ukuze usike", "coverAria": "Thinta ifreyimu ukuze usethe ikhava", "coverHint": "Thinta ifreyimu ukuze usethe ikhava", "coverOwn": "Isithombe sakho", "coverAuto": "Okuzenzakalelayo", "uploadCover": "Layisha isithombe sekhava", "mirrored": "Isibuko", "original": "Okokuqala", "rotate90": "Phendula ngo-90°", "showNormally": "Bonisa ngokujwayelekile", "showNormallyBody": "Bayibona ngokushesha", "hideUntilTap": "Fihla kuze kube yilapho ithintiwe", "hideUntilTapBody": "Ifiphele kuze kube yilapho beyithinta", "hidePrice": "Fihla ngemuva kwentengo", "hidePriceBody": "Ifiphele kuze kube yilapho bakukhokhela", "priceUnavailable": "Akukho kule ngxoxo", "timerOff": "Valiwe", "timerOffBody": "Ihlala engxoxweni.", "timerViewBody": "Iyanyamalala kini nobabili uma beyibonile.", "confirm": "Qinisekisa", "lockedFor": "Vula ukuze uthole {{value1}} DHB", "lockedForUsd": "Vula ukuze uthole {{value1}}", "editItem": "Hlela into {{value1}}", "kept": "{{time}} kugciniwe", "timerTimeBody": "Iyanyamalala kini nobabili {{value1}} ngemva kokuba uyithumile."},
+  "dmVideo": {"edit": "Hlela ividiyo", "hiddenTag": "Kufihliwe", "tapToEdit": "Thepha ukuze uhlele", "cover": "Ikhava", "trim": "Sika", "mirror": "Isibuko", "rotate": "Phendula", "hide": "Fihla", "timer": "Isikhathi", "sheetTitleAny": "Hlela ngaphambi kokuthumela", "close": "Vala", "replace": "Faka esikhundleni", "hiddenUntilTap": "Ifihliwe kuze kube yilapho beyithinta", "pause": "Misa isikhashana", "play": "Dlala ividiyo", "mute": "Thulisa", "unmute": "Susa ukuthula", "scrub": "Skrola kuvidiyo", "addMore": "Engeza izithombe noma amavidiyo", "trimAria": "Hudula imiphetho ukuze usike", "coverAria": "Thinta ifreyimu ukuze usethe ikhava", "coverHint": "Thinta ifreyimu ukuze usethe ikhava", "coverOwn": "Isithombe sakho", "coverAuto": "Okuzenzakalelayo", "uploadCover": "Layisha isithombe sekhava", "mirrored": "Isibuko", "original": "Okokuqala", "rotate90": "Phendula ngo-90°", "showNormally": "Bonisa ngokujwayelekile", "showNormallyBody": "Bayibona ngokushesha", "hideUntilTap": "Fihla kuze kube yilapho ithintiwe", "hideUntilTapBody": "Ifiphele kuze kube yilapho beyithinta", "hidePrice": "Fihla ngemuva kwentengo", "hidePriceBody": "Ifiphele kuze kube yilapho bakukhokhela", "priceUnavailable": "Akukho kule ngxoxo", "timerOff": "Valiwe", "timerOffBody": "Ihlala engxoxweni.", "timerViewBody": "Iyanyamalala kini nobabili uma beyibonile.", "confirm": "Qinisekisa", "lockedFor": "Vula ukuze uthole {{value1}} amathokheni", "lockedForUsd": "Vula ukuze uthole {{value1}}", "editItem": "Hlela into {{value1}}", "kept": "{{time}} kugciniwe", "timerTimeBody": "Iyanyamalala kini nobabili {{value1}} ngemva kokuba uyithumile."},
   "postBg": {
     "addMedia": "Engeza isithombe, i-GIF noma ividiyo",
     "changeMedia": "Shintsha isithombe, i-GIF noma ividiyo",
@@ -2121,7 +2121,7 @@
     "ogHolders_one": "Umnikazi we-OG ongu-{{count}}",
     "ogHolders_other": "Abanikazi be-OG abangu-{{count}}",
     "ogChallengeTitle": "Buyisa abanikazi be-OG",
-    "ogChallengeBody": "Mema abantu abasaphethe i-DHB. Uma bejoyina ngesixhumanisi sakho sesimemo futhi bagcine i-DHB yabo ku-wallet yabo ye-Riftn, babalelwa wena lapha.",
+    "ogChallengeBody": "Mema abantu abasaphethe i-amathokheni. Uma bejoyina ngesixhumanisi sakho sesimemo futhi bagcine i-amathokheni yabo ku-wallet yabo ye-Riftn, babalelwa wena lapha.",
     "ogChallengeCta": "Thola isixhumanisi sakho sesimemo"
   },
   "dhbListing": {
@@ -12264,7 +12264,7 @@
           "4": "Ukuze urekhode inothi lezwi, chofoza isithonjana semakrofoni.",
           "5": "Ukuze ungeze i-GIF, chofoza isithonjana se-GIF bese uyifuna.",
           "6": "Sebenzisa ama-#hashtag ukuze ukategorise okuthunyelwe kwakho (isb., #crypto, #defi).",
-          "7": "Sebenzisa ama-$cashtag ukuze ubhekise kumathokheni (isb., $RIFT, $ETH).",
+          "7": "Sebenzisa ama-$cashtag ukuze ubhekise kumathokheni (isb., $BTC, $ETH).",
           "8": "Sebenzisa ama-@mention ukuze umake abanye abasebenzisi (isb., @username).",
           "9": "Chofoza u-'Thumela' ukuze ushicilele. Okuthunyelwe kwakho kuvela kokuphakelayo ngokushesha."
         },
