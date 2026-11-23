@@ -170,6 +170,8 @@ const BAR_ITEMS: MobileNavItem[] = [
 const CREATE_ID = 'create';
 const CREATE_SLOT = 2;
 /** Saved under the destination's i18n key, which the app's bar shares. */
+/** Slots the pill shows without scrolling (each is w-1/5). */
+const VISIBLE_BAR_SLOTS = 5;
 const barItemId = (item: MobileNavItem) => NAV_LABEL_KEYS[item.label] ?? item.label;
 /** The bar's default order. */
 export const DEFAULT_BAR_IDS = BAR_ITEMS.map(barItemId);
@@ -219,7 +221,14 @@ export function MobileBottomNav() {
 
   const dmUnread = useTotalUnreadCount();
   const publicChatUnread = usePublicChatUnreadCount();
-  const messagesUnread = dmUnread + publicChatUnread;
+  // Public Chat unread shows on the envelope only while Public Chat has no icon
+  // of its own in the visible part of the pill; once it does, it carries its own count.
+  const publicChatOnBar = useMemo(() => {
+    const liveChat = barItems.find(item => item.path === LIVE_CHAT_PATH);
+    const at = liveChat ? barOrder.indexOf(barItemId(liveChat)) : -1;
+    return at >= 0 && at < VISIBLE_BAR_SLOTS;
+  }, [barItems, barOrder]);
+  const messagesUnread = dmUnread + (publicChatOnBar ? 0 : publicChatUnread);
   // Same badge sources as DesktopSidebar — keep the two navs in sync
   const { data: unreadCount } = useUnreadNotificationCount();
   const { data: customUnread } = useCustomUnreadCount();
