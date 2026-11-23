@@ -8673,6 +8673,7 @@
     "endStreamConfirmBody": "Your broadcast stops for everyone watching and cannot be resumed.",
     "keepStreaming": "Keep streaming",
     "encoderPermanentHint": "This key never changes. Set your encoder up once — next time just press Start there and Riftn creates the post for you.",
+    "encoderSettingsTip": "So your stream opens fast for viewers, set Keyframe Interval to 2 seconds in your encoder (OBS: Settings → Output), and B-frames to 0 if it has that setting. Left on auto, viewers can wait up to 8 seconds for the picture.",
     "notEnoughTokensForBounty": "Not enough tokens. Need {{need}} tokens but have {{have}}."
   },
   "events": {
