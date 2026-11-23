@@ -50,6 +50,7 @@ import { NewMemberChip } from '@/components/app/NewMemberChip';
 import { OnboardingCompleteChip } from '@/components/app/OnboardingCompleteChip';
 import { EarlySupporterChip } from '@/components/app/EarlySupporterChip';
 import { BadgeMuseumPanel, MilestoneChips } from '@/components/app/profile/BadgeMuseum';
+import { useMilestones } from '@/hooks/use-milestones';
 import { BadgePatronChip } from '@/components/app/BadgePatronChip';
 import { toast } from 'sonner';
 import { DISPLAY_WALLET_OVERRIDES, getDefaultBanner, type TabValue } from './ProfileConstants';
@@ -194,6 +195,10 @@ export function ProfileHeader({
     dismiss();
   }, [ceremony, dismiss]);
 
+  // The chips by the name (new member, onboarding, early supporter and the
+  // milestone badges) follow the owner's Badge Museum switch: off means none.
+  const { data: museum } = useMilestones(profile.walletAddress);
+  const showBadgeChips = !!museum && !museum.hidden;
   const [avatarFailed, setAvatarFailed] = useState(false);
   const [avatarCdnFailed, setAvatarCdnFailed] = useState(false);
   // The badge rides on the last word so a wrapping name never leaves it
@@ -462,18 +467,22 @@ export function ProfileHeader({
                     place that says whose badge it is. */}
                 <BadgePatronChip lookupId={profile.walletAddress} />
               </span>
-              {/* Temporary — gone NEW_MEMBER_WINDOW_DAYS after signup, and
-                  immediately if they switch it off in Settings › Privacy. */}
-              <NewMemberChip address={profile.walletAddress} />
-              {/* Your own profile only, and only once the walkthrough is
-                  finished — it is derived from your progress row, not from
-                  anything stored on the profile. */}
-              <OnboardingCompleteChip address={profile.walletAddress} />
-              {/* One of their requests on the Requests board shipped. */}
-              <EarlySupporterChip address={profile.walletAddress} username={profile.handle} />
-              {/* Badge Museum: their three rarest milestone badges. Tapping
-                  one opens the whole museum. */}
-              <MilestoneChips address={profile.walletAddress} own={!!isViewingOwnProfile} />
+              {showBadgeChips && (
+                <>
+                  {/* Temporary — gone NEW_MEMBER_WINDOW_DAYS after signup, and
+                      immediately if they switch it off in Settings › Privacy. */}
+                  <NewMemberChip address={profile.walletAddress} />
+                  {/* Your own profile only, and only once the walkthrough is
+                      finished — it is derived from your progress row, not from
+                      anything stored on the profile. */}
+                  <OnboardingCompleteChip address={profile.walletAddress} />
+                  {/* One of their requests on the Requests board shipped. */}
+                  <EarlySupporterChip address={profile.walletAddress} username={profile.handle} />
+                  {/* Badge Museum: their three rarest milestone badges. Tapping
+                      one opens the whole museum. */}
+                  <MilestoneChips address={profile.walletAddress} own={!!isViewingOwnProfile} />
+                </>
+              )}
             </div>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <button
