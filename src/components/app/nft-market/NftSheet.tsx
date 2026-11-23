@@ -35,6 +35,8 @@ import {
 import { NATIVE, buildListing, buildOffer, currentPrice, type RoyaltyTerm } from '@/lib/market/seaport';
 import { NftArt, formatPrice } from './NftCard';
 import { AuctionBox } from './AuctionBox';
+import { CollectorPanel } from '@/components/app/collect/CollectorPanel';
+import { useEdition } from '@/hooks/use-edition';
 import type { Auction } from '@/lib/api/dehub/collect';
 
 export interface NftSheetTarget {
@@ -177,6 +179,8 @@ export function NftSheet({
     enabled: open,
     staleTime: 15_000,
   });
+  // Create-tab NFTs carry copies, royalties and owner extras; posts do not.
+  const edition = useEdition(open && detail.data?.isDehub && !isBundle ? target?.tokenId : null);
   const holding = useQuery({
     queryKey: ['nft-market', 'held', target?.chainId, target?.contract, target?.tokenId, me],
     queryFn: () => heldAmount(target!, me),
@@ -398,6 +402,10 @@ export function NftSheet({
                   image={image}
                   preview={auctionPreview}
                 />
+              ) : null}
+
+              {!isBundle && target && detail.data?.isDehub && edition.data?.nftOnly && !auctionPreview ? (
+                <CollectorPanel tokenId={target.tokenId} chainId={target.chainId} />
               ) : null}
 
               {isAuthenticated ? <div className="flex flex-wrap gap-2">

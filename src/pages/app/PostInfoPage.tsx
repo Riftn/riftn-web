@@ -641,11 +641,15 @@ export default function PostInfoPage() {
               for all of it. */}
           {!isUnminted && (
           <>
-          <CollectorPanel
-            tokenId={nftInfo.tokenId}
-            chainId={nftInfo.chainId || 8453}
-            contract={collectionFor(nftInfo.chainId || 8453)}
-          />
+          {/* Copies, royalties and owner extras belong to NFTs made in the
+              market's Create tab; a post's mint is its 1,000 fractions. */}
+          {(nftInfo as { nftOnly?: boolean }).nftOnly ? (
+            <CollectorPanel
+              tokenId={nftInfo.tokenId}
+              chainId={nftInfo.chainId || 8453}
+              contract={collectionFor(nftInfo.chainId || 8453)}
+            />
+          ) : null}
 
           <FractionMarketPanel
             tokenId={String(nftInfo.tokenId)}
@@ -922,7 +926,7 @@ export default function PostInfoPage() {
           onOpenChange={setShowMintSheet}
           defaultChainId={nftInfo.chainId}
           isMinting={isMinting}
-          hideEdition={!!nftInfo.streamInfo?.isAddBounty}
+          hideEdition={!(nftInfo as { nftOnly?: boolean }).nftOnly}
           onConfirm={handleMintNow}
         />
       )}

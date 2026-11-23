@@ -18,6 +18,8 @@ export interface EditionInfo {
   minted: boolean;
   creator: string | null;
   chainId: number | null;
+  /** Made in the NFT market's Create tab, not a post. */
+  nftOnly?: boolean;
 }
 
 /** Copies a post mints when the creator does not choose. */
@@ -195,3 +197,21 @@ export function bpsLabel(bps: number): string {
   const pct = bps / 100;
   return `${Number.isInteger(pct) ? pct : pct.toFixed(pct * 10 % 1 === 0 ? 1 : 2)}%`;
 }
+
+/** An NFT you made in the market's Create tab. */
+export interface Creation {
+  tokenId: number;
+  chainId: number;
+  contract: string | null;
+  name: string;
+  image: string | null;
+  postType: string | null;
+  minted: boolean;
+  /** Sent to the chain, waiting for it to land. */
+  minting: boolean;
+  supply: number;
+  royaltyBps: number;
+  createdAt: string | null;
+}
+
+export const fetchCreations = () => apiCall<{ items: Creation[] }>('/api/collect/creations', { requiresAuth: true });

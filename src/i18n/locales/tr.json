@@ -7522,7 +7522,8 @@
     "spotlight": "Öne çıkan",
     "spotlightBuyNote": "NFT ve ödeme tek adımda el değiştirir.",
     "spotlightOfferNote": "Henüz satışta değil. Teklif gönder, sahibi istediği zaman kabul edebilir.",
-    "signInToTradeCta": "İşlem için giriş yap"
+    "signInToTradeCta": "İşlem için giriş yap",
+    "tabCreate": "Oluştur"
   },
   "usernames": {
     "swap": {
@@ -23468,5 +23469,27 @@
     "shelfAll": "Tümü",
     "shelfCreated": "Oluşturulan",
     "shelfCollected": "Toplanan"
+  },
+  "nftCreate": {
+    "eyebrow": "Oluştur",
+    "title": "NFT oluştur",
+    "intro": "NFT bir gönderi değildir. Burada, pazarda yaşar: kaç kopya olacağını, yeniden satışlardan kimin kazanacağını ve yalnızca sahiplerin açabileceği ekstraları seç.",
+    "pickArt": "Görseli seç",
+    "pickArtHint": "Resim veya GIF, en fazla 42 MB",
+    "removeArt": "Kaldır",
+    "name": "Başlık",
+    "namePlaceholder": "NFT'ne bir isim ver",
+    "description": "Açıklama (isteğe bağlı)",
+    "next": "Kopyaları seç ve mint et",
+    "yours": "NFT'lerin",
+    "none": "Henüz bir şey yok. NFT'lerin burada görünecek.",
+    "minting": "Mint ediliyor…",
+    "finish": "Mint işlemini bitir",
+    "sheetTitle": "NFT mint et",
+    "signIn": "NFT oluşturmak için giriş yap",
+    "imageOnly": "Bir resim veya GIF seç. Video, müzik veya dosyaları mint ettikten sonra sahiplere özel ekstra olarak ekle.",
+    "tooBig": "Bu dosya 42 MB'tan büyük",
+    "minted": "NFT mint edildi. Bir dakika içinde pazarda görünür.",
+    "failed": "NFT oluşturulamadı"
   }
 }

@@ -36,6 +36,7 @@ import { DropsTab } from '@/components/app/collect/DropsTab';
 import { AuctionBox } from '@/components/app/nft-market/AuctionBox';
 import type { Auction, Drop, MarketStats, Unlockable } from '@/lib/api/dehub/collect';
 import { MintChainSheet } from '@/components/app/mint/MintChainSheet';
+import { CreateNftPanel } from '@/components/app/nft-market/CreateNftPanel';
 import PayWithCoinSheet from '@/components/app/credits/PayWithCoinSheet';
 import { VoiceStripPlayer } from '@/components/app/audio/VoiceStripPlayer';
 import { LiveMicBars } from '@/components/app/audio/LiveMicBars';
@@ -1654,6 +1655,19 @@ function CollectGallery() {
         <div data-collect-state="auction-new">
           <AuctionBox target={{ chainId: 8453, contract: '0x9f8012074d27f8596c0e5038477acb52057bc934', tokenId: '1202' }} me={'0x' + 'c'.repeat(40)} isAuthenticated held={0n} standard="erc1155" dhb={undefined} offers={[]} name="Quiet field" image={null} preview={galleryAuction(false)} />
         </div>
+      </div>
+      <div className="mt-4" data-collect-state="create">
+        <CreateNftPanel
+          onOpen={() => undefined}
+          preview={{
+            creations: [
+              { tokenId: 1301, chainId: 8453, contract: '0x9f8012074d27f8596c0e5038477acb52057bc934', name: 'Neon harbour', image: `${GALLERY_IMG}-1/400/400`, postType: 'feed-images', minted: true, minting: false, supply: 25000, royaltyBps: 750, createdAt: null },
+              { tokenId: 1302, chainId: 56, contract: '0x1065f5922a336c75623b55d22c4a0c760efce947', name: 'Quiet field', image: `${GALLERY_IMG}-3/400/400`, postType: 'feed-images', minted: true, minting: false, supply: 1, royaltyBps: 1000, createdAt: null },
+              { tokenId: 1303, chainId: 8453, contract: '0x9f8012074d27f8596c0e5038477acb52057bc934', name: 'Glass tide', image: `${GALLERY_IMG}-2/400/400`, postType: 'feed-images', minted: false, minting: true, supply: 100, royaltyBps: 500, createdAt: null },
+              { tokenId: 1304, chainId: 8453, contract: '0x9f8012074d27f8596c0e5038477acb52057bc934', name: 'Paper moon', image: `${GALLERY_IMG}-4/400/400`, postType: 'feed-images', minted: false, minting: false, supply: 1000, royaltyBps: 0, createdAt: null },
+            ],
+          }}
+        />
       </div>
       <div className="mt-4" data-collect-state="drops">
         <DropsTab preview={{ drop: galleryDrop, stats: galleryStats, auctions: [galleryAuction(true), { ...galleryAuction(false), id: 'g2', nftName: 'Quiet field', nftImage: `${GALLERY_IMG}-3/400/400` }] }} />

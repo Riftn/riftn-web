@@ -21,12 +21,13 @@ import { NftSheet, errorText, type NftSheetTarget } from '@/components/app/nft-m
 import { toast } from 'sonner';
 import { CollectionsRow, formatVolume } from '@/components/app/nft-market/CollectionsRow';
 import { OpenSeaSheet } from '@/components/app/nft-market/OpenSeaSheet';
+import { CreateNftPanel } from '@/components/app/nft-market/CreateNftPanel';
 import { NftSpotlight, type SpotlightItem } from '@/components/app/nft-market/NftSpotlight';
 import { CHAIN_LABEL, EXPLORER, MARKET_CHAINS, OPENSEA_CHAINS, fillListings, walletAddress, fetchBestOffers, fetchCollections, fetchOpenSea, fetchOrders, fetchShowcase, fetchWalletNfts, type MarketCollection, type MarketOrder, type OpenSeaListing, type ShowcaseNft } from '@/lib/market/market';
 import SlidersHorizontal from '@/components/ui/cut-icons/settings';
 import { currentPrice } from '@/lib/market/seaport';
 
-type Tab = 'browse' | 'sell' | 'mine' | 'activity';
+type Tab = 'browse' | 'create' | 'sell' | 'mine' | 'activity';
 type ActivityKind = 'all' | 'sale' | 'listing' | 'offer';
 
 /** How long ago, short: 5m, 3h, 2d. */
@@ -75,7 +76,7 @@ export default function NftMarketPage({ embedded = false, islandSlot = null }: {
   const [tab, setTabState] = useState<Tab>(() => {
     const asked = params.get(tabParam);
     if (asked === 'sales' || asked === 'activity') return 'activity';
-    return asked === 'sell' || asked === 'mine' ? asked : 'browse';
+    return asked === 'sell' || asked === 'mine' || asked === 'create' ? asked : 'browse';
   });
   const setTab = (next: Tab) => {
     setTabState(next);
@@ -472,6 +473,7 @@ export default function NftMarketPage({ embedded = false, islandSlot = null }: {
       onChange={setTab}
       tabs={[
         { id: 'browse', label: t('nftMarket.tabBrowse', { defaultValue: 'Browse' }) },
+        { id: 'create', label: t('nftMarket.tabCreate', { defaultValue: 'Create' }) },
         { id: 'sell', label: t('nftMarket.tabSell', { defaultValue: 'Sell' }) },
         { id: 'mine', label: t('nftMarket.tabMine', { defaultValue: 'My orders' }) },
         { id: 'activity', label: t('nftMarket.tabRecent', { defaultValue: 'Recent' }) },
@@ -718,6 +720,8 @@ export default function NftMarketPage({ embedded = false, islandSlot = null }: {
               )}
             </>
           ) : null}
+
+          {tab === 'create' ? <CreateNftPanel onOpen={setOpen} /> : null}
 
           {tab === 'sell' ? (
             !me ? signedOut : (
