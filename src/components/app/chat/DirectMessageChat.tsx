@@ -17,7 +17,7 @@ import { useContext, useState, useRef, useEffect, useLayoutEffect, useCallback, 
 import { DhbAmount, DhbCoin } from '@/components/app/DhbAmount';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { MoreVertical, Loader2, ArrowDown, ShieldBan, AlertCircle, RotateCcw, Pin, FileText, Unlock, LockOpen, Hourglass } from "lucide-react";
+import { ChevronLeft, MoreVertical, Loader2, ArrowDown, ShieldBan, AlertCircle, RotateCcw, Pin, FileText, Unlock, LockOpen, Hourglass } from "lucide-react";
 import Trash2 from "@/components/ui/cut-icons/delete";
 import ShieldCheck from "@/components/ui/cut-icons/security";
 import RefreshCw from "@/components/ui/cut-icons/refresh";
@@ -197,6 +197,12 @@ interface DirectMessageChatProps {
    * readable width on wide screens.
    */
   cozy?: boolean;
+  /**
+   * Phones on /app/messages (not riftn.com/chat): B's top, photo and name
+   * centred with back on the left and calls + menu on the right (search
+   * moves into the menu), and the composer's + bar.
+   */
+  phoneB?: boolean;
   /**
    * The full chat options (new window, archive, pin, mute, mark unread,
    * clear history) for the three-dot menu. Block and delete stay this
@@ -1130,6 +1136,10 @@ const MessageBubble = memo(function MessageBubble({
           <div
             {...doubleTap}
             style={canDoubleTap ? { touchAction: 'manipulation' } : undefined}
+            /* Phones restyle plain text bubbles through these (styles/messages-phone-list.css). */
+            data-dm-bubble={message.msgType === 'media' || message.msgType === 'gif' || isPostShare ? undefined : isOwnMessage ? 'me' : 'them'}
+            data-dm-bubble-first={!cozy || cozy.first ? '' : undefined}
+            data-dm-bubble-last={!cozy || cozy.last ? '' : undefined}
             /* Mine vs theirs is carried by fill-vs-outline rather than by a
                glass stack: a filled block with no border for own messages, a
                hairline block with no fill for theirs. Geometry matches the
@@ -1678,7 +1688,7 @@ const MAX_READ_SPOT_PAGES = 10;
 /** Room above the unread line when a chat opens on it, so the sticky day pill doesn't cover it. */
 const UNREAD_MARKER_TOP_GAP = 48;
 
-export function DirectMessageChat({ conversation, onBack, initialComposerText, dock = false, headerActions, focusComposer = false, cozy = false, options }: DirectMessageChatProps) {
+export function DirectMessageChat({ conversation, onBack, initialComposerText, dock = false, headerActions, focusComposer = false, cozy = false, phoneB = false, options }: DirectMessageChatProps) {
   const { t: _copy } = _useCopy();
   const { user, walletAddress, openLoginModal } = useAuth();
   const isChatActive = useContext(CachedPageActiveContext);
@@ -3310,10 +3320,169 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     pinnedMessageId, handleUnpinMessage, _copy, setReportTarget,
   ]);
 
+  const toggleSearch = () => {
+    setShowSearchBar(prev => !prev);
+    if (!showSearchBar) {
+      setTimeout(() => searchInputRef.current?.focus(), 100);
+    } else {
+      setSearchQuery.complete(searchQuery, '');
+    }
+  };
+
+  const headerMenu = (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className={`text-zinc-400 hover:text-white hover:bg-zinc-800 ${dock ? 'h-8 w-8' : ''}`}>
+          <MoreVertical className={dock ? 'w-4 h-4' : 'w-5 h-5'} />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" data-chat-options-menu className={options ? CHAT_MENU_CONTENT : 'z-[150] bg-zinc-800 border-zinc-700'}>
+        {phoneB && (
+          <DropdownMenuItem className="text-zinc-300 focus:text-white focus:bg-zinc-700 cursor-pointer" onClick={toggleSearch} data-chat-menu-search>
+            <Search className="w-4 h-4 mr-2" />{_copy('messages.searchInChat', { defaultValue: 'Search in chat' })}
+          </DropdownMenuItem>
+        )}
+        {isGroupChat && (
+          <DropdownMenuItem
+            className="text-zinc-300 focus:text-white focus:bg-zinc-700 cursor-pointer"
+            onClick={() => setShowGroupSettings(true)}
+          >
+            <Settings className="w-4 h-4 mr-2" />{_copy("copy.8e4622c03c80", { defaultValue: "Group Settings" })}</DropdownMenuItem>
+        )}
+        {options ? (
+          <>
+            <ChatOptionsDropdownItems
+              {...options}
+              onToggleEncryption={canToggleEncryption ? toggleEncryption : undefined}
+              onToggleTranslateOut={canTranslateOut ? toggleTranslateOut : undefined}
+              isBlocked={isBlocked}
+              onBlock={handleToggleBlock}
+              onDelete={() => setShowDeleteDialog(true)}
+            />
+            {myMessageFee > 0 && (
+              <DropdownMenuItem
+                className="text-zinc-300 focus:text-white focus:bg-zinc-700 cursor-pointer"
+                onClick={handleToggleFreeAccess}
+                disabled={isFreeAccessProcessing}
+              >
+                <Gift className="w-4 h-4 mr-2" />
+                {isFreeAccessGranted ? _copy("copy.f9c2e63a6dd5", { defaultValue: "Revoke Free Access" }) : _copy("copy.52f749af5cc6", { defaultValue: "Grant Free Access" })}
+              </DropdownMenuItem>
+            )}
+          </>
+        ) : (
+          <>
+        <DropdownMenuItem
+          className="text-zinc-300 focus:text-white focus:bg-zinc-700 cursor-pointer"
+          onClick={handleToggleBlock}
+          disabled={isBlockProcessing}
+        >
+          {isBlocked ? (
+            <><ShieldCheck className="w-4 h-4 mr-2" />{_copy("copy.fba7f50dd3a0", { defaultValue: "Unblock User" })}</>
+          ) : (
+            <><ShieldBan className="w-4 h-4 mr-2" />{_copy("copy.e761ae1549da", { defaultValue: "Block User" })}</>
+          )}
+        </DropdownMenuItem>
+        {myMessageFee > 0 && (
+          <DropdownMenuItem
+            className="text-zinc-300 focus:text-white focus:bg-zinc-700 cursor-pointer"
+            onClick={handleToggleFreeAccess}
+            disabled={isFreeAccessProcessing}
+          >
+            <Gift className="w-4 h-4 mr-2" />
+            {isFreeAccessGranted ? _copy("copy.f9c2e63a6dd5", { defaultValue: "Revoke Free Access" }) : _copy("copy.52f749af5cc6", { defaultValue: "Grant Free Access" })}
+          </DropdownMenuItem>
+        )}
+        {canToggleEncryption && (
+          <DropdownMenuItem
+            className="text-zinc-300 focus:text-white focus:bg-zinc-700 cursor-pointer"
+            onClick={toggleEncryption}
+          >
+            {chatEncrypted ? <LockOpen className="w-4 h-4 mr-2" /> : <Lock className="w-4 h-4 mr-2" />}
+            {chatEncrypted
+              ? tr('chatMenu.encryptOff', { defaultValue: 'Turn off encryption' })
+              : tr('chatMenu.encrypt', { defaultValue: 'Encrypt chat' })}
+          </DropdownMenuItem>
+        )}
+        {canTranslateOut && (
+          <DropdownMenuItem
+            className="text-zinc-300 focus:text-white focus:bg-zinc-700 cursor-pointer"
+            onClick={toggleTranslateOut}
+          >
+            <Languages className="w-4 h-4 mr-2" />
+            {translateOutOn
+              ? tr('chatMenu.translateOutOff', { defaultValue: 'Send as I type' })
+              : tr('chatMenu.translateOut', { defaultValue: 'Send in their language' })}
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuItem
+          className="text-zinc-300 focus:text-white focus:bg-zinc-700 cursor-pointer"
+          onClick={() => setShowDeleteDialog(true)}
+        >
+          <Trash2 className="w-4 h-4 mr-2" />{_copy("copy.9ccd1fb969eb", { defaultValue: "Delete Conversation" })}</DropdownMenuItem>
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
   return (
     <div data-page-bento data-bento-flat className="h-full flex flex-col overflow-hidden relative">
       {/* Header. The shell carries no fill now, so the bar is separated by a
           hairline instead of sitting on its own slightly-lighter slab. */}
+      {phoneB ? (
+        <div data-chat-header data-chat-header-b className="flex items-start border-b border-white/[0.07] px-2 pb-2 pt-1">
+          <div className="flex w-[108px] shrink-0 items-center pt-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onBack}
+              data-swipe-back
+              aria-label={_copy('common.back', { defaultValue: 'Back' })}
+              className="h-9 w-9 text-white hover:bg-[color-mix(in_srgb,currentColor_10%,transparent)] [&_svg]:!h-6 [&_svg]:!w-6"
+            >
+              <ChevronLeft />
+            </Button>
+          </div>
+          <Link to={profileLink} data-chat-header-who className="flex min-w-0 flex-1 flex-col items-center">
+            <MomentFace address={otherUser?.address} size={40} name={displayName} className="rounded-[9px]">
+              <Avatar className="h-10 w-10 rounded-[9px]">
+                {avatarUrl && <AvatarImage src={avatarUrl} className="rounded-[9px]" />}
+                <AvatarFallback className="rounded-[9px] bg-zinc-700 text-white font-medium">
+                  {(displayName.startsWith('0x') ? displayName.charAt(2) : displayName.charAt(0)).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </MomentFace>
+            <span className="mt-1 flex max-w-full items-center gap-1 text-[13px] font-semibold text-white">
+              <span className="truncate">
+                <BadgedName
+                  badgeBalance={(otherUser as any)?.badgeBalance}
+                  badgeLock={(otherUser as any)?.badgeLock}
+                  username={otherUser?.username}
+                  lookupId={otherUser?.username || otherUser?.address}
+                >
+                  {displayName}
+                </BadgedName>
+              </span>
+              <OnlineDot address={otherUser?.address} />
+            </span>
+            {!isGroupChat && <span className="max-w-full truncate text-[11px] [&_p]:truncate [&_p]:text-[11px]"><LastSeenLine address={otherUser?.address} customs={peerProfile?.customs} /></span>}
+          </Link>
+          <div className="flex w-[108px] shrink-0 items-center justify-end gap-0.5 pt-1 [&_button]:h-8 [&_button]:w-8">
+            {!isGroupChat && isAssistantAddress(otherUser?.address) && (
+              <AssistantDmMenu compact className="text-zinc-300 hover:text-white hover:bg-zinc-800" />
+            )}
+            {!isGroupChat && otherUser?.address && !isAssistantAddress(otherUser.address) && (
+              <>
+                <DmVoiceCallButton recipientAddress={otherUser.address} className="text-zinc-300 hover:text-white hover:bg-zinc-800" />
+                <DmVideoCallButton recipientAddress={otherUser.address} className="text-zinc-300 hover:text-white hover:bg-zinc-800" />
+              </>
+            )}
+            {headerMenu}
+            {headerActions}
+          </div>
+        </div>
+      ) : (
       <div data-chat-header className={`flex items-center justify-between border-b border-white/[0.07] ${dock ? 'px-3 py-2' : 'px-4 py-3'}`}>
         <div className={`flex items-center min-w-0 ${dock ? 'gap-2' : 'gap-3'}`}>
           {!dock && (
@@ -3370,14 +3539,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
               variant="ghost"
               size="icon"
               className="text-zinc-400 hover:text-white hover:bg-zinc-800"
-              onClick={() => {
-                setShowSearchBar(prev => !prev);
-                if (!showSearchBar) {
-                  setTimeout(() => searchInputRef.current?.focus(), 100);
-                } else {
-                  setSearchQuery.complete(searchQuery, '');
-                }
-              }}
+              onClick={toggleSearch}
             >
               <Search className="w-5 h-5" />
             </Button>
@@ -3403,98 +3565,11 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
             </>
           )}
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className={`text-zinc-400 hover:text-white hover:bg-zinc-800 ${dock ? 'h-8 w-8' : ''}`}>
-              <MoreVertical className={dock ? 'w-4 h-4' : 'w-5 h-5'} />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" data-chat-options-menu className={options ? CHAT_MENU_CONTENT : 'z-[150] bg-zinc-800 border-zinc-700'}>
-            {isGroupChat && (
-              <DropdownMenuItem
-                className="text-zinc-300 focus:text-white focus:bg-zinc-700 cursor-pointer"
-                onClick={() => setShowGroupSettings(true)}
-              >
-                <Settings className="w-4 h-4 mr-2" />{_copy("copy.8e4622c03c80", { defaultValue: "Group Settings" })}</DropdownMenuItem>
-            )}
-            {options ? (
-              <>
-                <ChatOptionsDropdownItems
-                  {...options}
-                  onToggleEncryption={canToggleEncryption ? toggleEncryption : undefined}
-                  onToggleTranslateOut={canTranslateOut ? toggleTranslateOut : undefined}
-                  isBlocked={isBlocked}
-                  onBlock={handleToggleBlock}
-                  onDelete={() => setShowDeleteDialog(true)}
-                />
-                {myMessageFee > 0 && (
-                  <DropdownMenuItem
-                    className="text-zinc-300 focus:text-white focus:bg-zinc-700 cursor-pointer"
-                    onClick={handleToggleFreeAccess}
-                    disabled={isFreeAccessProcessing}
-                  >
-                    <Gift className="w-4 h-4 mr-2" />
-                    {isFreeAccessGranted ? _copy("copy.f9c2e63a6dd5", { defaultValue: "Revoke Free Access" }) : _copy("copy.52f749af5cc6", { defaultValue: "Grant Free Access" })}
-                  </DropdownMenuItem>
-                )}
-              </>
-            ) : (
-              <>
-            <DropdownMenuItem
-              className="text-zinc-300 focus:text-white focus:bg-zinc-700 cursor-pointer"
-              onClick={handleToggleBlock}
-              disabled={isBlockProcessing}
-            >
-              {isBlocked ? (
-                <><ShieldCheck className="w-4 h-4 mr-2" />{_copy("copy.fba7f50dd3a0", { defaultValue: "Unblock User" })}</>
-              ) : (
-                <><ShieldBan className="w-4 h-4 mr-2" />{_copy("copy.e761ae1549da", { defaultValue: "Block User" })}</>
-              )}
-            </DropdownMenuItem>
-            {myMessageFee > 0 && (
-              <DropdownMenuItem
-                className="text-zinc-300 focus:text-white focus:bg-zinc-700 cursor-pointer"
-                onClick={handleToggleFreeAccess}
-                disabled={isFreeAccessProcessing}
-              >
-                <Gift className="w-4 h-4 mr-2" />
-                {isFreeAccessGranted ? _copy("copy.f9c2e63a6dd5", { defaultValue: "Revoke Free Access" }) : _copy("copy.52f749af5cc6", { defaultValue: "Grant Free Access" })}
-              </DropdownMenuItem>
-            )}
-            {canToggleEncryption && (
-              <DropdownMenuItem
-                className="text-zinc-300 focus:text-white focus:bg-zinc-700 cursor-pointer"
-                onClick={toggleEncryption}
-              >
-                {chatEncrypted ? <LockOpen className="w-4 h-4 mr-2" /> : <Lock className="w-4 h-4 mr-2" />}
-                {chatEncrypted
-                  ? tr('chatMenu.encryptOff', { defaultValue: 'Turn off encryption' })
-                  : tr('chatMenu.encrypt', { defaultValue: 'Encrypt chat' })}
-              </DropdownMenuItem>
-            )}
-            {canTranslateOut && (
-              <DropdownMenuItem
-                className="text-zinc-300 focus:text-white focus:bg-zinc-700 cursor-pointer"
-                onClick={toggleTranslateOut}
-              >
-                <Languages className="w-4 h-4 mr-2" />
-                {translateOutOn
-                  ? tr('chatMenu.translateOutOff', { defaultValue: 'Send as I type' })
-                  : tr('chatMenu.translateOut', { defaultValue: 'Send in their language' })}
-              </DropdownMenuItem>
-            )}
-            <DropdownMenuItem
-              className="text-zinc-300 focus:text-white focus:bg-zinc-700 cursor-pointer"
-              onClick={() => setShowDeleteDialog(true)}
-            >
-              <Trash2 className="w-4 h-4 mr-2" />{_copy("copy.9ccd1fb969eb", { defaultValue: "Delete Conversation" })}</DropdownMenuItem>
-              </>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {headerMenu}
         {headerActions}
         </div>
       </div>
+      )}
 
       {/* Search Bar */}
       {showSearchBar && (
@@ -3746,6 +3821,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
         isSendingFee={isSendingFee}
         feeAmount={feeRequired ? activeFee : undefined}
         confirmBeforeSend={feeRequired ? confirmFeeSend : undefined}
+        phoneB={phoneB}
       />}
 
       {/* Delete the whole chat: for me, for both (1:1), or cancel */}

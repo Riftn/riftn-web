@@ -29,6 +29,7 @@ import { FeedDefaultsSync } from "@/components/app/FeedDefaultsSync";
 import { useAuth, useLoginSheet } from "@/contexts/AuthContext";
 import { useNotificationClickRouting } from "@/hooks/use-notification-click-routing";
 import { useNotificationRealtime } from "@/hooks/use-notification-realtime";
+import { useLiveListRealtime } from "@/hooks/use-live-list-realtime";
 import { usePageViewAddress, PageViewTracker } from "@/hooks/use-page-view-tracking";
 import { ChatLinkCatcher } from "@/components/app/chat/ChatLinkCatcher";
 import { prefetchUnifiedFeed } from "@/hooks/use-unified-feed";
@@ -557,6 +558,8 @@ function AppContent() {
   // Session-wide, not page-wide: the bell count and the cached notifications
   // page both go stale while the reader is anywhere else in the app.
   useNotificationRealtime();
+  // Someone going live (or ending) shows on every live surface at once.
+  useLiveListRealtime();
 
   const wallet = walletAddress ?? (user as { walletAddress?: string | null; address?: string | null } | null)?.walletAddress ?? (user as { address?: string | null } | null)?.address ?? null;
 
