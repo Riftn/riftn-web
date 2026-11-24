@@ -13883,6 +13883,7 @@
   },
   "dm": {
     "shareGroups": "Groepen",
+    "opened": {"photoA11y": "Foto, geopend {{time}}", "videoA11y": "Video, geopend {{time}}", "seenAt": "Gezien {{time}}", "replyCamera": "Antwoord met de camera", "quotePhoto": "Foto · Geopend", "quoteVideo": "Video · Geopend", "cameraTitle": "Antwoord op deze foto", "cameraOff": "Cameratoegang staat uit. Upload in plaats daarvan een foto of video.", "takePhoto": "Foto maken", "uploadInstead": "Uploaden"},
     "openTimer": {
       "secs": "{{n}} sec",
       "oneMin": "1 min",

@@ -13634,6 +13634,7 @@
   },
   "dm": {
     "shareGroups": "Groups",
+    "opened": {"photoA11y": "Photo, opened {{time}}", "videoA11y": "Video, opened {{time}}", "seenAt": "Seen {{time}}", "replyCamera": "Reply with the camera", "quotePhoto": "Photo · Opened", "quoteVideo": "Video · Opened", "cameraTitle": "Reply to this photo", "cameraOff": "Camera access is off. Upload a photo or video instead.", "takePhoto": "Take photo", "uploadInstead": "Upload instead"},
     "openTimer": {
       "secs": "{{n}} sec",
       "oneMin": "1 min",

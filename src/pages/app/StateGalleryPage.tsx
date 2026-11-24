@@ -584,6 +584,29 @@ function FullScreenChatGallery() {
           </div>
         ))}
       </div>
+      <h3 className="text-sm font-semibold">Opened view-once photo (pill + camera reply)</h3>
+      <div data-opened-photo-gallery className="grid gap-3 sm:grid-cols-2">
+        {[
+          { label: 'Got it (camera to reply)', rows: [
+            { m: msg('op-a', false, 'look what I found', ago(7)), mine: false },
+            { m: { ...msg('op-b', false, '', ago(6)), isDeleted: true, destruct: { mode: 'view', marker: true, kind: 'image', openedAt: ago(4) } } as unknown as DmMessage, mine: false },
+            { m: { ...msg('op-c', true, 'haha here is mine', ago(2)), replyTo: { _id: 'op-b', content: '', msgType: 'msg', mediaUrls: [], voiceDuration: null, sender: ella, destruct: { mode: 'view', kind: 'image', openedAt: ago(4), marker: true } } } as unknown as DmMessage, mine: true },
+          ] },
+          { label: 'Sent it (seen)', rows: [
+            { m: { ...msg('op-d', true, '', ago(6)), isDeleted: true, destruct: { mode: 'view', marker: true, kind: 'image', openedAt: ago(4) } } as unknown as DmMessage, mine: true },
+            { m: { ...msg('op-e', true, '', ago(5)), isDeleted: true, destruct: { mode: 'open', marker: true, kind: 'video', openedAt: ago(3) } } as unknown as DmMessage, mine: true },
+          ] },
+        ].map(side => (
+          <div key={side.label} data-msg-phone-b="" className="overflow-hidden rounded-2xl border border-white/10">
+            <div className="px-4 pt-3 text-xs text-zinc-400">{side.label}</div>
+            <div data-chat-wallpaper className="chat-text-zone px-4 pb-4">
+              {side.rows.map(({ m, mine }) => (
+                <DmMessageBubble key={m._id} message={m} isOwnMessage={mine} cozy={{ first: true, last: true }} currentUserAddress={me.address} onCameraReply={noop} />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
       <h3 className="text-sm font-semibold">Picking messages (Select, then click more)</h3>
       <div data-msg-select-gallery className="flex h-[30rem] flex-col overflow-hidden rounded-2xl border border-white/10">
         <div data-chat-wallpaper className="chat-text-zone min-h-0 flex-1 overflow-y-auto px-4 pb-4">
