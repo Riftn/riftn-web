@@ -1791,6 +1791,8 @@
     "remove": "Eliminar"
   },
   "tip": {
+    "appSent": "¡Propina de {{amount}} DHB enviada!",
+    "appFailed": "Tu propina no se envió. Inténtalo de nuevo.",
     "title": "Enviar propina",
     "toCreator": "Dar propina a {{name}}",
     "quickAmounts": "Cantidades rápidas",

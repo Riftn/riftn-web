@@ -57,6 +57,22 @@ export function sendAppTokens(input: {
   return apiCall('/api/app-tokens/send', { method: 'POST', body: input, requiresAuth: true });
 }
 
+/**
+ * Tip a post, a comment or a profile from the app balance. The server picks
+ * who is paid (post creator, comment author); `to` only counts for a profile
+ * tip. Same `key` on a retry, so a tip is never paid twice.
+ */
+export function tipWithAppTokens(input: {
+  tokenId?: string; commentId?: string; to?: string; amount: string; key: string;
+}): Promise<{ ok: true; balance: string; amount: string; to: string; receipt: string }> {
+  return apiCall('/api/app-tokens/tip', { method: 'POST', body: input, requiresAuth: true });
+}
+
+/** A DHB number as the exact decimal string the server reads (up to 6 decimals). */
+export function toTokenAmount(value: number): string {
+  return (Math.floor(value * 1e6) / 1e6).toFixed(6).replace(/\.?0+$/, '');
+}
+
 export function newAppTokenKey(): string {
   return `w-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }

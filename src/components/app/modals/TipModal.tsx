@@ -41,7 +41,9 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer';
 import { getChainById, type ChainId } from '@/components/app/ChainSelector';
-import { useTipPayment, MIN_TIP_DHB, MAX_TIP_DHB, MIN_DIRECT_TIP, DIRECT_QUICK_AMOUNTS } from '@/hooks/use-tip-payment';
+import { useTipPayment, persistTipRecord, MIN_TIP_DHB, MAX_TIP_DHB, MIN_DIRECT_TIP, DIRECT_QUICK_AMOUNTS } from '@/hooks/use-tip-payment';
+import { useAppTokens, useAppTokensEnabled, APP_TOKENS_QUERY_KEY } from '@/hooks/use-app-tokens';
+import { newAppTokenKey, tipWithAppTokens, toTokenAmount } from '@/lib/api/dehub/app-tokens';
 import { useTipNetwork } from '@/hooks/use-tip-network';
 import { useAuth } from '@/contexts/AuthContext';
 // NOTE: stream-controller and pay-chain reach wallet/contract code (wagmi +
@@ -128,6 +130,15 @@ function TipModalBody({
   const sendInFlight = useRef(false);
   const [preparing, setPreparing] = useState(false);
 
+  // In-app DHB: while the token contract is paused, tips come out of the
+  // Riftn balance instead of a wallet. The server checks and moves it; this
+  // sheet only shows it and asks.
+  const appTokens = useAppTokensEnabled();
+  const { data: appAccount } = useAppTokens(appTokens && open);
+  const appBalance = appTokens && appAccount ? Math.floor(Number(appAccount.balance) * 100) / 100 : null;
+  /** One key per tip attempt, kept across a retry so the tip can't be paid twice. */
+  const appTipKey = useRef<string | null>(null);
+
   // USDC/USDT: paid as is to the creator; the typed amount is in that token.
   const directToken = payWith?.direct ?? null;
   const directLogo = directToken?.symbol === 'USDT' ? usdtLogo : usdcLogo;
@@ -140,7 +151,8 @@ function TipModalBody({
 
   const parsedAmount = parseAbbreviatedAmount(amount);
   const isValidAmount = !Number.isNaN(parsedAmount) && parsedAmount >= (directToken ? MIN_DIRECT_TIP : MIN_TIP_DHB)
-    && (directBalance == null || parsedAmount <= directBalance);
+    && (directBalance == null || parsedAmount <= directBalance)
+    && (!appTokens || (appBalance != null && parsedAmount <= appBalance));
 
   // Base first, then BNB, then Base again as the place to fail — it is the one
   // chain the tipper can actually top up in-app. A pinned setting wins outright:
@@ -148,49 +160,94 @@ function TipModalBody({
   const autoChainId = AUTO_TIP_CHAINS.find(id => (balances?.[id] ?? 0) >= parsedAmount);
   const tipChainId = payWith ? (BASE_CHAIN_ID as ChainId) : pinnedChainId ?? autoChainId ?? (BASE_CHAIN_ID as ChainId);
 
+  const afterTipSent = () => {
+    // Comment tips pay the comment's author, not the post — the post's
+    // counter must not move for them.
+    if (!commentId && resolvedTokenId && lastTipAmount.current > 0) {
+      queryClient.cancelQueries({ queryKey: ['post-tip-count', resolvedTokenId] });
+      queryClient.setQueryData(['post-tip-count', resolvedTokenId], (old: number | undefined) => (old || 0) + lastTipAmount.current);
+      queryClient.invalidateQueries({ queryKey: ['post-tip-count', resolvedTokenId], refetchType: 'none' });
+    }
+    if (commentId) emitPostTipped(commentTipKey(commentId));
+    else if (resolvedTokenId) emitPostTipped(resolvedTokenId);
+    setAmount.complete(amount, '');
+    tipLanded.current = true;
+    if (tipMessageId.current) setMessage.complete(message, '');
+    onOpenChange(false);
+  };
+
+  const afterTipConfirmed = (txHash?: string) => {
+    const messageId = tipMessageId.current;
+    tipMessageId.current = null;
+    if (messageId && resolvedTokenId) {
+      // The webhook usually posts it first; this binds the hash in case it
+      // was slower, then the comments list fetches the wall and lands it.
+      // An in-app tip's message is posted by the server with the tip itself.
+      (txHash && !txHash.startsWith('app:') ? bindTipMessage(messageId, txHash) : Promise.resolve(null))
+        .catch(() => null)
+        .finally(() => emitTipMessageSent(String(resolvedTokenId)));
+    }
+    if (commentId && resolvedTokenId) {
+      queryClient.invalidateQueries({ queryKey: ['comment-tips', resolvedTokenId] });
+    } else if (resolvedTokenId) {
+      queryClient.invalidateQueries({ queryKey: ['post-tip-count', resolvedTokenId] });
+    }
+  };
+
   const { tip, isTipping } = useTipPayment({
     creatorAddress,
     chainId: tipChainId,
     tokenId: resolvedTokenId,
     commentId,
-    onSuccess: () => {
-      // Comment tips pay the comment's author, not the post — the post's
-      // counter must not move for them.
-      if (!commentId && resolvedTokenId && lastTipAmount.current > 0) {
-        queryClient.cancelQueries({ queryKey: ['post-tip-count', resolvedTokenId] });
-        queryClient.setQueryData(['post-tip-count', resolvedTokenId], (old: number | undefined) => (old || 0) + lastTipAmount.current);
-        queryClient.invalidateQueries({ queryKey: ['post-tip-count', resolvedTokenId], refetchType: 'none' });
-      }
-      if (commentId) emitPostTipped(commentTipKey(commentId));
-      else if (resolvedTokenId) emitPostTipped(resolvedTokenId);
-      setAmount.complete(amount, '');
-      tipLanded.current = true;
-      if (tipMessageId.current) setMessage.complete(message, '');
-      onOpenChange(false);
-    },
-    onConfirmed: (txHash) => {
-      const messageId = tipMessageId.current;
-      tipMessageId.current = null;
-      if (messageId && resolvedTokenId) {
-        // The webhook usually posts it first; this binds the hash in case it
-        // was slower, then the comments list fetches the wall and lands it.
-        (txHash ? bindTipMessage(messageId, txHash) : Promise.resolve(null))
-          .catch(() => null)
-          .finally(() => emitTipMessageSent(String(resolvedTokenId)));
-      }
-      if (commentId && resolvedTokenId) {
-        queryClient.invalidateQueries({ queryKey: ['comment-tips', resolvedTokenId] });
-      } else if (resolvedTokenId) {
-        queryClient.invalidateQueries({ queryKey: ['post-tip-count', resolvedTokenId] });
-      }
-    },
+    onSuccess: afterTipSent,
+    onConfirmed: afterTipConfirmed,
   });
+
+  /** Pay the tip from the in-app balance. Nothing goes on chain. */
+  const sendAppTip = async (dhb: number) => {
+    if (!walletAddress || !creatorAddress) return;
+    if (!appTipKey.current) appTipKey.current = newAppTokenKey();
+    const postId = /^[1-9]\d*$/.test(String(resolvedTokenId ?? '')) ? String(resolvedTokenId) : undefined;
+    try {
+      const res = await tipWithAppTokens({
+        tokenId: postId,
+        commentId: commentId || undefined,
+        to: creatorAddress,
+        amount: toTokenAmount(dhb),
+        key: appTipKey.current,
+      });
+      appTipKey.current = null;
+      const paid = Number(res.amount);
+      lastTipAmount.current = paid;
+      queryClient.setQueryData([APP_TOKENS_QUERY_KEY, walletAddress.toLowerCase()], (old: any) => old ? { ...old, balance: res.balance } : old);
+      queryClient.invalidateQueries({ queryKey: [APP_TOKENS_QUERY_KEY] });
+      // The post's and comments' tip figures read tip_records; the server
+      // already moved the DHB and counted the tip, this only draws it.
+      void persistTipRecord({
+        walletAddress,
+        creatorAddress: res.to,
+        amount: paid,
+        chainId: 0 as any,
+        txHash: res.receipt,
+        tokenId: postId ?? null,
+        commentId: commentId ?? null,
+      }).finally(() => afterTipConfirmed(res.receipt));
+      toast.success(t('tip.appSent', '{{amount}} DHB tip sent!', { amount: paid.toLocaleString() }));
+      afterTipSent();
+    } catch (err: any) {
+      // The server answered (not enough DHB, tips off…): that attempt is over,
+      // so the next tap is a new tip. A dropped connection keeps the key, so
+      // tapping again finishes the same tip instead of paying twice.
+      if (err && !/network|fetch|timed out/i.test(String(err.message))) appTipKey.current = null;
+      toast.error(err?.message || t('tip.appFailed', 'Your tip was not sent. Try again.'));
+    }
+  };
 
   // Read once per open, both chains at a time. Keying this on the amount would
   // put an RPC round trip behind every keystroke; the pick above is pure and
   // re-derives from what is already here.
   useEffect(() => {
-    if (!open || !walletAddress) return;
+    if (!open || !walletAddress || appTokens) return;
     let cancelled = false;
     import('@/lib/contracts/stream-controller')
       .then(m =>
@@ -210,7 +267,7 @@ function TipModalBody({
       })
       .catch(() => { if (!cancelled) setBalances(null); });
     return () => { cancelled = true; };
-  }, [open, walletAddress]);
+  }, [open, walletAddress, appTokens]);
 
   useEffect(() => {
     if (!open || !creatorAddress) return;
@@ -237,9 +294,11 @@ function TipModalBody({
   const chainName = getChainById(tipChainId)?.name ?? _copy("copy.9414886b1ebf", { defaultValue: "chain" });
   // What "All" can actually send: the bigger of the two, since either is
   // reachable without the tipper doing anything.
-  const dhbBalance = balances
-    ? Math.max(...AUTO_TIP_CHAINS.map(id => balances[id] ?? 0))
-    : null;
+  const dhbBalance = appTokens
+    ? appBalance
+    : balances
+      ? Math.max(...AUTO_TIP_CHAINS.map(id => balances[id] ?? 0))
+      : null;
 
   const handleSendTip = async () => {
     if (!isValidAmount || sendInFlight.current) return;
@@ -276,6 +335,10 @@ function TipModalBody({
           return;
         }
         tipMessageId.current = registered.messageId;
+      }
+      if (appTokens) {
+        await sendAppTip(parsedAmount);
+        return;
       }
       if (directToken) {
         lastTipAmount.current = 0;
@@ -383,7 +446,7 @@ function TipModalBody({
                 </p>
               ) : dhbBalance != null && (
                 <p className="text-white/30 text-xs">
-                  {dhbBalance.toLocaleString()} <DhbCoin />{_copy("copy.73cd2a424191", { defaultValue: " · via {{value1}}", value1: chainName })}
+                  {dhbBalance.toLocaleString()} <DhbCoin />{appTokens ? null : _copy("copy.73cd2a424191", { defaultValue: " · via {{value1}}", value1: chainName })}
                 </p>
               )}
             </div>
@@ -449,7 +512,7 @@ function TipModalBody({
             </div>
           ) : null}
 
-          {open && walletAddress && !recipientPrivate ? (
+          {open && walletAddress && !recipientPrivate && !appTokens ? (
             <Suspense fallback={null}>
               <TipPayWith amountDhb={isValidAmount && !directToken ? parsedAmount : 0} value={payWith} onChange={changePayWith} direct recipientName={creatorName} />
             </Suspense>

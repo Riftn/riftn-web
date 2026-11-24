@@ -69,7 +69,7 @@ interface UseTipPaymentOptions {
  * Persist tip to database with retries.
  * Returns true if saved successfully, false otherwise.
  */
-async function persistTipRecord(
+export async function persistTipRecord(
   params: {
     walletAddress: string;
     creatorAddress: string;
