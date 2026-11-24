@@ -5113,18 +5113,23 @@ function articleSlugOf(pathname) {
   return m[1].toLowerCase();
 }
 
-/** Resolve an article slug to its tokenId through the API that owns it. */
+/** Resolve an article slug to its tokenId through the API that owns it.
+ *  Returns the tokenId, null when the API says the slug does not exist, or
+ *  undefined when the lookup failed (rate limit, timeout, 5xx). A failed
+ *  lookup is not a missing post: answering 404 for it told crawlers that
+ *  real articles were gone whenever the API was busy. */
 async function resolveArticleSlugTokenId(slug) {
   try {
     const res = await fetch(`https://api.dehub.io/api/article/${encodeURIComponent(slug)}`, {
       signal: AbortSignal.timeout(6000),
     });
+    if (res.status === 429 || res.status >= 500) return undefined;
     if (!res.ok) return null;
     const data = await res.json();
     const id = data?.tokenId ?? data?.result?.tokenId;
     return Number.isFinite(Number(id)) ? String(Number(id)) : null;
   } catch {
-    return null;
+    return undefined;
   }
 }
 
@@ -8165,6 +8170,8 @@ async function handleRequest(request, env, ctx) {
   const articleSlug = articleSlugOf(pathname);
   if (articleSlug) {
     const tokenId = await resolveArticleSlugTokenId(articleSlug);
+    // Lookup failed: ask crawlers to come back instead of calling it gone.
+    if (tokenId === undefined) return entityUnavailable();
     // Unresolvable: the fn's miss on the slug lands on the 404 below.
     if (tokenId) ssrPath = `/app/post/${tokenId}`;
   } else if (newPostSlug) {
