@@ -23960,5 +23960,13 @@
       "drop-c": "Drop C",
       "b-standard": "B-standaard"
     }
+  },
+  "freeImages": {
+    "title": "Gratis afbeeldingen",
+    "search": "Zoek gratis foto's",
+    "note": "Foto's die je vrij mag gebruiken. Een vermelding wordt toegevoegd als de maker dat vraagt.",
+    "empty": "Geen foto's gevonden. Probeer een ander woord.",
+    "failed": "Kon die foto niet toevoegen. Probeer een andere.",
+    "credit": "Foto: {{creator}} ({{license}})"
   }
 }
