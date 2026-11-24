@@ -8,7 +8,6 @@ import VideoOff from '@/components/ui/cut-icons/video-off';
 import { useCall } from '@/contexts/CallContext';
 import { useAuth } from '@/contexts/AuthContext';
 import type { GroupParticipant } from '@/hooks/use-call';
-import { PUBLIC_CHAT_CALL_ID } from '@/lib/group-call';
 import { CallDuration } from './CallDuration';
 import {
   CallStage,
@@ -25,8 +24,8 @@ import { CallBackgroundPanel, CallFxButton, useCallBackgroundAvailable } from '.
 /**
  * A group call, voice or video, on the same stage as a direct call.
  *
- * Before anyone else is in the room it is the familiar ringing screen with the
- * group's name. Once somebody joins it becomes a grid: one tile per person,
+ * Before anyone else is in the room it is the waiting screen with the group's
+ * name (nobody is rung; members join from the pill). Once somebody joins it becomes a grid: one tile per person,
  * their camera when it is on and their picture when it is not, outlined while
  * they talk. Leaving is the one solid control; the call carries on for
  * whoever is still in it.
@@ -42,6 +41,7 @@ const GroupCallModal: React.FC = () => {
     isMuted,
     isCameraOff,
     selfSpeaking,
+    groupCamerasFull,
     groupParticipants,
     attachLocalVideo,
     attachGroupVideo,
@@ -77,9 +77,7 @@ const GroupCallModal: React.FC = () => {
     const status = isIncoming
       ? t('calls.isCalling', { name: caller.name, defaultValue: '{{name}} is calling' })
       : isRinging
-        ? currentCall.group_id === PUBLIC_CHAT_CALL_ID
-          ? t('calls.waitingForPeople', 'Waiting for people to join...')
-          : t('calls.callingGroup', 'Ringing the group...')
+        ? t('calls.waitingForPeople', 'Waiting for people to join...')
         : t('calls.connecting');
     return (
       <CallStage peer={stagePeer} onMinimize={isIncoming ? undefined : minimizeCall} minimizeLabel={t('calls.minimize')}>
@@ -148,7 +146,14 @@ const GroupCallModal: React.FC = () => {
           />
           {isVideo ? (
             <>
-              <CallControl icon={isCameraOff ? VideoOff : Video} label={t('calls.camera')} onClick={toggleCamera} active={isCameraOff} />
+              {/* Every camera slot taken: the button says so, and a tap explains how to get one. */}
+              <CallControl
+                icon={isCameraOff ? VideoOff : Video}
+                label={isCameraOff && groupCamerasFull ? t('calls.camerasFull', 'Cameras full') : t('calls.camera')}
+                onClick={toggleCamera}
+                active={isCameraOff}
+                dimmed={isCameraOff && groupCamerasFull}
+              />
               <CallControl icon={RotateCcw} label={t('calls.flip')} onClick={switchCamera} />
             </>
           ) : null}
