@@ -3,15 +3,14 @@ import { useTranslation } from 'react-i18next';
 import { Pin, User } from 'lucide-react';
 import MicOff from '@/components/ui/cut-icons/mic-off';
 import type { GroupParticipant } from '@/hooks/use-call';
-import { createStageDirector, readTownHallFx, TALK_LEVEL, type TownHallKey, type TownHallState } from '@/lib/town-hall';
-import { formatCount } from '@/lib/format-count';
+import { createStageDirector, TALK_LEVEL, type TownHallKey, type TownHallState } from '@/lib/town-hall';
 import { peerInitial, usePeerIdentity } from './CallChrome';
 
 /**
  * Town hall: whoever is talking fills the stage, everyone else sits in the
- * strip underneath. When several people talk at once the stage keeps cutting
- * between them (the cut style is `fx`) until it settles on one voice. Tap
- * someone in the strip to pin them to the stage; tap the stage pin to let go.
+ * strip underneath. When several people talk at once the loudest has the
+ * stage. A new speaker fades in. Tap someone in the strip to pin them to the
+ * stage; tap Unpin to let go.
  */
 export interface TownHallProps {
   isVideo: boolean;
@@ -24,22 +23,10 @@ export interface TownHallProps {
 
 const TICK_MS = 90;
 
-/** Where the signal bars of one cut land: different on every cut, the same on every render of it. */
-function cutBars(cut: number): React.CSSProperties[] {
-  let seed = (cut * 2654435761) >>> 0;
-  const next = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
-  return Array.from({ length: 5 }, () => ({
-    '--y': `${Math.round(next() * 92)}%`,
-    '--h': `${(1 + next() * 5).toFixed(1)}%`,
-    '--x': `${Math.round((next() - 0.5) * 60)}%`,
-  }) as React.CSSProperties);
-}
-
 export function TownHall({ isVideo, self, participants, attachLocalVideo, attachGroupVideo, readGroupLevels }: TownHallProps) {
   const { t } = useTranslation();
-  const fx = React.useMemo(readTownHallFx, []);
   const [pinned, setPinned] = React.useState<TownHallKey | null>(null);
-  const [state, setState] = React.useState<TownHallState>({ stage: null, talkers: [], contested: false, cut: 0 });
+  const [state, setState] = React.useState<TownHallState>({ stage: null, talkers: [], cut: 0 });
   const stageRef = React.useRef<HTMLDivElement | null>(null);
   const director = React.useMemo(createStageDirector, []);
 
@@ -63,7 +50,7 @@ export function TownHall({ isVideo, self, participants, attachLocalVideo, attach
       // The stage glow follows the voice on it, straight on the element (no re-render).
       const node = stageRef.current;
       if (node && next.stage != null) node.style.setProperty('--th-level', String(Math.min(1, (levels.get(next.stage) ?? 0) * 2.4)));
-      const key = `${next.stage}|${next.cut}|${next.contested}|${next.talkers.join(',')}`;
+      const key = `${next.stage}|${next.cut}|${next.talkers.join(',')}`;
       if (key !== previous) { previous = key; setState(next); }
     };
     tick();
@@ -82,28 +69,19 @@ export function TownHall({ isVideo, self, participants, attachLocalVideo, attach
   const togglePin = (key: TownHallKey) => setPinned(current => (current === key ? null : key));
 
   return (
-    <div className="th" data-fx={fx} data-video={isVideo ? 'true' : 'false'} data-contested={state.contested ? 'true' : 'false'}>
+    <div className="th" data-video={isVideo ? 'true' : 'false'}>
       <div ref={stageRef} className="th-stage" data-talking={talking.has(stage) ? 'true' : 'false'}>
         {stage === 0 ? (
           <StageShot key={`0-${state.cut}`} name={self.name} avatarUrl={self.avatarUrl} attach={isVideo && self.camera ? attachLocalVideo : null} mirrored />
         ) : onStage ? (
           <RemoteStageShot key={`${stage}-${state.cut}`} participant={onStage} attach={attachGroupVideo(stage)} />
         ) : null}
-        <div key={`fx-${state.cut}`} className="th-cut" aria-hidden>
-          {cutBars(state.cut).map((bar, index) => <i key={index} style={bar} />)}
-        </div>
-        <div className="th-scan" aria-hidden />
         <StageName
           name={stage === 0 ? t('calls.you', 'You') : null}
           participant={onStage}
           muted={stage === 0 ? self.muted : !onStage?.audio}
           talking={talking.has(stage)}
         />
-        {state.contested && state.talkers.length > 1 ? (
-          <span className="th-crowd" role="status">
-            {t('calls.townHallTalking', { count: state.talkers.length, n: formatCount(state.talkers.length), defaultValue: '{{n}} talking' })}
-          </span>
-        ) : null}
         {pinned != null ? (
           <button type="button" className="th-pin" onClick={() => setPinned(null)} aria-label={t('calls.unpin', 'Unpin')}>
             <Pin className="h-3.5 w-3.5" />

@@ -9,9 +9,8 @@
  * Prefix "group-" for a group call (group-incoming, group-ringing, group-active,
  * group-active-video, group-mini, group-ended); `people=` sets how many others are in it.
  * `subs=1` turns live subtitles on with sample lines; `subs=es` also reads them in Spanish.
- * `layout=hall|grid` picks the group layout (town hall is the default from 3 people); `thsim=1` plays a
+ * `layout=hall|grid` picks the group layout (town hall is the default); `thsim=1` plays a
  * scripted conversation (one talks, then three at once, then another alone, then quiet) every 10 s;
- * `thfx=glitch|flip|static` picks how the town hall stage cuts.
  * `bg=blur|night|ocean|sunset|forest|photo` marks that call background as picked (tap the corner button to see the row); `face=shades|cat|crown|hearts` marks a face filter.
  */
 import { useEffect, useMemo } from 'react';

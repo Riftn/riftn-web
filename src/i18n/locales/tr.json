@@ -8146,7 +8146,9 @@
         "low": "Hafif",
         "high": "Güçlü"
       },
-      "gateHint": "Konuşmaların arasında mikrofonunu susturur; klavye ve fan sesi yayına girmez."
+      "gateHint": "Konuşmaların arasında mikrofonunu susturur; klavye ve fan sesi yayına girmez.",
+      "hearShared": "Paylaşılan sekmeyi bu bilgisayarda duy",
+      "hearSharedHint": "Kapatınca sekmenin sesi izleyicilere gitmeye devam eder ama sende sessiz olur, böylece başka bir şey dinleyebilirsin. Chrome, Edge veya Brave'de paylaşılan bir sekmede çalışır."
     }
   },
   "liveStudio": {
@@ -23795,6 +23797,19 @@
     "postSnapshot": "Ekran görüntüsü paylaş",
     "shareLink": "Bağlantıyı paylaş",
     "snapshotFailed": "Ekran görüntüsü alınamadı. Tekrar dene."
+  },
+  "liveMini": {
+    "minimise": "Küçült",
+    "minimiseHint": "Gezinirken izlemeye devam et",
+    "player": "Canlı oynatıcı",
+    "soundOnly": "Yalnızca ses",
+    "showPicture": "Görüntüyü göster",
+    "openLive": "Canlıyı aç",
+    "float": "Diğer uygulamaların üzerinde yüzdür",
+    "play": "Oynat",
+    "pause": "Duraklat",
+    "close": "Canlıyı kapat",
+    "ended": "Bu canlı yayın sona erdi"
   },
   "liveTimeline": {
     "backToLive": "Canlıya dön"

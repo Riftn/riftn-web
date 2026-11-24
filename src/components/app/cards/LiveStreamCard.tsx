@@ -30,7 +30,7 @@ import {
 } from '@/lib/media-session';
 import { useNavigate } from 'react-router-dom';
 import MoreVertical from "@/components/ui/cut-icons/morevertical";
-import { Heart, StopCircle, Activity, Loader2 } from "lucide-react";
+import { Heart, StopCircle, Activity, Loader2, ChevronDown, Headphones } from "lucide-react";
 import AssistantNavIcon from "@/components/ui/AssistantNavIcon";
 import Flag from "@/components/ui/cut-icons/report";
 import Ban from "@/components/ui/cut-icons/blocked";
@@ -100,7 +100,8 @@ import { NO_RELAY_CANDIDATE, firstWhepRoute, forgetWhepRouteBlocked, forgetWhepS
 import { behindForRatio, liveEdgeSnap, timeForBehind, timelineSnap, type TimeshiftSnap } from '@/lib/live/timeshift';
 import { LiveTimelineBar, type LiveTimeshift } from '@/components/app/live/LiveTimeline';
 import { dropWarmLiveHls, LIVE_HLS_CONFIG, playsNativeHls, SLOW_KEYFRAME_SEC, takeWarmLiveHls, warmLiveHls } from '@/lib/live/hls-standby';
-import { peekLiveSession, takeLiveSession } from '@/lib/live-handoff';
+import { peekLiveSession, snapshot as snapshotLiveFrame, takeLiveSession } from '@/lib/live-handoff';
+import { claimLiveMini, getLiveMiniVideo, openLiveMini, type LiveMiniMode } from '@/lib/live-mini';
 import { useStreamActions, useStreamActivities } from '@/hooks/use-livestream';
 import { useBlockAuthor } from '@/hooks/use-block-author';
 import { useNotifyWhenLive } from '@/hooks/use-notify-when-live';
@@ -350,6 +351,9 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
   // before any new effect does, so it is there by now. Declared ahead of the
   // WebRTC effect below, which takes it.
   useEffect(() => {
+    // The same live playing in the corner hands its session and seat back to
+    // this viewer; any other minimised live closes (one live at a time).
+    claimLiveMini(streamProp.streamId, getLiveMiniVideo());
     if (handoff) return;
     const late = peekLiveSession(handoffPlaybackId);
     if (late) setHandoff(late);
@@ -665,6 +669,9 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
     if (stream.isLive && !streamEnded) warmTipTts();
   }, [stream.isLive, streamEnded]);
   const hlsRef = useRef<Hls | null>(null);
+  /** The WebRTC session on screen, and the one handed to the corner window. */
+  const whepSessionRef = useRef<WhepSubscription | null>(null);
+  const handedToMiniRef = useRef<WhepSubscription | null>(null);
   /** One WebRTC attempt per card: once it fails, HLS keeps the element. */
   const whepFailedRef = useRef(false);
   /** The WebRTC route the picture on screen came by, for the network memory. */
@@ -859,6 +866,7 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
           return;
         }
         session = opened;
+        whepSessionRef.current = opened;
         video.srcObject = opened.stream;
         if (!hasRealPicture(video)) {
           if (connected) arm(WHEP_FRAME_TIMEOUT_MS, 'no frames');
@@ -931,6 +939,12 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
       video.removeEventListener('resize', onPicture);
       video.removeEventListener('loadeddata', onPicture);
       videoPlaybackManager.unregister(videoId);
+      if (whepSessionRef.current === session) whepSessionRef.current = null;
+      // Minimised: the corner window owns the session now.
+      if (session && handedToMiniRef.current === session) {
+        if (video.srcObject) video.srcObject = null;
+        return;
+      }
       releaseAfterPictureInPicture(video, () => {
         void session?.stop();
         // Leaving a dead srcObject attached stops the HLS path from ever
@@ -1409,6 +1423,42 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
   useEffect(() => { setPipAvailable(canPictureInPicture(videoRef.current)); }, [streamEnded, transport]);
   const togglePip = useCallback(() => { void togglePictureInPicture(videoRef.current); }, []);
 
+  /*
+   * Minimise: keep the live playing in a corner window (or as a listen bar)
+   * while the viewer browses. The running WebRTC session and an audience
+   * seat go with it, so the picture never drops and the creator never sees
+   * a leave and a join.
+   */
+  const canMinimise = !swipeFeed && !!stream.streamId && !!stream.isLive && !streamEnded && hasPlaybackUrl;
+  const minimiseLive = useCallback(async (mode: LiveMiniMode = 'video') => {
+    const streamId = stream.streamId;
+    if (!streamId) return;
+    let seat: { leave: () => void } | null = null;
+    if (!isOwnStream) {
+      const { joinStreamPresence } = await import('@/lib/api/dehub/stream-presence');
+      seat = joinStreamPresence(streamId);
+    }
+    const video = videoRef.current;
+    const session = transport === 'whep' ? whepSessionRef.current : null;
+    if (session) handedToMiniRef.current = session;
+    openLiveMini({
+      streamId,
+      playbackId: whepPlaybackId,
+      urls: urlsToTry,
+      title: stream.title,
+      host: stream.creatorUsername ? `@${stream.creatorUsername}` : stream.streamer,
+      avatar: stream.avatar,
+      path: `${window.location.pathname}${window.location.search}`,
+      session,
+      poster: video ? snapshotLiveFrame(video) : undefined,
+      seat,
+      mode,
+    });
+    if (isFullscreen) toggleFullscreen();
+    if (window.history.length > 1) navigate(-1);
+    else navigate('/app');
+  }, [stream.streamId, stream.title, stream.creatorUsername, stream.streamer, stream.avatar, isOwnStream, transport, whepPlaybackId, urlsToTry, isFullscreen, toggleFullscreen, navigate]);
+
   /**
    * Hold the OS media session while this stream is audible, keyed on the
    * same `videoId` the playback manager uses. No seek handlers: live has
@@ -1711,6 +1761,22 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
                 >
                   <PictureInPicture2 className="w-4 h-4" />
                   {_copy("copy.c49677dc5ccd", { defaultValue: "Picture in picture" })}
+                </DropdownMenuItem>
+              )}
+              {canMinimise && (
+                <DropdownMenuItem
+                  onClick={() => { void minimiseLive('video'); }}
+                  className="text-white hover:bg-zinc-700 cursor-pointer gap-2"
+                >
+                  <ChevronDown className="w-4 h-4" /> {t('liveMini.minimiseHint', 'Keep watching while you browse')}
+                </DropdownMenuItem>
+              )}
+              {canMinimise && (
+                <DropdownMenuItem
+                  onClick={() => { void minimiseLive('listen'); }}
+                  className="text-white hover:bg-zinc-700 cursor-pointer gap-2"
+                >
+                  <Headphones className="w-4 h-4" /> {t('liveMini.soundOnly', 'Sound only')}
                 </DropdownMenuItem>
               )}
               {clippable && (
@@ -2111,6 +2177,18 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
                   >
                     {isMuted || volume === 0 ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
                   </VideoVolumeControl>
+                  {canMinimise && !immersive && (
+                    <button
+                      type="button"
+                      data-live-minimise
+                      onClick={(e) => { e.stopPropagation(); void minimiseLive('video'); }}
+                      aria-label={t('liveMini.minimiseHint', 'Keep watching while you browse')}
+                      title={t('liveMini.minimiseHint', 'Keep watching while you browse')}
+                      className="p-2 text-white hover:bg-white/20 rounded transition-colors"
+                    >
+                      <ChevronDown className="w-5 h-5" />
+                    </button>
+                  )}
                   <button
                     onClick={toggleFullscreen}
                     aria-label={isFullscreen ? t('stages.exitFullscreen', 'Exit fullscreen') : t('stages.fullscreen', 'Fullscreen')}
@@ -2267,6 +2345,7 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
             hidden={chromeHidden}
             streamId={stream.streamId}
             onClose={swipeFeed?.onClose}
+            onMinimise={canMinimise ? () => { void minimiseLive('video'); } : undefined}
             timeshift={timeshift}
           />
         )}

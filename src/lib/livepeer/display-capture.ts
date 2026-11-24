@@ -58,6 +58,53 @@ export const SHARED_AUDIO_CONSTRAINTS: MediaTrackConstraints = {
   channelCount: { ideal: 2 },
 };
 
+/**
+ * "Hear shared sound on this computer". Turned off, a shared tab keeps
+ * sending its sound to viewers but goes quiet on the creator's own speakers
+ * (Chromium's suppressLocalAudioPlayback), so they can listen to something
+ * else in another tab. Muting the tab itself would silence the live too.
+ */
+const HEAR_SHARED_KEY = 'riftn.live.hearSharedAudio';
+let sharedAudioTrack: MediaStreamTrack | null = null;
+
+export function canSilenceSharedAudioLocally(): boolean {
+  try {
+    const supported = navigator.mediaDevices?.getSupportedConstraints?.() as Record<string, boolean> | undefined;
+    return !!supported?.suppressLocalAudioPlayback;
+  } catch {
+    return false;
+  }
+}
+
+export function hearSharedAudioLocally(): boolean {
+  try {
+    return globalThis.localStorage?.getItem(HEAR_SHARED_KEY) !== '0';
+  } catch {
+    return true;
+  }
+}
+
+/** Saves the choice and applies it to the tab being shared right now, if any. */
+export async function setHearSharedAudioLocally(hear: boolean): Promise<void> {
+  try {
+    globalThis.localStorage?.setItem(HEAR_SHARED_KEY, hear ? '1' : '0');
+  } catch {
+    /* private mode: still applies to this share */
+  }
+  const track = sharedAudioTrack;
+  if (!track || track.readyState === 'ended' || typeof track.applyConstraints !== 'function') return;
+  try {
+    await track.applyConstraints({ ...SHARED_AUDIO_CONSTRAINTS, suppressLocalAudioPlayback: !hear } as MediaTrackConstraints);
+  } catch {
+    /* applies from the next share */
+  }
+}
+
+function sharedAudioConstraints(): MediaTrackConstraints {
+  if (hearSharedAudioLocally() || !canSilenceSharedAudioLocally()) return SHARED_AUDIO_CONSTRAINTS;
+  return { ...SHARED_AUDIO_CONSTRAINTS, suppressLocalAudioPlayback: true } as MediaTrackConstraints;
+}
+
 /** Tells the encoder the shared sound is music, so it is not squeezed like speech. */
 export function tuneDisplayAudio(track: MediaStreamTrack | null | undefined): void {
   if (!track) return;
@@ -88,7 +135,7 @@ export async function requestDisplayCapture(video: MediaTrackConstraints): Promi
 
   const options = {
     video,
-    audio: SHARED_AUDIO_CONSTRAINTS,
+    audio: sharedAudioConstraints(),
     // Sharing the Riftn tab itself only shows the stream inside the stream.
     selfBrowserSurface: 'exclude',
     // Lets the creator switch to another tab from Chrome's sharing bar
@@ -107,6 +154,8 @@ export async function requestDisplayCapture(video: MediaTrackConstraints): Promi
     stream = await navigator.mediaDevices.getDisplayMedia({ ...options, audio: true });
   }
   tuneDisplayTrack(stream.getVideoTracks()[0]);
-  tuneDisplayAudio(stream.getAudioTracks?.()[0]);
+  const audio = stream.getAudioTracks?.()[0] ?? null;
+  tuneDisplayAudio(audio);
+  sharedAudioTrack = audio;
   return stream;
 }
