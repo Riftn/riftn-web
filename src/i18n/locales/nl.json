@@ -8362,7 +8362,8 @@
         "connecting": "Verbinden",
         "live": "Live",
         "error": "Fout"
-      }
+      },
+      "addShort": "Toevoegen"
     },
     "vertical": {
       "title": "Verticale weergave",
@@ -8782,6 +8783,18 @@
         "word-timeout_one": "Tijdelijk uitgeschakeld {{target}} voor {{count}} seconde voor \"{{word}}\"",
         "word-timeout_other": "Tijdelijk uitgeschakeld {{target}} voor {{count}} seconden voor \"{{word}}\""
       }
+    },
+    "groups": {
+      "stream": "Live gaan",
+      "streamHint": "Schakelaars voor tijdens de stream, waar je stream naartoe gaat en de link voor OBS.",
+      "overlay": "Overlay",
+      "viewers": "Kijkers",
+      "viewersHint": "Polls, timers, punten en beloningen die je kijkers bij de stream betrekken.",
+      "chat": "Chat",
+      "chatHint": "Je chatbot en de regels voor de chat onder je streams.",
+      "replays": "Na de stream",
+      "replaysTab": "Na",
+      "replaysHint": "Hoe je laatste stream ging en clips die het delen waard zijn."
     }
   },
   "live": {

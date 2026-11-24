@@ -147,9 +147,16 @@ html[data-system-tone='light']:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [
 }
 
 /* Icons that stayed white (or page-coloured) inside a button the light pass
-   had already turned pale: they take the button's own ink. */
+   had already turned pale: they take the button's own ink. Their paths too:
+   the dark-chip rule in index.css (button[class*="bg-black/"] *) reached past
+   the svg and drew outline buttons' icons white on white. Same for a label
+   wrapped in its own span. */
 html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_)
-  [data-theme-button]:is([data-button-variant='default'], [data-button-variant='glass'], [data-button-variant='secondary'], [data-button-variant='outline']):not([data-keep-dark]):not([data-keep-white]):not([data-on-media]):not([data-on-media] *) > svg:not([class*='text-']) {
+  [data-theme-button]:is([data-button-variant='default'], [data-button-variant='glass'], [data-button-variant='secondary'], [data-button-variant='outline']):not([data-keep-dark]):not([data-keep-white]):not([data-on-media]):not([data-on-media] *) > svg:not([class*='text-']),
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_)
+  [data-theme-button]:is([data-button-variant='default'], [data-button-variant='glass'], [data-button-variant='secondary'], [data-button-variant='outline']):not([data-keep-dark]):not([data-keep-white]):not([data-on-media]):not([data-on-media] *) > svg:not([class*='text-']) *,
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_)
+  [data-theme-button]:is([data-button-variant='default'], [data-button-variant='glass'], [data-button-variant='secondary'], [data-button-variant='outline']):not([data-keep-dark]):not([data-keep-white]):not([data-on-media]):not([data-on-media] *) > span:not([class*='text-']) {
   color: inherit !important;
 }
 html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_) [data-theme-control-label] svg.text-background {

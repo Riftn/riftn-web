@@ -8173,7 +8173,8 @@
         "connecting": "Bağlanıyor",
         "live": "Canlı",
         "error": "Hata"
-      }
+      },
+      "addShort": "Ekle"
     },
     "vertical": {
       "title": "Dikey görünüm",
@@ -8593,6 +8594,18 @@
         "word-timeout_one": "\"{{word}}\" için {{count}} saniye {{target}} zaman aşımına uğradı",
         "word-timeout_other": "\"{{word}}\" için {{count}} saniye boyunca {{target}} zaman aşımına uğradı"
       }
+    },
+    "groups": {
+      "stream": "Canlı yayın",
+      "streamHint": "Yayın sırasındaki anahtarlar, yayınının gideceği yerler ve OBS bağlantısı.",
+      "overlay": "Kaplama",
+      "viewers": "İzleyiciler",
+      "viewersHint": "İzleyenleri yayına katan anketler, sayaçlar, puanlar ve ödüller.",
+      "chat": "Sohbet",
+      "chatHint": "Sohbet botun ve yayınlarının altındaki sohbetin kuralları.",
+      "replays": "Yayından sonra",
+      "replaysTab": "Sonra",
+      "replaysHint": "Son yayının nasıl geçti ve paylaşmaya değer klipler."
     }
   },
   "live": {

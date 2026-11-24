@@ -182,8 +182,11 @@
   html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):where(:not([data-theme='minimal'],[data-theme='light'],[data-theme='war'],[data-theme='jungle'])) :is([data-feed-nav], [data-kit-island])::after { display: none !important; }
   html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):where(:not([data-theme='minimal'],[data-theme='light'],[data-theme='war'],[data-theme='jungle'])) :is([data-feed-nav], [data-kit-island]) { background: none !important; box-shadow: none !important; }
   html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):where(:not([data-theme='minimal'],[data-theme='light'],[data-theme='war'],[data-theme='jungle'])) :is([data-feed-nav], [data-kit-island]) > [data-nav-glass-backdrop] { display: block !important; position: absolute; inset: 0; z-index: -1; border-radius: inherit; overflow: hidden; pointer-events: none; }
-  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):where(:not([data-theme='minimal'],[data-theme='light'],[data-theme='war'],[data-theme='jungle'])) :is([data-feed-nav], [data-kit-island]) > [data-nav-glass-backdrop]::before { content: ''; position: absolute; inset: -48px; -webkit-backdrop-filter: var(--g-blur); backdrop-filter: var(--g-blur); }
-  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):where(:not([data-theme='minimal'],[data-theme='light'],[data-theme='war'],[data-theme='jungle'])) :is([data-feed-nav], [data-kit-island]) > [data-nav-glass-backdrop]::after {
+  /* The feed nav keeps the liquid nav glass from glass-surfaces.css (frosted
+     tint, top sheen, crisp rim). The flat pane here, 45% black, read as a dark
+     see-through strip over scrolling posts. */
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):where(:not([data-theme='minimal'],[data-theme='light'],[data-theme='war'],[data-theme='jungle'])) [data-kit-island] > [data-nav-glass-backdrop]::before { content: ''; position: absolute; inset: -48px; -webkit-backdrop-filter: var(--g-blur); backdrop-filter: var(--g-blur); }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):where(:not([data-theme='minimal'],[data-theme='light'],[data-theme='war'],[data-theme='jungle'])) [data-kit-island] > [data-nav-glass-backdrop]::after {
     content: ''; position: absolute; inset: 0; border-radius: inherit;
     background: var(--g-pane), var(--g-under) !important;
     box-shadow: var(--g-pane-edge) !important;
