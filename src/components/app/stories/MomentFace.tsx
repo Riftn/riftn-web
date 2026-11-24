@@ -112,6 +112,7 @@ export function MomentFace({ address, size, children, className, big, name }: Mo
           ref={thumbRef}
           aria-hidden
           data-moment-peek={peek.state}
+          data-close-friends={peek.closeFriends ? '' : undefined}
           data-blur={blurred && peek.state === 'unseen' ? 'true' : undefined}
           style={{ width: w, height: h, borderRadius: Math.max(4, Math.round(w * 0.26)), right: big ? -6 : -4, bottom: big ? -6 : -4 }}
         >

@@ -17,7 +17,7 @@ import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { ArrowUpRight, ChevronLeft, ChevronRight, Eye, Heart, Link2, Loader2, Repeat2, Volume2, VolumeX } from 'lucide-react';
+import { ArrowUpRight, ChevronLeft, ChevronRight, Eye, Heart, Link2, Loader2, Repeat2, Star, Volume2, VolumeX } from 'lucide-react';
 import Close from '@/components/ui/cut-icons/close';
 import MoreVertical from '@/components/ui/cut-icons/morevertical';
 import Plus from '@/components/ui/cut-icons/add';
@@ -155,7 +155,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
 
   const entry = entries[authorIdx];
   const snapshot: StoryItem | undefined = entry?.items[itemIdx];
-  const customAudience = snapshot?.audience === 'selected' || snapshot?.audience === 'except';
+  const customAudience = snapshot?.audience === 'selected' || snapshot?.audience === 'except' || snapshot?.audience === 'close_friends';
   const delivery = useQuery({
     queryKey: ['private-story-playback', snapshot?.id, me],
     queryFn: () => getStory(snapshot!.id, true),
@@ -685,6 +685,9 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
             <small>
               {t('stories.agoLabel', { time: ageLabel(item.createdAt), defaultValue: '{{time}} ago' })}
               {item.audience === 'followers' ? ` · ${t('stories.followersOnly', { defaultValue: 'Followers' })}` : ''}
+              {item.closeFriends || item.audience === 'close_friends' ? (
+                <span data-sv-close-friends> <Star className="inline size-3 -mt-px" fill="currentColor" aria-hidden /> {t('stories.closeFriends', { defaultValue: 'Close friends' })}</span>
+              ) : null}
             </small>
           </button>
           {(item.type === 'video' && !item.muted) || item.song ? (

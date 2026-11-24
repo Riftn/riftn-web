@@ -36,11 +36,12 @@ async function flush() {
     batch.forEach(a => inflight.add(a));
     const key = viewerKey;
     try {
-      const { rings = {}, peeks = {} } = await getStoryRings(batch, signedIn);
+      const { rings = {}, peeks = {}, closeFriends = {} } = await getStoryRings(batch, signedIn);
       if (key !== viewerKey) continue;
       const at = Date.now();
       for (const a of batch) {
-        const peek = peeks[a] ?? (rings[a] ? { state: rings[a], count: 1, cover: null } : null);
+        const base = peeks[a] ?? (rings[a] ? { state: rings[a], count: 1, cover: null } : null);
+        const peek = base && closeFriends[a] ? { ...base, closeFriends: true } : base;
         cache.set(a, { peek, at });
       }
     } catch {
