@@ -2639,12 +2639,13 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
         data-media-frame-key={!isImmersive && !isFullscreen ? `video:${video.id}` : undefined}
         data-media-frame-measured={resolvedVideoAspect == null ? undefined : measuredAspect}
         data-audio-frame={video.isAudio || undefined}
+        data-video-pointer-hidden={(isFullscreen && overlayControls && !controlsVisible) || undefined}
         data-no-navigate
         data-feed-video-frame={cropFeedVideo || undefined}
         data-video-split-controls={splitControls || undefined}
         data-video-fullscreen={isFullscreen || undefined}
         data-media-full
-        className={`bg-black cursor-pointer group/thumb outline-none focus:outline-none focus-visible:outline-none overflow-hidden ${mediaRadius} ${isFullscreen ? `fixed inset-0 z-[9999] w-screen h-[100dvh] flex items-center justify-center ${overlayControls && !controlsVisible ? 'cursor-none' : ''}` : `relative ${isImmersive ? 'mx-auto' : ''} ${isImmersive && showComments ? 'aspect-[2/1]' : ''}`}`}
+        className={`bg-black cursor-pointer group/thumb outline-none focus:outline-none focus-visible:outline-none overflow-hidden ${mediaRadius} ${isFullscreen ? 'fixed inset-0 z-[9999] w-screen h-[100dvh] flex items-center justify-center' : `relative ${isImmersive ? 'mx-auto' : ''} ${isImmersive && showComments ? 'aspect-[2/1]' : ''}`}`}
         /* Inline footage fills the width and crops within its height budget.
            The transport stays below it; fullscreen retains the full picture. */
         style={{ ...(
@@ -3766,9 +3767,10 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
           <div className="flex flex-col gap-1">
             {!video.isAudio && !video.isLivePost && !video.isAd && !isContentGated && !requiresVideoAccess && !accessFallback
               && !contentWarning.hidden && (!video.visibility || video.visibility === 'public')
-              && (isOwnPost || !video.quotePolicy || video.quotePolicy === 'public') && playableVideoUrl && (
+              && playableVideoUrl && (
               <RemixMenuItems source={{ videoUrl: playableVideoUrl, sourceUrl: `https://riftn.com/app/post/${video.id}`,
-                title: video.title || 'Video', creator: video.creatorUsername, tokenId: String(video.id), creatorAddress: video.creatorId }}
+                title: video.title || 'Video', creator: video.creatorUsername, tokenId: String(video.id), creatorAddress: video.creatorId,
+                quotePolicy: video.quotePolicy }}
                 isOwner={!!isOwnPost}
                 onStart={() => { videoRef.current?.pause(); setShowOptionsDrawer(false); }} />
             )}

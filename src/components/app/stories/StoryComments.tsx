@@ -9,6 +9,7 @@ import { formatCount } from '@/lib/format-count';
 import { addStoryComment, deleteStoryComment, getStoryComments, type StoryComment, type StoryItem } from '@/lib/api/dehub/stories';
 import { localAge } from './story-utils';
 import { MomentComment } from './moment-icons';
+import { BoldText } from '@/lib/bold-markup';
 
 /** Public comments under a moment: everyone who can see it can read them. */
 export function StoryComments({ item, signedIn, onOpen, onClose, onSignIn, onCount }: {
@@ -106,7 +107,7 @@ export function StoryComments({ item, signedIn, onOpen, onClose, onSignIn, onCou
             {c.isCreator && <span className="ml-1.5 rounded-full bg-white/15 px-1.5 py-px text-[11px] font-semibold align-middle">{t('postInfo.creator', { defaultValue: 'Creator' })}</span>}
             {' '}<span className="font-normal opacity-50">{localAge(c.createdAt, i18n.language)}</span>
           </button>
-          <p className="text-[14px] break-words whitespace-pre-wrap">{c.text}</p>
+          <p className="text-[14px] break-words whitespace-pre-wrap"><BoldText text={c.text} /></p>
           {allow && (
             <button type="button" className="mt-0.5 min-h-[28px] text-[12px] font-semibold opacity-60 hover:opacity-100" onClick={() => answer(c, name)}>
               {t('messages.reply', { defaultValue: 'Reply' })}

@@ -5,6 +5,7 @@ import MicOff from '@/components/ui/cut-icons/mic-off';
 import Mic from '@/components/ui/cut-icons/mic';
 import Video from '@/components/ui/cut-icons/video';
 import VideoOff from '@/components/ui/cut-icons/video-off';
+import { toast } from 'sonner';
 import { useCall } from '@/contexts/CallContext';
 import { useAuth } from '@/contexts/AuthContext';
 import type { GroupParticipant } from '@/hooks/use-call';
@@ -22,6 +23,8 @@ import {
 import { CallCaptionsControl, CallCaptionsOverlay } from './CallCaptions';
 import { CallBackgroundPanel, CallFxButton, useCallBackgroundAvailable } from './CallBackgroundPicker';
 import { TownHall } from './TownHall';
+import { CallModMenu } from './CallModMenu';
+import type { CallModAction } from '@/lib/api/dehub/group-call-moderation';
 import { readTownHallMode, saveTownHallMode, TOWN_HALL_FROM, type TownHallMode } from '@/lib/town-hall';
 
 /**
@@ -30,7 +33,7 @@ import { readTownHallMode, saveTownHallMode, TOWN_HALL_FROM, type TownHallMode }
  * Before anyone else is in the room it is the ringing screen with the group's
  * name (Public Chat: the waiting screen, nobody is rung). Once somebody joins it becomes a grid: one tile per person,
  * their camera when it is on and their picture when it is not, outlined while
- * they talk. From three people it is a town hall instead (see TownHall): the
+ * they talk. By default it is a town hall instead (see TownHall): the
  * talker fills the stage over a strip of everyone else; the corner button
  * switches between the two and is remembered. Leaving is the one solid control; the call carries on for
  * whoever is still in it.
@@ -51,6 +54,8 @@ const GroupCallModal: React.FC = () => {
     attachLocalVideo,
     attachGroupVideo,
     readGroupLevels,
+    groupModeration,
+    moderateGroupMember,
     endCall,
     acceptCall,
     rejectCall,
@@ -114,7 +119,7 @@ const GroupCallModal: React.FC = () => {
   }
 
   const count = groupParticipants.length + 1;
-  // Town hall from three people unless the person picked a layout themselves.
+  // Town hall for every group call unless the person picked the grid themselves.
   const hall = layout === 'hall' || (layout === 'auto' && count >= TOWN_HALL_FROM);
   const flipLayout = () => {
     const next: TownHallMode = hall ? 'grid' : 'hall';
@@ -122,6 +127,16 @@ const GroupCallModal: React.FC = () => {
     setLayout(next);
   };
   const layoutLabel = hall ? t('calls.gridView', 'Grid') : t('calls.townHall', 'Town hall');
+  const onModerate = groupModeration.canModerate
+    ? (wallet: string, action: CallModAction) => {
+      void moderateGroupMember(wallet, action).then(done => {
+        if (!done) return;
+        toast(action === 'remove'
+          ? t('calls.modRemoved', 'Removed from the call')
+          : action === 'mute' ? t('calls.modMuted', 'Muted for everyone') : t('calls.modUnmuted', 'Unmuted'));
+      });
+    }
+    : undefined;
   return (
     <CallStage peer={stagePeer} video={isVideo} onMinimize={minimizeCall} minimizeLabel={t('calls.minimize')}>
       <div className="call-stage__top">
@@ -154,6 +169,7 @@ const GroupCallModal: React.FC = () => {
           attachLocalVideo={attachLocalVideo}
           attachGroupVideo={attachGroupVideo}
           readGroupLevels={readGroupLevels}
+          onModerate={onModerate}
         />
       ) : (
         <div className="group-call-grid" data-count={Math.min(count, 5)} data-video={isVideo ? 'true' : 'false'}>
@@ -167,7 +183,7 @@ const GroupCallModal: React.FC = () => {
             </span>
           </div>
           {groupParticipants.map(participant => (
-            <GroupTile key={participant.uid} participant={participant} attach={attachGroupVideo(participant.uid)} />
+            <GroupTile key={participant.uid} participant={participant} attach={attachGroupVideo(participant.uid)} onModerate={onModerate} />
           ))}
         </div>
       )}
@@ -214,8 +230,12 @@ function TileFace({ name, avatarUrl }: { name: string; avatarUrl: string | null 
   );
 }
 
-function GroupTile({ participant, attach }: { participant: GroupParticipant; attach: (node: HTMLDivElement | null) => void }) {
+function GroupTile({ participant, attach, onModerate }: {
+  participant: GroupParticipant; attach: (node: HTMLDivElement | null) => void;
+  onModerate?: (wallet: string, action: CallModAction) => void;
+}) {
   const peer = usePeerIdentity(participant.wallet ?? '');
+  const wallet = participant.wallet;
   return (
     <div className="group-call-tile" data-speaking={participant.speaking ? 'true' : 'false'}>
       {participant.video ? <div ref={attach} className="group-call-tile__video" /> : <TileFace name={peer.name} avatarUrl={peer.avatarUrl} />}
@@ -223,6 +243,9 @@ function GroupTile({ participant, attach }: { participant: GroupParticipant; att
         {!participant.audio ? <MicOff className="h-3 w-3" /> : null}
         <span>{participant.wallet ? peer.name : '…'}</span>
       </span>
+      {onModerate && wallet ? (
+        <CallModMenu className="group-call-tile__mod" name={peer.name} modMuted={!!participant.modMuted} onModerate={action => onModerate(wallet, action)} />
+      ) : null}
     </div>
   );
 }

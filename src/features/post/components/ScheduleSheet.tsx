@@ -14,6 +14,7 @@ import { AuthContext } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 
 import { formatCount } from '@/lib/format-count';
+import { DripSection, PostSpacingSection } from './PostSpacingSection';
 export type ScheduleKind = 'post' | 'live' | 'stage' | 'message';
 
 interface ScheduleSheetProps {
@@ -29,6 +30,11 @@ interface ScheduleSheetProps {
   moving?: boolean;
   /** Messages only: offer "When they're next online" above the clock. */
   onWhenOnline?: () => void;
+  /** Posts with several photos: offer "One post each, spaced out". */
+  dripCount?: number;
+  /** Minutes between the drip's posts, or null for one post with them all. */
+  dripGap?: number | null;
+  onDripChange?: (gap: number | null) => void;
 }
 
 const STEP = 15;
@@ -50,7 +56,7 @@ const firstSlot = (minAhead: number) => {
  * choose a day from the strip and step the time. Kit chips and buttons, so
  * every theme styles it like the rest of the app.
  */
-export function ScheduleSheet({ isOpen, onClose, scheduledDate, onSchedule, title: titleProp, minimumMinutes = 0, kind = 'post', moving = false, onWhenOnline }: ScheduleSheetProps) {
+export function ScheduleSheet({ isOpen, onClose, scheduledDate, onSchedule, title: titleProp, minimumMinutes = 0, kind = 'post', moving = false, onWhenOnline, dripCount = 0, dripGap = null, onDripChange }: ScheduleSheetProps) {
   const { t, i18n } = useTranslation();
   const title = titleProp ?? t('whenSheet.title', { defaultValue: 'When?' });
   const locale = i18n.language || undefined;
@@ -157,7 +163,15 @@ export function ScheduleSheet({ isOpen, onClose, scheduledDate, onSchedule, titl
     onClose();
   };
 
-  const confirmText = t('whenSheet.scheduleFor', { defaultValue: 'Schedule for {{when}}', when: `${dayLabel(day)}, ${timeLabel(selectedAt)}` });
+  const dripping = !!dripGap && dripCount > 1 && !!onDripChange;
+  const handleStartNow = () => {
+    onSchedule(null);
+    onClose();
+  };
+
+  const confirmText = dripping
+    ? t('postSpacing.planFrom', { defaultValue: 'Plan {{count}} posts from {{when}}', count: dripCount, when: `${dayLabel(day)}, ${timeLabel(selectedAt)}` })
+    : t('whenSheet.scheduleFor', { defaultValue: 'Schedule for {{when}}', when: `${dayLabel(day)}, ${timeLabel(selectedAt)}` });
   const kindTip = kind === 'live'
     ? t('whenSheet.liveTip', { defaultValue: 'Your followers can set a reminder. You start the Live yourself when it is time.' })
     : kind === 'stage'
@@ -188,6 +202,15 @@ export function ScheduleSheet({ isOpen, onClose, scheduledDate, onSchedule, titl
         </DrawerHeader>
 
         <div className="mx-auto w-full max-w-[440px] space-y-4">
+          {kind === 'post' && !moving && (
+            <>
+              <PostSpacingSection />
+              {dripCount > 1 && onDripChange && (
+                <DripSection count={dripCount} gap={dripGap} onChange={onDripChange} start={validTime ? selectedAt : new Date()} />
+              )}
+              <div className="h-px bg-white/10" aria-hidden />
+            </>
+          )}
           {kind === 'message' && onWhenOnline && (
             <button
               type="button"
@@ -344,6 +367,11 @@ export function ScheduleSheet({ isOpen, onClose, scheduledDate, onSchedule, titl
             <button type="button" data-kit-button="primary" onClick={handleConfirm} disabled={!validTime} className="w-full">
               {confirmText}
             </button>
+            {dripping && (
+              <button type="button" data-kit-button="quiet" onClick={handleStartNow} className="w-full" data-post-drip-now>
+                {t('postSpacing.startNow', { defaultValue: 'Start now' })}
+              </button>
+            )}
             {scheduledDate && !moving && (
               <button type="button" data-kit-button="quiet" onClick={handleClear} className="w-full">
                 {t('whenSheet.remove', { defaultValue: 'Remove schedule' })}

@@ -15,6 +15,7 @@ import { callBackgroundSettings, loadCallBackground, loadCallBackgroundPhoto, sa
 import type { BackgroundStage } from '@/lib/studio/background';
 import type { FaceFilterId, FaceFilterStage } from '@/lib/studio/face-filters';
 import { loadCallFaceFilter, saveCallFaceFilter } from '@/lib/calls/call-background';
+import { moderateCall, NO_CALL_MODERATION, readCallModeration, removedMinutesLeft, type CallModAction, type GroupCallModeration } from '@/lib/api/dehub/group-call-moderation';
 import { groupCallChannel, groupCallPresenceTopic, groupCallUid, presenceList, groupCallLoad, readGroupCallRoster, GROUP_CALL_MAX_RING } from '@/lib/group-call';
 
 export interface CallSession {
@@ -30,6 +31,8 @@ export interface GroupParticipant {
   /** From the room's presence; null for the moment between joining and announcing. */
   wallet: string | null;
   audio: boolean; video: boolean; speaking: boolean;
+  /** A moderator muted them: nobody in the call hears them until a moderator unmutes them. */
+  modMuted?: boolean;
 }
 export interface GroupCallTarget { id: string; name: string }
 /** How a call finished, kept briefly so the stage can say so and offer a way back. */
@@ -59,6 +62,11 @@ export interface UseCallReturn {
   startGroupCall: (group: GroupCallTarget, members: string[], callType?: 'audio' | 'video') => Promise<void>;
   /** Step into a group's room without ringing anyone (Public Chat, or a call already going). Same limits. */
   joinGroupCall: (group: GroupCallTarget, callType?: 'audio' | 'video') => Promise<void>;
+  /** Who the chat's moderators muted or removed in this group call, and whether you are one of them. */
+  groupModeration: GroupCallModeration;
+  /** A moderator muted you: the mic stays off until one unmutes you. */
+  modMuted: boolean;
+  moderateGroupMember: (wallet: string, action: CallModAction) => Promise<boolean>;
   /** The caller's side while the other phone is still ringing. */
   isRinging: boolean;
   callSummary: CallSummary | null; dismissCallSummary: () => void;
@@ -96,7 +104,7 @@ export interface UseCallReturn {
   callFaceFilter: FaceFilterId;
   setCallFaceFilter: (id: FaceFilterId) => void;
 }
-type GroupRemote = { audio: any; video: any };
+type GroupRemote = { audio: any; video: any; silenced?: boolean };
 type CallMedia = {
   client: any; audio: any; video: any; remoteVideo: any; remoteAudio: any; closed: boolean;
   remotes: Map<number, GroupRemote>; presence: ChannelLease | null;
@@ -104,6 +112,8 @@ type CallMedia = {
   camOn?: boolean;
   /** Tell the group room your camera changed. */
   announce?: () => void;
+  /** Re-reads who the moderators muted or removed (group calls). */
+  modTimer?: ReturnType<typeof setInterval> | null;
   /**
    * The camera effects, while any is on: raw camera -> background -> face
    * filter. The last stage's canvas track is what the camera track sends
@@ -148,6 +158,13 @@ export const useCall = (): UseCallReturn => {
     callBackgroundRef.current = { id, photo: id === 'photo' ? loadCallBackgroundPhoto() : null };
   }
   const rosterRef = useRef<Map<number, string>>(new Map());
+  const [groupModeration, setGroupModeration] = useState<GroupCallModeration>(NO_CALL_MODERATION);
+  const moderationRef = useRef<GroupCallModeration>(NO_CALL_MODERATION);
+  /** A moderator muted you: the mic stays off until one unmutes you. */
+  const [modMuted, setModMuted] = useState(false);
+  const modMutedRef = useRef(false);
+  /** The room volume last asked for (Agora's 0..100+ scale), to give back to someone a moderator unmutes. */
+  const callVolumeRef = useRef(100);
   const speakingRef = useRef<Set<number>>(new Set());
   /** Ring rows a group call's starter wrote, so an unanswered start can stop the phones. */
   const groupRingIdsRef = useRef<string[]>([]);
@@ -225,6 +242,8 @@ export const useCall = (): UseCallReturn => {
         for (const track of [remote.audio, remote.video]) { try { track?.stop(); } catch {} }
       }
       media.remotes.clear();
+      if (media.modTimer) clearInterval(media.modTimer);
+      media.modTimer = null;
       try { media.presence?.release(); } catch {}
       media.presence = null;
       try { media.client?.removeAllListeners(); } catch {}
@@ -249,6 +268,8 @@ export const useCall = (): UseCallReturn => {
     setGroupParticipants([]); setSelfSpeaking(false); setGroupCamerasFull(false);
     camerasFullRef.current = false; startCameraOffRef.current = false;
     rosterRef.current = new Map(); speakingRef.current = new Set();
+    moderationRef.current = NO_CALL_MODERATION; setGroupModeration(NO_CALL_MODERATION);
+    modMutedRef.current = false; setModMuted(false);
     visualActivity.setCall(false, false);
     // The chat note handler belongs to whichever direct chat is open, so a
     // group call never writes into it.
@@ -293,9 +314,25 @@ export const useCall = (): UseCallReturn => {
     if (media.closed) return;
     const roster = rosterRef.current;
     const speaking = speakingRef.current;
-    setGroupParticipants([...media.remotes.entries()].map(([uid, remote]) => ({
-      uid, wallet: roster.get(uid) ?? null, audio: !!remote.audio, video: !!remote.video, speaking: speaking.has(uid),
-    })));
+    const { muted, removed } = moderationRef.current;
+    const now = Date.now();
+    const out = new Set(removed.filter(entry => new Date(entry.until).getTime() > now).map(entry => entry.wallet));
+    const people: GroupParticipant[] = [];
+    for (const [uid, remote] of media.remotes) {
+      const wallet = roster.get(uid) ?? null;
+      const silenced = !!wallet && (muted.includes(wallet) || out.has(wallet));
+      // Muted or removed by a moderator: silent on every screen, not just theirs.
+      if (silenced !== !!remote.silenced) {
+        remote.silenced = silenced;
+        try { remote.audio?.setVolume?.(silenced ? 0 : callVolumeRef.current); } catch { /* track gone */ }
+      }
+      if (wallet && out.has(wallet)) continue;
+      people.push({
+        uid, wallet, audio: !!remote.audio && !silenced, video: !!remote.video, speaking: speaking.has(uid) && !silenced,
+        modMuted: !!wallet && muted.includes(wallet),
+      });
+    }
+    setGroupParticipants(people);
   }, []);
 
   /**
@@ -383,6 +420,38 @@ export const useCall = (): UseCallReturn => {
     media.fxQueue = next;
     return next;
   }, [_copy]);
+  /**
+   * What the chat's moderators decided for this call: a removed person leaves,
+   * a muted one has their mic held off, and everyone else's screen silences
+   * and hides them too.
+   */
+  const applyModeration = useCallback((media: CallMedia, next: GroupCallModeration) => {
+    if (media.closed || mediaRef.current !== media) return;
+    moderationRef.current = next;
+    setGroupModeration(next);
+    const me = userAddress?.toLowerCase() ?? '';
+    if (me && removedMinutesLeft(next, me) > 0) {
+      toast(_copy('calls.removedByMod', { defaultValue: 'A moderator removed you from this call' }));
+      void finishCall();
+      return;
+    }
+    const muted = !!me && next.muted.includes(me);
+    if (muted !== modMutedRef.current) {
+      modMutedRef.current = muted;
+      setModMuted(muted);
+      if (muted) {
+        if (media.audio) { void media.audio.setMuted(true); setIsMuted(true); }
+        toast(_copy('calls.mutedByMod', { defaultValue: 'A moderator muted you' }));
+      } else {
+        toast(_copy('calls.unmutedByMod', { defaultValue: 'A moderator unmuted you. Tap the mic to talk.' }));
+      }
+    }
+    syncGroup(media);
+  }, [userAddress, _copy, finishCall, syncGroup]);
+  const refreshModeration = useCallback((media: CallMedia, groupId: string) => {
+    readCallModeration(groupId).then(next => applyModeration(media, next)).catch(error => console.warn('Call moderation read failed', error));
+  }, [applyModeration]);
+
   const joinAgoraChannel = useCallback(async (call: CallSession, generation: number): Promise<boolean> => {
     const current = () => generationRef.current === generation && currentCallRef.current?.id === call.id;
     if (!current()) return false;
@@ -391,6 +460,19 @@ export const useCall = (): UseCallReturn => {
     const ownUid = groupId && userAddress ? groupCallUid(userAddress.toLowerCase()) : 0;
     let media: CallMedia | null = null;
     try {
+      if (groupId && userAddress) {
+        // Removed by a moderator a moment ago: stay out until the time is up.
+        const standing = await readCallModeration(groupId).catch(() => null);
+        if (!current()) return false;
+        const minutes = standing ? removedMinutesLeft(standing, userAddress) : 0;
+        if (minutes > 0) {
+          toast.error(_copy('calls.removedByMod', { defaultValue: 'A moderator removed you from this call' }), {
+            description: _copy('calls.removedFor', { count: minutes, defaultValue: 'You can join again in {{count}} min.' }),
+          });
+          return false;
+        }
+        if (standing) { moderationRef.current = standing; setGroupModeration(standing); }
+      }
       const authToken = getAuthToken();
       const headers = authToken && userAddress
         ? { 'x-dehub-token': authToken, 'x-wallet-address': userAddress.toLowerCase() } : undefined;
@@ -428,7 +510,10 @@ export const useCall = (): UseCallReturn => {
           }
           if (groupId) {
             const remote = ownedMedia.remotes.get(remoteUser.uid) ?? { audio: null, video: null };
-            if (mediaType === 'audio') { remote.audio = remoteUser.audioTrack; remoteUser.audioTrack?.play(); }
+            if (mediaType === 'audio') {
+              remote.audio = remoteUser.audioTrack; remoteUser.audioTrack?.play();
+              if (remote.silenced) { try { remote.audio?.setVolume?.(0); } catch { /* track gone */ } }
+            }
             else remote.video = remoteUser.videoTrack;
             ownedMedia.remotes.set(remoteUser.uid, remote);
             syncGroup(ownedMedia);
@@ -520,14 +605,25 @@ export const useCall = (): UseCallReturn => {
               setGroupCamerasFull(camerasFull);
               syncGroup(ownedMedia);
             },
+          }, {
+            // A moderator acted: read the list again (the message itself is only a nudge).
+            type: 'broadcast',
+            filter: { event: 'mod' },
+            handler: () => refreshModeration(ownedMedia, groupId),
           }],
           onJoin: announce,
         });
+        refreshModeration(ownedMedia, groupId);
+        ownedMedia.modTimer = setInterval(() => refreshModeration(ownedMedia, groupId), 20_000);
         ownedMedia.announce = () => { if (ownedMedia.presence) announce(ownedMedia.presence.channel); };
       }
       const audio = await AgoraRTC.createMicrophoneAudioTrack();
       if (!current() || media.closed) { audio.close(); await disposeMedia(media); return false; }
       media.audio = audio;
+      if (groupId && userAddress && moderationRef.current.muted.includes(userAddress.toLowerCase())) {
+        modMutedRef.current = true; setModMuted(true);
+        await audio.setMuted(true); setIsMuted(true);
+      }
       if (call.call_type === 'video') {
         const video = await AgoraRTC.createCameraVideoTrack();
         if (!current() || media.closed) { video.close(); await disposeMedia(media); return false; }
@@ -556,7 +652,7 @@ export const useCall = (): UseCallReturn => {
       }
       return false;
     }
-  }, [userAddress, disposeMedia, publishCall, endCall, _copy, syncGroup, applyEffects]);
+  }, [userAddress, disposeMedia, publishCall, endCall, _copy, syncGroup, applyEffects, refreshModeration]);
 
   /** Nobody answered the ring: a group room you are alone in closes after the ring window. */
   const armGroupTimeout = useCallback((generation: number, outcome: 'no_answer' | 'missed') => {
@@ -854,8 +950,31 @@ export const useCall = (): UseCallReturn => {
   }, [applyEffects]);
   const toggleMute = useCallback(() => {
     const audio = mediaRef.current?.audio;
+    // Muted by a moderator: the mic stays off until one of them unmutes you.
+    if (modMutedRef.current) {
+      toast(_copy('calls.mutedByMod', { defaultValue: 'A moderator muted you' }), {
+        description: _copy('calls.mutedByModHint', { defaultValue: 'You can talk again once a moderator unmutes you.' }),
+      });
+      return;
+    }
     if (audio) setIsMuted(previous => { void audio.setMuted(!previous); return !previous; });
-  }, []);
+  }, [_copy]);
+  /** A moderator mutes, unmutes or removes someone in this group call. */
+  const moderateGroupMember = useCallback(async (wallet: string, action: CallModAction) => {
+    const media = mediaRef.current;
+    const groupId = currentCallRef.current?.group_id;
+    if (!media || !groupId) return false;
+    try {
+      await moderateCall(groupId, wallet.toLowerCase(), action);
+    } catch (error) {
+      toast.error((error instanceof Error && error.message) || _copy('calls.modFailed', { defaultValue: "Couldn't do that. Try again." }));
+      return false;
+    }
+    // Tell everyone in the room to read the list again.
+    try { void media.presence?.channel.send({ type: 'broadcast', event: 'mod', payload: { target: wallet.toLowerCase(), action } }); } catch { /* channel gone */ }
+    refreshModeration(media, groupId);
+    return true;
+  }, [_copy, refreshModeration]);
   const toggleCamera = useCallback(() => {
     const media = mediaRef.current;
     const video = media?.video;
@@ -931,14 +1050,16 @@ export const useCall = (): UseCallReturn => {
   }, []);
   const setCallVolume = useCallback((volume: number) => {
     const media = mediaRef.current;
+    callVolumeRef.current = volume;
     if (!media) return;
-    for (const track of [media.remoteAudio, ...[...media.remotes.values()].map(r => r.audio)]) {
+    for (const track of [media.remoteAudio, ...[...media.remotes.values()].filter(r => !r.silenced).map(r => r.audio)]) {
       try { track?.setVolume?.(volume); } catch { /* track already gone */ }
     }
   }, []);
   return useMemo(() => ({
     captionRoom, captionSpeakers, getMicStream, setCallVolume,
     isGroupCall, groupParticipants, selfSpeaking, groupCamerasFull, attachGroupVideo, readGroupLevels, startGroupCall, joinGroupCall,
+    groupModeration, modMuted, moderateGroupMember,
     isRinging, callSummary, dismissCallSummary,
     isCallActive, isIncoming, currentCall, isConnecting, isMuted, isCameraOff, isUserOffline, callFailureReason,
     clearCallFailure, isMinimized, minimizeCall, maximizeCall, callStartedAt, mediaRevision, peerAddress, localVideoRef, remoteVideoRef,
@@ -946,6 +1067,7 @@ export const useCall = (): UseCallReturn => {
     localVideoTrack, debugCallState, checkForCalls, setCallMessageHandler,
     callBackground, callBackgroundBusy, setCallBackground, callFaceFilter, setCallFaceFilter,
   }), [callBackground, callBackgroundBusy, setCallBackground, callFaceFilter, setCallFaceFilter, captionRoom, captionSpeakers, getMicStream, setCallVolume, isGroupCall, groupParticipants, selfSpeaking, groupCamerasFull, attachGroupVideo, readGroupLevels, startGroupCall, joinGroupCall,
+    groupModeration, modMuted, moderateGroupMember,
     isRinging, callSummary, dismissCallSummary, isCallActive, isIncoming, currentCall, isConnecting, isMuted, isCameraOff, isUserOffline, callFailureReason,
     clearCallFailure, isMinimized, minimizeCall, maximizeCall, callStartedAt, mediaRevision, peerAddress, startCall, endCall, acceptCall,
     attachLocalVideo, attachRemoteVideo, toggleMute, toggleCamera, switchCamera, debugCallState, checkForCalls, setCallMessageHandler]);

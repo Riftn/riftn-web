@@ -50,6 +50,7 @@ import { useHoldMenu } from '@/hooks/use-hold-menu';
 import Copy from '@/components/ui/cut-icons/copy';
 import { toast } from 'sonner';
 import { profilePath } from '@/lib/profile-path';
+import { stripBold } from '@/lib/bold-markup';
 
 /**
  * One row of any of the chat tables. The columns are the same across all of
@@ -424,7 +425,7 @@ export function RealtimeChatPanel({
                       <div className="flex items-center gap-1 text-[10px] text-zinc-500 ml-9 mb-0.5">
                         <CornerDownRight className="w-2.5 h-2.5" />
                         <span className="font-medium">{msg.reply_to.sender_name}</span>
-                        <span className="truncate max-w-[200px]">{msg.reply_to.content}</span>
+                        <span className="truncate max-w-[200px]">{stripBold(msg.reply_to.content)}</span>
                       </div>
                     )}
                     <div className="flex items-start gap-2">
