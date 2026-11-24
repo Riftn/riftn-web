@@ -1,3 +1,4 @@
+import { Profiler } from "react";
 import '@/styles/skeleton.css';
 import "./lib/storage-quota-guard"; // Must run first: keeps localStorage writable when it fills up.
 import "./lib/canvas-polyfills"; // Must run before any canvas usage (Safari 15 compat)
@@ -170,9 +171,11 @@ applyChatTextSize();
 
 const render = () => {
   createRoot(document.getElementById("root")!).render(
+    <Profiler id="root" onRender={(id, phase, actual, base, start, commit) => { const w = window as unknown as { __commits?: unknown[] }; (w.__commits ??= []).push([phase, Math.round(actual), Math.round(start), Math.round(commit)]); }}>
     <ErrorBoundary>
       <App />
     </ErrorBoundary>
+    </Profiler>
   );
 };
 const finishMobileBootWait = beginMobileBootWait();

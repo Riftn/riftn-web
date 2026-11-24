@@ -497,9 +497,10 @@ export default defineConfig(({ mode }) => ({
   ].filter(Boolean),
 
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
+    alias: [
+      { find: /^react-dom(\/client)?$/, replacement: path.resolve(__dirname, "node_modules/react-dom/profiling.js") },
+      { find: "@", replacement: path.resolve(__dirname, "./src") },
+    ],
     dedupe: [
       "@web3auth/modal",
       "@web3auth/no-modal",
@@ -531,6 +532,7 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     target: ['es2020', 'safari14'],
+    minify: false,
     // Gzip-size reporting over this many chunks exhausted the build heap.
     reportCompressedSize: false,
     // Several WebP icons in src/assets/icons are under the 4 KB default and
