@@ -1,5 +1,5 @@
 {
-  "version": "fc1e56db1e140410",
+  "version": "1a4d81a3f35e8013",
   "routes": {
     "/": [
       "ar",
@@ -1367,6 +1367,13 @@
       "tr"
     ],
     "/guides/ready-to-debate-your-side-bring-it-to-dehub": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/guides/redes-sociais-descentralizadas-2026": [
       "ar",
       "es",
       "fr",
