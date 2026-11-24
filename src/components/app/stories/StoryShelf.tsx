@@ -19,7 +19,7 @@ import { useStoriesStore } from '@/store/storiesStore';
 import { buildAvatarUrl, buildAvatarCdnFallbackUrl, deviceWidth } from '@/lib/media-url';
 import type { ShelfEntry } from '@/lib/api/dehub/stories';
 import { coverOf, handleOf, nameOf, playable } from './story-utils';
-import { rememberShelfSeat } from '@/lib/story-shelf-seat';
+import { expectedShelfSeat, rememberShelfSeat, type ShelfSeat } from '@/lib/story-shelf-seat';
 import { StoryCreatePill, StoryCreateTile } from './StoryCreatePill';
 import { useMomentPreviewsBlurred } from '@/lib/moment-preview-blur';
 import '@/styles/stories.css';
@@ -33,7 +33,7 @@ export function StoryShelf() {
   const kidsMode = useKidsModeLock();
   const canSeeMature = isAuthenticated && showMatureContent && !kidsMode;
   const liveHosts = [...new Set(live.map(item => (item.wallet || '').toLowerCase()).filter(Boolean))].sort().slice(0, 100).join(',');
-  const { storiesEnabled } = useStoriesEnabled();
+  const { storiesEnabled, storiesSettingLoading } = useStoriesEnabled();
   const { data, isLoading } = useStoryShelf(liveHosts, canSeeMature, storiesEnabled || !!liveHosts);
   const eligibleLive = live.filter(item => data?.liveHosts?.includes((item.wallet || '').toLowerCase()));
   const openViewer = useStoriesStore(s => s.openViewer);
@@ -58,17 +58,37 @@ export function StoryShelf() {
     return () => window.clearTimeout(id);
   }, [storiesEnabled, hasMoments]);
 
-  // While the first load is out the row keeps its seat with loading tiles,
-  // signed in or not, so the feed under it never jumps down when it lands.
+  // Until the Stories setting and the first shelf are in, the seat keeps the
+  // shape it had last visit (row of loading tiles, ask bar, or nothing), the
+  // same one the boot skeleton drew, so the feed under it never moves.
+  const [lastSeat] = useState<ShelfSeat>(expectedShelfSeat);
+  const waiting = storiesSettingLoading || (isLoading && !data);
   const hidden = (!storiesEnabled || (!isAuthenticated && others.length === 0 && !isLoading)) && eligibleLive.length === 0;
   // Signed in and nobody has a Moment up (yours included): a thin pill that
   // invites you to create takes the row's place instead of a lone tile.
   const bare = storiesEnabled && isAuthenticated && !isLoading && !pending && !own?.items.length
     && others.length === 0 && eligibleLive.length === 0;
-  // The loading skeletons read this to hold the row's seat on the next visit.
+  const seat: ShelfSeat = hidden ? 'none' : bare ? 'ask' : 'row';
+  // The loading skeletons read this to hold the right seat on the next visit.
   useEffect(() => {
-    if (!isLoading) rememberShelfSeat(!hidden && !bare);
-  }, [isLoading, hidden, bare]);
+    if (!waiting) rememberShelfSeat(seat);
+  }, [waiting, seat]);
+  if (waiting && eligibleLive.length === 0) {
+    if (lastSeat === 'none') return null;
+    if (lastSeat === 'ask' && isAuthenticated) return <StoryCreatePill />;
+    if (lastSeat === 'ask') return null;
+    return (
+      <div data-stories data-story-shelf data-no-swipe role="list" aria-busy="true">
+        {isAuthenticated && <StoryCreateTile />}
+        {[0, 1, 2, 3].map(index => (
+          <div key={index} data-story-tile aria-hidden="true" className="!bg-foreground/[0.04]">
+            <span data-st-avatar className="!border-0 !bg-foreground/10" />
+            <span className="absolute bottom-2 left-2 h-2 w-10 rounded bg-foreground/10" />
+          </div>
+        ))}
+      </div>
+    );
+  }
   if (hidden) return null;
   if (bare) return <StoryCreatePill />;
 
