@@ -28,6 +28,7 @@ function emit() {
 
 async function flush() {
   timer = null;
+  const retry: string[] = [];
   const all = [...wanted].filter(a => !inflight.has(a));
   wanted.clear();
   const signedIn = !!viewerKey;
@@ -37,7 +38,12 @@ async function flush() {
     const key = viewerKey;
     try {
       const { rings = {}, peeks = {}, closeFriends = {} } = await getStoryRings(batch, signedIn);
-      if (key !== viewerKey) continue;
+      // Signed in (or out) while this was on its way: ask again as the new
+      // viewer, or the mark showed for a second and then never came back.
+      if (key !== viewerKey) {
+        retry.push(...batch);
+        continue;
+      }
       const at = Date.now();
       for (const a of batch) {
         const base = peeks[a] ?? (rings[a] ? { state: rings[a], count: 1, cover: null } : null);
@@ -47,12 +53,13 @@ async function flush() {
     } catch {
       // Try again in about 15 s rather than on every render.
       const at = Date.now() - FRESH_MS + 15_000;
-      for (const a of batch) if (!cache.has(a)) cache.set(a, { peek: null, at });
+      for (const a of batch) cache.set(a, { peek: cache.get(a)?.peek ?? null, at });
     } finally {
       batch.forEach(a => inflight.delete(a));
     }
     emit();
   }
+  retry.forEach(a => ask(a));
 }
 
 function ask(address: string) {
@@ -65,8 +72,10 @@ function ask(address: string) {
 
 /** Forget these people's marks (or everyone's) so the faces on screen ask again. */
 export function refreshMomentPeeks(addresses?: string[]) {
-  if (addresses) addresses.forEach(a => cache.delete(a.toLowerCase()));
-  else cache.clear();
+  // Keep the mark on screen while it is asked for again, so it never blinks out.
+  const stale = (a: string) => { const e = cache.get(a); if (e) cache.set(a, { peek: e.peek, at: 0 }); };
+  if (addresses) addresses.forEach(a => stale(a.toLowerCase()));
+  else [...cache.keys()].forEach(stale);
   emit();
 }
 
@@ -82,13 +91,14 @@ useStoriesStore.subscribe((state, prev) => {
 });
 
 // Marks older than a minute are asked for again while their faces are on screen.
+// The old mark stays up until the answer lands (it used to vanish for a beat).
 if (typeof window !== 'undefined') {
   window.setInterval(() => {
     if (!listeners.size) return;
     const stale = Date.now() - FRESH_MS;
     let changed = false;
     cache.forEach((entry, address) => {
-      if (entry.at < stale) { cache.delete(address); changed = true; }
+      if (entry.at > 0 && entry.at < stale) { cache.set(address, { peek: entry.peek, at: 0 }); changed = true; }
     });
     if (changed) emit();
   }, FRESH_MS);
