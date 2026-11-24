@@ -23,7 +23,7 @@ import { useTranslation as _useCopy } from 'react-i18next';
  *   HOME_INTRO_PRESS in CLOUDFLARE_WORKER_SEO.js, and LINKS with
  *   HOME_INTRO_LINKS there.
  */
-import type { CSSProperties, MouseEventHandler, PointerEventHandler } from 'react';
+import type { CSSProperties, MouseEventHandler, PointerEventHandler, Ref } from 'react';
 import { Link } from 'react-router-dom';
 import X from "@/components/ui/cut-icons/close";
 
@@ -166,6 +166,10 @@ export interface HomeIntroPanelProps {
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
   onDescriptionToggle?: (expanded: boolean) => void;
+  /** Holds every hero image at opacity 0 (the prerender leaves it unset). */
+  artHidden?: boolean;
+  /** The hero art box, so HomeIntro can wait for its image to decode. */
+  heroRef?: Ref<HTMLDivElement>;
 }
 
 export function HomeIntroPanel({
@@ -178,6 +182,8 @@ export function HomeIntroPanel({
   onMouseEnter,
   onMouseLeave,
   onDescriptionToggle,
+  artHidden,
+  heroRef,
 }: HomeIntroPanelProps) {
   const { t: _copy } = _useCopy();
   return (
@@ -219,7 +225,7 @@ export function HomeIntroPanel({
           panel's vertical centre — the banner template is pure art, but this
           panel carries body copy underneath and a centred hero sits straight
           on top of it. */}
-      <div aria-hidden="true" className="dehub-intro-hero pointer-events-none absolute">
+      <div ref={heroRef} aria-hidden="true" className="dehub-intro-hero pointer-events-none absolute">
         <div className="absolute inset-0" style={{ background: GLOW, borderRadius: '50%' }} />
         {SLIDES.map((slide, index) => (
         <img
@@ -244,7 +250,7 @@ export function HomeIntroPanel({
           {...({ fetchpriority: 'high' } as Record<string, string>)}
           decoding="async"
           className="dehub-intro-art absolute inset-0 h-full w-full object-contain"
-          style={{ opacity: index === active ? 1 : 0, filter: 'drop-shadow(0 34px 60px rgba(0,0,0,.85))' }}
+          style={{ opacity: !artHidden && index === active ? 1 : 0, filter: 'drop-shadow(0 34px 60px rgba(0,0,0,.85))' }}
         />
         ))}
       </div>

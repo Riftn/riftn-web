@@ -629,7 +629,10 @@ html {
 .dehub-intro-desc[open] .dehub-intro-short,
 .dehub-intro-desc[open] .dehub-intro-more { display: none; }
 .dehub-intro-desc[open] .dehub-intro-less { display: inline; }
-@media (prefers-reduced-motion: reduce) { .dehub-intro-art { animation: none; transition: none; } }
+/* Reduced motion keeps the opacity crossfade between slides: it is not motion,
+   and an instant 0 -> 1 swap makes Chrome log the next slide's art as a new,
+   later largest paint (a fade does not). */
+@media (prefers-reduced-motion: reduce) { .dehub-intro-art { animation: none; } }
 .dehub-intro-stage { padding-right: 114px; }
 .dehub-intro-head { font-size: 22px; }
 .dehub-intro-wide { display: none; }
