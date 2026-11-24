@@ -185,7 +185,7 @@ const OG_CARD_ROUTES = new Set([
   'arcade', 'arcade/kings-gambit', 'arcade/claude-of-duty', 'arcade/jungle-trail',
   'arcade/street-slayer',
   'arcade/trenchstar', 'arcade/love-lock-bridge',
-  'arcade/correspondence-chess', 'arcade/okey', 'arcade/sillycoin', 'arcade/gratitude',
+  'arcade/correspondence-chess', 'arcade/okey', 'arcade/sillycoin', 'arcade/gratitude', 'arcade/chestard',
   'apps', 'apps/dev',
   // App surfaces that had no card of their own and unfurled as the homepage.
   // `superpowers` art was rendered when the page shipped and was never added
@@ -1465,6 +1465,15 @@ const MARKETING_PAGES = {
     bodyHtml: `<p>Invite a friend by their username, or post an open invite anyone can take. You write one thing you are grateful for, they answer with theirs, and it goes back and forth. Pick 1, 2, 3, 5 or 7 days per turn, and get a notification when it is your turn.</p>
 <p>No repeats: every new line is checked against everything already said in the game, so the same blessing in other words is turned away and you get to try again. Whoever runs out of ideas before their turn time is up hands the win to the other player. Only the two players can read the game.</p>
 <p><a href="${APP_URL}/arcade/gratitude">Start a game</a> or <a href="${APP_URL}/arcade">see the whole arcade</a>.</p>`,
+  },
+  'arcade/chestard': {
+    title: 'Chestard Dice Drop Game | Riftn Arcade',
+    description: 'Roll the die and drop a checker into that column. Fill the bottom row to clear it, Tetris style, and do not let any column reach the top. A free retro arcade game on Riftn with a top 10.',
+    heading: 'Chestard: Roll, Drop, Clear the Row',
+    ...arcadeGameLd('/og/arcade-chestard.jpg'),
+    bodyHtml: `<p>Six columns, nine rows and one die. Every roll drops a checker into the column the die shows. When the bottom row is full it clears, everything above falls one row and you score a line bonus. Every cleared line also raises your points per drop.</p>
+<p>If any column fills to the top, the game is over. Every die is rolled fairly by the server, so the top 10 is real games. Play in your browser or the Riftn app, with chip-tune sound effects you can switch off.</p>
+<p><a href="${APP_URL}/arcade/chestard">Play Chestard</a> or <a href="${APP_URL}/arcade">see the whole arcade</a>.</p>`,
   },
   'arcade/street-slayer': {
     title: 'Street Slayer | Riftn Arcade',
