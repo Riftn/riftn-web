@@ -157,8 +157,19 @@ export function preloadRoute(path: string | undefined): void {
   warmed.add(key);
   const loaders = PRELOADERS[key];
   const list = Array.isArray(loaders) ? loaders : [loaders];
-  Promise.all(list.map(load => load())).catch(() => {
-    // Network hiccup — allow a later intent to retry.
-    warmed.delete(key);
-  });
+  const warm = () => {
+    Promise.all(list.map(load => load())).catch(() => {
+      // Network hiccup — allow a later intent to retry.
+      warmed.delete(key);
+    });
+  };
+  // Callers are touch and hover handlers. Starting a page's imports costs real
+  // time on a slow phone (one tag per file it needs), and inside the handler
+  // that time sits between the finger and the pressed state. One frame later
+  // costs the page nothing: a tap that follows starts the same imports itself.
+  if (typeof requestAnimationFrame === 'function' && typeof document !== 'undefined' && !document.hidden) {
+    requestAnimationFrame(() => setTimeout(warm, 0));
+  } else {
+    warm();
+  }
 }
