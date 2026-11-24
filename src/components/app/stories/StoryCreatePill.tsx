@@ -1,0 +1,179 @@
+/**
+ * The ask bar that takes the shelf's place while nobody has a Moment up.
+ *
+ * "What's on today?" starts a post, the camera and live buttons go straight
+ * to a Moment or a livestream, and + lists all five ways to create: Moment,
+ * Post, Live, Stage and Status. Phones get a sheet from the bottom; desktop
+ * gets a menu under the +. Every option opens its real flow.
+ */
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ComponentType, type CSSProperties } from 'react';
+import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
+import Add from '@/components/ui/cut-icons/add';
+import Camera from '@/components/ui/cut-icons/camera';
+import Edit from '@/components/ui/cut-icons/edit';
+import Live from '@/components/ui/cut-icons/live';
+import Mic from '@/components/ui/cut-icons/mic';
+import Chat from '@/components/ui/cut-icons/chat';
+import { useAuth } from '@/contexts/AuthContext';
+import { useGlobalDropZone } from '@/hooks/use-global-drop-zone';
+import { openStageModal } from '@/contexts/StageContext';
+import { openDmDock } from '@/hooks/use-dm-dock';
+import { useStoriesStore } from '@/store/storiesStore';
+import { NotesSheetHost, openNotesSheet, useNotesSheetAvailable } from '@/components/app/chat/NotesRow';
+import type { StoryAuthor } from '@/lib/api/dehub/stories';
+import '@/styles/stories.css';
+
+const PostModal = lazy(() => import('@/features/post/PostModal').then(m => ({ default: m.PostModal })));
+
+type Kind = 'moment' | 'post' | 'live' | 'stage' | 'status';
+type IconType = ComponentType<{ className?: string }>;
+
+const OPTIONS: ReadonlyArray<{ kind: Kind; icon: IconType; label: string; hint: string }> = [
+  { kind: 'moment', icon: Camera, label: 'Moment', hint: 'Photo or video for 24 hours' },
+  { kind: 'post', icon: Edit, label: 'Post', hint: 'Words, photos or video on your feed' },
+  { kind: 'live', icon: Live, label: 'Live', hint: 'Go live with video right now' },
+  { kind: 'stage', icon: Mic, label: 'Stage', hint: 'Talk live with voices' },
+  { kind: 'status', icon: Chat, label: 'Status', hint: 'A short note your followers see' },
+];
+
+/** Exit motion length; the menu stays mounted until it ends. */
+const CLOSE_MS = 200;
+
+export function StoryCreatePill() {
+  const { t } = useTranslation();
+  const { walletAddress, user } = useAuth();
+  const { openPostModal } = useGlobalDropZone();
+  const openCreator = useStoriesStore(s => s.openCreator);
+  const [menu, setMenu] = useState<'closed' | 'open' | 'closing'>('closed');
+  const [liveOpen, setLiveOpen] = useState(false);
+  const [liveMounted, setLiveMounted] = useState(false);
+  const [wantNotes, setWantNotes] = useState(false);
+  // Mounted once Status is picked where no other host exists, then kept.
+  const [ownNotesHost, setOwnNotesHost] = useState(false);
+  const notesHostUp = useNotesSheetAvailable();
+  const addRef = useRef<HTMLButtonElement>(null);
+  const [anchor, setAnchor] = useState<{ top: number; right: number } | null>(null);
+
+  const closeMenu = () => setMenu(m => (m === 'open' ? 'closing' : m));
+  useEffect(() => {
+    if (menu !== 'closing') return;
+    const id = window.setTimeout(() => setMenu('closed'), CLOSE_MS);
+    return () => window.clearTimeout(id);
+  }, [menu]);
+  useEffect(() => {
+    if (menu !== 'open') return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') closeMenu(); };
+    document.addEventListener('keydown', onKey);
+    window.addEventListener('resize', closeMenu);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      window.removeEventListener('resize', closeMenu);
+    };
+  }, [menu]);
+
+  // The status sheet only draws where a host is mounted (Messages has one).
+  // Home mounts its own the first time Status is picked, then opens it.
+  useEffect(() => {
+    if (wantNotes && notesHostUp) { openNotesSheet(); setWantNotes(false); }
+  }, [wantNotes, notesHostUp]);
+
+  const me = useMemo<StoryAuthor | null>(() => {
+    if (!walletAddress) return null;
+    const u = user as { username?: string; displayName?: string; avatarImageUrl?: string; avatarUrl?: string } | null;
+    return { address: walletAddress, username: u?.username ?? null, displayName: u?.displayName ?? null, avatarImageUrl: u?.avatarImageUrl || u?.avatarUrl || null };
+  }, [walletAddress, user]);
+  const firstName = (me?.displayName || me?.username || '').trim().split(/\s+/)[0] || '';
+
+  const pick = (kind: Kind) => {
+    closeMenu();
+    if (kind === 'moment') openCreator();
+    else if (kind === 'post') openPostModal();
+    else if (kind === 'live') { setLiveMounted(true); setLiveOpen(true); }
+    else if (kind === 'stage') openStageModal('create');
+    else if (kind === 'status') {
+      if (notesHostUp) openNotesSheet();
+      else { setOwnNotesHost(true); setWantNotes(true); }
+    }
+  };
+
+  const openMenu = () => {
+    const r = addRef.current?.getBoundingClientRect();
+    if (r) setAnchor({ top: r.bottom + 8, right: Math.max(12, window.innerWidth - r.right) });
+    setMenu('open');
+  };
+
+  const label = (kind: Kind, fallback: string) => t(`stories.ask.${kind}`, { defaultValue: fallback });
+  const createLabel = t('stories.ask.create', { defaultValue: 'Create' });
+
+  return (
+    <div data-stories data-create-ask>
+      <div data-ask-bar>
+        <button type="button" data-ask-prompt onClick={() => pick('post')}>
+          {firstName
+            ? t('stories.ask.promptNamed', { name: firstName, defaultValue: "What's on today, {{name}}?" })
+            : t('stories.ask.prompt', { defaultValue: "What's on today?" })}
+        </button>
+        <button type="button" data-ask-icon aria-label={label('moment', 'Moment')} onClick={() => pick('moment')}>
+          <Camera className="h-5 w-5" />
+        </button>
+        <button type="button" data-ask-icon aria-label={label('live', 'Live')} onClick={() => pick('live')}>
+          <Live className="h-5 w-5" />
+        </button>
+        <button
+          ref={addRef}
+          type="button"
+          data-ask-add
+          aria-haspopup="menu"
+          aria-expanded={menu === 'open'}
+          aria-label={createLabel}
+          onClick={() => (menu === 'open' ? closeMenu() : openMenu())}
+        >
+          <span data-ask-key><Add className="h-4 w-4" /></span>
+        </button>
+      </div>
+
+      {menu !== 'closed' && createPortal(
+        <div data-stories data-ask-layer data-state={menu}>
+          <div data-ask-scrim onClick={closeMenu} />
+          <div
+            data-ask-menu
+            role="menu"
+            aria-label={createLabel}
+            style={anchor ? ({ '--ask-top': `${anchor.top}px`, '--ask-right': `${anchor.right}px` } as CSSProperties) : undefined}
+          >
+            <span data-ask-grab aria-hidden="true" />
+            <div data-ask-title>{createLabel}</div>
+            {OPTIONS.map(({ kind, icon: Icon, label: fallback, hint }) => (
+              <button key={kind} type="button" role="menuitem" data-ask-row={kind} onClick={() => pick(kind)}>
+                <span data-ask-row-icon><Icon className="h-5 w-5" /></span>
+                <span data-ask-row-text>
+                  <b>{label(kind, fallback)}</b>
+                  <span>{t(`stories.ask.${kind}Hint`, { defaultValue: hint })}</span>
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>,
+        document.body,
+      )}
+
+      {liveMounted && (
+        <Suspense fallback={null}>
+          <PostModal isOpen={liveOpen} onClose={() => setLiveOpen(false)} initialLiveMode="video" />
+        </Suspense>
+      )}
+      {ownNotesHost && me && (
+        <NotesSheetHost
+          me={me}
+          onMessage={(author, reply) => openDmDock({
+            address: author.address,
+            username: author.username ?? undefined,
+            displayName: author.displayName ?? undefined,
+            autoSendBody: reply,
+          })}
+        />
+      )}
+    </div>
+  );
+}

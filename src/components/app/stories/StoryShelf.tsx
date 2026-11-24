@@ -21,6 +21,7 @@ import { buildAvatarUrl, buildAvatarCdnFallbackUrl, deviceWidth } from '@/lib/me
 import type { ShelfEntry } from '@/lib/api/dehub/stories';
 import { coverOf, handleOf, nameOf, playable } from './story-utils';
 import { rememberShelfSeat } from '@/lib/story-shelf-seat';
+import { StoryCreatePill } from './StoryCreatePill';
 import { useMomentPreviewsBlurred } from '@/lib/moment-preview-blur';
 import '@/styles/stories.css';
 
@@ -61,11 +62,16 @@ export function StoryShelf() {
   // While the first load is out the row keeps its seat with loading tiles,
   // signed in or not, so the feed under it never jumps down when it lands.
   const hidden = (!storiesEnabled || (!isAuthenticated && others.length === 0 && !isLoading)) && eligibleLive.length === 0;
+  // Signed in and nobody has a Moment up (yours included): a thin pill that
+  // invites you to create takes the row's place instead of a lone tile.
+  const bare = storiesEnabled && isAuthenticated && !isLoading && !pending && !own?.items.length
+    && others.length === 0 && eligibleLive.length === 0;
   // The loading skeletons read this to hold the row's seat on the next visit.
   useEffect(() => {
-    if (!isLoading) rememberShelfSeat(!hidden);
-  }, [isLoading, hidden]);
+    if (!isLoading) rememberShelfSeat(!hidden && !bare);
+  }, [isLoading, hidden, bare]);
   if (hidden) return null;
+  if (bare) return <StoryCreatePill />;
 
   const openEntry = (entry: ShelfEntry, el: HTMLElement) => {
     const index = watchable.findIndex(e => e.author.address === entry.author.address);
