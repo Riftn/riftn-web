@@ -9642,7 +9642,8 @@
     "followRequest": "{{name}} ha solicitado seguirte",
     "followAccepted": "{{name}} aceptó tu solicitud de seguimiento",
     "signalFlare": "{{name}} ha enviado una bengala de señal",
-    "newMessage": "{{name}} te ha enviado un mensaje"
+    "newMessage": "{{name}} te ha enviado un mensaje",
+    "unlike": "Ya no me gusta"
   },
   "audioPost": {
     "popOut": "Pop out — sigue escuchando mientras navegas",

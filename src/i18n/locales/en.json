@@ -9641,7 +9641,8 @@
     "followRequest": "{{name}} requested to follow you",
     "followAccepted": "{{name}} accepted your follow request",
     "signalFlare": "{{name}} sent a Signal Flare",
-    "newMessage": "{{name}} sent you a message"
+    "newMessage": "{{name}} sent you a message",
+    "unlike": "Unlike"
   },
   "audioPost": {
     "popOut": "Pop out — keep listening while you browse",

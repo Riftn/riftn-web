@@ -9642,7 +9642,8 @@
     "followRequest": "{{name}} seni takip etmek istiyor",
     "followAccepted": "{{name}} takip isteğini kabul etti",
     "signalFlare": "{{name}} bir Sinyal Fişeği gönderdi",
-    "newMessage": "{{name}} sana bir mesaj gönderdi"
+    "newMessage": "{{name}} sana bir mesaj gönderdi",
+    "unlike": "Beğenmekten vazgeç"
   },
   "audioPost": {
     "popOut": "Açılır pencere — göz atarken dinlemeye devam edin",
