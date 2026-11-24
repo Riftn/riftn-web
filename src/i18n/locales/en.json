@@ -382,7 +382,7 @@
     "faqTitle": "Frequently asked questions",
     "googlePlay": "Get it on Google Play",
     "heading": "The Riftn App",
-    "intro1": "Riftn is a decentralised social network and mobile app, in development since 2021, where posts can be minted on-chain and creators keep their audience, their content and their revenue.",
+    "intro1": "Riftn is a decentralised social media protocol with web and mobile apps, in development since 2021, where posts can be minted on-chain and creators keep their audience, their content and their revenue.",
     "intro2": "It combines a chronological feed, live streaming, end-to-end encrypted messaging, user-run communities, a multi-chain wallet and watch-to-earn rewards paid in tokens. The same account works on Android, iPhone and in any modern browser.",
     "iphone": "iPhone",
     "learnMore": "Want the full picture? <guide>What is Riftn?</guide> covers the platform in depth.",
@@ -14001,6 +14001,12 @@
     "reminderLater": "Not now"
   },
   "copy": {
+    "799c26913574": "Controls",
+    "ff73efa451e4": "Move with W, A, S, D or the arrow keys. Look and shoot with the mouse.",
+    "c718a21950e6": "Space jumps, Shift sprints, C crouches and Z goes prone.",
+    "7d1b81c85706": "R reloads, G throws a grenade, V is melee, and Q and E lean.",
+    "34669ebeeac1": "1, 2 or Tab swap weapons. T is the flashlight. Escape pauses.",
+    "febe50b0a46e": "On a phone, move with the on-screen stick and drag to look around.",
     "3f9b2c71d0a4": "{{n}} results",
     "8c4e1a6b2f57": "for “{{query}}”",
     "1d7234ff1b79": "in {{feed}}",

@@ -145,6 +145,6 @@ That is why "getting monetized" is no longer one milestone. It is a stack of pro
   readingTime: 13,
   featured: true,
   status: 'published',
-  seoTitle: 'How Monetization Works on Social Media Apps: 2026 Rules for Every Platform | Riftn',
-  seoDescription: 'Follower minimums, activity tests, invite walls and payout floors on Instagram, TikTok, YouTube, Facebook, X, Snap and Twitch, plus the 2026 and 2027 changes that reset the numbers.',
+  seoTitle: 'Monetization Requirements and Payout Thresholds by App (2026) | Riftn',
+  seoDescription: 'What it takes to get paid on Instagram, TikTok, YouTube, Facebook, X, Snapchat and Twitch in 2026: follower minimums, minimum payout, how often each app pays and which programs are invite-only.',
 };

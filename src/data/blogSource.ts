@@ -19,8 +19,19 @@ import { BlogPost, BlogTag } from '@/types/blog';
 import { blogPosts } from '@/data/blogPosts';
 import { newPosts, excludedTitles } from '@/data/newPosts';
 
+// Posts written under the company name carry the co-founder's byline. The
+// bio lives on /docs/team, which the byline links to.
+const BRAND_BYLINES = new Set(['', 'dehub', 'dehub team', 'riftn', 'riftn team']);
+const POST_AUTHOR = 'Malik Jan';
+
+/** Exported for the manifest generator, which reads newPosts without the overrides below. */
+export const withPostAuthor = (post: BlogPost): BlogPost =>
+  BRAND_BYLINES.has((post.author?.name || '').trim().toLowerCase())
+    ? { ...post, author: { ...post.author, name: POST_AUTHOR } }
+    : post;
+
 const applyPostOverrides = (post: BlogPost): BlogPost => {
-  const newPost = { ...post };
+  const newPost = { ...withPostAuthor(post) };
 
   if (post.slug === '1-million-dollar-raise-completed') {
     newPost.bannerImage = '/media/bdd1dd4c-eb62-44e7-a205-fced995bdf9f.png';
@@ -1023,7 +1034,7 @@ export const getLatestPost = (): BlogPost | undefined => {
   ).map(applyPostOverrides);
   
   // Combine all posts
-  const allPosts = [...originalPosts, ...newPosts];
+  const allPosts = [...originalPosts, ...newPosts.map(withPostAuthor)];
   
   // Remove duplicates based on slug
   const uniquePosts = allPosts.filter((post, index, self) =>

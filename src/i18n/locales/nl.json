@@ -382,7 +382,7 @@
     "faqTitle": "Veelgestelde vragen",
     "googlePlay": "Ontdek het op Google Play",
     "heading": "De Riftn-app",
-    "intro1": "Riftn is een gedecentraliseerd sociaal netwerk en mobiele app, in ontwikkeling sinds 2021, waar posts on-chain kunnen worden gemint en creators hun publiek, hun content en hun inkomsten behouden.",
+    "intro1": "Riftn is een gedecentraliseerd socialemediaprotocol met web- en mobiele apps, in ontwikkeling sinds 2021, waar posts on-chain kunnen worden gemint en creators hun publiek, hun content en hun inkomsten behouden.",
     "intro2": "Het combineert een chronologische feed, livestreaming, end-to-end versleutelde berichten, communities die door gebruikers worden beheerd, een multi-chain wallet en beloningen in tokens voor het kijken. Hetzelfde account werkt op Android, iPhone en in elke moderne browser.",
     "iphone": "iPhone",
     "learnMore": "Wil je het volledige plaatje? <guide>Wat is Riftn?</guide> legt het platform uitgebreid uit.",
@@ -14250,6 +14250,12 @@
     "reminderLater": "Niet nu"
   },
   "copy": {
+    "799c26913574": "Besturing",
+    "ff73efa451e4": "Beweeg met W, A, S, D of de pijltjestoetsen. Kijk en schiet met de muis.",
+    "c718a21950e6": "Spatie springt, Shift sprint, C hurkt en Z gaat liggen.",
+    "7d1b81c85706": "R herlaadt, G gooit een granaat, V is een slag van dichtbij, en met Q en E leun je.",
+    "34669ebeeac1": "Met 1, 2 of Tab wissel je van wapen. T is de zaklamp. Escape pauzeert.",
+    "febe50b0a46e": "Op een telefoon beweeg je met de stick op het scherm en sleep je om rond te kijken.",
     "3f9b2c71d0a4": "{{n}} resultaten",
     "8c4e1a6b2f57": "voor “{{query}}”",
     "1d7234ff1b79": "in {{feed}}",

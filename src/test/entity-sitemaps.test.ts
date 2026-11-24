@@ -81,12 +81,21 @@ describe('entity sitemaps', () => {
     parses(proposals);
     expect(locs(proposals)).toEqual(['https://riftn.com/app/governance/p1']);
     const features = entitySitemapXml('features', [[
-      { id: 'f1', title: 'Dark mode for Stages', description: TEXT, status: 'open', updated_at: '2026-09-01' },
-      { id: 'f2', title: 'Dark mode for Stages', description: TEXT, status: 'declined' },
-      { id: 'f3', title: 'bug', description: 'broken', status: 'open' },
+      { id: 'f1', title: 'Dark mode for Stages', description: TEXT, status: 'open', vote_count: 3, updated_at: '2026-09-01' },
+      { id: 'f2', title: 'Dark mode for Stages', description: TEXT, status: 'declined', vote_count: 9, comment_count: 9 },
+      { id: 'f3', title: 'bug', description: 'broken', status: 'open', vote_count: 9, comment_count: 9 },
+      // A line or two that nobody has voted on or answered is left out.
+      { id: 'f4', title: 'Dark mode for Stages', description: TEXT, status: 'open', vote_count: 1, comment_count: 0 },
+      { id: 'f5', title: 'Dark mode for Stages', description: TEXT, status: 'open', comment_count: 2 },
+      // A full write-up stands on its own.
+      { id: 'f6', title: 'Dark mode for Stages', description: TEXT.repeat(5), status: 'open' },
     ]]);
     parses(features);
-    expect(locs(features)).toEqual(['https://riftn.com/build?feature=f1']);
+    expect(locs(features)).toEqual([
+      'https://riftn.com/build?feature=f1',
+      'https://riftn.com/build?feature=f5',
+      'https://riftn.com/build?feature=f6',
+    ]);
   });
 
   it('is a valid, empty urlset when a table has no rows', () => {

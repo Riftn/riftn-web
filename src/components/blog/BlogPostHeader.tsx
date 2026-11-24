@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Clock } from "lucide-react";
+import { Clock, User } from "lucide-react";
 import Calendar from "@/components/ui/cut-icons/events";
 
 import { BlogPost } from '@/types/blog';
@@ -27,6 +27,12 @@ export const BlogPostHeader: React.FC<BlogPostHeaderProps> = ({ post, displayDat
       </h1>
       
       <div className="flex flex-wrap items-center gap-6 text-royal-blue/70 mb-6">
+        {post.author?.name ? (
+          <div className="flex items-center gap-1">
+            <User className="w-4 h-4" />
+            <Link to="/docs/team" rel="author" className="font-exo hover:underline">{post.author.name}</Link>
+          </div>
+        ) : null}
         <div className="flex items-center gap-1">
           <Calendar className="w-4 h-4" />
           <span className="font-exo">{displayDate}</span>

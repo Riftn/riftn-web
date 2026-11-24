@@ -247,6 +247,11 @@ describe('arcade assets', () => {
     for (const game of ARCADE_GAMES) {
       expect(pages, `MARKETING_PAGES is missing 'arcade/${game.slug}'`).toContain(`  'arcade/${game.slug}': {`);
       expect(grid, `the arcade grid's crawler copy does not link ${game.slug}`).toContain(`/arcade/${game.slug}"`);
+      // A game's how-to-play lines are shown to players on the boot screen and
+      // to crawlers on its page; the two are the same sentences.
+      for (const line of game.controls ?? []) {
+        expect(pages, `the crawler page for ${game.slug} is missing a controls line`).toContain(`<li>${line}</li>`);
+      }
       expect(sitemap, `sitemap-static.xml is missing /arcade/${game.slug}`).toContain(
         `<loc>https://riftn.com/arcade/${game.slug}</loc>`,
       );

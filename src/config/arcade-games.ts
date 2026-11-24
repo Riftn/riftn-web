@@ -130,6 +130,12 @@ export interface ArcadeGame {
    */
   hasOwnBootScreen?: boolean;
   /**
+   * How to play, one short line each. Shown under the boot readout, which is
+   * the one moment a player is waiting with nothing to do, and mirrored in the
+   * game's crawler page (`src/test/arcade.test.ts` holds the two together).
+   */
+  controls?: string[];
+  /**
    * `postMessage({ source })` value the frame uses to report readiness, when it
    * reports at all. Games with a loading screen of their own do not need one:
    * the player just reveals the frame and lets the game speak for itself.
@@ -512,6 +518,16 @@ export const ARCADE_GAMES: ArcadeGame[] = [
     get description() { return _translateCopy("copy.7242e3ca17b3", { defaultValue: "A first-person shooter that ships no art at all: every mesh, texture, weapon and sound is generated in JavaScript on your machine while the level loads." }); },
     get action() { return _translateCopy("copy.4c236daafb44", { defaultValue: "Deploy" }); },
     art: '/arcade/claude-of-duty.webp',
+    // Read off the engine's own default bindings, not written from memory.
+    get controls() {
+      return [
+      _translateCopy("copy.ff73efa451e4", { defaultValue: "Move with W, A, S, D or the arrow keys. Look and shoot with the mouse." }),
+      _translateCopy("copy.c718a21950e6", { defaultValue: "Space jumps, Shift sprints, C crouches and Z goes prone." }),
+      _translateCopy("copy.7d1b81c85706", { defaultValue: "R reloads, G throws a grenade, V is melee, and Q and E lean." }),
+      _translateCopy("copy.34669ebeeac1", { defaultValue: "1, 2 or Tab swap weapons. T is the flashlight. Escape pauses." }),
+      _translateCopy("copy.febe50b0a46e", { defaultValue: "On a phone, move with the on-screen stick and drag to look around." }),
+      ];
+    },
     get artAlt() { return _translateCopy("copy.c4e568f92ce6", { defaultValue: "First-person view down a weapon across the procedurally generated terrain of Claude of Duty" }); },
     credit: {
       name: 'Claude of Duty',

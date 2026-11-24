@@ -359,7 +359,7 @@ const HOME_INTRO_PRESS = ['US Weekly', 'Yahoo Finance', 'Entrepreneur', 'Investi
 const HOME_INTRO_HTML = `<section style="max-width:600px;margin:24px auto;text-align:left"><!--hl-body-->
 <h2 style="font-size:16px">Welcome to Riftn, the open-source, user-owned social platform</h2>
 ${HOME_INTRO_SLIDES.map(([h, p]) => `<h3 style="font-size:14px">${h}</h3>\n<p>${p}</p>`).join('\n')}
-<p>Riftn, formerly DeHub, is a decentralised social network and mobile app, in development since 2021, where posts can be minted on-chain and creators keep their audience, their content and their revenue. It combines a chronological feed, live streaming, end-to-end encrypted messaging, user-run communities, a multi-chain wallet and watch-to-earn rewards paid in tokens. If you arrived looking for a different DeHub, this is not DePaul University&rsquo;s student portal, Rowan&rsquo;s DEHub or the deHUB Access door-entry app.</p>
+<p>Riftn, formerly DeHub, is a decentralised social media protocol with web and mobile apps, in development since 2021, where posts can be minted on-chain and creators keep their audience, their content and their revenue. It combines a chronological feed, live streaming, end-to-end encrypted messaging, user-run communities, a multi-chain wallet and watch-to-earn rewards paid in tokens. If you arrived looking for a different DeHub, this is not DePaul University&rsquo;s student portal, Rowan&rsquo;s DEHub or the deHUB Access door-entry app.</p>
 <p><a href="${APP_URL}/docs">Read the docs</a></p>
 <p>Featured in ${HOME_INTRO_PRESS.join(', ')}. <a href="${APP_URL}/docs/featured-in">Riftn press coverage</a></p>
 <nav aria-label="Learn more about Riftn"><ul style="list-style:none;padding:0;margin:0">${
@@ -793,11 +793,21 @@ function relatedPostsHtml(manifest, currentSlug, limit = 4) {
  * stays a Person.
  */
 const BRAND_BYLINES = new Set(['', 'dehub', 'dehub team', 'riftn', 'riftn team']);
+// Where a named author's bio lives.
+const BLOG_AUTHOR_URL = `${APP_URL}/docs/team`;
 function blogAuthorLd(author) {
   const name = String(author || '').replace(/\s+/g, ' ').trim();
   return BRAND_BYLINES.has(name.toLowerCase())
     ? { '@type': 'Organization', name: 'Riftn', url: APP_URL }
-    : { '@type': 'Person', name };
+    : { '@type': 'Person', name, url: BLOG_AUTHOR_URL, worksFor: { '@type': 'Organization', name: 'Riftn', url: APP_URL } };
+}
+
+/** The visible byline: a named author links to the team page, as it does in the app. */
+function blogBylineHtml(author) {
+  const name = String(author || '').replace(/\s+/g, ' ').trim() || 'Riftn Team';
+  return BRAND_BYLINES.has(name.toLowerCase())
+    ? escHtml(name)
+    : `<a rel="author" href="${BLOG_AUTHOR_URL}">${escHtml(name)}</a>`;
 }
 
 /**
@@ -956,7 +966,7 @@ ${tagMeta}
 <main>
 <article>
 <h1>${escHtml(post.title)}</h1>
-<p><em>By ${escHtml(post.author || 'Riftn Team')}${published ? `, <time datetime="${escHtml(published)}">${escHtml(published.slice(0, 10))}</time>` : ''}</em></p>
+<p><em>By ${blogBylineHtml(post.author)}${published ? `, <time datetime="${escHtml(published)}">${escHtml(published.slice(0, 10))}</time>` : ''}</em></p>
 ${banner ? `<img src="${escHtml(banner)}" alt="${escHtml(imageAlt)}"${bannerDims} fetchpriority="high" decoding="async" style="max-width:100%;height:auto">` : ''}
 <!--hl-body-->${body}<!--/hl-body-->
 </article>
@@ -1407,6 +1417,14 @@ const MARKETING_PAGES = {
     ...arcadeGameLd('/arcade/claude-of-duty.webp'),
     bodyHtml: `<p>A first-person shooter that ships no art at all: every mesh, texture and sound is generated in JavaScript on your machine while the level loads.</p>
 <p>It is also hidden inside the War theme, where an arrow key offers to deploy you.</p>
+<h2>Controls</h2>
+<ul>
+<li>Move with W, A, S, D or the arrow keys. Look and shoot with the mouse.</li>
+<li>Space jumps, Shift sprints, C crouches and Z goes prone.</li>
+<li>R reloads, G throws a grenade, V is melee, and Q and E lean.</li>
+<li>1, 2 or Tab swap weapons. T is the flashlight. Escape pauses.</li>
+<li>On a phone, move with the on-screen stick and drag to look around.</li>
+</ul>
 <p><a href="${APP_URL}/arcade/claude-of-duty">Play Claude of Duty</a> or <a href="${APP_URL}/arcade">see the whole arcade</a>.</p>`,
   },
   'arcade/jungle-trail': {
@@ -6319,6 +6337,9 @@ function urlsetXml(urls) {
  * sitemap of them would be a list of pages that are about to disappear.
  */
 const ENTITY_SITEMAP_MIN_TEXT = 40;
+const FEATURE_SITEMAP_MIN_TEXT = 280;
+const FEATURE_SITEMAP_MIN_COMMENTS = 2;
+const FEATURE_SITEMAP_MIN_VOTES = 3;
 const ENTITY_SITEMAPS = {
   bounties: [{
     // Same rule as the page's own robots (status and deadline), so an open
@@ -6367,10 +6388,20 @@ const ENTITY_SITEMAPS = {
       : null),
   }],
   features: [{
-    query: () => 'feature_requests?status=neq.declined&select=id,title,description,status,image_url,updated_at&order=created_at.asc&limit=5000',
-    entry: (f) => (f.status !== 'declined' && substantiveLength(`${f.title || ''} ${f.description || ''}`) >= ENTITY_SITEMAP_MIN_TEXT
-      ? { loc: `${APP_URL}/build?feature=${f.id}`, lastmod: f.updated_at, changefreq: 'weekly', priority: '0.4', image: absolutizeImage(f.image_url) }
-      : null),
+    // A request earns its own entry by being a page somebody would want to
+    // land on: a proper write-up, or one other people have voted on or
+    // discussed. The sentence-of-text bar let through 786 of them, most a line
+    // or two that nobody had answered, and that many thin pages weigh on how
+    // the rest of the site is judged. The pages themselves still resolve.
+    query: () => 'feature_requests?status=neq.declined&select=id,title,description,status,image_url,vote_count,comment_count,updated_at&order=created_at.asc&limit=5000',
+    entry: (f) => {
+      if (f.status === 'declined') return null;
+      const text = substantiveLength(`${f.title || ''} ${f.description || ''}`);
+      if (text < ENTITY_SITEMAP_MIN_TEXT) return null;
+      const discussed = Number(f.comment_count) >= FEATURE_SITEMAP_MIN_COMMENTS || Number(f.vote_count) >= FEATURE_SITEMAP_MIN_VOTES;
+      if (text < FEATURE_SITEMAP_MIN_TEXT && !discussed) return null;
+      return { loc: `${APP_URL}/build?feature=${f.id}`, lastmod: f.updated_at, changefreq: 'weekly', priority: '0.4', image: absolutizeImage(f.image_url) };
+    },
   }],
 };
 

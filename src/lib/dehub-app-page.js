@@ -26,7 +26,7 @@ export const DEHUB_APP_PAGE = {
   description: 'Get the Riftn app: open-source, user-owned social media with live streaming, encrypted messaging and watch-to-earn. Free on Google Play, the App Store and the web.',
   heading: 'The Riftn App',
   intro: [
-    'Riftn is a decentralised social network and mobile app, in development since 2021, where posts can be minted on-chain and creators keep their audience, their content and their revenue.',
+    'Riftn is a decentralised social media protocol with web and mobile apps, in development since 2021, where posts can be minted on-chain and creators keep their audience, their content and their revenue.',
     'It combines a chronological feed, live streaming, end-to-end encrypted messaging, user-run communities, a multi-chain wallet and watch-to-earn rewards paid in tokens. The same account works on Android, iPhone and in any modern browser.',
   ],
   faq: [

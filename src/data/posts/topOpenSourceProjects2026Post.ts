@@ -4,8 +4,8 @@ export const topOpenSourceProjects2026Post: BlogPostType = {
   id: 'top-50-most-active-open-source-projects-2026',
   slug: 'top-50-most-active-open-source-projects-2026',
   title: 'Top 50 Most Active Open Source Projects 2026, Ranked by GitHub Activity',
-  seoTitle: 'Top 50 Most Active Open Source Projects 2026 (GitHub Data) | Riftn',
-  seoDescription: 'The 50 most active open source projects of 2026, ranked on real GitHub commits and contributors over 90 days. Linux, Chromium, Nixpkgs, LLVM, Firefox, vLLM, PyTorch and more.',
+  seoTitle: 'Top 50 Open Source Projects 2026: Most Active on GitHub, Ranked | Riftn',
+  seoDescription: 'Linux, Chromium and Nixpkgs are the most active open source projects of 2026, and AI projects take 12 of the top 50. The full ranking, on real GitHub commits and contributors over 90 days.',
   excerpt: 'We measured the GitHub history of 205 of the biggest open source projects and ranked the 50 most active on commits and contributors over the last 90 days. Linux, Chromium and Nixpkgs lead, and AI projects take 12 of the 50 spots.',
   content: `Which open source projects are actually being built the hardest right now? We measured the public GitHub history of 205 of the world's biggest open source projects and ranked the top 50 on two things: **how much code they shipped and how many people shipped it**. Every number below comes straight from each project's own public repository, so anyone can check it.
 
