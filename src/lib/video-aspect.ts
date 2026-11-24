@@ -13,3 +13,15 @@ export function storedVideoAspect(info: unknown): number | undefined {
   if (typeof w !== 'number' || typeof h !== 'number' || !(w > 0) || !(h > 0)) return undefined;
   return w / h;
 }
+
+/**
+ * True when the stored size is the shape the clip is shown at. Sizes recorded
+ * from version 3 on apply the rotation flag, so they are the real shape and a
+ * poster of another shape (a custom wide cover on a tall clip) must not
+ * reshape the frame. Older sizes can be sideways and still give way.
+ */
+export function storedVideoSizeShown(info: unknown): boolean {
+  if (!info || typeof info !== 'object') return false;
+  const { v } = info as { v?: unknown };
+  return typeof v === 'number' && v >= 3 && storedVideoAspect(info) !== undefined;
+}

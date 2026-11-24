@@ -30,7 +30,7 @@ const DEHUB_API_BASE = API_ORIGIN;
 
 import { parseSoundtrackTag } from '@/lib/soundtrack';
 import { toStoryboard } from '@/lib/storyboard';
-import { storedVideoAspect } from '@/lib/video-aspect';
+import { storedVideoAspect, storedVideoSizeShown } from '@/lib/video-aspect';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
 import { duetOfPost } from '@/lib/duet';
 import { API_ORIGIN } from '@/lib/api/api-origin';
@@ -339,6 +339,7 @@ function mapVideoItem(item: UnifiedFeedItem, index: number): VideoItem {
     transcodingStatus: item.transcodingStatus,
     storyboard: toStoryboard(item.storyboard),
     storedAspect: storedVideoAspect(item.videoInfo),
+    storedAspectShown: storedVideoSizeShown(item.videoInfo),
     newPostId: (item as any).newPostId,
     articleSlug: (item as any).articleSlug,
     creatorId: item.minter,
