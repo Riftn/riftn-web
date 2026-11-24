@@ -4751,6 +4751,20 @@
       "groupDetail": "Chat met veel mensen, openbaar of privé",
       "channelDetail": "Uitzenden naar volgers, gratis of betaald",
       "title": "Start iets"
+    },
+    "catchUp": {
+      "button": "Praat me bij",
+      "menuHint": "Een privé-samenvatting, naar je berichten gestuurd",
+      "last24h": "Laatste 24 uur",
+      "last3d": "Laatste 3 dagen",
+      "sinceRead": "Sinds ik het laatst las",
+      "working": "Je wordt bijgepraat…",
+      "sent": "Samenvatting naar je berichten gestuurd",
+      "sentCount": "{{window}} · {{formattedCount}} berichten",
+      "open": "Openen",
+      "nothing": "Niets nieuws om bij te praten",
+      "busy": "Je samenvatting is onderweg. Probeer het zo opnieuw.",
+      "failed": "Kon je samenvatting niet maken. Probeer het opnieuw."
     }
   },
   "prompt": {

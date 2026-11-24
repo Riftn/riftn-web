@@ -4562,6 +4562,20 @@
       "groupDetail": "Chat con muchas personas, público o privado",
       "channelDetail": "Transmitir a seguidores, gratis o de pago",
       "title": "Comienza algo"
+    },
+    "catchUp": {
+      "button": "Ponme al día",
+      "menuHint": "Un resumen privado, enviado a tus mensajes",
+      "last24h": "Últimas 24 horas",
+      "last3d": "Últimos 3 días",
+      "sinceRead": "Desde que leí por última vez",
+      "working": "Preparando tu resumen…",
+      "sent": "Resumen enviado a tus mensajes",
+      "sentCount": "{{window}} · {{formattedCount}} mensajes",
+      "open": "Abrir",
+      "nothing": "No hay nada nuevo",
+      "busy": "Tu resumen ya está en camino. Inténtalo de nuevo en un rato.",
+      "failed": "No se pudo hacer tu resumen. Inténtalo de nuevo."
     }
   },
   "prompt": {

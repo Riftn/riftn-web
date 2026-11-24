@@ -4562,6 +4562,20 @@
       "groupDetail": "Birçok kişiyle sohbet, herkese açık veya özel",
       "channelDetail": "Takipçilere yayın yap, ücretsiz veya ücretli",
       "title": "Bir şey başlat"
+    },
+    "catchUp": {
+      "button": "Beni güncelle",
+      "menuHint": "DM'lerine gönderilen özel bir özet",
+      "last24h": "Son 24 saat",
+      "last3d": "Son 3 gün",
+      "sinceRead": "Son okuduğumdan beri",
+      "working": "Özetin hazırlanıyor…",
+      "sent": "Özet DM'lerine gönderildi",
+      "sentCount": "{{window}} · {{formattedCount}} mesaj",
+      "open": "Aç",
+      "nothing": "Yetişilecek yeni bir şey yok",
+      "busy": "Özetin yolda. Biraz sonra tekrar dene.",
+      "failed": "Özetin hazırlanamadı. Tekrar dene."
     }
   },
   "prompt": {
