@@ -66,3 +66,11 @@ html:is([data-theme="light"], [data-system-tone="light"]) { --skeleton-shine: rg
 @keyframes skeleton-shine { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
 @keyframes skeleton-out { from { opacity: 1; } to { opacity: 0; } }
 @keyframes skeleton-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* Home's welcome card is already on screen before the app starts (index.html
+   prerenders it). CopyGate hides the page while copy loads and fades it back
+   in, which blanked the card for a moment (only its buttons stayed) and then
+   flashed it back. Keep the card visible, above the placeholder, and skip the
+   fade on the page that holds it; the placeholder still fades out around it. */
+[data-copy-gate] .dehub-intro { visibility: visible; z-index: 2; }
+[data-skeleton-reveal="in"]:has(.dehub-intro) { animation: none; }
