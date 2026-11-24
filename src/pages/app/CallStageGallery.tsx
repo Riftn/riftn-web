@@ -9,6 +9,9 @@
  * Prefix "group-" for a group call (group-incoming, group-ringing, group-active,
  * group-active-video, group-mini, group-ended); `people=` sets how many others are in it.
  * `subs=1` turns live subtitles on with sample lines; `subs=es` also reads them in Spanish.
+ * `layout=hall|grid` picks the group layout (town hall is the default from 3 people); `thsim=1` plays a
+ * scripted conversation (one talks, then three at once, then another alone, then quiet) every 10 s;
+ * `thfx=glitch|flip|static` picks how the town hall stage cuts.
  * `bg=blur|night|ocean|sunset|forest|photo` marks that call background as picked (tap the corner button to see the row); `face=shades|cat|crown|hearts` marks a face filter.
  */
 import { useEffect, useMemo } from 'react';
@@ -30,6 +33,7 @@ import { CallNoteCard } from '@/components/app/chat/calls/CallNoteCard';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { primeCallCaptionRoom } from '@/components/app/chat/calls/CallCaptions';
+import { saveTownHallMode } from '@/lib/town-hall';
 import { emitLocalCaption, emitLocalTranslation, setCaptionLanguage, setShowCaptions } from '@/lib/stage-captions';
 
 const PEER = '0x2222222222222222222222222222222222222222';
@@ -117,6 +121,9 @@ export default function CallStageGallery() {
     return () => { clearTimeout(first); clearInterval(again); };
   }, [subs, live, room, group]);
 
+  const layout = params.get('layout');
+  if (layout === 'hall' || layout === 'grid') saveTownHallMode(layout);
+
   const call = useMemo(() => {
     const noop = () => {};
     const value: Partial<UseCallReturn> = {
@@ -135,6 +142,17 @@ export default function CallStageGallery() {
         audio: index !== 2, video: video && index % 2 === 0, speaking: index === 1,
       })) : [],
       attachGroupVideo: (uid: number) => paint(['linear-gradient(160deg, #3b2f63, #1f4a5c)', 'linear-gradient(200deg, #5c3b2f, #1f2a5c)', 'linear-gradient(120deg, #2f5c45, #3b1f5c)'][uid % 3]),
+      readGroupLevels: () => {
+        const levels = new Map<number, number>();
+        if (params.get('thsim') !== '1') return levels;
+        const at = (performance.now() / 1000) % 10;
+        const wobble = (seed: number) => 0.22 + 0.16 * Math.abs(Math.sin(at * 7 + seed));
+        if (at < 2.4) levels.set(2, wobble(1));
+        else if (at < 6.6) { levels.set(2, wobble(1)); levels.set(3, wobble(2)); levels.set(0, wobble(3)); }
+        else if (at < 8.6) levels.set(4, wobble(4));
+        for (const uid of [0, 2, 3, 4, 5, 6, 7, 8, 9]) if (!levels.has(uid)) levels.set(uid, 0.01);
+        return levels;
+      },
       joinGroupCall: async () => {},
       // ?camfull=1: every camera slot taken, yours off.
       groupCamerasFull: params.get('camfull') === '1',

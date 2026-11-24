@@ -9881,6 +9881,10 @@
     "callFull": "This call is full",
     "callFullHint": "It already has the most people a call can take. You can join once someone leaves.",
     "camerasFull": "Cameras full",
+    "townHall": "Town hall",
+    "gridView": "Grid",
+    "unpin": "Unpin",
+    "townHallTalking": "{{n}} talking",
     "camerasFullJoin": "You're in with your camera off. You can turn it on when someone turns theirs off.",
     "camerasFullHint": "You can turn yours on when someone turns theirs off.",
     "full": "Full"

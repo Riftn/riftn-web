@@ -10071,6 +10071,10 @@
     "callFull": "Dit gesprek is vol",
     "callFullHint": "Er zitten al zoveel mensen in als een gesprek aankan. Je kunt meedoen zodra iemand weggaat.",
     "camerasFull": "Camera's vol",
+    "townHall": "Zaal",
+    "gridView": "Raster",
+    "unpin": "Losmaken",
+    "townHallTalking": "{{n}} praten",
     "camerasFullJoin": "Je zit erin met je camera uit. Je kunt hem aanzetten zodra iemand de zijne uitzet.",
     "camerasFullHint": "Je kunt de jouwe aanzetten zodra iemand de zijne uitzet.",
     "full": "Vol"

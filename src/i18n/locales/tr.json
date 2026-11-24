@@ -9882,6 +9882,10 @@
     "callFull": "Bu arama dolu",
     "callFullHint": "Bir aramanın alabileceği en fazla kişiye ulaştı. Biri ayrılınca katılabilirsin.",
     "camerasFull": "Kameralar dolu",
+    "townHall": "Meclis",
+    "gridView": "Izgara",
+    "unpin": "Sabitlemeyi kaldır",
+    "townHallTalking": "{{n}} kişi konuşuyor",
     "camerasFullJoin": "Kameran kapalı olarak katıldın. Biri kamerasını kapatınca açabilirsin.",
     "camerasFullHint": "Biri kamerasını kapatınca seninkini açabilirsin.",
     "full": "Dolu"
