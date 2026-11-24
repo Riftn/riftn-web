@@ -486,13 +486,13 @@ function StatusTile({ author, note, own, label, onClick }: { author: StoryAuthor
   const gif = note?.gifUrl || null;
   return (
     <button type="button" onClick={onClick} data-status-tile={own ? 'own' : ''} className="flex w-[88px] shrink-0 flex-col items-center text-center">
-      <span className="flex h-[58px] w-full flex-col items-center justify-end">
+      <span className="flex min-h-[62px] w-full flex-col items-center justify-end pt-1">
         {words && (
           <>
-            <span style={{ ...CLOUD_STYLE, borderRadius: 16 }} className="max-w-[86px] px-2.5 py-[7px]">
+            <span style={{ ...CLOUD_STYLE, borderRadius: 16 }} className="max-w-[86px] shrink-0 px-2.5 py-[7px]">
               <span className="line-clamp-2 break-words text-[11.5px] font-semibold leading-[1.25]" style={{ color: own && !note ? '#71717a' : '#0b0b0c' }}>{words}</span>
             </span>
-            <span aria-hidden className="flex w-full flex-col items-start pl-[26px]">
+            <span aria-hidden className="flex w-full shrink-0 flex-col items-start pl-[26px]">
               <span style={{ ...CLOUD_STYLE, borderRadius: 9999 }} className="mt-0.5 h-2 w-2" />
               <span style={{ ...CLOUD_STYLE, borderRadius: 9999 }} className="ml-1.5 mt-px h-1 w-1" />
             </span>
