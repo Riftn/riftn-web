@@ -8145,7 +8145,9 @@
         "low": "Light",
         "high": "Strong"
       },
-      "gateHint": "Silences your mic between words so keyboard clicks and fans stay off stream."
+      "gateHint": "Silences your mic between words so keyboard clicks and fans stay off stream.",
+      "hearShared": "Hear shared tab on this computer",
+      "hearSharedHint": "Turn off to keep the tab's sound going to viewers while it stays quiet for you, so you can listen to something else. Works on a shared tab in Chrome, Edge or Brave."
     }
   },
   "liveStudio": {
@@ -8172,7 +8174,8 @@
         "connecting": "Connecting",
         "live": "Live",
         "error": "Error"
-      }
+      },
+      "addShort": "Add"
     },
     "vertical": {
       "title": "Vertical view",
@@ -8592,6 +8595,18 @@
         "word-timeout_one": "Timed out {{target}} for {{count}} second for \"{{word}}\"",
         "word-timeout_other": "Timed out {{target}} for {{count}} seconds for \"{{word}}\""
       }
+    },
+    "groups": {
+      "stream": "Go live",
+      "streamHint": "Switches for mid-stream, where your stream is sent, and the link for OBS.",
+      "overlay": "Overlay",
+      "viewers": "Viewers",
+      "viewersHint": "Polls, timers, points and rewards that bring the people watching into the stream.",
+      "chat": "Chat",
+      "chatHint": "Your chat bot and the rules for the chat under your streams.",
+      "replays": "After the stream",
+      "replaysTab": "After",
+      "replaysHint": "How your last stream went, and clips worth sharing."
     }
   },
   "live": {
@@ -9628,7 +9643,8 @@
     "followRequest": "{{name}} requested to follow you",
     "followAccepted": "{{name}} accepted your follow request",
     "signalFlare": "{{name}} sent a Signal Flare",
-    "newMessage": "{{name}} sent you a message"
+    "newMessage": "{{name}} sent you a message",
+    "unlike": "Unlike"
   },
   "audioPost": {
     "popOut": "Pop out — keep listening while you browse",
@@ -9816,6 +9832,19 @@
     "yourChannelHint": "Paste your channel address — the handle on its own works too."
   },
   "calls": {
+    "removedByMod": "A moderator removed you from this call",
+    "removedFor": "You can join again in {{count}} min.",
+    "mutedByMod": "A moderator muted you",
+    "mutedByModHint": "You can talk again once a moderator unmutes you.",
+    "unmutedByMod": "A moderator unmuted you. Tap the mic to talk.",
+    "modFailed": "Couldn't do that. Try again.",
+    "modMenu": "Moderate {{name}}",
+    "modMute": "Mute {{name}}",
+    "modUnmute": "Unmute {{name}}",
+    "modRemove": "Remove from call",
+    "modRemoved": "Removed from the call",
+    "modMuted": "Muted for everyone",
+    "modUnmuted": "Unmuted",
     "voiceCall": "Riftn voice call",
     "videoCall": "Riftn video call",
     "incoming": "Incoming call",
@@ -9877,7 +9906,17 @@
     "startGroupVoice": "Start a group voice call",
     "startGroupVideo": "Start a group video call",
     "subtitles": "Subtitles",
-    "you": "You"
+    "you": "You",
+    "callFull": "This call is full",
+    "callFullHint": "It already has the most people a call can take. You can join once someone leaves.",
+    "camerasFull": "Cameras full",
+    "townHall": "Town hall",
+    "gridView": "Grid",
+    "unpin": "Unpin",
+    "townHallTalking": "{{n}} talking",
+    "camerasFullJoin": "You're in with your camera off. You can turn it on when someone turns theirs off.",
+    "camerasFullHint": "You can turn yours on when someone turns theirs off.",
+    "full": "Full"
   },
   "badgeAscension": {
     "reached": "You reached {{tier}}",
@@ -13610,6 +13649,7 @@
   },
   "dm": {
     "shareGroups": "Groups",
+    "opened": {"photoA11y": "Photo, opened {{time}}", "videoA11y": "Video, opened {{time}}", "seenAt": "Seen {{time}}", "replyCamera": "Reply with the camera", "quotePhoto": "Photo · Opened", "quoteVideo": "Video · Opened", "cameraTitle": "Reply to this photo", "cameraOff": "Camera access is off. Upload a photo or video instead.", "takePhoto": "Take photo", "uploadInstead": "Upload instead"},
     "openTimer": {
       "secs": "{{n}} sec",
       "oneMin": "1 min",
@@ -14015,6 +14055,10 @@
     "reminderLater": "Not now"
   },
   "copy": {
+    "1944d5ab19cd": "Translate to",
+    "98cdcf4f2415": "Search languages",
+    "48bec8529d3f": "Translated from {{language}}",
+    "d80d30a1c7fd": "Already in {{language}}",
     "799c26913574": "Controls",
     "ff73efa451e4": "Move with W, A, S, D or the arrow keys. Look and shoot with the mouse.",
     "c718a21950e6": "Space jumps, Shift sprints, C crouches and Z goes prone.",
@@ -21848,6 +21892,20 @@
     "notInChat": "That link is to a private chat you're not in."
   },
   "notes": {
+    "background": "Background",
+    "yourPhoto": "Your photo",
+    "newStatus": "New status",
+    "upFor": "Up {{time}}",
+    "postedAgo": "{{time}} ago",
+    "timeLeft": "{{time}} left",
+    "like": "Like",
+    "unlike": "Unlike",
+    "likedBy": "Liked by {{name}}",
+    "likedByMore": "Liked by {{name}} and {{others}} more",
+    "likes": "{{total}} likes",
+    "edit": "Edit",
+    "deleteShort": "Delete",
+    "charsLeft": "{{count}} left",
     "yourStatus": "Your status",
     "whatsUp": "What’s up?",
     "add": "Status",
@@ -23188,6 +23246,25 @@
       "disclaimer": "SillyCoins are just for fun and have no value. They are not a cryptocurrency, never touch your wallet, and cannot be bought, sold or cashed out."
     },
     "gratitude": {
+      "withFriend": "A friend",
+      "withComputer": "The computer",
+      "computer": "The computer",
+      "computerNote": "It answers in a few seconds. Make it run out of new ideas to win.",
+      "levelLabel": "Level",
+      "levelEasy": "Easy",
+      "levelNormal": "Normal",
+      "levelHard": "Hard",
+      "turnLabel": "Time per turn",
+      "turn1m": "1 min",
+      "turn5m": "5 min",
+      "turn1d": "1 day",
+      "playComputer": "Play the computer",
+      "computerEach": "{{level}} · {{time}} per turn",
+      "statusComputerTurn": "The computer is writing…",
+      "chipComputerTurn": "Its turn",
+      "writing": "Writing…",
+      "playAgain": "Play again",
+      "empty2": "No games yet. Invite a friend or play the computer above.",
       "rule1": "Write one thing you are grateful for and send it.",
       "rule2": "They answer with theirs. Back and forth.",
       "rule3": "No repeats. Each new one is checked against every earlier line in the game.",
@@ -23694,5 +23771,34 @@
     "empty": "No photos found. Try another word.",
     "failed": "Couldn't add that photo. Try another one.",
     "credit": "Photo: {{creator}} ({{license}})"
+  },
+  "arcadeCard": {
+    "best": "Best score",
+    "mined": "Coins mined",
+    "rankLine": "{{label}} · #{{rank}} on the board",
+    "shared": "Shared this game",
+    "play": "Play"
+  },
+  "arcadeShare": {
+    "postCard": "Post your score card",
+    "postSnapshot": "Post a snapshot",
+    "shareLink": "Share link",
+    "snapshotFailed": "Couldn’t take a snapshot. Try again."
+  },
+  "liveMini": {
+    "minimise": "Minimise",
+    "minimiseHint": "Keep watching while you browse",
+    "player": "Live player",
+    "soundOnly": "Sound only",
+    "showPicture": "Show picture",
+    "openLive": "Open live",
+    "float": "Float over other apps",
+    "play": "Play",
+    "pause": "Pause",
+    "close": "Close live",
+    "ended": "This live has ended"
+  },
+  "liveTimeline": {
+    "backToLive": "Back to live"
   }
 }

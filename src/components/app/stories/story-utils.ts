@@ -1,4 +1,5 @@
 import type { ShelfEntry, StoryItem } from '@/lib/api/dehub/stories';
+import { formatRelativeTime } from '@/i18n/date-locale';
 
 /** "now", "12m", "5h": how long ago a moment went up. */
 export function ageLabel(iso: string | null | undefined, now = Date.now()): string {
@@ -7,6 +8,16 @@ export function ageLabel(iso: string | null | undefined, now = Date.now()): stri
   if (mins < 1) return 'now';
   if (mins < 60) return `${mins}m`;
   return `${Math.floor(mins / 60)}h`;
+}
+
+/**
+ * The same age in the reader's language ("şimdi", "9 sa. önce"). English keeps
+ * its short "now", "12m", "5h".
+ */
+export function localAge(iso: string | null | undefined, language: string | undefined): string {
+  if (!iso) return '';
+  if (language && !language.startsWith('en')) return formatRelativeTime(iso, language, 'narrow');
+  return ageLabel(iso);
 }
 
 /** The moment to start on: the first one not watched yet, else the first. */

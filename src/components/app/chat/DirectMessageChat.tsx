@@ -17,7 +17,7 @@ import { useContext, useState, useRef, useEffect, useLayoutEffect, useCallback, 
 import { DhbAmount, DhbCoin } from '@/components/app/DhbAmount';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, MoreVertical, Loader2, ArrowDown, ShieldBan, AlertCircle, RotateCcw, Pin, FileText, Unlock, LockOpen, Hourglass } from "lucide-react";
+import { ChevronLeft, MoreVertical, Loader2, ArrowDown, ShieldBan, AlertCircle, RotateCcw, Pin, FileText, Unlock, LockOpen, Hourglass, Video, Image as ImageIcon } from "lucide-react";
 import Trash2 from "@/components/ui/cut-icons/delete";
 import ShieldCheck from "@/components/ui/cut-icons/security";
 import RefreshCw from "@/components/ui/cut-icons/refresh";
@@ -52,11 +52,12 @@ import { MomentFace } from '@/components/app/stories/MomentFace';
 import { ChatInput, type ChatInputSendArgs } from './ChatInput';
 import { DmVideoBubble } from './DmVideo';
 import type { DmVideoOptions } from '@/lib/dm-video-options';
-import type { DmDestruct, DmDestructChoice } from '@/lib/dm-destruct';
+import { isSeenOnce, type DmDestruct, type DmDestructChoice } from '@/lib/dm-destruct';
 import { markDmMessageViewed } from '@/lib/api/dehub/dm';
 import { DmTimeLeft } from './DmTimeLeft';
 import { DmOpenTimerMedia } from './DmOpenTimerMedia';
 import { DmViewOncePhoto } from './DmViewOncePhoto';
+import { OpenedBubble } from './OpenedMarker';
 import { DmUndecryptableMessages } from './DmLockedState';
 import { useChatPrefs } from '@/hooks/use-chat-prefs';
 import { DehubLinkEmbed } from '@/components/app/cards/DehubLinkEmbed';
@@ -67,6 +68,7 @@ import { findDehubLinks, stripDehubLinkMatches } from '@/lib/dehub-links';
 import { conversationIdentity } from '@/lib/conversation-identity';
 import { useTranslation, renderChatTextWithLinks } from '../TranslatableText';
 import { useTranslateUp } from '@/hooks/use-translate-up';
+import { useOwnLineTranslate } from './own-line-translate';
 import { useMessages, useSendMessage, useDeleteConversation, useCreateAndStart, messagesKeys, registerOpenConversation, createTransientBlobUrl, peerAddressForConversation, failedSendRetry, discardFailedSend } from '@/hooks/use-messages';
 import { SendStatus } from './SendStatus';
 import { UnreadMarker, UnreadJumpButton } from './UnreadJump';
@@ -336,7 +338,10 @@ function EncryptedMediaBody({
   onOpenImage,
   isOwn,
   destruct,
+  onCameraFile,
 }: {
+  /** Recipient of a view-once / on-open photo: answer it with the camera once opened. */
+  onCameraFile?: (file: File) => void;
   messageId: string;
   isOwn?: boolean;
   destruct?: DmDestruct | null;
@@ -374,6 +379,7 @@ function EncryptedMediaBody({
           return null;
         }}
         onOpenImage={onOpenImage}
+        onCameraFile={onCameraFile}
       />
     );
   }
@@ -381,7 +387,7 @@ function EncryptedMediaBody({
   // Gone a few seconds after the first open: a closed tile until tapped.
   if (destruct?.mode === 'open' && !isOwn && (media.kind === 'image' || media.kind === 'video')) {
     return (
-      <DmOpenTimerMedia messageId={messageId} mine={false} destruct={destruct} kind={media.kind} src={url} onNeedSource={load}>
+      <DmOpenTimerMedia messageId={messageId} mine={false} destruct={destruct} kind={media.kind} src={url} onNeedSource={load} onCameraFile={onCameraFile}>
         {null}
       </DmOpenTimerMedia>
     );
@@ -562,6 +568,7 @@ const MessageBubble = memo(function MessageBubble({
   onPin,
   onForward,
   onReply,
+  onCameraReply,
   onEdit,
   onSaveEdit,
   onCancelEdit,
@@ -616,6 +623,8 @@ const MessageBubble = memo(function MessageBubble({
   onPin?: (messageId: string) => void;
   onForward?: (message: DmMessage) => void;
   onReply?: (message: DmMessage) => void;
+  /** Answer a view-once / on-open photo you got with a photo or video (a reply to it). */
+  onCameraReply?: (message: DmMessage, file: File) => void;
   onEdit?: (message: DmMessage) => void;
   onSaveEdit?: (messageId: string, content: string) => Promise<boolean>;
   onCancelEdit?: () => void;
@@ -632,6 +641,8 @@ const MessageBubble = memo(function MessageBubble({
   // last bubble carries them. A failed or sending bubble keeps its line, since
   // that is where Retry and the spinner live.
   const cozyShowMeta = !cozy || cozy.last || message.sendState === 'failed' || message.sendState === 'sending';
+  // Answer an opened view-once / on-open photo you got with the camera.
+  const cameraFile = !isOwnMessage && onCameraReply ? (file: File) => onCameraReply(message, file) : undefined;
   const pickable = !!onStartPick && !message.isDeleted && message.sendState !== 'sending' && message.sendState !== 'failed';
   const cozyShowAvatar = !cozy || cozy.last;
   // Payment-pending spinner: memo means no incidental re-renders, so the 90s
@@ -800,7 +811,7 @@ const MessageBubble = memo(function MessageBubble({
   const {
     isTranslated: autoTranslated,
     translatedText: autoTranslatedText,
-    isLoading: isTranslating,
+    isLoading: autoTranslating,
     isTooShort,
     handleTranslate: autoTranslate,
     handleShowOriginal: autoShowOriginal,
@@ -812,15 +823,26 @@ const MessageBubble = memo(function MessageBubble({
   } = useTranslation(textContent, isOwnMessage || sentPair ? false : 'chat');
   // A line that already went out in their language carries both versions, so
   // flipping is local: no translator call.
-  const isTranslated = sentPair ? pairFlipped : autoTranslated;
-  const translatedText = sentPair ? (isOwnMessage ? message.content : sentPair.content) : autoTranslatedText;
+  // Your own line translates only when you ask (menu or the button under it),
+  // into your language, or your composer language when it is already in yours.
+  const ownLine = isOwnMessage && !sentPair && (message.msgType === 'msg' || (message.msgType === 'media' && !!message.content));
+  const {
+    isTranslated: ownTranslated,
+    translatedText: ownTranslatedText,
+    isLoading: ownTranslating,
+    translate: ownTranslate,
+    showOriginal: ownShowOriginal,
+  } = useOwnLineTranslate(textContent, ownLine && !message.isDeleted && !message.undecryptable);
+  const isTranslated = sentPair ? pairFlipped : ownLine ? ownTranslated : autoTranslated;
+  const translatedText = sentPair ? (isOwnMessage ? message.content : sentPair.content) : ownLine ? ownTranslatedText : autoTranslatedText;
+  const isTranslating = ownLine ? ownTranslating : autoTranslating;
   const handleTranslate = useCallback(
-    () => (sentPair ? setPairFlipped(true) : autoTranslate()),
-    [sentPair, autoTranslate],
+    () => (sentPair ? setPairFlipped(true) : ownLine ? void ownTranslate() : autoTranslate()),
+    [sentPair, ownLine, ownTranslate, autoTranslate],
   );
   const handleShowOriginal = useCallback(
-    () => (sentPair ? setPairFlipped(false) : autoShowOriginal()),
-    [sentPair, autoShowOriginal],
+    () => (sentPair ? setPairFlipped(false) : ownLine ? ownShowOriginal() : autoShowOriginal()),
+    [sentPair, ownLine, ownShowOriginal, autoShowOriginal],
   );
   const { t: tr, i18n } = useI18n();
 
@@ -880,10 +902,13 @@ const MessageBubble = memo(function MessageBubble({
     return { url, kind };
   })();
   const copyMediaNow = () => { if (copyMediaTarget) copyMediaWithToast(copyMediaTarget.url, copyMediaTarget.kind, _copy); };
-  const canTranslate = !!sentPair || (!isOwnMessage && message.msgType === 'msg' && !!textContent.trim() && !isTooShort);
+  const canTranslate = !!sentPair
+    || ((message.msgType === 'msg' || ownLine) && !!textContent.trim() && !isTooShort && !message.undecryptable);
   // Translate also translates every message above this one that still needs it.
-  const translateUpAll = useTranslateUp('dm', message._id, message.createdAt, !sentPair && canTranslate && !isTranslated && !isTranslating, handleTranslate);
-  const translateUp = sentPair ? handleTranslate : translateUpAll;
+  // Your own lines never join that, and a Translate on one only does that one.
+  const theirs = !isOwnMessage && !sentPair;
+  const translateUpAll = useTranslateUp('dm', message._id, message.createdAt, theirs && canTranslate && !isTranslated && !isTranslating, handleTranslate);
+  const translateUp = theirs ? translateUpAll : handleTranslate;
   // What the flip on a line sent in their language does next.
   const pairToggleLabel = !sentPair ? ''
     : isOwnMessage
@@ -1108,7 +1133,17 @@ const MessageBubble = memo(function MessageBubble({
             >
               <Reply className="w-3 h-3 flex-shrink-0" />
               <span className="text-zinc-300 font-medium flex-shrink-0">{message.replyTo.sender?.displayName || message.replyTo.sender?.username || _copy("copy.b512d97e7cbf", { defaultValue: "User" })}</span>
-              <span className="min-w-0 truncate">{message.replyTo.content || (message.replyTo.encMedia ? encryptedMediaLabel(message.replyTo.encMedia, _copy) : _copy("copy.2bc85f36b3e4", { defaultValue: "📎 Media" }))}</span>
+              {isSeenOnce(message.replyTo.destruct) ? (
+                // A view-once / on-open photo is quoted by what it was, never the picture.
+                <span className="min-w-0 truncate inline-flex items-center gap-1">
+                  {message.replyTo.destruct?.kind === 'video' ? <Video className="w-3 h-3 flex-shrink-0" /> : <ImageIcon className="w-3 h-3 flex-shrink-0" />}
+                  {message.replyTo.destruct?.marker || message.replyTo.destruct?.openedAt
+                    ? (message.replyTo.destruct?.kind === 'video' ? tr('dm.opened.quoteVideo', { defaultValue: 'Video · Opened' }) : tr('dm.opened.quotePhoto', { defaultValue: 'Photo · Opened' }))
+                    : (message.replyTo.destruct?.kind === 'video' ? tr('dm.video', { defaultValue: 'Video' }) : tr('dm.photo', { defaultValue: 'Photo' }))}
+                </span>
+              ) : (
+                <span className="min-w-0 truncate">{message.replyTo.content || (message.replyTo.encMedia ? encryptedMediaLabel(message.replyTo.encMedia, _copy) : _copy("copy.2bc85f36b3e4", { defaultValue: "📎 Media" }))}</span>
+              )}
             </button>
           </div>
         )}
@@ -1274,6 +1309,7 @@ const MessageBubble = memo(function MessageBubble({
                       media={encMedia}
                       mediaUrl={primaryMediaUrl}
                       onOpenImage={onOpenImage}
+                      onCameraFile={cameraFile}
                     />
                   </DmOpenTimerMedia>
                 ) : (
@@ -1284,6 +1320,7 @@ const MessageBubble = memo(function MessageBubble({
                   media={encMedia}
                   mediaUrl={primaryMediaUrl}
                   onOpenImage={onOpenImage}
+                  onCameraFile={cameraFile}
                 />
                 )}
                 {message.content && (
@@ -1337,6 +1374,7 @@ const MessageBubble = memo(function MessageBubble({
                         destruct={message.destruct}
                         kind={primaryMedia?.type === 'video' || primaryMedia?.mimeType?.startsWith('video/') ? 'video' : 'image'}
                         src={getMediaUrl(primaryMediaUrl) || primaryMediaUrl}
+                        onCameraFile={cameraFile}
                       >
                         {null}
                       </DmOpenTimerMedia>
@@ -1379,6 +1417,7 @@ const MessageBubble = memo(function MessageBubble({
                         messageId={message._id}
                         resolveUrl={() => getMediaUrl(primaryMediaUrl)}
                         onOpenImage={onOpenImage}
+                        onCameraFile={cameraFile}
                       />
                     ) : (
                     <DmTimeLeft destruct={message.destruct}>
@@ -1450,7 +1489,11 @@ const MessageBubble = memo(function MessageBubble({
         )}
 
         {/* Deleted message */}
-        {message.isDeleted && (
+        {message.isDeleted && message.destruct?.marker && (
+          // An opened view-once / on-open photo: the file is gone, the pill stays for both.
+          <OpenedBubble kind={message.destruct.kind} mine={isOwnMessage} openedAt={message.destruct.openedAt} onCameraFile={cameraFile} />
+        )}
+        {message.isDeleted && !message.destruct?.marker && (
           <div className={`inline-block rounded-xl px-4 py-2 border border-white/[0.10] text-zinc-500 text-sm italic ${isOwnMessage ? 'rounded-br-sm' : 'rounded-bl-sm'}`}>{_copy("copy.7e94d4b9a46b", { defaultValue: "Message deleted" })}</div>
         )}
 
@@ -2508,6 +2551,14 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     setReplyTarget(message);
   }, [setReplyTarget]);
 
+  // The camera on an "Opened" photo: what they took goes to the composer as a
+  // reply to that photo.
+  const [cameraFile, setCameraFile] = useState<{ file: File; n: number } | null>(null);
+  const handleCameraReply = useCallback((message: DmMessage, file: File) => {
+    setReplyTarget(message);
+    setCameraFile({ file, n: Date.now() });
+  }, [setReplyTarget]);
+
   // A quote left open in one thread must not ride along into the next. Runs
   // only when the thread changes: keyed on replyTarget it cleared every quote
   // the instant Reply set it, so Reply did nothing.
@@ -2530,12 +2581,16 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
       userId: sender?.address || sender?._id || '',
       userName: sender?.displayName || sender?.username
         || (sender?.address ? `${sender.address.slice(0, 6)}...${sender.address.slice(-4)}` : _copy("copy.b512d97e7cbf", { defaultValue: "User" })),
-      content: replyTarget.content
+      content: isSeenOnce(replyTarget.destruct)
+        ? (replyTarget.destruct?.kind === 'video' || replyTarget.encMedia?.kind === 'video'
+          ? tr('dm.opened.quoteVideo', { defaultValue: 'Video · Opened' })
+          : tr('dm.opened.quotePhoto', { defaultValue: 'Photo · Opened' }))
+        : replyTarget.content
         || (replyTarget.encMedia ? encryptedMediaLabel(replyTarget.encMedia, _copy) : replyTarget.msgType === 'voice' ? _copy("copy.e7d42aa1a046", { defaultValue: "🎤 Voice" }) : ''),
       timestamp: new Date(replyTarget.createdAt),
       type: replyTarget.msgType === 'gif' ? 'gif' as const : replyTarget.msgType === 'msg' ? 'text' as const : 'image' as const,
     };
-  }, [replyTarget, _copy]);
+  }, [replyTarget, _copy, tr]);
 
   const handleStartEdit = useCallback((message: DmMessage) => {
     setEditingMessageId(message._id);
@@ -2890,8 +2945,26 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     // out with this message only.
     const replyingTo = replyTarget;
 
+    // A view-once / on-open photo is quoted as "Photo · Opened", never the picture.
+    const seenOnce = isSeenOnce(replyingTo?.destruct);
     const replyPreview: DmMessage['replyTo'] = replyingTo
-      ? {
+      ? seenOnce
+        ? {
+            _id: replyingTo._id,
+            content: '',
+            msgType: replyingTo.msgType,
+            mediaUrls: [],
+            voiceDuration: null,
+            sender: replyingTo.sender,
+            destruct: {
+              mode: replyingTo.destruct!.mode,
+              kind: replyingTo.destruct?.kind
+                ?? (replyingTo.encMedia?.kind === 'video' || replyingTo.mediaUrls?.[0]?.type === 'video' ? 'video' : 'image'),
+              openedAt: replyingTo.destruct?.openedAt,
+              marker: replyingTo.destruct?.marker,
+            },
+          }
+        : {
           _id: replyingTo._id,
           content: replyingTo.content,
           ...(replyingTo.encMedia ? { encMedia: replyingTo.encMedia } : {}),
@@ -3278,6 +3351,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
         onPin={canPinHere ? handlePinMessage : undefined}
         onForward={handleForward}
         onReply={handleReply}
+        onCameraReply={handleCameraReply}
         onEdit={handleStartEdit}
         onSaveEdit={handleSaveEdit}
         onCancelEdit={handleCancelEdit}
@@ -3305,7 +3379,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
   }, [
     // txConfirmations: re-reads confirmedTxHashes (a ref) after a payment lands.
     messages, searchQuery, walletAddress, user?._id, cozy, unreadAnchor, txConfirmations,
-    editingMessageId, canPinHere, handlePinMessage, handleForward, handleReply, handleStartEdit,
+    editingMessageId, canPinHere, handlePinMessage, handleForward, handleReply, handleCameraReply, handleStartEdit,
     handleSaveEdit, handleCancelEdit, handleReact, handleRemoveReaction, handleRetrySend,
     handleDiscardSend, isGroupChat, otherUser?.address, pickedMsgs, togglePick, startPick,
     pinnedMessageId, handleUnpinMessage, _copy, setReportTarget,
@@ -3794,6 +3868,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
         onSendMessage={handleSendMessage}
         allowLock
         replyTo={composerReplyTo}
+        incomingFile={cameraFile}
         onCancelReply={() => setReplyTarget.complete(replyTarget, null)}
         onTipClick={feeRequired ? undefined : openTipDialog}
         onPollClick={isVirtualConv ? undefined : () => setShowPollDialog(true)}

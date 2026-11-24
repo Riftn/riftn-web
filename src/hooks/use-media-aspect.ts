@@ -64,6 +64,7 @@ export function clampAspect(ratio: number, minRatio: number = MIN_RATIO): number
  * @param intrinsic ratio read off the `<video>` once metadata loaded, if any
  * @param minRatio narrowest shape allowed; defaults to 9:16
  * @param stored width/height probed at upload (lib/video-aspect), used until measured
+ * @param storedShown the stored size is the shape as shown, so only the clip itself outranks it
  * @returns a clamped width/height ratio, never null — 16:9 until measured
  */
 export function useMediaAspect(
@@ -72,6 +73,7 @@ export function useMediaAspect(
   minRatio: number = MIN_RATIO,
   mediaKey?: string,
   stored?: number | null,
+  storedShown = false,
 ): number {
   const [measured, setMeasured] = useState<{ url: string; ratio: number } | null>(null);
   const shown = useRef<{ key: string | null | undefined; ratio: number } | null>(null);
@@ -83,12 +85,21 @@ export function useMediaAspect(
   // re-encoded thumbnail a few pixels off never nudges the frame after paint.
   const storedRatio = stored && Number.isFinite(stored) && stored > 0 ? stored : null;
   const poster = posterRatio && storedRatio && Math.abs(posterRatio / storedRatio - 1) < 0.02 ? storedRatio : posterRatio;
-  const known = intrinsic || (mediaKey ? videoAspects.get(mediaKey) : null) || poster || storedRatio;
+  // A size stored as shown is the clip's real shape. A poster can be a custom
+  // cover of any shape (a wide still on a tall clip): letting it win turned the
+  // frame wide when the poster landed and tall again once the clip loaded.
+  const shownRatio = storedShown ? storedRatio : null;
+  // A rendition a few pixels off the stored shape keeps the stored one, so the
+  // frame does not shift by a pixel when the clip's metadata arrives.
+  const played = intrinsic || (mediaKey ? videoAspects.get(mediaKey) : null);
+  const real = played && shownRatio && Math.abs(played / shownRatio - 1) < 0.02 ? shownRatio : played;
+  const known = real || shownRatio || poster || storedRatio;
   const ratio = known || (shown.current && shown.current.key === key ? shown.current.ratio : null);
   shown.current = ratio ? { key, ratio } : null;
 
   useEffect(() => {
-    if (!posterUrl) {
+    // Nothing to learn from the poster when the real shape is already stored.
+    if (!posterUrl || shownRatio) {
       return;
     }
     const cached = cache.get(posterUrl);
@@ -115,7 +126,7 @@ export function useMediaAspect(
     return () => {
       cancelled = true;
     };
-  }, [posterUrl]);
+  }, [posterUrl, shownRatio]);
 
   if (ratio) return clampAspect(ratio, minRatio);
   return DEFAULT_ASPECT;

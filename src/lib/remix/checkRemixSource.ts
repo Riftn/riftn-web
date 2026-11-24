@@ -14,7 +14,7 @@ export async function checkRemixSource(sourceUrl: string, mode: string) {
   const extra = post as typeof post & { plansDetails?: unknown[]; plans?: unknown[]; deleted?: boolean };
   if (!post || post.postType !== 'video' || post.isHidden || extra.deleted || post.is_live || post.status === 'live'
     || post.stream?.isActive || post.spoilerText || (post.contentRating && post.contentRating !== 'safe')
-    || (post.quotePolicy && post.quotePolicy !== 'public' && !post.isOwner)
+    || (mode === 'duet' && post.quotePolicy === 'nobody' && !post.isOwner)
     || videoNeedsAccess({ visibility: post.visibility, isPPV: post.is_ppv || post.streamInfo?.isPayPerView,
       isLocked: post.is_locked || post.streamInfo?.isLockContent,
       lockedPrice: post.locked_price ?? post.streamInfo?.lockContentAmount,

@@ -1,5 +1,5 @@
 {
-  "version": "78ff1ffbb21d584a",
+  "version": "0853eae344930965",
   "routes": {
     "/": [
       "ar",
@@ -953,6 +953,13 @@
       "nl",
       "tr"
     ],
+    "/guides/fastest-blockchains-2026": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
     "/guides/feature-spotlight-ad-tech": [
       "ar",
       "es",
@@ -1057,6 +1064,13 @@
       "tl",
       "vi",
       "zh"
+    ],
+    "/guides/higgsfield-katana-vs-genjutsu": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
     ],
     "/guides/high-score-dehub-gaming-hits-5000-monthly-active-users": [
       "ar",
@@ -1353,6 +1367,13 @@
       "tr"
     ],
     "/guides/ready-to-debate-your-side-bring-it-to-dehub": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/guides/redes-sociais-descentralizadas-2026": [
       "ar",
       "es",
       "fr",

@@ -45,6 +45,7 @@ import { toast } from 'sonner';
 import { QUICK_CHAT_REACTIONS } from '@/components/app/chat/reaction-options';
 import { MoreReactionsButton } from '@/components/app/chat/MoreReactionsButton';
 import { profilePath } from '@/lib/profile-path';
+import { stripBold } from '@/lib/bold-markup';
 
 function ChatAvatar({ src, address, name }: { src?: string | null; address?: string; name: string }) {
   const [failed, setFailed] = useState(false);
@@ -251,7 +252,7 @@ export function EventChat({ eventId, restricted }: EventChatProps) {
                       <div className="flex items-center gap-1 text-[10px] text-zinc-500 ml-9 mb-0.5">
                         <CornerDownRight className="w-2.5 h-2.5" />
                         <span className="font-medium">{msg.reply_to.sender_name}</span>
-                        <span className="truncate max-w-[200px]">{msg.reply_to.content}</span>
+                        <span className="truncate max-w-[200px]">{stripBold(msg.reply_to.content)}</span>
                       </div>
                     )}
                     <div className="flex items-start gap-2">

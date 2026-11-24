@@ -15,6 +15,9 @@ import { tanrininGozuPost } from './posts/tanrininGozuPost';
 import { blueskyMastodonFarcasterRiftnPost } from './posts/blueskyMastodonFarcasterRiftnPost';
 import { paidMembershipsPost } from './posts/paidMembershipsPost';
 import { filmsHurenPost } from './posts/filmsHurenPost';
+import { katanaVsGenjutsuPost } from './posts/katanaVsGenjutsuPost';
+import { fastestBlockchainsPost } from './posts/fastestBlockchainsPost';
+import { redesSociaisDescentralizadasPost } from './posts/redesSociaisDescentralizadasPost';
 import { youtubeFeaturesUsersWantPost } from './posts/youtubeFeaturesUsersWantPost';
 import { binancePioneerBurnAppealPost } from './posts/binancePioneerBurnAppealPost';
 import { ownEverythingTaglinePost } from './posts/ownEverythingTaglinePost';
@@ -1433,6 +1436,9 @@ const bnbPoolUpdatePost: BlogPostType = {
 };
 
 export const newPosts: BlogPostType[] = [
+  redesSociaisDescentralizadasPost,
+  fastestBlockchainsPost,
+  katanaVsGenjutsuPost,
   filmsHurenPost,
   paidMembershipsPost,
   blueskyMastodonFarcasterRiftnPost,

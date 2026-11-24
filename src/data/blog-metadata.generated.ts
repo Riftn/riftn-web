@@ -2988,6 +2988,87 @@ export const blogPostsMetadata: BlogPost[] = [
 // arrays at runtime in blogUtils.ts — metadata-only logic, no third copy here.
 export const newPostsMetadata: BlogPost[] = [
   {
+    "id": "redes-sociais-descentralizadas-2026",
+    "slug": "redes-sociais-descentralizadas-2026",
+    "title": "Redes Sociais Descentralizadas em 2026: As Melhores e Como Escolher",
+    "excerpt": "O que é uma rede social descentralizada, quais são as principais em 2026 (Bluesky, Mastodon, Farcaster, Nostr, Lens e Riftn) e como escolher a certa para você.",
+    "content": "",
+    "bannerImage": "/media/redes-sociais-descentralizadas-2026-banner-r2.jpg",
+    "bannerImageAlt": "Redes sociais descentralizadas em 2026: as melhores e como escolher",
+    "author": {
+      "name": "Mal Jan"
+    },
+    "publishedAt": "2026-11-25T00:30:00.000Z",
+    "updatedAt": "2026-11-25T00:30:00.000Z",
+    "tags": [
+      "Redes Sociais Descentralizadas",
+      "Brasil",
+      "Bluesky",
+      "Mastodon",
+      "Fediverso",
+      "Riftn"
+    ],
+    "readingTime": 5,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "Redes Sociais Descentralizadas em 2026: As Melhores e Como Escolher",
+    "seoDescription": "O que é uma rede social descentralizada e quais são as melhores em 2026: Bluesky, Mastodon, Farcaster, Nostr, Lens e Riftn comparados para você escolher."
+  },
+  {
+    "id": "fastest-blockchains-2026",
+    "slug": "fastest-blockchains-2026",
+    "title": "Fastest Blockchains in 2026: Real TPS, Block Time and Finality Compared",
+    "excerpt": "Which blockchain is fastest in 2026? Live transactions per second, peak TPS, block time and finality for 12 major chains, and why the advertised numbers mislead.",
+    "content": "",
+    "bannerImage": "/media/fastest-blockchains-2026-banner-r2.jpg",
+    "bannerImageAlt": "Fastest blockchains in 2026: real TPS, block time and finality for 12 chains compared",
+    "author": {
+      "name": "Mal Jan"
+    },
+    "publishedAt": "2026-11-25T00:00:00.000Z",
+    "updatedAt": "2026-11-25T00:00:00.000Z",
+    "tags": [
+      "Blockchain",
+      "TPS",
+      "Solana",
+      "Ethereum",
+      "Crypto",
+      "Riftn"
+    ],
+    "readingTime": 6,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "Fastest Blockchains in 2026: Real TPS and Finality Compared",
+    "seoDescription": "Fastest blockchains in 2026 ranked by real transactions per second, peak TPS, block time and finality: ICP, Solana, BNB Chain, Sui, Aptos, Base, Ethereum and more."
+  },
+  {
+    "id": "higgsfield-katana-vs-genjutsu",
+    "slug": "higgsfield-katana-vs-genjutsu",
+    "title": "Higgsfield Katana vs Genjutsu: What Each Does, Price and Speed (2026)",
+    "excerpt": "Genjutsu swaps one thing inside a single clip. Katana rebuilds a whole multi-shot edit around your photos. Here is what each one does, what it costs, how fast it is, and a per-clip alternative.",
+    "content": "",
+    "bannerImage": "/media/higgsfield-katana-vs-genjutsu-banner-r2.jpg",
+    "bannerImageAlt": "Higgsfield Katana vs Genjutsu: what each does, price and speed in 2026",
+    "author": {
+      "name": "Mal Jan"
+    },
+    "publishedAt": "2026-11-24T22:30:00.000Z",
+    "updatedAt": "2026-11-24T22:30:00.000Z",
+    "tags": [
+      "AI video",
+      "Higgsfield",
+      "Genjutsu",
+      "Katana",
+      "Maboroshi",
+      "Creator Studio"
+    ],
+    "readingTime": 5,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "Higgsfield Katana vs Genjutsu: Price, Speed and Model (2026)",
+    "seoDescription": "Higgsfield Katana vs Genjutsu in 2026: what each does, what it costs in credits, how long it takes, which model it uses, and a per-clip alternative with no subscription."
+  },
+  {
     "id": "films-huren-online-2026",
     "slug": "films-huren-online-2026",
     "title": "Renting Films Online in the Netherlands in 2026: Where and What It Costs",
@@ -4098,30 +4179,31 @@ export const newPostsMetadata: BlogPost[] = [
 
 // getLatestPost() result — docs home hero.
 export const latestPostMetadata: BlogPost | undefined = {
-  "id": "films-huren-online-2026",
-  "slug": "films-huren-online-2026",
-  "title": "Renting Films Online in the Netherlands in 2026: Where and What It Costs",
-  "excerpt": "Where to rent a film online in the Netherlands, what a rental costs, how long you get to watch it, and how to check every legal option and price for one film in a single search.",
+  "id": "redes-sociais-descentralizadas-2026",
+  "slug": "redes-sociais-descentralizadas-2026",
+  "title": "Redes Sociais Descentralizadas em 2026: As Melhores e Como Escolher",
+  "excerpt": "O que é uma rede social descentralizada, quais são as principais em 2026 (Bluesky, Mastodon, Farcaster, Nostr, Lens e Riftn) e como escolher a certa para você.",
   "content": "",
-  "bannerImage": "/media/films-huren-online-banner-r2.jpg",
-  "bannerImageAlt": "Renting films online in the Netherlands in 2026: where and what it costs",
+  "bannerImage": "/media/redes-sociais-descentralizadas-2026-banner-r2.jpg",
+  "bannerImageAlt": "Redes sociais descentralizadas em 2026: as melhores e como escolher",
   "author": {
     "name": "Mal Jan"
   },
-  "publishedAt": "2026-11-24T23:30:00.000Z",
-  "updatedAt": "2026-11-24T23:30:00.000Z",
+  "publishedAt": "2026-11-25T00:30:00.000Z",
+  "updatedAt": "2026-11-25T00:30:00.000Z",
   "tags": [
-    "Films Huren",
-    "Film Rental",
-    "Streaming",
-    "Netherlands",
-    "Riftn Cinema"
+    "Redes Sociais Descentralizadas",
+    "Brasil",
+    "Bluesky",
+    "Mastodon",
+    "Fediverso",
+    "Riftn"
   ],
-  "readingTime": 4,
+  "readingTime": 5,
   "featured": false,
   "status": "published",
-  "seoTitle": "Renting Films Online (2026): Where and What It Costs in the Netherlands",
-  "seoDescription": "Where to rent a film online in the Netherlands in 2026, what a rental costs, how long you have to watch, and how to compare every legal option in one search."
+  "seoTitle": "Redes Sociais Descentralizadas em 2026: As Melhores e Como Escolher",
+  "seoDescription": "O que é uma rede social descentralizada e quais são as melhores em 2026: Bluesky, Mastodon, Farcaster, Nostr, Lens e Riftn comparados para você escolher."
 };
 
 export const excludedTitles: string[] = [

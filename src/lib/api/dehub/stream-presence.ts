@@ -129,12 +129,25 @@ export function watchStreamReactions(streamId: string, onReaction: (event: Strea
   } };
 }
 
-/** Broadcast a tap; the sender already plays its animation optimistically. */
+/**
+ * Broadcast a tap; the sender already plays its animation optimistically.
+ *
+ * The room hears at most one reaction from you every 350 ms. Tapping is
+ * applause, so the button repeats as fast as a thumb goes and every tap
+ * floats on your own screen; the server keeps 30 per 10 s and drops the rest,
+ * so sending more than that only wasted the connection.
+ */
+const REACTION_SEND_GAP_MS = 350;
+let lastReactionSentAt = 0;
+
 export function sendStreamReaction(streamId: string, value: unknown): void {
   const reactionType = liveReactionType(value);
   if (!reactionType || !getAuthToken()) return;
   // Reactions are ephemeral: don't buffer old clicks over a disconnect.
   if (active?.socket.connected && active.token === getAuthToken()) {
+    const now = Date.now();
+    if (now - lastReactionSentAt < REACTION_SEND_GAP_MS) return;
+    lastReactionSentAt = now;
     active.socket.emit(EVENT.reaction, { streamId, reactionType });
   }
 }

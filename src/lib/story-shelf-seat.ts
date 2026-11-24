@@ -1,24 +1,28 @@
 /**
- * Whether Home showed the Moments row last time, so the loading skeletons
- * (index.html boot skeleton and the React FeedSkeleton) can hold its seat and
- * the feed does not jump down when the row arrives. Unknown counts as shown:
- * most people have the row, and an empty seat closing is rarer than a jump.
+ * What Home's Moments seat held last time: the row of tiles, the "What's on
+ * today?" ask bar, or nothing. The loading skeletons (index.html boot
+ * skeleton and the React FeedSkeleton) and the shelf itself, while it waits
+ * for its data, draw that same shape so the feed under it never moves when
+ * the real thing lands. Unknown counts as the row: most people have it.
  */
 export const SHELF_SEAT_KEY = 'dehub.shelfShown';
 
-export function rememberShelfSeat(shown: boolean): void {
+export type ShelfSeat = 'row' | 'ask' | 'none';
+
+export function rememberShelfSeat(seat: ShelfSeat): void {
   try {
-    localStorage.setItem(SHELF_SEAT_KEY, shown ? '1' : '0');
+    localStorage.setItem(SHELF_SEAT_KEY, seat === 'row' ? '1' : seat === 'ask' ? 'ask' : '0');
   } catch {
-    /* storage off: the seat is simply assumed next time */
+    /* storage off: the row is simply assumed next time */
   }
 }
 
-export function shelfSeatExpected(): boolean {
+export function expectedShelfSeat(): ShelfSeat {
   try {
-    return localStorage.getItem(SHELF_SEAT_KEY) !== '0';
+    const value = localStorage.getItem(SHELF_SEAT_KEY);
+    return value === '0' ? 'none' : value === 'ask' ? 'ask' : 'row';
   } catch {
-    return true;
+    return 'row';
   }
 }
 

@@ -16,16 +16,18 @@
  * public/sounds/chestard (the app ships the same files); the speaker button
  * mutes them.
  */
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState, type CSSProperties, type MutableRefObject } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Loader2, Share2, Volume2, VolumeX } from 'lucide-react';
+import { ArrowLeft, Loader2, Volume2, VolumeX } from 'lucide-react';
 import { toast } from 'sonner';
 import { SEOHead } from '@/components/SEOHead';
+import { ArcadeShareMenu } from '@/components/app/arcade/ArcadeShareMenu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ThemedIcon } from '@/components/app/war/WarHudIcon';
-import { useAuth } from '@/contexts/AuthContext';
+import { AuthContext, useAuth } from '@/contexts/AuthContext';
+import { drawChestardSnapshot } from '@/lib/chestard-snapshot';
 import { formatCount } from '@/lib/format-count';
 import { COLS, ROWS, drop, emptyBoard, perDrop, type ChestardBoard } from '@/lib/chestard';
 import { chestardRoll, chestardStart, chestardState, type ChestardState, type GamePlayer } from '@/lib/api/dehub/games';
@@ -41,6 +43,8 @@ const CLEAR_MS = 300;
 const SHIFT_MS = 220;
 const GUEST_BEST_KEY = 'chestard.best';
 const MUTE_KEY = 'chestard.muted';
+
+type SnapshotRef = MutableRefObject<(() => Promise<File | null>) | null>;
 
 type Sound = 'roll' | 'drop' | 'clear' | 'over' | 'best';
 
@@ -92,14 +96,6 @@ let nextId = 1;
 const stacksFrom = (heights: number[]): Checker[][] =>
   heights.map((h) => Array.from({ length: h }, (_, row) => ({ id: nextId++, row, state: 'idle' as const, fall: 0 })));
 
-function share(title: string, copied: string) {
-  const nav = navigator as Navigator & { share?: (d: ShareData) => Promise<void> };
-  if (nav.share) {
-    void nav.share({ url: PAGE_URL, title }).catch(() => undefined);
-    return;
-  }
-  void navigator.clipboard?.writeText(PAGE_URL).then(() => toast.success(copied));
-}
 
 function Stat({ label, value, accent = WHITE, big = false }: { label: string; value: string; accent?: string; big?: boolean }) {
   return (
@@ -197,7 +193,7 @@ const STYLE = `
 @media (prefers-reduced-motion: reduce) { .chestard-fall, .chestard-shake { animation: none; } }
 `;
 
-function ChestardGame({ wallet, data, onSignIn }: { wallet: string | null; data: ChestardState | undefined; onSignIn: () => void }) {
+function ChestardGame({ wallet, data, onSignIn, snapshotRef }: { wallet: string | null; data: ChestardState | undefined; onSignIn: () => void; snapshotRef: SnapshotRef }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const signedIn = !!wallet;
@@ -217,6 +213,22 @@ function ChestardGame({ wallet, data, onSignIn }: { wallet: string | null; data:
   const busyRef = useRef(false);
 
   const best = Math.max(signedIn ? data?.me?.best ?? 0 : guestBest, board.score);
+  const auth = useContext(AuthContext);
+  const handle = auth?.user?.username ? `@${auth.user.username.replace(/^@+/, '')}` : null;
+  // The share menu lives in the page header; it asks for the board through this.
+  snapshotRef.current = () => drawChestardSnapshot({
+    board,
+    best,
+    name: handle,
+    labels: {
+      score: t('games.chestard.score', { defaultValue: 'SCORE' }),
+      hi: t('games.chestard.hiScore', { defaultValue: 'HI-SCORE' }),
+      lines: t('games.chestard.lines', { defaultValue: 'LINES' }),
+      drops: t('games.chestard.drops', { defaultValue: 'DROPS' }),
+      perDrop: t('games.chestard.perDrop', { defaultValue: 'PER DROP' }),
+      gameOver: t('games.chestard.gameOver', { defaultValue: 'GAME OVER' }),
+    },
+  });
 
   const reset = useCallback(() => {
     setBoard(emptyBoard());
@@ -469,6 +481,7 @@ export default function ArcadeChestardPage() {
     refetchOnWindowFocus: false,
   });
   const title = t('games.chestard.title', { defaultValue: 'Chestard' });
+  const snapshotRef: SnapshotRef = useRef(null);
 
   return (
     <div data-glass-page data-theme-page-surface className="relative z-[1] min-h-screen bg-black">
@@ -503,20 +516,13 @@ export default function ArcadeChestardPage() {
             <h1 className="text-lg font-bold text-white">{title}</h1>
             <p className="text-xs text-zinc-500">{t('games.chestard.intro', { defaultValue: 'Roll, drop, clear the bottom row. Don’t top out.' })}</p>
           </div>
-          <button
-            type="button"
-            onClick={() => share(title, t('games.linkCopied', { defaultValue: 'Link copied' }))}
-            aria-label={t('games.share', { defaultValue: 'Share' })}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-zinc-900 text-zinc-300 ring-1 ring-white/10 hover:text-white"
-          >
-            <Share2 className="h-4 w-4" />
-          </button>
+          <ArcadeShareMenu slug="chestard" title={title} snapshot={() => snapshotRef.current?.() ?? Promise.resolve(null)} />
         </div>
 
         {isLoading && wallet ? (
           <div className="flex justify-center py-20"><Loader2 className="h-6 w-6 animate-spin text-zinc-500" /></div>
         ) : (
-          <ChestardGame key={wallet ?? 'guest'} wallet={wallet} data={data} onSignIn={() => void connect()} />
+          <ChestardGame key={wallet ?? 'guest'} wallet={wallet} data={data} onSignIn={() => void connect()} snapshotRef={snapshotRef} />
         )}
       </div>
     </div>

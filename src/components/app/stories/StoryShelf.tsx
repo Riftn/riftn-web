@@ -1,13 +1,14 @@
 /**
- * The Glass Shelf: one row of tall glass tiles at the top of Home.
+ * The stories row at the top of Home: slim pills.
  *
- * "Your day" first (tap + to share a moment, or watch your own), then
- * everyone live right now as tiles (it replaces the Live now row), then
- * people's moments, with viewed ones at the end. A tile opens the full-screen viewer.
+ * A + key first (opens the create menu), your own Moments while you have
+ * some, everyone live right now, then people's Moments with watched ones
+ * last. Pills share the row's width; with one or two up they also show who
+ * is watching or the Moments themselves. A pill opens the full-screen viewer.
  */
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import Add from '@/components/ui/cut-icons/add';
+import type { TFunction } from 'i18next';
 import Refresh from '@/components/ui/cut-icons/refresh';
 import { useBadgeBalance, useBadgeVisual } from '@/hooks/use-badge-balance';
 import { useAuth } from '@/contexts/AuthContext';
@@ -19,22 +20,24 @@ import { useKidsModeLock } from '@/hooks/use-kids-mode';
 import { useStoriesStore } from '@/store/storiesStore';
 import { buildAvatarUrl, buildAvatarCdnFallbackUrl, deviceWidth } from '@/lib/media-url';
 import type { ShelfEntry } from '@/lib/api/dehub/stories';
-import { coverOf, handleOf, nameOf, playable } from './story-utils';
-import { rememberShelfSeat } from '@/lib/story-shelf-seat';
+import { handleOf, localAge, nameOf, playable } from './story-utils';
+import { expectedShelfSeat, rememberShelfSeat, type ShelfSeat } from '@/lib/story-shelf-seat';
+import { StoryCreatePill, StoryCreateTile } from './StoryCreatePill';
 import { useMomentPreviewsBlurred } from '@/lib/moment-preview-blur';
+import { formatCount } from '@/lib/format-count';
+import { useLiveAudience } from '@/hooks/use-live-audience';
 import '@/styles/stories.css';
 
-const bg = (url?: string | null) => (url ? { backgroundImage: `url("${url.replace(/"/g, '%22')}")` } : undefined);
 
 export function StoryShelf() {
   const { isAuthenticated, walletAddress, user, openLoginModal } = useAuth();
-  const { items: live, open: openLive } = useLiveNowItems();
+  const { items: live, open: openLive, loading: liveLoading } = useLiveNowItems();
   const { showMatureContent } = useMatureContent();
   const kidsMode = useKidsModeLock();
   const canSeeMature = isAuthenticated && showMatureContent && !kidsMode;
   const liveHosts = [...new Set(live.map(item => (item.wallet || '').toLowerCase()).filter(Boolean))].sort().slice(0, 100).join(',');
-  const { storiesEnabled } = useStoriesEnabled();
-  const { data, isLoading } = useStoryShelf(liveHosts, canSeeMature, storiesEnabled || !!liveHosts);
+  const { storiesEnabled, storiesSettingLoading } = useStoriesEnabled();
+  const { data, isLoading, isError } = useStoryShelf(liveHosts, canSeeMature, storiesEnabled || !!liveHosts);
   const eligibleLive = live.filter(item => data?.liveHosts?.includes((item.wallet || '').toLowerCase()));
   const openViewer = useStoriesStore(s => s.openViewer);
   const openCreator = useStoriesStore(s => s.openCreator);
@@ -58,14 +61,43 @@ export function StoryShelf() {
     return () => window.clearTimeout(id);
   }, [storiesEnabled, hasMoments]);
 
-  // While the first load is out the row keeps its seat with loading tiles,
-  // signed in or not, so the feed under it never jumps down when it lands.
+  // Until the Stories setting and the first shelf are in, the seat keeps the
+  // shape it had last visit (row of loading tiles, ask bar, or nothing), the
+  // same one the boot skeleton drew.
+  const waiting = storiesSettingLoading || (isLoading && !data);
   const hidden = (!storiesEnabled || (!isAuthenticated && others.length === 0 && !isLoading)) && eligibleLive.length === 0;
-  // The loading skeletons read this to hold the row's seat on the next visit.
+  // Signed in and nobody has a Moment up (yours included): a thin pill that
+  // invites you to create takes the row's place instead of a lone tile.
+  const bare = storiesEnabled && isAuthenticated && !isLoading && !pending && !own?.items.length
+    && others.length === 0 && eligibleLive.length === 0;
+  const seat: ShelfSeat = hidden ? 'none' : bare ? 'ask' : 'row';
+  // Lives arrive a beat after the shelf, and the shelf then checks their
+  // hosts again. Until both are in, "nothing up" is not an answer yet.
+  const vetting = !!data && !isError && (data.askedHosts ?? '') !== liveHosts;
+  const nothingYet = eligibleLive.length === 0 && others.length === 0 && !own?.items.length;
+  const holding = eligibleLive.length === 0 && (waiting || ((liveLoading || vetting) && nothingYet));
+  // The seat on screen stays put while holding: what the last visit (or the
+  // last settled answer this visit) had, so the feed under it never moves.
+  const heldSeat = useRef<ShelfSeat>(expectedShelfSeat());
+  if (!holding) heldSeat.current = seat;
+  // The loading skeletons read this to hold the right seat on the next visit.
   useEffect(() => {
-    if (!isLoading) rememberShelfSeat(!hidden);
-  }, [isLoading, hidden]);
+    if (!holding) rememberShelfSeat(seat);
+  }, [holding, seat]);
+  if (holding) {
+    const lastSeat = heldSeat.current;
+    if (lastSeat === 'none') return null;
+    if (lastSeat === 'ask' && isAuthenticated) return <StoryCreatePill />;
+    if (lastSeat === 'ask') return null;
+    return (
+      <div data-stories data-story-shelf data-no-swipe role="list" aria-busy="true">
+        {isAuthenticated && <StoryCreateTile />}
+        {[0, 1, 2].map(index => <LoadingPill key={index} />)}
+      </div>
+    );
+  }
   if (hidden) return null;
+  if (bare) return <StoryCreatePill />;
 
   const openEntry = (entry: ShelfEntry, el: HTMLElement) => {
     const index = watchable.findIndex(e => e.author.address === entry.author.address);
@@ -74,32 +106,82 @@ export function StoryShelf() {
 
   const addMoment = () => (isAuthenticated ? openCreator() : openLoginModal());
 
+  const showMe = storiesEnabled && isAuthenticated && !!(pending || ownWatchable);
+  const shownOthers = storiesEnabled ? others : [];
+  // How many pills are up: with 1 the pill stretches across the row and
+  // shows a little more (who is watching, or the Moments themselves).
+  const upCount = isLoading ? 0 : (showMe ? 1 : 0) + eligibleLive.length + shownOthers.length;
+  const roomy = upCount >= 1 && upCount <= 2;
+
   return (
-    <div data-stories data-story-shelf data-no-swipe role="list">
-      {storiesEnabled && isAuthenticated && (
+    <div data-stories data-story-shelf data-no-swipe role="list" data-up={upCount || undefined}>
+      {storiesEnabled && isAuthenticated && <StoryCreateTile />}
+      {showMe && (
         <MeTile
           address={walletAddress ?? ''}
           avatar={user?.avatarImageUrl ?? own?.author.avatarImageUrl ?? null}
           entry={ownWatchable}
           processing={!!own?.items.some(i => i.status === 'processing')}
           pending={pending}
+          roomy={roomy}
           onAdd={addMoment}
           onOpen={el => ownWatchable && openEntry(ownWatchable, el)}
         />
       )}
       {eligibleLive.map(item => (
-        <LiveTile key={`${item.kind}-${item.id}`} item={item} onOpen={() => openLive(item)} />
+        <LiveTile key={`${item.kind}-${item.id}`} item={item} roomy={roomy} onOpen={() => openLive(item)} />
       ))}
-      {storiesEnabled && isLoading && [0, 1, 2, 3].map(index => (
-        <div key={index} data-story-tile aria-hidden="true" className="!bg-foreground/[0.04]">
-          <span data-st-avatar className="!border-0 !bg-foreground/10" />
-          <span className="absolute bottom-2 left-2 h-2 w-10 rounded bg-foreground/10" />
-        </div>
-      ))}
-      {storiesEnabled && others.map(entry => (
-        <PersonTile key={entry.author.address} entry={entry} onOpen={el => openEntry(entry, el)} />
+      {storiesEnabled && isLoading && [0, 1, 2].map(index => <LoadingPill key={index} />)}
+      {shownOthers.map(entry => (
+        <PersonTile key={entry.author.address} entry={entry} roomy={roomy} onOpen={el => openEntry(entry, el)} />
       ))}
     </div>
+  );
+}
+
+function LoadingPill() {
+  return (
+    <div data-story-tile data-st-loading aria-hidden="true">
+      <span data-st-avatar />
+      <span data-st-text><span /><span /></span>
+    </div>
+  );
+}
+
+/** Small covers of someone's Moments, for a pill that has the room. */
+function MomentCovers({ entry }: { entry: ShelfEntry | null }) {
+  const blurred = useMomentPreviewsBlurred();
+  if (!entry || blurred) return null;
+  const covers = entry.items
+    .map(item => item.posterUrl || (item.type === 'photo' ? item.mediaUrl : null))
+    .filter((url): url is string => !!url)
+    .slice(0, 3);
+  if (!covers.length) return null;
+  return (
+    <span data-st-stack data-covers aria-hidden="true">
+      {covers.map(url => <img key={url} src={url} alt="" loading="lazy" />)}
+    </span>
+  );
+}
+
+/** A few faces of who is watching a live, and how many more. */
+function LiveWatchers({ streamId }: { streamId: string }) {
+  const { data } = useLiveAudience(streamId);
+  const here = (data?.here ?? []).slice(0, 4);
+  if (!here.length) return null;
+  const more = Math.max(0, (data?.watching ?? 0) - here.length);
+  return (
+    <span data-st-stack aria-hidden="true">
+      {here.map(a => (
+        <img
+          key={a.address}
+          src={a.avatarImageUrl ? buildAvatarUrl(a.address, a.avatarImageUrl, deviceWidth(24)) : buildAvatarCdnFallbackUrl(a.address, undefined)}
+          alt=""
+          loading="lazy"
+        />
+      ))}
+      {more > 0 && <b>+{formatCount(more)}</b>}
+    </span>
   );
 }
 
@@ -112,21 +194,28 @@ function ShelfAvatar({ src }: { src?: string | null }) {
   );
 }
 
-function MeTile({ address, avatar, entry, processing, pending, onAdd, onOpen }: {
+function momentsLine(t: TFunction, count: number) {
+  return count === 1
+    ? t('stories.spot.oneMoment', { defaultValue: '1 Moment' })
+    : t('stories.spot.moments', { n: formatCount(count), defaultValue: '{{n}} Moments' });
+}
+
+function MeTile({ address, avatar, entry, processing, pending, roomy, onAdd, onOpen }: {
   address: string;
   avatar: string | null;
   entry: ShelfEntry | null;
   processing: boolean;
   pending: ReturnType<typeof useStoriesStore.getState>['pending'];
+  roomy: boolean;
   onAdd: () => void;
   onOpen: (el: HTMLElement) => void;
 }) {
   const { t } = useTranslation();
-  const face = avatar ? buildAvatarUrl(address, avatar, deviceWidth(68)) : buildAvatarCdnFallbackUrl(address, undefined);
-  const cover = pending ? pending.preview : entry && coverOf(entry);
-  const empty = !pending && !entry;
+  const face = avatar ? buildAvatarUrl(address, avatar, deviceWidth(36)) : buildAvatarCdnFallbackUrl(address, undefined);
   const busy = pending && pending.state !== 'failed';
+  const failed = pending?.state === 'failed';
   const fill = busy ? `${Math.max(6, pending.state === 'processing' ? 100 : pending.progress)}%` : undefined;
+  const you = t('stories.you', { defaultValue: 'You' });
 
   return (
     <button
@@ -134,43 +223,32 @@ function MeTile({ address, avatar, entry, processing, pending, onAdd, onOpen }: 
       role="listitem"
       data-story-tile
       data-kind="me"
-      aria-label={t('stories.yourDay', { defaultValue: 'Your day' })}
+      aria-label={you}
       onClick={e => (entry && !pending ? onOpen(e.currentTarget) : !busy ? (pending?.retry ? pending.retry() : onAdd()) : undefined)}
     >
-      <span data-st-bg style={bg(cover)} />
-      <span data-st-shade />
-      {pending?.state !== 'failed' && <ShelfAvatar src={face} />}
-      {fill && <span data-st-fill style={{ '--st-upload-progress': fill } as CSSProperties} />}
-      {empty ? (
-        <span data-st-plus-corner><Add className="w-3.5 h-3.5" /></span>
-      ) : pending?.state === 'failed' ? (
-        <span data-st-glass data-st-retry><Refresh className="w-5 h-5" /></span>
-      ) : (
-        <span
-          data-st-plus-corner
-          role="button"
-          aria-label={t('stories.addMoment', { defaultValue: 'Add a moment' })}
-          onClick={e => { e.stopPropagation(); onAdd(); }}
-        >
-          <Add className="w-3.5 h-3.5" />
+      {failed ? <span data-st-avatar className="grid place-items-center"><Refresh className="w-5 h-5" /></span> : <ShelfAvatar src={face} />}
+      <span data-st-text>
+        <span data-st-label><span data-st-name>{you}</span></span>
+        <span data-st-line>
+          {failed
+            ? t('stories.tapToRetry', { defaultValue: 'Tap to retry' })
+            : busy || processing
+              ? t('stories.posting', { defaultValue: 'Posting…' })
+              : momentsLine(t, entry?.items.length ?? 0)}
         </span>
-      )}
-      <span data-st-label>
-        {pending?.state === 'failed'
-          ? t('stories.tapToRetry', { defaultValue: 'Tap to retry' })
-          : busy || processing
-            ? t('stories.posting', { defaultValue: 'Posting…' })
-            : t('stories.yourDay', { defaultValue: 'Your day' })}
       </span>
+      {roomy && !pending && <MomentCovers entry={entry} />}
+      {fill && <span data-st-fill style={{ '--st-upload-progress': fill } as CSSProperties} />}
     </button>
   );
 }
 
-function TileIdentity({ address, username, displayName, live }: {
+function TileIdentity({ address, username, displayName, live, children }: {
   address: string;
   username: string | null;
   displayName?: string | null;
   live?: LiveNowItem;
+  children?: ReactNode;
 }) {
   const account = useBadgeBalance(address, live?.badgeBalance);
   const badge = useBadgeVisual({
@@ -186,28 +264,38 @@ function TileIdentity({ address, username, displayName, live }: {
       {badge.url && !live?.hideBadgeAndBalance && !account.hideBadgeAndBalance && (
         <img data-st-badge src={badge.url} alt={badge.name ?? ''} />
       )}
+      {children}
     </span>
   );
 }
 
-function LiveTile({ item, onOpen }: { item: LiveNowItem; onOpen: () => void }) {
+function LiveTile({ item, roomy, onOpen }: { item: LiveNowItem; roomy: boolean; onOpen: () => void }) {
   const { t } = useTranslation();
   const face = faceUrlOf(item);
+  const line = item.kind === 'stage'
+    ? [item.count && t('stories.spot.listening', { n: item.count, defaultValue: '{{n}} listening' })]
+    : [
+        item.count && t('stories.spot.watching', { n: item.count, defaultValue: '{{n}} watching' }),
+        item.views ? t('stories.spot.views', { n: formatCount(item.views), defaultValue: '{{n}} views' }) : '',
+      ];
   return (
     <button type="button" role="listitem" data-story-tile data-kind="live" onClick={onOpen} aria-label={item.title}>
-      <span data-st-bg style={bg(item.cover)} />
-      <span data-st-shade />
-      <span data-st-live>{t('stages.liveBadge', { defaultValue: 'LIVE' })}</span>
       <ShelfAvatar src={face} />
-      <TileIdentity address={item.wallet} username={item.username} displayName={item.displayName} live={item} />
+      <span data-st-text>
+        <TileIdentity address={item.wallet} username={item.username} displayName={item.displayName} live={item}>
+          <span data-st-live role="img" aria-label={t('stages.liveBadge', { defaultValue: 'LIVE' })}><i /><i /><i /></span>
+        </TileIdentity>
+        <span data-st-line>{line.filter(Boolean).join(' · ') || item.title}</span>
+      </span>
+      {roomy && item.kind === 'stream' && <LiveWatchers streamId={item.id} />}
     </button>
   );
 }
 
-function PersonTile({ entry, onOpen }: { entry: ShelfEntry; onOpen: (el: HTMLElement) => void }) {
+function PersonTile({ entry, roomy, onOpen }: { entry: ShelfEntry; roomy: boolean; onOpen: (el: HTMLElement) => void }) {
+  const { t, i18n } = useTranslation();
   const a = entry.author;
-  const face = a.avatarImageUrl ? buildAvatarUrl(a.address, a.avatarImageUrl, deviceWidth(68)) : buildAvatarCdnFallbackUrl(a.address, undefined);
-  const blurred = useMomentPreviewsBlurred();
+  const face = a.avatarImageUrl ? buildAvatarUrl(a.address, a.avatarImageUrl, deviceWidth(36)) : buildAvatarCdnFallbackUrl(a.address, undefined);
   return (
     <button
       type="button"
@@ -216,14 +304,17 @@ function PersonTile({ entry, onOpen }: { entry: ShelfEntry; onOpen: (el: HTMLEle
       data-kind="person"
       data-seen={entry.seen ? 'true' : 'false'}
       data-close-friends={entry.closeFriends && !entry.own ? '' : undefined}
-      data-blur={blurred ? 'true' : undefined}
       onClick={e => onOpen(e.currentTarget)}
       aria-label={nameOf(a)}
     >
-      <span data-st-bg style={bg(coverOf(entry))} />
-      <span data-st-shade />
       <ShelfAvatar src={face} />
-      <TileIdentity address={a.address} username={a.username} displayName={a.displayName} />
+      <span data-st-text>
+        <TileIdentity address={a.address} username={a.username} displayName={a.displayName} />
+        <span data-st-line>
+          {[localAge(entry.latestAt, i18n.language), momentsLine(t, entry.items.length)].filter(Boolean).join(' · ')}
+        </span>
+      </span>
+      {roomy && <MomentCovers entry={entry} />}
     </button>
   );
 }

@@ -15,7 +15,7 @@ import { BUY_PATHS } from '@/lib/buy-route';
 import { useSidebarCollapse } from '@/contexts/SidebarCollapseContext';
 import { lazyWithRetry } from '@/lib/lazy-with-retry';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { CopyGate, SkeletonAppear } from './CopyGate';
+import { CopyGate, SkeletonAppear, placeholderSince } from './CopyGate';
 import { CachedPageActiveContext } from '@/contexts/CachedPageActiveContext';
 import { RetainedPostActivityContext } from '@/lib/retained-post-surface';
 import HomePage from '@/pages/app/HomePage';
@@ -177,7 +177,7 @@ const HeldRoute = memo(function HeldRoute({ live, children }: { live: boolean; c
 
 /** The route's Suspense fallback; notes when its placeholder started to show. */
 function FallbackSkeleton({ shown, skeleton: Skeleton }: { shown: MutableRefObject<number>; skeleton: ComponentType }) {
-  const [since] = useState(() => shown.current || performance.now());
+  const [since] = useState(() => shown.current || placeholderSince());
   useLayoutEffect(() => { if (!shown.current) shown.current = since; }, [shown, since]);
   return <SkeletonAppear since={since}><Skeleton /></SkeletonAppear>;
 }
@@ -272,7 +272,12 @@ const CachedPage = memo(function CachedPage({
           {/* Only the active page may write document metadata — see the context. */}
           <RetainedPostActivityContext.Provider value={retainedPostKey ?? null}>
             <CachedPageActiveContext.Provider value={contextActive}>
-              <HeldRoute live={shouldStayVisible}><CopyGate skeleton={SkeletonComponent} skeletonShown={skeletonShown} copyOnly={config.key === 'home'}>{page}</CopyGate></HeldRoute>
+              {/* Home is never gated: its welcome card is painted from index.html
+                  before the app starts, and the rule for anything already on
+                  screen is that the app never hides it again. The feed draws
+                  its own placeholders. tests/first-paint-browser.mjs films
+                  this in CI. */}
+              <HeldRoute live={shouldStayVisible}>{config.key === 'home' ? page : <CopyGate skeleton={SkeletonComponent} skeletonShown={skeletonShown}>{page}</CopyGate>}</HeldRoute>
             </CachedPageActiveContext.Provider>
           </RetainedPostActivityContext.Provider>
         </Suspense>

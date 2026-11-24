@@ -15,6 +15,25 @@ export const REVEAL_MS = 320;
  */
 export const SKELETON_APPEAR_MS = 120;
 
+/**
+ * True while index.html's boot skeleton is still on screen, i.e. during the
+ * app's very first render. A placeholder drawn then takes over from one the
+ * visitor is already looking at, so it must show at once: fading it in would
+ * blank the screen between the two.
+ */
+export function bootSkeletonUp(): boolean {
+  return typeof document !== 'undefined' && !!document.querySelector('#root .bskel');
+}
+
+/**
+ * When a placeholder mounted now counts as having started to show. During the
+ * first render that is far enough back that its fade-in has already finished.
+ */
+export function placeholderSince(): number {
+  const now = performance.now();
+  return bootSkeletonUp() ? now - 2 * SKELETON_APPEAR_MS : now;
+}
+
 /** Anything a page draws while its own first data is still on the way. */
 const BUSY = '[data-skeleton], .theme-skeleton, [data-dehub-loader], .dehub-loader-mark, [data-page-loading]';
 
@@ -57,13 +76,9 @@ export function SkeletonAppear({ since, children }: { since: number; children: R
  *
  * The wrapper div is always there, so letting go never remounts the page.
  */
-export function CopyGate({ skeleton: Skeleton, children, skeletonShown, copyOnly }: {
+export function CopyGate({ skeleton: Skeleton, children, skeletonShown }: {
   skeleton: ComponentType;
   children: ReactNode;
-  /** Wait for the words only, and cut to the page with no dissolve. For home:
-   *  its welcome panel is already painted from index.html and the feed draws
-   *  its own placeholders, so covering the page again would blink both. */
-  copyOnly?: boolean;
   /** Set by the route's Suspense fallback: when its placeholder mounted (0 = never). */
   skeletonShown?: MutableRefObject<number>;
 }) {
@@ -73,6 +88,8 @@ export function CopyGate({ skeleton: Skeleton, children, skeletonShown, copyOnly
   const since = useRef(0);
   const content = useRef<HTMLDivElement | null>(null);
   const queries = useQueryClient();
+  // Read during render: by the layout effect the boot skeleton is already gone.
+  const [coldSince] = useState(placeholderSince);
 
   // Layout effect: runs after the page's first render asked for its packs and
   // before the browser paints it, so the stand-in text is never seen.
@@ -81,14 +98,14 @@ export function CopyGate({ skeleton: Skeleton, children, skeletonShown, copyOnly
     checked.current = true;
     const copy = takePendingCopy();
     const mountedAt = skeletonShown?.current || 0;
-    since.current = mountedAt || performance.now();
+    since.current = mountedAt || coldSince;
     // Only a placeholder that has actually faded in is worth dissolving.
-    const seen = () => !copyOnly && performance.now() >= since.current + SKELETON_APPEAR_MS;
+    const seen = () => performance.now() >= since.current + SKELETON_APPEAR_MS;
     // Requests already out before this page mounted belong to something else.
     const earlier = new Set<Query>(queries.getQueryCache().findAll({ fetchStatus: 'fetching' }));
     // Its own loader on the first screen, or a first request of its own still out.
-    const busy = () => !copyOnly && (loaderInView(content.current)
-      || queries.isFetching({ predicate: (q) => q.state.data === undefined && !earlier.has(q) }) > 0);
+    const busy = () => loaderInView(content.current)
+      || queries.isFetching({ predicate: (q) => q.state.data === undefined && !earlier.has(q) }) > 0;
     if (!copy && !busy()) {
       // Ready at once. After a skeleton that was seen, dissolve rather than cut.
       if (!mountedAt || !seen()) return;
@@ -134,7 +151,7 @@ export function CopyGate({ skeleton: Skeleton, children, skeletonShown, copyOnly
     if (copy) settle(copy);
     frame = requestAnimationFrame(check);
     return () => { alive = false; window.clearTimeout(timer); cancelAnimationFrame(frame); };
-  }, [skeletonShown, queries, copyOnly]);
+  }, [skeletonShown, queries, coldSince]);
 
   const hold = phase === 'hold';
   const covered = phase !== 'idle';
@@ -147,8 +164,7 @@ export function CopyGate({ skeleton: Skeleton, children, skeletonShown, copyOnly
       {covered && (
         <div data-skeleton-reveal={phase === 'reveal' ? 'out' : undefined}
           style={{ position: 'absolute', top: 0, left: 0, right: 0, pointerEvents: 'none' }}>
-          {/* Home keeps its placeholder up at once, exactly as before (index.html painted it). */}
-          {copyOnly ? <Skeleton /> : <SkeletonAppear since={since.current}><Skeleton /></SkeletonAppear>}
+          <SkeletonAppear since={since.current}><Skeleton /></SkeletonAppear>
         </div>
       )}
     </div>

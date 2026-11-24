@@ -553,8 +553,8 @@ export function ActionBar({
    * `reactionCounts`. Getting this wrong would make a post's like count jump
    * every time somebody changed their mind.
    */
-  const handleReaction = useCallback(async (reaction: PostReaction) => {
-    if (isAuthenticated && !externalDisabled) onLiveReaction?.(reaction);
+  const handleReaction = useCallback(async (reaction: PostReaction, options?: { float?: boolean }) => {
+    if (isAuthenticated && !externalDisabled && options?.float !== false) onLiveReaction?.(reaction);
     if (!postId || isVoting || voteInFlightRef.current || externalDisabled) return;
 
     if (!isAuthenticated) {
@@ -739,7 +739,27 @@ export function ActionBar({
    * which the server reads as "toggle it off" — so the thumb clears a 🔥 the
    * same way it clears a 👍, instead of downgrading it to a plain like.
    */
+  const thumbRef = useRef<HTMLButtonElement>(null);
+  /**
+   * On a live, tapping again is applause: another reaction floats up and the
+   * thumb pops, and the vote you already cast stays. Taking it back is in the
+   * tray (hold on a phone, hover on a mouse), never a second tap.
+   */
+  const repeatLiveReaction = useCallback((reaction: PostReaction) => {
+    onLiveReaction?.(reaction);
+    const el = thumbRef.current;
+    if (el && typeof el.animate === 'function' && !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      el.animate(
+        [{ transform: 'scale(1)' }, { transform: 'scale(1.22)', offset: 0.35 }, { transform: 'scale(1)' }],
+        { duration: 260, easing: 'cubic-bezier(0.2, 0.8, 0.3, 1)' },
+      );
+    }
+  }, [onLiveReaction]);
+
   const handleVote = useCallback((vote: boolean) => {
+    if (vote && onLiveReaction && isAuthenticated && !externalDisabled && isLiked) {
+      return repeatLiveReaction(myReaction && isPositiveReaction(myReaction) ? myReaction : 'like');
+    }
     // With reactions on there is no thumbs-down: 👎 lives in the thumbs-up's
     // tray, and the thumb wears it while it is yours. A tap then takes it back
     // rather than casting a like over it — see reactionForThumbTap.
@@ -748,7 +768,7 @@ export function ActionBar({
       return handleReaction(reactionForThumbTap(myReaction, localReactionCounts));
     }
     return handleReaction(reactionForTap(vote, myReaction, localReactionCounts));
-  }, [handleReaction, myReaction, localReactionCounts, isLiked, isDisliked, isAuthenticated, walletAddress]);
+  }, [handleReaction, myReaction, localReactionCounts, isLiked, isDisliked, isAuthenticated, walletAddress, onLiveReaction, externalDisabled, repeatLiveReaction]);
 
   // Listen for double-tap-to-like events dispatched by photo thumbnails / fullscreen viewer.
   // Instagram-style: double-tap always likes (never unlikes) and only for this post's ID.
@@ -1172,7 +1192,22 @@ export function ActionBar({
           open={likeTray.open}
           current={myReaction}
           counts={localReactionCounts}
-          onSelect={(reaction) => { likeTray.close(); handleReaction(reaction); }}
+          onSelect={(reaction) => {
+            // On a live the tray stays a launcher: picking the one you hold
+            // sends it again rather than taking it off (that is Unlike).
+            if (onLiveReaction && reaction === myReaction && isAuthenticated && !externalDisabled) {
+              likeTray.close();
+              repeatLiveReaction(reaction);
+              return;
+            }
+            likeTray.close();
+            handleReaction(reaction);
+          }}
+          onRemove={
+            onLiveReaction && myReaction && isAuthenticated
+              ? () => { likeTray.close(); handleReaction(myReaction, { float: false }); }
+              : undefined
+          }
           onClose={likeTray.close}
           align={leftHanded ? "left" : "right"}
           onShowInfo={
@@ -1192,6 +1227,7 @@ export function ActionBar({
             handleVote(true);
           }}
           {...likeTray.buttonProps}
+          ref={thumbRef}
           // The phone post page's mini player mirrors and presses this one.
           data-stage-like={stage ? '' : undefined}
           /* Engaged whenever the viewer holds a reaction, not only a plain

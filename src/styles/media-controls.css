@@ -256,3 +256,24 @@ html:is([data-theme='light'], [data-system-tone='light']) {
   object-fit: cover !important;
   object-position: center !important;
 }
+
+/* Glass rail with comments: a link card shrinks to a short strip of its
+   picture with a small link badge, no words under it, so the comments keep
+   their room. Cards with no picture, and rails with no comments, are left as
+   they are. */
+[data-wide-rail][data-rail-compact-links] :is([data-link-preview-layout="image"], [data-glass-embed]) [data-link-preview-text] { display: none; }
+[data-wide-rail][data-rail-compact-links] [data-link-preview-layout="image"] [data-link-preview-media] { aspect-ratio: 2.4 / 1; }
+[data-wide-rail][data-rail-compact-links] [data-link-preview-badge] { display: flex; }
+
+/* Full screen is a black room on every theme: light themes repainted the
+   frame, leaving white either side of a tall video with white controls on it. */
+html[data-theme] body [data-video-fullscreen]:not([data-audio-frame]):not(#_):not(#_):not(#_):not(#_):not(#_) {
+  background: #000 !important;
+}
+
+/* The pointer leaves with the transport while a full screen video plays. An
+   attribute, not a utility class: the frame's own cursor-pointer won on order. */
+[data-video-fullscreen][data-video-pointer-hidden],
+[data-video-fullscreen][data-video-pointer-hidden] * {
+  cursor: none !important;
+}

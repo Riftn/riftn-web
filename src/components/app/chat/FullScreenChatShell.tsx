@@ -1,4 +1,4 @@
-import { useLayoutEffect, type CSSProperties, type ReactNode } from 'react';
+import { useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { useTranslation as _useCopy } from 'react-i18next';
 import MessagesIcon from '@/components/ui/cut-icons/messages';
 import { cn } from '@/lib/utils';
@@ -30,6 +30,13 @@ export function FullScreenChatShell({
   inline?: boolean;
 }) {
   const { t: _copy } = _useCopy();
+  const shellRef = useRef<HTMLDivElement>(null);
+  const [listShare, setListShare] = useState<number | null>(null);
+  const resizeList = (clientX: number) => {
+    const bounds = shellRef.current?.getBoundingClientRect();
+    if (!bounds?.width) return;
+    setListShare(Math.min(60, Math.max(25, (clientX - bounds.left) / bounds.width * 100)));
+  };
   // index.css lifts menus and sheets above this layer while it is up.
   useLayoutEffect(() => {
     if (inline) return;
@@ -44,6 +51,7 @@ export function FullScreenChatShell({
     <div
       id={inline ? undefined : 'app-root'}
       data-fullscreen-chat
+      ref={shellRef}
       style={style}
       className={cn(
         'flex overflow-hidden bg-black text-white',
@@ -52,12 +60,39 @@ export function FullScreenChatShell({
     >
       <aside
         data-fsc-list
+        style={listShare === null ? undefined : { '--chat-list-width': `${listShare}%` } as CSSProperties}
         className={cn(
-          'flex h-full min-h-0 w-full flex-col md:w-[clamp(18rem,30vw,26.5rem)] md:shrink-0 md:border-r md:border-white/[0.07]',
+          'relative z-10 flex h-full min-h-0 w-full flex-col md:w-[var(--chat-list-width,clamp(18rem,30vw,26.5rem))] md:shrink-0 md:border-r md:border-white/[0.07]',
           chatOpen && 'max-md:hidden',
         )}
       >
         {list}
+        <div
+          role="separator"
+          aria-orientation="vertical"
+          aria-label={_copy('fullscreenChat.resizeList', { defaultValue: 'Resize conversation list' })}
+          aria-valuemin={25}
+          aria-valuemax={60}
+          aria-valuenow={Math.round(listShare ?? 30)}
+          tabIndex={0}
+          className="group absolute inset-y-0 -right-1 z-10 hidden w-2 cursor-col-resize touch-none select-none outline-none md:block"
+          onPointerDown={(event) => {
+            if (event.button !== 0 || !event.isPrimary) return;
+            event.currentTarget.setPointerCapture(event.pointerId);
+            event.preventDefault();
+          }}
+          onPointerMove={(event) => {
+            if (event.currentTarget.hasPointerCapture(event.pointerId)) resizeList(event.clientX);
+          }}
+          onKeyDown={(event) => {
+            if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+            event.preventDefault();
+            const current = listShare ?? event.currentTarget.parentElement!.offsetWidth / (shellRef.current?.clientWidth || 1) * 100;
+            setListShare(Math.min(60, Math.max(25, current + (event.key === 'ArrowLeft' ? -2 : 2))));
+          }}
+        >
+          <span aria-hidden className="pointer-events-none absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 bg-current opacity-0 group-hover:opacity-25 group-focus-visible:opacity-50" />
+        </div>
       </aside>
       <section
         data-fsc-chat

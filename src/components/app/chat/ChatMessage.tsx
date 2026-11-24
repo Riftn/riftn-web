@@ -48,6 +48,7 @@ import { ChatReactorsDrawer } from './ChatReactorsDrawer';
 import { SendStatus } from './SendStatus';
 import { FullscreenImageViewerLazy } from '@/components/app/cards/FullscreenImageViewerLazy';
 import { profilePath } from '@/lib/profile-path';
+import { stripBold } from '@/lib/bold-markup';
 
 /** Avatar with cascading fallback: primary → CDN → initials */
 function ChatAvatar({ src, address, name, className }: { src?: string; address?: string; name: string; className?: string }) {
@@ -492,7 +493,7 @@ export const ChatMessage = memo(function ChatMessage({
           >
             <CornerDownRight className="w-3 h-3" />
             <span className="font-medium">{message.replyTo.senderName}</span>
-            <span className="truncate max-w-[200px]">{message.replyTo.content}</span>
+            <span className="truncate max-w-[200px]">{stripBold(message.replyTo.content)}</span>
           </button>
         )}
 
