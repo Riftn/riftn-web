@@ -97,7 +97,8 @@ export function NotificationsDrawer() {
         <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain">
           <ErrorBoundary compact resetKey={String(open)} label={_copy("copy.788011833a5a", { defaultValue: "Notifications" })}>
             <Suspense fallback={<div role="status" className="p-4">{_copy("copy.eae12e0d3bab", { defaultValue: "Loading notifications…" })}</div>}>
-              {open && <NotificationsPage inDrawer />}
+              {/* DrawerContent keeps the list mounted through its exit. */}
+              <NotificationsPage inDrawer />
             </Suspense>
           </ErrorBoundary>
         </div>
