@@ -7,6 +7,7 @@
  * A chat seen for the first time starts as read up to its newest line, so
  * turning this on never lights every group up with old history.
  */
+import { stripBold } from '@/lib/bold-markup';
 export interface RoomReadStorage {
   read: (key: string) => string | null | undefined;
   write: (key: string, value: string) => void;
@@ -87,7 +88,7 @@ export function roomPreviewLine(
   t: (key: string, options: { defaultValue: string }) => string,
 ): string {
   const type = (line.message_type || 'text').toLowerCase();
-  const body = (line.content || '').replace(/\s+/g, ' ').trim()
+  const body = stripBold(line.content || '').replace(/\s+/g, ' ').trim()
     || (type === 'gif' ? t('copy.fd0ce9669a4e', { defaultValue: '🎞️ GIF' })
       : type === 'audio' || type === 'voice' ? t('roomPreview.voice', { defaultValue: '🎤 Voice message' })
         : line.image_url || type === 'image' ? t('copy.1b13ff986443', { defaultValue: '📷 Photo' })

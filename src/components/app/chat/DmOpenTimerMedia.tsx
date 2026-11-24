@@ -14,10 +14,11 @@
  */
 import { useEffect, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { Eye, Image as ImageIcon, Loader2, RotateCcw, Timer, Video, X } from 'lucide-react';
+import { Image as ImageIcon, Loader2, RotateCcw, Timer, Video, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { markDmMessageViewed } from '@/lib/api/dehub/dm';
 import { countdownLabel, replaysLeft, type DmDestruct } from '@/lib/dm-destruct';
+import { OpenedBubble } from './OpenedMarker';
 
 const openedKey = (id: string) => `riftn.dm.opened.${id}`;
 
@@ -53,6 +54,7 @@ export function DmOpenTimerMedia({
   kind,
   src,
   onNeedSource,
+  onCameraFile,
   children,
 }: {
   messageId: string;
@@ -62,6 +64,8 @@ export function DmOpenTimerMedia({
   /** The playable address; may arrive after `onNeedSource` (encrypted media). */
   src?: string;
   onNeedSource?: () => void;
+  /** Recipient: answer it with a photo or video once it has been opened. */
+  onCameraFile?: (file: File) => void;
   /** The normal bubble, shown to the sender. */
   children: ReactNode;
 }) {
@@ -70,6 +74,8 @@ export function DmOpenTimerMedia({
   const secLabel = seconds >= 60 ? t('dm.openTimer.oneMin', '1 min') : t('dm.openTimer.secs', '{{n}} sec', { n: seconds });
   const allowsReplay = (Number(destruct.replaysAllowed) || 0) > 0;
 
+  // The sender: once they have opened it, it reads "Opened" here too.
+  if (mine && destruct.openedAt) return <OpenedBubble kind={kind} mine openedAt={destruct.openedAt} />;
   if (mine) {
     return (
       <div className="relative">
@@ -82,13 +88,13 @@ export function DmOpenTimerMedia({
       </div>
     );
   }
-  return <RecipientTile messageId={messageId} destruct={destruct} kind={kind} src={src} onNeedSource={onNeedSource} secLabel={secLabel} seconds={seconds} />;
+  return <RecipientTile messageId={messageId} destruct={destruct} kind={kind} src={src} onNeedSource={onNeedSource} onCameraFile={onCameraFile} secLabel={secLabel} seconds={seconds} />;
 }
 
 function RecipientTile({
-  messageId, destruct, kind, src, onNeedSource, secLabel, seconds,
+  messageId, destruct, kind, src, onNeedSource, onCameraFile, secLabel, seconds,
 }: {
-  messageId: string; destruct: DmDestruct; kind: 'image' | 'video'; src?: string; onNeedSource?: () => void; secLabel: string; seconds: number;
+  messageId: string; destruct: DmDestruct; kind: 'image' | 'video'; src?: string; onNeedSource?: () => void; onCameraFile?: (file: File) => void; secLabel: string; seconds: number;
 }) {
   const { t } = useTranslation();
   const [phase, setPhase] = useState<Phase>(() => initialOpenPhase(messageId, destruct));
@@ -96,6 +102,7 @@ function RecipientTile({
   const [left, setLeft] = useState(() => replaysLeft(destruct));
   const [isReplay, setIsReplay] = useState(false);
   const [now, setNow] = useState(Date.now());
+  const [openedAt, setOpenedAt] = useState<Date | null>(null);
 
   const open = async () => {
     if (phase !== 'closed' && phase !== 'replay') return;
@@ -116,6 +123,7 @@ function RecipientTile({
       if (typeof res.replaysLeft === 'number') after = res.replaysLeft;
     } catch { /* offline: show it with the local countdown */ }
     noteOpened(messageId, after);
+    setOpenedAt((d) => d ?? new Date());
     setLeft(after);
     setEndsAt(end);
     setNow(Date.now());
@@ -138,12 +146,7 @@ function RecipientTile({
   const KindIcon = kind === 'video' ? Video : ImageIcon;
 
   if (phase === 'done') {
-    return (
-      <div className="flex min-w-[180px] items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5 text-sm text-white/60" data-dm-open-timer="done">
-        <Eye className="h-4 w-4 shrink-0" />
-        {t('dm.openTimer.opened', 'Opened')}
-      </div>
-    );
+    return <OpenedBubble kind={kind} mine={false} openedAt={destruct.openedAt ?? openedAt} onCameraFile={onCameraFile} />;
   }
 
   const replayTile = phase === 'replay' || (phase === 'starting' && isReplay);

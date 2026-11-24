@@ -92,6 +92,7 @@ import { TipWall, TipChip } from '@/components/app/comments/TipWall';
 import type { Comment as GalleryComment } from '@/lib/comment-mapper';
 import { KitButton, PageEmpty, PageSection, PageTabs } from '@/components/app/page-kit/PageKit';
 import { ScheduleSheet, type ScheduleKind } from '@/features/post/components/ScheduleSheet';
+import { POST_SPACING_KEY } from '@/features/post/components/PostSpacingSection';
 import { ChatInput } from '@/components/app/chat/ChatInput';
 import { MessageRequestBarView, MessageRequestsHeader, MessageRequestsRow } from '@/components/app/chat/MessageRequestBar';
 import { PostEditHistoryLineView, PostEditHistoryViewer } from '@/components/app/post-info/PostEditHistory';
@@ -129,6 +130,7 @@ import type { PollData } from '@/features/post/types';
 import { LiveClearedLayer } from '@/components/app/live/LiveClearedLayer';
 import { ImmersiveLiveChrome } from '@/components/app/live/ImmersiveLiveChrome';
 import { LivePostChat } from '@/components/app/cards/LivePostChat';
+import { LiveViewerActionsProvider } from '@/components/app/live/live-viewer-actions';
 import { RewardsSheet } from '@/components/app/live/points/RewardsSheet';
 import { RewardsPanel } from '@/components/app/live/studio/RewardsPanel';
 import type { LiveAudience } from '@/lib/api/dehub/livestream';
@@ -203,6 +205,8 @@ import { MobileMenuLayout, MenuTabs } from '@/components/app/navigation/MobileMe
 import { MenuAccountSwitcher } from '@/components/app/navigation/MenuAccountSwitcher';
 import { groupMenuItems } from '@/components/app/navigation/menu-groups';
 import { normaliseMenuLayout, useMenuLayout, writeMenuLayout } from '@/lib/menu-layout';
+import { renderChatTextWithLinks } from '@/components/app/TranslatableText';
+import { BoldText } from '@/lib/bold-markup';
 
 /**
  * Comic posts: the deck as the feed shows it, the post page with the hand of
@@ -584,6 +588,29 @@ function FullScreenChatGallery() {
           </div>
         ))}
       </div>
+      <h3 className="text-sm font-semibold">Opened view-once photo (pill + camera reply)</h3>
+      <div data-opened-photo-gallery className="grid gap-3 sm:grid-cols-2">
+        {[
+          { label: 'Got it (camera to reply)', rows: [
+            { m: msg('op-a', false, 'look what I found', ago(7)), mine: false },
+            { m: { ...msg('op-b', false, '', ago(6)), isDeleted: true, destruct: { mode: 'view', marker: true, kind: 'image', openedAt: ago(4) } } as unknown as DmMessage, mine: false },
+            { m: { ...msg('op-c', true, 'haha here is mine', ago(2)), replyTo: { _id: 'op-b', content: '', msgType: 'msg', mediaUrls: [], voiceDuration: null, sender: ella, destruct: { mode: 'view', kind: 'image', openedAt: ago(4), marker: true } } } as unknown as DmMessage, mine: true },
+          ] },
+          { label: 'Sent it (seen)', rows: [
+            { m: { ...msg('op-d', true, '', ago(6)), isDeleted: true, destruct: { mode: 'view', marker: true, kind: 'image', openedAt: ago(4) } } as unknown as DmMessage, mine: true },
+            { m: { ...msg('op-e', true, '', ago(5)), isDeleted: true, destruct: { mode: 'open', marker: true, kind: 'video', openedAt: ago(3) } } as unknown as DmMessage, mine: true },
+          ] },
+        ].map(side => (
+          <div key={side.label} data-msg-phone-b="" className="overflow-hidden rounded-2xl border border-white/10">
+            <div className="px-4 pt-3 text-xs text-zinc-400">{side.label}</div>
+            <div data-chat-wallpaper className="chat-text-zone px-4 pb-4">
+              {side.rows.map(({ m, mine }) => (
+                <DmMessageBubble key={m._id} message={m} isOwnMessage={mine} cozy={{ first: true, last: true }} currentUserAddress={me.address} onCameraReply={noop} />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
       <h3 className="text-sm font-semibold">Picking messages (Select, then click more)</h3>
       <div data-msg-select-gallery className="flex h-[30rem] flex-col overflow-hidden rounded-2xl border border-white/10">
         <div data-chat-wallpaper className="chat-text-zone min-h-0 flex-1 overflow-y-auto px-4 pb-4">
@@ -727,6 +754,19 @@ function AssistantCardsGallery() {
     { ...base, id: 'aaaaaaaaaaaaaaaaaaaaaaa3', kind: 'react', status: 'done', preview: { choice: 'fitting', count: 118, author: jules }, result: { done: 118, total: 118, added: 118, used: { love: 61, like: 40, lol: 17 } } },
     { ...base, id: 'aaaaaaaaaaaaaaaaaaaaaaa4', kind: 'follow', status: 'pending', preview: { count: 2, people: [jules, { address: '0x2222222222222222222222222222222222222222', username: 'xluna', displayName: 'Luna', avatar: null }] } },
     { ...base, id: 'aaaaaaaaaaaaaaaaaaaaaaa5', kind: 'chat_access', status: 'pending', preview: { allow: true } },
+    {
+      ...base, id: 'aaaaaaaaaaaaaaaaaaaaaaa6', kind: 'schedule_posts', status: 'pending',
+      preview: {
+        count: 4, gapMinutes: 1440,
+        items: [0, 1, 2, 3].map((i) => ({
+          text: ['Sunday market haul', '', 'Golden hour from the roof', 'Last one from the trip'][i],
+          photo: i === 1 ? null : `https://picsum.photos/seed/plan${i}/120/120`,
+          at: i === 0 ? null : new Date(Date.now() + i * 86_400_000).toISOString(),
+        })),
+      },
+    },
+    { ...base, id: 'aaaaaaaaaaaaaaaaaaaaaaa7', kind: 'schedule_posts', status: 'done', preview: { count: 20 }, result: { done: 20, total: 20, ok: 20, failed: 0 } },
+    { ...base, id: 'aaaaaaaaaaaaaaaaaaaaaaa8', kind: 'post_spacing', status: 'pending', preview: { gapMinutes: 60, before: 0 } },
   ];
   return (
     <section data-assistant-cards-gallery className="mb-5">
@@ -904,8 +944,43 @@ function ThreadedComposerGallery() {
   }), []);
   const media = useMemo(() => ({ upload: () => Promise.reject(new Error('gallery')) }), []);
   const noop = () => Promise.resolve();
+  // One of your own comments with a reply of yours under it: tap the words
+  // to edit in place and check the typing line shows in every theme.
+  const [own, setOwn] = useState(() => {
+    const row = (id: string, content: string, parent: string | null) => ({
+      id, wallet_address: GALLERY_THREAD_AUTHOR, username: 'you', avatar: null, content,
+      created_at: new Date(Date.now() - 20 * 60_000).toISOString(), parent_id: parent, updated_at: null,
+      reactionCounts: {}, likes: 0, dislikes: 0, myReaction: null,
+    });
+    return [{ comment: row('gallery-own-1', 'Can the live chat keep my place when I scroll up?', null), replies: [row('gallery-own-2', 'Same on the app please', 'gallery-own-1')] }];
+  });
+  const editOwn = (comment: { id: string }, content: string) => {
+    setOwn((threads) => threads.map((t) => ({
+      comment: t.comment.id === comment.id ? { ...t.comment, content } : t.comment,
+      replies: t.replies.map((r) => (r.id === comment.id ? { ...r, content } : r)),
+    })));
+    return Promise.resolve();
+  };
   return (
     <AuthContext.Provider value={GALLERY_THREAD_AUTHOR_AUTH}>
+      <section data-threaded-own-gallery className="mb-5 max-w-2xl rounded-xl border border-white/[0.12] bg-white/[0.03] p-3">
+        <ThreadedComments
+          draftScope="gallery:threaded-own"
+          threads={own}
+          isLoading={false}
+          isError={false}
+          isFetching={false}
+          onRetry={() => {}}
+          entityAuthorAddress={GALLERY_THREAD_AUTHOR}
+          labels={labels}
+          busy={false}
+          submitting={false}
+          onSubmit={noop}
+          onEdit={editOwn}
+          onDelete={() => {}}
+          onReact={() => {}}
+        />
+      </section>
       <section data-threaded-composer-gallery className="mb-5 max-w-2xl rounded-xl border border-white/[0.12] bg-white/[0.03] p-3">
         <ThreadedComments
           draftScope="gallery:threaded-composer"
@@ -956,6 +1031,9 @@ import { PetSprite } from '@/components/app/pet/PetSprite';
 import StreamPetCorner from '@/components/app/pet/StreamPetCorner';
 import { PetPanel, PetHatch } from '@/components/app/live/studio/PetPanel';
 import type { StreamPet } from '@/lib/api/dehub/stream-pet';
+import { CoStreamInviteCard } from '@/components/app/live/costream/CoStreamInviteCard';
+import { CoStreamAskButton } from '@/components/app/live/costream/CoStreamAskButton';
+import { coStreamViewerKey } from '@/components/app/live/costream/use-costream-viewer';
 const BadgeShowcase = lazy(() => import('@/components/app/badge-showcase/BadgeShowcase'));
 
 // The standard public BIP-39 test vector: owns nothing, safe to show.
@@ -1220,6 +1298,72 @@ function PostOptionsGallery() {
 
 /** AI menu > Translate on a draft, with the Undo line it leaves (sample text, no translator call). */
 const GALLERY_DRAFT = { tr: 'Bir günde bir yıllık yol ilerliyoruz', en: 'We are covering a year\u2019s worth of road in a single day' };
+const ASK_AUTH = { ...GALLERY_AUTH, isAuthenticated: true, walletAddress: '0xgallery' } as unknown as AuthContextType;
+
+/** Ask to join in the live's own controls: asking, and asked (tap again cancels). */
+function CoStreamAskGallery() {
+  const qc = useQueryClient();
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const room = {
+      id: 'room', host_wallet: '0xhost', host_stream_id: 'gallery', host_username: 'dehu_b', accepting_requests: true,
+      status: 'active', battle_started_at: null, battle_ends_at: null, battle_round: 0, created_at: '',
+    };
+    const later = { updatedAt: Date.now() + 3_600_000 };
+    qc.setQueryData(coStreamViewerKey('gallery-ask', null), { room, seats: [] }, later);
+    qc.setQueryData(coStreamViewerKey('gallery-asked', null), {
+      room,
+      seats: [{ id: 's1', costream_id: 'room', wallet: '0xgallery', stream_id: null, username: 'you', status: 'requested', muted: false, updated_at: '' }],
+    }, later);
+    setReady(true);
+  }, [qc]);
+  if (!ready) return null;
+  return (
+    <AuthContext.Provider value={ASK_AUTH}>
+      <div data-costream-ask-gallery className="mt-3 space-y-3">
+        <div className="flex items-start gap-3 px-1">
+          <p className="min-w-0 flex-1 text-sm">Late night ranked with chat</p>
+          <CoStreamAskButton preview streamId="gallery-ask" className="-mt-1.5" />
+        </div>
+        <div className="flex items-start gap-3 px-1">
+          <p className="min-w-0 flex-1 text-sm">Late night ranked with chat</p>
+          <CoStreamAskButton preview streamId="gallery-asked" className="-mt-1.5" />
+        </div>
+        <div className="flex items-center justify-end gap-2 rounded-2xl p-3" style={{ background: '#1d1a24' }} data-on-media>
+          <CoStreamAskButton preview streamId="gallery-ask" variant="square" />
+          <CoStreamAskButton preview streamId="gallery-asked" variant="square" />
+        </div>
+      </div>
+    </AuthContext.Provider>
+  );
+}
+
+/** The host's invite to come on screen, over a live picture: open, and tucked. */
+function CoStreamInviteGallery() {
+  const [busy, setBusy] = useState(false);
+  const frame = 'relative flex h-[260px] items-start justify-center overflow-hidden rounded-2xl pt-12';
+  const picture = { background: 'radial-gradient(circle at 30% 30%, #6b4f3a, #1d1a24 60%), #111' };
+  return (
+    <section data-page-bento data-costream-invite-gallery className="mb-5 max-w-md rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Live invite on screen</h2>
+      <div className={frame} style={picture} data-on-media>
+        <CoStreamInviteCard
+          hostName="@dehu_b"
+          hostAvatar={null}
+          myName="you"
+          busy={busy}
+          onJoin={() => { setBusy(true); window.setTimeout(() => setBusy(false), 1500); }}
+          onDecline={() => {}}
+        />
+      </div>
+      <div className={`${frame} mt-3 h-[120px]`} style={picture} data-on-media>
+        <CoStreamInviteCard hostName="@dehu_b" initiallyTucked onJoin={() => {}} onDecline={() => {}} />
+      </div>
+      <CoStreamAskGallery />
+    </section>
+  );
+}
+
 function PostTranslateGallery() {
   const imageRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLInputElement>(null);
@@ -1785,10 +1929,18 @@ function MintChainGallery() {
   );
 }
 
+/** Signed in as a stand-in wallet, so Space my posts shows (it hides when signed out). */
+const SPACING_AUTH = { ...GALLERY_AUTH, walletAddress: '0x0000000000000000000000000000000000000001' } as AuthContextType;
+
 function WhenSheetGallery() {
   const { t } = useTranslation();
   const [kind, setKind] = useState<ScheduleKind | null>(null);
+  const qc = useQueryClient();
+  // Space my posts, as an account with it on and two posts waiting.
+  useState(() => qc.setQueryData([POST_SPACING_KEY, SPACING_AUTH.walletAddress], { gapMinutes: 60, nextAt: new Date(Date.now() + 2 * 3_600_000).toISOString(), waiting: 2 }));
+  const [dripGap, setDripGap] = useState<number | null>(1440);
   return (
+    <AuthContext.Provider value={SPACING_AUTH}>
     <section data-page-bento data-when-sheet-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
       <h2 className="mb-3 text-sm font-semibold">{t('whenSheet.title', { defaultValue: 'When?' })}</h2>
       <div className="flex flex-wrap gap-2">
@@ -1796,8 +1948,9 @@ function WhenSheetGallery() {
           <button key={k} type="button" data-kit-button="quiet" data-when-open={k} onClick={() => setKind(k)}>{k}</button>
         ))}
       </div>
-      <ScheduleSheet isOpen={!!kind} onClose={() => setKind(null)} scheduledDate={null} onSchedule={() => {}} kind={kind ?? 'post'} minimumMinutes={kind === 'live' ? 30 : 0} />
+      <ScheduleSheet isOpen={!!kind} onClose={() => setKind(null)} scheduledDate={null} onSchedule={() => {}} kind={kind ?? 'post'} minimumMinutes={kind === 'live' ? 30 : 0} dripCount={12} dripGap={dripGap} onDripChange={setDripGap} />
     </section>
+    </AuthContext.Provider>
   );
 }
 
@@ -2495,6 +2648,7 @@ export default function StateGalleryPage() {
         {params.get('sounds') === '1' && <SoundsGallery step={params.get('soundstep')} library={params.get('library')} />}
         {params.get('thread') === '1' && <AuthorThreadGallery />}
         {params.get('coauthors') && <CoAuthorsGallery mode={params.get('coauthors')} />}
+        {params.get('bold') && <BoldTextGallery />}
         {params.get('composer') === '1' && <ThreadedComposerGallery />}
         {params.get('notifs') === '1' && <NotificationRowsGallery />}
         {params.get('links') === '1' && <LinkCardsGallery mention={params.get('mention')} />}
@@ -2695,6 +2849,7 @@ export default function StateGalleryPage() {
         <AudioGallery />
         <PostOptionsGallery />
         <PostTranslateGallery />
+        <CoStreamInviteGallery />
         <FeedFilterLineGallery />
         <AltPillGallery />
         <VoiceNotesGallery />
@@ -2979,7 +3134,16 @@ function LivePointsGallery({ initiallyOpen = false }: { initiallyOpen?: boolean 
             className="relative flex h-[520px] w-[390px] max-w-full flex-col justify-end overflow-hidden rounded-[28px] px-3 pb-3"
             style={{ background: 'radial-gradient(60% 30% at 50% 26%, rgba(255,170,90,.55), transparent 70%), radial-gradient(40% 25% at 85% 12%, rgba(80,120,255,.55), transparent 70%), linear-gradient(180deg, #2a1240 0%, #3b1d4f 40%, #120a1c 100%)' }}
           >
-            <LivePostChat tokenId="0" streamId={GALLERY_STREAM_ID} overlay />
+            {/* The full-bleed row: message box, then gift, share and thumb. */}
+            <LiveViewerActionsProvider
+              value={
+                <div className="flex items-center gap-2">
+                  <ActionBar compact postId="gallery-live" likeCount={26} dislikeCount={0} commentCount={0} tipCount={3} onTip={() => {}} nativeShare={{ title: 'Live' }} />
+                </div>
+              }
+            >
+              <LivePostChat tokenId="0" streamId={GALLERY_STREAM_ID} overlay />
+            </LiveViewerActionsProvider>
           </div>
           <div data-live-points-desktop className="w-[380px] max-w-full rounded-2xl border border-white/10 bg-black/40 p-4">
             <LivePostChat tokenId="0" streamId={GALLERY_STREAM_ID} />
@@ -3120,6 +3284,7 @@ function LiveViewerGallery() {
             }
             hidden={false}
             streamId={GALLERY_STREAM_ID}
+            onMinimise={noop}
           />
         </div>
         <div
@@ -3166,6 +3331,33 @@ const GALLERY_TEXT_POSTS: GalleryTextPost[] = [
   author: { id: 'gallery-profile', name: 'Marco V', handle: '@marco_v', verified: false },
   stats: { comments: 12 + i * 7, reposts: i, likes: 140 + i * 53, dislikes: 0 },
 }) as GalleryTextPost);
+
+/** `**bold**` in a post, a chat line and a Note (?bold=1). The typed text sits above each. */
+const GALLERY_BOLD_POST = 'Stage opens **tonight at 9** with @ellaverse. **Bring #music** and see **riftn.com/build** 2**3 stays as typed';
+const GALLERY_BOLD_CHAT = 'are you coming? **doors at 9** @kai, tickets at **riftn.com**';
+const GALLERY_BOLD_NOTE = 'gym then **studio**';
+function BoldTextGallery() {
+  const post = { ...GALLERY_TEXT_POSTS[0], id: '990201', content: GALLERY_BOLD_POST } as GalleryTextPost;
+  const typed = (text: string) => <p data-bold-typed className="mb-2 font-mono text-[11px] text-zinc-500">{text}</p>;
+  return (
+    <AuthContext.Provider value={GALLERY_AUTH}>
+      <section data-page-bento data-bold-text-gallery className="mb-5 grid gap-4 rounded-3xl border border-white/10 bg-white/[0.04] p-4 md:grid-cols-3">
+        <div data-feed-item className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3">
+          {typed(GALLERY_BOLD_POST)}
+          <GalleryPostCard post={post} />
+        </div>
+        <div className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3">
+          {typed(GALLERY_BOLD_CHAT)}
+          <p className="chat-body whitespace-pre-wrap break-words rounded-2xl bg-white/10 px-3 py-2 text-sm text-white">{renderChatTextWithLinks(GALLERY_BOLD_CHAT)}</p>
+        </div>
+        <div className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3">
+          {typed(GALLERY_BOLD_NOTE)}
+          <p className="text-center text-[31px] font-extrabold leading-[1.18] text-white"><BoldText text={GALLERY_BOLD_NOTE} /></p>
+        </div>
+      </section>
+    </AuthContext.Provider>
+  );
+}
 
 /** Co-authored posts: both names on the header, the invite card, and the sheet (?coauthors=sheet opens it). */
 const GALLERY_CO_AUTHORS = [

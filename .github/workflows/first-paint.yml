@@ -19,6 +19,7 @@ on:
       - 'src/components/app/home-intro/**'
       - 'src/components/app/AppLayout*.tsx'
       - 'src/pages/app/HomePage.tsx'
+      - 'scripts/critical-css.mjs'
       - 'tests/first-paint-browser.mjs'
       - '.github/workflows/first-paint.yml'
   workflow_dispatch:

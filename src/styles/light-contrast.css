@@ -252,3 +252,22 @@ html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_
   html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-rail-follow='follow']:hover { background: #2a2a2e !important; border-color: #2a2a2e !important; }
   html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-rail-follow='following']:hover { background: rgb(11 11 13 / 0.09) !important; }
 }
+
+/* The typing line follows the words. Edit boxes for comments, replies and
+   chat lines ask for a white caret, written for the dark themes; on a light
+   page that line vanished while the text itself turned ink. Here the caret
+   takes the text colour instead, so it shows wherever the words show, ink on
+   paper and still white on a photo or a live video. */
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
+  :is(.caret-white, [style*='caret-color: white'], [style*='caret-color: #fff'], [style*='caret-color: rgb(255, 255, 255)']) {
+  caret-color: currentColor !important;
+}
+
+/* Editing your own comment turns its words into the field. The field keeps
+   the dark themes' plain look (data-keep-dark stops Jungle and Osaka boxing
+   it), which on Minimal Light also meant white words on paper. It reads in
+   the same ink as the comment did before the tap. */
+html[data-theme='light']:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
+  [data-inplace-edit]:not(:where([data-keep-dark] *, [data-on-media] *, [data-media-full] *)) {
+  color: #2e2e2e !important;
+}
