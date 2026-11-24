@@ -18,13 +18,12 @@ import Chat from '@/components/ui/cut-icons/chat';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGlobalDropZone } from '@/hooks/use-global-drop-zone';
 import { openStageModal } from '@/contexts/StageContext';
-import { openDmDock } from '@/hooks/use-dm-dock';
 import { useStoriesStore } from '@/store/storiesStore';
-import { NotesSheetHost, openNotesSheet, useNotesSheetAvailable } from '@/components/app/chat/NotesRow';
 import type { StoryAuthor } from '@/lib/api/dehub/stories';
 import '@/styles/stories.css';
 
 const PostModal = lazy(() => import('@/features/post/PostModal').then(m => ({ default: m.PostModal })));
+const StoryStatusLauncher = lazy(() => import('./StoryStatusLauncher'));
 
 type Kind = 'moment' | 'post' | 'live' | 'stage' | 'status';
 type IconType = ComponentType<{ className?: string }>;
@@ -48,10 +47,8 @@ export function StoryCreatePill() {
   const [menu, setMenu] = useState<'closed' | 'open' | 'closing'>('closed');
   const [liveOpen, setLiveOpen] = useState(false);
   const [liveMounted, setLiveMounted] = useState(false);
-  const [wantNotes, setWantNotes] = useState(false);
-  // Mounted once Status is picked where no other host exists, then kept.
-  const [ownNotesHost, setOwnNotesHost] = useState(false);
-  const notesHostUp = useNotesSheetAvailable();
+  // Bumped on each Status pick; the launcher mounts on the first and stays.
+  const [statusNonce, setStatusNonce] = useState(0);
   const addRef = useRef<HTMLButtonElement>(null);
   const [anchor, setAnchor] = useState<{ top: number; right: number } | null>(null);
 
@@ -72,12 +69,6 @@ export function StoryCreatePill() {
     };
   }, [menu]);
 
-  // The status sheet only draws where a host is mounted (Messages has one).
-  // Home mounts its own the first time Status is picked, then opens it.
-  useEffect(() => {
-    if (wantNotes && notesHostUp) { openNotesSheet(); setWantNotes(false); }
-  }, [wantNotes, notesHostUp]);
-
   const me = useMemo<StoryAuthor | null>(() => {
     if (!walletAddress) return null;
     const u = user as { username?: string; displayName?: string; avatarImageUrl?: string; avatarUrl?: string } | null;
@@ -91,10 +82,7 @@ export function StoryCreatePill() {
     else if (kind === 'post') openPostModal();
     else if (kind === 'live') { setLiveMounted(true); setLiveOpen(true); }
     else if (kind === 'stage') openStageModal('create');
-    else if (kind === 'status') {
-      if (notesHostUp) openNotesSheet();
-      else { setOwnNotesHost(true); setWantNotes(true); }
-    }
+    else if (kind === 'status') setStatusNonce(n => n + 1);
   };
 
   const openMenu = () => {
@@ -163,16 +151,10 @@ export function StoryCreatePill() {
           <PostModal isOpen={liveOpen} onClose={() => setLiveOpen(false)} initialLiveMode="video" />
         </Suspense>
       )}
-      {ownNotesHost && me && (
-        <NotesSheetHost
-          me={me}
-          onMessage={(author, reply) => openDmDock({
-            address: author.address,
-            username: author.username ?? undefined,
-            displayName: author.displayName ?? undefined,
-            autoSendBody: reply,
-          })}
-        />
+      {statusNonce > 0 && me && (
+        <Suspense fallback={null}>
+          <StoryStatusLauncher me={me} nonce={statusNonce} />
+        </Suspense>
       )}
     </div>
   );
