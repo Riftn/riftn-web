@@ -25,7 +25,7 @@ const decodeHtml = value => value.replace(/&#(\d+);/g, (_, n) => String.fromCode
 const normalizeCopy = value => decodeHtml(value).replace(/\s+/g, ' ').trim();
 const neutralCopy = s=>!/\p{L}/u.test(s)||/^(?:#[a-f0-9]{3,8}|0x[a-f0-9]{40}|bc1[a-z0-9]{25,}|[^\s@]+@[^\s@]+\.[^\s@]+|(?:https?:\/\/)?[a-z0-9-]+\.(?:io|com|net|org)(?:\/\S*)?|Exo (?:Black|Semi-bold|Medium|Light) — \d+)$/i.test(s);
 const escapeHtml = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
-const fixedImageName = value => /^(?:Malik Jan|Mike Hales|Indi Jay Cammish|Bailey Young|Riftn|DeHub|ChatGPT|Claude)$/i.test(value);
+const fixedImageName = value => /^(?:Mal Jan|Mike Hales|Indi Jay Cammish|Bailey Young|Riftn|DeHub|ChatGPT|Claude)$/i.test(value);
 const numbers = value => [...value.replace(/(\d)[\u00a0 ](?=\d{3}(?:\D|$))/g, '$1').matchAll(/\d[\d.,]*/g)].map(match => match[0].replace(/\D/g, ''));
 const accessibleText = (source, normalizedDictionary, route, lang) => {
   const suffix = source.endsWith('|avatar') ? '|avatar' : '';

@@ -140,7 +140,14 @@ const BlogPost = () => {
           description: post.seoDescription || post.excerpt,
           image: shareImage,
           datePublished: post.publishedAt,
-          author: { '@type': 'Person', name: post.author.name, url: 'https://riftn.com/docs/team' },
+          author: {
+            '@type': 'Person',
+            name: post.author.name,
+            url: 'https://riftn.com/docs/team',
+            ...(post.author.name === 'Mal Jan'
+              ? { jobTitle: 'Co-Founder', sameAs: ['https://riftn.com/maldoteth', 'https://x.com/maldoteth'] }
+              : {}),
+          },
           publisher: { '@type': 'Organization', name: 'Riftn', url: 'https://riftn.com' },
           mainEntityOfPage: { '@type': 'WebPage', '@id': shareUrl },
         }}

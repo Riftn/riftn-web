@@ -22,6 +22,7 @@ Every link below is a public page that renders without an account. The app's sig
 - [Documentation](https://riftn.com/docs): Index of the official docs, platform, dApps, token, staking, governance, roadmap and FAQ.
 - [Riftn overview](https://riftn.com/docs/overview): How the platform fits together.
 - [FAQ](https://riftn.com/docs/faq): Answers to the most common questions about Riftn and tokens.
+- [Compare](https://riftn.com/compare): Riftn features side by side with YouTube, X, Twitch, TikTok, Bluesky and others, with sources.
 
 ## Watch, listen and browse
 

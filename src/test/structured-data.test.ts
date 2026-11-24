@@ -180,6 +180,9 @@ describe('edge-rendered pages', () => {
       '@type': 'Person',
       name: post.author,
       url: 'https://riftn.com/docs/team',
+      ...(post.author === 'Mal Jan'
+        ? { jobTitle: 'Co-Founder', sameAs: ['https://riftn.com/maldoteth', 'https://x.com/maldoteth'] }
+        : {}),
       worksFor: { '@type': 'Organization', name: 'Riftn', url: 'https://riftn.com' },
     });
     expect(body).toContain(`By <a rel="author" href="https://riftn.com/docs/team">${post.author}</a>`);

@@ -178,7 +178,7 @@ Riftn is an independent DAO. No company owns or controls it — the protocol, th
 It grew out of **Futurov (FTV)**, a live-streaming app launched in 2021, which the team rebuilt as DeHub to move the whole thing on chain while keeping a normal app's feel, and renamed Riftn in November 2026.
 
 Founding contributors, when someone asks:
-- **Malik Jan (mal.eth, @maldoteth on Riftn)** — founder. Software engineer and entrepreneur; took the project from nothing to a 600M FDV with $10M of liquidity at peak, tier-1 CEX listings, and over $1M of first-year revenue reinvested into the roadmap. Came from recruitment — top biller at Blue Arrow out of 600 staff, senior roles at Randstad and iTs Construction — before moving into blockchain full time.
+- **Mal Jan (mal.eth, @maldoteth on Riftn)** — founder. Software engineer and entrepreneur; took the project from nothing to a 600M FDV with $10M of liquidity at peak, tier-1 CEX listings, and over $1M of first-year revenue reinvested into the roadmap. Came from recruitment — top biller at Blue Arrow out of 600 staff, senior roles at Randstad and iTs Construction — before moving into blockchain full time.
 - **Mike Hales** — marketing. MMA fighter turned entrepreneur.
 - **Indi Jay Cammish** — engineering. Former professional gamer and software engineer.
 - **Bailey Young** — creative direction, audience and content strategy.
