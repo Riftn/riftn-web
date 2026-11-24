@@ -2923,8 +2923,14 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
               /* On air: play the stream right here. The feed used to show only
                  a poster for a live post, so a stream that was actually running
                  read as a dead card until you opened it. */
-              <Suspense fallback={<div className="absolute inset-0 bg-black" />}>
+              /* The preview is its own chunk, so the fallback shows the cover:
+                 when a live post tops the feed this cover is the phone LCP,
+                 and a black box here held it back until the chunk loaded. */
+              <Suspense fallback={thumbnail
+                ? <img src={thumbnail} alt="" aria-hidden="true" decoding="async" className="absolute inset-0 w-full h-full object-cover" loading={aboveFold ? 'eager' : 'lazy'} fetchPriority={aboveFold ? 'high' : 'auto'} />
+                : <div className="absolute inset-0 bg-black" />}>
                 <LiveFeedPreview
+                  eager={aboveFold}
                   streamId={video.liveStreamId}
                   streamStatus={video.liveStatus}
                   creatorId={video.creatorId}

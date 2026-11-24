@@ -406,13 +406,12 @@
             // Feed API is hit at boot via fetch() (CORS) — the warmed socket is
             // reused only when the preconnect is crossorigin (DebugBear 7/14).
             hint("preconnect", "https://api.dehub.io", true);
-            // Posters + avatars stream from DO Spaces via Cloudflare as plain
-            // <img> (non-CORS) — no crossorigin, or the socket wouldn't be reused.
-            hint("preconnect", "https://dehubcdn.ams3.cdn.digitaloceanspaces.com", false);
+            // Video files play straight from DO Spaces, but only after first
+            // paint, so a DNS lookup is enough there (a full preconnect made
+            // five, and PSI flags more than four).
             hint("dns-prefetch", "https://dehubcdn.ams3.cdn.digitaloceanspaces.com", false);
-            // ...but feed posters are requested through the dehub.io image
-            // transform (cdnImage in media-url.ts), so that is the socket the
-            // first poster actually waits on.
+            // Posters and avatars come through the dehub.io image transform
+            // (cdnImage in media-url.ts) as plain <img>, so no crossorigin.
             hint("preconnect", "https://dehub.io", false);
           }
 
