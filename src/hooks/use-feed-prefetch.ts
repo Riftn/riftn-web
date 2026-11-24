@@ -20,8 +20,9 @@ import { DEFAULT_DEHUB_LIVE_QUERY_OPTIONS } from '@/hooks/use-dehub-feed';
 import { getFeedViewer } from '@/hooks/use-unified-feed';
 import { useAuth } from '@/contexts/AuthContext';
 import { getLiteMode } from '@/hooks/use-connection-quality';
+import { API_ORIGIN } from '@/lib/api/api-origin';
 
-const DEHUB_API_BASE = "https://api.dehub.io";
+const DEHUB_API_BASE = API_ORIGIN;
 
 // Delay prefetch to avoid overlapping with nebula prefetch and feed component loads
 const PREFETCH_DELAY_MS = 3000;

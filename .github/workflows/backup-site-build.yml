@@ -1,0 +1,76 @@
+name: Backup site build (IPFS)
+
+# Builds the website for a backup address and packs it for IPFS.
+# Changes nothing live: no deploy, no DNS, no pinning. The output is a CAR
+# file + its CID as a workflow artifact, ready to pin on any IPFS service and
+# to point riftn.eth at. See docs/BACKUP-ADDRESSES.md.
+
+on:
+  workflow_dispatch:
+    inputs:
+      api_origin:
+        description: API address the copy talks to (keep the default unless api.dehub.io is gone)
+        default: https://api.dehub.io
+        required: true
+      api_relay_base:
+        description: Optional relay for blocked networks, e.g. https://riftn.ch/_api (blank = default)
+        default: ''
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '9.15.9'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build for the backup address
+        env:
+          VITE_API_ORIGIN: ${{ inputs.api_origin }}
+          VITE_API_RELAY_BASE: ${{ inputs.api_relay_base }}
+        run: pnpm build
+      - name: Make it work on IPFS gateways
+        env:
+          API_ORIGIN: ${{ inputs.api_origin }}
+        run: |
+          # Any path falls back to the app shell, like the live site.
+          printf '/* /index.html 200\n' > dist/_redirects
+          git rev-parse HEAD > dist/backup-build.txt
+          date -u +%Y-%m-%dT%H:%M:%SZ >> dist/backup-build.txt
+          echo "$API_ORIGIN" >> dist/backup-build.txt
+      - name: Pack for IPFS
+        env:
+          API_ORIGIN: ${{ inputs.api_origin }}
+        run: |
+          npx --yes ipfs-car@3.1.0 pack dist --output site.car | tee pack.log
+          cid=$(grep -oE 'baf[a-z0-9]{50,}' pack.log | head -1)
+          test -n "$cid"
+          echo "$cid" > cid.txt
+          size=$(du -sh site.car | cut -f1)
+          {
+            echo "### Backup site build"
+            echo ""
+            echo "- CID: \`$cid\`"
+            echo "- Size: $size"
+            echo "- API: $API_ORIGIN"
+            echo "- Preview: https://$cid.ipfs.dweb.link (after pinning)"
+            echo ""
+            echo "Next: pin site.car on an IPFS service, then set riftn.eth's content hash to ipfs://$cid"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: backup-site-ipfs
+          path: |
+            site.car
+            cid.txt
+          retention-days: 30
