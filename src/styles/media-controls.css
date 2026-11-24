@@ -256,3 +256,11 @@ html:is([data-theme='light'], [data-system-tone='light']) {
   object-fit: cover !important;
   object-position: center !important;
 }
+
+/* Glass rail with comments: a link card shrinks to a short strip of its
+   picture with a small link badge, no words under it, so the comments keep
+   their room. Cards with no picture, and rails with no comments, are left as
+   they are. */
+[data-wide-rail][data-rail-compact-links] :is([data-link-preview-layout="image"], [data-glass-embed]) [data-link-preview-text] { display: none; }
+[data-wide-rail][data-rail-compact-links] [data-link-preview-layout="image"] [data-link-preview-media] { aspect-ratio: 2.4 / 1; }
+[data-wide-rail][data-rail-compact-links] [data-link-preview-badge] { display: flex; }
