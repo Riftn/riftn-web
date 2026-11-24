@@ -6770,13 +6770,10 @@ html[data-theme="horror"] [data-creator-page] { --cr-accent: linear-gradient(135
     display: block; opacity: .32;
     background-image: var(--silk-phone, url(/brand-kit/bg/bg-16-phone.jpg)) !important;
   }
-  /* The app's copy draws the same portrait crop as a border-image, which is
-     never an LCP candidate: the prerendered card keeps the early LCP even when
-     the re-rendered card comes out a few pixels taller (same fix as the art). */
-  .dehub-intro .dehub-intro-plate.dehub-intro-silk-live {
-    background-image: none !important;
-    border-image: var(--silk-phone, url(/brand-kit/bg/bg-16-phone.jpg)) 0 fill;
-  }
+  /* The app's copy keeps the silk as a background too, so it is an LCP
+     candidate: when the entry runs before the first frame (PSI's observed run
+     paints first at 2.4 s), the app's card is what paints first, and without
+     this the LCP fell to the welcome text after the whole app had run. */
   .dehub-intro .dehub-intro-tail { display: block; margin-top: 0; }
   .dehub-intro .dehub-intro-hero {
     top: 54px; left: 50%; right: auto; width: 120px; height: 118px; opacity: 1;
