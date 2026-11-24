@@ -12,7 +12,8 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { AtSign, EyeOff, Sticker, Wand2, Timer, Pencil, RefreshCw, RotateCw, Type, Undo2, Users, Globe2, Volume2, VolumeX, Scissors } from 'lucide-react';
+import { formatCount } from '@/lib/format-count';
+import { AtSign, EyeOff, Sticker, Wand2, Timer, Pencil, RefreshCw, RotateCw, Type, Undo2, Users, Globe2, Volume2, VolumeX, Scissors, Star, Loader2 } from 'lucide-react';
 import Back from '@/components/ui/cut-icons/back';
 import Close from '@/components/ui/cut-icons/close';
 import Images from '@/components/ui/cut-icons/images';
@@ -23,7 +24,7 @@ import type { AttachedSound } from '@/features/post/hooks/usePostSound';
 import { bindSoundWindow, soundWindow } from '@/lib/sound-window';
 import { searchUsersForDM } from '@/lib/api/dehub/dm';
 import type { DeHubUser } from '@/lib/api/dehub';
-import { getStoryShelf, STORY_LIFETIMES, type StoryAudience, type StoryLifetime, type StorySong } from '@/lib/api/dehub/stories';
+import { getCloseFriends, getStoryShelf, setCloseFriends, STORY_LIFETIMES, type StoryAudience, type StoryLifetime, type StorySong } from '@/lib/api/dehub/stories';
 import { getMediaUrl } from '@/lib/api/dehub/core';
 import { useRefreshStoryShelf } from '@/hooks/use-story-shelf';
 import { useQuery } from '@tanstack/react-query';
@@ -348,7 +349,37 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
     followers: t('stories.followersOnly', { defaultValue: 'Followers' }),
     selected: t('stories.selectedPeople', { defaultValue: 'Only selected people' }),
     except: t('stories.hideFromPeople', { defaultValue: 'Hide from selected people' }),
+    close_friends: t('stories.closeFriends', { defaultValue: 'Close friends' }),
   };
+  // Your Close Friends list, kept on your account. Loaded when the privacy
+  // panel opens; a list saved only in this browser before is moved up once.
+  const [closeFriends, setCloseFriendsList] = useState<DeHubUser[] | null>(null);
+  const closeFriendsSave = useRef<number | null>(null);
+  const isCloseFriends = audience === 'close_friends';
+  useEffect(() => {
+    if (!customAudience || closeFriends !== null || (tool !== 'audience' && !isCloseFriends)) return;
+    let alive = true;
+    getCloseFriends().then(async ({ friends }) => {
+      let list: DeHubUser[] = friends.map(f => ({ address: f.address, username: f.username ?? undefined, displayName: f.displayName ?? undefined } as DeHubUser));
+      const local = readCloseFriends();
+      if (!list.length && local.length) {
+        const saved = await setCloseFriends(local.map(u => u.address!)).catch(() => null);
+        list = saved ? saved.friends.map(f => ({ address: f.address, username: f.username ?? undefined, displayName: f.displayName ?? undefined } as DeHubUser)) : local;
+      }
+      if (alive) setCloseFriendsList(list);
+    }).catch(() => { if (alive) setCloseFriendsList([]); });
+    return () => { alive = false; };
+  }, [customAudience, closeFriends, tool, isCloseFriends]);
+  const changeCloseFriends = (next: DeHubUser[]) => {
+    setCloseFriendsList(next);
+    if (closeFriendsSave.current) window.clearTimeout(closeFriendsSave.current);
+    closeFriendsSave.current = window.setTimeout(() => {
+      setCloseFriends(next.map(u => u.address!).filter(Boolean)).catch(() => {
+        toast.error(t('common.somethingWentWrong', { defaultValue: 'Something went wrong' }));
+      });
+    }, 500);
+  };
+  const audienceBlocked = (restrictPeople && !audiencePeople.length) || (isCloseFriends && !closeFriends?.length);
   const [lifetime, setLifetime] = useState<StoryLifetime>(24);
   const lifetimeLabel = t('stories.lifetime', { defaultValue: 'Story duration' });
   const [busy, setBusy] = useState(false);
@@ -508,7 +539,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
 
   // ── Share ─────────────────────────────────────────────────────────
   const share = useCallback(async () => {
-    if (busy || (restrictPeople && !audiencePeople.length)) return;
+    if (busy || audienceBlocked) return;
     setBusy(true);
     try {
       try { if (!restrictPeople) localStorage.setItem(AUDIENCE_KEY, audience); } catch { /* private mode */ }
@@ -552,7 +583,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
       toast.error(t('stories.couldNotPrepare', { defaultValue: "Couldn't get your moment ready. Try again." }));
       setBusy(false);
     }
-  }, [busy, audience, audiencePeople, restrictPeople, customLifetime, lifetime, layers, song, media, muted, drew, trim, photoSeconds, customPhotoDuration, remixSourceId, onShared, onClose, t]);
+  }, [busy, audience, audiencePeople, restrictPeople, audienceBlocked, customLifetime, lifetime, layers, song, media, muted, drew, trim, photoSeconds, customPhotoDuration, remixSourceId, onShared, onClose, t]);
 
   const isVideo = media.kind === 'video';
   const duration = media.duration || MAX_VIDEO_S;
@@ -667,7 +698,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
             data-st-dark-glass
             onClick={() => { setQuery(''); setPeople([]); setTool('audience'); }}
           >
-            {audience === 'everyone' ? <Globe2 className="w-4 h-4" /> : <Users className="w-4 h-4" />}
+            {audience === 'everyone' ? <Globe2 className="w-4 h-4" /> : isCloseFriends ? <Star className="w-4 h-4 text-green-400" fill="currentColor" /> : <Users className="w-4 h-4" />}
             {audienceLabels[audience]}
           </button>
           {customLifetime ? (
@@ -675,7 +706,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
               {lifetime}h
             </button>
           ) : <span data-sc-chip data-st-dark-glass>24h</span>}
-          <button type="button" data-sc-share onClick={share} disabled={busy || (restrictPeople && !audiencePeople.length)}>
+          <button type="button" data-sc-share onClick={share} disabled={busy || audienceBlocked}>
             {t('stories.share', { defaultValue: 'Share' })}
           </button>
         </div>
@@ -692,28 +723,31 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
           <div className="flex flex-wrap gap-2">
             {(Object.keys(audienceLabels) as StoryAudience[]).filter(mode => customAudience || mode === 'everyone' || mode === 'followers').map(mode => (
               <button key={mode} type="button" data-sc-chip data-st-dark-glass aria-pressed={audience === mode}
-                onClick={() => { if (audience !== mode) setAudiencePeople([]); setAudience(mode); }}>
-                {audience === mode && <Check className="size-4" />}{audienceLabels[mode]}
+                data-sc-close-friends={mode === 'close_friends' ? '' : undefined}
+                onClick={() => { if (audience !== mode) setAudiencePeople([]); setAudience(mode); setQuery(''); setPeople([]); }}>
+                {audience === mode ? <Check className="size-4" /> : mode === 'close_friends' ? <Star className="size-4 text-green-400" fill="currentColor" /> : null}
+                {audienceLabels[mode]}{mode === 'close_friends' && closeFriends?.length ? ` (${formatCount(closeFriends.length)})` : ''}
               </button>
             ))}
           </div>
-          {customAudience && (
-            <div className="mt-2 flex flex-wrap gap-2">
-              <button type="button" data-sc-chip data-st-dark-glass data-sc-close-friends
-                disabled={!readCloseFriends().length}
-                onClick={() => { setAudience('selected'); setAudiencePeople(readCloseFriends()); }}>
-                {t('stories.closeFriends', { defaultValue: 'Close friends' })} ({readCloseFriends().length})
-              </button>
-              {audience === 'selected' && audiencePeople.length > 0 && (
-                <button type="button" data-sc-chip data-st-dark-glass
-                  onClick={() => {
-                    try { localStorage.setItem(CLOSE_FRIENDS_KEY, JSON.stringify(audiencePeople.map(u => ({ address: u.address, username: u.username, displayName: u.displayName })))); } catch { /* private mode */ }
-                    toast.success(t('stories.closeFriendsSaved', { defaultValue: 'Saved as your Close friends' }));
-                  }}>
-                  {t('stories.saveCloseFriends', { defaultValue: 'Save as Close friends' })}
+          {isCloseFriends && (
+            <>
+              <input value={query} onChange={e => setQuery(e.target.value)} placeholder={t('common.search', { defaultValue: 'Search' })}
+                aria-label={t('common.search', { defaultValue: 'Search' })} className="my-2 w-full rounded-full bg-white/10 px-4 py-2" />
+              {closeFriends === null && <Loader2 className="my-2 size-5 animate-spin opacity-70" />}
+              <div className="flex flex-wrap gap-2">
+                {(closeFriends ?? []).map(user => (
+                  <button key={user.address} type="button" data-sc-chip data-st-dark-glass
+                    onClick={() => changeCloseFriends((closeFriends ?? []).filter(item => item.address !== user.address))}>@{user.username || user.address?.slice(0, 8)} ×</button>
+                ))}
+              </div>
+              {people.filter(user => user.address && user.username && !(closeFriends ?? []).some(item => item.address?.toLowerCase() === user.address!.toLowerCase())).map(user => (
+                <button type="button" key={user.address} className="block py-2" disabled={(closeFriends?.length ?? 0) >= 500}
+                  onClick={() => { changeCloseFriends([...(closeFriends ?? []), user]); setQuery(''); setPeople([]); }}>
+                  {user.displayName} @{user.username}
                 </button>
-              )}
-            </div>
+              ))}
+            </>
           )}
           {restrictPeople && (
             <>

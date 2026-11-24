@@ -215,6 +215,7 @@ function PersonTile({ entry, onOpen }: { entry: ShelfEntry; onOpen: (el: HTMLEle
       data-story-tile
       data-kind="person"
       data-seen={entry.seen ? 'true' : 'false'}
+      data-close-friends={entry.closeFriends && !entry.own ? '' : undefined}
       data-blur={blurred ? 'true' : undefined}
       onClick={e => onOpen(e.currentTarget)}
       aria-label={nameOf(a)}

@@ -13,7 +13,10 @@
  */
 import { apiCall, authedUpload } from './core';
 
-export type StoryAudience = 'everyone' | 'followers' | 'selected' | 'except';
+export type StoryAudience = 'everyone' | 'followers' | 'selected' | 'except' | 'close_friends';
+
+/** Audiences whose media is private and signed per viewer. */
+export const isCustomStoryAudience = (audience?: string | null) => audience === 'selected' || audience === 'except' || audience === 'close_friends';
 export const STORY_LIFETIMES = [6, 12, 24] as const;
 export type StoryLifetime = (typeof STORY_LIFETIMES)[number];
 
@@ -64,6 +67,8 @@ export interface StoryItem {
   mentions: StoryMention[];
   song: StorySong | null;
   audience: StoryAudience;
+  /** Posted to the author's Close Friends: green ring and star label. */
+  closeFriends?: boolean;
   allowReplies: boolean;
   createdAt: string;
   expiresAt: string;
@@ -87,6 +92,8 @@ export interface ShelfEntry {
   seen: boolean;
   latestAt: string | null;
   items: StoryItem[];
+  /** One of their Moments up for you is a Close Friends one (green ring). */
+  closeFriends?: boolean;
 }
 
 export interface StoryViewer extends StoryAuthor {
@@ -103,10 +110,22 @@ export interface MomentPeek {
   state: 'unseen' | 'seen';
   count: number;
   cover: string | null;
+  /** A Close Friends Moment of theirs is up for you: the rim turns green. */
+  closeFriends?: boolean;
 }
 
-export function getStoryRings(addresses: string[], signedIn = false): Promise<{ rings: Record<string, 'unseen' | 'seen'>; peeks?: Record<string, MomentPeek> }> {
+export function getStoryRings(addresses: string[], signedIn = false): Promise<{ rings: Record<string, 'unseen' | 'seen'>; peeks?: Record<string, MomentPeek>; closeFriends?: Record<string, true> }> {
   return apiCall('/api/stories/rings', { params: { addresses: addresses.join(',') }, requiresAuth: signedIn });
+}
+
+/** Your Close Friends list: the people who see your Close Friends Moments. */
+export function getCloseFriends(): Promise<{ friends: StoryAuthor[] }> {
+  return apiCall('/api/stories/close-friends', { requiresAuth: true });
+}
+
+/** Replace your Close Friends list (up to 500). Moments already up follow the change. */
+export function setCloseFriends(addresses: string[]): Promise<{ friends: StoryAuthor[] }> {
+  return apiCall('/api/stories/close-friends', { method: 'PUT', body: { addresses }, requiresAuth: true });
 }
 
 export function getUserStories(address: string, signedIn = false): Promise<{ author: StoryAuthor | null; items: StoryItem[] }> {
@@ -150,8 +169,8 @@ export function createStory(
   const form = new FormData();
   form.append('type', fields.type ?? (fields.draftVideoId ? 'video' : 'photo'));
   form.append('audience', fields.audience);
-  const customAudience = fields.audience === 'selected' || fields.audience === 'except';
-  if (customAudience) form.append('audienceAddresses', JSON.stringify(fields.audienceAddresses ?? []));
+  const customAudience = isCustomStoryAudience(fields.audience);
+  if (fields.audience === 'selected' || fields.audience === 'except') form.append('audienceAddresses', JSON.stringify(fields.audienceAddresses ?? []));
   if (fields.photoDurationSeconds != null) form.append('photoDurationSeconds', String(fields.photoDurationSeconds));
   if (fields.expiresInHours != null) form.append('expiresInHours', String(fields.expiresInHours));
   form.append('allowReplies', String(fields.allowReplies !== false));
