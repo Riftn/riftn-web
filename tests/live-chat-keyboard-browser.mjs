@@ -32,7 +32,7 @@ try {
     const context = await browser.newContext({ ...device });
     await context.addInitScript((t) => { try { localStorage.setItem('dehub.theme', t); } catch { /* private mode */ } }, theme);
     const page = await context.newPage();
-    await page.goto(`${base}/app/post/${stream.tokenId}`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`${base}/app/post/${stream.tokenId}`, { waitUntil: 'commit' });
     const box = page.locator('textarea').first();
     await box.waitFor({ state: 'visible', timeout: 90_000 });
     await page.waitForTimeout(2500);

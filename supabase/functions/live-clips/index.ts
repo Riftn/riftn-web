@@ -352,7 +352,7 @@ async function render(db: any, wallet: string, body: any) {
   const windowStart = Number(row.window_start);
   const windowEnd = Number(row.window_end);
   if (!Number.isFinite(start) || !Number.isFinite(end)) return json({ error: 'start and end required' }, 400);
-  if (start < windowStart - 0.1 || end > windowEnd + 0.1) return json({ error: 'Pick a stretch inside the clip.' }, 400);
+  if (start < windowStart - 0.05 || end > windowEnd + 0.05) return json({ error: 'Pick a stretch inside the clip.' }, 400);
   if (end - start < MIN_CLIP_S - 1e-6 || end - start > MAX_CLIP_S + 1e-6) return json({ error: `Clips run ${MIN_CLIP_S}-${MAX_CLIP_S} seconds.` }, 400);
   const title = String(body?.title ?? '').replace(/\s+/g, ' ').trim().slice(0, 100) || row.title || 'Live clip';
 

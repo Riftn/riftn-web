@@ -37,6 +37,9 @@ const fmt = (s: number) => {
   return h ? `${h}:${String(m).padStart(2, '0')}:${sec}` : `${m}:${sec}`;
 };
 
+/** 4.1 - 1.1 is 2.9999999999999996: compare lengths with a little slack. */
+const LENGTH_SLACK = 1e-6;
+
 /** Keep [start, end] inside the window and 3-60 s long, moving the side that was not dragged. */
 export function clampRange(start: number, end: number, lo: number, hi: number, moved: 'start' | 'end'): [number, number] {
   let s = Math.max(lo, Math.min(start, hi));
@@ -53,11 +56,12 @@ export function clampRange(start: number, end: number, lo: number, hi: number, m
   // Round to a tenth, then clamp again: rounding a window edge such as
   // 59.85 up to 59.9 would put the pick past the server's window.
   const r = (v: number) => Math.round(v * 10) / 10;
-  return [Math.max(lo, r(s)), Math.min(hi, r(e))];
+  const roundedStart = Math.max(lo, r(s));
+  const roundedEnd = Math.min(hi, r(e));
+  const roundedLength = roundedEnd - roundedStart;
+  if (roundedLength < CLIP_MIN_S - LENGTH_SLACK || roundedLength > CLIP_MAX_S + LENGTH_SLACK) return [s, e];
+  return [roundedStart, roundedEnd];
 }
-
-/** 4.1 - 1.1 is 2.9999999999999996: compare lengths with a little slack. */
-const LENGTH_SLACK = 1e-6;
 
 export function ClipEditorSheet({ clip: initial, open, onOpenChange, onChange }: Props) {
   const { t } = useTranslation();

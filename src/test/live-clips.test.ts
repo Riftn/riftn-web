@@ -46,6 +46,9 @@ describe('trim range', () => {
       expect(s).toBeGreaterThanOrEqual(0);
     }
     expect(clampRange(29.85, 59.85, 0, 59.85, 'end')).toEqual([29.9, 59.85]);
+    const [start, end] = clampRange(56.85, 59.85, 0, 59.85, 'end');
+    expect(end).toBe(59.85);
+    expect(end - start).toBeCloseTo(3, 8);
   });
 });
 
