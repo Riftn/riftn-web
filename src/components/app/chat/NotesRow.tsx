@@ -486,13 +486,13 @@ function StatusTile({ author, note, own, label, onClick }: { author: StoryAuthor
   const gif = note?.gifUrl || null;
   return (
     <button type="button" onClick={onClick} data-status-tile={own ? 'own' : ''} className="flex w-[88px] shrink-0 flex-col items-center text-center">
-      <span className="flex h-[58px] w-full flex-col items-center justify-end">
+      <span className="flex min-h-[62px] w-full flex-col items-center justify-end pt-1">
         {words && (
           <>
-            <span style={{ ...CLOUD_STYLE, borderRadius: 16 }} className="max-w-[86px] px-2.5 py-[7px]">
+            <span style={{ ...CLOUD_STYLE, borderRadius: 16 }} className="max-w-[86px] shrink-0 px-2.5 py-[7px]">
               <span className="line-clamp-2 break-words text-[11.5px] font-semibold leading-[1.25]" style={{ color: own && !note ? '#71717a' : '#0b0b0c' }}>{words}</span>
             </span>
-            <span aria-hidden className="flex w-full flex-col items-start pl-[26px]">
+            <span aria-hidden className="flex w-full shrink-0 flex-col items-start pl-[26px]">
               <span style={{ ...CLOUD_STYLE, borderRadius: 9999 }} className="mt-0.5 h-2 w-2" />
               <span style={{ ...CLOUD_STYLE, borderRadius: 9999 }} className="ml-1.5 mt-px h-1 w-1" />
             </span>
@@ -526,9 +526,24 @@ export function StatusRow({ me }: { me: StoryAuthor | null }) {
   const mine = data?.mine ?? null;
   const notes = data?.notes ?? [];
   const self = mine?.author ?? me;
+  const statusScrollCleanup = useRef<(() => void) | null>(null);
+  const bindStatusScroll = useCallback((row: HTMLDivElement | null) => {
+    statusScrollCleanup.current?.();
+    statusScrollCleanup.current = null;
+    if (!row?.closest('[data-fullscreen-chat]')) return;
+    const scrollSideways = (event: WheelEvent) => {
+      if (event.ctrlKey || event.shiftKey || event.deltaX || !event.deltaY || !event.cancelable) return;
+      const multiplier = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? row.clientWidth : 1;
+      const before = row.scrollLeft;
+      row.scrollBy({ left: event.deltaY * multiplier, behavior: 'instant' });
+      if (row.scrollLeft !== before) event.preventDefault();
+    };
+    row.addEventListener('wheel', scrollSideways, { passive: false });
+    statusScrollCleanup.current = () => row.removeEventListener('wheel', scrollSideways);
+  }, []);
   if (!self) return null;
   return (
-    <div data-status-row className="-mx-0.5 flex gap-1 overflow-x-auto px-0.5 pb-1 [scrollbar-width:none] [mask-image:linear-gradient(90deg,#000_calc(100%-28px),transparent)]">
+    <div ref={bindStatusScroll} data-status-row className="-mx-0.5 flex gap-1 overflow-x-auto px-0.5 pb-1 [scrollbar-width:none] [mask-image:linear-gradient(90deg,#000_calc(100%-28px),transparent)]">
       <StatusTile own author={self} note={mine?.note ?? null} label={t('notes.yourStatus', { defaultValue: 'Your status' })} onClick={() => openNotesSheet()} />
       {notes.map(entry => (
         <StatusTile key={entry.note.id} author={entry.author} note={entry.note} label={nameOf(entry.author)} onClick={() => openNotesSheet(entry)} />
