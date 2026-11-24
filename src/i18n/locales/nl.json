@@ -24022,5 +24022,8 @@
     "postSnapshot": "Momentopname plaatsen",
     "shareLink": "Link delen",
     "snapshotFailed": "Momentopname mislukt. Probeer opnieuw."
+  },
+  "liveTimeline": {
+    "backToLive": "Terug naar live"
   }
 }

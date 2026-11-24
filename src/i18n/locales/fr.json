@@ -23778,5 +23778,8 @@
     "postSnapshot": "Publier une capture",
     "shareLink": "Partager le lien",
     "snapshotFailed": "Impossible de prendre la capture. Réessaie."
+  },
+  "liveTimeline": {
+    "backToLive": "Revenir au direct"
   }
 }
