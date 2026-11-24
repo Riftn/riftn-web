@@ -1,0 +1,68 @@
+name: First paint
+# Films the first load on a slow phone and a desktop and fails on any blink,
+# flash or jump (tests/first-paint-browser.mjs). Evidence frames are uploaded.
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'vite.config.ts'
+      - 'src/main.tsx'
+      - 'src/App.tsx'
+      - 'src/index.css'
+      - 'src/styles/skeleton.css'
+      - 'src/i18n/index.ts'
+      - 'src/components/app/CopyGate.tsx'
+      - 'src/components/app/PersistentPageCache.tsx'
+      - 'src/components/app/PageSkeletons.tsx'
+      - 'src/components/app/PageBones*.tsx'
+      - 'src/components/app/HomeIntro.tsx'
+      - 'src/components/app/home-intro/**'
+      - 'src/components/app/AppLayout*.tsx'
+      - 'src/pages/app/HomePage.tsx'
+      - 'tests/first-paint-browser.mjs'
+      - '.github/workflows/first-paint.yml'
+  workflow_dispatch:
+jobs:
+  film:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install the app
+        run: npm ci --no-audit --no-fund --ignore-scripts
+      - name: Prepare isolated browser dependencies
+        run: |
+          npm install --prefix "$RUNNER_TEMP/first-paint" --no-save --no-package-lock --ignore-scripts playwright@1.64.0
+          "$RUNNER_TEMP/first-paint/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Build
+        run: npx vite build --outDir "$RUNNER_TEMP/site"
+      - name: Serve the build
+        run: |
+          cat > "$RUNNER_TEMP/serve.py" <<'PY'
+          import http.server, functools, os, sys
+          root = sys.argv[1]
+          class H(http.server.SimpleHTTPRequestHandler):
+              def send_head(self):
+                  if not os.path.exists(self.translate_path(self.path.split('?')[0])):
+                      self.path = '/index.html'
+                  return super().send_head()
+              def log_message(self, *a): pass
+          http.server.ThreadingHTTPServer(('127.0.0.1', 4173), functools.partial(H, directory=root)).serve_forever()
+          PY
+          python3 "$RUNNER_TEMP/serve.py" "$RUNNER_TEMP/site" &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:4173/ >/dev/null && exit 0; sleep 1; done
+          exit 1
+      - name: Film the first load
+        run: node tests/first-paint-browser.mjs
+        env:
+          BROWSER_DEPS: ${{ runner.temp }}/first-paint
+          BASE_URL: http://127.0.0.1:4173
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: first-paint-evidence
+          path: first-paint-evidence/
+          retention-days: 14
