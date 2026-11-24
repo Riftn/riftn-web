@@ -231,6 +231,8 @@ const ClipPage = React.lazy(() => import("./pages/app/ClipPage"));
 const DuetsPage = React.lazy(() => import("./pages/app/DuetsPage"));
 const CoStreamJoinPage = React.lazy(() => import("./pages/app/CoStreamJoinPage"));
 const LinkTvPage = React.lazy(() => import("./pages/app/LinkTvPage"));
+// Binary Metal: type text, hear it as a metal riff, download WAV or MP3 (engine in public/binary-metal).
+const BinaryMetalPage = React.lazy(() => import("./pages/app/BinaryMetalPage"));
 const MobilePreview = React.lazy(() => import("./pages/MobilePreview"));
 const GuidePage = React.lazy(() => import("./pages/GuidePage"));
 const BestDecentralizedStreaming = React.lazy(() => import("./pages/BestDecentralizedStreaming"));
@@ -1028,6 +1030,7 @@ function AppContent() {
             <Route path="/tv" element={null} />
             {/* Where the TV app sends people to sign it in ("or visit riftn.com/link"). */}
             <Route path="/link" element={<Suspense fallback={<PageLoader />}><LinkTvPage /></Suspense>} />
+            <Route path="/music/binary-metal" element={<Suspense fallback={<PageLoader />}><BinaryMetalPage /></Suspense>} />
             <Route path="/bridge" element={null} />
             <Route path="/agents" element={null} />
             <Route path="/assistant" element={null} />

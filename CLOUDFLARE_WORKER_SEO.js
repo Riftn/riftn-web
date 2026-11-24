@@ -186,6 +186,7 @@ const OG_CARD_ROUTES = new Set([
   'arcade/street-slayer',
   'arcade/trenchstar', 'arcade/love-lock-bridge',
   'arcade/correspondence-chess', 'arcade/okey', 'arcade/sillycoin', 'arcade/gratitude', 'arcade/chestard',
+  'music/binary-metal',
   'apps', 'apps/dev',
   // App surfaces that had no card of their own and unfurled as the homepage.
   // `superpowers` art was rendered when the page shipped and was never added
@@ -1465,6 +1466,21 @@ const MARKETING_PAGES = {
     bodyHtml: `<p>Invite a friend by their username, or post an open invite anyone can take. You write one thing you are grateful for, they answer with theirs, and it goes back and forth. Pick 1, 2, 3, 5 or 7 days per turn, and get a notification when it is your turn.</p>
 <p>No repeats: every new line is checked against everything already said in the game, so the same blessing in other words is turned away and you get to try again. Whoever runs out of ideas before their turn time is up hands the win to the other player. Only the two players can read the game.</p>
 <p><a href="${APP_URL}/arcade/gratitude">Start a game</a> or <a href="${APP_URL}/arcade">see the whole arcade</a>.</p>`,
+  },
+  'music/binary-metal': {
+    title: 'Binary Metal: turn text into a metal riff | Riftn',
+    description: 'Type anything and hear it as heavy metal. Every letter becomes binary, every 0 an open string and every 1 the first fret, with drums and bass to match. Download WAV or MP3, free.',
+    heading: 'Binary Metal: Text to Metal Riff',
+    jsonLdType: 'WebApplication',
+    jsonLdExtra: {
+      image: `${APP_URL}/og/music-binary-metal.jpg`,
+      applicationCategory: 'MultimediaApplication',
+      operatingSystem: 'Any',
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+    },
+    bodyHtml: `<p>Type a word, a name or a whole sentence. Every letter becomes its 8-bit binary code and plays as one bar of eight notes: on the low string, 0 is the open string and 1 is the first fret. The bass doubles the guitar, the kick drum follows the 1s and the snare keeps the beat.</p>
+<p>Pick Thrash, Doom, Blast or Groove, set the tempo and the tuning, and turn on power chords. Watch the binary and the guitar tab light up as it plays, then download the riff as WAV or MP3 or post it to your feed. It is all made in your browser and in the Riftn app, and nothing is uploaded unless you post it.</p>
+<p><a href="${APP_URL}/music/binary-metal">Make a riff</a> or <a href="${APP_URL}/music">listen to Riftn Music</a>.</p>`,
   },
   'arcade/chestard': {
     title: 'Chestard Dice Drop Game | Riftn Arcade',

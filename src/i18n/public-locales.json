@@ -1,5 +1,5 @@
 {
-  "version": "4076c402f13a6204",
+  "version": "89da3d490b2b6928",
   "routes": {
     "/": [
       "ar",
@@ -1619,6 +1619,13 @@
       "tr"
     ],
     "/music": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/music/binary-metal": [
       "ar",
       "es",
       "fr",
