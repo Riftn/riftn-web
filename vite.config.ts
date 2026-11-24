@@ -421,8 +421,8 @@ function prerenderHomeIntroPlugin() {
  * The main stylesheet (~130 KB compressed) was render-blocking, so the boot
  * skeleton and the prerendered welcome card, both already in index.html,
  * waited on it. The rules those two need (scripts/critical-css.mjs, ~11 KB
- * compressed) are inlined in its place and the full sheet loads beside them
- * without blocking: the first frame is drawn from the document itself.
+ * compressed) are inlined in its place and the full sheet loads after the
+ * first frame: that frame is drawn from the document itself.
  * (PSI's test machine also draws nothing for ~2.4 s on any page with a
  * blocking external stylesheet, ours or anyone's, and paints at once without.)
  *
@@ -431,8 +431,12 @@ function prerenderHomeIntroPlugin() {
  * lights, line separators, an OBS overlay) keeps the blocking stylesheet,
  * written by the same inline script, so nobody ever sees a restyle.
  *
- * window.__mainCss resolves when the full sheet has applied; the entry
- * starter below waits for it, so the app never renders against partial CSS.
+ * window.__mainCss() starts the full sheet and resolves when it has applied.
+ * The entry starter below calls it once the first frame is on screen and
+ * waits for it, so the app never renders against partial CSS. It is not even
+ * requested before that frame: Lighthouse bills to FCP and LCP whatever
+ * finished downloading before the paint, and on its test machine the first
+ * frame comes late enough that a preloaded sheet always had.
  */
 function inlineCriticalCssPlugin() {
   return {
@@ -457,11 +461,10 @@ function inlineCriticalCssPlugin() {
           const href = m[1];
           const loader = [
             `<style data-critical>${critical}</style>`,
-            `<link rel="preload" as="style" crossorigin href="${href}">`,
-            '<script>(function(){var d=document,s=d.documentElement.dataset,h=' + JSON.stringify(href) + ';',
+            '<script>(function(){var d=document,s=d.documentElement.dataset,h=' + JSON.stringify(href) + ',p;',
             'if(s.theme==="system"&&s.systemTone==="dark"&&s.shortsEnabled==="true"&&s.sidebarCollapsed==="false"&&s.dimLights==="false"&&!("feedSep" in s)&&!("chatOwnBubble" in s)&&!("obsOverlay" in s)){',
-            'var l=d.createElement("link");l.rel="stylesheet";l.crossOrigin="";l.href=h;l.setAttribute("data-main-css","");',
-            'window.__mainCss=new Promise(function(r){l.onload=l.onerror=r;});d.head.appendChild(l);}',
+            'window.__mainCss=function(){if(p)return p;var l=d.createElement("link"),c=d.querySelector("style[data-critical]");l.rel="stylesheet";l.crossOrigin="";l.href=h;l.setAttribute("data-main-css","");',
+            'p=new Promise(function(r){l.onload=l.onerror=r;});if(c)c.insertAdjacentElement("afterend",l);else d.head.appendChild(l);return p;};}',
             `else{d.write('<link rel="stylesheet" crossorigin href="'+h+'">');}})();</script>`,
             `<noscript><link rel="stylesheet" crossorigin href="${href}"></noscript>`,
           ].join('');
@@ -535,7 +538,7 @@ function startEntryAfterFirstPaintPlugin() {
           'function add(q){var t=d.getElementById("boot-preloads");if(!t||!t.content)return;var l=t.content.querySelectorAll(q);for(var i=0;i<l.length;i++)d.head.appendChild(l[i].cloneNode(true));}',
           'function go(r){if(s)return;s=1;mark("entry-start:"+r);add("link:not([data-prefetch-only])");',
           'var c=window.__mainCss;function run(){import(e).then(function(){setTimeout(function(){add("link[data-prefetch-only]");},1500);},function(){});}',
-          'if(c)c.then(run);else run();}',
+          'if(c)c().then(run);else run();}',
           'function afterPaint(){var p=0,sup=0;function f(r){if(p)return;p=1;setTimeout(function(){go(r);},0);}',
           'try{sup=PerformanceObserver.supportedEntryTypes.indexOf("paint")>=0;if(sup)new PerformanceObserver(function(l,o){o.disconnect();f("paint");}).observe({type:"paint",buffered:true});}catch(x){sup=0;}',
           'requestAnimationFrame(function(){mark("first-raf");if(sup)setTimeout(function(){f("frame");},1000);else requestAnimationFrame(function(){f("frame");});});}',
