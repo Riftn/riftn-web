@@ -7521,3 +7521,16 @@ html[data-theme='system'][data-system-tone='light'] [data-menu-account-switcher]
   .chat-jump-glide, .chat-jump-press, .chat-jump-count { transition-duration: 1ms !important; }
   .chat-jump-glide { filter: none; transform: none; }
 }
+
+/* Use a visible native caret in light-mode composers and inline editors.
+   The blue stays legible on both paper and dark media overlays. */
+html:is([data-theme="light"], [data-system-tone="light"]) :is(
+  .chat-text-input,
+  [data-chat-bulk-reply-input],
+  textarea[data-in-place-edit],
+  [data-comments-section] textarea,
+  [data-requests-page] :is(textarea, input:not([type]), input[type="text"], input[type="search"])
+):focus {
+  caret-color: #365dcc;
+  caret-shape: bar;
+}
