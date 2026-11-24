@@ -29,7 +29,10 @@
 
 import { handleCorsPreflight, jsonResponse, serviceClient } from "../_shared/auth.ts";
 
-const API_BASE = (Deno.env.get("DEHUB_API_BASE") || "https://api.dehub.io").replace(/\/$/, "");
+// Origin only: the path below adds its own `/api`. Not `DEHUB_API_BASE`, which
+// is set on this project with `/api` already on the end.
+const API_BASE = (Deno.env.get("DEHUB_PUBLIC_API_BASE") || "https://api.dehub.io")
+  .replace(/\/+$/, "").replace(/\/api$/, "");
 const RECEIPT_TIMEOUT_MS = 8_000;
 
 const TX_HASH = /^(0x[0-9a-fA-F]{64}|app:send:0x[0-9a-f]{40}:[\w-]{8,80})$/;
