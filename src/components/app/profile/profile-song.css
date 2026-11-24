@@ -16,6 +16,11 @@
   transition: transform 160ms ease;
 }
 [data-profile-song]:active { transform: scale(0.985); }
+/* Desktop: only as wide as the song name needs. */
+@media (min-width: 768px) {
+  [data-profile-song] { width: fit-content; min-width: 220px; padding-right: 10px; }
+  [data-profile-song] > .min-w-0 { flex: 0 1 auto; }
+}
 [data-profile-song] .ps-art {
   width: 38px;
   height: 38px;

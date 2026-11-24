@@ -19,6 +19,8 @@ export interface Note {
   gifUrl: string | null;
   song: StorySong | null;
   location: string | null;
+  /** Full-screen backdrop: 'photo' (their photo, blurred) or a colour. */
+  background?: string | null;
   postedAt: string;
   expiresAt: string;
   /** Hearts on it, and whether you gave one. */
@@ -38,6 +40,7 @@ export interface NoteInput {
   gifUrl?: string;
   song?: StorySong;
   location?: string;
+  background?: string;
 }
 
 export function getNotes(): Promise<{ mine: NoteEntry | null; notes: NoteEntry[] }> {

@@ -32,6 +32,7 @@ import { clientNavigate } from '@/lib/client-navigate';
 import { setFilterValue } from '@/hooks/use-persisted-feed-filter';
 import { parseDehubLink, ownSitePath } from '@/lib/dehub-links';
 import { expandEmojiTokens } from '@/components/app/emoji/EmojiText';
+import { applyBold } from '@/lib/bold-markup';
 
 export { LANGUAGE_NAMES };
 import { cn } from '@/lib/utils';
@@ -47,7 +48,8 @@ const CC_TLDS = 'ac|ad|ae|af|ag|al|am|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|
 const GENERIC_TLDS = 'com|org|net|info|biz|xyz|app|dev|ai|io|cc|gg|me|tv|ly|fm|sh|digital|store|online|site|tech|world|club|live|space|art|design|social|link|page|one|pro|media|studio|agency|blog|shop|network|land|zone|fund|games|gaming|vc|nft|crypto|dao|eth|web3|defi|music|video|news|chat|cloud|data|host|email|money|bank|pay|finance|trade|market|exchange|casino|bet|poker|win|lol|wtf|meme|cool|guru|ninja|expert|solutions|services|systems|technology|software|computer|science|education|academy|school|university|institute|training|health|medical|dental|fitness|yoga|beauty|fashion|style|clothing|shoes|jewelry|luxury|estate|property|house|apartments|construction|auto|car|bike|travel|flights|holiday|tours|hotel|restaurant|food|pizza|coffee|bar|pub|wine|beer|recipes|photography|photo|camera|gallery|graphics|ink|tattoo|wedding|events|party|flowers|gifts|toys|baby|kids|family|pets|dog|cat|vet|garden|green|eco|solar|energy|organic|farm|legal|law|attorney|consulting|accountant|tax|insurance|loans|credit|investments|capital|ventures|partners|associates|group|team|community|foundation|charity|church|bible|faith|domains|website|web|blog|forum|wiki|directory|guide|tips|how|reviews|best|top|cheap|discount|sale|deals|coupons|free|plus|vip|gold|black|blue|red|pink|green|orange|theater|movie|film|show|radio|audio|stream|tube|band|rocks|dance|dj|actor|place|city|town|country|earth|world|global|international|company|business|corp|inc|ltd|enterprises|holdings|industries|works|careers|jobs|hire|run|fit|life|love|date|singles|camp|center|care|support|help|repair|direct|express|delivery|supply|tools|parts|equipment|kitchen|house|furniture|lighting|glass|flooring|tiles|build|builders|contractors|plumbing|heating|cleaning|security|cctv|codes|dev|engineer|hacker|geek|tech|digital|cyber|net|systems|app|cloud|host|storage|server|mobile|phone|computer|monitor|watch|today|now|news|report|press|media|social|pics|photos|video|click|download|online|email|chat|games|play|game|poker|bet|casino|win|lol|fail|wtf|meme|cool|fun|sexy|xxx|adult|porn|sucks|gripe|icu|rest|cafe|pub|bar|bio|ceo|voting|democrat|republican|forex|trading|rip|memorial|giving|christmas|theater';
 const COMMON_TLDS = `${CC_TLDS}|${GENERIC_TLDS}`;
 
-const URL_BOUNDARY_REGEX_SRC = `(?:^|\\s|[\\(\\[<"'])`;
+// `*` so a link inside **bold** is still a link.
+const URL_BOUNDARY_REGEX_SRC = `(?:^|\\s|[\\(\\[<"'*])`;
 
 // TLD-restricted regex for non-www links (avoids false positives like "file.mp4")
 // Allow dots in hostname to support subdomains like "Kokoroko.lnk.to"
@@ -59,7 +61,7 @@ const WWW_URL_CORE_REGEX_SRC = `(?:https?:\\/\\/)?www\\.[-a-zA-Z0-9@:%_+~#=]+(?:
 // Core URL matcher for tooltips/hrefs, plus boundary-aware version for inline text scanning
 const URL_REGEX = new RegExp(`(?:${WWW_URL_CORE_REGEX_SRC})|(?:${TLD_URL_CORE_REGEX_SRC})`, 'gi');
 const URL_WITH_BOUNDARY_REGEX = new RegExp(`(?:${URL_BOUNDARY_REGEX_SRC})(?:${URL_REGEX.source})`, 'gi');
-const URL_LEADING_BOUNDARY_REGEX = /^[\s(\[<"']+/;
+const URL_LEADING_BOUNDARY_REGEX = /^[\s(\[<"'*]+/;
 
 /** A fresh copy of the matcher the feed renders with, for editors that chip links. */
 export function createLinkScanRegex(): RegExp {
@@ -396,7 +398,8 @@ export function renderTextWithLinks(text: string, opts?: { flagged?: boolean }):
   
   // Custom and shortcode emoji (`:fire:`, `<:pepe:123>`) inside the plain-text
   // runs — see components/app/emoji/EmojiText.
-  return expandEmojiTokens(parts.length > 0 ? parts : [text]);
+  // `**bold**` last, so a bold run can hold any of the above.
+  return applyBold(expandEmojiTokens(parts.length > 0 ? parts : [text]));
 }
 
 /**
@@ -486,7 +489,7 @@ export function renderChatTextWithLinks(text: string): ReactNode[] {
 
   // Custom and shortcode emoji (`:fire:`, `<:pepe:123>`) inside the plain-text
   // runs — see components/app/emoji/EmojiText.
-  return expandEmojiTokens(linkChatMentions(parts.length > 0 ? parts : [text]));
+  return applyBold(expandEmojiTokens(linkChatMentions(parts.length > 0 ? parts : [text])));
 }
 
 /** @name in a message; the character before the @ can't be part of a word, so name@mail.com stays text. */

@@ -8146,7 +8146,9 @@
         "low": "Suave",
         "high": "Fuerte"
       },
-      "gateHint": "Silencia tu micro entre palabras para que el teclado y los ventiladores no se oigan."
+      "gateHint": "Silencia tu micro entre palabras para que el teclado y los ventiladores no se oigan.",
+      "hearShared": "Escuchar la pestaña compartida en este ordenador",
+      "hearSharedHint": "Desactívalo para que el sonido de la pestaña siga llegando a tus espectadores mientras tú no lo oyes, y así puedas escuchar otra cosa. Funciona con una pestaña compartida en Chrome, Edge o Brave."
     }
   },
   "liveStudio": {
@@ -8173,7 +8175,8 @@
         "connecting": "Conectando",
         "live": "En vivo",
         "error": "Error"
-      }
+      },
+      "addShort": "Añadir"
     },
     "vertical": {
       "title": "Vista vertical",
@@ -8593,6 +8596,18 @@
         "word-timeout_one": "Puso en *timeout* a {{target}} por {{count}} segundo por \"{{word}}\"",
         "word-timeout_other": "Puso en *timeout* a {{target}} por {{count}} segundos por \"{{word}}\""
       }
+    },
+    "groups": {
+      "stream": "En directo",
+      "streamHint": "Interruptores para durante el directo, adónde se envía tu emisión y el enlace para OBS.",
+      "overlay": "Overlay",
+      "viewers": "Espectadores",
+      "viewersHint": "Encuestas, temporizadores, puntos y recompensas que meten en el directo a quien lo ve.",
+      "chat": "Chat",
+      "chatHint": "Tu bot de chat y las reglas del chat bajo tus emisiones.",
+      "replays": "Después del directo",
+      "replaysTab": "Después",
+      "replaysHint": "Cómo fue tu último directo y clips para compartir."
     }
   },
   "live": {
@@ -9629,7 +9644,8 @@
     "followRequest": "{{name}} ha solicitado seguirte",
     "followAccepted": "{{name}} aceptó tu solicitud de seguimiento",
     "signalFlare": "{{name}} ha enviado una bengala de señal",
-    "newMessage": "{{name}} te ha enviado un mensaje"
+    "newMessage": "{{name}} te ha enviado un mensaje",
+    "unlike": "Ya no me gusta"
   },
   "audioPost": {
     "popOut": "Pop out — sigue escuchando mientras navegas",
@@ -9817,6 +9833,19 @@
     "yourChannelHint": "Pega la dirección de tu canal, el identificador también funciona por sí solo."
   },
   "calls": {
+    "removedByMod": "Un moderador te sacó de esta llamada",
+    "removedFor": "Podrás volver a unirte en {{count}} min.",
+    "mutedByMod": "Un moderador te silenció",
+    "mutedByModHint": "Podrás hablar cuando un moderador te active el micrófono.",
+    "unmutedByMod": "Un moderador te activó el micrófono. Toca el micro para hablar.",
+    "modFailed": "No se pudo. Inténtalo de nuevo.",
+    "modMenu": "Moderar a {{name}}",
+    "modMute": "Silenciar a {{name}}",
+    "modUnmute": "Activar a {{name}}",
+    "modRemove": "Sacar de la llamada",
+    "modRemoved": "Sacado de la llamada",
+    "modMuted": "Silenciado para todos",
+    "modUnmuted": "Micrófono activado",
     "voiceCall": "Llamada de voz Riftn",
     "videoCall": "Videollamada Riftn",
     "incoming": "Llamada entrante",
@@ -9878,7 +9907,17 @@
     "startGroupVoice": "Iniciar una llamada de voz grupal",
     "startGroupVideo": "Iniciar una videollamada grupal",
     "subtitles": "Subtítulos",
-    "you": "Tú"
+    "you": "Tú",
+    "callFull": "Esta llamada está llena",
+    "callFullHint": "Ya tiene el máximo de personas posible. Podrás unirte cuando alguien salga.",
+    "camerasFull": "Cámaras completas",
+    "townHall": "Asamblea",
+    "gridView": "Cuadrícula",
+    "unpin": "Desfijar",
+    "townHallTalking": "{{n}} hablando",
+    "camerasFullJoin": "Estás dentro con la cámara apagada. Podrás encenderla cuando alguien apague la suya.",
+    "camerasFullHint": "Podrás encender la tuya cuando alguien apague la suya.",
+    "full": "Llena"
   },
   "badgeAscension": {
     "reached": "Has llegado a {{tier}}",
@@ -13611,6 +13650,7 @@
   },
   "dm": {
     "shareGroups": "Grupos",
+    "opened": {"photoA11y": "Foto, abierta {{time}}", "videoA11y": "Video, abierto {{time}}", "seenAt": "Visto {{time}}", "replyCamera": "Responder con la cámara", "quotePhoto": "Foto · Abierta", "quoteVideo": "Video · Abierto", "cameraTitle": "Responder a esta foto", "cameraOff": "El acceso a la cámara está desactivado. Sube una foto o un video.", "takePhoto": "Tomar foto", "uploadInstead": "Subir archivo"},
     "openTimer": {
       "secs": "{{n}} s",
       "oneMin": "1 min",
@@ -14016,6 +14056,10 @@
     "reminderLater": "Ahora no"
   },
   "copy": {
+    "1944d5ab19cd": "Traducir a",
+    "98cdcf4f2415": "Buscar idiomas",
+    "48bec8529d3f": "Traducido del {{language}}",
+    "d80d30a1c7fd": "Ya está en {{language}}",
     "799c26913574": "Controles",
     "ff73efa451e4": "Muévete con W, A, S, D o las flechas. Mira y dispara con el ratón.",
     "c718a21950e6": "Espacio salta, Shift esprinta, C te agacha y Z te tumba.",
@@ -21874,6 +21918,8 @@
     "notInChat": "Ese enlace es de un chat privado en el que no estás."
   },
   "notes": {
+    "background": "Fondo",
+    "yourPhoto": "Tu foto",
     "newStatus": "Nuevo estado",
     "upFor": "Publicado hace {{time}}",
     "postedAgo": "hace {{time}}",
@@ -23226,6 +23272,25 @@
       "disclaimer": "Las SillyCoins son solo por diversión y no tienen valor. No son una criptomoneda, nunca tocan tu billetera y no se pueden comprar, vender ni cobrar."
     },
     "gratitude": {
+      "withFriend": "Un amigo",
+      "withComputer": "La computadora",
+      "computer": "La computadora",
+      "computerNote": "Responde en unos segundos. Haz que se quede sin ideas nuevas para ganar.",
+      "levelLabel": "Nivel",
+      "levelEasy": "Fácil",
+      "levelNormal": "Normal",
+      "levelHard": "Difícil",
+      "turnLabel": "Tiempo por turno",
+      "turn1m": "1 min",
+      "turn5m": "5 min",
+      "turn1d": "1 día",
+      "playComputer": "Jugar contra la computadora",
+      "computerEach": "{{level}} · {{time}} por turno",
+      "statusComputerTurn": "La computadora está escribiendo…",
+      "chipComputerTurn": "Su turno",
+      "writing": "Escribiendo…",
+      "playAgain": "Jugar otra vez",
+      "empty2": "Aún no hay partidas. Invita a un amigo o juega contra la computadora arriba.",
       "rule1": "Escribe algo por lo que estés agradecido y envíalo.",
       "rule2": "La otra persona responde con lo suyo. Y así sucesivamente.",
       "rule3": "Sin repeticiones. Cada nueva línea se compara con todas las anteriores de la partida.",
@@ -23745,5 +23810,21 @@
     "postSnapshot": "Publicar una captura",
     "shareLink": "Compartir enlace",
     "snapshotFailed": "No se pudo hacer la captura. Inténtalo de nuevo."
+  },
+  "liveMini": {
+    "minimise": "Minimizar",
+    "minimiseHint": "Sigue viendo mientras navegas",
+    "player": "Reproductor en directo",
+    "soundOnly": "Solo sonido",
+    "showPicture": "Mostrar imagen",
+    "openLive": "Abrir directo",
+    "float": "Flotar sobre otras apps",
+    "play": "Reproducir",
+    "pause": "Pausar",
+    "close": "Cerrar directo",
+    "ended": "Este directo ha terminado"
+  },
+  "liveTimeline": {
+    "backToLive": "Volver al directo"
   }
 }

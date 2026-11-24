@@ -21,7 +21,7 @@ import { cn } from '@/lib/utils';
 import { DeHubPageLoader } from '@/components/app/DeHubLoader';
 import { FeedCardSkeletonList } from '@/components/app/cards/FeedCardSkeleton';
 import { FEED_TABS } from '@/constants/app.constants';
-import { isShelfPath, shelfSeatExpected } from '@/lib/story-shelf-seat';
+import { expectedShelfSeat, isShelfPath } from '@/lib/story-shelf-seat';
 import { useShortsEnabled } from '@/contexts/ShortsEnabledContext';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -117,16 +117,22 @@ export function FeedTabBarSkeleton() {
 }
 
 /**
- * The Moments row's seat on phones, same size and place as the real row
- * (stories.css [data-story-shelf]), so the posts do not drop when it lands.
- * Only on Home's own feed, and only when the row was there last visit.
+ * The Moments seat, same size and place as what Home showed last visit: the
+ * row of tiles (stories.css [data-story-shelf]) or the ask bar
+ * ([data-create-ask]), so the posts do not move when it lands.
  */
 export function ShelfSeatSkeleton() {
-  if (typeof window === 'undefined' || !isShelfPath(window.location.pathname) || !shelfSeatExpected()) return null;
+  if (typeof window === 'undefined' || !isShelfPath(window.location.pathname)) return null;
+  const seat = expectedShelfSeat();
+  if (seat === 'none') return null;
+  if (seat === 'ask') {
+    return <div data-shelf-seat="ask" aria-hidden="true" className="home-skeleton-block h-12 mt-[2px] mb-3 rounded-xl" />;
+  }
   return (
-    <div data-shelf-seat aria-hidden="true" className="lg:hidden flex gap-2 overflow-hidden py-[2px] mb-[10px]">
-      {[0, 1, 2, 3, 4].map(index => (
-        <div key={index} className="home-skeleton-block flex-none w-[86px] h-[118px] rounded-2xl" />
+    <div data-shelf-seat="row" aria-hidden="true" className="flex gap-2 overflow-hidden py-[2px] mb-[10px]">
+      <div className="home-skeleton-block flex-none w-[52px] h-[52px] rounded-[17px]" />
+      {[0, 1, 2].map(index => (
+        <div key={index} className="home-skeleton-block flex-none w-[150px] h-[52px] rounded-[17px]" />
       ))}
     </div>
   );

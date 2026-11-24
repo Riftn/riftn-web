@@ -13182,6 +13182,10 @@
     "reminderLater": "Ei nyt"
   },
   "copy": {
+    "1944d5ab19cd": "Käännä",
+    "98cdcf4f2415": "Hae kieliä",
+    "48bec8529d3f": "Käännetty kohteesta {{language}}",
+    "d80d30a1c7fd": "Jo valmiiksi kohdassa {{language}}",
     "55656b5e434f": "Sulje hakukenttä",
     "57e2faa5ec63": "Hae Riftnista",
     "96d7bff86b44": "Hakua ei voitu ladata",

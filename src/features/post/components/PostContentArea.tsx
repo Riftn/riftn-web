@@ -16,7 +16,7 @@ import type { MediaFile, AudioFile, LiveMode, PollData } from '../types';
 import type { FilterSettings, CropSettings } from '../types/filters';
 import type { DraftVideoSnapshot } from '../lib/draft-video';
 import { useEffect, useCallback, useRef, useState } from 'react';
-import { Save, Clock, Square, Hash, AlertTriangle } from "lucide-react";
+import { Save, Clock, Square, Hash, AlertTriangle, AlignLeft, Layers } from "lucide-react";
 import { CONTENT_WARNING_MAX } from '@/components/app/cards/ContentWarningGate';
 import Upload from "@/components/ui/cut-icons/upload";
 import Calendar from "@/components/ui/cut-icons/events";
@@ -27,6 +27,8 @@ import X from "@/components/ui/cut-icons/close";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ScheduleSheet } from './ScheduleSheet';
+import { usePostSpacing } from './PostSpacingSection';
+import { gapLabel } from '../lib/post-spacing';
 import { DraftsSheet, type Draft } from './DraftsSheet';
 import { format } from 'date-fns';
 import { UserMentionDropdown, type MentionUser } from '@/components/app/mentions';
@@ -80,6 +82,10 @@ interface PostContentAreaProps {
   // Schedule/Drafts props
   scheduledDate: Date | null;
   onSchedule: (date: Date | null) => void;
+  /** Photos that could each become their own post ("One post each"). */
+  dripCount?: number;
+  dripGap?: number | null;
+  onDripChange?: (gap: number | null) => void;
   drafts: Draft[];
   onSaveDraft: () => void;
   onLoadDraft: (draft: Draft) => void;
@@ -192,6 +198,9 @@ export function PostContentArea({
   hasAudio,
   onFileDrop,
   scheduledDate,
+  dripCount = 0,
+  dripGap = null,
+  onDripChange,
   onSchedule,
   drafts,
   onSaveDraft,
@@ -216,6 +225,9 @@ export function PostContentArea({
   draftVideo,
 }: PostContentAreaProps) {
   const { t: _copy } = _useCopy();
+  const t = _copy;
+  // The saved "Space my posts" gap: shown as a chip so a spaced post is never a surprise.
+  const spacing = usePostSpacing(!hideScheduleAndDrafts && !liveMode);
   const isLive = liveMode !== null;
   const isProcessingLinks = useRef(false);
   const linkDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -480,6 +492,21 @@ export function PostContentArea({
               {format(scheduledDate, 'MMM d, h:mm a')}
             </motion.div>
           )}
+
+          {/* Space my posts / One post each: where this post will land. */}
+          {!liveMode && (dripGap && dripCount > 1 ? (
+            <button type="button" onClick={() => setShowSchedule(true)} data-post-spacing-chip className="flex items-center gap-1.5 rounded-lg border border-white/15 px-2.5 py-1 text-xs font-medium text-white/80">
+              <Layers className="h-3 w-3" />
+              {_copy("postSpacing.dripChip", { defaultValue: "{{count}} posts, {{gap}} apart", count: dripCount, gap: gapLabel(dripGap, t) })}
+            </button>
+          ) : !scheduledDate && spacing.data?.gapMinutes ? (
+            <button type="button" onClick={() => setShowSchedule(true)} data-post-spacing-chip className="flex items-center gap-1.5 rounded-lg border border-white/15 px-2.5 py-1 text-xs font-medium text-white/80">
+              <AlignLeft className="h-3 w-3" />
+              {spacing.data.nextAt
+                ? _copy("postSpacing.chipAt", { defaultValue: "Spaced · {{time}}", time: format(new Date(spacing.data.nextAt), 'h:mm a') })
+                : _copy("postSpacing.chipNow", { defaultValue: "Spaced · now" })}
+            </button>
+          ) : null)}
 
           {/* Drafts count badge */}
           {drafts.length > 0 && (
@@ -812,6 +839,9 @@ export function PostContentArea({
         title={liveMode === 'townhall' ? _copy("copy.e6c671395de3", { defaultValue: "Schedule stage" }) : liveMode === 'video' ? _copy("copy.e8b72dfec3eb", { defaultValue: "Schedule livestream" }) : _copy("copy.765608de66a0", { defaultValue: "Schedule Post" })}
         minimumMinutes={liveMode === 'video' ? 30 : 0}
         kind={liveMode === 'townhall' ? 'stage' : liveMode === 'video' ? 'live' : 'post'}
+        dripCount={dripCount}
+        dripGap={dripGap}
+        onDripChange={onDripChange}
       />
 
       {/* Drafts Sheet */}

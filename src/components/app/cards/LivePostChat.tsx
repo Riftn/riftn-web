@@ -83,6 +83,7 @@ import { useFocusChatMessage, chatMessageDomId } from '@/hooks/use-focus-chat-me
 import { canLinkMessage, copyChatMessageLink, copyLinkLabel, useLinkedMessage } from '@/lib/chat-message-link';
 import { Link2 } from 'lucide-react';
 import { dblClickReply } from '@/lib/dblclick-reply';
+import { stripBold } from '@/lib/bold-markup';
 
 /** Avatar with cascading fallback: primary → CDN → initials */
 function LiveChatAvatar({ src, address, name }: { src?: string | null; address?: string; name: string }) {
@@ -285,8 +286,23 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
   // While you type, the whole row is the message box: the viewer's buttons
   // slide away and the box widens into their space, then they slide back
   // when the keyboard goes. Focus counts, so the first letter moves nothing.
+  // Only focus counts: a saved draft used to keep the buttons folded away
+  // after you clicked off the box, with no way to get them back.
   const [boxFocused, setBoxFocused] = useState(false);
-  const typing = boxFocused || newMessage.trim().length > 0;
+  const typing = boxFocused;
+  // Clicking anywhere off the row puts the box down, even on a player
+  // that keeps focus where it is when pressed.
+  const composeRowRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!boxFocused) return;
+    const onDown = (e: PointerEvent) => {
+      const row = composeRowRef.current;
+      if (row && e.target instanceof Node && row.contains(e.target)) return;
+      textareaRef.current?.blur();
+    };
+    document.addEventListener('pointerdown', onDown, true);
+    return () => document.removeEventListener('pointerdown', onDown, true);
+  }, [boxFocused]);
   // The send key stays mounted while it folds away.
   const [keyLeaving, setKeyLeaving] = useState(false);
   const wasTypingRef = useRef(typing);
@@ -800,10 +816,9 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
         'relative',
         overlay
           ? 'flex min-h-0 flex-1 flex-col justify-end'
-          // mt-3 and the 2xl radius match the post page's bento rhythm: without
-          // the margin this card butts straight onto the post above it and the
-          // two glass surfaces read as one slab with a seam through them.
-          : 'mt-3 rounded-2xl border border-white/[0.12] bg-white/[0.03] p-3'
+          // Flat inside the post's own bento: a hairline under the caption
+          // instead of a second card, which read as a box inside a box.
+          : 'mt-3 border-t border-white/[0.08] pt-3'
       )}
     >
       {/* Header — the overlay has none. The host already has the room's
@@ -968,7 +983,7 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
                       >
                         <CornerDownRight className="h-3 w-3 shrink-0" />
                         <span className="shrink-0 font-semibold">{msg.reply_to.sender_name}</span>
-                        <span className="truncate">{msg.reply_to.content}</span>
+                        <span className="truncate">{stripBold(msg.reply_to.content)}</span>
                       </button>
                     )}
                     <div className="flex items-baseline gap-1.5">
@@ -1139,7 +1154,7 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
             with nothing left to send. A reply sits inside the box, on top of
             what you type. Nothing is ever on this row that the viewer is not
             about to use. */}
-        <div className="flex items-end gap-2">
+        <div ref={composeRowRef} className="flex items-end gap-2">
         <div className="relative flex-1 min-w-0">
 
           {replyTo && (
@@ -1185,11 +1200,11 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
             onFocus={() => setBoxFocused(true)}
             onBlur={() => setBoxFocused(false)}
             readOnly={!isAuthenticated}
-            placeholder={isOffline ? _copy("copy.17529a437b97", { defaultValue: "Chat is offline" }) : !isAuthenticated ? _copy("copy.048ff525a56b", { defaultValue: "Sign in to chat" }) : bannedHere ? t('liveChatModeration.youAreBanned') : muted ? t('liveChatModeration.youAreTimedOut') : replyTo ? t('stories.replyTo', { defaultValue: 'Reply to {{name}}', name: replyTo.sender_display_name || replyTo.sender_username || replyTo.sender_address.slice(0, 8) }) : _copy("copy.69518e684f06", { defaultValue: "Type a message..." })}
+            placeholder={isOffline ? _copy("copy.17529a437b97", { defaultValue: "Chat is offline" }) : !isAuthenticated ? _copy("copy.048ff525a56b", { defaultValue: "Sign in to chat" }) : bannedHere ? t('liveChatModeration.youAreBanned') : muted ? t('liveChatModeration.youAreTimedOut') : replyTo ? t('stories.replyTo', { defaultValue: 'Reply to {{name}}', name: replyTo.sender_display_name || replyTo.sender_username || replyTo.sender_address.slice(0, 8) }) : _copy("copy.71cbad2cda40", { defaultValue: "Type…" })}
             disabled={isOffline || bannedHere || muted}
             data-live-chat-box
             className={cn(
-              'live-chat-box chat-text-input max-h-32 resize-none text-white text-sm scrollbar-hide',
+              'live-chat-box chat-text-input max-h-32 resize-none text-white text-sm scrollbar-hide placeholder:whitespace-nowrap placeholder:overflow-hidden placeholder:text-ellipsis',
               overlay ? (typing ? 'pr-14' : showInlinePoints ? 'pr-20' : 'pr-4') : 'pr-14',
               replyTo && '!pt-9',
               overlay

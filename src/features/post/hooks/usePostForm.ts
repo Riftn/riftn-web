@@ -30,6 +30,7 @@ import { usePostProcessingStore } from '@/store/postProcessingStore';
 // though the mint helpers below cannot be (see the note under this import).
 import { isSmartWalletSession } from '@/lib/connection-source';
 import { applyEditsToImageFile } from '@/lib/filters';
+import { dripTimes, isLater } from '@/features/post/lib/post-spacing';
 import { startDraftImage, resolveDraftImages } from '../lib/draftImages';
 import { MEDIA_LIMITS } from '@/constants/post.constants';
 import { createVoiceRecorder, voiceRecordingBlob, voiceRecordingFile } from '@/lib/voice-recording';
@@ -65,6 +66,8 @@ import type { PostChainId } from '@/components/app/ChainSelector';
 import { normalizeCategoryList } from '@/lib/category-names';
 import { trackFirstPost } from '@/lib/analytics';
 import { extractUrlsFromText } from '@/lib/api/link-preview';
+import { translateDraft, rememberTranslateLang } from '@/features/post/post-translate';
+import { LANGUAGE_NAMES } from '@/hooks/use-user-language';
 
 // Title switch preference. The old key was also written whenever Article or
 // Comic was picked, which left the title stuck on for plain posts; the new
@@ -270,6 +273,8 @@ const deleteDraftFromDb = async (id: string, walletAddress: string) => {
 interface UsePostFormReturn {
   state: PostFormState & {
     scheduledDate: Date | null;
+    /** "One post each": minutes between the photos' posts, or null for one post. */
+    dripGap: number | null;
     drafts: Draft[];
     isRecording: boolean;
     recordingTime: number;
@@ -288,6 +293,7 @@ interface UsePostFormReturn {
   };
   actions: PostFormActions & {
     setScheduledDate: (date: Date | null) => void;
+    setDripGap: (gap: number | null) => void;
     saveDraft: (article?: { body: string; title: string; imageData?: string; socialData?: string }, replaceId?: string) => void;
     loadDraft: (draft: Draft) => void;
     deleteDraft: (id: string) => void;
@@ -401,6 +407,9 @@ export function usePostForm(
   // Who may see the post. Everyone, unless the creator narrows it; fixed once posted.
   const [visibility, setVisibility] = useState<PostVisibility>('public');
   const [isEnhancing, setIsEnhancing] = useState(false);
+  // AI menu > Translate: what the draft said before, kept so it can be undone
+  // until the post goes out or the writer types over the translation.
+  const [translation, setTranslation] = useState<{ original: string; translated: string; from: string | null } | null>(null);
   const [isPosting, setIsPosting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   /**
@@ -425,6 +434,7 @@ export function usePostForm(
    */
   const postAttemptRef = useRef<{ signature: string; key: string } | null>(null);
   
+  const [dripGap, setDripGap] = useState<number | null>(null);
   const [scheduledDate, setScheduledDate] = useState<Date | null>(() => {
     if (!d?.scheduledDate) return null;
     const when = new Date(d.scheduledDate);
@@ -1206,6 +1216,49 @@ export function usePostForm(
     }
   }, [text, setText, _copy]);
 
+  const writeDraft = useCallback((next: string) => {
+    setText(next);
+    if (editorRef.current) editorRef.current.innerText = next;
+  }, [setText]);
+
+  const handleTranslateDraft = useCallback(async (lang: string) => {
+    const typed = text.trim();
+    if (!typed) {
+      toast.error(_copy("copy.9034a5022016", { defaultValue: "Enter some text first" }));
+      return;
+    }
+    rememberTranslateLang(lang);
+    setIsEnhancing(true);
+    try {
+      const result = await translateDraft(typed, lang);
+      if (result.same) {
+        toast(_copy("copy.d80d30a1c7fd", { defaultValue: "Already in {{language}}", language: LANGUAGE_NAMES[lang] ?? lang }));
+        return;
+      }
+      // Undo goes back to the first words, however many times it is translated.
+      setTranslation((prev) => ({
+        original: prev && prev.translated === text ? prev.original : text,
+        translated: result.text,
+        from: prev && prev.translated === text ? prev.from : result.from,
+      }));
+      writeDraft(result.text);
+    } catch (err) {
+      console.error('Draft translation error:', err);
+      toast.error(_copy("copy.037091068590", { defaultValue: "Translation failed" }));
+    } finally {
+      setIsEnhancing(false);
+    }
+  }, [text, writeDraft, _copy]);
+
+  const undoTranslateDraft = useCallback(() => {
+    if (!translation) return;
+    writeDraft(translation.original);
+    setTranslation(null);
+  }, [translation, writeDraft]);
+
+  // The Undo line only stands for the translation as it came back.
+  const translatedDraft = translation && translation.translated === text ? translation : null;
+
   const insertFormatting = useCallback((format: 'bold' | 'italic' | 'mention') => {
     const editor = editorRef.current;
     if (!editor) return;
@@ -1314,6 +1367,7 @@ export function usePostForm(
     setStitchPolicy(null);
     setVisibility('public');
     setScheduledDate(null);
+    setDripGap(null);
     setTitleText.complete(titleText, '');
     // Cleared per post, deliberately. A board is usually specific to what was
     // just posted, and one that quietly carries over ends up on content it has
@@ -2153,6 +2207,45 @@ export function usePostForm(
         if (trimmed) toast.info(_copy("post.trim.notApplied", { defaultValue: "This video was posted without your trim and edits." }));
       };
 
+      /**
+       * "One post each" (Requests 86e8907b): every photo becomes its own post,
+       * one every `dripGap` minutes from the time picked (or now). The first
+       * one that is due now goes straight out; the rest wait in Planned. Each
+       * photo has its own key, so tapping Post again after a failure halfway
+       * picks up where it stopped instead of posting the first ones twice.
+       */
+      if (dripGap && postType === 'feed-images' && !isQuoting && !liveMode && postLayout !== 'comic' && !mintingThisPost && files.length > 1) {
+        const times = dripTimes(scheduledDate ?? new Date(), files.length, dripGap);
+        const imageMedia = media.filter(m => m.type === 'image');
+        const baseKey = postAttemptRef.current.key;
+        for (let i = 0; i < files.length; i++) {
+          toast.loading(_copy("postSpacing.dripProgress", { defaultValue: "Planning post {{n}} of {{total}}", n: i + 1, total: files.length }), { id: 'mint-progress', duration: Infinity });
+          setUploadProgress(Math.round((i / files.length) * 100));
+          const at = times[i];
+          const description = imageMedia[i]?.description;
+          await mintPost(
+            {
+              ...mintParams,
+              files: [files[i]],
+              draftImageIds: undefined,
+              mediaDescriptions: description ? [description] : undefined,
+              layout: undefined,
+              mediaCaptions: undefined,
+              comicBorder: undefined,
+              scheduledAt: isLater(at) ? at.toISOString() : undefined,
+              spacing: 'skip',
+              idempotencyKey: `${baseKey}-${i}`,
+            },
+            () => {},
+          );
+        }
+        const last = times[times.length - 1];
+        toast.success(_copy("postSpacing.dripDone", { defaultValue: "{{count}} posts planned. Last one {{when}}", count: files.length, when: last.toLocaleString() }), { id: 'mint-progress' });
+        resetForm();
+        onClose();
+        return;
+      }
+
       let mintResponse: MintResponse;
       if (draftVideoId) {
         try {
@@ -2332,7 +2425,12 @@ export function usePostForm(
         const when = mintResponse.scheduledAt ? new Date(mintResponse.scheduledAt) : scheduledDate;
         // The poll goes on now; its clock starts at the scheduled time.
         await attachPoll(when ? when.getTime() : Date.now());
-        toast.success(when ? _copy("copy.ef58a8022edc", { defaultValue: "Post scheduled for {{value1}}", value1: when.toLocaleString() }) : _copy("copy.0ae4cb6e00b3", { defaultValue: "Post scheduled for later" }), { id: 'mint-progress' });
+        toast.success(
+          when && mintResponse.spaced
+            ? _copy("postSpacing.spacedToast", { defaultValue: "Spaced out: goes out {{value1}}", value1: when.toLocaleString() })
+            : when ? _copy("copy.ef58a8022edc", { defaultValue: "Post scheduled for {{value1}}", value1: when.toLocaleString() }) : _copy("copy.0ae4cb6e00b3", { defaultValue: "Post scheduled for later" }),
+          { id: 'mint-progress' },
+        );
         resetForm();
         onClose();
         return;
@@ -2965,7 +3063,7 @@ export function usePostForm(
     // Add the dependency when you read new state in here.
     text, media, isSubscribersOnly, isPPV, ppvAmount, ppvCurrency,
     isWatch2Earn, w2eViews, w2eComments, w2eTotal,
-    isTokenGated, tokenContract, tokenSymbol, tokenAmount, liveMode, scheduledDate,
+    isTokenGated, tokenContract, tokenSymbol, tokenAmount, liveMode, scheduledDate, dripGap,
     hasVideo, hasImage, hasAudio, isPosting, resetForm, onClose, navigate, addOptimisticPost, user,
     showTitle, titleText, connectionSource, poll, pollIsValid, quiz, quizIsValid, photoTags, chainId,
     refreshSession, openLoginModal, requestWalletUnlock,
@@ -3017,12 +3115,14 @@ export function usePostForm(
       stitchPolicy,
       visibility,
       isEnhancing,
+      translatedDraft,
       isPosting,
       uploadProgress,
       draftVideo,
       mintAwaitingWallet,
 
       scheduledDate,
+      dripGap,
       drafts,
       isRecording,
       recordingTime,
@@ -3090,11 +3190,14 @@ export function usePostForm(
       setComicBorder,
       addComicPages,
       handleEnhanceWithAI,
+      handleTranslateDraft,
+      undoTranslateDraft,
       insertFormatting,
       handlePost,
       abandonMint,
       resetForm,
       setScheduledDate,
+      setDripGap,
       saveDraft,
       loadDraft,
       deleteDraft,

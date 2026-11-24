@@ -23,6 +23,10 @@ import ChevronRight from "@/components/ui/cut-icons/next";
 import X from "@/components/ui/cut-icons/close";
 import Search from "@/components/ui/cut-icons/search";
 import MessageSquare from "@/components/ui/cut-icons/messages";
+import Languages from "@/components/ui/cut-icons/language";
+import { LANGUAGE_NAMES } from '@/hooks/use-user-language';
+import { TranslateLanguageList } from './TranslateLanguageList';
+import { rememberedTranslateLang } from '../post-translate';
 
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -61,6 +65,8 @@ interface PostActionBarProps {
   onInsertGif: (gifUrl: string) => void;
   onCameraCapture: () => void;
   onEnhanceWithAI: (mode: 'spellcheck' | 'grammar' | 'style', style?: string) => void;
+  /** AI menu > Translate: turn the draft into the picked language. */
+  onTranslate?: (lang: string) => void;
   onPost: () => void;
   /** Opens the post drawn by the real feed card. */
   onPreview?: () => void;
@@ -125,6 +131,7 @@ export function PostActionBar({
   onInsertGif,
   onCameraCapture,
   onEnhanceWithAI,
+  onTranslate,
   onPost,
   onPreview,
   canPost,
@@ -177,6 +184,7 @@ export function PostActionBar({
   const [livePopoverOpen, setLivePopoverOpen] = useState(false);
   const [enhanceSheetOpen, setEnhanceSheetOpen] = useState(false);
   const [styleView, setStyleView] = useState(false);
+  const [langView, setLangView] = useState(false);
   const navigate = useNavigate();
   const isLive = liveMode !== null;
   const attachmentInputRef = useRef<HTMLInputElement>(null);
@@ -240,12 +248,20 @@ export function PostActionBar({
   const handleCloseEnhance = () => {
     setEnhanceSheetOpen(false);
     setStyleView(false);
+    setLangView(false);
+  };
+
+  const handleTranslate = (lang: string) => {
+    onTranslate?.(lang);
+    handleCloseEnhance();
   };
 
   // Menu content - used in Drawer on all devices
   const menuContent = (
     <div className="flex flex-col max-h-[50vh] overflow-y-auto pb-4">
-      {styleView ? (
+      {langView ? (
+        <TranslateLanguageList onPick={handleTranslate} />
+      ) : styleView ? (
         <>
           {AI_STYLE_OPTIONS.map((style) => (
             <button
@@ -284,6 +300,21 @@ export function PostActionBar({
               <Palette className="w-5 h-5 text-white" />{_copy("copy.21b90e9de0f4", { defaultValue: "Change Style" })}</div>
             <ChevronRight className="w-4 h-4 text-zinc-500" />
           </button>
+
+          {onTranslate && (
+            <button
+              type="button"
+              onClick={() => setLangView(true)}
+              className="flex items-center justify-between px-4 py-3 text-sm text-white hover:bg-white/10 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <Languages className="w-5 h-5 text-white" />{_copy("copy.8fe147696fbf", { defaultValue: "Translate" })}</div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-white/60">{LANGUAGE_NAMES[rememberedTranslateLang()] ?? LANGUAGE_NAMES.en}</span>
+                <ChevronRight className="w-4 h-4 text-zinc-500" />
+              </div>
+            </button>
+          )}
 
           <button
             type="button"
@@ -756,17 +787,17 @@ export function PostActionBar({
         <Drawer open={enhanceSheetOpen} onOpenChange={handleCloseEnhance}>
           <DrawerContent column glass className="border-t border-white/10 max-h-[90dvh]">
             <DrawerHeader className="border-b border-white/10">
-              {styleView && (
+              {(styleView || langView) && (
                 <button
                   type="button"
-                  onClick={() => setStyleView(false)}
+                  onClick={() => { setStyleView(false); setLangView(false); }}
                   className="flex items-center gap-1 text-sm text-zinc-400 hover:text-white transition-colors mb-2"
                 >
                   <ChevronLeft className="w-4 h-4" />{_copy("copy.76900f1bfd16", { defaultValue: "Back" })}</button>
               )}
               <DrawerTitle className="text-white flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-white" />
-                {styleView ? _copy("copy.dc7a1d57c478", { defaultValue: "Choose Style" }) : _copy("copy.a91c19f54936", { defaultValue: "Enhance" })}
+                {langView ? <Languages className="w-5 h-5 text-white" /> : <Sparkles className="w-5 h-5 text-white" />}
+                {langView ? _copy("copy.1944d5ab19cd", { defaultValue: "Translate to" }) : styleView ? _copy("copy.dc7a1d57c478", { defaultValue: "Choose Style" }) : _copy("copy.a91c19f54936", { defaultValue: "Enhance" })}
               </DrawerTitle>
             </DrawerHeader>
             {menuContent}

@@ -75,7 +75,7 @@ import lock3dIcon from '@/assets/lock-3d.webp';
 import home3dIcon from '@/assets/icons/home-3d-icon.webp';
 import comment3dIcon from '@/assets/icons/comment-3d-icon.webp';
 import { toStoryboard } from '@/lib/storyboard';
-import { storedVideoAspect } from '@/lib/video-aspect';
+import { storedVideoAspect, storedVideoSizeShown } from '@/lib/video-aspect';
 
 import { formatCount } from '@/lib/format-count';
 /** Empty-state copy when the channel toolbar's sort/search is what emptied the tab. */
@@ -1182,6 +1182,7 @@ function PinnedPostCard({ pin }: { pin: any }) {
           transcodingStatus: post.transcodingStatus,
           storyboard: toStoryboard((post as { storyboard?: unknown }).storyboard),
           storedAspect: storedVideoAspect((post as { videoInfo?: unknown }).videoInfo),
+          storedAspectShown: storedVideoSizeShown((post as { videoInfo?: unknown }).videoInfo),
           title: post.title || post.name || '',
           channel: post.minterDisplayName || post.minterUsername || creatorObj?.display_name || _translateCopy("copy.b764cdc0eab7", { defaultValue: "Unknown" }),
           channelAvatar: avatar, verified: false,

@@ -694,7 +694,12 @@ export function useMessages(conversationId: string | null) {
             // Deleted for me: gone from this chat. For everyone: the line says so.
             items: data.forMe
               ? page.items.filter((m: DmMessage) => m._id !== id)
-              : page.items.map((m: DmMessage) => (m._id === id ? { ...m, isDeleted: true, content: '' } : m)),
+              : page.items.map((m: DmMessage) => (m._id === id
+                ? (data.marker && data.destruct
+                  // An opened view-once / on-open photo: the file goes, an "Opened" pill stays.
+                  ? { ...m, isDeleted: true, content: '', mediaUrls: [], encMedia: undefined, destruct: data.destruct }
+                  : { ...m, isDeleted: true, content: '' })
+                : m)),
           }));
           return { ...old, pages };
         }

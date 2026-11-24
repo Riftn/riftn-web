@@ -203,6 +203,8 @@ export interface VideoItem extends BaseFeedItem {
   storyboard?: Storyboard;
   /** Width/height stored at upload — see lib/video-aspect. */
   storedAspect?: number;
+  /** The stored size is the shape as shown (rotation applied), so it outranks the poster. */
+  storedAspectShown?: boolean;
   /** Off-chain slug — the post presents as /newpost/<newPostId> until minted. */
   newPostId?: number;
   /** Readable URL: /app/post/<articleSlug> (first ten words of title or description). */

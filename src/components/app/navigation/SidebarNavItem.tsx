@@ -251,6 +251,8 @@ function SidebarNavItemInner({
         {glassIndicator}
         <div className={cn(
           theme === 'glass' && "!bg-transparent",
+          // Light: the dark tile behind each icon read as a grey plate.
+          isLightTheme && isDesktop && "!bg-transparent",
           "relative z-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors",
           isDesktop ? "w-9 h-9" : "w-10 h-10",
           isDesktop
@@ -301,6 +303,8 @@ function SidebarNavItemInner({
       ) : (
         <div className={cn(
           theme === 'glass' && "!bg-transparent",
+          // Light: the dark tile behind each icon read as a grey plate.
+          isLightTheme && isDesktop && "!bg-transparent",
           "relative z-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors",
           isDesktop ? "w-9 h-9" : "w-10 h-10",
           isDesktop

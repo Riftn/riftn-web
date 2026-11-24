@@ -23,7 +23,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { PageSection } from '@/components/app/page-kit/PageKit';
+import { PageSection, PageTabs } from '@/components/app/page-kit/PageKit';
+import { StudioGroup } from './studio-groups';
 import { cn } from '@/lib/utils';
 import { getMyOverlay, saveMyOverlay, sendOverlayTest, type OverlayTestKind } from '@/lib/api/dehub/live-overlay';
 import { MAX_WIDGETS, OVERLAY_KINDS, isKnownKind, newWidget, type OverlayKind } from '@/lib/live-overlay/registry';
@@ -248,181 +249,178 @@ export function LiveStudio() {
     return <p className="py-10 text-sm text-zinc-400">{t('liveStudio.loadFailed')}</p>;
   }
 
-  return (
-    <div className="space-y-4 pb-24">
-      <p className="text-sm text-zinc-400">{t('liveStudio.intro')}</p>
+  const previewTabs = (
+    <PageTabs
+      size="sm"
+      value={portrait ? 'portrait' : 'landscape'}
+      onChange={(id) => setPortrait(id === 'portrait')}
+      tabs={[
+        { id: 'landscape', label: t('liveStudio.landscape') },
+        { id: 'portrait', label: t('liveStudio.portrait') },
+      ]}
+    />
+  );
 
+  return (
+    <div data-live-studio className="mx-auto w-full max-w-3xl space-y-10 pb-24">
       {justEnded && <RecapPanel address={walletAddress} streamId={justEnded} />}
 
-      <QuickControls overlay={data} queryKey={myOverlayKey} />
+      <StudioGroup id="stream" title={t('liveStudio.groups.stream')} hint={t('liveStudio.groups.streamHint')}>
+        <QuickControls overlay={data} queryKey={myOverlayKey} />
+        <DestinationsPanel address={walletAddress} />
+        <ObsPanel
+          token={data.token}
+          renderIn={renderIn}
+          obsConnected={data.obsConnected}
+          selectedWidgetId={selectedId}
+          onRenderIn={chooseRenderIn}
+        />
+      </StudioGroup>
 
-      <DestinationsPanel address={walletAddress} />
+      <StudioGroup id="overlay" title={t('liveStudio.groups.overlay')} hint={t('liveStudio.intro')}>
+        <PageSection title={t('liveStudio.preview')} action={previewTabs}>
+          <OverlayEventContext.Provider value={bus}>
+            <RuleBusContext.Provider value={ruleBus}>
+              <RuleAudio playLive={false} />
+              <PollContext.Provider value={{ poll: previewPoll, myVote: null, interactive: false }}>
+              <SubathonContext.Provider value={previewSubathon}>
+              <HypeContext.Provider value={previewHype}>
+              <OverlayCreatorContext.Provider value={walletAddress ?? ''}>
+                <StudioStage
+                  widgets={widgets}
+                  portrait={portrait}
+                  selectedId={selectedId}
+                  stats={PREVIEW_STATS}
+                  onSelect={setSelectedId}
+                  onMove={move}
+                />
+              </OverlayCreatorContext.Provider>
+              </HypeContext.Provider>
+              </SubathonContext.Provider>
+              </PollContext.Provider>
+            </RuleBusContext.Provider>
+          </OverlayEventContext.Provider>
+          <p className="mt-3 text-xs text-zinc-400">{t('liveStudio.layoutHint')}</p>
+        </PageSection>
 
-      <HighlightsPanel address={walletAddress} />
-
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-        <div className="space-y-4">
-          <PageSection
-            title={t('liveStudio.preview')}
-            action={
-              <div role="tablist" aria-label={t('liveStudio.preview')} className="flex rounded-lg border border-zinc-700 p-0.5">
-                {[false, true].map((p) => (
-                  <button
-                    key={String(p)}
-                    role="tab"
-                    aria-selected={portrait === p}
-                    onClick={() => setPortrait(p)}
-                    className={cn(
-                      'rounded-md px-2.5 py-1 text-xs font-medium',
-                      portrait === p ? 'bg-white text-zinc-900' : 'text-zinc-400 hover:text-white',
-                    )}
-                  >
-                    {p ? t('liveStudio.portrait') : t('liveStudio.landscape')}
-                  </button>
-                ))}
-              </div>
-            }
-          >
-            <OverlayEventContext.Provider value={bus}>
-              <RuleBusContext.Provider value={ruleBus}>
-                <RuleAudio playLive={false} />
-                <PollContext.Provider value={{ poll: previewPoll, myVote: null, interactive: false }}>
-                <SubathonContext.Provider value={previewSubathon}>
-                <HypeContext.Provider value={previewHype}>
-                <OverlayCreatorContext.Provider value={walletAddress ?? ''}>
-                  <StudioStage
-                    widgets={widgets}
-                    portrait={portrait}
-                    selectedId={selectedId}
-                    stats={PREVIEW_STATS}
-                    onSelect={setSelectedId}
-                    onMove={move}
-                  />
-                </OverlayCreatorContext.Provider>
-                </HypeContext.Provider>
-                </SubathonContext.Provider>
-                </PollContext.Provider>
-              </RuleBusContext.Provider>
-            </OverlayEventContext.Provider>
-            <p className="mt-3 text-xs text-zinc-500">{t('liveStudio.layoutHint')}</p>
-          </PageSection>
-
-          <VerticalCropPanel crop={verticalCrop} onChange={chooseVerticalCrop} />
-
-          <PageSection title={t('liveStudio.test')}>
-            <p className="mb-3 text-xs text-zinc-500">{t('liveStudio.testHint')}</p>
-            <div className="flex flex-wrap gap-2">
-              {TESTS.map((kind) => (
-                <Button
-                  key={kind}
-                  variant="outline"
-                  size="sm"
-                  disabled={test.isPending}
-                  onClick={() => test.mutate(kind)}
-                >
-                  {t(`liveStudio.tests.${kind}`)}
+        <PageSection
+          title={t('liveStudio.widgets')}
+          action={
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="sm" variant="outline">
+                  <Plus className="mr-1 h-4 w-4" />
+                  {t('liveStudio.addWidget')}
                 </Button>
-              ))}
-            </div>
-          </PageSection>
-        </div>
-
-        <div className="space-y-4">
-          <ObsPanel
-            token={data.token}
-            renderIn={renderIn}
-            obsConnected={data.obsConnected}
-            selectedWidgetId={selectedId}
-            onRenderIn={chooseRenderIn}
-          />
-
-          <PageSection
-            title={t('liveStudio.widgets')}
-            action={
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button size="sm" variant="outline">
-                    <Plus className="mr-1 h-4 w-4" />
-                    {t('liveStudio.addWidget')}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-64">
-                  {OVERLAY_KINDS.map((kind) => (
-                    <DropdownMenuItem key={kind} onSelect={() => add(kind)} className="flex-col items-start gap-0.5">
-                      <span className="text-sm font-medium">{t(`liveStudio.kinds.${kind}`)}</span>
-                      <span className="text-xs text-zinc-500">{t(`liveStudio.hints.${kind}`)}</span>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            }
-          >
-            {widgets.length === 0 ? (
-              <p className="text-sm text-zinc-500">{t('liveStudio.empty')}</p>
-            ) : (
-              <ul className="space-y-1.5">
-                {widgets.map((w) => (
-                  <li
-                    key={w.id}
-                    className={cn(
-                      'flex items-center gap-3 rounded-lg px-2 py-1.5',
-                      w.id === selectedId ? 'bg-zinc-800' : 'hover:bg-zinc-800/60',
-                    )}
-                  >
-                    <button onClick={() => setSelectedId(w.id)} className="min-w-0 flex-1 truncate text-left text-sm text-white">
-                      {isKnownKind(w.kind) ? t(`liveStudio.kinds.${w.kind}`) : w.kind}
-                    </button>
-                    <Switch
-                      checked={w.enabled}
-                      onCheckedChange={(v) => update(w.id, { enabled: v })}
-                      aria-label={t('liveStudio.visible')}
-                    />
-                    <button
-                      onClick={() => remove(w.id)}
-                      aria-label={t('liveStudio.remove')}
-                      className="rounded-md p-1 text-zinc-500 hover:bg-zinc-700 hover:text-white"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </li>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-64">
+                {OVERLAY_KINDS.map((kind) => (
+                  <DropdownMenuItem key={kind} onSelect={() => add(kind)} className="flex-col items-start gap-0.5">
+                    <span className="text-sm font-medium">{t(`liveStudio.kinds.${kind}`)}</span>
+                    <span className="text-xs text-zinc-500">{t(`liveStudio.hints.${kind}`)}</span>
+                  </DropdownMenuItem>
                 ))}
-              </ul>
-            )}
-          </PageSection>
-
-          <PageSection title={selected ? t(`liveStudio.kinds.${selected.kind}`) : t('liveStudio.settings')}>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          }
+        >
+          {widgets.length === 0 ? (
+            <p className="text-sm text-zinc-400">{t('liveStudio.empty')}</p>
+          ) : (
+            <ul className="-mx-2 space-y-1">
+              {widgets.map((w) => (
+                <li
+                  key={w.id}
+                  data-active={w.id === selectedId ? 'true' : undefined}
+                  className={cn(
+                    'flex items-center gap-3 rounded-lg px-2 py-1.5',
+                    w.id === selectedId ? 'bg-white/10' : '[@media(hover:hover)]:hover:bg-white/5',
+                  )}
+                >
+                  <button onClick={() => setSelectedId(w.id)} className="min-w-0 flex-1 truncate py-1 text-left text-sm text-white">
+                    {isKnownKind(w.kind) ? t(`liveStudio.kinds.${w.kind}`) : w.kind}
+                  </button>
+                  <Switch
+                    checked={w.enabled}
+                    onCheckedChange={(v) => update(w.id, { enabled: v })}
+                    aria-label={t('liveStudio.visible')}
+                  />
+                  <button
+                    onClick={() => remove(w.id)}
+                    aria-label={t('liveStudio.remove')}
+                    className="rounded-md p-1.5 text-zinc-400 [@media(hover:hover)]:hover:bg-white/10 [@media(hover:hover)]:hover:text-white"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="mt-4 border-t border-white/10 pt-4">
             {selected ? (
-              <WidgetSettings widget={selected} onChange={(settings) => update(selected.id, { settings })} />
+              <>
+                <h3 className="mb-3 text-sm font-semibold text-white">{t(`liveStudio.kinds.${selected.kind}`)}</h3>
+                <WidgetSettings widget={selected} onChange={(settings) => update(selected.id, { settings })} />
+              </>
             ) : (
-              <p className="text-sm text-zinc-500">{t('liveStudio.selectHint')}</p>
+              <p className="text-sm text-zinc-400">{t('liveStudio.selectHint')}</p>
             )}
-          </PageSection>
-        </div>
-      </div>
+          </div>
+        </PageSection>
 
-      <PollPanel poll={poll} onPoll={setPoll} />
+        <PageSection title={t('liveStudio.test')}>
+          <p className="mb-3 text-xs text-zinc-400">{t('liveStudio.testHint')}</p>
+          <div className="flex flex-wrap gap-2">
+            {TESTS.map((kind) => (
+              <Button
+                key={kind}
+                variant="outline"
+                size="sm"
+                disabled={test.isPending}
+                onClick={() => test.mutate(kind)}
+              >
+                {t(`liveStudio.tests.${kind}`)}
+              </Button>
+            ))}
+          </div>
+        </PageSection>
 
-      <SubathonPanel subathon={subathon} onChange={setSubathon} />
+        <VerticalCropPanel crop={verticalCrop} onChange={chooseVerticalCrop} />
 
-      <RewardsPanel />
+        <RulesPanel hasAlertWidget={widgets.some((w) => w.kind === 'rule_alert' && w.enabled)} />
+      </StudioGroup>
 
-      <PointsPanel address={walletAddress} />
+      <StudioGroup id="viewers" title={t('liveStudio.groups.viewers')} hint={t('liveStudio.groups.viewersHint')}>
+        <PollPanel poll={poll} onPoll={setPoll} />
+        <SubathonPanel subathon={subathon} onChange={setSubathon} />
+        <RewardsPanel />
+        <PointsPanel address={walletAddress} />
+        <PetPanel />
+        <BadgesPanel />
+      </StudioGroup>
 
-      <PetPanel />
+      <StudioGroup id="chat" title={t('liveStudio.groups.chat')} hint={t('liveStudio.groups.chatHint')}>
+        <StreamBotPanel />
+        <ModerationPanel />
+      </StudioGroup>
 
-      <BadgesPanel />
+      <StudioGroup id="replays" title={t('liveStudio.groups.replays')} hint={t('liveStudio.groups.replaysHint')}>
+        {!justEnded && <RecapPanel address={walletAddress} />}
+        <HighlightsPanel address={walletAddress} />
+      </StudioGroup>
 
-      {!justEnded && <RecapPanel address={walletAddress} />}
-
-      <StreamBotPanel />
-
-      <RulesPanel hasAlertWidget={widgets.some((w) => w.kind === 'rule_alert' && w.enabled)} />
-
-      <ModerationPanel />
-
-      <div className="sticky bottom-4 z-10 flex justify-end">
-        <div className="flex items-center gap-3 rounded-xl border border-zinc-700 bg-zinc-900/95 px-3 py-2 shadow-lg backdrop-blur">
-          {dirty && <span className="text-xs text-zinc-400">{t('liveStudio.unsaved')}</span>}
+      {/* Only overlay edits need saving (everything else saves on its own),
+          so the bar slides up when there is something to save. */}
+      <div
+        data-studio-save
+        aria-hidden={!dirty && !save.isPending}
+        className={cn(
+          'sticky bottom-4 z-10 flex justify-end transition-[transform,visibility] duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] motion-reduce:transition-none',
+          dirty || save.isPending ? 'translate-y-0' : 'invisible translate-y-[calc(100%+2rem)]',
+        )}
+      >
+        <div data-glass-menu className="flex items-center gap-3 rounded-xl border border-white/10 px-3 py-2">
+          <span className="text-xs text-zinc-300">{t('liveStudio.unsaved')}</span>
           <Button size="sm" disabled={!dirty || save.isPending} onClick={() => save.mutate()}>
             {save.isPending ? t('liveStudio.saving') : t('liveStudio.save')}
           </Button>

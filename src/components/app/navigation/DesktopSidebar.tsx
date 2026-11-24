@@ -2,7 +2,7 @@ import PenSquare from "@/components/ui/cut-icons/edit";
 import LogIn from "@/components/ui/cut-icons/sign-in";
 import CornerDownLeft from "@/components/ui/cut-icons/reply";
 import { useTranslation as _useCopy } from 'react-i18next';
-import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+import { useSessionText } from '@/hooks/use-session-text';
 import React, { Suspense, lazy, useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
 import { useLocation, useNavigate, NavLink } from 'react-router-dom';
 import { isHomePath } from '@/lib/home-path';
@@ -129,7 +129,7 @@ export function DesktopSidebar({ onPostClick }: DesktopSidebarProps) {
 
   // Menu search. Always shown on the open rail; on the collapsed rail it stays
   // out of the way until the list is scrolled.
-  const [navQuery, setNavQuery] = useSurfaceDraft("components/app/navigation/DesktopSidebar.tsx:navQuery", '');
+  const [navQuery, setNavQuery] = useSessionText("desktop-nav-search");
   const [navScrolled, setNavScrolled] = useState(false);
   const [navAtBottom, setNavAtBottom] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);

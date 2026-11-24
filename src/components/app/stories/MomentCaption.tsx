@@ -15,6 +15,7 @@ import Languages from '@/components/ui/cut-icons/language';
 import { useTranslation as useTextTranslation } from '@/components/app/TranslatableText';
 import { useUserLanguage } from '@/hooks/use-user-language';
 import { momentTextLooksForeign } from './story-translate';
+import { BoldText } from '@/lib/bold-markup';
 
 export function MomentCaption({ text, publicContent }: { text: string; publicContent: boolean }) {
   const { t } = useCopy();
@@ -55,7 +56,7 @@ export function MomentCaption({ text, publicContent }: { text: string; publicCon
   return (
     <>
       <div key={isTranslated ? 'translated' : 'original'} className="animate-in fade-in duration-150">
-        {isTranslated ? translatedText : text}
+        <BoldText text={isTranslated ? translatedText : text} />
       </div>
       {foreign && !same && (
         <button
