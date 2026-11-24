@@ -795,11 +795,22 @@ function relatedPostsHtml(manifest, currentSlug, limit = 4) {
 const BRAND_BYLINES = new Set(['', 'dehub', 'dehub team', 'riftn', 'riftn team']);
 // Where a named author's bio lives.
 const BLOG_AUTHOR_URL = `${APP_URL}/docs/team`;
+// What the team page says about the people who sign guides, so search engines
+// and assistants can tell which Mal Jan this is.
+const BLOG_AUTHOR_FACTS = {
+  'mal jan': { jobTitle: 'Co-Founder', sameAs: [`${APP_URL}/maldoteth`, 'https://x.com/maldoteth'] },
+};
 function blogAuthorLd(author) {
   const name = String(author || '').replace(/\s+/g, ' ').trim();
   return BRAND_BYLINES.has(name.toLowerCase())
     ? { '@type': 'Organization', name: 'Riftn', url: APP_URL }
-    : { '@type': 'Person', name, url: BLOG_AUTHOR_URL, worksFor: { '@type': 'Organization', name: 'Riftn', url: APP_URL } };
+    : {
+      '@type': 'Person',
+      name,
+      url: BLOG_AUTHOR_URL,
+      ...(BLOG_AUTHOR_FACTS[name.toLowerCase()] || {}),
+      worksFor: { '@type': 'Organization', name: 'Riftn', url: APP_URL },
+    };
 }
 
 /** The visible byline: a named author links to the team page, as it does in the app. */
@@ -4739,12 +4750,13 @@ export function isAiTrainingBotUa(ua) {
 
 /** The 403 an AI training crawler gets, or null for everyone else. */
 /**
- * Riftn's own pages about itself: the home page, docs, guides, blog and
- * llms.txt. Training crawlers may read these, so that assistants know what
- * Riftn is and that DeHub became Riftn. Nothing a member posted is in here.
- * public/robots.txt carries the same list as Allow lines.
+ * Riftn's own pages about itself: the home page, docs, guides, blog,
+ * llms.txt and the product pages llms.txt points to (compare, glossary,
+ * pricing and the like). Training crawlers may read these, so that assistants
+ * know what Riftn is and that DeHub became Riftn. Nothing a member posted is
+ * in here. public/robots.txt carries the same list as Allow lines.
  */
-const AI_TRAINING_OPEN_PATH = /^\/(?:$|robots\.txt$|llms(?:-full)?\.txt$|rss\.xml$|(?:docs|guides|blog)(?:\/|$))/;
+const AI_TRAINING_OPEN_PATH = /^\/(?:$|robots\.txt$|llms(?:-full)?\.txt$|rss\.xml$|(?:docs|guides|blog|connect)(?:\/|$)|(?:compare|glossary|pricing|premium|bridge|creator|converter|migrate-youtube|dehub-app)$)/;
 
 export function aiTrainingBotRefusal(request) {
   if (!isAiTrainingBotUa(request.headers.get('User-Agent'))) return null;
@@ -4933,7 +4945,7 @@ th{color:#fff;font-weight:700}
 // spent a hop or a duplicate on every page.
 const PRERENDER_HEADER = `<header class="dh-head"><a href="${APP_URL}/"><img src="${APP_URL}/dehub-header-logo.png" alt="Riftn" width="270" height="81"></a><a class="dh-open" href="${APP_URL}/explore">Open Riftn</a></header><main class="dh-main">`;
 
-const PRERENDER_FOOTER = `</main><footer class="dh-foot">Riftn (formerly DeHub) | open source, user owned and censorship resistant media.<br><a href="${APP_URL}/docs">Docs</a> · <a href="${APP_URL}/docs/blog">Blog</a> · <a href="${APP_URL}/explore">Explore</a></footer>`;
+const PRERENDER_FOOTER = `</main><footer class="dh-foot">Riftn (formerly DeHub) | open source, user owned and censorship resistant media.<br><a href="${APP_URL}/docs">Docs</a> · <a href="${APP_URL}/docs/blog">Blog</a> · <a href="${APP_URL}/glossary">Glossary</a> · <a href="${APP_URL}/compare">Compare</a> · <a href="${APP_URL}/explore">Explore</a></footer>`;
 
 /**
  * The other half of the problem: every builder in this file, and the ssr-seo

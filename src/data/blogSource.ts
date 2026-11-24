@@ -22,7 +22,7 @@ import { newPosts, excludedTitles } from '@/data/newPosts';
 // Posts written under the company name carry the co-founder's byline. The
 // bio lives on /docs/team, which the byline links to.
 const BRAND_BYLINES = new Set(['', 'dehub', 'dehub team', 'riftn', 'riftn team']);
-const POST_AUTHOR = 'Malik Jan';
+const POST_AUTHOR = 'Mal Jan';
 
 /** Exported for the manifest generator, which reads newPosts without the overrides below. */
 export const withPostAuthor = (post: BlogPost): BlogPost =>
@@ -156,8 +156,8 @@ Stay tuned for announcements about our selected ambassadors and future opportuni
 ## Meet the Team
 
 [TEAM_SECTION_START]
-### Malik Jan - Co-Founder
-![Malik Jan|avatar](/media/361bb373-38ee-4888-a4b1-ab8239941261.png)
+### Mal Jan - Co-Founder
+![Mal Jan|avatar](/media/361bb373-38ee-4888-a4b1-ab8239941261.png)
 Full stack web and blockchain developer, building AI business solutions at Pixcellor, former senior consultant at Randstad, scaled Riftn to a £250m market cap peak with a near $10m liquidity pool and $2m year 1 revenue.
 
 **Key Experience:**
