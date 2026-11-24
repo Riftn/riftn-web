@@ -1,5 +1,5 @@
 {
-  "version": "3ba17fe2812eb987",
+  "version": "db822776be9e6461",
   "routes": {
     "/": [
       "ar",
@@ -1073,6 +1073,13 @@
       "tr"
     ],
     "/guides/how-to-stream-on-riftn": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/guides/how-to-watch-free-live-tv-online-2026": [
       "ar",
       "es",
       "fr",

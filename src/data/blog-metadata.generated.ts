@@ -2988,6 +2988,32 @@ export const blogPostsMetadata: BlogPost[] = [
 // arrays at runtime in blogUtils.ts — metadata-only logic, no third copy here.
 export const newPostsMetadata: BlogPost[] = [
   {
+    "id": "how-to-watch-free-live-tv-online-2026",
+    "slug": "how-to-watch-free-live-tv-online-2026",
+    "title": "How to Watch Free Live TV Online in 2026 (Legal Channels, No Sign-Up)",
+    "excerpt": "Free live TV is legal, it plays in any browser, and most of it needs no account. Here is where to find news, sport, film and kids channels from around the world, and how to spot an illegal IPTV deal.",
+    "content": "",
+    "bannerImage": "/media/watch-free-live-tv-online-banner-r2.jpg",
+    "bannerImageAlt": "Free live TV online: legal channels with no sign-up and no subscription, on Riftn TV",
+    "author": {
+      "name": "Riftn Team"
+    },
+    "publishedAt": "2026-11-24T16:00:00.000Z",
+    "updatedAt": "2026-11-24T16:00:00.000Z",
+    "tags": [
+      "Live TV",
+      "Free TV",
+      "Streaming",
+      "IPTV",
+      "Riftn TV"
+    ],
+    "readingTime": 5,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "How to Watch Free Live TV Online (2026): Legal, No Sign-Up",
+    "seoDescription": "Watch free live TV online, legally, in any browser and with no account. Where to find free news, sport, film and kids channels in 2026, and how to avoid illegal IPTV."
+  },
+  {
     "id": "github-trending-open-source-november-2026",
     "slug": "github-trending-open-source-november-2026",
     "title": "GitHub Trending: The 20 Fastest-Rising New Open Source Projects (November 2026)",
@@ -3862,31 +3888,30 @@ export const newPostsMetadata: BlogPost[] = [
 
 // getLatestPost() result — docs home hero.
 export const latestPostMetadata: BlogPost | undefined = {
-  "id": "github-trending-open-source-november-2026",
-  "slug": "github-trending-open-source-november-2026",
-  "title": "GitHub Trending: The 20 Fastest-Rising New Open Source Projects (November 2026)",
-  "excerpt": "The 20 new open source projects that gained the most GitHub stars in their first month, from a tool that explains how any software works to on-device AI agents, a Rust download manager and a container runtime.",
+  "id": "how-to-watch-free-live-tv-online-2026",
+  "slug": "how-to-watch-free-live-tv-online-2026",
+  "title": "How to Watch Free Live TV Online in 2026 (Legal Channels, No Sign-Up)",
+  "excerpt": "Free live TV is legal, it plays in any browser, and most of it needs no account. Here is where to find news, sport, film and kids channels from around the world, and how to spot an illegal IPTV deal.",
   "content": "",
-  "bannerImage": "/media/github-trending-open-source-november-2026-banner-r2.jpg",
-  "bannerImageAlt": "GitHub trending: the fastest-rising new open source projects of November 2026",
+  "bannerImage": "/media/watch-free-live-tv-online-banner-r2.jpg",
+  "bannerImageAlt": "Free live TV online: legal channels with no sign-up and no subscription, on Riftn TV",
   "author": {
     "name": "Riftn Team"
   },
-  "publishedAt": "2026-11-24T15:00:00.000Z",
-  "updatedAt": "2026-11-24T15:00:00.000Z",
+  "publishedAt": "2026-11-24T16:00:00.000Z",
+  "updatedAt": "2026-11-24T16:00:00.000Z",
   "tags": [
-    "Open Source",
-    "GitHub",
-    "GitHub Trending",
-    "AI Agents",
-    "Rust",
-    "Riftn"
+    "Live TV",
+    "Free TV",
+    "Streaming",
+    "IPTV",
+    "Riftn TV"
   ],
-  "readingTime": 6,
+  "readingTime": 5,
   "featured": false,
   "status": "published",
-  "seoTitle": "GitHub Trending November 2026: 20 Fastest-Rising Open Source Projects",
-  "seoDescription": "The 20 new open source projects that gained the most GitHub stars between 24 October and 24 November 2026, with what each one does and the trends behind them."
+  "seoTitle": "How to Watch Free Live TV Online (2026): Legal, No Sign-Up",
+  "seoDescription": "Watch free live TV online, legally, in any browser and with no account. Where to find free news, sport, film and kids channels in 2026, and how to avoid illegal IPTV."
 };
 
 export const excludedTitles: string[] = [
