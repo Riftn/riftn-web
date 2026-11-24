@@ -204,6 +204,8 @@ import { MobileMenuLayout, MenuTabs } from '@/components/app/navigation/MobileMe
 import { MenuAccountSwitcher } from '@/components/app/navigation/MenuAccountSwitcher';
 import { groupMenuItems } from '@/components/app/navigation/menu-groups';
 import { normaliseMenuLayout, useMenuLayout, writeMenuLayout } from '@/lib/menu-layout';
+import { renderChatTextWithLinks } from '@/components/app/TranslatableText';
+import { BoldText } from '@/lib/bold-markup';
 
 /**
  * Comic posts: the deck as the feed shows it, the post page with the hand of
@@ -2576,6 +2578,7 @@ export default function StateGalleryPage() {
         {params.get('sounds') === '1' && <SoundsGallery step={params.get('soundstep')} library={params.get('library')} />}
         {params.get('thread') === '1' && <AuthorThreadGallery />}
         {params.get('coauthors') && <CoAuthorsGallery mode={params.get('coauthors')} />}
+        {params.get('bold') && <BoldTextGallery />}
         {params.get('composer') === '1' && <ThreadedComposerGallery />}
         {params.get('notifs') === '1' && <NotificationRowsGallery />}
         {params.get('links') === '1' && <LinkCardsGallery mention={params.get('mention')} />}
@@ -3248,6 +3251,33 @@ const GALLERY_TEXT_POSTS: GalleryTextPost[] = [
   author: { id: 'gallery-profile', name: 'Marco V', handle: '@marco_v', verified: false },
   stats: { comments: 12 + i * 7, reposts: i, likes: 140 + i * 53, dislikes: 0 },
 }) as GalleryTextPost);
+
+/** `**bold**` in a post, a chat line and a Note (?bold=1). The typed text sits above each. */
+const GALLERY_BOLD_POST = 'Stage opens **tonight at 9** with @ellaverse. **Bring #music** and see **riftn.com/build** 2**3 stays as typed';
+const GALLERY_BOLD_CHAT = 'are you coming? **doors at 9** @kai, tickets at **riftn.com**';
+const GALLERY_BOLD_NOTE = 'gym then **studio**';
+function BoldTextGallery() {
+  const post = { ...GALLERY_TEXT_POSTS[0], id: '990201', content: GALLERY_BOLD_POST } as GalleryTextPost;
+  const typed = (text: string) => <p data-bold-typed className="mb-2 font-mono text-[11px] text-zinc-500">{text}</p>;
+  return (
+    <AuthContext.Provider value={GALLERY_AUTH}>
+      <section data-page-bento data-bold-text-gallery className="mb-5 grid gap-4 rounded-3xl border border-white/10 bg-white/[0.04] p-4 md:grid-cols-3">
+        <div data-feed-item className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3">
+          {typed(GALLERY_BOLD_POST)}
+          <GalleryPostCard post={post} />
+        </div>
+        <div className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3">
+          {typed(GALLERY_BOLD_CHAT)}
+          <p className="chat-body whitespace-pre-wrap break-words rounded-2xl bg-white/10 px-3 py-2 text-sm text-white">{renderChatTextWithLinks(GALLERY_BOLD_CHAT)}</p>
+        </div>
+        <div className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3">
+          {typed(GALLERY_BOLD_NOTE)}
+          <p className="text-center text-[31px] font-extrabold leading-[1.18] text-white"><BoldText text={GALLERY_BOLD_NOTE} /></p>
+        </div>
+      </section>
+    </AuthContext.Provider>
+  );
+}
 
 /** Co-authored posts: both names on the header, the invite card, and the sheet (?coauthors=sheet opens it). */
 const GALLERY_CO_AUTHORS = [
