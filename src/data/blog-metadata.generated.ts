@@ -2988,6 +2988,33 @@ export const blogPostsMetadata: BlogPost[] = [
 // arrays at runtime in blogUtils.ts — metadata-only logic, no third copy here.
 export const newPostsMetadata: BlogPost[] = [
   {
+    "id": "github-trending-open-source-november-2026",
+    "slug": "github-trending-open-source-november-2026",
+    "title": "GitHub Trending: The 20 Fastest-Rising New Open Source Projects (November 2026)",
+    "excerpt": "The 20 new open source projects that gained the most GitHub stars in their first month, from a tool that explains how any software works to on-device AI agents, a Rust download manager and a container runtime.",
+    "content": "",
+    "bannerImage": "/media/github-trending-open-source-november-2026-banner-r2.jpg",
+    "bannerImageAlt": "GitHub trending: the fastest-rising new open source projects of November 2026",
+    "author": {
+      "name": "Riftn Team"
+    },
+    "publishedAt": "2026-11-24T15:00:00.000Z",
+    "updatedAt": "2026-11-24T15:00:00.000Z",
+    "tags": [
+      "Open Source",
+      "GitHub",
+      "GitHub Trending",
+      "AI Agents",
+      "Rust",
+      "Riftn"
+    ],
+    "readingTime": 6,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "GitHub Trending November 2026: 20 Fastest-Rising Open Source Projects",
+    "seoDescription": "The 20 new open source projects that gained the most GitHub stars between 24 October and 24 November 2026, with what each one does and the trends behind them."
+  },
+  {
     "id": "creator-payout-thresholds-compared-2026",
     "slug": "creator-payout-thresholds-compared-2026",
     "title": "Creator Payout Thresholds and Schedules Compared (2026)",
@@ -3835,32 +3862,31 @@ export const newPostsMetadata: BlogPost[] = [
 
 // getLatestPost() result — docs home hero.
 export const latestPostMetadata: BlogPost | undefined = {
-  "id": "creator-payout-thresholds-compared-2026",
-  "slug": "creator-payout-thresholds-compared-2026",
-  "title": "Creator Payout Thresholds and Schedules Compared (2026)",
-  "excerpt": "How many followers you need, the smallest balance you can cash out, and the day the money arrives, for YouTube, TikTok, Twitch, Kick, X, Instagram, Facebook, Snapchat and Riftn.",
+  "id": "github-trending-open-source-november-2026",
+  "slug": "github-trending-open-source-november-2026",
+  "title": "GitHub Trending: The 20 Fastest-Rising New Open Source Projects (November 2026)",
+  "excerpt": "The 20 new open source projects that gained the most GitHub stars in their first month, from a tool that explains how any software works to on-device AI agents, a Rust download manager and a container runtime.",
   "content": "",
-  "bannerImage": "/media/creator-payout-thresholds-compared-banner-r2.jpg",
-  "bannerImageAlt": "Who pays first: creator payout thresholds and schedules compared for 2026",
+  "bannerImage": "/media/github-trending-open-source-november-2026-banner-r2.jpg",
+  "bannerImageAlt": "GitHub trending: the fastest-rising new open source projects of November 2026",
   "author": {
     "name": "Riftn Team"
   },
-  "publishedAt": "2026-11-24T14:00:00.000Z",
-  "updatedAt": "2026-11-24T14:00:00.000Z",
+  "publishedAt": "2026-11-24T15:00:00.000Z",
+  "updatedAt": "2026-11-24T15:00:00.000Z",
   "tags": [
-    "Creator Economy",
-    "Monetization",
-    "YouTube",
-    "TikTok",
-    "Twitch",
-    "Kick",
+    "Open Source",
+    "GitHub",
+    "GitHub Trending",
+    "AI Agents",
+    "Rust",
     "Riftn"
   ],
-  "readingTime": 7,
+  "readingTime": 6,
   "featured": false,
   "status": "published",
-  "seoTitle": "Creator Payout Thresholds Compared (2026): Minimums and Pay Dates",
-  "seoDescription": "Minimum payouts, pay dates and eligibility for YouTube, TikTok, Twitch, Kick, X, Instagram, Facebook, Snapchat and Riftn in 2026, in one table."
+  "seoTitle": "GitHub Trending November 2026: 20 Fastest-Rising Open Source Projects",
+  "seoDescription": "The 20 new open source projects that gained the most GitHub stars between 24 October and 24 November 2026, with what each one does and the trends behind them."
 };
 
 export const excludedTitles: string[] = [
