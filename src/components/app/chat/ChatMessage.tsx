@@ -395,7 +395,7 @@ export const ChatMessage = memo(function ChatMessage({
   };
   const menuActions: MessageMenuAction[] = [];
   if (onReply) menuActions.push({ key: 'reply', icon: menuIcons.reply, label: _copy('copy.c253f451bdd5', { defaultValue: 'Reply' }), onSelect: () => onReply(message), hint: 'R' });
-  if (canEdit) menuActions.push({ key: 'edit', icon: menuIcons.edit, label: _copy('copy.464c4ffd019e', { defaultValue: 'Edit' }), onSelect: () => startEditing(), hint: 'E' });
+  if (canEdit) menuActions.push({ key: 'edit', icon: menuIcons.edit, label: _copy('copy.464c4ffd019e', { defaultValue: 'Edit' }), onSelect: () => requestAnimationFrame(() => startEditing()), hint: 'E' });
   if (showActions && onTogglePin) menuActions.push({ key: 'pin', icon: isPinned ? menuIcons.unpin : menuIcons.pin, label: isPinned ? _copy('copy.ee3c71613054', { defaultValue: 'Unpin' }) : _copy('chatHold.pin', { defaultValue: 'Pin' }), onSelect: () => onTogglePin(message), hint: 'P' });
   if (message.content?.trim()) menuActions.push({ key: 'copy', icon: menuIcons.copy, label: _copy('msgMenu.copyText', { defaultValue: 'Copy Text' }), onSelect: copyText, hint: 'C' });
   if (onCopyLink) menuActions.push({ key: 'copy-link', icon: menuIcons.link, label: copyLinkLabel(), onSelect: () => onCopyLink(message), hint: 'L' });

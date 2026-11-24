@@ -157,7 +157,7 @@ export function InPlaceEditField({ draftKey, text, caret = null, onSave, onDone,
       onContextMenu={(e) => e.stopPropagation()}
       aria-label={t('common.edit', 'Edit')}
       className={cn(
-        'block w-full resize-none overflow-hidden bg-transparent border-0 p-0 m-0 shadow-none outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 break-words caret-white',
+        'block w-full resize-none overflow-hidden bg-transparent border-0 p-0 m-0 shadow-none outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 break-words caret-current',
         className,
       )}
       onKeyDown={(e) => {
