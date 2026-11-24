@@ -8173,7 +8173,8 @@
         "connecting": "Conectando",
         "live": "En vivo",
         "error": "Error"
-      }
+      },
+      "addShort": "Añadir"
     },
     "vertical": {
       "title": "Vista vertical",
@@ -8593,6 +8594,18 @@
         "word-timeout_one": "Puso en *timeout* a {{target}} por {{count}} segundo por \"{{word}}\"",
         "word-timeout_other": "Puso en *timeout* a {{target}} por {{count}} segundos por \"{{word}}\""
       }
+    },
+    "groups": {
+      "stream": "En directo",
+      "streamHint": "Interruptores para durante el directo, adónde se envía tu emisión y el enlace para OBS.",
+      "overlay": "Overlay",
+      "viewers": "Espectadores",
+      "viewersHint": "Encuestas, temporizadores, puntos y recompensas que meten en el directo a quien lo ve.",
+      "chat": "Chat",
+      "chatHint": "Tu bot de chat y las reglas del chat bajo tus emisiones.",
+      "replays": "Después del directo",
+      "replaysTab": "Después",
+      "replaysHint": "Cómo fue tu último directo y clips para compartir."
     }
   },
   "live": {
@@ -14022,6 +14035,10 @@
     "reminderLater": "Ahora no"
   },
   "copy": {
+    "1944d5ab19cd": "Traducir a",
+    "98cdcf4f2415": "Buscar idiomas",
+    "48bec8529d3f": "Traducido del {{language}}",
+    "d80d30a1c7fd": "Ya está en {{language}}",
     "799c26913574": "Controles",
     "ff73efa451e4": "Muévete con W, A, S, D o las flechas. Mira y dispara con el ratón.",
     "c718a21950e6": "Espacio salta, Shift esprinta, C te agacha y Z te tumba.",

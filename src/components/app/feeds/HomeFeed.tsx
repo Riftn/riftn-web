@@ -630,6 +630,12 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
   const loaderRef = useRef<HTMLDivElement>(null);
   const bentoRef = useRef<HTMLDivElement>(null);
   const portalTarget = resolvePortalTarget(filtersPortalRef);
+  // The header's portal refs attach in the same commit as the feed, so the
+  // first render cannot see them yet. Until it can, nothing that will move
+  // into the header is drawn in the feed itself (it pushed the page down 60px
+  // for one frame, then jumped back up).
+  const [portalsReady, setPortalsReady] = useState(!filtersPortalRef);
+  useEffect(() => setPortalsReady(true), []);
   const { theme } = useAppTheme();
   const behindNav = theme === 'system' && !!portalTarget;
   const islandPortal = useFeedIslandPortal();
@@ -2179,7 +2185,7 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
       {(() => {
         if (!showFilterDrawer) return null;
         const room = <div data-feed-drawer-room aria-hidden="true" style={{ height: FEED_DRAWER_HEIGHT }} />;
-        return chipsTarget ? createPortal(room, chipsTarget) : room;
+        return chipsTarget ? createPortal(room, chipsTarget) : portalsReady ? room : null;
       })()}
 
       {/* One drawer pulls out from under the nav pill: the active filters as
@@ -2221,6 +2227,7 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
             portalTarget,
           );
         }
+        if (!portalsReady) return null;
         return <div data-feed-new-posts-slot="inline" className="pointer-events-none flex justify-center pt-3">{drawer}</div>;
       })()}
 

@@ -8172,7 +8172,8 @@
         "connecting": "Connecting",
         "live": "Live",
         "error": "Error"
-      }
+      },
+      "addShort": "Add"
     },
     "vertical": {
       "title": "Vertical view",
@@ -8592,6 +8593,18 @@
         "word-timeout_one": "Timed out {{target}} for {{count}} second for \"{{word}}\"",
         "word-timeout_other": "Timed out {{target}} for {{count}} seconds for \"{{word}}\""
       }
+    },
+    "groups": {
+      "stream": "Go live",
+      "streamHint": "Switches for mid-stream, where your stream is sent, and the link for OBS.",
+      "overlay": "Overlay",
+      "viewers": "Viewers",
+      "viewersHint": "Polls, timers, points and rewards that bring the people watching into the stream.",
+      "chat": "Chat",
+      "chatHint": "Your chat bot and the rules for the chat under your streams.",
+      "replays": "After the stream",
+      "replaysTab": "After",
+      "replaysHint": "How your last stream went, and clips worth sharing."
     }
   },
   "live": {
@@ -14021,6 +14034,10 @@
     "reminderLater": "Not now"
   },
   "copy": {
+    "1944d5ab19cd": "Translate to",
+    "98cdcf4f2415": "Search languages",
+    "48bec8529d3f": "Translated from {{language}}",
+    "d80d30a1c7fd": "Already in {{language}}",
     "799c26913574": "Controls",
     "ff73efa451e4": "Move with W, A, S, D or the arrow keys. Look and shoot with the mouse.",
     "c718a21950e6": "Space jumps, Shift sprints, C crouches and Z goes prone.",
