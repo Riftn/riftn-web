@@ -1791,6 +1791,8 @@
     "remove": "Kaldır"
   },
   "tip": {
+    "appSent": "{{amount}} DHB bahşiş gönderildi!",
+    "appFailed": "Bahşişin gönderilmedi. Tekrar dene.",
     "title": "Bahşiş Gönder",
     "toCreator": "{{name}} için bahşiş",
     "quickAmounts": "Hızlı tutarlar",
