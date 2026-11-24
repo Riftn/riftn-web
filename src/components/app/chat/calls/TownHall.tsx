@@ -30,7 +30,7 @@ function cutBars(cut: number): React.CSSProperties[] {
   const next = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
   return Array.from({ length: 5 }, () => ({
     '--y': `${Math.round(next() * 92)}%`,
-    '--h': `${(1 + next() * 10).toFixed(1)}%`,
+    '--h': `${(1 + next() * 5).toFixed(1)}%`,
     '--x': `${Math.round((next() - 0.5) * 60)}%`,
   }) as React.CSSProperties);
 }
@@ -99,7 +99,7 @@ export function TownHall({ isVideo, self, participants, attachLocalVideo, attach
           muted={stage === 0 ? self.muted : !onStage?.audio}
           talking={talking.has(stage)}
         />
-        {state.contested ? (
+        {state.contested && state.talkers.length > 1 ? (
           <span className="th-crowd" role="status">
             {t('calls.townHallTalking', { count: state.talkers.length, n: formatCount(state.talkers.length), defaultValue: '{{n}} talking' })}
           </span>
