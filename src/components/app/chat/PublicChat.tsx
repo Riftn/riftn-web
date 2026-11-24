@@ -1,6 +1,6 @@
 import { useTranslation as _useCopy } from 'react-i18next';
 import { useDraftState } from "@/hooks/use-draft-state";
-import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo, Fragment } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo, useContext, Fragment } from 'react';
 import { UnreadMarker, UnreadJumpButton } from './UnreadJump';
 import type { UnreadAnchor } from '@/lib/chat-unread-anchor';
 import { anchorFromReadSpot, newestLineOnScreen } from '@/lib/chat-read-position';
@@ -58,15 +58,14 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Check } from 'lucide-react';
+import { Phone } from 'lucide-react';
+import Video from '@/components/ui/cut-icons/video';
+import { CallContext } from '@/contexts/CallContext';
 import Plus from '@/components/ui/cut-icons/add';
 import { CHAT_MENU_CONTENT } from './ChatOptionsMenu';
-import { CHAT_TEXT_SCALE, setChatTextSize, useChatTextSize } from '@/lib/chat-text-size';
-import { useChatTextSizeOptions } from '@/hooks/use-chat-text-size-options';
 import { cn } from '@/lib/utils';
 import { formatCount } from '@/lib/format-count';
 
@@ -77,8 +76,8 @@ interface PublicChatProps {
   onBack: () => void;
   /** Shown inside another page (the Riftn community's Chat tab): no back button. */
   embedded?: boolean;
-  /** /app/messages on phones: "24 online" moves under the title, call and
-   *  video stay, and text size, translate and search move behind one +. */
+  /** /app/messages on phones: "24 online" moves under the title, search and
+   *  text size stay, and calls, translate and room settings move behind +. */
   phoneB?: boolean;
 }
 
@@ -175,8 +174,7 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
   // Search: one box for words and people. `list` shows what it found, `chat`
   // shows the room on the result that was opened.
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const textSize = useChatTextSize();
-  const textSizes = useChatTextSizeOptions();
+  const call = useContext(CallContext);
   const [searchText, setSearchText] = useState('');
   const [searchPerson, setSearchPerson] = useState<ChatSearchPerson | null>(null);
   const [searchView, setSearchView] = useState<'list' | 'chat'>('list');
@@ -856,10 +854,16 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
         {phoneB ? (
         <div data-live-chat-toolbar className="flex shrink-0 items-center gap-1">
           {!isBanned && (
-            <GroupCallButtons groupId={PUBLIC_CHAT_CALL_ID} groupName={t('publicChat.title')} ring={false} />
+            <GroupCallButtons groupId={PUBLIC_CHAT_CALL_ID} groupName={t('publicChat.title')} ring={false} joinOnly />
           )}
-          {/* Text size, translate and search: behind + so the top isn't
-              crowded on phones; "24 online" sits under the title (2026-11-24). */}
+          {/* Search and text size on the bar; calls, translate and room
+              settings behind + so the top isn't crowded on phones. "24 online"
+              sits under the title (2026-11-24). */}
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-white" data-chat-search-open
+            aria-label={t('publicChat.searchMessages')} onClick={() => openSearch()}>
+            <Search className="w-4 h-4" />
+          </Button>
+          <ChatTextSizeButton />
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" data-public-chat-plus aria-label={_copy('chatTabs.menu', { defaultValue: 'Chat options' })}
@@ -868,9 +872,19 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" sideOffset={6} data-chat-options-menu className={cn(CHAT_MENU_CONTENT, 'text-white')}>
-              <DropdownMenuItem className={PC_ROW} onSelect={() => openSearch()} data-chat-menu-search>
-                <Search />{t('publicChat.searchMessages')}
-              </DropdownMenuItem>
+              {call && walletAddress && !isBanned && (
+                <>
+                  <DropdownMenuItem className={PC_ROW} disabled={!!call.currentCall}
+                    onSelect={() => { void call.joinGroupCall({ id: PUBLIC_CHAT_CALL_ID, name: t('publicChat.title') }, 'audio'); }}>
+                    <Phone />{t('calls.groupVoiceCall', 'Group voice call')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className={PC_ROW} disabled={!!call.currentCall}
+                    onSelect={() => { void call.joinGroupCall({ id: PUBLIC_CHAT_CALL_ID, name: t('publicChat.title') }, 'video'); }}>
+                    <Video />{t('calls.groupVideoCall', 'Group video call')}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator className="my-1 h-px bg-white/10" />
+                </>
+              )}
               <DropdownMenuItem className={PC_ROW} onSelect={handleTranslateAll}>
                 {isAllTranslated ? <RotateCcw /> : <Languages />}
                 {isAllTranslated ? _copy("copy.16194a69c43d", { defaultValue: "Show original" }) : _copy("copy.29a7e1c24c92", { defaultValue: "Translate all" })}
@@ -885,17 +899,6 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
                   </DropdownMenuItem>
                 </>
               )}
-              <DropdownMenuSeparator className="my-1 h-px bg-white/10" />
-              <DropdownMenuLabel className="px-2.5 pb-1 pt-1 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-500">
-                {t('chatTextSize.title', 'Text size')}
-              </DropdownMenuLabel>
-              {textSizes.map((o) => (
-                <DropdownMenuItem key={o.value} className={cn(PC_ROW, 'justify-between')} onSelect={(e) => { e.preventDefault(); setChatTextSize(o.value); }}
-                  role="menuitemradio" aria-checked={o.value === textSize}>
-                  <span style={{ fontSize: `calc(0.875rem * ${CHAT_TEXT_SCALE[o.value]})` }}>{o.label}</span>
-                  {o.value === textSize && <Check className="!text-white" />}
-                </DropdownMenuItem>
-              ))}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

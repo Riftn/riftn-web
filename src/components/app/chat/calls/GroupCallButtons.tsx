@@ -14,11 +14,12 @@ import { useGroupCallRoster, GROUP_CALL_MAX_RING } from '@/lib/group-call';
  * while one is going. Starting rings every member; joining just steps into
  * the room.
  */
-export function GroupCallButtons({ groupId, groupName, canStart = true, ring = true }: { groupId: string; groupName: string; canStart?: boolean; ring?: boolean }) {
+/** `joinOnly`: just the "Join call" pill while a call is on, nothing otherwise (Public Chat on phones starts calls from its + menu). */
+export function GroupCallButtons({ groupId, groupName, canStart = true, ring = true, joinOnly = false }: { groupId: string; groupName: string; canStart?: boolean; ring?: boolean; joinOnly?: boolean }) {
   // Context reads, not the throwing hooks: the chat also renders in previews with no call or auth provider.
   const call = useContext(CallContext);
   const walletAddress = useContext(AuthContext)?.walletAddress ?? null;
-  return call && walletAddress ? <GroupCallControls groupId={groupId} groupName={groupName} walletAddress={walletAddress} call={call} canStart={canStart} ring={ring} /> : null;
+  return call && walletAddress ? <GroupCallControls groupId={groupId} groupName={groupName} walletAddress={walletAddress} call={call} canStart={canStart && !joinOnly} ring={ring} /> : null;
 }
 
 function GroupCallControls({ groupId, groupName, walletAddress, call, canStart, ring }: {
