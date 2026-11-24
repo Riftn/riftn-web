@@ -1,5 +1,5 @@
 {
-  "version": "f5fe60eaab431bb4",
+  "version": "bd7c9246cd7dad29",
   "routes": {
     "/": [
       "ar",
@@ -639,6 +639,13 @@
       "tr"
     ],
     "/guides/best-decentralized-streaming-apps": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/guides/best-free-browser-games-no-download-2026": [
       "ar",
       "es",
       "fr",
