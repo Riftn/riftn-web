@@ -76,6 +76,7 @@ import { VideoCard } from '@/components/app/cards/VideoCard';
 import { CardHeader } from '@/components/app/cards/CardHeader';
 import { ImageCard } from '@/components/app/cards/ImageCard';
 import { PostCard } from '@/components/app/cards/PostCard';
+import { PostBgLayer, ProfilePostBgArtContext, postBgHostProps, useAuthorPostBg } from '@/components/app/profile/PostBackground';
 import { CommentsWrapper } from '@/components/app/cards/CommentsWrapper';
 import { PostAIChatLazy } from '@/components/app/cards/PostAIChatLazy';
 import { ReportModal } from '@/components/app/modals/ReportModal';
@@ -1316,6 +1317,8 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
   const isVideoPost = contentType === 'video' && !isAudioPost;
   const isImagePost = contentType === 'image';
   const isTextPost = contentType === 'post' || contentType === null;
+  // A text post opens on its author's post background, the look its profile tile has.
+  const textBg = useAuthorPostBg(post && isTextPost ? (post as { minter?: string | null; postBg?: unknown }) : null);
 
   // Opened from a shared link on a phone: a video plays in the Shorts viewer
   // on top of this page, the same player a feed tap opens. Back or closing it
@@ -1534,8 +1537,8 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
           />
         );
       }
-      default:
-        return (
+      default: {
+        const card = (
           <PostCard
             post={toTextPost(post)}
             onOpenComments={openPageComments}
@@ -1544,6 +1547,17 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
             }
           />
         );
+        // The author's post background, as on their profile tile.
+        if (!textBg.bg) return card;
+        return (
+          <ProfilePostBgArtContext.Provider value={textBg.art}>
+            <div data-opened-post-bg className="rounded-2xl p-3" {...postBgHostProps(textBg.bg, id)}>
+              <PostBgLayer bg={textBg.bg} seed={id} />
+              {card}
+            </div>
+          </ProfilePostBgArtContext.Provider>
+        );
+      }
     }
   };
 
