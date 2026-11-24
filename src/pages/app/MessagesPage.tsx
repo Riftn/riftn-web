@@ -1198,6 +1198,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
       <div style={keyboardStyle} className={`${mobileChatHeight} lg:h-[calc(100dvh-32px)] pt-1 pb-0 sm:pt-1 sm:pb-3 lg:pt-2 overflow-hidden`}>
           <PublicChat
             onBack={closeChat}
+            phoneB={phonePill}
           />
       </div>
     );
