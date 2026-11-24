@@ -44,7 +44,7 @@ describe('display capture', () => {
     expect(setFocusBehavior).toHaveBeenCalledWith('no-focus-change');
     const opts = getDisplayMedia.mock.calls[0][0];
     expect(opts.selfBrowserSurface).toBe('exclude');
-    expect(opts.audio).toBe(true);
+    expect(opts.audio).toMatchObject({ echoCancellation: false, noiseSuppression: false, autoGainControl: false });
     expect(opts.controller).toBeInstanceOf(FakeController);
     expect(video.contentHint).toBe('motion');
   });

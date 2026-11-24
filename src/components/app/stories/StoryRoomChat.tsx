@@ -11,7 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { buildAvatarUrl, buildAvatarCdnFallbackUrl } from '@/lib/media-url';
 import { getStoryComments, type StoryComment } from '@/lib/api/dehub/stories';
-import { ageLabel } from './story-utils';
+import { localAge } from './story-utils';
 
 const FLOATING = 4;
 
@@ -48,7 +48,7 @@ function Face({ c }: { c: StoryComment }) {
 
 /** The newest few over the picture. Empty draws nothing. */
 export function StoryRoomChat({ comments, onOpen }: { comments: StoryComment[]; onOpen: () => void }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   // The server sends newest first; the room reads top to bottom like live chat.
   const rows = useMemo(() => comments.slice(0, FLOATING).reverse(), [comments]);
   // Rows already there when the list first arrives sit still; later ones rise in.
@@ -94,7 +94,7 @@ export function StoryRoomRows({ comments, onOpenProfile, emptyLabel }: { comment
           <div>
             <b>{nameOfComment(c)}</b>
             <p>{c.text}</p>
-            <small>{ageLabel(c.createdAt)}</small>
+            <small>{localAge(c.createdAt, i18n.language)}</small>
           </div>
         </div>
       ))}
