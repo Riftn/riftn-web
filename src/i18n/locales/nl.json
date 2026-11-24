@@ -9831,7 +9831,8 @@
     "followRequest": "{{name}} verzocht u te volgen",
     "followAccepted": "{{name}} heeft je volgverzoek geaccepteerd",
     "signalFlare": "{{name}} stuurde een signaalflare",
-    "newMessage": "{{name}} heeft je een bericht gestuurd"
+    "newMessage": "{{name}} heeft je een bericht gestuurd",
+    "unlike": "Niet meer leuk"
   },
   "audioPost": {
     "popOut": "Pop out — blijf luisteren terwijl je surft",

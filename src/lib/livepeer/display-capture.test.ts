@@ -17,7 +17,7 @@ describe('display capture', () => {
     expect(displaySurfaceOf(null)).toBe('unknown');
   });
 
-  it('treats windows and screens as motion, leaves tabs alone', () => {
+  it('treats windows, screens and tabs as motion', () => {
     const w = track('window');
     const m = track('monitor');
     const b = track('browser');
@@ -26,7 +26,7 @@ describe('display capture', () => {
     tuneDisplayTrack(b);
     expect(w.contentHint).toBe('motion');
     expect(m.contentHint).toBe('motion');
-    expect(b.contentHint).toBe('');
+    expect(b.contentHint).toBe('motion');
   });
 
   it('keeps Riftn in front and opens the picker with the share options', async () => {
@@ -44,7 +44,7 @@ describe('display capture', () => {
     expect(setFocusBehavior).toHaveBeenCalledWith('no-focus-change');
     const opts = getDisplayMedia.mock.calls[0][0];
     expect(opts.selfBrowserSurface).toBe('exclude');
-    expect(opts.audio).toBe(true);
+    expect(opts.audio).toMatchObject({ echoCancellation: false, noiseSuppression: false, autoGainControl: false });
     expect(opts.controller).toBeInstanceOf(FakeController);
     expect(video.contentHint).toBe('motion');
   });

@@ -2,7 +2,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  sendTip: vi.fn(), switchChain: vi.fn(), readTip: vi.fn(), insert: vi.fn(), remixLink: vi.fn(),
+  sendTip: vi.fn(), switchChain: vi.fn(), readTip: vi.fn(), record: vi.fn(), remixLink: vi.fn(),
   toast: { loading: vi.fn(), success: vi.fn(), warning: vi.fn(), error: vi.fn(), dismiss: vi.fn() },
 }));
 vi.mock('sonner', () => ({ toast: mocks.toast }));
@@ -16,8 +16,7 @@ vi.mock('@/lib/contracts/aa-utils', () => ({
 }));
 vi.mock('@/lib/contracts/stream-controller', () => ({ sendTip: mocks.sendTip }));
 vi.mock('@/lib/contracts/read-tip-transaction', () => ({ readConfirmedTipDetails: mocks.readTip }));
-vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: () => ({ insert: mocks.insert }) } }));
-vi.mock('@/lib/supabase-wallet-client', () => ({ withWalletHeader: (query: unknown) => query }));
+vi.mock('@/integrations/supabase/client', () => ({ supabase: { functions: { invoke: mocks.record } } }));
 vi.mock('@/lib/remix-links', async (actual) => ({ ...(await actual<typeof import('@/lib/remix-links')>()), getRemixLink: mocks.remixLink }));
 
 import { useTipPayment } from '../use-tip-payment';
@@ -32,7 +31,7 @@ function confirmation() {
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.switchChain.mockResolvedValue(undefined);
-  mocks.insert.mockResolvedValue({ error: null });
+  mocks.record.mockResolvedValue({ data: { recorded: true }, error: null });
   mocks.remixLink.mockResolvedValue(null);
   mocks.readTip.mockResolvedValue({ receiverAddress: '0xcreator', amount: 500, tokenId: '123' });
 });
@@ -47,10 +46,10 @@ describe('tip payment reporting', () => {
     await act(async () => { await result.current.tip(500); });
     expect(onSubmitted).toHaveBeenCalledWith('0xtip', 500);
     expect(mocks.toast.success).not.toHaveBeenCalled();
-    expect(mocks.insert).not.toHaveBeenCalled();
+    expect(mocks.record).not.toHaveBeenCalled();
     confirmed.resolve('0xtip');
     await waitFor(() => expect(onConfirmed).toHaveBeenCalledOnce());
-    expect(mocks.insert).toHaveBeenCalledWith(expect.objectContaining({ tx_hash: '0xtip', amount: 500 }));
+    expect(mocks.record).toHaveBeenCalledWith('tip-record', { body: { txHash: '0xtip' } });
     expect(mocks.toast.success).toHaveBeenCalledOnce();
   });
 
@@ -62,7 +61,7 @@ describe('tip payment reporting', () => {
     confirmed.reject(Object.assign(new Error('receipt unavailable'), { code: 'TRANSACTION_CONFIRMATION_PENDING' }));
     await waitFor(() => expect(mocks.toast.warning).toHaveBeenCalledWith('staking.pendingSubmitted', expect.objectContaining({ description: '0xtip' })));
     expect(mocks.toast.success).not.toHaveBeenCalled();
-    expect(mocks.insert).not.toHaveBeenCalled();
+    expect(mocks.record).not.toHaveBeenCalled();
     expect(mocks.sendTip).toHaveBeenCalledOnce();
   });
 
@@ -74,7 +73,7 @@ describe('tip payment reporting', () => {
     confirmed.reject(Object.assign(new Error('reverted'), { code: 'TRANSACTION_REVERTED' }));
     await waitFor(() => expect(mocks.toast.error).toHaveBeenCalledWith('toasts.transaction_reverted', { id: 'tip-payment' }));
     expect(mocks.toast.success).not.toHaveBeenCalled();
-    expect(mocks.insert).not.toHaveBeenCalled();
+    expect(mocks.record).not.toHaveBeenCalled();
   });
 
   it('prevents two clicks from submitting two payments', async () => {
@@ -93,7 +92,7 @@ describe('tip payment reporting', () => {
     await act(async () => { await result.current.tip(500); });
     expect(mocks.toast.warning).toHaveBeenCalledOnce();
     expect(mocks.toast.error).not.toHaveBeenCalled();
-    expect(mocks.insert).not.toHaveBeenCalled();
+    expect(mocks.record).not.toHaveBeenCalled();
   });
 
   it('sends the original creator their share of a tip on a duet', async () => {
@@ -107,7 +106,7 @@ describe('tip payment reporting', () => {
     await waitFor(() => expect(mocks.sendTip).toHaveBeenCalledTimes(2));
     expect(mocks.sendTip).toHaveBeenNthCalledWith(1, expect.objectContaining({ to: '0xcreator', amount: 450, tokenId: '123' }));
     expect(mocks.sendTip).toHaveBeenNthCalledWith(2, expect.objectContaining({ to: '0xoriginal', amount: 50, tokenId: 77 }));
-    await waitFor(() => expect(mocks.insert).toHaveBeenCalledWith(expect.objectContaining({ receiver_address: '0xoriginal', amount: 50, token_id: '77' })));
+    await waitFor(() => expect(mocks.record).toHaveBeenCalledWith('tip-record', { body: { txHash: '0xoriginal' } }));
   });
 
   it('does not split a tip on a comment', async () => {
@@ -118,5 +117,15 @@ describe('tip payment reporting', () => {
     await waitFor(() => expect(mocks.toast.success).toHaveBeenCalledOnce());
     expect(mocks.sendTip).toHaveBeenCalledOnce();
     expect(mocks.sendTip).toHaveBeenCalledWith(expect.objectContaining({ amount: 500 }));
+    expect(mocks.record).toHaveBeenCalledWith('tip-record', { body: { txHash: '0xtip', commentId: 'c1' } });
+  });
+
+  it('never writes the tip row from the browser', async () => {
+    mocks.sendTip.mockResolvedValue({ hash: '0xtip', confirmed: Promise.resolve('0xtip') });
+    const { result } = renderHook(() => useTipPayment({ creatorAddress: '0xcreator', tokenId: '123' }));
+    await act(async () => { await result.current.tip(500); });
+    await waitFor(() => expect(mocks.toast.success).toHaveBeenCalledOnce());
+    // Only the payment is named; amount, sender and receiver come from the server's own record.
+    expect(mocks.record.mock.calls).toEqual([['tip-record', { body: { txHash: '0xtip' } }]]);
   });
 });

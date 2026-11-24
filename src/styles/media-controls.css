@@ -264,3 +264,9 @@ html:is([data-theme='light'], [data-system-tone='light']) {
 [data-wide-rail][data-rail-compact-links] :is([data-link-preview-layout="image"], [data-glass-embed]) [data-link-preview-text] { display: none; }
 [data-wide-rail][data-rail-compact-links] [data-link-preview-layout="image"] [data-link-preview-media] { aspect-ratio: 2.4 / 1; }
 [data-wide-rail][data-rail-compact-links] [data-link-preview-badge] { display: flex; }
+
+/* Full screen is a black room on every theme: light themes repainted the
+   frame, leaving white either side of a tall video with white controls on it. */
+html[data-theme] body [data-video-fullscreen]:not([data-audio-frame]):not(#_):not(#_):not(#_):not(#_):not(#_) {
+  background: #000 !important;
+}

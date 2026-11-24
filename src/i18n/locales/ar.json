@@ -9666,7 +9666,8 @@
     "followRequest": "طلب {{name}} متابعتك",
     "followAccepted": "قبل {{name}} طلبك للمتابعة",
     "signalFlare": "أرسل {{name}} إشارة مضيئة",
-    "newMessage": "أرسل لك {{name}} رسالة"
+    "newMessage": "أرسل لك {{name}} رسالة",
+    "unlike": "إلغاء الإعجاب"
   },
   "audioPost": {
     "popOut": "انبثق - استمر في الاستماع أثناء التصفح",
