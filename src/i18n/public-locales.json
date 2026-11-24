@@ -1,5 +1,5 @@
 {
-  "version": "78ff1ffbb21d584a",
+  "version": "f1419a723ab0093c",
   "routes": {
     "/": [
       "ar",
@@ -1057,6 +1057,13 @@
       "tl",
       "vi",
       "zh"
+    ],
+    "/guides/higgsfield-katana-vs-genjutsu": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
     ],
     "/guides/high-score-dehub-gaming-hits-5000-monthly-active-users": [
       "ar",
