@@ -71,6 +71,23 @@ export interface ReactionPose {
   opacity: number;
 }
 
+/** 0..1 eased with a gentle start and finish, so nothing snaps. */
+function smooth(u: number): number {
+  'worklet';
+  const v = Math.max(0, Math.min(1, u));
+  return v * v * (3 - 2 * v);
+}
+
+/**
+ * How far past full size the pop goes. The table's figures read as a jolt on
+ * a phone (a 32px emoji jumping to 53px in a tenth of a second), so the pop is
+ * a softer swell of a bit under half of that.
+ */
+function popPeak(m: ReactionMotion): number {
+  'worklet';
+  return 1 + (m.pop - 1) * 0.6;
+}
+
 /** Where a particle sits `t` (0..1) of the way through its climb. */
 export function reactionPose(type: LiveReactionType, seed: number, t: number): ReactionPose {
   // The app runs this on the UI thread inside an animated style.
@@ -79,22 +96,27 @@ export function reactionPose(type: LiveReactionType, seed: number, t: number): R
   const p = Math.max(0, Math.min(1, t));
   const phase = (seed * 2.39996) % (Math.PI * 2);
   const side = seed % 2 ? 1 : -1;
-  // Pop in past full size, settle, then shrink a little near the top.
-  let scale = p < 0.07 ? 0.3 + (m.pop - 0.3) * (p / 0.07)
-    : p < 0.17 ? m.pop + (1 - m.pop) * ((p - 0.07) / 0.1)
-    : p > 0.8 ? 1 - 0.25 * ((p - 0.8) / 0.2)
+  const peak = popPeak(m);
+  // Swell in (fast out of the button, easing into the peak), settle to full
+  // size, then shrink a little as it fades near the top. Every leg is eased,
+  // so there is no corner where the size changes speed all at once.
+  let scale = p < 0.08 ? 0.4 + (peak - 0.4) * (1 - Math.pow(1 - p / 0.08, 3))
+    : p < 0.22 ? peak + (1 - peak) * smooth((p - 0.08) / 0.14)
+    : p > 0.72 ? 1 - 0.2 * smooth((p - 0.72) / 0.28)
     : 1;
-  if (m.pulse) scale *= 1 + m.pulseDepth * Math.sin(p * Math.PI * 2 * m.pulse);
+  // The beat (a heart, a flame) fades in after the pop rather than fighting it.
+  if (m.pulse) scale *= 1 + m.pulseDepth * smooth((p - 0.15) / 0.15) * Math.sin(p * Math.PI * 2 * m.pulse);
+  // The rock also eases in from upright, so a particle never starts tilted.
   const rotate = m.spin
     ? side * m.spin * (1 - Math.pow(1 - p, 2))
-    : m.wobble * Math.sin(p * Math.PI * 2 * 2 + phase);
+    : m.wobble * smooth(p / 0.2) * Math.sin(p * Math.PI * 2 * 1.5 + phase);
   return {
-    x: m.sway * (0.35 + 0.65 * p) * Math.sin(p * Math.PI * 2 * m.waves + phase),
+    x: m.sway * (0.25 + 0.75 * p) * Math.sin(p * Math.PI * 2 * m.waves + phase) - m.sway * 0.25 * Math.sin(phase),
     // Quick off the button, easing out as it nears the top.
     rise: 1 - Math.pow(1 - p, 1.7),
     rotate,
     scale,
-    opacity: p < 0.05 ? p / 0.05 : p > 0.72 ? Math.max(0, (1 - p) / 0.28) : 1,
+    opacity: p < 0.06 ? smooth(p / 0.06) : p > 0.68 ? 1 - smooth((p - 0.68) / 0.32) : 1,
   };
 }
 
@@ -103,7 +125,11 @@ export function reactionColumn(seed: number): number {
   return 6 + (seed * 37 % 5) * 14;
 }
 
-const MAX_ACTIVE = 30;
+/**
+ * The most emoji in the air at once. Past about two dozen a phone's lane is a
+ * smear rather than applause, and every extra one is another layer to move.
+ */
+export const MAX_ACTIVE = 24;
 
 /** A small FIFO fountain. Bound both the picture and the backlog during a raid. */
 export class ReactionFlowQueue {
@@ -119,6 +145,24 @@ export class ReactionFlowQueue {
     for (let i = 0; i < count; i++) this.pending.push({ type, big: safeWeight > 1 });
     // Keep recent applause rather than replaying minutes of stale reactions.
     if (this.pending.length > 600) this.pending.splice(0, this.pending.length - 600);
+  }
+
+  /**
+   * The viewer's own tap: one emoji up NOW, not in the queue behind the room.
+   * Every tap is another one, so holding a finger to the button reads as a
+   * stream of applause rather than a trickle that lags the taps. A full lane
+   * gives up its oldest (the one already fading at the top) to make room.
+   */
+  launch(value: unknown, weight = 1, now = Date.now()): boolean {
+    const type = liveReactionType(value);
+    if (!type) return false;
+    const big = Number.isFinite(weight) && weight > 1;
+    this.active = this.active.filter(item => item.expiresAt > now);
+    if (this.active.length >= MAX_ACTIVE) this.active.shift();
+    this.active.push({ id: String(++this.sequence), type, big, expiresAt: now + REACTION_MOTION[type].duration });
+    // A badge holder's tap trails one more, never a backlog of them.
+    if (big && this.pending.length < 12) this.pending.push({ type, big });
+    return true;
   }
 
   tick(now: number): ReactionParticle[] {
