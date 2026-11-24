@@ -845,7 +845,7 @@ export function StatusRow({ me }: { me: StoryAuthor | null }) {
   }, []);
   if (!self) return null;
   return (
-    <div ref={bindStatusScroll} data-status-row className="-mx-0.5 flex gap-1 overflow-x-auto px-0.5 pb-1 [scrollbar-width:none] [mask-image:linear-gradient(90deg,#000_calc(100%-28px),transparent)]">
+    <div ref={bindStatusScroll} data-status-row className="-mx-0.5 flex gap-1 overflow-x-auto px-0.5 pb-1 pt-0.5 [scrollbar-width:none] [mask-image:linear-gradient(90deg,#000_calc(100%-28px),transparent)]">
       <StatusTile own author={self} note={mine?.note ?? null} label={t('notes.yourStatus', { defaultValue: 'Your status' })} onClick={() => openNotesSheet()} />
       {notes.map(entry => (
         <StatusTile key={entry.note.id} author={entry.author} note={entry.note} label={nameOf(entry.author)} onClick={() => openNotesSheet(entry)} />
