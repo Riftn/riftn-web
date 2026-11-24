@@ -23795,5 +23795,8 @@
     "postSnapshot": "Ekran görüntüsü paylaş",
     "shareLink": "Bağlantıyı paylaş",
     "snapshotFailed": "Ekran görüntüsü alınamadı. Tekrar dene."
+  },
+  "liveTimeline": {
+    "backToLive": "Canlıya dön"
   }
 }

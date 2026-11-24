@@ -23769,5 +23769,8 @@
     "postSnapshot": "Post a snapshot",
     "shareLink": "Share link",
     "snapshotFailed": "Couldn’t take a snapshot. Try again."
+  },
+  "liveTimeline": {
+    "backToLive": "Back to live"
   }
 }

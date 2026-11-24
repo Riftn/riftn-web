@@ -23855,5 +23855,8 @@
     "postSnapshot": "انشر لقطة",
     "shareLink": "مشاركة الرابط",
     "snapshotFailed": "تعذّر التقاط اللقطة. حاول مرة أخرى."
+  },
+  "liveTimeline": {
+    "backToLive": "العودة إلى البث المباشر"
   }
 }
