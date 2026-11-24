@@ -23750,5 +23750,18 @@
     "postSnapshot": "Post a snapshot",
     "shareLink": "Share link",
     "snapshotFailed": "Couldn’t take a snapshot. Try again."
+  },
+  "liveMini": {
+    "minimise": "Minimise",
+    "minimiseHint": "Keep watching while you browse",
+    "player": "Live player",
+    "soundOnly": "Sound only",
+    "showPicture": "Show picture",
+    "openLive": "Open live",
+    "float": "Float over other apps",
+    "play": "Play",
+    "pause": "Pause",
+    "close": "Close live",
+    "ended": "This live has ended"
   }
 }

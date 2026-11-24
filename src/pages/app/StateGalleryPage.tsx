@@ -3178,6 +3178,7 @@ function LiveViewerGallery() {
             }
             hidden={false}
             streamId={GALLERY_STREAM_ID}
+            onMinimise={noop}
           />
         </div>
         <div
