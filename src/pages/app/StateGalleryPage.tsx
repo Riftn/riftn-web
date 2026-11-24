@@ -751,6 +751,19 @@ function AssistantCardsGallery() {
     { ...base, id: 'aaaaaaaaaaaaaaaaaaaaaaa3', kind: 'react', status: 'done', preview: { choice: 'fitting', count: 118, author: jules }, result: { done: 118, total: 118, added: 118, used: { love: 61, like: 40, lol: 17 } } },
     { ...base, id: 'aaaaaaaaaaaaaaaaaaaaaaa4', kind: 'follow', status: 'pending', preview: { count: 2, people: [jules, { address: '0x2222222222222222222222222222222222222222', username: 'xluna', displayName: 'Luna', avatar: null }] } },
     { ...base, id: 'aaaaaaaaaaaaaaaaaaaaaaa5', kind: 'chat_access', status: 'pending', preview: { allow: true } },
+    {
+      ...base, id: 'aaaaaaaaaaaaaaaaaaaaaaa6', kind: 'schedule_posts', status: 'pending',
+      preview: {
+        count: 4, gapMinutes: 1440,
+        items: [0, 1, 2, 3].map((i) => ({
+          text: ['Sunday market haul', '', 'Golden hour from the roof', 'Last one from the trip'][i],
+          photo: i === 1 ? null : `https://picsum.photos/seed/plan${i}/120/120`,
+          at: i === 0 ? null : new Date(Date.now() + i * 86_400_000).toISOString(),
+        })),
+      },
+    },
+    { ...base, id: 'aaaaaaaaaaaaaaaaaaaaaaa7', kind: 'schedule_posts', status: 'done', preview: { count: 20 }, result: { done: 20, total: 20, ok: 20, failed: 0 } },
+    { ...base, id: 'aaaaaaaaaaaaaaaaaaaaaaa8', kind: 'post_spacing', status: 'pending', preview: { gapMinutes: 60, before: 0 } },
   ];
   return (
     <section data-assistant-cards-gallery className="mb-5">
