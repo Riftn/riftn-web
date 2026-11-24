@@ -6763,6 +6763,20 @@ html[data-theme="horror"] [data-creator-page] { --cr-accent: linear-gradient(135
   .dehub-intro .dehub-intro-plate,
   .dehub-intro .dehub-intro-sub,
   .dehub-intro .dehub-intro-foot { display: none; }
+  /* The silk stays, dimmed under the glass. Without it the card's biggest
+     painted piece is the 120 px globe, so Chrome timed the first sliver of
+     feed media below it as the page's LCP, and that waits on the whole app. */
+  .dehub-intro .dehub-intro-plate.dehub-intro-silk {
+    display: block; opacity: .32;
+    background-image: url(/brand-kit/bg/bg-16-phone.jpg) !important;
+  }
+  /* The app's copy draws the same portrait crop as a border-image, which is
+     never an LCP candidate: the prerendered card keeps the early LCP even when
+     the re-rendered card comes out a few pixels taller (same fix as the art). */
+  .dehub-intro .dehub-intro-plate.dehub-intro-silk-live {
+    background-image: none !important;
+    border-image: url(/brand-kit/bg/bg-16-phone.jpg) 0 fill;
+  }
   .dehub-intro .dehub-intro-tail { display: block; margin-top: 0; }
   .dehub-intro .dehub-intro-hero {
     top: 54px; left: 50%; right: auto; width: 120px; height: 118px; opacity: 1;
