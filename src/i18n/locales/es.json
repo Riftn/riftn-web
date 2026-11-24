@@ -23507,7 +23507,14 @@
     "imageOnly": "Elige una imagen o GIF. Añade vídeo, música o archivos como extras para dueños después de acuñar.",
     "tooBig": "Ese archivo pasa de 42 MB",
     "minted": "NFT acuñado. Aparecerá en el mercado en un minuto.",
-    "failed": "No se pudo crear el NFT"
+    "failed": "No se pudo crear el NFT",
+    "newNft": "Nuevo NFT",
+    "untitled": "Sin título",
+    "addArt": "Añade una imagen o un GIF",
+    "tileEarn": "{{pct}} para ti en reventas",
+    "otherCopies": "Otro",
+    "otherPlaceholder": "Cualquier número, como 250 o 50000",
+    "chain": "Cadena"
   },
   "profileImage": {
     "view": "Ver foto"

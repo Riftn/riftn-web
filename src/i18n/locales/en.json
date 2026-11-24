@@ -23481,7 +23481,14 @@
     "imageOnly": "Pick a picture or GIF. Add video, music or files as owner extras after minting.",
     "tooBig": "That file is over 42 MB",
     "minted": "NFT minted. It shows on the market in a minute.",
-    "failed": "Could not create the NFT"
+    "failed": "Could not create the NFT",
+    "newNft": "New NFT",
+    "untitled": "Untitled",
+    "addArt": "Add a picture or GIF",
+    "tileEarn": "{{pct}} to you on resales",
+    "otherCopies": "Other",
+    "otherPlaceholder": "Any number, like 250 or 50000",
+    "chain": "Chain"
   },
   "profileImage": {
     "view": "View photo"
