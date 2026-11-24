@@ -686,6 +686,11 @@
          prerenderHomeIntroPlugin). The boot script sets data-home-intro="off"
          when HomeIntro would not render: off "/", signed in, or dismissed. */
       html[data-home-intro="off"] [data-prerendered-intro] { display: none; }
+      /* Chrome paints while the parser is still inside the panel, so the first
+         frame could show a half-built card (300 px instead of 565). Its silk was
+         then a small LCP candidate, and the app's full-size card a later, larger
+         one. Keep the panel unpainted until its end marker is parsed. */
+      [data-prerendered-intro]:not(:has(> [data-intro-done])) { visibility: hidden; }
       html[data-home-intro="off"] [data-home-intro-slot] { display: none; }
       @media (prefers-reduced-motion: no-preference) {
         .bskel-wash { animation: bskel-pulse 2s ease-in-out infinite; }

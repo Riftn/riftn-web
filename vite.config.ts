@@ -403,7 +403,9 @@ function prerenderHomeIntroPlugin() {
           });
           if (!markup.includes('dehub-intro')) throw new Error('no panel markup in output');
           console.log(`[prerender-home-intro] injected ${(markup.length / 1024).toFixed(1)} KB of welcome-panel HTML`);
-          return html.replace(slot, `<div data-prerendered-intro>${markup}</div>`);
+          // The trailing marker lets index.html keep the panel unpainted until
+          // the parser has reached its end (see [data-intro-done] there).
+          return html.replace(slot, `<div data-prerendered-intro>${markup}<i data-intro-done hidden></i></div>`);
         } catch (e) {
           console.warn('[prerender-home-intro] failed — keeping the skeleton card', e);
           return html;
