@@ -232,9 +232,15 @@ export function WideVideoPanel({ video, onOpenComments, walletAddress, onLogin, 
       ref={railRef}
       data-wide-rail
       data-no-navigate
-      className="flex min-w-[260px] flex-1 basis-0 flex-col overflow-hidden rounded-2xl border border-white/[0.12] bg-black/40 text-white backdrop-blur-[24px] backdrop-saturate-[160%] shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]"
+      // With comments up, link cards here shrink to their picture (see
+      // media-controls.css) so the comments keep their room.
+      data-rail-compact-links={count > 0 || undefined}
+      // The panel takes the picture's height and never adds its own: size
+      // containment keeps its content out of the row's height. The caption
+      // scrolls, comments clip and the comment box stays pinned.
+      className="flex min-w-[260px] flex-1 basis-0 flex-col overflow-hidden [contain:size] rounded-2xl border border-white/[0.12] bg-black/40 text-white backdrop-blur-[24px] backdrop-saturate-[160%] shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]"
     >
-      <div className="flex max-h-[62%] shrink-0 flex-col gap-3 p-4">
+      <div className="flex max-h-[62%] shrink-0 flex-col gap-2.5 p-3">
         {!hideCaption && (title || body || description) && (
           // A long caption scrolls inside the panel, so Follow and the comment
           // box below always stay in view.
@@ -249,7 +255,7 @@ export function WideVideoPanel({ video, onOpenComments, walletAddress, onLogin, 
         {!isOwnPost && <div className="shrink-0"><RailFollowButton video={video} walletAddress={walletAddress} onLogin={onLogin} /></div>}
       </div>
 
-      <div className="mx-4 h-px bg-white/[0.08]" />
+      <div className="mx-3 h-px bg-white/[0.08]" />
 
       {writing ? (
         // The same panel and composer as the comments section: attachments,
@@ -272,7 +278,7 @@ export function WideVideoPanel({ video, onOpenComments, walletAddress, onLogin, 
         </div>
       ) : (
         <>
-          <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden p-4">
+          <div className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-hidden px-3 py-2.5">
             <button
               type="button"
               onClick={(event) => { event.stopPropagation(); onOpenComments(); }}
@@ -297,7 +303,7 @@ export function WideVideoPanel({ video, onOpenComments, walletAddress, onLogin, 
             {count === 0 && <p className="text-[13px] text-white/60">{t('wideVideo.noComments', 'No comments yet')}</p>}
           </div>
 
-          <div className="p-4 pt-0">
+          <div className="p-3 pt-0">
             <RailCommentBox tokenId={tokenId} walletAddress={walletAddress} onLogin={onLogin} onPosted={() => setPosted((n) => n + 1)} onExpand={() => setWriting(true)} />
           </div>
         </>

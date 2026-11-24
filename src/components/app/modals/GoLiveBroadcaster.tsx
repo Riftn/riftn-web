@@ -2268,10 +2268,11 @@ export function GoLiveBroadcaster({
 
   return (
     <div className={cn(fullBleed ? 'absolute inset-0 bg-black' : 'space-y-4 pb-4')}>
+      <div className={cn(!fullBleed && 'flex items-start gap-4')}>
       <div
         className={cn(
           'overflow-hidden bg-black',
-          fullBleed ? 'absolute inset-0' : 'relative aspect-video w-full rounded-2xl'
+          fullBleed ? 'absolute inset-0' : 'relative aspect-video w-full min-w-0 flex-1 rounded-2xl'
         )}
       >
         {/* muted + playsInline: iOS Safari refuses to autoplay otherwise, and
@@ -2407,6 +2408,23 @@ export function GoLiveBroadcaster({
         {isCard && phase !== 'error' && (
           <span className="absolute right-3 top-[calc(max(0.75rem,env(safe-area-inset-top))+3rem)] flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] text-white backdrop-blur-xl">
             <Cable className="h-3 w-3" />{_copy("copy.4a1bd4a3aaf3", { defaultValue: "Capture card" })}</span>
+        )}
+      </div>
+        {/* On a computer the chat sits beside the picture. Under it, it
+            landed below the fold of the sheet and was clipped at 45vh, so a
+            host on a laptop could not read their own room. */}
+        {!fullBleed && openPanel === 'chat' && tokenId && (
+          <aside className="flex w-80 shrink-0 flex-col [&>div]:mt-0">
+            <Suspense
+              fallback={
+                <div className="flex items-center justify-center py-10">
+                  <Loader2 className="h-5 w-5 animate-spin text-white/60" />
+                </div>
+              }
+            >
+              <LivePostChat tokenId={tokenId} streamId={streamId ?? undefined} isHost />
+            </Suspense>
+          </aside>
         )}
       </div>
 
@@ -2686,17 +2704,14 @@ export function GoLiveBroadcaster({
         />
       )}
 
-      {openPanel === 'chat' && tokenId && (
+      {openPanel === 'chat' && tokenId && fullBleed && (
         <div
-          className={cn(
-            // Above the floating controls, not below the video — there is no
-            // "below the video" once the video is the whole screen. Bottom-
-            // aligned so a quiet room keeps the composer where a busy one has
-            // it, rather than floating the pair up the frame.
-            fullBleed
-              ? 'absolute inset-x-3 bottom-24 z-20 flex max-h-[55vh] flex-col justify-end'
-              : 'max-h-[45vh] overflow-hidden rounded-xl border border-white/10'
-          )}
+          // Above the floating controls, not below the video — there is no
+          // "below the video" once the video is the whole screen. Bottom-
+          // aligned so a quiet room keeps the composer where a busy one has
+          // it, rather than floating the pair up the frame. A computer shows
+          // the chat beside the picture instead (above).
+          className="absolute inset-x-3 bottom-24 z-20 flex max-h-[55vh] flex-col justify-end"
         >
           <Suspense
             fallback={
@@ -2711,7 +2726,7 @@ export function GoLiveBroadcaster({
                 ObjectId, so host and audience named different rooms and only
                 shared a conversation because the backend ignored the room and
                 put everyone in the platform chat. */}
-            <LivePostChat tokenId={tokenId} streamId={streamId ?? undefined} isHost overlay={fullBleed} />
+            <LivePostChat tokenId={tokenId} streamId={streamId ?? undefined} isHost overlay />
           </Suspense>
         </div>
       )}

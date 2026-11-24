@@ -8,6 +8,7 @@ import VideoOff from '@/components/ui/cut-icons/video-off';
 import { useCall } from '@/contexts/CallContext';
 import { useAuth } from '@/contexts/AuthContext';
 import type { GroupParticipant } from '@/hooks/use-call';
+import { PUBLIC_CHAT_CALL_ID } from '@/lib/group-call';
 import { CallDuration } from './CallDuration';
 import {
   CallStage,
@@ -26,8 +27,8 @@ import { readTownHallMode, saveTownHallMode, TOWN_HALL_FROM, type TownHallMode }
 /**
  * A group call, voice or video, on the same stage as a direct call.
  *
- * Before anyone else is in the room it is the waiting screen with the group's
- * name (nobody is rung; members join from the pill). Once somebody joins it becomes a grid: one tile per person,
+ * Before anyone else is in the room it is the ringing screen with the group's
+ * name (Public Chat: the waiting screen, nobody is rung). Once somebody joins it becomes a grid: one tile per person,
  * their camera when it is on and their picture when it is not, outlined while
  * they talk. From three people it is a town hall instead (see TownHall): the
  * talker fills the stage over a strip of everyone else; the corner button
@@ -83,7 +84,9 @@ const GroupCallModal: React.FC = () => {
     const status = isIncoming
       ? t('calls.isCalling', { name: caller.name, defaultValue: '{{name}} is calling' })
       : isRinging
-        ? t('calls.waitingForPeople', 'Waiting for people to join...')
+        ? currentCall.group_id === PUBLIC_CHAT_CALL_ID
+          ? t('calls.waitingForPeople', 'Waiting for people to join...')
+          : t('calls.callingGroup', 'Ringing the group...')
         : t('calls.connecting');
     return (
       <CallStage peer={stagePeer} onMinimize={isIncoming ? undefined : minimizeCall} minimizeLabel={t('calls.minimize')}>

@@ -3488,8 +3488,8 @@ function WideVideoModeRow() {
         onValueChange={(value) => { if (isWideVideoMode(value)) writeWideVideoMode(value); }}
         title={title}
         options={[
-          { value: 'rails', label: t('settings.wideVideoRails', 'Glass rails'), description: t('settings.wideMediaRailsDesc', 'The video or photo beside one glass panel with what it is, a Follow button and the top comments') },
           { value: 'ambient', label: t('settings.wideVideoAmbient', 'Ambient'), description: t('settings.wideMediaAmbientDesc', 'The video or photo fills the width, with a soft blurred glow of itself on each side') },
+          { value: 'rails', label: t('settings.wideVideoRails', 'Glass rails'), description: t('settings.wideMediaRailsDesc', 'The video or photo beside one glass panel with what it is, a Follow button and the top comments') },
           { value: 'standard', label: t('settings.wideVideoStandard', 'Standard'), description: t('settings.wideMediaStandardDesc', 'The video or photo on its own, as before') },
         ]}
       />}

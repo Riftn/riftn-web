@@ -153,7 +153,7 @@ export default function CallStageGallery() {
         for (const uid of [0, 2, 3, 4, 5, 6, 7, 8, 9]) if (!levels.has(uid)) levels.set(uid, 0.01);
         return levels;
       },
-      joinGroupCall: async () => {},
+      startGroupCall: async () => {}, joinGroupCall: async () => {},
       // ?camfull=1: every camera slot taken, yours off.
       groupCamerasFull: params.get('camfull') === '1',
       captionRoom: subs && live ? room : null,
