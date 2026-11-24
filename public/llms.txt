@@ -1,13 +1,13 @@
 # Riftn
 
-> Riftn (riftn.com), formerly DeHub (dehub.io), is an open source, user-owned and censorship-resistant social network and mobile app, in development since 2021. Posts can be minted on-chain, creators keep their audience and up to 99% of their revenue, and its token, $RIFT, replaces the old DHB token for tips, watch-to-earn rewards, staking and governance. $RIFT is not trading yet. Not to be confused with DePaul University's DeHUB portal or Rowan's DEHub.
+> Riftn (riftn.com), formerly DeHub (dehub.io), is an open source, user-owned and censorship-resistant social media protocol, in development since 2021, with a web app and mobile apps. Posts can be minted on-chain, creators keep their audience and up to 99% of their revenue, and its token, $RIFT, replaces the old DHB token for tips, watch-to-earn rewards, staking and governance. $RIFT is not trading yet. Not to be confused with DePaul University's DeHUB portal or Rowan's DEHub.
 
 Every link below is a public page that renders without an account. The app's signed-in screens (messages, wallet, notifications, settings) are private and not listed. Machine-readable API access for assistants is described in [skill.md](https://riftn.com/skill.md). The full text of the FAQ and every guide below is in [llms-full.txt](https://riftn.com/llms-full.txt).
 
 ## Key facts
 
 - Name: Riftn. It was called DeHub until November 2026. The old address dehub.io forwards to riftn.com, and old links keep working.
-- What it is: an open source, user-owned social network with video, shorts, live streaming, music, encrypted messaging, communities, browser games and a built-in wallet.
+- What it is: a social media protocol. It is open source and user-owned, with video, shorts, live streaming, music, encrypted messaging, communities, browser games and a built-in wallet.
 - Cost: free to join and post. Creators keep up to 99% of what they earn, and tips arrive on-chain as they are sent.
 - Token: $RIFT is Riftn's token, used for tips, unlocks, rewards and governance votes. It replaces DHB, and DHB holders keep their balance and claim it by logging in once after listing.
 - Apps: web at riftn.com, Android on Google Play or direct APK, and iPhone on the App Store.
