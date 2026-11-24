@@ -84,6 +84,12 @@ export function BadgeShowcaseHost() {
   useEffect(() => {
     const connection = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
     if (connection?.saveData || /2g/.test(connection?.effectiveType ?? '')) return;
+    // Not on touch screens. The showcase pulls in three.js: about 1 MB of
+    // script fetched and compiled for every phone visitor, most of whom never
+    // open a badge, while they are scrolling and tapping the feed (which is
+    // what INP measures). There a tap on a badge fetches it (BadgeIcon warms
+    // it on pointerdown) and the pending art covers the wait.
+    if (window.matchMedia?.('(hover: none), (pointer: coarse)').matches) return;
     let idle = 0;
     const fetchNow = () => { void preloadBadgeShowcase().catch(() => {}); };
     const timer = window.setTimeout(() => {
