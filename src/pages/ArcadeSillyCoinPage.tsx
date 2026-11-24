@@ -18,9 +18,10 @@ import { useCallback, useEffect, useRef, useState, type KeyboardEvent as ReactKe
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowDownLeft, ArrowLeft, ArrowUpRight, Bot, Drill, Loader2, Pickaxe, Send, Share2 } from 'lucide-react';
+import { ArrowDownLeft, ArrowLeft, ArrowUpRight, Bot, Drill, Loader2, Pickaxe, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { SEOHead } from '@/components/SEOHead';
+import { ArcadeShareMenu } from '@/components/app/arcade/ArcadeShareMenu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ThemedIcon } from '@/components/app/war/WarHudIcon';
 import { useAuth } from '@/contexts/AuthContext';
@@ -45,14 +46,6 @@ const UPGRADE_ICONS: Record<SillyUpgradeKind, typeof Pickaxe> = { pick: Pickaxe,
 const UPGRADE_NAMES: Record<SillyUpgradeKind, string> = { pick: 'Bigger pick', miner: 'Auto-miner', rig: 'Drill rig' };
 const BOUGHT: Record<SillyUpgradeKind, string> = { pick: 'Bigger pick bought', miner: 'Auto-miner bought', rig: 'Drill rig bought' };
 
-function share(title: string, copied: string) {
-  const nav = navigator as Navigator & { share?: (d: ShareData) => Promise<void> };
-  if (nav.share) {
-    void nav.share({ url: PAGE_URL, title }).catch(() => undefined);
-    return;
-  }
-  void navigator.clipboard?.writeText(PAGE_URL).then(() => toast.success(copied));
-}
 
 /** The coin itself: drawn here so it is crisp at any size and in every theme. */
 function CoinArt() {
@@ -487,14 +480,7 @@ export default function ArcadeSillyCoinPage() {
             <h1 className="text-lg font-bold text-white">{title}</h1>
             <p className="text-xs text-zinc-500">{t('games.sillycoin.intro', { defaultValue: 'Tap to mine, upgrade, send coins to friends.' })}</p>
           </div>
-          <button
-            type="button"
-            onClick={() => share(title, t('games.linkCopied', { defaultValue: 'Link copied' }))}
-            aria-label={t('games.share', { defaultValue: 'Share' })}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-zinc-900 text-zinc-300 ring-1 ring-white/10 hover:text-white"
-          >
-            <Share2 className="h-4 w-4" />
-          </button>
+          <ArcadeShareMenu slug="sillycoin" title={title} />
         </div>
 
         {isLoading && wallet ? (

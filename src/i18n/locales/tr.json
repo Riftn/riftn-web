@@ -23720,5 +23720,18 @@
     "empty": "Fotoğraf bulunamadı. Başka bir kelime dene.",
     "failed": "Bu fotoğraf eklenemedi. Başka birini dene.",
     "credit": "Fotoğraf: {{creator}} ({{license}})"
+  },
+  "arcadeCard": {
+    "best": "En iyi skor",
+    "mined": "Kazılan coin",
+    "rankLine": "{{label}} · Tabloda {{rank}}.",
+    "shared": "Bu oyunu paylaştı",
+    "play": "Oyna"
+  },
+  "arcadeShare": {
+    "postCard": "Skor kartını paylaş",
+    "postSnapshot": "Ekran görüntüsü paylaş",
+    "shareLink": "Bağlantıyı paylaş",
+    "snapshotFailed": "Ekran görüntüsü alınamadı. Tekrar dene."
   }
 }
