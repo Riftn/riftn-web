@@ -21874,6 +21874,8 @@
     "notInChat": "Ese enlace es de un chat privado en el que no estás."
   },
   "notes": {
+    "background": "Fondo",
+    "yourPhoto": "Tu foto",
     "newStatus": "Nuevo estado",
     "upFor": "Publicado hace {{time}}",
     "postedAgo": "hace {{time}}",
