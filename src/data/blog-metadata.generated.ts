@@ -2988,6 +2988,32 @@ export const blogPostsMetadata: BlogPost[] = [
 // arrays at runtime in blogUtils.ts — metadata-only logic, no third copy here.
 export const newPostsMetadata: BlogPost[] = [
   {
+    "id": "claude-of-duty-how-to-play",
+    "slug": "claude-of-duty-how-to-play",
+    "title": "Claude of Duty: How to Play the Browser Shooter (Controls, Tips, FAQ)",
+    "excerpt": "Claude of Duty is a free first-person shooter that runs in your browser and builds every model, texture and sound on your own machine. Here are the controls, the settings that matter and how to get it running smoothly.",
+    "content": "",
+    "bannerImage": "/media/claude-of-duty-how-to-play-banner-r2.jpg",
+    "bannerImageAlt": "Claude of Duty: how to play the free browser shooter, with controls and tips",
+    "author": {
+      "name": "Mal Jan"
+    },
+    "publishedAt": "2026-11-24T19:00:00.000Z",
+    "updatedAt": "2026-11-24T19:00:00.000Z",
+    "tags": [
+      "Claude of Duty",
+      "Browser Games",
+      "FPS",
+      "Riftn Arcade",
+      "Free Games"
+    ],
+    "readingTime": 4,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "Claude of Duty: How to Play, Controls and Tips (Free Browser FPS)",
+    "seoDescription": "How to play Claude of Duty, the free browser shooter: every control, the settings that matter, tips to win fights and why the first load takes a minute."
+  },
+  {
     "id": "how-does-a-token-get-listed-on-an-exchange-2026",
     "slug": "how-does-a-token-get-listed-on-an-exchange-2026",
     "title": "How Does a Token Get Listed on an Exchange? Requirements, Costs and Timeline (2026)",
@@ -3940,30 +3966,30 @@ export const newPostsMetadata: BlogPost[] = [
 
 // getLatestPost() result — docs home hero.
 export const latestPostMetadata: BlogPost | undefined = {
-  "id": "how-does-a-token-get-listed-on-an-exchange-2026",
-  "slug": "how-does-a-token-get-listed-on-an-exchange-2026",
-  "title": "How Does a Token Get Listed on an Exchange? Requirements, Costs and Timeline (2026)",
-  "excerpt": "Anyone can list a token on a decentralised exchange in minutes. A centralised exchange takes weeks or months of legal, technical and liquidity checks. Here is how each route works, what it costs, and the scams to avoid.",
+  "id": "claude-of-duty-how-to-play",
+  "slug": "claude-of-duty-how-to-play",
+  "title": "Claude of Duty: How to Play the Browser Shooter (Controls, Tips, FAQ)",
+  "excerpt": "Claude of Duty is a free first-person shooter that runs in your browser and builds every model, texture and sound on your own machine. Here are the controls, the settings that matter and how to get it running smoothly.",
   "content": "",
-  "bannerImage": "/media/how-a-token-gets-listed-on-an-exchange-banner-r2.jpg",
-  "bannerImageAlt": "Getting listed: how a token gets listed on an exchange, with requirements, costs and timeline for 2026",
+  "bannerImage": "/media/claude-of-duty-how-to-play-banner-r2.jpg",
+  "bannerImageAlt": "Claude of Duty: how to play the free browser shooter, with controls and tips",
   "author": {
     "name": "Mal Jan"
   },
-  "publishedAt": "2026-11-24T18:00:00.000Z",
-  "updatedAt": "2026-11-24T18:00:00.000Z",
+  "publishedAt": "2026-11-24T19:00:00.000Z",
+  "updatedAt": "2026-11-24T19:00:00.000Z",
   "tags": [
-    "Token Listing",
-    "Crypto Exchange",
-    "DEX",
-    "MiCA",
-    "Riftn"
+    "Claude of Duty",
+    "Browser Games",
+    "FPS",
+    "Riftn Arcade",
+    "Free Games"
   ],
-  "readingTime": 6,
+  "readingTime": 4,
   "featured": false,
   "status": "published",
-  "seoTitle": "How Does a Token Get Listed on an Exchange? (2026 Guide)",
-  "seoDescription": "How tokens get listed on DEX and centralised exchanges in 2026: the requirements, the costs, how long it takes, and the listing scams to avoid."
+  "seoTitle": "Claude of Duty: How to Play, Controls and Tips (Free Browser FPS)",
+  "seoDescription": "How to play Claude of Duty, the free browser shooter: every control, the settings that matter, tips to win fights and why the first load takes a minute."
 };
 
 export const excludedTitles: string[] = [

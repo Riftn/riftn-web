@@ -9,7 +9,15 @@
     <copyright>Copyright 2026 Riftn</copyright>
     <managingEditor>dev@riftn.com (Riftn Team)</managingEditor>
     <webMaster>dev@riftn.com (Riftn Team)</webMaster>
-    <lastBuildDate>Tue, 24 Nov 2026 18:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Tue, 24 Nov 2026 19:00:00 GMT</lastBuildDate>
+    <item>
+      <title>Claude of Duty: How to Play the Browser Shooter (Controls, Tips, FAQ)</title>
+      <description>How to play Claude of Duty, the free browser shooter: every control, the settings that matter, tips to win fights and why the first load takes a minute.</description>
+      <link>https://riftn.com/guides/claude-of-duty-how-to-play</link>
+      <guid>https://riftn.com/guides/claude-of-duty-how-to-play</guid>
+      <pubDate>Tue, 24 Nov 2026 19:00:00 GMT</pubDate>
+      <dc:creator>Mal Jan</dc:creator>
+    </item>
     <item>
       <title>How Does a Token Get Listed on an Exchange? Requirements, Costs and Timeline (2026)</title>
       <description>How tokens get listed on DEX and centralised exchanges in 2026: the requirements, the costs, how long it takes, and the listing scams to avoid.</description>
@@ -160,14 +168,6 @@
       <link>https://riftn.com/guides/dehub-next-chapter-riftn-bnb-recovery-relaunch</link>
       <guid>https://riftn.com/guides/dehub-next-chapter-riftn-bnb-recovery-relaunch</guid>
       <pubDate>Thu, 22 Oct 2026 18:00:00 GMT</pubDate>
-      <dc:creator>Mal Jan</dc:creator>
-    </item>
-    <item>
-      <title>Q4 Development Overview</title>
-      <description>Everything Riftn shipped since October across web, mobile, the streaming backend and admin, the video editor, Creator, AI agents, live, profiles, System Light and wallets, with pull request links throughout.</description>
-      <link>https://riftn.com/guides/q4-development-overview</link>
-      <guid>https://riftn.com/guides/q4-development-overview</guid>
-      <pubDate>Sat, 17 Oct 2026 12:00:00 GMT</pubDate>
       <dc:creator>Mal Jan</dc:creator>
     </item>
   </channel>

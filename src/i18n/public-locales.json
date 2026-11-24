@@ -1,5 +1,5 @@
 {
-  "version": "de91b1840bd5ba17",
+  "version": "ad304ff46a4db84e",
   "routes": {
     "/": [
       "ar",
@@ -688,6 +688,13 @@
       "tr"
     ],
     "/guides/challenge-accepted-social-features-and-friend-challenges-arrive": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/guides/claude-of-duty-how-to-play": [
       "ar",
       "es",
       "fr",

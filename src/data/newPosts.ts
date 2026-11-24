@@ -9,6 +9,7 @@ import { githubTrendingNovember2026Post } from './posts/githubTrendingNovember20
 import { watchFreeLiveTvOnlinePost } from './posts/watchFreeLiveTvOnlinePost';
 import { bestFreeBrowserGamesPost } from './posts/bestFreeBrowserGamesPost';
 import { tokenListingExplainerPost } from './posts/tokenListingExplainerPost';
+import { claudeOfDutyHowToPlayPost } from './posts/claudeOfDutyHowToPlayPost';
 import { youtubeFeaturesUsersWantPost } from './posts/youtubeFeaturesUsersWantPost';
 import { binancePioneerBurnAppealPost } from './posts/binancePioneerBurnAppealPost';
 import { ownEverythingTaglinePost } from './posts/ownEverythingTaglinePost';
@@ -1427,6 +1428,7 @@ const bnbPoolUpdatePost: BlogPostType = {
 };
 
 export const newPosts: BlogPostType[] = [
+  claudeOfDutyHowToPlayPost,
   tokenListingExplainerPost,
   bestFreeBrowserGamesPost,
   watchFreeLiveTvOnlinePost,
