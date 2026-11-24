@@ -1,6 +1,7 @@
 import { reportPostEvent } from '@/lib/api/dehub/post-stats';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
 import { LiveRipple } from '@/components/app/LiveRipple';
+import { MomentFace } from '@/components/app/stories/MomentFace';
 /**
  * Card Header Component
  * =====================
@@ -184,13 +185,17 @@ export function CardHeader({
           className={`flex shrink-0 ${isClickable ? 'cursor-pointer' : 'cursor-default'}`}
         >
           <LiveRipple ids={[creatorId, creatorUsername, handle]} className="rounded-md">
-            <span className="relative flex">
-              <Avatar className="w-9 h-9 rounded-md">
-                {avatarSrc && <AvatarImage src={avatarSrc} onError={() => setImageError(true)} className="rounded-md" />}
-                <AvatarFallback className="bg-zinc-700 text-white font-medium rounded-md">{username[0]?.toUpperCase()}</AvatarFallback>
-              </Avatar>
-              <CoAuthorAvatarBadge users={coAuthors} />
-            </span>
+            {/* A Moment up: its small corner peek sits on the face and a tap
+                opens it (co-authored posts keep their own corner badge). */}
+            <MomentFace address={coAuthors.length ? null : creatorId} size={36} name={username} className="rounded-md">
+              <span className="relative flex">
+                <Avatar className="w-9 h-9 rounded-md">
+                  {avatarSrc && <AvatarImage src={avatarSrc} onError={() => setImageError(true)} className="rounded-md" />}
+                  <AvatarFallback className="bg-zinc-700 text-white font-medium rounded-md">{username[0]?.toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <CoAuthorAvatarBadge users={coAuthors} />
+              </span>
+            </MomentFace>
           </LiveRipple>
         </button>
       </ProfileHoverCard>
