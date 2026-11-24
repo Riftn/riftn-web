@@ -1511,8 +1511,8 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
     // Focus leaves the Full screen button for the player itself: Space then
     // plays and pauses instead of pressing the button again, which threw the
     // viewer straight back out of full screen.
-    frame?.focus({ preventScroll: true });
-  }, [isFullscreen, toggleFullscreen]);
+    if (!isPhone) frame?.focus({ preventScroll: true });
+  }, [isFullscreen, isPhone, toggleFullscreen]);
   const handleFullscreen = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     switchFullscreen();
@@ -2999,11 +2999,11 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
                     alt=""
                     aria-hidden="true"
                     onLoad={notePosterShape}
-                    // Full screen shows the clip alone: a cover of another shape
-                    // used to spill out behind a tall clip, filling the screen
-                    // on both sides of it. A cover that is not the clip's shape
+                    // Full screen shows the clip alone once this card holds the
+                    // player: a cover of another shape used to spill out behind
+                    // a tall clip, filling the screen on both sides of it. A cover that is not the clip's shape
                     // fills the inline frame instead of sitting in it with bars.
-                    className={`absolute inset-0 w-full h-full ${isFullscreen ? 'object-contain opacity-0' : isPhone || posterOffShape ? 'object-cover' : wideCentered ? 'object-contain' : 'object-contain object-left'}`}
+                    className={`absolute inset-0 w-full h-full ${isFullscreen ? (ownsVideoElement ? 'object-contain opacity-0' : 'object-contain') : isPhone || posterOffShape ? 'object-cover' : wideCentered ? 'object-contain' : 'object-contain object-left'}`}
                     loading={aboveFold ? 'eager' : 'lazy'}
                     fetchPriority={aboveFold ? 'high' : 'auto'}
                   />
