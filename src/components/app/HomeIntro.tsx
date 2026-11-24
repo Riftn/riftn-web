@@ -129,37 +129,11 @@ export function HomeIntro({ tab }: { tab?: string } = {}) {
   const resume = useCallback(() => { paused.current = false; }, []);
   const join = useCallback(() => openLoginModal(), [openLoginModal]);
 
-  // The page's largest paint is this panel's hero art, and index.html already
-  // painted it in the first frame (the prerendered copy). Mounting replaces that
-  // copy with new <img> nodes; drawn straight at full opacity, the new one came
-  // out a few hundred device pixels bigger (hover animation + drop-shadow) and
-  // Chrome logged it as a new, later LCP: ~2.5 s after first paint on a phone,
-  // 11 s in Lighthouse's model, which waits for the whole boot bundle. So the
-  // app's copy first paints at opacity 0 (never an LCP candidate) and fades in
-  // through the opacity transition once its image has decoded. A plain
-  // decode-or-timeout, because an image that paints its pixels after the fade
-  // has finished would be logged all the same.
-  const heroRef = useRef<HTMLDivElement>(null);
-  const [artShown, setArtShown] = useState(false);
-  useEffect(() => {
-    if (artShown || !show) return;
-    let off = false;
-    const reveal = () => {
-      if (!off) requestAnimationFrame(() => { if (!off) setArtShown(true); });
-    };
-    const timer = window.setTimeout(reveal, 2500);
-    const img = heroRef.current?.querySelector('img');
-    if (img && typeof img.decode === 'function') img.decode().then(reveal, reveal);
-    else reveal();
-    return () => { off = true; window.clearTimeout(timer); };
-  }, [artShown, show]);
-
   if (!show) return null;
 
   return (
     <HomeIntroPanel
-      heroRef={heroRef}
-      artHidden={!artShown}
+      liveArt
       active={active}
       runId={runId}
       onDismiss={dismiss}
