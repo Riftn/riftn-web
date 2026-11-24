@@ -151,7 +151,7 @@ export const NewMessageDrawer = forwardRef<NewMessageDrawerHandle, NewMessageDra
   );
 
   const q = query.trim().replace(/^@/, '').toLowerCase();
-  const { data: searchResults, isLoading: searching } = useUserSearchForDM(query);
+  const { data: searchResults, isLoading: searching } = useUserSearchForDM(query, open);
   const matches = useMemo(() => {
     if (!q) return [];
     const seen = new Set<string>();
