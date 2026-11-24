@@ -15,8 +15,8 @@
  * - A shared window or whole screen is treated as moving video (a game, a
  *   player), not a page of text. Chrome's default for screen captures keeps
  *   every pixel sharp and drops frames instead, which on a game reads as a
- *   stuttering, glitchy picture. Tabs keep the default (they are usually
- *   pages, where sharp text matters more).
+ *   stuttering, glitchy picture. Tabs get the same treatment: on a live a
+ *   shared tab is usually a video or music player.
  * - Shared sound is music, not a voice call. Asked for plainly, the browser
  *   runs the tab's or system's sound through its call processing (echo
  *   cancelling, noise removal, automatic gain), which strips the bass out of
@@ -36,13 +36,13 @@ export function displaySurfaceOf(track: MediaStreamTrack | null | undefined): Di
 }
 
 /**
- * Window and screen shares carry games and video: keep the frame rate and let
- * sharpness give under pressure. Tabs keep the browser's text-friendly default.
+ * A share on a live carries games and video (a tab is most often a player):
+ * keep the frame rate and let sharpness give under pressure. The browser's
+ * text-friendly default drops frames instead, which glitches on every scene
+ * change.
  */
 export function tuneDisplayTrack(track: MediaStreamTrack | null | undefined): void {
   if (!track) return;
-  const surface = displaySurfaceOf(track);
-  if (surface !== 'window' && surface !== 'monitor') return;
   try {
     track.contentHint = 'motion';
   } catch {
