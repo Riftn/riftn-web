@@ -9,7 +9,7 @@ import { IslandAction, PageIsland, usePhonePill } from '@/components/app/page-ki
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
 import { PULL_REFRESH_THRESHOLD } from '@/lib/pill-pull-motion';
 import { DhbCoin } from '@/components/app/DhbAmount';
-import { lazy, Suspense, useState, useEffect, useRef, useCallback, useMemo, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react';
+import { lazy, Suspense, useContext, useState, useEffect, useRef, useCallback, useMemo, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react';
 import CloseIcon from '@/components/ui/cut-icons/close';
 import { useTranslation } from 'react-i18next';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
@@ -48,6 +48,7 @@ import { flushSync } from 'react-dom';
 import { OnlineDot } from '@/components/app/chat/OnlineDot';
 
 import { useAuth } from '@/contexts/AuthContext';
+import { CachedPageActiveContext } from '@/contexts/CachedPageActiveContext';
 import { usePublicChatReading, usePublicChatUnreadCount } from '@/hooks/use-public-chat-unread';
 import { AuthGate } from '@/components/app/AuthGate';
 import { useConversations, useCreateConversation, useUserSearchForDM, useDeleteConversation } from '@/hooks/use-messages';
@@ -999,6 +1000,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // app layout, so each copy only polls and pushes history while it is shown.
   const routeBase = fullscreen ? '/chat' : '/app/messages';
   const isMessagesRouteActive = location.pathname === routeBase;
+  const isPageActive = useContext(CachedPageActiveContext);
   const publicUnread = usePublicChatUnreadCount();
   usePublicChatReading(isMessagesRouteActive && showPublicChat);
   // An open chat's reactions are seen: clear them, including ones that land
@@ -1088,16 +1090,18 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     if (selectedConversation || showPublicChat) setSelectedRoom(null);
   }, [selectedConversation, showPublicChat]);
   useEffect(() => {
-    if (!hasVirtualSelected || !isMessagesRouteActive) return;
-    // Poll at 1.5s for first 30s, then 5s
-    const fast = setInterval(() => refetch(), 1500);
+    // The cached page retains its last pathname when it is hidden.
+    if (!isPageActive || !hasVirtualSelected || !isMessagesRouteActive) return;
+    const refreshContacts = () => { void refetch({ cancelRefetch: false }); };
+    // Poll at 1.5s for first 30s, then 5s.
+    const fast = setInterval(refreshContacts, 1500);
     let slowInterval: ReturnType<typeof setInterval>;
     const slow = setTimeout(() => {
       clearInterval(fast);
-      slowInterval = setInterval(() => refetch(), 5000);
+      slowInterval = setInterval(refreshContacts, 5000);
     }, 30000);
     return () => { clearInterval(fast); clearTimeout(slow); clearInterval(slowInterval); };
-  }, [hasVirtualSelected, isMessagesRouteActive, refetch]);
+  }, [hasVirtualSelected, isMessagesRouteActive, isPageActive, refetch]);
 
   // Auto-send a queued invite/draft message once the selected conversation has a real dmId
   useEffect(() => {
