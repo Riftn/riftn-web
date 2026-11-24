@@ -3,13 +3,14 @@
  * =====
  * A note is a short line with an optional song, GIF or place that stays up for
  * 24 hours. The Notes sheet opens from the + in Messages and from the note
- * button in a chat: write or change yours at the top, and below it see the
- * notes of people you follow (tap one to see it, hear the song, message them).
+ * button in a chat. It works like Instagram Notes: a status opens as a short
+ * sheet with the person's face big and the white cloud above it; you write
+ * yours straight into the cloud over your own face; a heart likes it.
  */
 import { useCallback, useContext, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { ChevronDown, Loader2, MapPin, Music2, Pause, Play, Plus, SendHorizontal, X } from 'lucide-react';
+import { ChevronDown, Heart, Loader2, MapPin, Music2, Play, Plus, SendHorizontal, X } from 'lucide-react';
 import Languages from '@/components/ui/cut-icons/language';
 import { supabase } from '@/integrations/supabase/client';
 import { CachedPageActiveContext } from '@/contexts/CachedPageActiveContext';
@@ -23,9 +24,10 @@ import { SoundPicker } from '@/features/post/components/SoundPicker';
 import type { AttachedSound } from '@/features/post/hooks/usePostSound';
 import { EmojiGifPicker } from './EmojiGifPicker';
 import { useNoteWords } from './note-translate';
+import { formatCount } from '@/lib/format-count';
 import type { StoryAuthor, StorySong } from '@/lib/api/dehub/stories';
 import {
-  deleteNote, getNotes, isNoteGif, NOTE_LOCATION_MAX, NOTE_TEXT_MAX, putNote,
+  deleteNote, getNotes, isNoteGif, likeNote, NOTE_LOCATION_MAX, NOTE_TEXT_MAX, putNote,
   type Note, type NoteEntry, type NoteInput,
 } from '@/lib/api/dehub/notes';
 
@@ -185,7 +187,68 @@ export function NoteTile({ author, note, label, own, onClick, inCard }: { author
   );
 }
 
-function SongLine({ song, autoPlay, playToken = 0 }: { song: StorySong; autoPlay?: boolean; playToken?: number }) {
+// ── The open status (Instagram Notes style) ─────────────────────────────
+// Tapping a status opens a short sheet: the person's face big, and the same
+// white cloud as in the row above it, grown up. Writing your own happens IN
+// that cloud, over your own face, so what you see is what friends see.
+
+/** Ink inside the white cloud. Kept out of the grey range the light-theme
+ *  readability pass repaints, so it stays dark on every theme. */
+const CLOUD_INK = '#0b0b0c';
+const CLOUD_SOFT = 'rgba(11,11,12,0.55)';
+
+/** "2h", "35m", "now": short, like the chat list. */
+function shortSpan(ms: number): string {
+  const m = Math.max(0, Math.round(ms / 60_000));
+  if (m < 1) return '1m';
+  if (m < 60) return `${m}m`;
+  return `${Math.round(m / 60)}h`;
+}
+
+function NoteTimes({ note, own }: { note: Note; own?: boolean }) {
+  const { t } = useTranslation();
+  const now = Date.now();
+  const ago = shortSpan(now - Date.parse(note.postedAt));
+  const left = shortSpan(Date.parse(note.expiresAt) - now);
+  return (
+    <span data-note-times className="text-[12.5px] text-zinc-400">
+      {own ? t('notes.upFor', { defaultValue: 'Up {{time}}', time: ago }) : t('notes.postedAgo', { defaultValue: '{{time}} ago', time: ago })}
+      {' · '}
+      {t('notes.timeLeft', { defaultValue: '{{time}} left', time: left })}
+    </span>
+  );
+}
+
+/** The big cloud with its two trailing dots, over a big squared face. */
+function BigCloud({ author, gifFace, children }: { author: StoryAuthor; gifFace?: string | null; children: React.ReactNode }) {
+  const avatar = buildAvatarUrl(author.address, author.avatarImageUrl, 200);
+  return (
+    <div data-note-big className="flex flex-col items-center">
+      <div
+        data-note-cloud
+        style={{ ...CLOUD_STYLE, borderRadius: 22, color: CLOUD_INK }}
+        className="w-fit max-w-[264px] px-[18px] py-3 text-center animate-in fade-in zoom-in-90 slide-in-from-bottom-2 duration-300"
+      >
+        {children}
+      </div>
+      <span aria-hidden className="flex w-[110px] flex-col items-start pl-[30px]">
+        <span style={{ ...CLOUD_STYLE, borderRadius: 9999 }} className="mt-1 h-3 w-3" />
+        <span style={{ ...CLOUD_STYLE, borderRadius: 9999 }} className="ml-[9px] mt-[3px] h-1.5 w-1.5" />
+      </span>
+      {gifFace ? (
+        <img src={gifFace} alt="" style={{ borderRadius: 24 }} className="mt-0.5 h-[92px] w-[92px] object-cover" />
+      ) : (
+        <Avatar style={{ borderRadius: 24 }} className="mt-0.5 h-[92px] w-[92px]">
+          {avatar && <AvatarImage src={avatar} style={{ borderRadius: 24 }} className="object-cover" />}
+          <AvatarFallback style={{ borderRadius: 24 }} className="bg-zinc-700 text-[28px] text-white">{nameOf(author).charAt(0).toUpperCase()}</AvatarFallback>
+        </Avatar>
+      )}
+    </div>
+  );
+}
+
+/** A song inside the cloud: artwork, title, and bars while it plays. Tap to play or pause. */
+function CloudSong({ song, autoPlay }: { song: StorySong; autoPlay?: boolean }) {
   const ref = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
   useEffect(() => {
@@ -195,14 +258,6 @@ function SongLine({ song, autoPlay, playToken = 0 }: { song: StorySong; autoPlay
     audio.play().then(() => setPlaying(true)).catch(() => {});
     return () => audio.pause();
   }, [autoPlay, song.audioUrl, song.startMs]);
-  // A tap on the note's words plays the song (or keeps it playing): a
-  // browser can block the autoplay above, and the words are what people tap.
-  useEffect(() => {
-    const audio = ref.current;
-    if (!audio || !playToken || !audio.paused) return;
-    if (!audio.currentTime) audio.currentTime = (song.startMs || 0) / 1000;
-    audio.play().then(() => setPlaying(true)).catch(() => {});
-  }, [playToken, song.startMs]);
   const toggle = () => {
     const audio = ref.current;
     if (!audio) return;
@@ -211,71 +266,166 @@ function SongLine({ song, autoPlay, playToken = 0 }: { song: StorySong; autoPlay
     audio.play().then(() => setPlaying(true)).catch(() => {});
   };
   return (
-    <button type="button" data-note-song onClick={toggle} className="flex w-full items-center gap-2.5 rounded-[12px] border border-white/10 bg-white/[0.06] px-3 py-2 text-left text-white">
+    <button
+      type="button"
+      data-note-song
+      onClick={toggle}
+      style={{ background: 'rgba(11,11,12,0.06)', color: CLOUD_INK }}
+      className="mx-auto mt-2 flex max-w-full items-center gap-2 rounded-[10px] py-1 pl-1 pr-2.5 text-left text-[12.5px] font-bold"
+    >
       {song.artworkUrl
-        ? <img src={song.artworkUrl} alt="" className="h-9 w-9 rounded-md object-cover" />
-        : <span className="flex h-9 w-9 items-center justify-center rounded-md bg-white/10"><Music2 className="h-4 w-4" /></span>}
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-[13px] font-medium text-white">{song.title}</span>
-        {song.artist && <span className="block truncate text-[12px] text-zinc-400">{song.artist}</span>}
-      </span>
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-white/[0.08] text-white">{playing ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}</span>
+        ? <img src={song.artworkUrl} alt="" className="h-6 w-6 shrink-0 rounded-[6px] object-cover" />
+        : <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[6px]" style={{ background: 'rgba(11,11,12,0.1)' }}><Music2 className="h-3.5 w-3.5" style={{ color: CLOUD_INK }} /></span>}
+      <span className="min-w-0 truncate">{song.title}{song.artist ? ` · ${song.artist}` : ''}</span>
+      {playing
+        ? <span data-note-bars aria-hidden className="flex h-3 shrink-0 items-end gap-[2px]">{[0, 1, 2].map(i => <span key={i} className="w-[2.5px] origin-bottom animate-[note-bar_0.9s_ease-in-out_infinite] rounded-[1px]" style={{ height: 11, background: CLOUD_INK, animationDelay: `${i * 0.15}s` }} />)}</span>
+        : <Play className="h-3 w-3 shrink-0" style={{ color: CLOUD_INK, fill: CLOUD_INK }} />}
       <audio ref={ref} src={song.audioUrl} preload="none" onEnded={() => setPlaying(false)} />
+      <style>{'@keyframes note-bar{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}'}</style>
     </button>
   );
 }
 
-function NoteCard({ note }: { note: Note }) {
-  const { t } = useTranslation();
-  const [playToken, setPlayToken] = useState(0);
-  const words = useNoteWords(note.text);
-  const chipLabel = words.isLoading
-    ? t('stories.translating', { defaultValue: 'Translating…' })
-    : words.isTranslated
-      ? t('stories.seeOriginal', { defaultValue: 'See original' })
-      : t('stories.translate', { defaultValue: 'Translate' });
+/** What goes inside the cloud for a note: GIF, words, song, place. */
+function CloudBody({ note, words, autoPlay }: { note: Note; words: string; autoPlay?: boolean }) {
   return (
-    <div className="flex flex-col gap-2.5">
-      {note.gifUrl && <img src={note.gifUrl} alt="" className="max-h-56 w-full rounded-xl object-contain" />}
-      {/* The words sit in a chat bubble, like a message. With a song, the
-          bubble is a button that plays it. */}
-      {note.text && (
-        <button
-          type="button"
-          data-note-text-bubble
-          onClick={note.song ? () => setPlayToken(n => n + 1) : undefined}
-          disabled={!note.song}
-          style={BUBBLE_STYLE}
-          className="mx-auto max-w-full break-words rounded-[16px] rounded-bl-[6px] px-4 py-2.5 text-left text-[16px] font-medium text-white disabled:cursor-default"
-        >
-          <span key={words.isTranslated ? 'translated' : 'original'} className="block animate-in fade-in duration-150">{words.shown}</span>
-        </button>
+    <>
+      {note.gifUrl && <img src={note.gifUrl} alt="" className="mx-auto mb-1.5 max-h-28 rounded-[12px] object-contain" />}
+      {note.text && <span key={words} className="block break-words text-[17px] font-bold leading-[1.3] animate-in fade-in duration-150" style={{ color: CLOUD_INK }}>{words}</span>}
+      {note.song && <CloudSong song={note.song} autoPlay={autoPlay} />}
+      {note.location && (
+        <span className="mt-1.5 flex items-center justify-center gap-1 text-[12.5px] font-semibold" style={{ color: CLOUD_SOFT }}>
+          <MapPin className="h-3.5 w-3.5" style={{ color: CLOUD_SOFT }} />{note.location}
+        </span>
       )}
-      {/* Translated on sight when it reads as another language; this flips
-          back to the words as written. */}
+    </>
+  );
+}
+
+/** Someone else's status: big cloud, who and when, reply box and a heart. */
+function NoteView({ entry, onSend }: { entry: NoteEntry; onSend: (text: string) => void }) {
+  const { t } = useTranslation();
+  const { note, author } = entry;
+  const words = useNoteWords(note.text);
+  const name = nameOf(author);
+  const [liked, setLiked] = useState(!!note.liked);
+  const [text, setText] = useState('');
+  const toggleLike = () => {
+    const next = !liked;
+    setLiked(next);
+    likeNote(note.id, next).then(() => { note.liked = next; refreshNotes(); }).catch(() => setLiked(!next));
+  };
+  const send = () => {
+    const reply = text.trim();
+    if (!reply) return;
+    // The note's words ride along, so the chat shows what was answered.
+    onSend(note.text ? `📝 “${note.text}”\n${reply}` : reply);
+  };
+  return (
+    <div data-note-view className="flex flex-col items-center">
+      <BigCloud author={author} gifFace={null}>
+        <CloudBody note={note} words={words.shown} autoPlay />
+      </BigCloud>
+      <p className="mt-2.5 max-w-full truncate text-[16px] font-extrabold text-white">{name}</p>
+      <NoteTimes note={note} />
       {note.text && words.offer && (
         <button
           type="button"
-          data-kit-chip
-          data-size="sm"
           data-note-translate={words.isTranslated ? 'translated' : 'original'}
           disabled={words.isLoading}
           onClick={words.isTranslated ? words.showOriginal : words.translate}
-          className="mx-auto -mt-1"
+          className="mt-2 inline-flex items-center gap-1.5 text-[12px] font-semibold text-zinc-400"
         >
           {words.isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Languages className="h-3.5 w-3.5" />}
-          {chipLabel}
+          {words.isLoading
+            ? t('stories.translating', { defaultValue: 'Translating…' })
+            : words.isTranslated ? t('stories.seeOriginal', { defaultValue: 'See original' }) : t('stories.translate', { defaultValue: 'Translate' })}
         </button>
       )}
-      {note.song && <SongLine song={note.song} autoPlay playToken={playToken} />}
-      {note.location && (
-        <p className="flex items-center justify-center gap-1 text-[13px] text-zinc-400"><MapPin className="h-3.5 w-3.5" />{note.location}</p>
-      )}
+      <form data-note-reply className="mt-4 flex w-full items-center gap-2" onSubmit={e => { e.preventDefault(); send(); }}>
+        <input
+          value={text}
+          onChange={e => setText(e.target.value)}
+          maxLength={1000}
+          placeholder={t('notes.replyTo', { defaultValue: 'Reply to {{name}}…', name })}
+          aria-label={t('notes.replyTo', { defaultValue: 'Reply to {{name}}…', name })}
+          className="h-11 min-w-0 flex-1 rounded-[13px] border border-white/10 bg-white/[0.07] px-3.5 text-[15px] text-white outline-none placeholder:text-zinc-500 focus:border-white/30"
+        />
+        {text.trim() ? (
+          <button type="submit" data-kit-button="primary" aria-label={t('notes.send', { defaultValue: 'Send' })} className="!h-11 !w-11 !min-w-0 !p-0 animate-in fade-in zoom-in-90 duration-150">
+            <SendHorizontal className="h-[18px] w-[18px]" />
+          </button>
+        ) : (
+          <button
+            type="button"
+            data-note-like={liked ? 'on' : 'off'}
+            aria-pressed={liked}
+            aria-label={liked ? t('notes.unlike', { defaultValue: 'Unlike' }) : t('notes.like', { defaultValue: 'Like' })}
+            onClick={toggleLike}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[13px] border border-white/10 bg-white/[0.07] text-white"
+          >
+            <Heart
+              key={liked ? 'on' : 'off'}
+              className={`h-5 w-5 ${liked ? 'animate-in zoom-in-50 duration-200' : ''}`}
+              style={liked ? { color: '#ff3b5c', fill: '#ff3b5c' } : undefined}
+            />
+          </button>
+        )}
+      </form>
     </div>
   );
 }
 
-function NoteComposer({ mine, onClose }: { mine: Note | null; onClose: () => void }) {
+/** Your own status: big cloud, how long it has left, who hearted it, edit or delete. */
+function MyNoteView({ entry, onEdit, onClose }: { entry: NoteEntry; onEdit: () => void; onClose: () => void }) {
+  const { t } = useTranslation();
+  const [saving, setSaving] = useState(false);
+  const likers = entry.likers ?? [];
+  const count = Math.max(entry.note.likeCount ?? 0, likers.length);
+  const remove = () => {
+    if (saving) return;
+    setSaving(true);
+    deleteNote().then(() => { refreshNotes(); onClose(); })
+      .catch(() => toast.error(t('notes.failed', { defaultValue: "Your status didn't go up. Try again." })))
+      .finally(() => setSaving(false));
+  };
+  return (
+    <div data-note-mine className="flex flex-col items-center">
+      <BigCloud author={entry.author} gifFace={null}>
+        <CloudBody note={entry.note} words={entry.note.text ?? ''} />
+      </BigCloud>
+      <p className="mt-2.5 text-[16px] font-extrabold text-white">{t('notes.yourStatus', { defaultValue: 'Your status' })}</p>
+      <NoteTimes note={entry.note} own />
+      {count > 0 && (
+        <div data-note-likers className="mt-4 flex w-full items-center gap-2.5 rounded-[14px] border border-white/10 bg-white/[0.06] px-3 py-2.5">
+          <Heart className="h-5 w-5 shrink-0" style={{ color: '#ff3b5c', fill: '#ff3b5c' }} />
+          <span className="flex shrink-0">
+            {likers.slice(0, 3).map((a, i) => (
+              <img key={a.address} src={buildAvatarUrl(a.address, a.avatarImageUrl, 56)} alt="" className="h-[26px] w-[26px] rounded-[8px] object-cover" style={{ marginLeft: i ? -8 : 0, boxShadow: '0 0 0 2px hsl(var(--background))' }} />
+            ))}
+          </span>
+          <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-white">
+            {likers.length && count > 1
+              ? t('notes.likedByMore', { defaultValue: 'Liked by {{name}} and {{others}} more', name: nameOf(likers[0]), others: formatCount(count - 1) })
+              : likers.length
+                ? t('notes.likedBy', { defaultValue: 'Liked by {{name}}', name: nameOf(likers[0]) })
+                : t('notes.likes', { defaultValue: '{{total}} likes', total: formatCount(count) })}
+          </span>
+        </div>
+      )}
+      <div className="mt-3 flex w-full gap-2">
+        <button type="button" data-kit-button="quiet" data-note-edit onClick={onEdit} className="flex-1">
+          {t('notes.edit', { defaultValue: 'Edit' })}
+        </button>
+        <button type="button" data-kit-button="quiet" data-note-delete disabled={saving} onClick={remove} className="flex-1 !text-[#ff5a6e]">
+          {t('notes.deleteShort', { defaultValue: 'Delete' })}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function NoteComposer({ me, mine, onClose }: { me: StoryAuthor; mine: Note | null; onClose: () => void }) {
   const { t } = useTranslation();
   const [text, setText] = useState(mine?.text ?? '');
   const [location, setLocation] = useState(mine?.location ?? '');
@@ -284,99 +434,110 @@ function NoteComposer({ mine, onClose }: { mine: Note | null; onClose: () => voi
   const [song, setSong] = useState<StorySong | null>(mine?.song ?? null);
   const [soundOpen, setSoundOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const failed = () => toast.error(t('notes.failed', { defaultValue: "Your note didn't go up. Try again." }));
-  const run = (work: () => Promise<unknown>, done?: () => void) => {
-    if (saving) return;
-    setSaving(true);
-    work().then(() => { refreshNotes(); done?.(); onClose(); }).catch(failed).finally(() => setSaving(false));
-  };
+  const area = useRef<HTMLTextAreaElement>(null);
+  // The cloud grows with the words, like the one in the row.
+  useEffect(() => {
+    const el = area.current;
+    if (!el) return;
+    el.style.height = '0px';
+    el.style.height = `${el.scrollHeight}px`;
+  }, [text]);
   const empty = !text.trim() && !location.trim() && !gifUrl && !song;
   const share = () => {
     if (empty || saving) return;
-    run(() => putNote({
+    setSaving(true);
+    putNote({
       ...(text.trim() && { text: text.trim() }),
       ...(location.trim() && { location: location.trim() }),
       ...(gifUrl && { gifUrl }),
       ...(song && { song }),
-    } as NoteInput), () => toast.success(t('notes.shared', { defaultValue: 'Your note is up for 24 hours' })));
+    } as NoteInput)
+      .then(() => { refreshNotes(); toast.success(t('notes.shared', { defaultValue: 'Your status is up for 24 hours' })); onClose(); })
+      .catch(() => toast.error(t('notes.failed', { defaultValue: "Your status didn't go up. Try again." })))
+      .finally(() => setSaving(false));
   };
 
   return (
     <>
-      <div className="flex flex-col gap-3">
-        <div className="relative">
+      <div data-note-composer className="flex flex-col items-center">
+        <div className="mb-3 flex h-9 w-full items-center justify-between">
+          <button type="button" data-note-cancel onClick={onClose} className="w-[76px] text-left text-[14px] font-semibold text-zinc-400">
+            {t('common.cancel', { defaultValue: 'Cancel' })}
+          </button>
+          <span className="text-[15px] font-bold text-white">{t('notes.newStatus', { defaultValue: 'New status' })}</span>
+          <span className="flex w-[76px] justify-end">
+            <button type="button" data-kit-button="primary" data-size="sm" data-note-share disabled={empty || saving} onClick={share} className="!h-[34px] !px-3.5">
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : t('notes.share', { defaultValue: 'Share' })}
+            </button>
+          </span>
+        </div>
+
+        <BigCloud author={me}>
+          {gifUrl && (
+            <span className="relative mx-auto mb-1.5 block w-fit">
+              <img src={gifUrl} alt="" className="max-h-28 rounded-[12px] object-contain" />
+              <button type="button" aria-label={t('notes.removeGif', { defaultValue: 'Remove GIF' })} onClick={() => setGifUrl(null)} data-keep-dark className="absolute right-1 top-1 rounded-[8px] bg-black/60 p-1 text-white"><X className="h-3.5 w-3.5" /></button>
+            </span>
+          )}
           <textarea
+            ref={area}
             data-note-text
             autoFocus
             value={text}
             maxLength={NOTE_TEXT_MAX}
-            rows={2}
+            rows={1}
             onChange={e => setText(e.target.value.replace(/\n/g, ' '))}
             onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); share(); } }}
-            placeholder={t('notes.placeholder', { defaultValue: "Share a thought…" })}
-            className="w-full resize-none rounded-[12px] border border-white/10 bg-white/[0.06] px-4 py-3 text-center text-[16px] text-white placeholder:text-zinc-500 focus:outline-none"
+            placeholder={t('notes.placeholder', { defaultValue: 'Share a thought…' })}
+            aria-label={t('notes.placeholder', { defaultValue: 'Share a thought…' })}
+            style={{ color: CLOUD_INK, caretColor: CLOUD_INK, width: Math.min(228, Math.max(120, (text.length || 16) * 9.6)) }}
+            className="block resize-none overflow-hidden bg-transparent text-center text-[17px] font-bold leading-[1.3] outline-none"
           />
-          <span className="absolute bottom-1.5 right-3 text-[11px] tabular-nums text-zinc-500">{NOTE_TEXT_MAX - text.length}</span>
-        </div>
+          {/* Theme passes repaint placeholders; this one sits on white in every theme. */}
+          <style>{'html body [data-note-cloud]:not(#_):not(#_):not(#_) :is(textarea,input)::placeholder{color:rgba(11,11,12,.4)!important;-webkit-text-fill-color:rgba(11,11,12,.4)!important;opacity:1}'}</style>
+          {song && (
+            <span className="relative mx-auto mt-2 flex w-fit items-center gap-1">
+              <span className="min-w-0"><CloudSong song={song} /></span>
+              <button type="button" aria-label={t('notes.removeSong', { defaultValue: 'Remove song' })} onClick={() => setSong(null)} className="mt-2 rounded-[8px] p-1"><X className="h-3.5 w-3.5" style={{ color: CLOUD_SOFT }} /></button>
+            </span>
+          )}
+          {showPlace && (
+            <span className="mt-1.5 flex items-center justify-center gap-1">
+              <MapPin className="h-3.5 w-3.5 shrink-0" style={{ color: CLOUD_SOFT }} />
+              <input
+                data-note-place
+                value={location}
+                maxLength={NOTE_LOCATION_MAX}
+                onChange={e => setLocation(e.target.value)}
+                placeholder={t('notes.placePlaceholder', { defaultValue: 'Where are you?' })}
+                style={{ color: CLOUD_SOFT }}
+                className="w-[130px] bg-transparent text-center text-[12.5px] font-semibold outline-none"
+              />
+              <button type="button" aria-label={t('notes.removePlace', { defaultValue: 'Remove place' })} onClick={() => { setLocation(''); setShowPlace(false); }}><X className="h-3.5 w-3.5" style={{ color: CLOUD_SOFT }} /></button>
+            </span>
+          )}
+        </BigCloud>
 
-        {gifUrl && (
-          <div className="relative mx-auto">
-            <img src={gifUrl} alt="" className="max-h-40 rounded-xl object-contain" />
-            <button type="button" aria-label={t('notes.removeGif', { defaultValue: 'Remove GIF' })} onClick={() => setGifUrl(null)} data-keep-dark className="absolute right-1 top-1 rounded-[8px] bg-black/60 p-1 text-white"><X className="h-3.5 w-3.5" /></button>
-          </div>
-        )}
-        {song && (
-          <div className="flex items-center gap-2">
-            <div className="min-w-0 flex-1"><SongLine song={song} /></div>
-            <button type="button" aria-label={t('notes.removeSong', { defaultValue: 'Remove song' })} onClick={() => setSong(null)} className="rounded-[10px] bg-white/[0.06] p-2.5 text-white"><X className="h-4 w-4" /></button>
-          </div>
-        )}
-        {showPlace && (
-          <div className="flex items-center gap-2 rounded-xl bg-white/[0.06] px-3">
-            <MapPin className="h-4 w-4 shrink-0 text-zinc-400" />
-            <input
-              data-note-place
-              value={location}
-              maxLength={NOTE_LOCATION_MAX}
-              onChange={e => setLocation(e.target.value)}
-              placeholder={t('notes.placePlaceholder', { defaultValue: 'Where are you?' })}
-              className="h-10 min-w-0 flex-1 bg-transparent text-[14px] text-white placeholder:text-zinc-500 focus:outline-none"
-            />
-            <button type="button" aria-label={t('notes.removePlace', { defaultValue: 'Remove place' })} onClick={() => { setLocation(''); setShowPlace(false); }}><X className="h-4 w-4 text-zinc-400" /></button>
-          </div>
-        )}
+        <p className="mt-2 text-[11.5px] tabular-nums text-zinc-500">{t('notes.charsLeft', { defaultValue: '{{count}} left', count: NOTE_TEXT_MAX - text.length })}</p>
 
-        <div className="flex flex-wrap items-center justify-center gap-2">
-          <button type="button" data-kit-button="quiet" data-note-add-song onClick={() => setSoundOpen(true)}>
-            <Music2 className="mr-1 inline h-4 w-4" />{t('notes.song', { defaultValue: 'Song' })}
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5">
+          <button type="button" data-kit-chip data-active={song ? 'true' : undefined} data-note-add-song onClick={() => setSoundOpen(true)}>
+            <Music2 className="h-4 w-4" />{t('notes.song', { defaultValue: 'Song' })}
           </button>
           <EmojiGifPicker
             onEmojiSelect={emoji => setText(v => (v + emoji).slice(0, NOTE_TEXT_MAX))}
             onGifSelect={url => {
               if (isNoteGif(url)) setGifUrl(url);
-              else toast.error(t('notes.gifHost', { defaultValue: 'Pick a GIF from the GIF tab for notes.' }));
+              else toast.error(t('notes.gifHost', { defaultValue: 'Pick a GIF from the GIF tab for statuses.' }));
             }}
-            triggerClassName="h-[42px] rounded-[10px] border border-white/10 bg-white/[0.06] px-[1.1rem] text-[14px] font-semibold text-white"
+            triggerClassName="!h-[34px] !w-auto rounded-[11px] border border-white/10 bg-white/[0.07] px-3 text-[13px] font-semibold text-white"
           />
-          {!showPlace && (
-            <button type="button" data-kit-button="quiet" data-note-add-place onClick={() => setShowPlace(true)}>
-              <MapPin className="mr-1 inline h-4 w-4" />{t('notes.place', { defaultValue: 'Place' })}
-            </button>
-          )}
-        </div>
-
-        <p className="text-center text-[12px] text-zinc-500">{t('notes.who', { defaultValue: 'People who follow you can see it for 24 hours.' })}</p>
-
-        <div className="flex gap-2">
-          {mine && (
-            <button type="button" data-kit-button="quiet" data-note-delete disabled={saving} onClick={() => run(deleteNote)} className="flex-1">
-              {t('notes.delete', { defaultValue: 'Delete note' })}
-            </button>
-          )}
-          <button type="button" data-kit-button="primary" data-note-share disabled={empty || saving} onClick={share} className="flex-1">
-            {t('notes.share', { defaultValue: 'Share' })}
+          <button type="button" data-kit-chip data-active={showPlace ? 'true' : undefined} data-note-add-place onClick={() => setShowPlace(true)}>
+            <MapPin className="h-4 w-4" />{t('notes.place', { defaultValue: 'Place' })}
           </button>
         </div>
+
+        <p className="mt-3 text-center text-[12px] text-zinc-500">{t('notes.who', { defaultValue: 'People who follow you can see it for 24 hours.' })}</p>
       </div>
       {soundOpen && (
         <SoundPicker
@@ -412,33 +573,6 @@ function useSheetOpen(): boolean {
     useCallback((l: () => void) => { sheetListeners.add(l); return () => { sheetListeners.delete(l); }; }, []),
     () => sheetOpen,
     () => false,
-  );
-}
-
-/** Reply to a note: a message box that sends straight into your chat with them. */
-function NoteReply({ note, name, onSend }: { note: Note; name: string; onSend: (text: string) => void }) {
-  const { t } = useTranslation();
-  const [text, setText] = useState('');
-  const send = () => {
-    const reply = text.trim();
-    if (!reply) return;
-    // The note's words ride along, so the chat shows what was answered.
-    onSend(note.text ? `📝 “${note.text}”\n${reply}` : reply);
-  };
-  return (
-    <form data-note-reply className="flex items-center gap-2" onSubmit={e => { e.preventDefault(); send(); }}>
-      <input
-        value={text}
-        onChange={e => setText(e.target.value)}
-        maxLength={1000}
-        placeholder={t('notes.replyTo', { defaultValue: 'Reply to {{name}}…', name })}
-        aria-label={t('notes.replyTo', { defaultValue: 'Reply to {{name}}…', name })}
-        className="h-[42px] min-w-0 flex-1 rounded-[10px] border border-white/10 bg-white/[0.06] px-3.5 text-[15px] text-white outline-none placeholder:text-zinc-500 focus:border-white/30"
-      />
-      <button type="submit" data-kit-button="primary" disabled={!text.trim()} aria-label={t('notes.send', { defaultValue: 'Send' })} className="!w-[42px] !min-w-0 !p-0">
-        <SendHorizontal className="h-[18px] w-[18px]" />
-      </button>
-    </form>
   );
 }
 
@@ -698,49 +832,45 @@ export function GroupChatNotesRow({ groupId, me }: { groupId: string; me: string
   );
 }
 
-export function NotesSheetHost({ onMessage }: { onMessage: (author: StoryAuthor, reply?: string) => void }) {
+export function NotesSheetHost({ me, onMessage }: { me?: StoryAuthor | null; onMessage: (author: StoryAuthor, reply?: string) => void }) {
   const { t } = useTranslation();
   const open = useSheetOpen();
   const data = useNotes({ enabled: open, refreshOnStart: true });
+  // What the sheet shows: someone's status, your own, or the writer.
   const [viewing, setViewing] = useState<NoteEntry | null>(null);
+  const [writing, setWriting] = useState(false);
   useEffect(() => { hosts += 1; emitSheet(); return () => { hosts -= 1; emitSheet(); }; }, []);
   useEffect(() => {
-    if (open) { if (pendingView) setViewing(pendingView); pendingView = null; }
-    else setViewing(null);
+    if (open) { setViewing(pendingView); setWriting(false); pendingView = null; }
+    else { setViewing(null); setWriting(false); }
   }, [open]);
   const close = () => { sheetOpen = false; emitSheet(); };
-  const mine = data?.mine?.note ?? null;
-  const notes = data?.notes ?? [];
+  const mineEntry = data?.mine ?? null;
+  const self = mineEntry?.author ?? me ?? null;
+  const showMine = !viewing && !writing && !!mineEntry;
+  const label = viewing ? nameOf(viewing.author) : t('notes.title', { defaultValue: 'Status' });
 
   return (
     <Dialog open={open} onOpenChange={v => { if (!v) close(); }}>
-      <DialogContent data-note-sheet className="max-h-[90dvh] max-w-sm overflow-y-auto border border-white/10 bg-black/60 p-5 text-white shadow-2xl backdrop-blur-[24px]">
-        <DialogTitle className="text-center text-[15px]">
-          {viewing ? nameOf(viewing.author) : t('notes.title', { defaultValue: 'Notes' })}
-        </DialogTitle>
+      <DialogContent
+        data-note-sheet={viewing ? 'view' : showMine ? 'mine' : 'write'}
+        hideCloseButton={!viewing && !showMine}
+        className="max-h-[90dvh] max-w-sm gap-3 overflow-y-auto border border-white/10 bg-black/60 px-4 pb-6 pt-3 text-white shadow-2xl backdrop-blur-[28px] sm:p-5"
+      >
+        <DialogTitle className="sr-only">{label}</DialogTitle>
         {viewing ? (
-          <div className="flex flex-col gap-4">
-            <NoteCard note={viewing.note} />
-            <NoteReply key={viewing.note.id} note={viewing.note} name={nameOf(viewing.author)} onSend={reply => { const a = viewing.author; close(); onMessage(a, reply); }} />
-            <button type="button" data-kit-button="quiet" data-note-back onClick={() => setViewing(null)}>
-              {t('notes.back', { defaultValue: 'Back to notes' })}
-            </button>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-4">
-            {open && <NoteComposer key={mine?.id ?? 'new'} mine={mine} onClose={close} />}
-            {notes.length > 0 && (
-              <div className="flex flex-col gap-1.5">
-                <p className="text-[12px] font-medium text-zinc-400">{t('notes.fromFollowing', { defaultValue: 'From people you follow' })}</p>
-                <div data-notes-friends className="-mx-1 flex gap-1 overflow-x-auto pb-1 [scrollbar-width:none]">
-                  {notes.map(entry => (
-                    <NoteTile key={entry.note.id} author={entry.author} note={entry.note} label={nameOf(entry.author)} onClick={() => setViewing(entry)} />
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+          <NoteView
+            key={viewing.note.id}
+            entry={viewing}
+            onSend={reply => { const a = viewing.author; close(); onMessage(a, reply); }}
+          />
+        ) : showMine ? (
+          <MyNoteView entry={mineEntry!} onEdit={() => setWriting(true)} onClose={close} />
+        ) : open && self ? (
+          <NoteComposer key={mineEntry?.note.id ?? 'new'} me={self} mine={writing ? mineEntry?.note ?? null : null} onClose={close} />
+        ) : open ? (
+          <div className="flex justify-center py-10"><Loader2 className="h-5 w-5 animate-spin text-zinc-400" /></div>
+        ) : null}
       </DialogContent>
     </Dialog>
   );

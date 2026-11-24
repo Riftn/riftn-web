@@ -21848,6 +21848,18 @@
     "notInChat": "That link is to a private chat you're not in."
   },
   "notes": {
+    "newStatus": "New status",
+    "upFor": "Up {{time}}",
+    "postedAgo": "{{time}} ago",
+    "timeLeft": "{{time}} left",
+    "like": "Like",
+    "unlike": "Unlike",
+    "likedBy": "Liked by {{name}}",
+    "likedByMore": "Liked by {{name}} and {{others}} more",
+    "likes": "{{total}} likes",
+    "edit": "Edit",
+    "deleteShort": "Delete",
+    "charsLeft": "{{count}} left",
     "yourStatus": "Your status",
     "whatsUp": "What’s up?",
     "add": "Status",
