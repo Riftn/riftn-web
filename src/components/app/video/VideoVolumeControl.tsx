@@ -310,7 +310,8 @@ export function VideoVolumeControl({
         <div
           data-volume-pop
           data-on-media
-          className={cn('absolute left-1/2 z-30 -translate-x-1/2', layout === 'below' ? 'top-full pt-1.5' : 'bottom-full pb-1.5')}
+          // Eases in rather than appearing in one frame.
+          className={cn('absolute left-1/2 z-30 -translate-x-1/2 animate-in fade-in-0 duration-150', layout === 'below' ? 'top-full pt-1.5 slide-in-from-top-1' : 'bottom-full pb-1.5 slide-in-from-bottom-1')}
           onClick={(event) => event.stopPropagation()}
         >
           <div className="flex h-[104px] w-8 items-center justify-center rounded-xl border border-white/10 bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%]">

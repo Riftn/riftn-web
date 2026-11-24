@@ -55,6 +55,8 @@ import { cn } from '@/lib/utils';
 import type Hls from 'hls.js';
 import { CardHeader } from './CardHeader';
 import { ActionBar } from './ActionBar';
+import { VideoVolumeControl } from '@/components/app/video/VideoVolumeControl';
+import { useMediaVolume, setVolume as vpSetVolume } from '@/lib/video-preferences';
 import { CommentsWrapper } from './CommentsWrapper';
 import { LiveEndedMedia } from './LiveEndedMedia';
 import { StreamShopPinnedCard } from '../live/StreamShop';
@@ -1245,6 +1247,27 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
     setIsMuted(true);
   }, []);
 
+  // The speaker's own level (the same saved level every video uses). Hover the
+  // speaker on a desktop and a slider comes up; click still mutes.
+  const volume = useMediaVolume();
+  const [volumeOpen, setVolumeOpen] = useState(false);
+  useEffect(() => {
+    for (const el of [videoRef.current, replayRef.current]) if (el) el.volume = volume;
+  }, [volume, isPlaying, streamEnded]);
+  /** Dragging to zero mutes and dragging off zero unmutes, so the icon and slider agree. */
+  const setVolumeTo = useCallback((next: number) => {
+    const level = Math.max(0, Math.min(1, next));
+    vpSetVolume(level);
+    const video = videoRef.current ?? replayRef.current;
+    if (video) video.volume = level;
+    const shouldMute = level === 0;
+    if (shouldMute !== isMuted) {
+      if (video) video.muted = shouldMute;
+      setIsMuted(shouldMute);
+      videoPlaybackManager.globalMuted = shouldMute;
+    }
+  }, [isMuted]);
+
   const toggleMute = useCallback(() => {
     // Whichever video is on screen. An ended stream with a recording plays
     // through `replayRef` and never mounts the live element at all, so this
@@ -1781,19 +1804,8 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
                  live status flip (liveNow) is what says a live one stopped. */
               onEnded={() => { if (!liveNow) setStreamEnded(true); }}
             />
-            {/* Inline cards offer an unmute prompt. The immersive playback
-                screen already has its sound control in the top-right header. */}
-            {!immersive && isMuted && isPlaying && !streamEnded && (
-              <button
-                type="button"
-                onClick={toggleMute}
-                className="absolute top-3 left-3 z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/50 backdrop-blur-[24px] backdrop-saturate-[180%] border border-white/10 text-white text-xs font-medium hover:bg-black/70 transition-colors"
-                aria-label={t('stages.unmute', 'Unmute')}
-              >
-                <VolumeX className="w-4 h-4" />
-                {t('stages.unmute', 'Unmute')}
-              </button>
-            )}
+            {/* No separate "Unmute" pill: the speaker in the control bar is
+                the one sound control, and it showed muted already. */}
             {/* Playback feedback stays visible even when the controls are hidden. */}
             {(isBuffering || error || broadcastPaused) && (
               <div role="status" aria-label={error ? playbackErrorText(error) : t('common.loading', 'Loading')} className="absolute inset-0 z-10 pointer-events-none flex items-center justify-center">
@@ -1876,13 +1888,21 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
                       <MessageSquare className="w-5 h-5" />
                     </button>
                   )}
-                  <button
-                    onClick={toggleMute}
-                    aria-label={isMuted ? t('stages.unmute', 'Unmute') : t('stages.mute', 'Mute')}
-                    className="p-2 text-white hover:bg-white/20 rounded transition-colors"
+                  <VideoVolumeControl
+                    layout="above"
+                    volume={volume}
+                    muted={isMuted || volume === 0}
+                    onToggleMute={() => { if (volume === 0) setVolumeTo(0.8); else toggleMute(); }}
+                    onVolume={setVolumeTo}
+                    open={volumeOpen}
+                    onOpenChange={setVolumeOpen}
+                    label={isMuted || volume === 0 ? t('stages.unmute', 'Unmute') : t('stages.mute', 'Mute')}
+                    sliderLabel={t('videoPlayer.volume')}
+                    wrapperData={{ 'data-live-volume': true }}
+                    buttonClassName="p-2 text-white hover:bg-white/20 rounded transition-colors"
                   >
-                    {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-                  </button>
+                    {isMuted || volume === 0 ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                  </VideoVolumeControl>
                   <button
                     onClick={toggleFullscreen}
                     aria-label={isFullscreen ? t('stages.exitFullscreen', 'Exit fullscreen') : t('stages.fullscreen', 'Fullscreen')}
