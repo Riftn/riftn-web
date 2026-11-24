@@ -1791,7 +1791,7 @@
     "remove": "Supprimer"
   },
   "tip": {
-    "appSent": "Pourboire de {{amount}} DHB envoyé !",
+    "appSent": "Pourboire de {{amount}} tokens envoyé !",
     "appFailed": "Ton pourboire n’a pas été envoyé. Réessaie.",
     "title": "Envoyer un pourboire",
     "toCreator": "Pourboire à {{name}}",
