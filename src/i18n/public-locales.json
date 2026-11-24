@@ -1,5 +1,5 @@
 {
-  "version": "bd7c9246cd7dad29",
+  "version": "de91b1840bd5ba17",
   "routes": {
     "/": [
       "ar",
@@ -1038,6 +1038,13 @@
       "zh"
     ],
     "/guides/high-score-dehub-gaming-hits-5000-monthly-active-users": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/guides/how-does-a-token-get-listed-on-an-exchange-2026": [
       "ar",
       "es",
       "fr",

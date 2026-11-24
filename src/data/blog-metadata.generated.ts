@@ -2988,6 +2988,32 @@ export const blogPostsMetadata: BlogPost[] = [
 // arrays at runtime in blogUtils.ts — metadata-only logic, no third copy here.
 export const newPostsMetadata: BlogPost[] = [
   {
+    "id": "how-does-a-token-get-listed-on-an-exchange-2026",
+    "slug": "how-does-a-token-get-listed-on-an-exchange-2026",
+    "title": "How Does a Token Get Listed on an Exchange? Requirements, Costs and Timeline (2026)",
+    "excerpt": "Anyone can list a token on a decentralised exchange in minutes. A centralised exchange takes weeks or months of legal, technical and liquidity checks. Here is how each route works, what it costs, and the scams to avoid.",
+    "content": "",
+    "bannerImage": "/media/how-a-token-gets-listed-on-an-exchange-banner-r2.jpg",
+    "bannerImageAlt": "Getting listed: how a token gets listed on an exchange, with requirements, costs and timeline for 2026",
+    "author": {
+      "name": "Mal Jan"
+    },
+    "publishedAt": "2026-11-24T18:00:00.000Z",
+    "updatedAt": "2026-11-24T18:00:00.000Z",
+    "tags": [
+      "Token Listing",
+      "Crypto Exchange",
+      "DEX",
+      "MiCA",
+      "Riftn"
+    ],
+    "readingTime": 6,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "How Does a Token Get Listed on an Exchange? (2026 Guide)",
+    "seoDescription": "How tokens get listed on DEX and centralised exchanges in 2026: the requirements, the costs, how long it takes, and the listing scams to avoid."
+  },
+  {
     "id": "best-free-browser-games-no-download-2026",
     "slug": "best-free-browser-games-no-download-2026",
     "title": "Best Free Browser Games With No Download (2026)",
@@ -3914,30 +3940,30 @@ export const newPostsMetadata: BlogPost[] = [
 
 // getLatestPost() result — docs home hero.
 export const latestPostMetadata: BlogPost | undefined = {
-  "id": "best-free-browser-games-no-download-2026",
-  "slug": "best-free-browser-games-no-download-2026",
-  "title": "Best Free Browser Games With No Download (2026)",
-  "excerpt": "Ten free games that run in a browser tab, from cinematic 3D chess and a neon street brawler to a live 3D globe, a walk through a rainforest and Okey with friends. Nothing to install, nothing to buy.",
+  "id": "how-does-a-token-get-listed-on-an-exchange-2026",
+  "slug": "how-does-a-token-get-listed-on-an-exchange-2026",
+  "title": "How Does a Token Get Listed on an Exchange? Requirements, Costs and Timeline (2026)",
+  "excerpt": "Anyone can list a token on a decentralised exchange in minutes. A centralised exchange takes weeks or months of legal, technical and liquidity checks. Here is how each route works, what it costs, and the scams to avoid.",
   "content": "",
-  "bannerImage": "/media/best-free-browser-games-no-download-banner-r2.jpg",
-  "bannerImageAlt": "Play in a tab: the best free browser games with no download, in the Riftn Arcade",
+  "bannerImage": "/media/how-a-token-gets-listed-on-an-exchange-banner-r2.jpg",
+  "bannerImageAlt": "Getting listed: how a token gets listed on an exchange, with requirements, costs and timeline for 2026",
   "author": {
     "name": "Mal Jan"
   },
-  "publishedAt": "2026-11-24T17:00:00.000Z",
-  "updatedAt": "2026-11-24T17:00:00.000Z",
+  "publishedAt": "2026-11-24T18:00:00.000Z",
+  "updatedAt": "2026-11-24T18:00:00.000Z",
   "tags": [
-    "Browser Games",
-    "Free Games",
-    "Arcade",
-    "Chess",
+    "Token Listing",
+    "Crypto Exchange",
+    "DEX",
+    "MiCA",
     "Riftn"
   ],
   "readingTime": 6,
   "featured": false,
   "status": "published",
-  "seoTitle": "Best Free Browser Games With No Download (2026)",
-  "seoDescription": "Ten free browser games you can play in a tab with no download: 3D chess, a neon brawler, a live 3D globe, Okey with friends and more, plus five favourites beyond Riftn."
+  "seoTitle": "How Does a Token Get Listed on an Exchange? (2026 Guide)",
+  "seoDescription": "How tokens get listed on DEX and centralised exchanges in 2026: the requirements, the costs, how long it takes, and the listing scams to avoid."
 };
 
 export const excludedTitles: string[] = [

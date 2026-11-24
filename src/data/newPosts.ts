@@ -8,6 +8,7 @@ import { creatorPayoutThresholdsPost } from './posts/creatorPayoutThresholdsPost
 import { githubTrendingNovember2026Post } from './posts/githubTrendingNovember2026Post';
 import { watchFreeLiveTvOnlinePost } from './posts/watchFreeLiveTvOnlinePost';
 import { bestFreeBrowserGamesPost } from './posts/bestFreeBrowserGamesPost';
+import { tokenListingExplainerPost } from './posts/tokenListingExplainerPost';
 import { youtubeFeaturesUsersWantPost } from './posts/youtubeFeaturesUsersWantPost';
 import { binancePioneerBurnAppealPost } from './posts/binancePioneerBurnAppealPost';
 import { ownEverythingTaglinePost } from './posts/ownEverythingTaglinePost';
@@ -1426,6 +1427,7 @@ const bnbPoolUpdatePost: BlogPostType = {
 };
 
 export const newPosts: BlogPostType[] = [
+  tokenListingExplainerPost,
   bestFreeBrowserGamesPost,
   watchFreeLiveTvOnlinePost,
   githubTrendingNovember2026Post,
