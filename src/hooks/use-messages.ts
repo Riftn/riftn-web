@@ -188,7 +188,7 @@ export async function decryptConversationPreviews(
 
 // ─── Conversations ────────────────────────────────────────────────────────────
 
-export function useConversations(searchQuery: string = '') {
+export function useConversations(searchQuery: string = '', enabled = true) {
   const { isAuthenticated, walletAddress, isLoading: isAuthResolving } = useAuth();
   const queryClient = useQueryClient();
 
@@ -233,19 +233,19 @@ export function useConversations(searchQuery: string = '') {
         return conv;
       });
     },
-    enabled: hasQueryInput,
+    enabled: enabled && hasQueryInput,
   });
 
   // Real-time: when any DM message arrives, refresh the conversations list.
   // Only subscribe after the first successful REST fetch (avoids eager socket connect on load).
   const hasData = !!query.data;
   useEffect(() => {
-    if (!isAuthenticated || !hasData) return;
+    if (!enabled || !isAuthenticated || !hasData) return;
     const unsub = onDmSendMessage(() => {
       queryClient.invalidateQueries({ queryKey: messagesKeys.conversations() });
     });
     return unsub;
-  }, [isAuthenticated, hasData, queryClient]);
+  }, [enabled, isAuthenticated, hasData, queryClient]);
 
   // Re-render when the set of open conversations changes so the badge clears instantly
   const [, forceTick] = useReducer((x: number) => x + 1, 0);
@@ -1327,7 +1327,7 @@ export function useDeleteConversation() {
 
 // ─── User search ──────────────────────────────────────────────────────────────
 
-export function useUserSearchForDM(query: string) {
+export function useUserSearchForDM(query: string, enabled = true) {
   const { isAuthenticated } = useAuth();
   // Normalised here too, not just in the API call: the `enabled` gate below
   // counts characters, and a raw "@ab" would otherwise pass a two-character
@@ -1337,7 +1337,7 @@ export function useUserSearchForDM(query: string) {
   return useQuery({
     queryKey: messagesKeys.userSearch(debouncedQuery),
     queryFn: () => searchUsersForDM(debouncedQuery, 0, 10),
-    enabled: isAuthenticated && debouncedQuery.length >= 2,
+    enabled: enabled && isAuthenticated && debouncedQuery.length >= 2,
     staleTime: 60 * 1000,
   });
 }
