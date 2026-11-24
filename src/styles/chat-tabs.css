@@ -49,6 +49,12 @@ html[data-theme='osaka'] [data-chat-tabs] { --ct-accent: #ff6fb5; }
   background: var(--ct-accent);
   box-shadow: 0 0 10px var(--ct-accent);
 }
+html:is([data-system-tone='light'], [data-theme='light']) [data-chat-tabs] [data-chat-tab][aria-selected='true']::after {
+  box-shadow: 0 0 3px var(--ct-accent);
+}
+html:is([data-system-tone='light'], [data-theme='light']) [data-status-row] {
+  --status-cloud-shadow: 0 1px 4px rgb(0 0 0 / 0.09);
+}
 /* A chat dragged over a custom tab. */
 [data-chat-tabs] [data-chat-tab][data-drop] { color: var(--ct-ink); box-shadow: inset 0 0 0 1.5px var(--ct-accent); }
 [data-chat-tabs] [data-chat-tab-unread] {
