@@ -9878,7 +9878,13 @@
     "startGroupVoice": "Iniciar una llamada de voz grupal",
     "startGroupVideo": "Iniciar una videollamada grupal",
     "subtitles": "Subtítulos",
-    "you": "Tú"
+    "you": "Tú",
+    "callFull": "Esta llamada está llena",
+    "callFullHint": "Ya tiene el máximo de personas posible. Podrás unirte cuando alguien salga.",
+    "camerasFull": "Cámaras completas",
+    "camerasFullJoin": "Estás dentro con la cámara apagada. Podrás encenderla cuando alguien apague la suya.",
+    "camerasFullHint": "Podrás encender la tuya cuando alguien apague la suya.",
+    "full": "Llena"
   },
   "badgeAscension": {
     "reached": "Has llegado a {{tier}}",

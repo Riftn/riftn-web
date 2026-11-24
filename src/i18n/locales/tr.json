@@ -9878,7 +9878,13 @@
     "startGroupVoice": "Grup sesli araması başlat",
     "startGroupVideo": "Grup görüntülü araması başlat",
     "subtitles": "Altyazı",
-    "you": "Sen"
+    "you": "Sen",
+    "callFull": "Bu arama dolu",
+    "callFullHint": "Bir aramanın alabileceği en fazla kişiye ulaştı. Biri ayrılınca katılabilirsin.",
+    "camerasFull": "Kameralar dolu",
+    "camerasFullJoin": "Kameran kapalı olarak katıldın. Biri kamerasını kapatınca açabilirsin.",
+    "camerasFullHint": "Biri kamerasını kapatınca seninkini açabilirsin.",
+    "full": "Dolu"
   },
   "badgeAscension": {
     "reached": "{{tier}} seviyesine ulaştınız",
