@@ -36,6 +36,7 @@ import { useRowLongPress } from '@/hooks/use-row-long-press';
 import { MessageRequestsHeader, MessageRequestsRow } from '@/components/app/chat/MessageRequestBar';
 import { MessagesNavGlyph } from '@/components/app/navigation/MessagesNavGlyph';
 import '@/styles/messages-cards.css';
+import '@/styles/messages-phone-list.css';
 import { useFeedSeparator } from '@/lib/feed-separator';
 
 import { VerifiedBadge } from '@/components/app/VerifiedBadge';
@@ -1271,7 +1272,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
        every theme. The rows and composer carry their own inner padding. */
     return (
       <>
-      <div style={keyboardStyle} className={`${mobileChatHeight} lg:h-[calc(100dvh-32px)] pt-1 pb-0 sm:pt-1 sm:pb-3 lg:pt-2 overflow-hidden`}>
+      <div style={keyboardStyle} data-msg-phone-b={phonePill ? '' : undefined} className={`${mobileChatHeight} lg:h-[calc(100dvh-32px)] pt-1 pb-0 sm:pt-1 sm:pb-3 lg:pt-2 overflow-hidden`}>
         <DirectMessageChat
           /*
            * Keyed on WHO, not on the conversation id. A thread you have never
@@ -1286,6 +1287,8 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
           initialComposerText={composerPrefill?.convId === selectedConversation.id ? composerPrefill.text : undefined}
           focusComposer={composerFocusFor === conversationIdentity(selectedConversation)}
           onBack={closeChat}
+          // Phones: runs of bubbles from one side join up, one time per run.
+          cozy={phonePill}
         />
       </div>
       {newMessageDrawer}
@@ -1470,7 +1473,8 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // chat and search stay pinned at the end of their row.
   const phoneTop = phonePill ? (
     <PhoneChatListTop
-      title={_copy('settings.chat', { defaultValue: 'Chat' })}
+      title={fullscreen ? _copy('settings.chat', { defaultValue: 'Chat' }) : _copy('messages.title', { defaultValue: 'Messages' })}
+      big={!fullscreen}
       chips={tabBar}
       searchValue={searchQuery}
       onSearch={setSearchQuery}
@@ -1554,7 +1558,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
             [data-page-bento] hook stays: the Osaka and Jungle `#app-root` class
             nets exclude on it, and without it every bg-zinc-8/9 descendant in
             here becomes a frosted rectangle. */}
-        <div data-page-bento data-bento-flat data-msg-cards={cards ? '' : undefined} data-msg-plain={plainList ? '' : undefined} data-msg-cards-picking={deskCards && picking ? '' : undefined} className="relative w-full h-full flex flex-col overflow-hidden">
+        <div data-page-bento data-bento-flat data-msg-phone-b={phonePill && !fullscreen ? '' : undefined} data-msg-cards={cards ? '' : undefined} data-msg-plain={plainList ? '' : undefined} data-msg-cards-picking={deskCards && picking ? '' : undefined} className="relative w-full h-full flex flex-col overflow-hidden">
           {/* Header */}
           {fullscreenTop ?? deskTop ?? phoneTop ?? (<PageIsland
             className={fullscreen ? 'shrink-0 top-0 lg:top-0 px-2 pt-2' : 'shrink-0'}

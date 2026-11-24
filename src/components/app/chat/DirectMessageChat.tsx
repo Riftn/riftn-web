@@ -1130,6 +1130,10 @@ const MessageBubble = memo(function MessageBubble({
           <div
             {...doubleTap}
             style={canDoubleTap ? { touchAction: 'manipulation' } : undefined}
+            /* Phones restyle plain text bubbles through these (styles/messages-phone-list.css). */
+            data-dm-bubble={message.msgType === 'media' || message.msgType === 'gif' || isPostShare ? undefined : isOwnMessage ? 'me' : 'them'}
+            data-dm-bubble-first={!cozy || cozy.first ? '' : undefined}
+            data-dm-bubble-last={!cozy || cozy.last ? '' : undefined}
             /* Mine vs theirs is carried by fill-vs-outline rather than by a
                glass stack: a filled block with no border for own messages, a
                hairline block with no fill for theirs. Geometry matches the
