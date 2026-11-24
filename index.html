@@ -410,6 +410,10 @@
             // <img> (non-CORS) — no crossorigin, or the socket wouldn't be reused.
             hint("preconnect", "https://dehubcdn.ams3.cdn.digitaloceanspaces.com", false);
             hint("dns-prefetch", "https://dehubcdn.ams3.cdn.digitaloceanspaces.com", false);
+            // ...but feed posters are requested through the dehub.io image
+            // transform (cdnImage in media-url.ts), so that is the socket the
+            // first poster actually waits on.
+            hint("preconnect", "https://dehub.io", false);
           }
 
           // Boot feed fetch: start the page-1 /api/feed request at parse time,
@@ -457,6 +461,43 @@
               { headers: h }
             ).then(function (r) { return r.ok ? r.json() : null; })
              .catch(function () { return null; });
+
+            // First poster: on phones the first feed card's <video poster> is
+            // the LCP, and the app only names it after the entry bundle has
+            // run and the card has rendered (PSI: 2.3 s resource load delay).
+            // The feed response already says which image it is, so start it
+            // as soon as the response lands. The URL must match the card's
+            // byte for byte or this is a wasted download: it mirrors
+            // mapVideoItem (use-unified-feed.ts), cdnImage + deviceWidth
+            // (media-url.ts) and VideoCard's deviceWidth(isMdUp() ? 680 : 360).
+            // Video and live posts only; photo posts use a srcset.
+            window.__DEHUB_FEED__.then(function (d) {
+              try {
+                var first = d && Array.isArray(d.result) ? d.result[0] : null;
+                if (!first || (first.postType !== "video" && first.postType !== "live")) return;
+                var src = (first.postType === "live" && first.stream && first.stream.thumbnail) || first.imageUrl;
+                if (!src || /\.(svg|gif)(\?|$)/i.test(src)) return;
+                if (sessionStorage.getItem("dehub:image-transforms-down") === "1") return;
+                var cdn = "https://dehubcdn.ams3.cdn.digitaloceanspaces.com/";
+                if (/^https?:\/\//.test(src)) {
+                  if (src.indexOf(cdn) !== 0) return;
+                } else if (/^(images|shorts|live)\//.test(src)) {
+                  src = cdn + src;
+                } else return;
+                var dpr = Math.min(window.devicePixelRatio || 1, 3);
+                var need = (window.matchMedia("(min-width: 768px)").matches ? 680 : 360) * dpr;
+                var ladder = [64, 96, 128, 192, 256, 360, 480, 736, 1100, 1440, 1920];
+                var w = 1920;
+                for (var i = 0; i < ladder.length; i++) if (ladder[i] >= need) { w = ladder[i]; break; }
+                var l = document.createElement("link");
+                l.rel = "preload";
+                l.as = "image";
+                l.href = "https://dehub.io/cdn-cgi/image/format=auto,quality=80,width=" + w + "/" + src;
+                l.setAttribute("fetchpriority", "high");
+                l.setAttribute("data-feed-poster", "");
+                document.head.appendChild(l);
+              } catch (e) { /* hint only */ }
+            });
           }
         } catch (e) { /* never block boot */ }
       })();
