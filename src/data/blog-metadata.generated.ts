@@ -2988,6 +2988,32 @@ export const blogPostsMetadata: BlogPost[] = [
 // arrays at runtime in blogUtils.ts — metadata-only logic, no third copy here.
 export const newPostsMetadata: BlogPost[] = [
   {
+    "id": "tanrinin-gozu-nedir",
+    "slug": "tanrinin-gozu-nedir",
+    "title": "What Is God's Eye (Tanrının Gözü)? Riftn's Live 3D World Map",
+    "excerpt": "God's Eye, Tanrının Gözü in Turkish, is a free live 3D globe in Riftn's Arcade: flights, satellites, earthquakes and traffic over a spinning Earth. It is not the illegal data panel that uses the same name.",
+    "content": "",
+    "bannerImage": "/media/tanrinin-gozu-nedir-banner-r2.jpg",
+    "bannerImageAlt": "God's Eye, Tanrının Gözü: Riftn's free live 3D world map",
+    "author": {
+      "name": "Mal Jan"
+    },
+    "publishedAt": "2026-11-24T21:00:00.000Z",
+    "updatedAt": "2026-11-24T21:00:00.000Z",
+    "tags": [
+      "God's Eye",
+      "Tanrının Gözü",
+      "3D Globe",
+      "Riftn Arcade",
+      "Online Safety"
+    ],
+    "readingTime": 4,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "God's Eye (Tanrının Gözü): Riftn's Live 3D World Map, Explained",
+    "seoDescription": "What is God's Eye, Tanrının Gözü? A free live 3D globe of flights, satellites and earthquakes on Riftn, and why it has nothing to do with illegal data panels."
+  },
+  {
     "id": "is-riftn-legit",
     "slug": "is-riftn-legit",
     "title": "Is Riftn Legit? Company, Audits, Token and Track Record Since 2021",
@@ -3992,30 +4018,30 @@ export const newPostsMetadata: BlogPost[] = [
 
 // getLatestPost() result — docs home hero.
 export const latestPostMetadata: BlogPost | undefined = {
-  "id": "is-riftn-legit",
-  "slug": "is-riftn-legit",
-  "title": "Is Riftn Legit? Company, Audits, Token and Track Record Since 2021",
-  "excerpt": "Is Riftn safe and legit? Here is what you can check yourself: who runs it, its open source code, its audit, its press coverage, the honest state of its token, and the scams that use its name.",
+  "id": "tanrinin-gozu-nedir",
+  "slug": "tanrinin-gozu-nedir",
+  "title": "What Is God's Eye (Tanrının Gözü)? Riftn's Live 3D World Map",
+  "excerpt": "God's Eye, Tanrının Gözü in Turkish, is a free live 3D globe in Riftn's Arcade: flights, satellites, earthquakes and traffic over a spinning Earth. It is not the illegal data panel that uses the same name.",
   "content": "",
-  "bannerImage": "/media/is-riftn-legit-banner-r2.jpg",
-  "bannerImageAlt": "Is Riftn legit? The company, audit, token and track record since 2021",
+  "bannerImage": "/media/tanrinin-gozu-nedir-banner-r2.jpg",
+  "bannerImageAlt": "God's Eye, Tanrının Gözü: Riftn's free live 3D world map",
   "author": {
     "name": "Mal Jan"
   },
-  "publishedAt": "2026-11-24T20:00:00.000Z",
-  "updatedAt": "2026-11-24T20:00:00.000Z",
+  "publishedAt": "2026-11-24T21:00:00.000Z",
+  "updatedAt": "2026-11-24T21:00:00.000Z",
   "tags": [
-    "Riftn",
-    "Is It Legit",
-    "Safety",
-    "Crypto Scams",
-    "DeHub"
+    "God's Eye",
+    "Tanrının Gözü",
+    "3D Globe",
+    "Riftn Arcade",
+    "Online Safety"
   ],
-  "readingTime": 5,
+  "readingTime": 4,
   "featured": false,
   "status": "published",
-  "seoTitle": "Is Riftn Legit? Team, Audit, Token and Track Record (2026)",
-  "seoDescription": "Is Riftn safe and legit? Who runs it, its open source code, CertiK audit, press coverage, the honest state of the $RIFT token and the scams that use its name."
+  "seoTitle": "God's Eye (Tanrının Gözü): Riftn's Live 3D World Map, Explained",
+  "seoDescription": "What is God's Eye, Tanrının Gözü? A free live 3D globe of flights, satellites and earthquakes on Riftn, and why it has nothing to do with illegal data panels."
 };
 
 export const excludedTitles: string[] = [
