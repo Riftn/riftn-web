@@ -8,7 +8,7 @@ import manifest from './locale-manifest.json';
  * Syncs with useUserLanguage hook for language preference.
  */
 
-import i18n from 'i18next';
+import i18n, { type FormatterModule } from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 import en from './core-en.json';
@@ -261,7 +261,11 @@ export async function loadLanguage(lang: string): Promise<boolean> {
   // Optional feature packs must not prevent an offline reader using cached core copy.
   return results[groups.indexOf('core')] ?? false;
 }
-i18n.use(initReactI18next).init({
+const counterFormatter = {
+  type: 'formatter',
+  format: (value, format, lng, options) => shortenCounterPlaceholder(value, format, lng, options) as string,
+} satisfies Pick<FormatterModule, 'type' | 'format'>;
+i18n.use(counterFormatter).use(initReactI18next).init({
   resources: {
     en: { translation: en },
   },
@@ -275,7 +279,6 @@ i18n.use(initReactI18next).init({
     // Counters in copy ({{count}} listens, {{views}} views...) read short, 1.2K
     // not 1200, the same as everywhere else on the site.
     alwaysFormat: true,
-    format: (value, format, lng, options) => shortenCounterPlaceholder(value, format, lng, options) as string,
   },
 });
 

@@ -41,6 +41,35 @@ export function parseVerticalCrop(raw: unknown): VerticalCrop | null {
 }
 
 /**
+ * A screen is rarely exactly 9:16 (phones run about 9:19.5), and
+ * verticalCropStyle is only right inside a true 9:16 box. These two styles
+ * make that box in any frame: the outer one fills the frame and clips, the
+ * inner one is a 9:16 window that covers it, centred, like object-cover.
+ * Without the window a full-screen slide stretched the picture box to the
+ * screen's shape and object-cover then shaved its sides, so off-centre crops
+ * landed several percent of the frame away from what the streamer picked.
+ */
+export const VERTICAL_FRAME_STYLE: CSSProperties = {
+  position: 'absolute',
+  inset: 0,
+  overflow: 'hidden',
+  containerType: 'size',
+};
+
+export const VERTICAL_WINDOW_STYLE: CSSProperties = {
+  position: 'absolute',
+  left: '50%',
+  top: '50%',
+  width: 'max(100cqw, 56.25cqh)',
+  aspectRatio: '9 / 16',
+  transform: 'translate(-50%, -50%)',
+  overflow: 'hidden',
+};
+
+/** Leaves the element's layout alone: for wrappers that only apply sometimes. */
+export const PASS_THROUGH_STYLE: CSSProperties = { display: 'contents' };
+
+/**
  * Style for a box holding the whole landscape picture, inside a 9:16 frame
  * with overflow hidden, so only the crop shows. The video inside it should be
  * `w-full h-full object-cover`: when the picture really is 16:9 that is an

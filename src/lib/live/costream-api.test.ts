@@ -3,9 +3,23 @@ import { resolve } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/integrations/supabase/client', () => ({ supabase: {} }));
-vi.mock('@/lib/supabase-wallet-client', () => ({ walletScopedClient: () => ({}) }));
+const filters: Array<[string, unknown]> = [];
+const query = {
+  update: () => query,
+  eq: (col: string, val: unknown) => { filters.push([col, val]); return query; },
+  then: (done: (v: { error: null }) => void) => done({ error: null }),
+};
+vi.mock('@/lib/supabase-wallet-client', () => ({ walletScopedClient: () => ({ from: () => query }) }));
 
-import { battlePhase, battleSides, BATTLE_RESULT_MS, costreamUid, type CoStreamState } from './costream-api';
+import { battlePhase, battleSides, BATTLE_RESULT_MS, costreamUid, reportBattleScores, type CoStreamState } from './costream-api';
+
+describe('reportBattleScores', () => {
+  it('only writes onto the round the totals were counted for', async () => {
+    filters.length = 0;
+    await reportBattleScores('0xA', 'room-1', 5, 3, 2);
+    expect(filters).toEqual([['id', 'room-1'], ['battle_round', 2]]);
+  });
+});
 
 const HOST = '0x1111111111111111111111111111111111111111';
 const GUEST = '0xabcdef0123456789abcdef0123456789abcdef01';

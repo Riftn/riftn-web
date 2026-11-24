@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { CHAT_MENU_CONTENT } from '@/components/app/chat/ChatOptionsMenu';
+import { ThemedIcon } from '@/components/app/war/WarHudIcon';
 import { CHAT_TEXT_SCALE, setChatTextSize, useChatTextSize } from '@/lib/chat-text-size';
 import { useChatTextSizeOptions } from '@/hooks/use-chat-text-size-options';
 import { cn } from '@/lib/utils';
@@ -131,6 +132,7 @@ export function PhoneChatListTop({
     return (
       <div data-phone-chat-top data-phone-chat-big className={cn('shrink-0 pt-1', className)}>
         <div className="flex h-12 items-center gap-1.5 pl-4 pr-3">
+          <ThemedIcon icon="messages" alt="" className="mr-1 h-8 w-8 shrink-0 object-contain" />
           <h1 data-phone-chat-title className="min-w-0 flex-1 truncate text-[30px] font-extrabold leading-none tracking-[-0.02em] text-white">{title}</h1>
           <div data-phone-chat-tools className="flex shrink-0 items-center gap-1.5">
             {menu}

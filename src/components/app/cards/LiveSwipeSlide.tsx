@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next';
 import Eye from '@/components/ui/cut-icons/visibility';
 import { LiveStreamCard } from './LiveStreamCard';
 import { useStreamOverlay } from '@/hooks/use-stream-overlay';
-import { verticalCropStyle } from '@/lib/live-overlay/vertical-crop';
+import { VERTICAL_FRAME_STYLE, VERTICAL_WINDOW_STYLE, verticalCropStyle } from '@/lib/live-overlay/vertical-crop';
 import type { LiveStream } from '@/types/feed.types';
 
 const LivePostChat = lazy(() => import('./LivePostChat').then((m) => ({ default: m.LivePostChat })));
@@ -78,9 +78,17 @@ export const LiveSwipeSlide = memo(function LiveSwipeSlide({ stream, isActive, o
   return (
     <div data-live-slide-preview className="absolute inset-0 overflow-hidden bg-black">
       {stream.thumbnail && (
-        <div className="absolute inset-0" style={crop ? verticalCropStyle(crop) : undefined}>
-          <img src={stream.thumbnail} alt="" className="h-full w-full object-cover" />
-        </div>
+        crop ? (
+          <div style={VERTICAL_FRAME_STYLE}>
+            <div style={VERTICAL_WINDOW_STYLE}>
+              <div style={verticalCropStyle(crop)}>
+                <img src={stream.thumbnail} alt="" className="h-full w-full object-cover" />
+              </div>
+            </div>
+          </div>
+        ) : (
+          <img src={stream.thumbnail} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        )
       )}
       <div className="absolute left-4 top-[max(1rem,env(safe-area-inset-top))] flex items-center gap-2">
         <span className="rounded-md bg-red-600 px-1.5 py-1 text-xs font-extrabold leading-none tracking-wide text-white">

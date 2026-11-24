@@ -61,6 +61,24 @@ export function CoStreamGuestRoom({ roomId, wallet, onClose }: { roomId: string;
   const seat = state?.seats.find((s) => s.wallet === me) ?? null;
   const hostMuted = !!seat?.muted;
 
+  // The seat we still hold. Cleared once the seat is gone some other way
+  // (removed, room ended, left with the button), so only a real walk-away
+  // (closed tab, navigated off, screen unmounted) gives it back.
+  const heldSeatRef = useRef<string | null>(null);
+  heldSeatRef.current = seat?.status === 'accepted' ? seat.id : heldSeatRef.current;
+  useEffect(() => {
+    const release = () => {
+      const id = heldSeatRef.current;
+      heldSeatRef.current = null;
+      if (id) void leaveSeat(me, id).catch(() => undefined);
+    };
+    window.addEventListener('pagehide', release);
+    return () => {
+      window.removeEventListener('pagehide', release);
+      release();
+    };
+  }, [me]);
+
   // Camera, microphone, and the link.
   useEffect(() => {
     let cancelled = false;
@@ -103,11 +121,13 @@ export function CoStreamGuestRoom({ roomId, wallet, onClose }: { roomId: string;
       if (cancelled) return;
       const mine = next?.seats.find((s) => s.wallet === me);
       if (!next || next.room.status !== 'active') {
+        heldSeatRef.current = null;
         toast.message(t('costream.ended', { defaultValue: 'The live has ended' }));
         closeRef.current();
         return;
       }
       if (!mine || mine.status !== 'accepted') {
+        heldSeatRef.current = null;
         if (mine?.status === 'removed') toast.message(t('costream.removed', { defaultValue: 'The host took you off screen' }));
         closeRef.current();
         return;
@@ -131,6 +151,7 @@ export function CoStreamGuestRoom({ roomId, wallet, onClose }: { roomId: string;
   }, [connecting, camOn, sendAudio, t]);
 
   const leave = async () => {
+    heldSeatRef.current = null;
     if (seat) await leaveSeat(me, seat.id).catch(() => undefined);
     onClose();
   };

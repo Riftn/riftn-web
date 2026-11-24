@@ -191,9 +191,9 @@ export function ScheduleSheet({ isOpen, onClose, scheduledDate, onSchedule, titl
         className="max-h-[92dvh] px-4 pb-2 md:left-[calc(var(--app-main-left,0px)+(var(--app-main-width,100vw)-488px)/2)] md:w-[488px] md:px-6 md:pb-0"
         data-when-sheet
       >
-        <DrawerHeader className="relative mx-auto w-full max-w-[440px] px-0 pb-3 md:pt-4">
+        <DrawerHeader className="relative mx-auto w-full max-w-[440px] px-0 pb-3 pt-4 md:pt-6">
           <div className="flex items-center justify-between">
-            <button type="button" onClick={onClose} aria-label={t('common.close', { defaultValue: 'Close' })} className="-ml-2 rounded-xl p-2 transition-colors hover:bg-white/10">
+            <button type="button" onClick={onClose} aria-label={t('common.close', { defaultValue: 'Close' })} className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-transparent transition-colors hover:text-foreground focus-visible:outline focus-visible:outline-2">
               <X className="h-5 w-5 text-white/70" />
             </button>
             <DrawerTitle className="absolute left-1/2 -translate-x-1/2 font-semibold text-white">{title}</DrawerTitle>
