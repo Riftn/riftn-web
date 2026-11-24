@@ -139,6 +139,7 @@ import {
   type OpenReactionsEventDetail,
 } from '@/lib/tap-reactions';
 import { profilePath } from '@/lib/profile-path';
+import { BoldText } from '@/lib/bold-markup';
 
 interface ShortsViewerProps {
   shorts: ShortVideo[];
@@ -188,7 +189,7 @@ function ExpandableDescription({ text }: { text: string }) {
           ref={ref}
           className={cn("text-white/80 text-xs lg:text-sm", !expanded && "line-clamp-2")}
         >
-          {text}
+          <BoldText text={text} />
         </p>
       </div>
       {(clamped || expanded) && (
@@ -309,14 +310,14 @@ function ShortCaption({
               <p className={`text-white text-sm font-semibold leading-relaxed [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)] ${
                 expanded ? 'whitespace-pre-wrap' : 'line-clamp-1'
               }`}>
-                {shownTitle}
+                <BoldText text={shownTitle} />
               </p>
             )}
             {shownBody && (
               <p className={`text-white text-sm leading-relaxed [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)] ${
                 expanded ? 'whitespace-pre-wrap' : 'line-clamp-2'
               }`}>
-                {shownBody}
+                <BoldText text={shownBody} />
               </p>
             )}
           </div>
@@ -336,7 +337,7 @@ function ShortCaption({
     <div className="mt-2 lg:mt-3 flex-shrink-0">
       {shownTitle && (
         <p className="text-white text-sm lg:text-base font-medium leading-snug mb-1">
-          {shownTitle}
+          <BoldText text={shownTitle} />
         </p>
       )}
       {shownBody && <ExpandableDescription text={shownBody} />}

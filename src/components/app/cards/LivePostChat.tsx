@@ -83,6 +83,7 @@ import { useFocusChatMessage, chatMessageDomId } from '@/hooks/use-focus-chat-me
 import { canLinkMessage, copyChatMessageLink, copyLinkLabel, useLinkedMessage } from '@/lib/chat-message-link';
 import { Link2 } from 'lucide-react';
 import { dblClickReply } from '@/lib/dblclick-reply';
+import { stripBold } from '@/lib/bold-markup';
 
 /** Avatar with cascading fallback: primary → CDN → initials */
 function LiveChatAvatar({ src, address, name }: { src?: string | null; address?: string; name: string }) {
@@ -967,7 +968,7 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
                       >
                         <CornerDownRight className="h-3 w-3 shrink-0" />
                         <span className="shrink-0 font-semibold">{msg.reply_to.sender_name}</span>
-                        <span className="truncate">{msg.reply_to.content}</span>
+                        <span className="truncate">{stripBold(msg.reply_to.content)}</span>
                       </button>
                     )}
                     <div className="flex items-baseline gap-1.5">
