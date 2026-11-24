@@ -316,7 +316,7 @@ export function ProfileHeader({
                   data-keep-dark
                   data-pull-through
                   data-own-avatar={isViewingOwnProfile ? '' : undefined}
-                  className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl bg-zinc-900 backdrop-blur-none p-0.5 cursor-pointer disabled:cursor-default"
+                  className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl bg-[linear-gradient(to_bottom,#18181b_50%,transparent_50%)] p-0.5 cursor-pointer disabled:cursor-default"
                   onClick={() => profile.avatarUrl && setFullscreenImage(profile.avatarUrl)}
                   // Kept clickable for the owner with no picture yet, so the
                   // right-click / hold menu (Change, Paste) still reaches it.
@@ -327,7 +327,7 @@ export function ProfileHeader({
                     <img
                       src={avatarFailed ? cdnFallbackUrl : profile.avatarUrl}
                       alt={profile.name}
-                      className="w-full h-full rounded-[10px] object-cover aspect-square"
+                      className="block w-full h-full rounded-[10px] object-cover"
                       onError={() => avatarFailed ? setAvatarCdnFailed(true) : setAvatarFailed(true)}
                     />
                   ) : (
