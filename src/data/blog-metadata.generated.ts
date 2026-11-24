@@ -2988,6 +2988,33 @@ export const blogPostsMetadata: BlogPost[] = [
 // arrays at runtime in blogUtils.ts — metadata-only logic, no third copy here.
 export const newPostsMetadata: BlogPost[] = [
   {
+    "id": "fastest-blockchains-2026",
+    "slug": "fastest-blockchains-2026",
+    "title": "Fastest Blockchains in 2026: Real TPS, Block Time and Finality Compared",
+    "excerpt": "Which blockchain is fastest in 2026? Live transactions per second, peak TPS, block time and finality for 12 major chains, and why the advertised numbers mislead.",
+    "content": "",
+    "bannerImage": "/media/fastest-blockchains-2026-banner-r2.jpg",
+    "bannerImageAlt": "Fastest blockchains in 2026: real TPS, block time and finality for 12 chains compared",
+    "author": {
+      "name": "Mal Jan"
+    },
+    "publishedAt": "2026-11-25T00:00:00.000Z",
+    "updatedAt": "2026-11-25T00:00:00.000Z",
+    "tags": [
+      "Blockchain",
+      "TPS",
+      "Solana",
+      "Ethereum",
+      "Crypto",
+      "Riftn"
+    ],
+    "readingTime": 6,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "Fastest Blockchains in 2026: Real TPS and Finality Compared",
+    "seoDescription": "Fastest blockchains in 2026 ranked by real transactions per second, peak TPS, block time and finality: ICP, Solana, BNB Chain, Sui, Aptos, Base, Ethereum and more."
+  },
+  {
     "id": "higgsfield-katana-vs-genjutsu",
     "slug": "higgsfield-katana-vs-genjutsu",
     "title": "Higgsfield Katana vs Genjutsu: What Each Does, Price and Speed (2026)",
@@ -4125,30 +4152,31 @@ export const newPostsMetadata: BlogPost[] = [
 
 // getLatestPost() result — docs home hero.
 export const latestPostMetadata: BlogPost | undefined = {
-  "id": "films-huren-online-2026",
-  "slug": "films-huren-online-2026",
-  "title": "Renting Films Online in the Netherlands in 2026: Where and What It Costs",
-  "excerpt": "Where to rent a film online in the Netherlands, what a rental costs, how long you get to watch it, and how to check every legal option and price for one film in a single search.",
+  "id": "fastest-blockchains-2026",
+  "slug": "fastest-blockchains-2026",
+  "title": "Fastest Blockchains in 2026: Real TPS, Block Time and Finality Compared",
+  "excerpt": "Which blockchain is fastest in 2026? Live transactions per second, peak TPS, block time and finality for 12 major chains, and why the advertised numbers mislead.",
   "content": "",
-  "bannerImage": "/media/films-huren-online-banner-r2.jpg",
-  "bannerImageAlt": "Renting films online in the Netherlands in 2026: where and what it costs",
+  "bannerImage": "/media/fastest-blockchains-2026-banner-r2.jpg",
+  "bannerImageAlt": "Fastest blockchains in 2026: real TPS, block time and finality for 12 chains compared",
   "author": {
     "name": "Mal Jan"
   },
-  "publishedAt": "2026-11-24T23:30:00.000Z",
-  "updatedAt": "2026-11-24T23:30:00.000Z",
+  "publishedAt": "2026-11-25T00:00:00.000Z",
+  "updatedAt": "2026-11-25T00:00:00.000Z",
   "tags": [
-    "Films Huren",
-    "Film Rental",
-    "Streaming",
-    "Netherlands",
-    "Riftn Cinema"
+    "Blockchain",
+    "TPS",
+    "Solana",
+    "Ethereum",
+    "Crypto",
+    "Riftn"
   ],
-  "readingTime": 4,
+  "readingTime": 6,
   "featured": false,
   "status": "published",
-  "seoTitle": "Renting Films Online (2026): Where and What It Costs in the Netherlands",
-  "seoDescription": "Where to rent a film online in the Netherlands in 2026, what a rental costs, how long you have to watch, and how to compare every legal option in one search."
+  "seoTitle": "Fastest Blockchains in 2026: Real TPS and Finality Compared",
+  "seoDescription": "Fastest blockchains in 2026 ranked by real transactions per second, peak TPS, block time and finality: ICP, Solana, BNB Chain, Sui, Aptos, Base, Ethereum and more."
 };
 
 export const excludedTitles: string[] = [

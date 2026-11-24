@@ -1,5 +1,5 @@
 {
-  "version": "f1419a723ab0093c",
+  "version": "fc1e56db1e140410",
   "routes": {
     "/": [
       "ar",
@@ -947,6 +947,13 @@
       "tr"
     ],
     "/guides/faster-and-sleeker-ui-overhaul-and-200-backend-speed-boost": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/guides/fastest-blockchains-2026": [
       "ar",
       "es",
       "fr",
