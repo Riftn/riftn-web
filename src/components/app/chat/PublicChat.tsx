@@ -5,7 +5,7 @@ import { UnreadMarker, UnreadJumpButton } from './UnreadJump';
 import type { UnreadAnchor } from '@/lib/chat-unread-anchor';
 import { anchorFromReadSpot, newestLineOnScreen } from '@/lib/chat-read-position';
 import { useChatReadPosition } from '@/hooks/use-chat-read-position';
-import { countLinesBelow, glideToBottom } from '@/lib/chat-lines-below';
+import { glideToBottom } from '@/lib/chat-lines-below';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { MoreVertical, Loader2, ShieldBan, MessageSquarePlus, AlertCircle, RotateCcw, ChevronsDown } from "lucide-react";
 import ShieldCheck from "@/components/ui/cut-icons/security";
@@ -302,7 +302,6 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
   const [unreadMarkerSeen, setUnreadMarkerSeen] = useState(false);
   const [unreadMarkerAbove, setUnreadMarkerAbove] = useState(false);
   const [unreadBelow, setUnreadBelow] = useState(0);
-  const [linesBelow, setLinesBelow] = useState(0);
   const [scrolledUp, setScrolledUp] = useState(false);
   const readDecidedRoom = useRef<string | null>(null);
   const unreadPlacedRef = useRef(false);
@@ -497,11 +496,6 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
   }, [selectedRoomId, messages.length, messagesLoading, readSpot.ready, hasOlder, loadingOlder, signInWall]);
 
   /** Every line below the fold (the scroll-down count), not just the unread ones. */
-  const refreshLinesBelow = useCallback(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-    setLinesBelow(countLinesBelow(container, messages.map((m) => m.id), (id) => document.getElementById(chatMessageDomId(id))));
-  }, [messages]);
 
   /** How many unread lines sit below the fold, and whether the marker is above it. */
   const refreshUnreadJump = useCallback(() => {
@@ -540,10 +534,9 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
     scrollFrame.current = requestAnimationFrame(() => {
       scrollFrame.current = 0;
       refreshUnreadJump();
-      refreshLinesBelow();
       reportReadSpot();
     });
-  }, [refreshUnreadJump, refreshLinesBelow, reportReadSpot]);
+  }, [refreshUnreadJump, reportReadSpot]);
   useEffect(() => () => cancelAnimationFrame(scrollFrame.current), []);
   useEffect(() => {
     const timer = window.setTimeout(scheduleScrollWork, 400);
@@ -1031,7 +1024,7 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
           // Same control as DMs: up to the unread line until it has been seen,
           // then down to the newest, counting every line still below you.
           const up = !!unreadAnchor && !unreadMarkerSeen && unreadMarkerAbove;
-          const below = Math.max(linesBelow, unreadBelow);
+          const below = unreadBelow;
           return (
             <UnreadJumpButton
               show={up || scrolledUp || below > 0}

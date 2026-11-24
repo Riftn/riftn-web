@@ -2554,7 +2554,9 @@
       "sentNotification": "{{name}} te ha enviado una notificación",
       "fractionGift": "{{name}} te envió fracciones",
       "storyLiked": "A {{name}} le gustó tu momento",
-      "storyMention": "{{name}} te mencionó en su momento"
+      "storyMention": "{{name}} te mencionó en su momento",
+      "storyComment": "{{name}} comentó tu momento",
+      "storyCommentReply": "{{name}} respondió a tu comentario en un momento"
     }
   },
   "leaderboard": {

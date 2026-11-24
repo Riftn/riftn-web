@@ -2554,7 +2554,9 @@
       "sentNotification": "أرسل لك {{name}} إشعارًا",
       "fractionGift": "{{name}} أرسل لك حصصًا",
       "storyLiked": "أعجب {{name}} بلحظتك",
-      "storyMention": "ذكرك {{name}} في لحظته"
+      "storyMention": "ذكرك {{name}} في لحظته",
+      "storyComment": "علّق {{name}} على لحظتك",
+      "storyCommentReply": "ردّ {{name}} على تعليقك في لحظة"
     }
   },
   "leaderboard": {

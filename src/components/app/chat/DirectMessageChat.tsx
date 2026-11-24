@@ -73,7 +73,7 @@ import { UnreadMarker, UnreadJumpButton } from './UnreadJump';
 import { findUnreadAnchor, type UnreadAnchor } from '@/lib/chat-unread-anchor';
 import { anchorFromReadSpot, newestLineOnScreen } from '@/lib/chat-read-position';
 import { useChatReadPosition } from '@/hooks/use-chat-read-position';
-import { countLinesBelow, glideToBottom } from '@/lib/chat-lines-below';
+import { glideToBottom } from '@/lib/chat-lines-below';
 import { useAuth } from '@/contexts/AuthContext';
 import { CachedPageActiveContext } from '@/contexts/CachedPageActiveContext';
 import { useDmSettings } from '@/hooks/use-dm-settings';
@@ -1701,8 +1701,6 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
   const [unreadMarkerSeen, setUnreadMarkerSeen] = useState(false);
   const [unreadMarkerAbove, setUnreadMarkerAbove] = useState(false);
   const [unreadBelow, setUnreadBelow] = useState(0);
-  // Every line below the fold: the number on the scroll-down button.
-  const [linesBelow, setLinesBelow] = useState(0);
   const unreadPlacedRef = useRef(false);
   // The _id of the message that was last when this effect last ran, so an
   // append can be told apart from prepended history.
@@ -2331,11 +2329,6 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unreadAnchor, unreadMarkerOffset]);
 
-  const refreshLinesBelow = useCallback(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-    setLinesBelow(countLinesBelow(container, messagesRef.current.map((m) => m._id), (id) => document.getElementById(`dm-msg-${id}`)));
-  }, []);
 
   const unreadJumpFrame = useRef(0);
   const scheduleUnreadJump = useCallback(() => {
@@ -2343,9 +2336,8 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     unreadJumpFrame.current = requestAnimationFrame(() => {
       unreadJumpFrame.current = 0;
       refreshUnreadJump();
-      refreshLinesBelow();
     });
-  }, [refreshUnreadJump, refreshLinesBelow]);
+  }, [refreshUnreadJump]);
   useEffect(() => () => cancelAnimationFrame(unreadJumpFrame.current), []);
   // Lines arriving (or older pages landing) while you're up the thread.
   useEffect(() => {
@@ -3649,7 +3641,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
           down to the newest line. The count is unread lines still below. */}
       {(() => {
         const up = !!unreadAnchor && !unreadMarkerSeen && unreadMarkerAbove;
-        const count = Math.max(linesBelow, unreadBelow + newMessageCount);
+        const count = unreadBelow + newMessageCount;
         return (
           <UnreadJumpButton
             show={up || showJumpToLatest || newMessageCount > 0}

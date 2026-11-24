@@ -2554,7 +2554,9 @@
       "sentNotification": "{{name}} sent you a notification",
       "fractionGift": "{{name}} sent you fractions",
       "storyLiked": "{{name}} liked your moment",
-      "storyMention": "{{name}} mentioned you in their moment"
+      "storyMention": "{{name}} mentioned you in their moment",
+      "storyComment": "{{name}} commented on your moment",
+      "storyCommentReply": "{{name}} replied to your comment on a moment"
     }
   },
   "leaderboard": {

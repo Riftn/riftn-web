@@ -56,6 +56,12 @@ export function localizedNotificationContent(
   if (count > 1 && !multipleActors && item.type === 'like') {
     return t('notifications.likedPosts', { name, count });
   }
+  if (item.type === 'story_comment') {
+    // The comment itself rides along, the way the push shows it.
+    const sentence = t(item.metadata?.reply ? 'notifications.custom.storyCommentReply' : 'notifications.custom.storyComment', { name: actor });
+    const said = item.commentPreview?.trim();
+    return said ? `${sentence}: “${said}”` : sentence;
+  }
   if (item.type === 'comment_like' && item.commentPreview) {
     return t('notifications.likedCommentPreview', { name: actor, preview: item.commentPreview });
   }
