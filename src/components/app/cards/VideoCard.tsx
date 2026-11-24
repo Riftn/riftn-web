@@ -1375,9 +1375,11 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
           if (videoRef.current === vidEl) { vidEl.pause(); setIsLoading(false); }
           return;
         }
+        // Recovery can accept work before the browser starts the video.
+        if (vidEl.paused) return;
         isPlayingRef.current = true;
         setIsPlaying(true);
-        setIsLoading(false);
+        if (vidEl.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) setIsLoading(false);
         setShowPlayIndicator('play');
         setTimeout(() => setShowPlayIndicator(null), 500);
         showControlsBriefly();
@@ -1872,7 +1874,10 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
     },
     allowed: () => !!videoRef.current && videoRef.current.dataset.userPaused !== 'true' &&
       !visualActivity.isCallBusy() && ((playbackAllowedRef.current && surfaceActiveRef.current &&
-        (isIntersectingRef.current || isVideoOutsideFeed(videoRef.current)) && isRendered(containerRef.current)) || isVideoInPictureInPicture(videoRef.current)),
+        // A manual click can land before the observer reports the new position.
+        (isVideoOutsideFeed(videoRef.current) || (autoStartedRef.current
+          ? isIntersectingRef.current
+          : slotOnScreen(containerRef.current))) && isRendered(containerRef.current)) || isVideoInPictureInPicture(videoRef.current)),
   });
   useEffect(() => {
     setHasError(playbackPhase === 'failed');
@@ -1958,9 +1963,10 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
                   setIsLoading(false);
                   return;
                 }
+                if (vid.paused) return;
                 isPlayingRef.current = true;
                 setIsPlaying(true);
-                setIsLoading(false);
+                if (vid.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) setIsLoading(false);
               }).catch(() => {
                 setIsLoading(false);
               });
