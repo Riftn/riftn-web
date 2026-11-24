@@ -37,6 +37,9 @@ const fmt = (s: number) => {
   return h ? `${h}:${String(m).padStart(2, '0')}:${sec}` : `${m}:${sec}`;
 };
 
+/** 4.1 - 1.1 is 2.9999999999999996: compare lengths with a little slack. */
+const LENGTH_SLACK = 1e-6;
+
 /** Keep [start, end] inside the window and 3-60 s long, moving the side that was not dragged. */
 export function clampRange(start: number, end: number, lo: number, hi: number, moved: 'start' | 'end'): [number, number] {
   let s = Math.max(lo, Math.min(start, hi));
@@ -50,7 +53,14 @@ export function clampRange(start: number, end: number, lo: number, hi: number, m
     if (e - s > CLIP_MAX_S) s = e - CLIP_MAX_S;
     if (e - s < CLIP_MIN_S) e = Math.min(hi, s + CLIP_MIN_S);
   }
-  return [Math.round(s * 10) / 10, Math.round(e * 10) / 10];
+  // Round to a tenth, then clamp again: rounding a window edge such as
+  // 59.85 up to 59.9 would put the pick past the server's window.
+  const r = (v: number) => Math.round(v * 10) / 10;
+  const roundedStart = Math.max(lo, r(s));
+  const roundedEnd = Math.min(hi, r(e));
+  const roundedLength = roundedEnd - roundedStart;
+  if (roundedLength < CLIP_MIN_S - LENGTH_SLACK || roundedLength > CLIP_MAX_S + LENGTH_SLACK) return [s, e];
+  return [roundedStart, roundedEnd];
 }
 
 export function ClipEditorSheet({ clip: initial, open, onOpenChange, onChange }: Props) {
@@ -227,7 +237,7 @@ export function ClipEditorSheet({ clip: initial, open, onOpenChange, onChange }:
           placeholder={t('liveClips.titlePlaceholder', 'Give your clip a title')}
           aria-label={t('liveClips.titleLabel', 'Clip title')}
         />
-        <Button className="w-full" onClick={make} disabled={busy || length < CLIP_MIN_S || length > CLIP_MAX_S}>
+        <Button className="w-full" onClick={make} disabled={busy || length < CLIP_MIN_S - LENGTH_SLACK || length > CLIP_MAX_S + LENGTH_SLACK}>
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : t('liveClips.make', 'Make clip')}
         </Button>
       </div>
