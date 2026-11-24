@@ -51,3 +51,27 @@
   transform: scale(1.1);
   filter: drop-shadow(0 0 4px rgba(255, 255, 255, .55));
 }
+
+[data-sidebar-composer-tools] {
+  display: none;
+}
+[data-sidebar-composer-tools]:is([data-open], :has([data-voice-recording])) {
+  display: flex;
+}
+[data-sidebar-composer-tools]:not([data-open]) > :not([data-voice-recording]) {
+  display: none;
+}
+
+html[data-theme] [data-sidebar-composer-toolbar]:not(#_):not(#_) > button,
+html[data-theme] [data-sidebar-composer-toolbar]:not(#_):not(#_)
+  :is([data-sidebar-composer-tools], [data-voice-recording]) > button {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+[data-sidebar-composer-toolbar] button:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 2px;
+}

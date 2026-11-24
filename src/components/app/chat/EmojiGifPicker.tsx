@@ -52,12 +52,13 @@ interface EmojiGifPickerProps {
    *  neighbouring controls use a different button style (e.g. the comment
    *  composer's bordered glass pills instead of the chat rail's ghost icons). */
   triggerClassName?: string;
+  triggerLabel?: string;
   /** Overrides the Smile glyph's default size, to match a neighbouring icon
    *  size other than the chat rail's w-5 h-5. */
   iconClassName?: string;
 }
 
-export function EmojiGifPicker({ onEmojiSelect, onGifSelect, triggerClassName, iconClassName }: EmojiGifPickerProps) {
+export function EmojiGifPicker({ onEmojiSelect, onGifSelect, triggerClassName, triggerLabel, iconClassName }: EmojiGifPickerProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   // Touch screens: the picker opens beside the keyboard instead of taking
@@ -141,6 +142,7 @@ export function EmojiGifPicker({ onEmojiSelect, onGifSelect, triggerClassName, i
           type="button"
           variant="ghost"
           size="icon"
+          aria-label={triggerLabel}
           className={cn("h-8 w-8 text-white hover:text-white hover:bg-zinc-700", triggerClassName)}
           onPointerDown={touch ? (e) => e.preventDefault() : undefined}
           onMouseDown={touch ? (e) => e.preventDefault() : undefined}

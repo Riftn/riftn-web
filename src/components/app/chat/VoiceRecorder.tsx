@@ -12,9 +12,10 @@ interface VoiceRecorderProps {
   onRecordingComplete: (audioBlob: Blob, duration: number) => void;
   disabled?: boolean;
   maxDuration?: number;
+  triggerLabel?: string;
 }
 
-export function VoiceRecorder({ onRecordingComplete, disabled, maxDuration = VOICE_RECORDING_SECONDS }: VoiceRecorderProps) {
+export function VoiceRecorder({ onRecordingComplete, disabled, triggerLabel, maxDuration = VOICE_RECORDING_SECONDS }: VoiceRecorderProps) {
   const { t: _copy } = _useCopy();
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
@@ -165,6 +166,7 @@ export function VoiceRecorder({ onRecordingComplete, disabled, maxDuration = VOI
       variant="ghost"
       size="icon"
       className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-700"
+      aria-label={triggerLabel}
       onClick={startRecording}
       disabled={disabled}
     >
