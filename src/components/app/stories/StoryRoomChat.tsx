@@ -48,7 +48,7 @@ function Face({ c }: { c: StoryComment }) {
 
 /** The newest few over the picture. Empty draws nothing. */
 export function StoryRoomChat({ comments, onOpen }: { comments: StoryComment[]; onOpen: () => void }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   // The server sends newest first; the room reads top to bottom like live chat.
   const rows = useMemo(() => comments.slice(0, FLOATING).reverse(), [comments]);
   // Rows already there when the list first arrives sit still; later ones rise in.
@@ -80,6 +80,7 @@ export function StoryRoomChat({ comments, onOpen }: { comments: StoryComment[]; 
 
 /** Rows for the side panel: the whole list, newest at the bottom, with times. */
 export function StoryRoomRows({ comments, onOpenProfile, emptyLabel }: { comments: StoryComment[]; onOpenProfile: (address: string) => void; emptyLabel: string }) {
+  const { i18n } = useTranslation();
   const rows = useMemo(() => [...comments].reverse(), [comments]);
   const endRef = useRef<HTMLDivElement>(null);
   useEffect(() => { endRef.current?.scrollIntoView({ block: 'end' }); }, [rows.length]);
