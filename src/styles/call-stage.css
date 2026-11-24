@@ -238,19 +238,20 @@ html[data-theme="hacker"] .call-card__go { background: #39ff88; color: #001a0a; 
 }
 
 /* Group calls: one tile per person between the name chip and the dock. */
+/* The screen splits as people join, up to four: one fills it, two take a
+   half each, three are a wide tile over two, four are quarters. A fifth
+   person and on keep quarter tiles and the grid scrolls for the rest. */
 .group-call-grid {
-  flex: 1 1 auto; min-height: 0; display: grid; gap: 8px; align-content: center;
+  flex: 1 1 auto; min-height: 0; display: grid; gap: 8px;
   grid-template-columns: repeat(var(--gc-cols, 1), minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr);
   padding: calc(max(18px, env(safe-area-inset-top)) + 54px) 12px 0;
 }
-.group-call-grid[data-count="2"] { --gc-cols: 1; }
-.group-call-grid[data-count="3"], .group-call-grid[data-count="4"] { --gc-cols: 2; }
-.group-call-grid[data-count="5"], .group-call-grid[data-count="6"] { --gc-cols: 2; }
-.group-call-grid[data-count="7"], .group-call-grid[data-count="8"], .group-call-grid[data-count="9"] { --gc-cols: 3; }
-.group-call-grid[data-count="9"] { overflow-y: auto; grid-auto-rows: minmax(120px, 1fr); }
+.group-call-grid[data-count="3"], .group-call-grid[data-count="4"], .group-call-grid[data-count="5"] { --gc-cols: 2; }
+.group-call-grid[data-count="3"] > .group-call-tile:first-child { grid-column: 1 / -1; }
+.group-call-grid[data-count="5"] { overflow-y: auto; overscroll-behavior: contain; grid-auto-rows: calc((100% - 8px) / 2); scrollbar-width: none; }
+.group-call-grid[data-count="5"]::-webkit-scrollbar { display: none; }
 @media (min-width: 768px) {
   .group-call-grid[data-video="true"][data-count="2"] { --gc-cols: 2; }
-  .group-call-grid[data-video="true"][data-count="5"], .group-call-grid[data-video="true"][data-count="6"] { --gc-cols: 3; }
 }
 .group-call-tile {
   position: relative; min-height: 0; overflow: hidden; border-radius: 20px;

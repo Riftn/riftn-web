@@ -119,7 +119,7 @@ const GroupCallModal: React.FC = () => {
         <CallFxButton open={fxOpen} onToggle={() => setFxOpen(open => !open)} active={callBackground !== 'none' || callFaceFilter !== 'none'} />
       ) : null}
 
-      <div className="group-call-grid" data-count={Math.min(count, 9)} data-video={isVideo ? 'true' : 'false'}>
+      <div className="group-call-grid" data-count={Math.min(count, 5)} data-video={isVideo ? 'true' : 'false'}>
         <div className="group-call-tile" data-speaking={selfSpeaking && !isMuted ? 'true' : 'false'}>
           {isVideo && !isCameraOff ? <div ref={attachLocalVideo} className="group-call-tile__video group-call-tile__video--self" /> : (
             <TileFace name={self.name} avatarUrl={self.avatarUrl} />
