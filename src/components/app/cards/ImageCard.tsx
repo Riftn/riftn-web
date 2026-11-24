@@ -704,7 +704,7 @@ function ImageCarousel({
       )}
     </div>
   );
-  return wideRails ? <div data-wide-rails-row className="flex items-stretch gap-3">{gallery}{railPanel}</div> : gallery;
+  return wideRails ? <div data-wide-rails-row className="flex items-stretch gap-3">{railPanel}{gallery}</div> : gallery;
 }
 
 /**
