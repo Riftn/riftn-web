@@ -20,12 +20,12 @@
 import { useSyncExternalStore } from 'react';
 
 export type WideVideoMode = 'standard' | 'ambient' | 'rails';
-export const WIDE_VIDEO_MODES: readonly WideVideoMode[] = ['rails', 'ambient', 'standard'];
+export const WIDE_VIDEO_MODES: readonly WideVideoMode[] = ['standard', 'ambient', 'rails'];
 /**
- * Glass rails for anyone who has not picked one in Settings. A stored pick
+ * Ambient for anyone who has not picked one in Settings. A stored pick
  * (ambient, rails or standard) always wins, so people who chose keep their look.
  */
-export const DEFAULT_WIDE_VIDEO_MODE: WideVideoMode = 'rails';
+export const DEFAULT_WIDE_VIDEO_MODE: WideVideoMode = 'ambient';
 
 /** Rails need room beside the picture: anything wider than this shows as normal. */
 export const WIDE_RAILS_MAX_ASPECT = 1.25;

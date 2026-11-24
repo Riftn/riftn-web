@@ -136,10 +136,12 @@ export default function CallStageGallery() {
       })) : [],
       attachGroupVideo: (uid: number) => paint(['linear-gradient(160deg, #3b2f63, #1f4a5c)', 'linear-gradient(200deg, #5c3b2f, #1f2a5c)', 'linear-gradient(120deg, #2f5c45, #3b1f5c)'][uid % 3]),
       startGroupCall: async () => {}, joinGroupCall: async () => {},
+      // ?camfull=1: every camera slot taken, yours off.
+      groupCamerasFull: params.get('camfull') === '1',
       captionRoom: subs && live ? room : null,
       captionSpeakers: [ME, PEER],
       getMicStream: () => null, setCallVolume: noop,
-      peerAddress: PEER, isMuted: base === 'muted', isCameraOff: false, isMinimized: base === 'mini',
+      peerAddress: PEER, isMuted: base === 'muted', isCameraOff: params.get('camfull') === '1', isMinimized: base === 'mini',
       callStartedAt: live ? Date.now() - 272_000 : null, mediaRevision: 0,
       remoteAudioRef: { current: null }, localVideoTrack: { current: null },
       attachLocalVideo: paint(params.get('self') ? `center / cover url("${params.get('self')}")` : '#3f3f46'),

@@ -25,8 +25,8 @@ import { CallBackgroundPanel, CallFxButton, useCallBackgroundAvailable } from '.
 /**
  * A group call, voice or video, on the same stage as a direct call.
  *
- * Before anyone else is in the room it is the familiar ringing screen with the
- * group's name. Once somebody joins it becomes a grid: one tile per person,
+ * Before anyone else is in the room it is the ringing screen with the group's
+ * name (Public Chat: the waiting screen, nobody is rung). Once somebody joins it becomes a grid: one tile per person,
  * their camera when it is on and their picture when it is not, outlined while
  * they talk. Leaving is the one solid control; the call carries on for
  * whoever is still in it.
@@ -42,6 +42,7 @@ const GroupCallModal: React.FC = () => {
     isMuted,
     isCameraOff,
     selfSpeaking,
+    groupCamerasFull,
     groupParticipants,
     attachLocalVideo,
     attachGroupVideo,
@@ -148,7 +149,14 @@ const GroupCallModal: React.FC = () => {
           />
           {isVideo ? (
             <>
-              <CallControl icon={isCameraOff ? VideoOff : Video} label={t('calls.camera')} onClick={toggleCamera} active={isCameraOff} />
+              {/* Every camera slot taken: the button says so, and a tap explains how to get one. */}
+              <CallControl
+                icon={isCameraOff ? VideoOff : Video}
+                label={isCameraOff && groupCamerasFull ? t('calls.camerasFull', 'Cameras full') : t('calls.camera')}
+                onClick={toggleCamera}
+                active={isCameraOff}
+                dimmed={isCameraOff && groupCamerasFull}
+              />
               <CallControl icon={RotateCcw} label={t('calls.flip')} onClick={switchCamera} />
             </>
           ) : null}

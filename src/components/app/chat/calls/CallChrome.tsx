@@ -170,6 +170,7 @@ export function CallControl({
   active,
   primary,
   disabled,
+  dimmed,
   compact,
 }: {
   icon: LucideIcon | React.ComponentType<{ className?: string }>;
@@ -178,6 +179,8 @@ export function CallControl({
   active?: boolean;
   primary?: boolean;
   disabled?: boolean;
+  /** Can't be turned on right now, but still tappable so it can say why. */
+  dimmed?: boolean;
   /** Icon only, for the minimised pill. */
   compact?: boolean;
 }) {
@@ -185,7 +188,8 @@ export function CallControl({
     <button
       type="button"
       className="call-btn"
-      data-solid={primary || active ? 'true' : 'false'}
+      data-solid={(primary || active) && !dimmed ? 'true' : 'false'}
+      data-dimmed={dimmed ? 'true' : undefined}
       onClick={onClick}
       disabled={disabled}
       aria-label={label}
@@ -197,7 +201,7 @@ export function CallControl({
   );
   if (compact) return button;
   return (
-    <div className="call-ctl">
+    <div className="call-ctl" data-dimmed={dimmed ? 'true' : undefined}>
       {button}
       <span>{label}</span>
     </div>

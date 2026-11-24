@@ -854,7 +854,7 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
         {phoneB ? (
         <div data-live-chat-toolbar className="flex shrink-0 items-center gap-1">
           {!isBanned && (
-            <GroupCallButtons groupId={PUBLIC_CHAT_CALL_ID} groupName={t('publicChat.title')} ring={false} joinOnly />
+            <GroupCallButtons groupId={PUBLIC_CHAT_CALL_ID} groupName={t('publicChat.title')} joinOnly />
           )}
           {/* Search and text size on the bar; calls, translate and room
               settings behind + so the top isn't crowded on phones. "24 online"
@@ -923,7 +923,7 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
             <TooltipContent>{isAllTranslated ? _copy("copy.16194a69c43d", { defaultValue: "Show original" }) : _copy("copy.29a7e1c24c92", { defaultValue: "Translate all" })}</TooltipContent>
           </Tooltip>
           {!embedded && !isBanned && (
-            <GroupCallButtons groupId={PUBLIC_CHAT_CALL_ID} groupName={t('publicChat.title')} ring={false} />
+            <GroupCallButtons groupId={PUBLIC_CHAT_CALL_ID} groupName={t('publicChat.title')} />
           )}
           {/* Search toggle */}
           <Tooltip>
