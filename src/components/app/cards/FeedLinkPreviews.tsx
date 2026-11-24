@@ -157,7 +157,7 @@ export function FeedLinkPreviews({ text, hidden }: FeedLinkPreviewsProps) {
         <div data-glass-embed className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
           {/* Shaped like the card most links become, so the swap barely moves anything. */}
           <div className="aspect-[1.91/1] w-full bg-white/5" />
-          <div className="px-3 pb-3 pt-3.5 sm:pt-4 space-y-2">
+          <div data-link-preview-text className="px-3 pb-3 pt-3.5 sm:pt-4 space-y-2">
             <Skeleton className="h-3 w-20" />
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-3 w-3/4" />
