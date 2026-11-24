@@ -7924,6 +7924,9 @@
     "shareTitle": "@{{handle}} te koop op Riftn"
   },
   "stories": {
+    "repliesOff": "Reacties staan uit",
+    "repliesOn": "Reacties staan aan",
+    "replies": "Reacties",
     "effects": "Effecten",
     "backdrop": "Achtergrond",
     "looks": {

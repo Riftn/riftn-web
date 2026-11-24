@@ -13,7 +13,7 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { formatCount } from '@/lib/format-count';
-import { AtSign, EyeOff, Sticker, Wand2, Timer, Pencil, RefreshCw, RotateCw, Type, Undo2, Users, Globe2, Volume2, VolumeX, Scissors, Star, Loader2 } from 'lucide-react';
+import { AtSign, EyeOff, Sticker, Wand2, Timer, Pencil, RefreshCw, RotateCw, Type, Undo2, Users, Globe2, Volume2, VolumeX, Scissors, Star, Loader2, MessageCircle, MessageCircleOff } from 'lucide-react';
 import Back from '@/components/ui/cut-icons/back';
 import Close from '@/components/ui/cut-icons/close';
 import Images from '@/components/ui/cut-icons/images';
@@ -343,6 +343,8 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
     try { return localStorage.getItem(AUDIENCE_KEY) === 'followers' ? 'followers' : 'everyone'; } catch { return 'everyone'; }
   });
   const [audiencePeople, setAudiencePeople] = useState<DeHubUser[]>([]);
+  // Replies are on for every new moment; the top-right switch turns them off for this one.
+  const [allowReplies, setAllowReplies] = useState(true);
   const restrictPeople = audience === 'selected' || audience === 'except';
   const audienceLabels = {
     everyone: t('stories.everyone', { defaultValue: 'Everyone' }),
@@ -561,7 +563,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
           };
         }
       }
-      const fields = { audience, audienceAddresses: restrictPeople ? audiencePeople.map(user => user.address!) : undefined, expiresInHours: customLifetime ? lifetime : undefined, mentions, song: songField, muted: media.kind === 'video' ? muted : false, remixSourceId, postTokenId: media.postTokenId };
+      const fields = { audience, allowReplies, audienceAddresses: restrictPeople ? audiencePeople.map(user => user.address!) : undefined, expiresInHours: customLifetime ? lifetime : undefined, mentions, song: songField, muted: media.kind === 'video' ? muted : false, remixSourceId, postTokenId: media.postTokenId };
       if (media.kind === 'photo') {
         const img = imgRef.current!;
         if (!img.complete) await new Promise(r => { img.onload = r; });
@@ -583,7 +585,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
       toast.error(t('stories.couldNotPrepare', { defaultValue: "Couldn't get your moment ready. Try again." }));
       setBusy(false);
     }
-  }, [busy, audience, audiencePeople, restrictPeople, audienceBlocked, customLifetime, lifetime, layers, song, media, muted, drew, trim, photoSeconds, customPhotoDuration, remixSourceId, onShared, onClose, t]);
+  }, [busy, audience, allowReplies, audiencePeople, restrictPeople, audienceBlocked, customLifetime, lifetime, layers, song, media, muted, drew, trim, photoSeconds, customPhotoDuration, remixSourceId, onShared, onClose, t]);
 
   const isVideo = media.kind === 'video';
   const duration = media.duration || MAX_VIDEO_S;
@@ -665,6 +667,15 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
       </div>
 
       <div data-sc-tools>
+        <button type="button" data-sc-btn data-st-dark-glass role="switch" aria-checked={allowReplies}
+          onClick={() => {
+            const next = !allowReplies;
+            setAllowReplies(next);
+            toast(next ? t('stories.repliesOn', { defaultValue: 'Replies are on' }) : t('stories.repliesOff', { defaultValue: 'Replies are off' }));
+          }}
+          aria-label={t('stories.replies', { defaultValue: 'Replies' })}>
+          {allowReplies ? <MessageCircle className="w-5 h-5" /> : <MessageCircleOff className="w-5 h-5" />}
+        </button>
         {!isVideo && customPhotoDuration && (
           <button type="button" data-sc-btn data-st-dark-glass data-on={tool === 'timer' ? 'true' : 'false'}
             onClick={() => setTool(tl => tl === 'timer' ? null : 'timer')}

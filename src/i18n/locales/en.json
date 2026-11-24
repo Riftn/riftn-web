@@ -7734,6 +7734,9 @@
     "shareTitle": "@{{handle}} is for sale on Riftn"
   },
   "stories": {
+    "repliesOff": "Replies are off",
+    "repliesOn": "Replies are on",
+    "replies": "Replies",
     "effects": "Effects",
     "backdrop": "Background",
     "looks": {

@@ -7759,6 +7759,9 @@
     "shareTitle": "@{{handle}} معروض للبيع على Riftn"
   },
   "stories": {
+    "repliesOff": "الردود متوقفة",
+    "repliesOn": "الردود مفعّلة",
+    "replies": "الردود",
     "effects": "تأثيرات",
     "backdrop": "الخلفية",
     "looks": {

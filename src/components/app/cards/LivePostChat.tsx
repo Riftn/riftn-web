@@ -1,3 +1,4 @@
+import { formatMessageTime } from '@/i18n/date-locale';
 import { outsideImage } from '@/lib/outside-image';
 import { FullscreenImageViewerLazy } from '@/components/app/cards/FullscreenImageViewerLazy';
 import { useTranslation as _useCopy } from 'react-i18next';
@@ -66,7 +67,6 @@ import { addStreamModerator, banFromStreams, pinLiveChatMessage, timeOutInStream
 import { VoiceRecorder } from '@/components/app/chat/VoiceRecorder';
 import { VoiceWaveformPlayer } from '@/components/app/chat/VoiceWaveformPlayer';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import type { SupabaseLiveChatMessage } from '@/hooks/use-livechat';
 import { useStreamChatJoins } from '@/hooks/use-stream-chat-joins';
@@ -1019,7 +1019,7 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
                       />
                     )}
                     <span className="text-[10px] text-zinc-600 mt-0.5 flex items-center gap-1.5">
-                      {format(new Date(msg.created_at), 'HH:mm')}
+                      {formatMessageTime(new Date(msg.created_at))}
                       {msg.client_key && (
                         <SendStatus
                           state={msg.send_state}
