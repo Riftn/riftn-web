@@ -17,7 +17,7 @@ import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { ArrowUpRight, ChevronLeft, ChevronRight, Eye, Heart, Link2, Loader2, Repeat2, Star, Volume2, VolumeX } from 'lucide-react';
+import { ArrowUpRight, ChevronLeft, ChevronRight, Eye, Heart, Link2, Loader2, Repeat2, Star, Users, Volume2, VolumeX } from 'lucide-react';
 import Close from '@/components/ui/cut-icons/close';
 import MoreVertical from '@/components/ui/cut-icons/morevertical';
 import Plus from '@/components/ui/cut-icons/add';
@@ -958,7 +958,9 @@ function ViewersList({ item, onOpen, onClose }: { item: StoryItem; onOpen: (addr
   const { t } = useTranslation();
   const [rows, setRows] = useState<StoryViewerRow[] | null>(null);
   const [next, setNext] = useState<string | null>(null);
-  const [counts, setCounts] = useState({ views: item.viewCount ?? 0, likes: item.likeCount ?? 0 });
+  // Different people who watched, and every watch with repeats. Both come
+  // with the list, so the numbers always match the rows below them.
+  const [counts, setCounts] = useState({ viewers: item.viewCount ?? 0, views: item.viewCount ?? 0, likes: item.likeCount ?? 0 });
 
   useEffect(() => {
     let alive = true;
@@ -966,7 +968,7 @@ function ViewersList({ item, onOpen, onClose }: { item: StoryItem; onOpen: (addr
       if (!alive) return;
       setRows(r.viewers);
       setNext(r.next);
-      setCounts({ views: r.viewCount, likes: r.likeCount });
+      setCounts({ viewers: r.viewCount, views: Math.max(r.playCount ?? 0, r.viewCount), likes: r.likeCount });
     }).catch(() => alive && setRows([]));
     return () => { alive = false; };
   }, [item.id]);
@@ -982,7 +984,16 @@ function ViewersList({ item, onOpen, onClose }: { item: StoryItem; onOpen: (addr
   return (
     <div>
       <div className="flex items-center gap-3 text-[14px] font-semibold">
-        <span className="inline-flex items-center gap-1.5"><Eye className="w-4 h-4" />{formatCount(counts.views)}</span>
+        <span className="inline-flex items-center gap-1.5" title={t('stories.viewersCount', { defaultValue: '{{formatted}} viewers', formatted: formatCount(counts.viewers) })}>
+          <Users className="w-4 h-4" aria-hidden />
+          <span className="sr-only">{t('stories.viewersCount', { defaultValue: '{{formatted}} viewers', formatted: formatCount(counts.viewers) })}</span>
+          <span aria-hidden>{formatCount(counts.viewers)}</span>
+        </span>
+        <span className="inline-flex items-center gap-1.5" title={t('stories.viewsCount', { defaultValue: '{{formatted}} views', formatted: formatCount(counts.views) })}>
+          <Eye className="w-4 h-4" aria-hidden />
+          <span className="sr-only">{t('stories.viewsCount', { defaultValue: '{{formatted}} views', formatted: formatCount(counts.views) })}</span>
+          <span aria-hidden>{formatCount(counts.views)}</span>
+        </span>
         <span className="inline-flex items-center gap-1.5"><Heart data-sv-heart className="w-4 h-4 fill-current" />{formatCount(counts.likes)}</span>
         <button type="button" className="ml-auto grid size-11 place-items-center rounded-full hover:bg-white/10" onClick={onClose} aria-label={t('common.close', { defaultValue: 'Close' })}>
           <Close className="size-[18px]" />
@@ -998,7 +1009,7 @@ function ViewersList({ item, onOpen, onClose }: { item: StoryItem; onOpen: (addr
             const face = v.avatarImageUrl ? buildAvatarUrl(v.address, v.avatarImageUrl) : buildAvatarCdnFallbackUrl(v.address, undefined);
             const name = v.displayName || v.username || v.address.slice(0, 8);
             return (
-              <button key={v.address} type="button" className="grid w-full min-w-0 grid-cols-[auto_minmax(0,1fr)_1rem] items-center gap-3 py-2 text-start" onClick={() => onOpen(v.address)}>
+              <button key={v.address} type="button" className="grid w-full min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 py-2 text-start" onClick={() => onOpen(v.address)}>
                 <Avatar className="size-9">
                   {face && <AvatarImage src={face} alt="" className="object-cover" />}
                   <AvatarFallback className="bg-white/15 text-[13px] text-white">{name.slice(0, 1).toUpperCase()}</AvatarFallback>
@@ -1007,7 +1018,14 @@ function ViewersList({ item, onOpen, onClose }: { item: StoryItem; onOpen: (addr
                   <span className="block text-[14px] font-medium truncate">{name}</span>
                   {v.username && <span className="block text-[12px] opacity-60 truncate">@{v.username}</span>}
                 </span>
-                {v.liked && <Heart data-sv-heart className="w-4 h-4 fill-current" />}
+                <span className="inline-flex items-center gap-2">
+                  {(v.plays ?? 1) > 1 && (
+                    <span className="text-[13px] font-semibold opacity-70" title={t('stories.watchedTimes', { defaultValue: 'Watched {{formatted}} times', formatted: formatCount(v.plays ?? 1) })}>
+                      {t('stories.playsShort', { defaultValue: '{{formatted}}×', formatted: formatCount(v.plays ?? 1) })}
+                    </span>
+                  )}
+                  {v.liked && <Heart data-sv-heart className="w-4 h-4 fill-current" />}
+                </span>
               </button>
             );
           })}

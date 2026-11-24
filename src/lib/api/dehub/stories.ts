@@ -98,6 +98,8 @@ export interface ShelfEntry {
 
 export interface StoryViewer extends StoryAuthor {
   liked: boolean;
+  /** How many times this person watched it (newer servers). */
+  plays?: number;
   viewedAt: string;
 }
 
@@ -210,7 +212,7 @@ export function checkStoryReply(id: string): Promise<{ ok: boolean; to: string }
   return apiCall(`/api/stories/${encodeURIComponent(id)}/reply`, { method: 'POST', requiresAuth: true });
 }
 
-export function getStoryViewers(id: string, cursor?: string): Promise<{ viewCount: number; likeCount: number; viewers: StoryViewer[]; next: string | null }> {
+export function getStoryViewers(id: string, cursor?: string): Promise<{ viewCount: number; playCount?: number; likeCount: number; viewers: StoryViewer[]; next: string | null }> {
   return apiCall(`/api/stories/${encodeURIComponent(id)}/viewers`, { params: { cursor }, requiresAuth: true });
 }
 
