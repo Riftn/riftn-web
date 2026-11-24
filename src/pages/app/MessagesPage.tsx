@@ -363,6 +363,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const [newChatKind, setNewChatKind] = useState<NewChatKind | null>(null);
   const { data: myMemberships } = useUserCommunities();
   
+  const isPageActive = useContext(CachedPageActiveContext);
   const [searchQuery, setSearchQuery] = useSurfaceDraft("pages/app/MessagesPage.tsx:searchQuery", '');
   const phonePill = usePhonePill();
   // Both search-backed queries key on the query string — passing the raw
@@ -380,13 +381,14 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // Subscribe to DM realtime updates only when on messages page
   useDMRealtime();
 
+  // A retained search draft should not keep fetching after leaving Messages.
   const{
     conversations,
     isLoading,
     isError,
     refetch,
     isRefetching,
-  } = useConversations(debouncedSearchQuery);
+  } = useConversations(debouncedSearchQuery, isPageActive || !debouncedSearchQuery);
 
   // Phones: pull the chat list down from its top to refresh it.
   const chatListRef = useRef<HTMLDivElement>(null);
@@ -457,7 +459,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
       });
     }, 60);
   }, [conversations]);
-  const { data: userSearchResults, isLoading: isSearchingUsers } = useUserSearchForDM(debouncedSearchQuery);
+  const { data: userSearchResults, isLoading: isSearchingUsers } = useUserSearchForDM(debouncedSearchQuery, isPageActive);
 
   /*
    * Until now deleting a thread meant opening it first and going through its
@@ -1000,7 +1002,6 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // app layout, so each copy only polls and pushes history while it is shown.
   const routeBase = fullscreen ? '/chat' : '/app/messages';
   const isMessagesRouteActive = location.pathname === routeBase;
-  const isPageActive = useContext(CachedPageActiveContext);
   const publicUnread = usePublicChatUnreadCount();
   usePublicChatReading(isMessagesRouteActive && showPublicChat);
   // An open chat's reactions are seen: clear them, including ones that land
