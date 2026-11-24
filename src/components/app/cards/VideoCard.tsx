@@ -24,7 +24,7 @@ import { isVideoInPictureInPicture } from '@/lib/picture-in-picture';
  */
 
 import { audioStudioPlaceholderHeight } from '@/components/app/audio/audio-studio-shape';
-import { useState, useRef, useCallback, memo, useEffect, useId, lazy, Suspense, useContext, type ReactNode } from 'react';
+import { useState, useRef, useCallback, useMemo, memo, useEffect, useId, lazy, Suspense, useContext, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { CachedPageActiveContext } from '@/contexts/CachedPageActiveContext';
 const BountyClaimActions = lazy(() => import('./BountyClaimActions'));
@@ -1065,6 +1065,22 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
     sourceLang: videoSourceLang,
     isTooShort: nothingToTranslate,
   } = useTranslation(videoText, true, containerRef, true);
+  // Glass rails show the caption in the panel beside the video, so they need
+  // the same translated title and description as the caption under the card.
+  const [railTitle, railDescription] = useMemo(
+    () => (isVideoTranslated && videoTranslatedText
+      ? splitTranslatedTitleAndBody(videoTranslatedText, video.title, ownDescription)
+      : [video.title, ownDescription]),
+    [isVideoTranslated, videoTranslatedText, video.title, ownDescription],
+  );
+  const videoTranslateControl = nothingToTranslate ? undefined : {
+    isTranslated: isVideoTranslated,
+    isLoading: isTranslateLoading,
+    error: translateError,
+    onTranslate: handleVideoTranslate,
+    onShowOriginal: handleVideoShowOriginal,
+    sourceLang: videoSourceLang,
+  };
 
   // Repost handler
   const handleRepost = useCallback(async () => {
@@ -2536,6 +2552,17 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
             onLogin={openLoginModal}
             isOwnPost={isOwnPost}
             hideCaption={contentWarning.hidden}
+            title={railTitle}
+            body={railDescription ? (
+              <ExpandableDescription
+                description={railDescription}
+                isImmersive={false}
+                clampLines={4}
+                hideAssetCards={video.hideAssetCards}
+                hiddenLinkPreviews={video.hiddenLinkPreviews}
+              />
+            ) : null}
+            translate={videoTranslateControl}
             onOpenComments={() => {
               if (onOpenComments) { onOpenComments(); return; }
               setCommentsInitialTab(undefined);
@@ -3512,14 +3539,8 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
             isAd={video.isAd}
             isAudio={video.isAudio}
             isOwnPost={isOwnPost}
-            translateControl={nothingToTranslate ? undefined : {
-              isTranslated: isVideoTranslated,
-              isLoading: isTranslateLoading,
-              error: translateError,
-              onTranslate: handleVideoTranslate,
-              onShowOriginal: handleVideoShowOriginal,
-              sourceLang: videoSourceLang,
-            }}
+            // With Glass rails the Translate button sits in the panel, under the caption it translates.
+            translateControl={wideRails ? undefined : videoTranslateControl}
             watched={isWatchedVideo && !video.isW2E}
           />
         </div>
