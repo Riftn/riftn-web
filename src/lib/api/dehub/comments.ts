@@ -57,6 +57,14 @@ export interface ApiCommentResponse {
    */
   creatorReplied?: boolean;
   /**
+   * A top-level comment written by somebody the post tags, or one they replied
+   * in. The API puts these first, under the creator's own thread, whatever
+   * the sort. Absent otherwise.
+   */
+  taggedReplied?: boolean;
+  /** Written by somebody the post tags (an @mention or a photo tag). */
+  byTagged?: boolean;
+  /**
    * When a paid Comment Anchor on this comment runs out, ISO. Absent on every
    * comment that has never been anchored, which is nearly all of them.
    */

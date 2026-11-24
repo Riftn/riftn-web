@@ -158,4 +158,10 @@ describe('collapsed thread preview', () => {
     const replies = [reply('2', OTHER, '1'), reply('3', OTHER, '1'), reply('4', AUTHOR, '3')];
     expect(previewReplies(replies, AUTHOR, 1).map(r => r.comment.id)).toEqual(['3', '4']);
   });
+
+  it("shows a tagged person's answer when the creator has not answered", () => {
+    const tagged = { comment: { id: '3', address: '0xassistant', replyToId: '1', byTagged: true }, depth: 1 };
+    const replies = [reply('2', OTHER, '1'), tagged];
+    expect(previewReplies(replies, AUTHOR, 1).map(r => r.comment.id)).toEqual(['3']);
+  });
 });
