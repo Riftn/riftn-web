@@ -2988,6 +2988,32 @@ export const blogPostsMetadata: BlogPost[] = [
 // arrays at runtime in blogUtils.ts — metadata-only logic, no third copy here.
 export const newPostsMetadata: BlogPost[] = [
   {
+    "id": "is-riftn-legit",
+    "slug": "is-riftn-legit",
+    "title": "Is Riftn Legit? Company, Audits, Token and Track Record Since 2021",
+    "excerpt": "Is Riftn safe and legit? Here is what you can check yourself: who runs it, its open source code, its audit, its press coverage, the honest state of its token, and the scams that use its name.",
+    "content": "",
+    "bannerImage": "/media/is-riftn-legit-banner-r2.jpg",
+    "bannerImageAlt": "Is Riftn legit? The company, audit, token and track record since 2021",
+    "author": {
+      "name": "Mal Jan"
+    },
+    "publishedAt": "2026-11-24T20:00:00.000Z",
+    "updatedAt": "2026-11-24T20:00:00.000Z",
+    "tags": [
+      "Riftn",
+      "Is It Legit",
+      "Safety",
+      "Crypto Scams",
+      "DeHub"
+    ],
+    "readingTime": 5,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "Is Riftn Legit? Team, Audit, Token and Track Record (2026)",
+    "seoDescription": "Is Riftn safe and legit? Who runs it, its open source code, CertiK audit, press coverage, the honest state of the $RIFT token and the scams that use its name."
+  },
+  {
     "id": "claude-of-duty-how-to-play",
     "slug": "claude-of-duty-how-to-play",
     "title": "Claude of Duty: How to Play the Browser Shooter (Controls, Tips, FAQ)",
@@ -3966,30 +3992,30 @@ export const newPostsMetadata: BlogPost[] = [
 
 // getLatestPost() result — docs home hero.
 export const latestPostMetadata: BlogPost | undefined = {
-  "id": "claude-of-duty-how-to-play",
-  "slug": "claude-of-duty-how-to-play",
-  "title": "Claude of Duty: How to Play the Browser Shooter (Controls, Tips, FAQ)",
-  "excerpt": "Claude of Duty is a free first-person shooter that runs in your browser and builds every model, texture and sound on your own machine. Here are the controls, the settings that matter and how to get it running smoothly.",
+  "id": "is-riftn-legit",
+  "slug": "is-riftn-legit",
+  "title": "Is Riftn Legit? Company, Audits, Token and Track Record Since 2021",
+  "excerpt": "Is Riftn safe and legit? Here is what you can check yourself: who runs it, its open source code, its audit, its press coverage, the honest state of its token, and the scams that use its name.",
   "content": "",
-  "bannerImage": "/media/claude-of-duty-how-to-play-banner-r2.jpg",
-  "bannerImageAlt": "Claude of Duty: how to play the free browser shooter, with controls and tips",
+  "bannerImage": "/media/is-riftn-legit-banner-r2.jpg",
+  "bannerImageAlt": "Is Riftn legit? The company, audit, token and track record since 2021",
   "author": {
     "name": "Mal Jan"
   },
-  "publishedAt": "2026-11-24T19:00:00.000Z",
-  "updatedAt": "2026-11-24T19:00:00.000Z",
+  "publishedAt": "2026-11-24T20:00:00.000Z",
+  "updatedAt": "2026-11-24T20:00:00.000Z",
   "tags": [
-    "Claude of Duty",
-    "Browser Games",
-    "FPS",
-    "Riftn Arcade",
-    "Free Games"
+    "Riftn",
+    "Is It Legit",
+    "Safety",
+    "Crypto Scams",
+    "DeHub"
   ],
-  "readingTime": 4,
+  "readingTime": 5,
   "featured": false,
   "status": "published",
-  "seoTitle": "Claude of Duty: How to Play, Controls and Tips (Free Browser FPS)",
-  "seoDescription": "How to play Claude of Duty, the free browser shooter: every control, the settings that matter, tips to win fights and why the first load takes a minute."
+  "seoTitle": "Is Riftn Legit? Team, Audit, Token and Track Record (2026)",
+  "seoDescription": "Is Riftn safe and legit? Who runs it, its open source code, CertiK audit, press coverage, the honest state of the $RIFT token and the scams that use its name."
 };
 
 export const excludedTitles: string[] = [
