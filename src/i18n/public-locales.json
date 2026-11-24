@@ -1,5 +1,5 @@
 {
-  "version": "ad304ff46a4db84e",
+  "version": "94a97d576947b87f",
   "routes": {
     "/": [
       "ar",
@@ -1115,6 +1115,13 @@
       "tr"
     ],
     "/guides/interactive-streaming-on-chain-live-streams-with-animated-tip": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/guides/is-riftn-legit": [
       "ar",
       "es",
       "fr",
