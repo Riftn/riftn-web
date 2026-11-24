@@ -2988,6 +2988,34 @@ export const blogPostsMetadata: BlogPost[] = [
 // arrays at runtime in blogUtils.ts — metadata-only logic, no third copy here.
 export const newPostsMetadata: BlogPost[] = [
   {
+    "id": "creator-payout-thresholds-compared-2026",
+    "slug": "creator-payout-thresholds-compared-2026",
+    "title": "Creator Payout Thresholds and Schedules Compared (2026)",
+    "excerpt": "How many followers you need, the smallest balance you can cash out, and the day the money arrives, for YouTube, TikTok, Twitch, Kick, X, Instagram, Facebook, Snapchat and Riftn.",
+    "content": "",
+    "bannerImage": "/media/creator-payout-thresholds-compared-banner-r2.jpg",
+    "bannerImageAlt": "Who pays first: creator payout thresholds and schedules compared for 2026",
+    "author": {
+      "name": "Malik Jan"
+    },
+    "publishedAt": "2026-11-24T14:00:00.000Z",
+    "updatedAt": "2026-11-24T14:00:00.000Z",
+    "tags": [
+      "Creator Economy",
+      "Monetization",
+      "YouTube",
+      "TikTok",
+      "Twitch",
+      "Kick",
+      "Riftn"
+    ],
+    "readingTime": 7,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "Creator Payout Thresholds Compared (2026): Minimums and Pay Dates",
+    "seoDescription": "Minimum payouts, pay dates and eligibility for YouTube, TikTok, Twitch, Kick, X, Instagram, Facebook, Snapchat and Riftn in 2026, in one table."
+  },
+  {
     "id": "how-to-stream-on-riftn",
     "slug": "how-to-stream-on-riftn",
     "title": "How to Stream on Riftn: Every Way to Go Live, Step by Step",
@@ -3807,30 +3835,32 @@ export const newPostsMetadata: BlogPost[] = [
 
 // getLatestPost() result — docs home hero.
 export const latestPostMetadata: BlogPost | undefined = {
-  "id": "how-to-stream-on-riftn",
-  "slug": "how-to-stream-on-riftn",
-  "title": "How to Stream on Riftn: Every Way to Go Live, Step by Step",
-  "excerpt": "Go live from your browser, your phone, the Riftn app, OBS or a capture card. Host audio Stages, bring guests on screen, call your group and multistream to Twitch and YouTube. Then set up alerts, a chat bot, channel points and more in Live Studio. Here is every step.",
+  "id": "creator-payout-thresholds-compared-2026",
+  "slug": "creator-payout-thresholds-compared-2026",
+  "title": "Creator Payout Thresholds and Schedules Compared (2026)",
+  "excerpt": "How many followers you need, the smallest balance you can cash out, and the day the money arrives, for YouTube, TikTok, Twitch, Kick, X, Instagram, Facebook, Snapchat and Riftn.",
   "content": "",
-  "bannerImage": "/media/how-to-stream-on-riftn-banner.jpg",
-  "bannerImageAlt": "How to stream on Riftn: every way to go live, step by step",
+  "bannerImage": "/media/creator-payout-thresholds-compared-banner-r2.jpg",
+  "bannerImageAlt": "Who pays first: creator payout thresholds and schedules compared for 2026",
   "author": {
     "name": "Malik Jan"
   },
-  "publishedAt": "2026-11-22T18:00:00.000Z",
-  "updatedAt": "2026-11-22T18:00:00.000Z",
+  "publishedAt": "2026-11-24T14:00:00.000Z",
+  "updatedAt": "2026-11-24T14:00:00.000Z",
   "tags": [
-    "Live Streaming",
-    "How To",
-    "OBS",
-    "Creators",
+    "Creator Economy",
+    "Monetization",
+    "YouTube",
+    "TikTok",
+    "Twitch",
+    "Kick",
     "Riftn"
   ],
-  "readingTime": 11,
+  "readingTime": 7,
   "featured": false,
   "status": "published",
-  "seoTitle": "How to Stream on Riftn (2026): Every Way to Go Live",
-  "seoDescription": "Step-by-step guide to live streaming on Riftn: go live from your browser, phone, the app, OBS or a capture card, host audio Stages, add guests, multistream to Twitch and YouTube, and set up alerts, a chat bot and channel points."
+  "seoTitle": "Creator Payout Thresholds Compared (2026): Minimums and Pay Dates",
+  "seoDescription": "Minimum payouts, pay dates and eligibility for YouTube, TikTok, Twitch, Kick, X, Instagram, Facebook, Snapchat and Riftn in 2026, in one table."
 };
 
 export const excludedTitles: string[] = [

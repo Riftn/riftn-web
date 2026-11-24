@@ -7193,6 +7193,16 @@ async function handleRequest(request, env, ctx) {
     return env.ASSETS.fetch(new Request(new URL('/creator-mesh-preview', url), request));
   }
 
+  // Binary Metal's renderer: the app draws riffs in a hidden WebView on this
+  // page. Same story as above, the .html path 307s to a bare path that is not
+  // an app route, so both spellings get the file straight from assets.
+  if (pathname === '/binary-metal/render.html' || pathname === '/binary-metal/render') {
+    const resp = await env.ASSETS.fetch(new Request(new URL('/binary-metal/render', url), request));
+    const out = new Response(resp.body, resp);
+    out.headers.set('X-Robots-Tag', 'noindex, nofollow');
+    return out;
+  }
+
   if (pathname === '/gods-eye-game/index.html' || pathname === '/gods-eye-game/') {
     const resp = await guardNext();
     const out = new Response(resp.body, resp);

@@ -77,6 +77,10 @@ export interface Comment {
   threadPos?: number;
   /** The post's creator has replied somewhere in this comment's thread. */
   creatorReplied?: boolean;
+  /** Somebody the post tags wrote this comment or replied in its thread; it leads the list. */
+  taggedReplied?: boolean;
+  /** Written by somebody the post tags. */
+  byTagged?: boolean;
   /**
    * When this comment's paid Comment Anchor expires, or undefined.
    *
@@ -184,6 +188,8 @@ export function mapApiComment(apiComment: ApiCommentResponse): Comment {
     hiddenByCreator: apiComment.hiddenByCreator === true,
     threadPos: typeof apiComment.threadPos === 'number' ? apiComment.threadPos : undefined,
     creatorReplied: apiComment.creatorReplied === true,
+    taggedReplied: apiComment.taggedReplied === true,
+    byTagged: apiComment.byTagged === true,
     anchoredUntil: apiComment.anchoredUntil ? new Date(apiComment.anchoredUntil) : undefined,
     tip: apiComment.tip && Number(apiComment.tip.amount) > 0 ? apiComment.tip : undefined,
   };

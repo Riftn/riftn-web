@@ -106,7 +106,7 @@ export function recordCreatorLifts(
 }
 
 interface PreviewReply {
-  comment: { id: string; address?: string; replyToId?: string };
+  comment: { id: string; address?: string; replyToId?: string; byTagged?: boolean };
 }
 
 /**
@@ -116,7 +116,9 @@ interface PreviewReply {
  * thread, their first answer instead, with the replies it hangs from so it
  * never reads as addressed to nobody. That answer is why the thread sits at
  * the top: showing somebody else's reply in its place left a lifted thread
- * with no visible reason for being there.
+ * with no visible reason for being there. Without a creator answer, the first
+ * answer from somebody the post tags (`byTagged`) is shown the same way, for
+ * the same reason.
  */
 export function previewReplies<R extends PreviewReply>(
   replies: R[],
@@ -124,9 +126,9 @@ export function previewReplies<R extends PreviewReply>(
   count: number,
 ): R[] {
   const creator = creatorAddress?.toLowerCase();
-  const answer = creator
-    ? replies.find(({ comment }) => comment.address?.toLowerCase() === creator)
-    : undefined;
+  const answer =
+    (creator ? replies.find(({ comment }) => comment.address?.toLowerCase() === creator) : undefined) ??
+    replies.find(({ comment }) => comment.byTagged);
   if (!answer) return replies.slice(0, count);
 
   const byId = new Map(replies.map(reply => [reply.comment.id, reply]));

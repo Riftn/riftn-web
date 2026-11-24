@@ -2189,6 +2189,12 @@ function CommentsSectionForAccount({ tokenId, onClose, initialTab, embedded = fa
       const bAuthor = isAuthorThreadRoot(b.comment, author);
       if (aAuthor !== bAuthor) return aAuthor ? -1 : 1;
       if (aAuthor) return compareThreadParts(a.comment, b.comment);
+      // Then what the people the post tags wrote (an @assistant answer, a
+      // tagged friend's reply), whichever way the reader sorted. The API sorts
+      // the same way; the flag keeps it through this client-side re-sort.
+      const aTagged = !!a.comment.taggedReplied;
+      const bTagged = !!b.comment.taggedReplied;
+      if (aTagged !== bTagged) return aTagged ? -1 : 1;
       return rest(a, b);
     });
 
