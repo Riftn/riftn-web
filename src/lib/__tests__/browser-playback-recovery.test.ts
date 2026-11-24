@@ -28,6 +28,19 @@ describe('browser media recovery', () => {
     expect(video.pause).toHaveBeenCalledTimes(1);
     detach();
   });
+  it('rejects a play request that the current surface cannot start', async () => {
+    const { video, allowed, changed, detach } = setup();
+    allowed.mockReturnValue(false);
+    await expect(requestVideoPlayback(video)).rejects.toMatchObject({ name: 'AbortError' });
+    expect(video.play).not.toHaveBeenCalled();
+    expect(changed).not.toHaveBeenCalled();
+
+    allowed.mockReturnValue(true);
+    await requestVideoPlayback(video);
+    expect(video.play).toHaveBeenCalledTimes(1);
+    detach();
+  });
+
   it('cancels a stuck play when its owner leaves', async () => {
     const { video, allowed, detach } = setup();
     await requestVideoPlayback(video);

@@ -112,13 +112,14 @@ export function createPlaybackRecovery(options: Options) {
   };
   return {
     start() {
-      if (!options.allowed()) return;
+      if (!options.allowed()) return false;
       const fresh = !wanted;
       const reload = phase === 'failed';
       watch();
       // Readiness may repeat the original play intent, but must not start a
       // second replacement or reset the retry budget.
       if (fresh || !replacing) attempt(reload);
+      return true;
     },
     watch,
     stop,
