@@ -113,6 +113,8 @@ export interface PostFormState {
   /** Who may see the post. Fixed once it is posted. */
   visibility: import('@/lib/api/dehub/types').PostVisibility;
   isEnhancing: boolean;
+  /** Set while the draft is a translation from the AI menu, so it can be undone. */
+  translatedDraft: { original: string; translated: string; from: string | null } | null;
   isPosting: boolean;
   uploadProgress: number; // 0–100 stage-based progress
   /** The mint is waiting on a wallet that has not answered yet. */
@@ -182,6 +184,9 @@ export interface PostFormActions {
   /** Adds comic pages, shrinking big art first. */
   addComicPages: (files: File[]) => Promise<void>;
   handleEnhanceWithAI: (mode?: 'spellcheck' | 'grammar' | 'style', style?: string) => Promise<void>;
+  /** AI menu > Translate: turn the draft into another language. */
+  handleTranslateDraft: (lang: string) => Promise<void>;
+  undoTranslateDraft: () => void;
   insertFormatting: (format: 'bold' | 'italic' | 'mention') => void;
   handlePost: (extra?: { soundtrackTag?: string; articleBody?: string; articleImage?: File; socialImage?: File }) => void;
   /** Give up on the wallet and publish the post off-chain. */

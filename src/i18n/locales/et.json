@@ -13182,6 +13182,10 @@
     "reminderLater": "Ei praegu"
   },
   "copy": {
+    "1944d5ab19cd": "Tõlgi keelde",
+    "98cdcf4f2415": "Otsi keeli",
+    "48bec8529d3f": "Tõlgitud {{language}}",
+    "d80d30a1c7fd": "Juba kohal {{language}}",
     "55656b5e434f": "Sulge otsing",
     "57e2faa5ec63": "Otsi Riftnist",
     "96d7bff86b44": "Otsingut ei saanud laadida",

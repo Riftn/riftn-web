@@ -14039,6 +14039,10 @@
     "reminderLater": "Pas maintenant"
   },
   "copy": {
+    "1944d5ab19cd": "Traduire en",
+    "98cdcf4f2415": "Rechercher des langues",
+    "48bec8529d3f": "Traduit de {{language}}",
+    "d80d30a1c7fd": "Déjà dans {{language}}",
     "799c26913574": "Commandes",
     "ff73efa451e4": "Déplacez-vous avec W, A, S, D ou les flèches. Visez et tirez à la souris.",
     "c718a21950e6": "Espace pour sauter, Maj pour sprinter, C pour s'accroupir et Z pour se coucher.",
