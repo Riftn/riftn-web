@@ -140,7 +140,7 @@ const BlogPost = () => {
           description: post.seoDescription || post.excerpt,
           image: shareImage,
           datePublished: post.publishedAt,
-          author: { '@type': 'Person', name: post.author.name },
+          author: { '@type': 'Person', name: post.author.name, url: 'https://riftn.com/docs/team' },
           publisher: { '@type': 'Organization', name: 'Riftn', url: 'https://riftn.com' },
           mainEntityOfPage: { '@type': 'WebPage', '@id': shareUrl },
         }}

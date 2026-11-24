@@ -382,7 +382,7 @@
     "faqTitle": "Foire aux questions",
     "googlePlay": "Disponible sur Google Play",
     "heading": "L'application Riftn",
-    "intro1": "Riftn est un réseau social décentralisé et une application mobile, en développement depuis 2021, où les publications peuvent être mintées on-chain et où les créateurs gardent leur audience, leur contenu et leurs revenus.",
+    "intro1": "Riftn est un protocole de réseau social décentralisé avec des applications web et mobiles, en développement depuis 2021, où les publications peuvent être mintées on-chain et où les créateurs gardent leur audience, leur contenu et leurs revenus.",
     "intro2": "Il réunit un fil chronologique, la diffusion en direct, une messagerie chiffrée de bout en bout, des communautés gérées par les utilisateurs, un portefeuille multichaîne et des récompenses en jetons pour le visionnage. Le même compte fonctionne sur Android, sur iPhone et dans n'importe quel navigateur moderne.",
     "iphone": "iPhone",
     "learnMore": "Vous voulez une vue d’ensemble ? <guide>Qu’est-ce que Riftn ?</guide> présente la plateforme en détail.",
@@ -14006,6 +14006,12 @@
     "reminderLater": "Pas maintenant"
   },
   "copy": {
+    "799c26913574": "Commandes",
+    "ff73efa451e4": "Déplacez-vous avec W, A, S, D ou les flèches. Visez et tirez à la souris.",
+    "c718a21950e6": "Espace pour sauter, Maj pour sprinter, C pour s'accroupir et Z pour se coucher.",
+    "7d1b81c85706": "R recharge, G lance une grenade, V frappe au corps à corps, et Q et E font pencher.",
+    "34669ebeeac1": "1, 2 ou Tab changent d'arme. T allume la lampe. Échap met en pause.",
+    "febe50b0a46e": "Sur téléphone, déplacez-vous avec le stick à l'écran et faites glisser pour regarder autour de vous.",
     "3f9b2c71d0a4": "{{n}} résultats",
     "8c4e1a6b2f57": "pour « {{query}} »",
     "1d7234ff1b79": "dans {{feed}}",

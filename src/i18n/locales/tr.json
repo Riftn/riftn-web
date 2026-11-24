@@ -382,7 +382,7 @@
     "faqTitle": "Sıkça sorulan sorular",
     "googlePlay": "Google Play'den edinin",
     "heading": "Riftn Uygulaması",
-    "intro1": "Riftn, 2021'den beri geliştirilmekte olan, gönderilerin zincir üzerinde basılabildiği ve içerik üreticilerinin kitlelerini, içeriklerini ve gelirlerini elinde tuttuğu merkeziyetsiz bir sosyal ağ ve mobil uygulamadır.",
+    "intro1": "Riftn, 2021'den beri geliştirilmekte olan, gönderilerin zincir üzerinde basılabildiği ve içerik üreticilerinin kitlelerini, içeriklerini ve gelirlerini elinde tuttuğu, web ve mobil uygulamaları olan merkeziyetsiz bir sosyal medya protokolüdür.",
     "intro2": "Kronolojik akışı, canlı yayını, uçtan uca şifreli mesajlaşmayı, kullanıcıların yönettiği toplulukları, çok zincirli bir cüzdanı ve token olarak ödenen izle-kazan ödüllerini bir araya getirir. Aynı hesap Android'de, iPhone'da ve herhangi bir modern tarayıcıda çalışır.",
     "iphone": "iPhone",
     "learnMore": "Tüm resmi görmek ister misin? <guide>Riftn nedir?</guide> platformu ayrıntılı olarak anlatıyor.",
@@ -14002,6 +14002,12 @@
     "reminderLater": "Şimdi değil"
   },
   "copy": {
+    "799c26913574": "Kontroller",
+    "ff73efa451e4": "W, A, S, D veya ok tuşlarıyla hareket et. Fareyle bak ve ateş et.",
+    "c718a21950e6": "Boşluk zıplar, Shift koşar, C çömelir ve Z yere yatar.",
+    "7d1b81c85706": "R şarjör değiştirir, G el bombası atar, V yakın dövüştür, Q ve E ile yana eğilirsin.",
+    "34669ebeeac1": "1, 2 veya Tab silah değiştirir. T el feneridir. Escape oyunu duraklatır.",
+    "febe50b0a46e": "Telefonda ekrandaki çubukla hareket et ve etrafa bakmak için ekranı sürükle.",
     "3f9b2c71d0a4": "{{n}} sonuç",
     "8c4e1a6b2f57": "“{{query}}” için",
     "1d7234ff1b79": "{{feed}} içinde",

@@ -382,7 +382,7 @@
     "faqTitle": "Preguntas frecuentes",
     "googlePlay": "Disponible en Google Play",
     "heading": "La aplicación Riftn",
-    "intro1": "Riftn es una red social descentralizada y una aplicación móvil, en desarrollo desde 2021, donde las publicaciones se pueden acuñar en cadena y los creadores conservan su audiencia, su contenido y sus ingresos.",
+    "intro1": "Riftn es un protocolo descentralizado de redes sociales con aplicaciones web y móviles, en desarrollo desde 2021, donde las publicaciones se pueden acuñar en cadena y los creadores conservan su audiencia, su contenido y sus ingresos.",
     "intro2": "Combina un feed cronológico, transmisiones en vivo, mensajería cifrada de extremo a extremo, comunidades gestionadas por los usuarios, una billetera multicadena y recompensas en tokens por ver contenido. La misma cuenta funciona en Android, iPhone y en cualquier navegador moderno.",
     "iphone": "iPhone",
     "learnMore": "¿Quieres el panorama completo? <guide>¿Qué es Riftn?</guide> explica la plataforma en profundidad.",
@@ -14002,6 +14002,12 @@
     "reminderLater": "Ahora no"
   },
   "copy": {
+    "799c26913574": "Controles",
+    "ff73efa451e4": "Muévete con W, A, S, D o las flechas. Mira y dispara con el ratón.",
+    "c718a21950e6": "Espacio salta, Shift esprinta, C te agacha y Z te tumba.",
+    "7d1b81c85706": "R recarga, G lanza una granada, V es el ataque cuerpo a cuerpo, y Q y E te inclinan.",
+    "34669ebeeac1": "1, 2 o Tab cambian de arma. T es la linterna. Escape pausa.",
+    "febe50b0a46e": "En el móvil, muévete con el stick en pantalla y arrastra para mirar alrededor.",
     "3f9b2c71d0a4": "{{n}} resultados",
     "8c4e1a6b2f57": "para “{{query}}”",
     "1d7234ff1b79": "en {{feed}}",
