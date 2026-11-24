@@ -377,7 +377,8 @@ export function RecentTransactions() {
         <div className={cn("space-y-0", dividerClass)}>
           {recent.map((tx) => {
             const dateStr = format(new Date(tx.createdAt), 'dd MMM');
-            const explorerUrl = tx.txHash
+            // In-app DHB moves (app: receipts) never touched a chain, so they have no explorer page.
+            const explorerUrl = tx.txHash && !String(tx.txHash).startsWith('app:')
               ? (tx.chainId === 56 ? `https://bscscan.com/tx/${tx.txHash}` : `https://basescan.org/tx/${tx.txHash}`)
               : null;
             return (

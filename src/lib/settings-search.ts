@@ -49,6 +49,7 @@ export const SETTINGS_SEARCH_INDEX: SettingsSearchEntry[] = [
   { tab: 'profile', anchor: 'display-name', label: 'Display Name', labelKey: 'settings.displayName', keywords: 'nickname rename' },
   { tab: 'profile', anchor: 'username', label: 'Username', labelKey: 'settings.username', keywords: 'handle rename @' },
   { tab: 'profile', anchor: 'bio', label: 'Bio', labelKey: 'settings.bio', keywords: 'about description' },
+  { tab: 'profile', anchor: 'profile-song', label: 'Profile song', labelKey: 'profileSong.title', keywords: 'music song audio track tune anthem play on my profile myspace autoplay' },
   { tab: 'profile', anchor: 'badge-museum', label: 'Badge Museum', labelKey: 'badgeMuseum.title', keywords: 'badges milestones museum medals trophies achievements show on my profile hide view my badges progress' },
   { tab: 'profile', anchor: 'social-links', label: 'Social Links', labelKey: 'settings.socialLinks', keywords: 'twitter x instagram tiktok youtube discord telegram facebook github verified followers follower count total reach audience' },
   { tab: 'profile', anchor: 'profile-fields', label: 'Profile fields', labelKey: 'profileFields.title', keywords: 'website pronouns links verify rel me metadata fields' },

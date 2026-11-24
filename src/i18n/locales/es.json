@@ -1791,6 +1791,8 @@
     "remove": "Eliminar"
   },
   "tip": {
+    "appSent": "¡Propina de {{amount}} DHB enviada!",
+    "appFailed": "Tu propina no se envió. Inténtalo de nuevo.",
     "title": "Enviar propina",
     "toCreator": "Dar propina a {{name}}",
     "quickAmounts": "Cantidades rápidas",
@@ -23625,5 +23627,21 @@
   },
   "profileImage": {
     "view": "Ver foto"
+  },
+  "profileSong": {
+    "title": "Canción del perfil",
+    "hint": "Una canción debajo de tu biografía. La gente la toca para escucharla.",
+    "part": "Suena {{part}}",
+    "change": "Cambiar canción",
+    "remove": "Quitar",
+    "removed": "Canción del perfil quitada",
+    "saved": "Canción del perfil guardada",
+    "saveFailed": "No se pudo guardar la canción del perfil. Inténtalo de nuevo.",
+    "autoplay": "Reproducir cuando visiten mi perfil",
+    "autoplayHint": "Empieza suave cuando alguien abre tu perfil. Pueden pararla con un toque.",
+    "add": "Añadir una canción",
+    "cantUse": "Esa canción no se puede usar en un perfil. Prueba otra.",
+    "play": "Reproducir {{title}}",
+    "pause": "Pausar {{title}}"
   }
 }

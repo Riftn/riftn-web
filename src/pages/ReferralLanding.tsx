@@ -15,6 +15,7 @@ import { isValidAffiliateCode, setAffiliateRef, recordAffiliateClick, recordAffi
 import { resolveDeepLinkTarget } from "@/lib/affiliateDeepLink";
 import { getAffiliateShareImageUrl } from "@/lib/affiliateShareImage";
 import { DEFAULT_AFFILIATE_LANDING, ownLandingCtaLabel, ownLandingHeadline, ownLandingMessage, parseLandingCtas, withAffiliateRef, type AffiliateLandingCustomization } from "@/lib/affiliate";
+import { API_ORIGIN } from '@/lib/api/api-origin';
 
 
 const SITE = typeof window !== "undefined" ? window.location.origin : "https://riftn.com";
@@ -84,7 +85,7 @@ export default function ReferralLanding() {
       let resolved: string | null = null;
       if (data?.owner_address) {
         try {
-          const r = await fetch(`https://api.dehub.io/api/account_info/${data.owner_address}`);
+          const r = await fetch(`${API_ORIGIN}/api/account_info/${data.owner_address}`);
           if (r.ok) {
             const j = await r.json();
             const u = j?.result || j;

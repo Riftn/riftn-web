@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { getAuthToken } from '@/lib/api/dehub';
+import { API_ORIGIN } from '@/lib/api/api-origin';
 
-const DEHUB_API_BASE = 'https://api.dehub.io';
+const DEHUB_API_BASE = API_ORIGIN;
 
 export type MilestoneKind = 'views' | 'videos' | 'followers' | 'likes' | 'lives' | 'liveHours';
 

@@ -45,9 +45,10 @@ import { cryptoPurchaseApi } from '@/lib/api/crypto-purchase';
 import type { Purchase } from '@/lib/crypto-purchase';
 import { FundingError } from '@/lib/tip-funding-error';
 import type { ChainId } from '@/components/app/ChainSelector';
+import { API_ORIGIN } from '@/lib/api/api-origin';
 
 const DLN_API = 'https://dln.debridge.finance/v1.0';
-const DPAY_API = 'https://api.dehub.io/api/dpay';
+const DPAY_API = `${API_ORIGIN}/api/dpay`;
 const USDC_BASE = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
 const DHB_BASE = CHAIN_CONFIGS[BASE_CHAIN_ID].dhbToken;
 const ZERO = '0x0000000000000000000000000000000000000000';

@@ -1,0 +1,79 @@
+/* Profile song row (ProfileSong.tsx): a glass row under the bio. */
+[data-profile-song] {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 420px;
+  margin-top: 12px;
+  padding: 8px;
+  border-radius: 14px;
+  overflow: hidden;
+  text-align: left;
+  background: var(--kit-chip-bg);
+  box-shadow: inset 0 0 0 1px var(--kit-hairline);
+  transition: transform 160ms ease;
+}
+[data-profile-song]:active { transform: scale(0.985); }
+[data-profile-song] .ps-art {
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border-radius: 9px;
+  object-fit: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--kit-square-bg);
+}
+[data-profile-song] .ps-btn {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--kit-square-bg);
+  transition: background 200ms ease, color 200ms ease;
+}
+[data-profile-song][data-playing='true'] .ps-btn {
+  background: var(--kit-chip-active-bg);
+  color: var(--kit-chip-active-ink);
+}
+[data-profile-song] .ps-bar {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 100%;
+  transform-origin: 0 50%;
+  background: var(--kit-chip-active-bg);
+  transition: opacity 200ms ease;
+}
+[data-profile-song] .ps-eq {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+  flex: none;
+}
+[data-profile-song] .ps-eq i {
+  width: 3px;
+  height: 100%;
+  border-radius: 2px;
+  background: currentColor;
+  transform-origin: 50% 100%;
+  animation: ps-eq 900ms ease-in-out infinite;
+}
+[data-profile-song] .ps-eq i:nth-child(2) { animation-delay: -300ms; animation-duration: 760ms; }
+[data-profile-song] .ps-eq i:nth-child(3) { animation-delay: -520ms; animation-duration: 1040ms; }
+[data-profile-song] .ps-eq i:nth-child(4) { animation-delay: -140ms; animation-duration: 820ms; }
+@keyframes ps-eq {
+  0%, 100% { transform: scaleY(0.25); }
+  50% { transform: scaleY(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-profile-song] .ps-eq i { animation: none; transform: scaleY(0.6); }
+}
