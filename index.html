@@ -441,7 +441,12 @@
             var plate = document.createElement("link");
             plate.rel = "preload";
             plate.as = "image";
-            plate.href = "/brand-kit/bg/bg-16.jpg";
+            // Phones (< 640 px, see .dehub-intro-silk in index.css) draw a
+            // portrait crop: it is the card's LCP there, so fetch it first.
+            plate.href = window.matchMedia("(max-width: 639px)").matches
+              ? "/brand-kit/bg/bg-16-phone.jpg"
+              : "/brand-kit/bg/bg-16.jpg";
+            plate.setAttribute("fetchpriority", "high");
             document.head.appendChild(plate);
           }
 

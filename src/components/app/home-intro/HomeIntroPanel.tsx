@@ -212,7 +212,7 @@ export function HomeIntroPanel({
       {/* --- plate: silk texture, vignette, dot grid, marks, scrim, grain --- */}
       <div
         aria-hidden="true"
-        className="dehub-intro-plate pointer-events-none absolute inset-0 bg-cover bg-center opacity-90"
+        className={`dehub-intro-plate dehub-intro-silk${liveArt ? ' dehub-intro-silk-live' : ''} pointer-events-none absolute inset-0 bg-cover bg-center opacity-90`}
         style={{ backgroundImage: 'url(/brand-kit/bg/bg-16.jpg)' }}
       />
       <div aria-hidden="true" className="dehub-intro-plate pointer-events-none absolute inset-0" style={{ background: VIGNETTE }} />
