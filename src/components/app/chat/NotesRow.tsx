@@ -6,11 +6,12 @@
  * button in a chat: write or change yours at the top, and below it see the
  * notes of people you follow (tap one to see it, hear the song, message them).
  */
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { ChevronDown, MapPin, Music2, Pause, Play, Plus, SendHorizontal, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { CachedPageActiveContext } from '@/contexts/CachedPageActiveContext';
 import { withWalletHeader } from '@/lib/supabase-wallet-client';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -31,23 +32,34 @@ import {
 type NotesData = { mine: NoteEntry | null; notes: NoteEntry[] };
 let notesData: NotesData | null = null;
 let notesFetchedAt = 0;
+let activeNotesReaders = 0;
+let notesRefreshTimer: ReturnType<typeof setInterval> | undefined;
 const listeners = new Set<() => void>();
 const emit = () => listeners.forEach(l => l());
 export function refreshNotes(): void {
   notesFetchedAt = Date.now();
   getNotes().then(d => { notesData = d; emit(); }).catch(() => {});
 }
-export function useNotes(): NotesData | null {
+export function useNotes({ enabled = true, refreshOnStart = false } = {}): NotesData | null {
+  const pageActive = useContext(CachedPageActiveContext);
   const data = useSyncExternalStore(
     useCallback((l: () => void) => { listeners.add(l); return () => { listeners.delete(l); }; }, []),
     () => notesData,
     () => null,
   );
   useEffect(() => {
-    if (Date.now() - notesFetchedAt > 60_000) refreshNotes();
-    const id = setInterval(refreshNotes, 5 * 60_000);
-    return () => clearInterval(id);
-  }, []);
+    if (!enabled || !pageActive) return;
+    if (refreshOnStart || Date.now() - notesFetchedAt > 60_000) refreshNotes();
+    activeNotesReaders += 1;
+    notesRefreshTimer ??= setInterval(refreshNotes, 5 * 60_000);
+    return () => {
+      activeNotesReaders -= 1;
+      if (activeNotesReaders === 0) {
+        clearInterval(notesRefreshTimer);
+        notesRefreshTimer = undefined;
+      }
+    };
+  }, [enabled, pageActive, refreshOnStart]);
   return data;
 }
 
@@ -646,11 +658,11 @@ export function GroupChatNotesRow({ groupId, me }: { groupId: string; me: string
 export function NotesSheetHost({ onMessage }: { onMessage: (author: StoryAuthor, reply?: string) => void }) {
   const { t } = useTranslation();
   const open = useSheetOpen();
-  const data = useNotes();
+  const data = useNotes({ enabled: open, refreshOnStart: true });
   const [viewing, setViewing] = useState<NoteEntry | null>(null);
   useEffect(() => { hosts += 1; emitSheet(); return () => { hosts -= 1; emitSheet(); }; }, []);
   useEffect(() => {
-    if (open) { refreshNotes(); if (pendingView) setViewing(pendingView); pendingView = null; }
+    if (open) { if (pendingView) setViewing(pendingView); pendingView = null; }
     else setViewing(null);
   }, [open]);
   const close = () => { sheetOpen = false; emitSheet(); };
