@@ -29,12 +29,11 @@ vi.mock('@/hooks/use-story-shelf', () => ({
   }] } }),
 }));
 
-it('uses the opening visible story poster and keeps live broadcasts when Stories are hidden', () => {
+it('shows the visible Moments as small covers when there is room, and keeps lives when Stories are hidden', () => {
   prefs.storiesEnabled = true;
   const view = render(<StoryShelf />);
-  expect(screen.getByRole('listitem', { name: 'River Song' }).querySelector('[data-st-bg]')).toHaveStyle({
-    backgroundImage: 'url("/opening.jpg")',
-  });
+  const covers = [...screen.getByRole('listitem', { name: 'River Song' }).querySelectorAll('[data-st-stack] img')].map(img => img.getAttribute('src'));
+  expect(covers).toEqual(['/seen.jpg', '/opening.jpg']);
   prefs.storiesEnabled = false;
   view.rerender(<StoryShelf />);
   expect(screen.queryByRole('listitem', { name: 'River Song' })).toBeNull();
@@ -56,12 +55,12 @@ it('labels moments and live hosts with their display name and visible badge', ()
   expect(screen.queryByAltText('Dolphin')).toBeNull();
 });
 
-it('provides the cover, avatar and badge slots across the carousel', () => {
+it('gives every pill a face, a name and a line', () => {
   prefs.storiesEnabled = true;
   const { container } = render(<StoryShelf />);
   for (const kind of ['live', 'person']) {
     const tile = container.querySelector(`[data-kind="${kind}"]`);
-    expect(tile?.querySelector('[data-st-bg]')).toBeTruthy();
+    expect(tile?.querySelector('[data-st-line]')).toBeTruthy();
     expect(tile?.querySelector('[data-st-avatar]')).toBeTruthy();
     expect(tile?.querySelector('[data-st-label]')).toBeTruthy();
   }
