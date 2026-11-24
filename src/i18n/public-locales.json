@@ -1,5 +1,5 @@
 {
-  "version": "923c3d9e8fab112a",
+  "version": "4076c402f13a6204",
   "routes": {
     "/": [
       "ar",
@@ -65,6 +65,13 @@
       "tr"
     ],
     "/arcade": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/arcade/chestard": [
       "ar",
       "es",
       "fr",

@@ -49,6 +49,14 @@ const FRIEND_GAMES = [
     blurb: 'Tap to mine, buy upgrades, send coins to friends. Just for fun, no value.',
   },
   {
+    href: '/arcade/chestard',
+    art: '/og/arcade-chestard.jpg',
+    titleKey: 'games.chestard.title',
+    title: 'Chestard',
+    blurbKey: 'games.chestard.cardBlurb',
+    blurb: 'Roll the die, drop the checker, clear the bottom row. Retro arcade with a top 10.',
+  },
+  {
     href: '/arcade/gratitude',
     art: '/og/arcade-gratitude.jpg',
     titleKey: 'games.gratitude.title',
