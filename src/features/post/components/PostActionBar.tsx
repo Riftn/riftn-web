@@ -573,7 +573,7 @@ export function PostActionBar({
                 <button
                   type="button"
                   onClick={() => handleSelectLiveMode('video')}
-                  className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-left hover:bg-white/10 transition-colors"
+                  className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-left bg-transparent motion-safe:transition-transform [@media(hover:hover)]:motion-safe:hover:scale-[1.02]"
                 >
                   <Video className="w-4 h-4 text-white shrink-0" />
                   <span className="text-sm text-white">{t('goLive.sourceCamera')}</span>
@@ -581,7 +581,7 @@ export function PostActionBar({
                 <button
                   type="button"
                   onClick={() => handleSelectLiveMode('townhall')}
-                  className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-left hover:bg-white/10 transition-colors"
+                  className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-left bg-transparent motion-safe:transition-transform [@media(hover:hover)]:motion-safe:hover:scale-[1.02]"
                 >
                   <Mic className="w-4 h-4 text-white shrink-0" />
                   <span className="text-sm text-white">{t('stages.title')}</span>
@@ -594,7 +594,7 @@ export function PostActionBar({
                 <button
                   type="button"
                   onClick={handleSelectEncoder}
-                  className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-left hover:bg-white/10 transition-colors"
+                  className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-left bg-transparent motion-safe:transition-transform [@media(hover:hover)]:motion-safe:hover:scale-[1.02]"
                 >
                   <MonitorPlay className="w-4 h-4 text-white shrink-0" />
                   <span className="text-sm text-white">{t('goLive.sourceEncoder')}</span>
@@ -610,7 +610,7 @@ export function PostActionBar({
                       duration: 8000,
                       action: { label: t('goLive.screenInAppCta'), onClick: () => navigate('/dehub-app') },
                     })}
-                    className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-left hover:bg-white/10 transition-colors"
+                    className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-left bg-transparent motion-safe:transition-transform [@media(hover:hover)]:motion-safe:hover:scale-[1.02]"
                   >
                     <ScreenShare className="w-4 h-4 text-white shrink-0" />
                     <span className="flex flex-col">
@@ -626,7 +626,7 @@ export function PostActionBar({
                   <button
                     type="button"
                     onClick={handleSelectCaptureCard}
-                    className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-left hover:bg-white/10 transition-colors"
+                    className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-left bg-transparent motion-safe:transition-transform [@media(hover:hover)]:motion-safe:hover:scale-[1.02]"
                   >
                     <Cable className="w-4 h-4 text-white shrink-0" />
                     <span className="text-sm text-white">{_copy("copy.4a1bd4a3aaf3", { defaultValue: "Capture card" })}</span>
