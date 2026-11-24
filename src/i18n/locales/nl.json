@@ -24046,6 +24046,19 @@
     "shareLink": "Link delen",
     "snapshotFailed": "Momentopname mislukt. Probeer opnieuw."
   },
+  "liveMini": {
+    "minimise": "Minimaliseren",
+    "minimiseHint": "Blijf kijken terwijl je rondkijkt",
+    "player": "Livespeler",
+    "soundOnly": "Alleen geluid",
+    "showPicture": "Beeld tonen",
+    "openLive": "Live openen",
+    "float": "Zwevend boven andere apps",
+    "play": "Afspelen",
+    "pause": "Pauzeren",
+    "close": "Live sluiten",
+    "ended": "Deze live is afgelopen"
+  },
   "liveTimeline": {
     "backToLive": "Terug naar live"
   }

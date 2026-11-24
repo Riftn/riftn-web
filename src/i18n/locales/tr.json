@@ -23798,6 +23798,19 @@
     "shareLink": "Bağlantıyı paylaş",
     "snapshotFailed": "Ekran görüntüsü alınamadı. Tekrar dene."
   },
+  "liveMini": {
+    "minimise": "Küçült",
+    "minimiseHint": "Gezinirken izlemeye devam et",
+    "player": "Canlı oynatıcı",
+    "soundOnly": "Yalnızca ses",
+    "showPicture": "Görüntüyü göster",
+    "openLive": "Canlıyı aç",
+    "float": "Diğer uygulamaların üzerinde yüzdür",
+    "play": "Oynat",
+    "pause": "Duraklat",
+    "close": "Canlıyı kapat",
+    "ended": "Bu canlı yayın sona erdi"
+  },
   "liveTimeline": {
     "backToLive": "Canlıya dön"
   }

@@ -25,6 +25,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
+import { ChevronDown } from 'lucide-react';
 import Users from "@/components/ui/cut-icons/communities";
 import Volume2 from "@/components/ui/cut-icons/volume";
 import VolumeX from "@/components/ui/cut-icons/mute";
@@ -115,6 +116,8 @@ export interface ImmersiveLiveChromeProps {
   streamId?: string;
   /** What the close button does instead of going back, e.g. leaving the Shorts viewer. */
   onClose?: () => void;
+  /** Keep the live playing in a corner window while the viewer browses. */
+  onMinimise?: () => void;
   /** Pause, rewind and back-to-live for a broadcast on air. */
   timeshift?: LiveTimeshift;
 }
@@ -139,6 +142,7 @@ export function ImmersiveLiveChrome({
   hidden,
   streamId,
   onClose,
+  onMinimise,
   timeshift,
 }: ImmersiveLiveChromeProps) {
   const { t } = useTranslation();
@@ -329,6 +333,17 @@ export function ImmersiveLiveChrome({
             {isMuted ? <VolumeX className="h-[18px] w-[18px]" /> : <Volume2 className="h-[18px] w-[18px]" />}
           </button>
           {optionsSlot}
+          {onMinimise ? (
+            <button
+              type="button"
+              onClick={onMinimise}
+              data-live-minimise
+              aria-label={t('liveMini.minimiseHint', 'Keep watching while you browse')}
+              className={CIRCLE}
+            >
+              <ChevronDown className="h-[22px] w-[22px]" />
+            </button>
+          ) : null}
           <button
             type="button"
             onClick={onClose ?? goBack}

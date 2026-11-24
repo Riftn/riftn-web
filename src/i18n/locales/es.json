@@ -23798,6 +23798,19 @@
     "shareLink": "Compartir enlace",
     "snapshotFailed": "No se pudo hacer la captura. Inténtalo de nuevo."
   },
+  "liveMini": {
+    "minimise": "Minimizar",
+    "minimiseHint": "Sigue viendo mientras navegas",
+    "player": "Reproductor en directo",
+    "soundOnly": "Solo sonido",
+    "showPicture": "Mostrar imagen",
+    "openLive": "Abrir directo",
+    "float": "Flotar sobre otras apps",
+    "play": "Reproducir",
+    "pause": "Pausar",
+    "close": "Cerrar directo",
+    "ended": "Este directo ha terminado"
+  },
   "liveTimeline": {
     "backToLive": "Volver al directo"
   }
