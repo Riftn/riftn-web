@@ -13,7 +13,7 @@ export function applyDateLocale(language: string): void {
  */
 export function usesRegion24h(): boolean {
   try {
-    const cycle = new Intl.DateTimeFormat(undefined, { hour: 'numeric' }).resolvedOptions().hourCycle;
+    const cycle = (new Intl.DateTimeFormat(undefined, { hour: 'numeric' }).resolvedOptions() as { hourCycle?: string }).hourCycle;
     if (cycle) return cycle === 'h23' || cycle === 'h24';
   } catch {
     // fall through
