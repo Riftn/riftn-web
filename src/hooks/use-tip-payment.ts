@@ -13,7 +13,6 @@ import { useState, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
 import { dhbText } from '@/lib/dhb-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { withWalletHeader } from '@/lib/supabase-wallet-client';
 // NOTE: aa-utils / stream-controller / read-tip-transaction reach wagmi +
 // web3auth. This hook is used by eager feed cards (TipModal), so those
 // modules are dynamically imported inside tip() to keep the wallet stack out
@@ -66,8 +65,14 @@ interface UseTipPaymentOptions {
 }
 
 /**
- * Persist tip to database with retries.
- * Returns true if saved successfully, false otherwise.
+ * Ask for an on-chain tip's record to be written, so the post's and comments'
+ * tip figures include it.
+ *
+ * The browser no longer writes the row itself: it names the payment, and the
+ * `tip-record` function writes what the API has on file for it. `commentId`
+ * tells it which comment an on-chain tip was for (the chain only carries the
+ * post). The API also writes the row on its own once it has indexed the
+ * payment, so "not on file yet" is not a failure.
  */
 export async function persistTipRecord(
   params: {
@@ -80,29 +85,21 @@ export async function persistTipRecord(
     commentId: string | null;
   },
 ): Promise<boolean> {
-  for (let attempt = 1; attempt <= MAX_DB_RETRIES; attempt++) {
-    const { error } = await withWalletHeader(
-      supabase.from('tip_records').insert({
-        sender_address: params.walletAddress.toLowerCase(),
-        receiver_address: params.creatorAddress.toLowerCase(),
-        amount: params.amount,
-        chain_id: params.chainId,
-        tx_hash: params.txHash,
-        token_id: params.tokenId,
-        comment_id: params.commentId,
-      } as any),
-      params.walletAddress
-    );
-
-    if (!error) return true;
-
-    console.error(`[Tip] DB save attempt ${attempt}/${MAX_DB_RETRIES} failed:`, error);
-
-    if (attempt < MAX_DB_RETRIES) {
-      await new Promise((r) => setTimeout(r, 1000 * attempt));
-    }
+  // A comment tip needs this call to land after the payment is indexed, so it
+  // keeps asking a little longer than a post tip does.
+  const attempts = params.commentId ? 6 : MAX_DB_RETRIES;
+  let failed = false;
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    const { data, error } = await supabase.functions.invoke('tip-record', {
+      body: { txHash: params.txHash, ...(params.commentId ? { commentId: params.commentId } : {}) },
+    });
+    if (!error && (data as { recorded?: boolean } | null)?.recorded) return true;
+    failed = !!error;
+    if (error) console.error(`[Tip] record attempt ${attempt}/${attempts} failed:`, error);
+    if (attempt < attempts) await new Promise((r) => setTimeout(r, 1500 * attempt));
   }
-  return false;
+  // Not on file yet is fine for a post tip: the API writes that row by itself.
+  return !failed && !params.commentId;
 }
 
 /** Send the original creator's share of a remix tip, once the main tip is confirmed. */

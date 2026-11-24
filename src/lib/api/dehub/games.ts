@@ -347,9 +347,16 @@ export interface GratitudeGame {
   you: string | null;
   yourTurn: boolean;
   maxChars: number;
+  /** Played against the computer (it plays as @assistant). */
+  vsComputer?: boolean;
+  level?: GratitudeLevel | null;
+  /** Turn time in seconds for computer games (60, 300 or 86400). */
+  turnSeconds?: number | null;
   createdAt: string;
   updatedAt: string;
 }
+
+export type GratitudeLevel = 'easy' | 'normal' | 'hard';
 
 export interface GratitudeList {
   games: GratitudeGame[];
@@ -368,7 +375,7 @@ export interface GratitudeCheck {
 const gratitudePath = (id: string, tail = '') => `/api/games/gratitude/${encodeURIComponent(id)}${tail}`;
 export const gratitudeList = () => apiCall<GratitudeList>('/api/games/gratitude', { requiresAuth: true });
 export const gratitudeGet = (id: string, signedIn: boolean) => apiCall<{ game: GratitudeGame }>(gratitudePath(id), { requiresAuth: signedIn });
-export const gratitudeCreate = (body: { opponent?: string; days: number }) =>
+export const gratitudeCreate = (body: { opponent?: string; days?: number; computer?: boolean; level?: GratitudeLevel; turnSeconds?: number }) =>
   apiCall<{ game: GratitudeGame }>('/api/games/gratitude', { method: 'POST', body, requiresAuth: true });
 export const gratitudeAction = (id: string, action: 'accept' | 'decline' | 'give-up') =>
   apiCall<{ game: GratitudeGame }>(gratitudePath(id, `/${action}`), { method: 'POST', requiresAuth: true });

@@ -41,7 +41,7 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer';
 import { getChainById, type ChainId } from '@/components/app/ChainSelector';
-import { useTipPayment, persistTipRecord, MIN_TIP_DHB, MAX_TIP_DHB, MIN_DIRECT_TIP, DIRECT_QUICK_AMOUNTS } from '@/hooks/use-tip-payment';
+import { useTipPayment, MIN_TIP_DHB, MAX_TIP_DHB, MIN_DIRECT_TIP, DIRECT_QUICK_AMOUNTS } from '@/hooks/use-tip-payment';
 import { useAppTokens, useAppTokensEnabled, APP_TOKENS_QUERY_KEY } from '@/hooks/use-app-tokens';
 import { newAppTokenKey, tipWithAppTokens, toTokenAmount } from '@/lib/api/dehub/app-tokens';
 import { useTipNetwork } from '@/hooks/use-tip-network';
@@ -221,17 +221,9 @@ function TipModalBody({
       lastTipAmount.current = paid;
       queryClient.setQueryData([APP_TOKENS_QUERY_KEY, walletAddress.toLowerCase()], (old: any) => old ? { ...old, balance: res.balance } : old);
       queryClient.invalidateQueries({ queryKey: [APP_TOKENS_QUERY_KEY] });
-      // The post's and comments' tip figures read tip_records; the server
-      // already moved the DHB and counted the tip, this only draws it.
-      void persistTipRecord({
-        walletAddress,
-        creatorAddress: res.to,
-        amount: paid,
-        chainId: 0 as any,
-        txHash: res.receipt,
-        tokenId: postId ?? null,
-        commentId: commentId ?? null,
-      }).finally(() => afterTipConfirmed(res.receipt));
+      // The server wrote the tip's record with the tip itself, so the post's
+      // and comments' tip figures can be read back straight away.
+      afterTipConfirmed(res.receipt);
       toast.success(t('tip.appSent', 'Tip of {{amount}} tokens sent!', { amount: paid.toLocaleString() }));
       afterTipSent();
     } catch (err: any) {

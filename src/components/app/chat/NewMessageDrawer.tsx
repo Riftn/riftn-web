@@ -194,7 +194,7 @@ export const NewMessageDrawer = forwardRef<NewMessageDrawerHandle, NewMessageDra
       onMouseDown={keepFocus}
       onClick={() => pick(u)}
       disabled={dmDisabled(u)}
-      className="w-full flex items-center gap-3 px-2 py-2 rounded-xl text-left active:bg-white/[0.06] disabled:opacity-50"
+      className="w-full flex items-center gap-3 px-2 py-2 rounded-xl text-left !border-transparent !bg-none !bg-transparent !shadow-none transition-colors enabled:hover:!bg-current/[0.06] enabled:active:!bg-current/[0.09] focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 disabled:opacity-50"
     >
       <Face user={u} size="w-10 h-10" />
       <span className="min-w-0 flex-1">

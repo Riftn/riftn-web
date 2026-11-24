@@ -8150,7 +8150,9 @@
         "low": "Léger",
         "high": "Fort"
       },
-      "gateHint": "Coupe votre micro entre les mots pour que le clavier et les ventilateurs restent hors du live."
+      "gateHint": "Coupe votre micro entre les mots pour que le clavier et les ventilateurs restent hors du live.",
+      "hearShared": "Entendre l'onglet partagé sur cet ordinateur",
+      "hearSharedHint": "Désactivez pour que le son de l'onglet continue d'arriver aux spectateurs sans que vous l'entendiez, pour écouter autre chose. Fonctionne avec un onglet partagé dans Chrome, Edge ou Brave."
     }
   },
   "liveStudio": {
@@ -9646,7 +9648,8 @@
     "followRequest": "{{name}} a demandé à vous suivre",
     "followAccepted": "{{name}} a accepté votre demande de suivi",
     "signalFlare": "{{name}} a envoyé une fusée éclairante",
-    "newMessage": "{{name}} vous a envoyé un message"
+    "newMessage": "{{name}} vous a envoyé un message",
+    "unlike": "Je n'aime plus"
   },
   "audioPost": {
     "popOut": "Sortez — continuez à écouter pendant que vous naviguez",
@@ -9834,6 +9837,19 @@
     "yourChannelHint": "Collez l'adresse de votre chaîne — la poignée fonctionne également par elle-même."
   },
   "calls": {
+    "removedByMod": "Un modérateur t'a retiré de cet appel",
+    "removedFor": "Tu pourras revenir dans {{count}} min.",
+    "mutedByMod": "Un modérateur t'a coupé le micro",
+    "mutedByModHint": "Tu pourras parler quand un modérateur te le rendra.",
+    "unmutedByMod": "Un modérateur t'a rendu le micro. Touche le micro pour parler.",
+    "modFailed": "Impossible. Réessaie.",
+    "modMenu": "Modérer {{name}}",
+    "modMute": "Couper le micro de {{name}}",
+    "modUnmute": "Rendre le micro à {{name}}",
+    "modRemove": "Retirer de l'appel",
+    "modRemoved": "Retiré de l'appel",
+    "modMuted": "Micro coupé pour tous",
+    "modUnmuted": "Micro rendu",
     "voiceCall": "Appel vocal Riftn",
     "videoCall": "Appel vidéo Riftn",
     "incoming": "Appel entrant",
@@ -13638,6 +13654,7 @@
   },
   "dm": {
     "shareGroups": "Groupes",
+    "opened": {"photoA11y": "Photo, ouverte {{time}}", "videoA11y": "Vidéo, ouverte {{time}}", "seenAt": "Vu {{time}}", "replyCamera": "Répondre avec la caméra", "quotePhoto": "Photo · Ouverte", "quoteVideo": "Vidéo · Ouverte", "cameraTitle": "Répondre à cette photo", "cameraOff": "L'accès à la caméra est désactivé. Envoie plutôt une photo ou une vidéo.", "takePhoto": "Prendre une photo", "uploadInstead": "Importer un fichier"},
     "openTimer": {
       "secs": "{{n}} s",
       "oneMin": "1 min",
@@ -23259,6 +23276,25 @@
       "disclaimer": "Les SillyCoins sont juste pour le fun et n’ont aucune valeur. Ce n’est pas une cryptomonnaie, elles ne touchent jamais votre portefeuille et ne peuvent être ni achetées, ni vendues, ni encaissées."
     },
     "gratitude": {
+      "withFriend": "Un ami",
+      "withComputer": "L'ordinateur",
+      "computer": "L'ordinateur",
+      "computerNote": "Il répond en quelques secondes. Épuise ses idées nouvelles pour gagner.",
+      "levelLabel": "Niveau",
+      "levelEasy": "Facile",
+      "levelNormal": "Normal",
+      "levelHard": "Difficile",
+      "turnLabel": "Temps par tour",
+      "turn1m": "1 min",
+      "turn5m": "5 min",
+      "turn1d": "1 jour",
+      "playComputer": "Jouer contre l'ordinateur",
+      "computerEach": "{{level}} · {{time}} par tour",
+      "statusComputerTurn": "L'ordinateur écrit…",
+      "chipComputerTurn": "Son tour",
+      "writing": "Écrit…",
+      "playAgain": "Rejouer",
+      "empty2": "Aucune partie pour l'instant. Invite un ami ou joue contre l'ordinateur ci-dessus.",
       "rule1": "Écrivez une chose pour laquelle vous êtes reconnaissant et envoyez-la.",
       "rule2": "L'autre répond avec la sienne. Et ainsi de suite.",
       "rule3": "Pas de répétition. Chaque nouvelle ligne est comparée à toutes les précédentes de la partie.",
@@ -23778,5 +23814,21 @@
     "postSnapshot": "Publier une capture",
     "shareLink": "Partager le lien",
     "snapshotFailed": "Impossible de prendre la capture. Réessaie."
+  },
+  "liveMini": {
+    "minimise": "Réduire",
+    "minimiseHint": "Continue de regarder en naviguant",
+    "player": "Lecteur du live",
+    "soundOnly": "Son uniquement",
+    "showPicture": "Afficher l’image",
+    "openLive": "Ouvrir le live",
+    "float": "Flotter au-dessus des autres apps",
+    "play": "Lire",
+    "pause": "Pause",
+    "close": "Fermer le live",
+    "ended": "Ce live est terminé"
+  },
+  "liveTimeline": {
+    "backToLive": "Revenir au direct"
   }
 }

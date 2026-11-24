@@ -114,6 +114,11 @@ interface ChatInputProps {
   /** Cancel the current reply */
   onCancelReply?: () => void;
   /**
+   * A photo or video taken from outside the composer (the camera on an
+   * "Opened" photo). Each new `n` adds the file to the edit screen once.
+   */
+  incomingFile?: { file: File; n: number } | null;
+  /**
    * Pre-fill the composer (e.g. a shared post routed into a fee-gated chat —
    * the user reviews the fee and sends with one tap instead of retyping).
    */
@@ -144,7 +149,7 @@ interface ChatInputProps {
   allowLock?: boolean;
 }
 
-export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, scheduledCount = 0, onPollClick, onNoteClick, sendDisabled, sendDisabledReason, isSendingFee, feeAmount, confirmBeforeSend, canSend, replyTo, onCancelReply, initialText, thread, peerName, draftKey, allowDocuments = true, voiceMaxDuration = 59, allowLock = false, autoFocus = false, phoneB = false }: ChatInputProps) {
+export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, scheduledCount = 0, onPollClick, onNoteClick, sendDisabled, sendDisabledReason, isSendingFee, feeAmount, confirmBeforeSend, canSend, replyTo, onCancelReply, incomingFile, initialText, thread, peerName, draftKey, allowDocuments = true, voiceMaxDuration = 59, allowLock = false, autoFocus = false, phoneB = false }: ChatInputProps) {
   const { t: _copy } = _useCopy();
   const { t } = useTranslation();
   const [message, setMessage] = useDraft(draftKey, initialText ?? '');
@@ -497,6 +502,15 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
     clearImage();
     clearStudio();
   };
+
+  const lastIncoming = useRef<number | null>(null);
+  useEffect(() => {
+    if (!incomingFile || incomingFile.n === lastIncoming.current) return;
+    lastIncoming.current = incomingFile.n;
+    attachFile(incomingFile.file);
+    // attachFile reads the latest state through refs and setters.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [incomingFile]);
 
   const addToStudio = (file: File, kind: 'image' | 'video') => {
     const url = URL.createObjectURL(file);

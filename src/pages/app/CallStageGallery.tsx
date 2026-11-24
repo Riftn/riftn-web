@@ -9,9 +9,8 @@
  * Prefix "group-" for a group call (group-incoming, group-ringing, group-active,
  * group-active-video, group-mini, group-ended); `people=` sets how many others are in it.
  * `subs=1` turns live subtitles on with sample lines; `subs=es` also reads them in Spanish.
- * `layout=hall|grid` picks the group layout (town hall is the default from 3 people); `thsim=1` plays a
+ * `layout=hall|grid` picks the group layout (town hall is the default); `thsim=1` plays a
  * scripted conversation (one talks, then three at once, then another alone, then quiet) every 10 s;
- * `thfx=glitch|flip|static` picks how the town hall stage cuts.
  * `bg=blur|night|ocean|sunset|forest|photo` marks that call background as picked (tap the corner button to see the row); `face=shades|cat|crown|hearts` marks a face filter.
  */
 import { useEffect, useMemo } from 'react';
@@ -140,6 +139,8 @@ export default function CallStageGallery() {
       groupParticipants: group && live ? Array.from({ length: people }, (_, index) => ({
         uid: index + 2, wallet: `0x${String(index + 3).repeat(40).slice(0, 40)}`,
         audio: index !== 2, video: video && index % 2 === 0, speaking: index === 1,
+        // ?mod=1: the third person was muted by a moderator.
+        modMuted: params.get('mod') === '1' && index === 2,
       })) : [],
       attachGroupVideo: (uid: number) => paint(['linear-gradient(160deg, #3b2f63, #1f4a5c)', 'linear-gradient(200deg, #5c3b2f, #1f2a5c)', 'linear-gradient(120deg, #2f5c45, #3b1f5c)'][uid % 3]),
       readGroupLevels: () => {
@@ -154,6 +155,9 @@ export default function CallStageGallery() {
         return levels;
       },
       startGroupCall: async () => {}, joinGroupCall: async () => {},
+      // ?mod=1: you moderate this chat, so the call shows the moderator menus.
+      groupModeration: { muted: [], removed: [], canModerate: params.get('mod') === '1' },
+      modMuted: params.get('modmuted') === '1', moderateGroupMember: async () => true,
       // ?camfull=1: every camera slot taken, yours off.
       groupCamerasFull: params.get('camfull') === '1',
       captionRoom: subs && live ? room : null,

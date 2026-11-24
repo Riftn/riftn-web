@@ -180,7 +180,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     // lib/lazy-with-retry.
     if (isChunkLoadError(error)) {
       this.clearRecoveryTimer();
-      if (recoverFromChunkError() === 'exhausted') {
+      if (recoverFromChunkError(error) === 'exhausted') {
         // Both reloads already ran and the file is still missing: only now is
         // the crash screen (with its manual buttons) the right thing to show.
         this.setState({ recovering: false });

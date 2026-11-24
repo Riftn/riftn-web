@@ -471,3 +471,8 @@ verify_jwt = false
 
 [functions.follower-rankings]
 verify_jwt = false
+
+# The only writer to tip_records. Public on purpose: a caller names a payment
+# and every column is read back from the API's own record of it.
+[functions.tip-record]
+verify_jwt = false

@@ -8335,7 +8335,9 @@
         "low": "Licht",
         "high": "Sterk"
       },
-      "gateHint": "Dempt je microfoon tussen woorden, zodat toetsenbord en ventilatoren niet te horen zijn."
+      "gateHint": "Dempt je microfoon tussen woorden, zodat toetsenbord en ventilatoren niet te horen zijn.",
+      "hearShared": "Gedeeld tabblad horen op deze computer",
+      "hearSharedHint": "Zet uit zodat het geluid van het tabblad naar je kijkers blijft gaan terwijl het bij jou stil is, zodat je iets anders kunt luisteren. Werkt met een gedeeld tabblad in Chrome, Edge of Brave."
     }
   },
   "liveStudio": {
@@ -9831,7 +9833,8 @@
     "followRequest": "{{name}} verzocht u te volgen",
     "followAccepted": "{{name}} heeft je volgverzoek geaccepteerd",
     "signalFlare": "{{name}} stuurde een signaalflare",
-    "newMessage": "{{name}} heeft je een bericht gestuurd"
+    "newMessage": "{{name}} heeft je een bericht gestuurd",
+    "unlike": "Niet meer leuk"
   },
   "audioPost": {
     "popOut": "Pop out — blijf luisteren terwijl je surft",
@@ -10019,6 +10022,19 @@
     "yourChannelHint": "Plak je kanaaladres — de greep op zijn eigen werkt ook."
   },
   "calls": {
+    "removedByMod": "Een moderator heeft je uit dit gesprek gehaald",
+    "removedFor": "Je kunt over {{count}} min weer meedoen.",
+    "mutedByMod": "Een moderator heeft je gedempt",
+    "mutedByModHint": "Je kunt weer praten zodra een moderator je dempen opheft.",
+    "unmutedByMod": "Een moderator heeft je dempen opgeheven. Tik op de microfoon om te praten.",
+    "modFailed": "Dat lukte niet. Probeer opnieuw.",
+    "modMenu": "{{name}} modereren",
+    "modMute": "{{name}} dempen",
+    "modUnmute": "Dempen van {{name}} opheffen",
+    "modRemove": "Uit gesprek halen",
+    "modRemoved": "Uit het gesprek gehaald",
+    "modMuted": "Gedempt voor iedereen",
+    "modUnmuted": "Dempen opgeheven",
     "voiceCall": "Riftn-spraakoproep",
     "videoCall": "Riftn-videogesprek",
     "incoming": "Inkomende oproep",
@@ -13882,6 +13898,7 @@
   },
   "dm": {
     "shareGroups": "Groepen",
+    "opened": {"photoA11y": "Foto, geopend {{time}}", "videoA11y": "Video, geopend {{time}}", "seenAt": "Gezien {{time}}", "replyCamera": "Antwoord met de camera", "quotePhoto": "Foto · Geopend", "quoteVideo": "Video · Geopend", "cameraTitle": "Antwoord op deze foto", "cameraOff": "Cameratoegang staat uit. Upload in plaats daarvan een foto of video.", "takePhoto": "Foto maken", "uploadInstead": "Uploaden"},
     "openTimer": {
       "secs": "{{n}} sec",
       "oneMin": "1 min",
@@ -23503,6 +23520,25 @@
       "disclaimer": "SillyCoins zijn gewoon voor de lol en hebben geen waarde. Het is geen cryptomunt, ze komen nooit aan je wallet en je kunt ze niet kopen, verkopen of uitbetalen."
     },
     "gratitude": {
+      "withFriend": "Een vriend",
+      "withComputer": "De computer",
+      "computer": "De computer",
+      "computerNote": "Hij antwoordt binnen een paar seconden. Laat hem door zijn nieuwe ideeën heen raken om te winnen.",
+      "levelLabel": "Niveau",
+      "levelEasy": "Makkelijk",
+      "levelNormal": "Normaal",
+      "levelHard": "Moeilijk",
+      "turnLabel": "Tijd per beurt",
+      "turn1m": "1 min",
+      "turn5m": "5 min",
+      "turn1d": "1 dag",
+      "playComputer": "Speel tegen de computer",
+      "computerEach": "{{level}} · {{time}} per beurt",
+      "statusComputerTurn": "De computer schrijft…",
+      "chipComputerTurn": "Zijn beurt",
+      "writing": "Schrijft…",
+      "playAgain": "Opnieuw spelen",
+      "empty2": "Nog geen spellen. Nodig hierboven een vriend uit of speel tegen de computer.",
       "rule1": "Schrijf één ding waar je dankbaar voor bent en stuur het.",
       "rule2": "De ander antwoordt met het zijne. Zo gaat het heen en weer.",
       "rule3": "Geen herhalingen. Elke nieuwe regel wordt vergeleken met alle eerdere regels in het spel.",
@@ -24022,5 +24058,21 @@
     "postSnapshot": "Momentopname plaatsen",
     "shareLink": "Link delen",
     "snapshotFailed": "Momentopname mislukt. Probeer opnieuw."
+  },
+  "liveMini": {
+    "minimise": "Minimaliseren",
+    "minimiseHint": "Blijf kijken terwijl je rondkijkt",
+    "player": "Livespeler",
+    "soundOnly": "Alleen geluid",
+    "showPicture": "Beeld tonen",
+    "openLive": "Live openen",
+    "float": "Zwevend boven andere apps",
+    "play": "Afspelen",
+    "pause": "Pauzeren",
+    "close": "Live sluiten",
+    "ended": "Deze live is afgelopen"
+  },
+  "liveTimeline": {
+    "backToLive": "Terug naar live"
   }
 }
