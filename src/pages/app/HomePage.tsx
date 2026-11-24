@@ -284,6 +284,10 @@ export default function HomePage() {
     });
   }, [deferredTab]);
   
+  // Mount the selected feed or its fallback in the same render that hides
+  // the outgoing feed. The effect above retains it for later visits.
+  const shouldMountFeed = (tab: string) => deferredTab === tab || visitedTabs.has(tab);
+
   // Listen for tab changes from GlobalFeedNav (collapsed mode)
   useEffect(() => {
     const handleStorage = (e: StorageEvent) => {
@@ -1324,7 +1328,7 @@ export default function HomePage() {
         {/* Feeds mount lazily on first tab visit, then stay alive (CSS display toggle).
             Memo wrappers prevent re-renders during drag — feeds only update when
             their own props change, not when activeTab/deferredTab changes. */}
-        {visitedTabs.has('home') && (
+        {shouldMountFeed('home') && (
           <div style={{ display: deferredTab === 'home' && !searchQuery ? 'block' : 'none' }}>
             <CachedPageActiveContext.Provider value={pageActive && deferredTab === 'home'}>
             <MemoHomeFeed active={deferredTab === 'home'} shuffleKey={refreshKey} isRefreshing={isRefreshing} showFilters={showHomeFilters && deferredTab === 'home'} pinnedPostId={pinnedPostId} filtersPortalRef={isCollapsed && globalFeedNav?.filtersPortalElement ? globalFeedNav.filtersPortalElement : homeFiltersRef} chipsPortalRef={isCollapsed && globalFeedNav?.chipsPortalElement ? globalFeedNav.chipsPortalElement : homeChipsRef} />
@@ -1344,7 +1348,7 @@ export default function HomePage() {
             fallback is the same skeleton the feeds show while their first page
             loads, so a first tap that beats the prefetch reads as loading, not
             as an empty tab. */}
-        {visitedTabs.has('videos') && (
+        {shouldMountFeed('videos') && (
           <div className={isCollapsed ? 'pt-2' : undefined} style={{ display: deferredTab === 'videos' ? 'block' : 'none' }}>
             <CachedPageActiveContext.Provider value={pageActive && deferredTab === 'videos'}>
             <Suspense fallback={<FeedBodySkeleton />}>
@@ -1353,7 +1357,7 @@ export default function HomePage() {
             </CachedPageActiveContext.Provider>
           </div>
         )}
-        {visitedTabs.has('text') && (
+        {shouldMountFeed('text') && (
           <div style={{ display: deferredTab === 'text' ? 'block' : 'none' }}>
             <CachedPageActiveContext.Provider value={pageActive && deferredTab === 'text'}>
             <Suspense fallback={<FeedBodySkeleton />}>
@@ -1362,7 +1366,7 @@ export default function HomePage() {
             </CachedPageActiveContext.Provider>
           </div>
         )}
-        {visitedTabs.has('images') && (
+        {shouldMountFeed('images') && (
           <div className={isCollapsed && !(islandTopBar && isMobile) ? 'pt-2' : undefined} style={{ display: deferredTab === 'images' ? 'block' : 'none' }}>
             <CachedPageActiveContext.Provider value={pageActive && deferredTab === 'images'}>
             <Suspense fallback={<FeedBodySkeleton />}>
@@ -1379,7 +1383,7 @@ export default function HomePage() {
             </CachedPageActiveContext.Provider>
           </div>
         )}
-        {visitedTabs.has('shorts') && (
+        {shouldMountFeed('shorts') && (
           <div className={isCollapsed && !(islandTopBar && isMobile) ? 'pt-2' : undefined} style={{ display: deferredTab === 'shorts' ? 'block' : 'none' }}>
             <CachedPageActiveContext.Provider value={pageActive && deferredTab === 'shorts'}>
             <Suspense fallback={<FeedBodySkeleton />}>
@@ -1388,7 +1392,7 @@ export default function HomePage() {
             </CachedPageActiveContext.Provider>
           </div>
         )}
-        {visitedTabs.has('live') && (
+        {shouldMountFeed('live') && (
           <div className={isCollapsed ? 'pt-2' : undefined} style={{ display: deferredTab === 'live' ? 'block' : 'none' }}>
             <CachedPageActiveContext.Provider value={pageActive && deferredTab === 'live'}>
             <Suspense fallback={<FeedBodySkeleton />}>
@@ -1397,7 +1401,7 @@ export default function HomePage() {
             </CachedPageActiveContext.Provider>
           </div>
         )}
-        {visitedTabs.has('music') && (
+        {shouldMountFeed('music') && (
           <div className={isCollapsed ? 'pt-2' : undefined} style={{ display: deferredTab === 'music' ? 'block' : 'none' }}>
             <CachedPageActiveContext.Provider value={pageActive && deferredTab === 'music'}>
             <Suspense fallback={<FeedBodySkeleton />}>
@@ -1406,7 +1410,7 @@ export default function HomePage() {
             </CachedPageActiveContext.Provider>
           </div>
         )}
-        {visitedTabs.has('ppv') && (
+        {shouldMountFeed('ppv') && (
           <div className={isCollapsed ? 'pt-2' : undefined} style={{ display: deferredTab === 'ppv' ? 'block' : 'none' }}>
             <CachedPageActiveContext.Provider value={pageActive && deferredTab === 'ppv'}>
             <Suspense fallback={<FeedBodySkeleton />}>
@@ -1415,7 +1419,7 @@ export default function HomePage() {
             </CachedPageActiveContext.Provider>
           </div>
         )}
-        {visitedTabs.has('w2e') && (
+        {shouldMountFeed('w2e') && (
           <div className={isCollapsed ? 'pt-2' : undefined} style={{ display: deferredTab === 'w2e' ? 'block' : 'none' }}>
             <CachedPageActiveContext.Provider value={pageActive && deferredTab === 'w2e'}>
             <Suspense fallback={<FeedBodySkeleton />}>
