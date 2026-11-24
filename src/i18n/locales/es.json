@@ -8146,7 +8146,9 @@
         "low": "Suave",
         "high": "Fuerte"
       },
-      "gateHint": "Silencia tu micro entre palabras para que el teclado y los ventiladores no se oigan."
+      "gateHint": "Silencia tu micro entre palabras para que el teclado y los ventiladores no se oigan.",
+      "hearShared": "Escuchar la pestaña compartida en este ordenador",
+      "hearSharedHint": "Desactívalo para que el sonido de la pestaña siga llegando a tus espectadores mientras tú no lo oyes, y así puedas escuchar otra cosa. Funciona con una pestaña compartida en Chrome, Edge o Brave."
     }
   },
   "liveStudio": {

@@ -168,7 +168,7 @@ export function withOpusFec(sdp: string): string {
     if (m) pts.add(m[1]);
   }
   if (!pts.size) return sdp;
-  const wanted = ['useinbandfec=1', 'stereo=1', 'sprop-stereo=1', 'maxaveragebitrate=128000'];
+  const wanted = ['useinbandfec=1', 'stereo=1', 'sprop-stereo=1', 'maxaveragebitrate=256000', 'maxplaybackrate=48000'];
   return sdp
     .split(/(\r?\n)/)
     .map((line) => {
@@ -387,6 +387,8 @@ export async function publishToWhip({
       transceivers.audio = pc.addTransceiver(audioTrack, {
         direction: 'sendonly',
         streams: [stream],
+        // Room for music in stereo; speech never gets near it.
+        sendEncodings: [{ maxBitrate: 256_000 }],
       });
     }
 
