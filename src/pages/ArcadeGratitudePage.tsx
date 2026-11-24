@@ -100,7 +100,7 @@ function GameView({ id, wallet }: { id: string; wallet: string | null }) {
     queryKey: ['gratitude', id, wallet],
     queryFn: () => gratitudeGet(id, !!wallet),
     // Days per turn: a quiet poll is plenty while waiting on them.
-    refetchInterval: (q) => (q.state.data?.game.status === 'active' && !q.state.data.game.yourTurn ? 20_000 : false),
+    refetchInterval: (q) => (q.state.data?.game?.status === 'active' && !q.state.data.game.yourTurn ? 20_000 : false),
     refetchOnWindowFocus: true,
   });
   useEffect(() => {
