@@ -41,6 +41,7 @@ import {
   type VideoEncoding,
 } from '@/lib/livepeer/whip';
 import { openCaptureCard, encodingForTrack } from '@/lib/livepeer/capture-card';
+import { requestDisplayCapture, tuneDisplayTrack, displaySurfaceOf } from '@/lib/livepeer/display-capture';
 import {
   composeCameraBubble,
   BUBBLE_CORNERS,
@@ -1285,10 +1286,7 @@ export function GoLiveBroadcaster({
 
     let display: MediaStream | null = null;
     try {
-      display = await navigator.mediaDevices.getDisplayMedia({
-        video: SCREEN_CONSTRAINTS,
-        audio: true,
-      });
+      display = await requestDisplayCapture(SCREEN_CONSTRAINTS);
       const track = display.getVideoTracks()[0] ?? null;
       if (!track) return;
 
@@ -1427,6 +1425,12 @@ export function GoLiveBroadcaster({
         if (screenTrack) {
           screenStreamRef.current = handed;
           videoTrack = screenTrack;
+          tuneDisplayTrack(screenTrack);
+          // A game window or whole screen needs the bitrate of a capture
+          // card, not the camera default, to stay smooth for viewers.
+          if (displaySurfaceOf(screenTrack) !== 'browser') {
+            videoEncodingRef.current = encodingForTrack(screenTrack);
+          }
           systemAudio = handed?.getAudioTracks()[0] ?? null;
           // A denied mic must not sink a screen share — the tab's own audio is
           // often the whole point. The camera path has no such fallback.
