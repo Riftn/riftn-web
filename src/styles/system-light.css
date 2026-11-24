@@ -56,6 +56,11 @@ html[data-theme="system"][data-system-tone="light"] :is(#root, [data-vaul-drawer
 /* Hairlines and washes */
 html[data-theme="system"][data-system-tone="light"] :is(#root, [data-vaul-drawer], [role="dialog"], [role="alertdialog"], [data-radix-popper-content-wrapper]):not(#_):not(#_):not(#_) [class*="border-white/"], html[data-theme="system"][data-system-tone="light"] :is(#root, [data-vaul-drawer], [role="dialog"], [role="alertdialog"], [data-radix-popper-content-wrapper]):not(#_):not(#_):not(#_) [class*="border-zinc-8"], html[data-theme="system"][data-system-tone="light"] :is(#root, [data-vaul-drawer], [role="dialog"], [role="alertdialog"], [data-radix-popper-content-wrapper]):not(#_):not(#_):not(#_) [class*="border-zinc-7"] { border-color: var(--sl-line) !important; }
 html[data-theme="system"][data-system-tone="light"] :is(#root, [data-vaul-drawer], [role="dialog"], [role="alertdialog"], [data-radix-popper-content-wrapper]):not(#_):not(#_):not(#_) [class*="bg-white/"]:not([data-on-media]):not([data-on-media] *) { background-color: rgba(11,11,13,.045) !important; }
+/* The wash above matches the class string, so it also caught hover-only
+   utilities (hover:bg-white/10) and painted them at rest. A static token
+   starts the string or follows a space; a hover one follows a colon. */
+html[data-theme="system"][data-system-tone="light"] :is(#root, [data-vaul-drawer], [role="dialog"], [role="alertdialog"], [data-radix-popper-content-wrapper]):not(#_):not(#_):not(#_) [class*="hover:bg-white/"]:not([class^="bg-white/"]):not([class*=" bg-white/"]) { background-color: transparent !important; }
+html[data-theme="system"][data-system-tone="light"] :is(#root, [data-vaul-drawer], [role="dialog"], [role="alertdialog"], [data-radix-popper-content-wrapper]):not(#_):not(#_):not(#_) [class*="hover:bg-white/"]:not([class^="bg-white/"]):not([class*=" bg-white/"]):hover { background-color: rgba(11,11,13,.045) !important; }
 /* Bento cards: soft grey plates, no glow */
 html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_) [data-feed-item] { background: var(--sl-card) !important; border-color: transparent !important; box-shadow: none !important; }
 /* Liquid glass pills: frosted white */
