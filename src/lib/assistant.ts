@@ -1,4 +1,4 @@
-import assistantAvatar from '@/assets/ai-assistant-avatar.png';
+import assistantAvatar from '@/assets/ai-assistant-avatar.webp';
 
 /**
  * The @assistant bot's identity.
