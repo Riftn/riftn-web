@@ -1551,7 +1551,7 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
         if (!textBg.bg) return card;
         return (
           <ProfilePostBgArtContext.Provider value={textBg.art}>
-            <div data-post-page-bg className="rounded-2xl p-3" {...postBgHostProps(textBg.bg, id)}>
+            <div data-opened-post-bg className="rounded-2xl p-3" {...postBgHostProps(textBg.bg, id)}>
               <PostBgLayer bg={textBg.bg} seed={id} />
               {card}
             </div>
