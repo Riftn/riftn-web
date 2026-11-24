@@ -358,9 +358,6 @@ html[data-theme="hacker"] .call-card__go { background: #39ff88; color: #001a0a; 
   transform: scale(calc(1 + var(--th-level) * 0.07)); transition: transform 0.09s linear;
   box-shadow: 0 0 0 calc(var(--th-level) * 10px) color-mix(in srgb, var(--cs-ring) 22%, transparent);
 }
-.th-cut, .th-scan { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
-.th-cut i { position: absolute; left: 0; right: 0; opacity: 0; }
-.th-scan { opacity: 0; transition: opacity 0.25s ease; }
 
 .th-name {
   position: absolute; left: 12px; bottom: 12px; z-index: 2; max-width: calc(100% - 24px); display: inline-flex; align-items: center; gap: 8px;
@@ -374,14 +371,12 @@ html[data-theme="hacker"] .call-card__go { background: #39ff88; color: #001a0a; 
 .th-meter[data-on="true"] i:nth-child(2) { animation-delay: -0.25s; }
 .th-meter[data-on="true"] i:nth-child(3) { animation-delay: -0.5s; }
 @keyframes th-meter { from { transform: scaleY(0.3); } to { transform: scaleY(1); } }
-.th-crowd, .th-pin {
+.th-pin {
   position: absolute; top: 12px; z-index: 2; display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px;
   border-radius: 999px; border: 0; background: rgb(18 18 22 / 0.55); color: #fff; font-size: 12.5px; font-weight: 700;
   backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
 }
-.th-crowd { right: 12px; animation: th-crowd-in 0.22s ease-out; }
 .th-pin { left: 12px; cursor: pointer; }
-@keyframes th-crowd-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 
 .th-strip { flex: 0 0 auto; display: flex; gap: 8px; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; padding: 2px 0; }
 .th-strip::-webkit-scrollbar { display: none; }
@@ -406,69 +401,8 @@ html[data-theme="hacker"] .call-card__go { background: #39ff88; color: #001a0a; 
 }
 .th-tile__name > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-/* Cut A, glitch: the picture tears into slices and settles, with theme-coloured
-   signal bars. While several talk the bars keep flickering over the stage. */
-.th[data-fx="glitch"] .th-shot { animation: th-tear 0.42s linear both; }
-.th[data-fx="glitch"] .th-cut i { height: var(--h); top: var(--y); background: var(--c); mix-blend-mode: normal; animation: th-bar 0.42s linear both; animation-delay: var(--d); }
-.th-cut i:nth-child(1) { --c: color-mix(in srgb, var(--cs-ring) 70%, transparent); --d: 0s; }
-.th-cut i:nth-child(2) { --c: color-mix(in srgb, var(--cs-ring-2) 85%, transparent); --d: 0.04s; }
-.th-cut i:nth-child(3) { --c: color-mix(in srgb, var(--cs-ring) 35%, transparent); --d: 0.02s; }
-.th-cut i:nth-child(4) { --c: color-mix(in srgb, var(--cs-ring-2) 60%, transparent); --d: 0.07s; }
-.th-cut i:nth-child(5) { --c: color-mix(in srgb, var(--cs-fg) 80%, transparent); --d: 0.1s; }
-@keyframes th-tear {
-  0% { clip-path: inset(0 0 62% 0); transform: translateX(-14px) skewX(-8deg); filter: contrast(1.7) saturate(2.2) brightness(1.3); }
-  12% { clip-path: inset(34% 0 22% 0); transform: translateX(12px) skewX(5deg); }
-  24% { clip-path: inset(68% 0 0 0); transform: translateX(-8px); filter: contrast(1.5) hue-rotate(30deg) brightness(1.2); }
-  36% { clip-path: inset(6% 0 48% 0); transform: translateX(9px) skewX(-3deg); }
-  48% { clip-path: inset(0 0 0 0); transform: translateX(-4px); filter: contrast(1.25) brightness(1.1); }
-  64% { transform: translateX(2px); filter: none; }
-  100% { clip-path: inset(0 0 0 0); transform: none; filter: none; }
-}
-@keyframes th-bar {
-  0% { opacity: 0; transform: translateX(var(--x)) scaleY(1); }
-  15% { opacity: 1; transform: translateX(calc(var(--x) * -0.6)) scaleY(1.3); }
-  35% { opacity: 0.85; transform: translateX(calc(var(--x) * 0.4)) scaleY(0.6); }
-  55% { opacity: 0.6; transform: translateX(0) scaleY(1); }
-  100% { opacity: 0; transform: translateX(0) scaleY(1); }
-}
-.th[data-fx="glitch"] .th-scan { background: repeating-linear-gradient(0deg, color-mix(in srgb, var(--cs-fg) 7%, transparent) 0 1px, transparent 1px 4px); }
-.th[data-fx="glitch"][data-contested="true"] .th-scan { opacity: 1; animation: th-roll 0.9s linear infinite; }
-.th[data-fx="glitch"][data-contested="true"] .th-cut i { animation: th-bar 0.9s linear infinite; animation-delay: calc(var(--d) * 4); }
-.th[data-fx="glitch"][data-contested="true"] .th-shot { animation: th-tear 0.42s linear both, th-jitter 1.1s steps(1) 0.42s infinite; }
-@keyframes th-roll { from { background-position: 0 0; } to { background-position: 0 16px; } }
-@keyframes th-jitter {
-  0%, 100% { transform: none; }
-  18% { transform: translateX(3px); }
-  22% { transform: translateX(-2px) skewX(1deg); }
-  26% { transform: none; }
-  71% { transform: translateX(-3px); }
-  74% { transform: none; }
-}
+/* A new speaker fades in over the last one. */
+.th-shot { animation: th-fade 0.24s ease-out both; }
+@keyframes th-fade { from { opacity: 0; } to { opacity: 1; } }
 
-/* Cut B, flip: a camera-director cut, the new person swings in like a card. */
-.th[data-fx="flip"] .th-stage { perspective: 1400px; }
-.th[data-fx="flip"] .th-shot { animation: th-flip 0.46s cubic-bezier(0.2, 0.8, 0.2, 1) both; transform-origin: 50% 50%; }
-.th[data-fx="flip"] .th-cut { display: none; }
-.th[data-fx="flip"][data-contested="true"] .th-stage { animation: th-pulse 0.64s ease-in-out infinite alternate; }
-@keyframes th-flip { from { transform: rotateY(-72deg) scale(0.9); opacity: 0.2; } to { transform: none; opacity: 1; } }
-@keyframes th-pulse { from { border-color: var(--cs-line); } to { border-color: var(--cs-ring); } }
-
-/* Cut C, static: an old TV changing channel, a burst of snow and a roll. */
-.th[data-fx="static"] .th-shot { animation: th-channel 0.4s ease-out both; }
-.th[data-fx="static"] .th-cut i { display: none; }
-.th[data-fx="static"] .th-cut, .th[data-fx="static"] .th-scan {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1.4 -0.2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 160px 160px;
-}
-.th[data-fx="static"] .th-cut { animation: th-snow 0.4s steps(8) both; }
-.th[data-fx="static"][data-contested="true"] .th-scan { opacity: 0.2; animation: th-snow-loop 0.5s steps(5) infinite; }
-@keyframes th-channel { 0% { transform: translateY(-10%) scaleY(1.04); filter: brightness(2.2) contrast(0.6); } 35% { transform: translateY(4%); filter: brightness(1.3); } 100% { transform: none; filter: none; } }
-@keyframes th-snow { 0% { opacity: 1; background-position: 0 0; } 60% { opacity: 0.8; background-position: 60px 90px; } 100% { opacity: 0; background-position: 130px 40px; } }
-@keyframes th-snow-loop { 0% { background-position: 0 0; } 100% { background-position: 150px 110px; } }
-
-@media (prefers-reduced-motion: reduce) {
-  .th .th-shot { animation: th-fade 0.2s ease-out both !important; }
-  .th .th-cut, .th .th-scan { display: none; }
-  .th .th-stage { animation: none !important; }
-  @keyframes th-fade { from { opacity: 0; } to { opacity: 1; } }
-}
+@media (prefers-reduced-motion: reduce) { .th .th-shot { animation: none; } }
