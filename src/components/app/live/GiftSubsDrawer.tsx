@@ -7,7 +7,7 @@
  * chain and only then grants them — so a gift is never granted unpaid and a
  * paid one is never lost to a dropped confirmation.
  */
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { formatUnits } from 'ethers';
@@ -23,6 +23,7 @@ import {
   clearPendingGift,
   confirmSubscriptionGift,
   quoteSubscriptionGift,
+  reconcilePendingGifts,
   rememberPendingGift,
   type GiftResult,
 } from '@/lib/api/dehub/live-hype';
@@ -75,10 +76,23 @@ export function GiftSubsDrawer({ open, onOpenChange, creatorAddress, creatorName
       setStage('wallet');
       const { sendERC20Token } = await import('@/lib/wallet/send');
       const tx = await sendERC20Token(quote.dhbToken, quote.treasuryAddress, formatUnits(BigInt(quote.dhbAmountWei), 18), 18, chainId);
-      setStage('confirming');
-      await tx.wait();
-      setStage('recording');
+      // Remember the payment as soon as it has a hash: if the receipt wait
+      // times out or the tab closes, the next open still grants the gift.
       rememberPendingGift({ giftId: quote.giftId, hash: tx.hash, chainId });
+      setStage('confirming');
+      let receipt: { status: number } | undefined;
+      try {
+        receipt = await tx.wait();
+      } catch (err) {
+        // A replaced transfer paid nothing, so there is nothing to finish later.
+        if ((err as { code?: string })?.code === 'TRANSACTION_REPLACED') clearPendingGift(quote.giftId);
+        throw err;
+      }
+      if (receipt?.status === 0) {
+        clearPendingGift(quote.giftId);
+        throw Object.assign(new Error(t('liveHype.gift.failed')), { code: 'TRANSACTION_REVERTED' });
+      }
+      setStage('recording');
       // The API reads the chain, which can lag the receipt by a block or two.
       let result: GiftResult | null = null;
       for (let attempt = 0; attempt < 5 && !result; attempt++) {
@@ -100,6 +114,11 @@ export function GiftSubsDrawer({ open, onOpenChange, creatorAddress, creatorName
     onError: (err: Error) => toastTxError(err, t('liveHype.gift.failed'), { context: 'subscribe' }),
     onSettled: () => setStage('idle'),
   });
+
+  // Finish any earlier gift that was paid while its confirmation never landed.
+  useEffect(() => {
+    if (open) void reconcilePendingGifts();
+  }, [open]);
 
   const busy = gift.isPending;
   const canSend = !!plan && !busy && (mode === 'random' ? !!streamId : recipient.trim().length > 1);
