@@ -1,5 +1,5 @@
 {
-  "version": "9df54b730f54344e",
+  "version": "78ff1ffbb21d584a",
   "routes": {
     "/": [
       "ar",
@@ -954,6 +954,13 @@
       "tr"
     ],
     "/guides/feature-spotlight-ad-tech": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/guides/films-huren-online-2026": [
       "ar",
       "es",
       "fr",

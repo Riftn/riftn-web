@@ -2988,6 +2988,32 @@ export const blogPostsMetadata: BlogPost[] = [
 // arrays at runtime in blogUtils.ts — metadata-only logic, no third copy here.
 export const newPostsMetadata: BlogPost[] = [
   {
+    "id": "films-huren-online-2026",
+    "slug": "films-huren-online-2026",
+    "title": "Renting Films Online in the Netherlands in 2026: Where and What It Costs",
+    "excerpt": "Where to rent a film online in the Netherlands, what a rental costs, how long you get to watch it, and how to check every legal option and price for one film in a single search.",
+    "content": "",
+    "bannerImage": "/media/films-huren-online-banner-r2.jpg",
+    "bannerImageAlt": "Renting films online in the Netherlands in 2026: where and what it costs",
+    "author": {
+      "name": "Mal Jan"
+    },
+    "publishedAt": "2026-11-24T23:30:00.000Z",
+    "updatedAt": "2026-11-24T23:30:00.000Z",
+    "tags": [
+      "Films Huren",
+      "Film Rental",
+      "Streaming",
+      "Netherlands",
+      "Riftn Cinema"
+    ],
+    "readingTime": 4,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "Renting Films Online (2026): Where and What It Costs in the Netherlands",
+    "seoDescription": "Where to rent a film online in the Netherlands in 2026, what a rental costs, how long you have to watch, and how to compare every legal option in one search."
+  },
+  {
     "id": "sell-paid-memberships-instagram-tiktok-followers-2026",
     "slug": "sell-paid-memberships-instagram-tiktok-followers-2026",
     "title": "How to Sell Paid Memberships to Your Instagram and TikTok Followers (2026)",
@@ -4072,31 +4098,30 @@ export const newPostsMetadata: BlogPost[] = [
 
 // getLatestPost() result — docs home hero.
 export const latestPostMetadata: BlogPost | undefined = {
-  "id": "sell-paid-memberships-instagram-tiktok-followers-2026",
-  "slug": "sell-paid-memberships-instagram-tiktok-followers-2026",
-  "title": "How to Sell Paid Memberships to Your Instagram and TikTok Followers (2026)",
-  "excerpt": "Turn followers into paying members: where to host a membership, what to offer, how to price it and how to promote it on Instagram and TikTok without breaking their rules.",
+  "id": "films-huren-online-2026",
+  "slug": "films-huren-online-2026",
+  "title": "Renting Films Online in the Netherlands in 2026: Where and What It Costs",
+  "excerpt": "Where to rent a film online in the Netherlands, what a rental costs, how long you get to watch it, and how to check every legal option and price for one film in a single search.",
   "content": "",
-  "bannerImage": "/media/sell-paid-memberships-banner-r2.jpg",
-  "bannerImageAlt": "How to sell paid memberships to your Instagram and TikTok followers in 2026",
+  "bannerImage": "/media/films-huren-online-banner-r2.jpg",
+  "bannerImageAlt": "Renting films online in the Netherlands in 2026: where and what it costs",
   "author": {
     "name": "Mal Jan"
   },
-  "publishedAt": "2026-11-24T23:00:00.000Z",
-  "updatedAt": "2026-11-24T23:00:00.000Z",
+  "publishedAt": "2026-11-24T23:30:00.000Z",
+  "updatedAt": "2026-11-24T23:30:00.000Z",
   "tags": [
-    "Creator Economy",
-    "Memberships",
-    "Instagram",
-    "TikTok",
-    "Monetization",
-    "Riftn"
+    "Films Huren",
+    "Film Rental",
+    "Streaming",
+    "Netherlands",
+    "Riftn Cinema"
   ],
-  "readingTime": 5,
+  "readingTime": 4,
   "featured": false,
   "status": "published",
-  "seoTitle": "How to Sell Paid Memberships to Instagram and TikTok Followers (2026)",
-  "seoDescription": "Turn Instagram and TikTok followers into paying members: where to host a membership, what to offer, how to price it and how to promote it without breaking the rules."
+  "seoTitle": "Renting Films Online (2026): Where and What It Costs in the Netherlands",
+  "seoDescription": "Where to rent a film online in the Netherlands in 2026, what a rental costs, how long you have to watch, and how to compare every legal option in one search."
 };
 
 export const excludedTitles: string[] = [
