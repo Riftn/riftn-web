@@ -340,3 +340,8 @@ https://riftn.com/*
 /sdk/*
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=300
+
+# Self-hosted Manrope (index.html). File names carry the font version, so a
+# new version ships under a new name.
+/fonts/manrope/*
+  Cache-Control: public, max-age=31536000, immutable
