@@ -205,7 +205,7 @@ function StudioStylePicker({ style, onPick, title, hue, theme, seed }: { style: 
     </button>
   );
   const grid = (
-    <div data-audio-studio-style-menu role="group" aria-label={title}>
+    <div data-audio-studio-style-menu role="group" aria-label={title} onWheel={event => event.stopPropagation()}>
       {STYLES.slice(0, shown).map(s => (
         <button key={s.value} type="button" data-active={s.value === style || undefined} aria-pressed={s.value === style} onClick={() => { onPick(s.value); setOpen(false); }}>
           <StylePreview style={s.value} hue={hue} theme={theme} seed={seed} />
