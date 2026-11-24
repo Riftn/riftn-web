@@ -56,3 +56,15 @@ it('leaves faces with nothing up alone, in one request for the whole list', asyn
   expect(onRow).toHaveBeenCalled();
   expect(getUserStories).not.toHaveBeenCalled();
 });
+
+it('draws no corner thumbnail on profiles but a tap still opens their Moments', async () => {
+  useStoriesStore.setState({ viewer: null });
+  const { container } = render(
+    <MomentFace address={ELLA} size={96} noPeek name="Ella"><span>face</span></MomentFace>,
+  );
+  await waitFor(() => expect(container.querySelector('[data-moment-face="unseen"]')).not.toBeNull());
+  expect(container.querySelector('[data-moment-peek]')).toBeNull();
+  expect(container.querySelector('[data-moment-count]')).toBeNull();
+  fireEvent.click(container.querySelector('[data-moment-face]')!);
+  await waitFor(() => expect(useStoriesStore.getState().viewer?.entries[0].items).toHaveLength(2));
+});

@@ -63,6 +63,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLivePlaybackFeedback } from '@/hooks/use-live-playback-feedback';
 
 interface LiveFeedPreviewProps {
+  /** Above the fold: load the cover now (it can be the LCP). */
+  eager?: boolean;
   streamId?: string;
   streamStatus?: string;
   creatorId?: string;
@@ -117,7 +119,7 @@ function mayPlayNow(el: HTMLVideoElement, muted: boolean): boolean {
   return visualActivity.isFeedPlaybackAllowed() || isVideoInPictureInPicture(el) || (!muted && visualActivity.isLivePlaybackAllowed());
 }
 
-export function LiveFeedPreview({ urls, thumbnail, className, fallbackLabel, muted = true, controlsVisible = false, onToggleMute, streamId, streamStatus, creatorId, isOwner, selfReaction, onViewerCount }: LiveFeedPreviewProps) {
+export function LiveFeedPreview({ eager = false, urls, thumbnail, className, fallbackLabel, muted = true, controlsVisible = false, onToggleMute, streamId, streamStatus, creatorId, isOwner, selfReaction, onViewerCount }: LiveFeedPreviewProps) {
   const { t: _copy } = _useCopy();
   const { pathname } = useLocation();
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -410,7 +412,7 @@ export function LiveFeedPreview({ urls, thumbnail, className, fallbackLabel, mut
             alt=""
             aria-hidden="true"
             className="absolute inset-0 w-full h-full object-cover"
-            loading="lazy"
+            loading={eager ? 'eager' : 'lazy'}
           />
         ) : (
           /* No cover — the normal case for a stream published from an encoder,

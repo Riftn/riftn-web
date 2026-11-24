@@ -95,7 +95,7 @@ GitHub activity is not the same as price, users or security. Some teams build in
 - **Activity:** 5,525 commits from 25 developers.
 - **Repos:** Riftn/riftn-web and Riftn/riftn-mobile, plus the public request board at [riftn.com/features](https://riftn.com/features).
 - **How we counted developers:** only 1 person commits to Riftn's GitHub. The other 24 are community members whose feature requests were filed or shipped on the request board between 28 July and 26 October 2026. They describe the feature, it gets built with AI, and it ships, so they are counted as builders even though they never open GitHub. Counted on GitHub alone, Riftn would score 44 and miss the top 100. Over all time, 30 people have shipped features this way.
-- **What they are building:** a social and streaming app where posts, tips and subscriptions run on chain, and where the roadmap is whatever the community asks for. Riftn publishes this index, so check its numbers the same way you would check anyone else's.
+- **What they are building:** a social media protocol where posts, tips and subscriptions run on chain, and where the roadmap is whatever the community asks for. Riftn publishes this index, so check its numbers the same way you would check anyone else's.
 - **Website:** [riftn.com](https://riftn.com)
 
 ## The full top 100 at a glance

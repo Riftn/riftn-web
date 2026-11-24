@@ -1,13 +1,13 @@
 import { useTranslation as _useCopy } from 'react-i18next';
 import BarChart3 from "@/components/ui/cut-icons/stats";
 import Quote from "@/components/ui/cut-icons/quote";
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useIsMobile } from '@/hooks/use-mobile';
 import '@/styles/chat-hold.css';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Wand2, MessageCircleQuestion, FileText, Play, Lock, EyeOff, Timer, Plus, Languages } from "lucide-react";
+import { Loader2, Wand2, MessageCircleQuestion, FileText, Play, Lock, EyeOff, Timer, Plus, Languages, ArrowUp } from "lucide-react";
 import Sparkles from "@/components/ui/cut-icons/assistant";
 import Reply from "@/components/ui/cut-icons/reply";
 import Paperclip from "@/components/ui/cut-icons/attach";
@@ -68,6 +68,8 @@ export interface ChatInputSendArgs {
 }
 
 interface ChatInputProps {
+  /** Phones on /app/messages: the + bar, with every other button in the drawer + opens. */
+  phoneB?: boolean;
   /** Put the caret in the box on mount (a chat just opened from New message, keyboard already up). */
   autoFocus?: boolean;
   onSendMessage: (args: ChatInputSendArgs) => Promise<boolean>;
@@ -112,6 +114,11 @@ interface ChatInputProps {
   /** Cancel the current reply */
   onCancelReply?: () => void;
   /**
+   * A photo or video taken from outside the composer (the camera on an
+   * "Opened" photo). Each new `n` adds the file to the edit screen once.
+   */
+  incomingFile?: { file: File; n: number } | null;
+  /**
    * Pre-fill the composer (e.g. a shared post routed into a fee-gated chat —
    * the user reviews the fee and sends with one tap instead of retyping).
    */
@@ -142,7 +149,7 @@ interface ChatInputProps {
   allowLock?: boolean;
 }
 
-export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, scheduledCount = 0, onPollClick, onNoteClick, sendDisabled, sendDisabledReason, isSendingFee, feeAmount, confirmBeforeSend, canSend, replyTo, onCancelReply, initialText, thread, peerName, draftKey, allowDocuments = true, voiceMaxDuration = 59, allowLock = false, autoFocus = false }: ChatInputProps) {
+export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, scheduledCount = 0, onPollClick, onNoteClick, sendDisabled, sendDisabledReason, isSendingFee, feeAmount, confirmBeforeSend, canSend, replyTo, onCancelReply, incomingFile, initialText, thread, peerName, draftKey, allowDocuments = true, voiceMaxDuration = 59, allowLock = false, autoFocus = false, phoneB = false }: ChatInputProps) {
   const { t: _copy } = _useCopy();
   const { t } = useTranslation();
   const [message, setMessage] = useDraft(draftKey, initialText ?? '');
@@ -208,6 +215,7 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
   const awaitingReply = hasThread && thread![thread!.length - 1]?.from === 'them';
 
   const [composerFocused, setComposerFocused] = useState(false);
+  const [trayOpen, setTrayOpen] = useState(false);
 
   // Where the rail hangs is the ONLY thing the viewport decides now: below the
   // composer on phones, where it fills the band the bottom nav vacates, and as
@@ -495,6 +503,15 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
     clearStudio();
   };
 
+  const lastIncoming = useRef<number | null>(null);
+  useEffect(() => {
+    if (!incomingFile || incomingFile.n === lastIncoming.current) return;
+    lastIncoming.current = incomingFile.n;
+    attachFile(incomingFile.file);
+    // attachFile reads the latest state through refs and setters.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [incomingFile]);
+
   const addToStudio = (file: File, kind: 'image' | 'video') => {
     const url = URL.createObjectURL(file);
     studioUrls.current.push(url);
@@ -755,6 +772,13 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
     dismissLabel: t('messages.turnOffSmartReplies', 'Turn off suggested replies'),
   };
 
+
+  const scheduleDraft = () => onScheduleClick?.({
+    text: message.trim(),
+    hasAttachment: !!(studioItems.length || imageFile || docFile || audioPreview),
+    clear: () => { setMessage.complete(message, ''); resetComposerHeight(); },
+  });
+  const hasSomethingToSend = !!(message.trim() || imageFile || docFile || audioPreview || studioItems.length);
   return (
     <>
     {/* Wide layouts: the rail is a band of its own above the composer, where
@@ -943,7 +967,154 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
         </div>
       )}
 
-      {/* Input Area */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept={allowDocuments ? `image/*,video/*,audio/*,${ATTACHMENT_ACCEPT}` : 'image/*'}
+        onChange={handleAttachPick}
+        multiple
+        className="hidden"
+      />
+      {phoneB ? (
+        <>
+          {/* B bar: + on the left, the field with send inside it. Every other
+              button lives in the drawer the + opens under it. */}
+          <div className="flex items-end gap-2" data-chat-bar-b>
+            <button
+              type="button"
+              data-chat-plus
+              aria-label={_copy('liveChat.attachTitle', { defaultValue: 'Add to message' })}
+              aria-expanded={trayOpen}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => { if (!trayOpen) textareaRef.current?.blur(); setTrayOpen((v) => !v); }}
+              className={cn('grid h-[38px] w-[38px] shrink-0 place-items-center rounded-[10px] transition-colors [&>svg]:h-[22px] [&>svg]:w-[22px]', trayOpen ? 'bg-[var(--pb-accent)] text-[var(--pb-accent-ink)]' : 'bg-[var(--pb-tile)] text-[var(--pb-tile-ink)]')}
+            >
+              {trayOpen ? <X /> : <Plus strokeWidth={2.2} />}
+            </button>
+            <div className="relative flex min-w-0 flex-1 items-end rounded-[19px] border border-white/[0.14] pl-3.5 pr-1">
+              <Textarea
+                ref={textareaRef}
+                data-chat-composer-input
+                placeholder={replyTo ? _copy("governance.discussion.writeReply", { defaultValue: "Write a reply" }) : _copy('messages.composerB', { defaultValue: 'Message' })}
+                value={message}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setMessage(val);
+                  mention.handleInput(val, e.target.selectionStart);
+                  const ta = e.target;
+                  requestAnimationFrame(() => {
+                    ta.style.height = 'auto';
+                    ta.style.height = `${Math.min(ta.scrollHeight, 128)}px`;
+                  });
+                }}
+                onKeyDown={handleKeyDown}
+                onPaste={handlePaste}
+                onFocus={() => { setComposerFocused(true); setTrayOpen(false); }}
+                onBlur={() => setComposerFocused(false)}
+                className="chat-text-input min-h-[36px] max-h-32 flex-1 resize-none border-none bg-transparent px-0 py-[7px] text-base leading-[22px] text-white placeholder:text-zinc-500 focus-visible:ring-0 focus-visible:ring-offset-0"
+                rows={1}
+              />
+              <UserMentionDropdown
+                query={mention.query}
+                isOpen={mention.isOpen}
+                position={mention.position}
+                armed={mention.armed}
+                selectedIndex={mention.selectedIndex}
+                onSelectedIndexChange={mention.setSelectedIndex}
+                onSelect={mention.handleSelect}
+                onClose={mention.handleClose}
+              />
+              <button
+                type="button"
+                data-chat-send
+                aria-label={_copy('dm.sendMessage', { defaultValue: 'Send message' })}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={handleSend}
+                disabled={sendDisabled || isSendingFee || !hasSomethingToSend}
+                title={sendDisabled ? sendDisabledReason : feeAmount ? t('messages.feePerMessage', { amount: feeAmount.toLocaleString() }) : undefined}
+                className={cn('mb-[3px] ml-1.5 flex h-[30px] shrink-0 items-center justify-center gap-1 rounded-full bg-[var(--pb-accent)] text-[var(--pb-accent-ink)] transition-opacity disabled:opacity-35 [&>svg]:h-[17px] [&>svg]:w-[17px]', feeAmount ? 'px-2.5' : 'w-[30px]')}
+              >
+                {isSendingFee ? <Loader2 className="animate-spin" /> : (
+                  <>
+                    {!!feeAmount && <span className="text-[11px] font-bold leading-none">{feeAmount.toLocaleString()}</span>}
+                    <ArrowUp strokeWidth={2.6} />
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+          {trayOpen && (
+            <div data-chat-tray className="grid grid-cols-4 gap-x-1 gap-y-3 px-0.5 pb-1 pt-3">
+              <TrayCell label={allowDocuments ? _copy('dm.attachPhotoOrVideoOrFile', { defaultValue: 'Photo, video or file' }) : _copy("copy.1aa4cb0bcca7", { defaultValue: "Image" })}>
+                <button type="button" data-chat-tool="attach" onClick={() => fileInputRef.current?.click()}><Paperclip /></button>
+              </TrayCell>
+              <TrayCell label={_copy('dm.trayGif', { defaultValue: 'GIF & emoji' })}>
+                <EmojiGifPicker onEmojiSelect={handleEmojiSelect} onGifSelect={handleGifSelect} />
+              </TrayCell>
+              <TrayCell label={_copy('dm.trayVoice', { defaultValue: 'Voice note' })} wide>
+                <VoiceRecorder maxDuration={voiceMaxDuration} onRecordingComplete={handleVoiceRecordingComplete} disabled={sendDisabled} />
+              </TrayCell>
+              {onTipClick && (
+                <TrayCell label={_copy('dm.trayTip', { defaultValue: 'Tip' })}>
+                  <button type="button" onClick={() => { setTrayOpen(false); onTipClick(); }}><Gem /></button>
+                </TrayCell>
+              )}
+              {onPollClick && (
+                <TrayCell label={_copy('dm.trayPoll', { defaultValue: 'Poll' })}>
+                  <button type="button" onClick={() => { setTrayOpen(false); onPollClick(); }}><BarChart3 /></button>
+                </TrayCell>
+              )}
+              {onScheduleClick && (
+                <TrayCell label={_copy('dm.traySchedule', { defaultValue: 'Schedule' })}>
+                  <button type="button" data-chat-tool="schedule" className="relative" onClick={() => { setTrayOpen(false); scheduleDraft(); }}>
+                    <Clock />
+                    {scheduledCount > 0 && <span aria-hidden className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-current" />}
+                  </button>
+                </TrayCell>
+              )}
+              {onNoteClick && (
+                <TrayCell label={_copy('notes.yourNote', { defaultValue: 'Your note' })}>
+                  <button type="button" data-chat-tool="note" onClick={() => { setTrayOpen(false); onNoteClick(); }}><Quote /></button>
+                </TrayCell>
+              )}
+              <TrayCell label={_copy('copy.8fe147696fbf', { defaultValue: 'Translate' })}>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button type="button" data-testid="chat-translate-tile" disabled={!message.trim() || isTranslating}>
+                      {isTranslating ? <Loader2 className="animate-spin" /> : <Languages />}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent align="center" side="top" sideOffset={6} className="w-56 p-1 bg-black/80 backdrop-blur-[24px] border border-white/10 text-white">
+                    <button type="button" data-testid="chat-translate" onClick={() => void handleTranslate()} className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left text-sm hover:bg-white/10">
+                      <Languages className="h-4 w-4 text-zinc-300" />
+                      {_copy('copy.8fe147696fbf', { defaultValue: 'Translate' })}
+                    </button>
+                    <select
+                      aria-label={_copy('copy.a4fe65264ef7', { defaultValue: 'Language' })}
+                      value={translateTo}
+                      onChange={(e) => chooseTranslateTo(e.target.value)}
+                      className="mt-1 w-full rounded-md border border-white/10 bg-white/10 px-2 py-1.5 text-[13px] text-white focus:outline-none"
+                    >
+                      {SUPPORTED_LANGUAGES.map(l => (
+                        <option key={l.code} value={l.code} className="bg-zinc-900 text-white">{l.nativeName}</option>
+                      ))}
+                    </select>
+                  </PopoverContent>
+                </Popover>
+              </TrayCell>
+              <TrayCell label={_copy('dm.trayFix', { defaultValue: 'Fix with AI' })}>
+                <button type="button" disabled={!message.trim() || isEnhancing} onClick={() => void handleEnhanceText()}>
+                  {isEnhancing ? <Loader2 className="animate-spin" /> : <Wand2 />}
+                </button>
+              </TrayCell>
+              <TrayCell label={_copy('dm.trayAsk', { defaultValue: 'Ask @assistant' })}>
+                <button type="button" onClick={() => { setTrayOpen(false); handleAskAssistant(); }}><MessageCircleQuestion /></button>
+              </TrayCell>
+            </div>
+          )}
+        </>
+      ) : (
+      // Input Area
       <div>
         <Textarea
           ref={textareaRef}
@@ -1018,11 +1189,7 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
                   className="relative h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-700"
                   // Keeps the caret (and the phone keyboard) where it is.
                   onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => onScheduleClick({
-                    text: message.trim(),
-                    hasAttachment: !!(studioItems.length || imageFile || docFile || audioPreview),
-                    clear: () => { setMessage.complete(message, ''); resetComposerHeight(); },
-                  })}
+                  onClick={scheduleDraft}
                 >
                   <Clock className="w-5 h-5" />
                   {scheduledCount > 0 && (
@@ -1096,14 +1263,6 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
               ? _copy("dm.attachAnything", { defaultValue: "Attach a photo, video, audio or file" })
               : _copy("copy.21298c62c8e5", { defaultValue: "Attach a file" })}</TooltipContent>
           </Tooltip>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept={allowDocuments ? `image/*,video/*,audio/*,${ATTACHMENT_ACCEPT}` : 'image/*'}
-            onChange={handleAttachPick}
-            multiple
-            className="hidden"
-          />
 
           <VoiceRecorder
             maxDuration={voiceMaxDuration}
@@ -1222,6 +1381,7 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
           </Button>
         </div>
       </div>
+      )}
 
       {/* Phones and tablets: the same rail, under the composer, filling the
           band the bottom nav vacates while a conversation is open. It exists
@@ -1236,5 +1396,22 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
       )}
     </div>
     </>
+  );
+}
+
+/** One tile in the phone composer's + drawer: the control, squared, with its name under it. */
+function TrayCell({ label, wide, children }: { label: string; wide?: boolean; children: ReactNode }) {
+  return (
+    <div
+      data-tray-cell
+      className={cn(
+        'flex min-w-0 flex-col items-center gap-1.5 text-center',
+        '[&>button]:grid [&>button]:h-[54px] [&>button]:w-[54px] [&>button]:place-items-center [&>button]:rounded-[13px] [&>button]:bg-white/[0.08] [&>button]:text-white [&>button]:transition-opacity [&>button:disabled]:opacity-40 [&>button_svg]:!h-6 [&>button_svg]:!w-6',
+        wide && 'has-[[data-voice-recording]]:col-span-4 [&:has([data-voice-recording])>span]:hidden',
+      )}
+    >
+      {children}
+      <span className="line-clamp-2 text-[11.5px] font-semibold leading-[14px] text-white">{label}</span>
+    </div>
   );
 }

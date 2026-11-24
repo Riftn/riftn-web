@@ -382,7 +382,7 @@
     "faqTitle": "Preguntas frecuentes",
     "googlePlay": "Disponible en Google Play",
     "heading": "La aplicación Riftn",
-    "intro1": "Riftn es una red social descentralizada y una aplicación móvil, en desarrollo desde 2021, donde las publicaciones se pueden acuñar en cadena y los creadores conservan su audiencia, su contenido y sus ingresos.",
+    "intro1": "Riftn es un protocolo descentralizado de redes sociales con aplicaciones web y móviles, en desarrollo desde 2021, donde las publicaciones se pueden acuñar en cadena y los creadores conservan su audiencia, su contenido y sus ingresos.",
     "intro2": "Combina un feed cronológico, transmisiones en vivo, mensajería cifrada de extremo a extremo, comunidades gestionadas por los usuarios, una billetera multicadena y recompensas en tokens por ver contenido. La misma cuenta funciona en Android, iPhone y en cualquier navegador moderno.",
     "iphone": "iPhone",
     "learnMore": "¿Quieres el panorama completo? <guide>¿Qué es Riftn?</guide> explica la plataforma en profundidad.",
@@ -1791,7 +1791,7 @@
     "remove": "Eliminar"
   },
   "tip": {
-    "appSent": "¡Propina de {{amount}} DHB enviada!",
+    "appSent": "¡Propina de {{amount}} tokens enviada!",
     "appFailed": "Tu propina no se envió. Inténtalo de nuevo.",
     "title": "Enviar propina",
     "toCreator": "Dar propina a {{name}}",
@@ -4562,6 +4562,20 @@
       "groupDetail": "Chat con muchas personas, público o privado",
       "channelDetail": "Transmitir a seguidores, gratis o de pago",
       "title": "Comienza algo"
+    },
+    "catchUp": {
+      "button": "Ponme al día",
+      "menuHint": "Un resumen privado, enviado a tus mensajes",
+      "last24h": "Últimas 24 horas",
+      "last3d": "Últimos 3 días",
+      "sinceRead": "Desde que leí por última vez",
+      "working": "Preparando tu resumen…",
+      "sent": "Resumen enviado a tus mensajes",
+      "sentCount": "{{window}} · {{formattedCount}} mensajes",
+      "open": "Abrir",
+      "nothing": "No hay nada nuevo",
+      "busy": "Tu resumen ya está en camino. Inténtalo de nuevo en un rato.",
+      "failed": "No se pudo hacer tu resumen. Inténtalo de nuevo."
     }
   },
   "prompt": {
@@ -8132,7 +8146,9 @@
         "low": "Suave",
         "high": "Fuerte"
       },
-      "gateHint": "Silencia tu micro entre palabras para que el teclado y los ventiladores no se oigan."
+      "gateHint": "Silencia tu micro entre palabras para que el teclado y los ventiladores no se oigan.",
+      "hearShared": "Escuchar la pestaña compartida en este ordenador",
+      "hearSharedHint": "Desactívalo para que el sonido de la pestaña siga llegando a tus espectadores mientras tú no lo oyes, y así puedas escuchar otra cosa. Funciona con una pestaña compartida en Chrome, Edge o Brave."
     }
   },
   "liveStudio": {
@@ -8159,7 +8175,8 @@
         "connecting": "Conectando",
         "live": "En vivo",
         "error": "Error"
-      }
+      },
+      "addShort": "Añadir"
     },
     "vertical": {
       "title": "Vista vertical",
@@ -8579,6 +8596,18 @@
         "word-timeout_one": "Puso en *timeout* a {{target}} por {{count}} segundo por \"{{word}}\"",
         "word-timeout_other": "Puso en *timeout* a {{target}} por {{count}} segundos por \"{{word}}\""
       }
+    },
+    "groups": {
+      "stream": "En directo",
+      "streamHint": "Interruptores para durante el directo, adónde se envía tu emisión y el enlace para OBS.",
+      "overlay": "Overlay",
+      "viewers": "Espectadores",
+      "viewersHint": "Encuestas, temporizadores, puntos y recompensas que meten en el directo a quien lo ve.",
+      "chat": "Chat",
+      "chatHint": "Tu bot de chat y las reglas del chat bajo tus emisiones.",
+      "replays": "Después del directo",
+      "replaysTab": "Después",
+      "replaysHint": "Cómo fue tu último directo y clips para compartir."
     }
   },
   "live": {
@@ -9615,7 +9644,8 @@
     "followRequest": "{{name}} ha solicitado seguirte",
     "followAccepted": "{{name}} aceptó tu solicitud de seguimiento",
     "signalFlare": "{{name}} ha enviado una bengala de señal",
-    "newMessage": "{{name}} te ha enviado un mensaje"
+    "newMessage": "{{name}} te ha enviado un mensaje",
+    "unlike": "Ya no me gusta"
   },
   "audioPost": {
     "popOut": "Pop out — sigue escuchando mientras navegas",
@@ -9803,6 +9833,19 @@
     "yourChannelHint": "Pega la dirección de tu canal, el identificador también funciona por sí solo."
   },
   "calls": {
+    "removedByMod": "Un moderador te sacó de esta llamada",
+    "removedFor": "Podrás volver a unirte en {{count}} min.",
+    "mutedByMod": "Un moderador te silenció",
+    "mutedByModHint": "Podrás hablar cuando un moderador te active el micrófono.",
+    "unmutedByMod": "Un moderador te activó el micrófono. Toca el micro para hablar.",
+    "modFailed": "No se pudo. Inténtalo de nuevo.",
+    "modMenu": "Moderar a {{name}}",
+    "modMute": "Silenciar a {{name}}",
+    "modUnmute": "Activar a {{name}}",
+    "modRemove": "Sacar de la llamada",
+    "modRemoved": "Sacado de la llamada",
+    "modMuted": "Silenciado para todos",
+    "modUnmuted": "Micrófono activado",
     "voiceCall": "Llamada de voz Riftn",
     "videoCall": "Videollamada Riftn",
     "incoming": "Llamada entrante",
@@ -9864,7 +9907,17 @@
     "startGroupVoice": "Iniciar una llamada de voz grupal",
     "startGroupVideo": "Iniciar una videollamada grupal",
     "subtitles": "Subtítulos",
-    "you": "Tú"
+    "you": "Tú",
+    "callFull": "Esta llamada está llena",
+    "callFullHint": "Ya tiene el máximo de personas posible. Podrás unirte cuando alguien salga.",
+    "camerasFull": "Cámaras completas",
+    "townHall": "Asamblea",
+    "gridView": "Cuadrícula",
+    "unpin": "Desfijar",
+    "townHallTalking": "{{n}} hablando",
+    "camerasFullJoin": "Estás dentro con la cámara apagada. Podrás encenderla cuando alguien apague la suya.",
+    "camerasFullHint": "Podrás encender la tuya cuando alguien apague la suya.",
+    "full": "Llena"
   },
   "badgeAscension": {
     "reached": "Has llegado a {{tier}}",
@@ -13597,6 +13650,7 @@
   },
   "dm": {
     "shareGroups": "Grupos",
+    "opened": {"photoA11y": "Foto, abierta {{time}}", "videoA11y": "Video, abierto {{time}}", "seenAt": "Visto {{time}}", "replyCamera": "Responder con la cámara", "quotePhoto": "Foto · Abierta", "quoteVideo": "Video · Abierto", "cameraTitle": "Responder a esta foto", "cameraOff": "El acceso a la cámara está desactivado. Sube una foto o un video.", "takePhoto": "Tomar foto", "uploadInstead": "Subir archivo"},
     "openTimer": {
       "secs": "{{n}} s",
       "oneMin": "1 min",
@@ -14002,6 +14056,16 @@
     "reminderLater": "Ahora no"
   },
   "copy": {
+    "1944d5ab19cd": "Traducir a",
+    "98cdcf4f2415": "Buscar idiomas",
+    "48bec8529d3f": "Traducido del {{language}}",
+    "d80d30a1c7fd": "Ya está en {{language}}",
+    "799c26913574": "Controles",
+    "ff73efa451e4": "Muévete con W, A, S, D o las flechas. Mira y dispara con el ratón.",
+    "c718a21950e6": "Espacio salta, Shift esprinta, C te agacha y Z te tumba.",
+    "7d1b81c85706": "R recarga, G lanza una granada, V es el ataque cuerpo a cuerpo, y Q y E te inclinan.",
+    "34669ebeeac1": "1, 2 o Tab cambian de arma. T es la linterna. Escape pausa.",
+    "febe50b0a46e": "En el móvil, muévete con el stick en pantalla y arrastra para mirar alrededor.",
     "3f9b2c71d0a4": "{{n}} resultados",
     "8c4e1a6b2f57": "para “{{query}}”",
     "1d7234ff1b79": "en {{feed}}",
@@ -21854,6 +21918,20 @@
     "notInChat": "Ese enlace es de un chat privado en el que no estás."
   },
   "notes": {
+    "background": "Fondo",
+    "yourPhoto": "Tu foto",
+    "newStatus": "Nuevo estado",
+    "upFor": "Publicado hace {{time}}",
+    "postedAgo": "hace {{time}}",
+    "timeLeft": "quedan {{time}}",
+    "like": "Me gusta",
+    "unlike": "Ya no me gusta",
+    "likedBy": "Le gusta a {{name}}",
+    "likedByMore": "Le gusta a {{name}} y {{others}} más",
+    "likes": "{{total}} me gusta",
+    "edit": "Editar",
+    "deleteShort": "Eliminar",
+    "charsLeft": "Quedan {{count}}",
     "add": "Nota",
     "yourStatus": "Tu estado",
     "whatsUp": "¿Qué tal?",
@@ -23194,6 +23272,25 @@
       "disclaimer": "Las SillyCoins son solo por diversión y no tienen valor. No son una criptomoneda, nunca tocan tu billetera y no se pueden comprar, vender ni cobrar."
     },
     "gratitude": {
+      "withFriend": "Un amigo",
+      "withComputer": "La computadora",
+      "computer": "La computadora",
+      "computerNote": "Responde en unos segundos. Haz que se quede sin ideas nuevas para ganar.",
+      "levelLabel": "Nivel",
+      "levelEasy": "Fácil",
+      "levelNormal": "Normal",
+      "levelHard": "Difícil",
+      "turnLabel": "Tiempo por turno",
+      "turn1m": "1 min",
+      "turn5m": "5 min",
+      "turn1d": "1 día",
+      "playComputer": "Jugar contra la computadora",
+      "computerEach": "{{level}} · {{time}} por turno",
+      "statusComputerTurn": "La computadora está escribiendo…",
+      "chipComputerTurn": "Su turno",
+      "writing": "Escribiendo…",
+      "playAgain": "Jugar otra vez",
+      "empty2": "Aún no hay partidas. Invita a un amigo o juega contra la computadora arriba.",
       "rule1": "Escribe algo por lo que estés agradecido y envíalo.",
       "rule2": "La otra persona responde con lo suyo. Y así sucesivamente.",
       "rule3": "Sin repeticiones. Cada nueva línea se compara con todas las anteriores de la partida.",
@@ -23643,5 +23740,91 @@
     "cantUse": "Esa canción no se puede usar en un perfil. Prueba otra.",
     "play": "Reproducir {{title}}",
     "pause": "Pausar {{title}}"
+  },
+  "binaryMetal": {
+    "title": "Binary Metal",
+    "cardBlurb": "Escribe lo que quieras y escúchalo como un riff de metal. Descarga WAV o MP3.",
+    "seoTitle": "Binary Metal: convierte texto en un riff de metal | Riftn",
+    "seoDescription": "Escribe lo que quieras y escúchalo como heavy metal. Cada letra se vuelve binario, cada 0 una cuerda al aire y cada 1 el primer traste, con batería y bajo a juego. Descarga WAV o MP3, gratis.",
+    "typeLabel": "Escribe lo que quieras",
+    "placeholder": "Tus palabras, tu riff",
+    "empty": "Escribe algo arriba para crear un riff.",
+    "binaryEyebrow": "Binario · cada letra es un compás de 8 notas",
+    "tabEyebrow": "Tablatura · cuerda grave, 0 = al aire, 1 = primer traste",
+    "lanesEyebrow": "La batería y el bajo siguen los bits",
+    "styleEyebrow": "Estilo",
+    "howEyebrow": "Cómo funciona",
+    "how": "Cada letra se convierte en su código binario de 8 bits y suena como un compás. En la cuerda grave, 0 es la cuerda al aire y 1 el primer traste. El bajo dobla la guitarra, el bombo sigue los 1 y la caja marca el ritmo.",
+    "guitar": "Guitarra",
+    "bass": "Bajo",
+    "kick": "Bombo",
+    "snare": "Caja",
+    "tempo": "Tempo",
+    "tuning": "Afinación",
+    "power": "Power chords",
+    "bpm": "{{bpm}} BPM",
+    "slower": "Más lento",
+    "faster": "Más rápido",
+    "play": "Reproducir",
+    "pause": "Pausa",
+    "making": "Creando",
+    "post": "Publicar",
+    "share": "Compartir",
+    "linkCopied": "Enlace copiado",
+    "onDevice": "Hecho en tu dispositivo. No se sube nada salvo que lo publiques.",
+    "postCaption": "\"{{text}}\" como riff de metal. Crea el tuyo: {{url}}",
+    "loadFailed": "Binary Metal no cargó. Actualiza para intentarlo de nuevo.",
+    "playFailed": "Ese riff no se reprodujo. Inténtalo de nuevo.",
+    "exportFailed": "El archivo no se guardó. Inténtalo de nuevo.",
+    "saved": "Guardado",
+    "styles": {
+      "thrash": "Thrash",
+      "doom": "Doom",
+      "blast": "Blast",
+      "groove": "Groove"
+    },
+    "tunings": {
+      "e-standard": "Mi estándar",
+      "drop-d": "Drop D",
+      "drop-c": "Drop C",
+      "b-standard": "Si estándar"
+    }
+  },
+  "freeImages": {
+    "title": "Imágenes gratis",
+    "search": "Busca fotos gratis",
+    "note": "Fotos de uso libre. Añadimos el crédito cuando el autor lo pide.",
+    "empty": "No hay fotos. Prueba otra palabra.",
+    "failed": "No se pudo añadir esa foto. Prueba otra.",
+    "credit": "Foto: {{creator}} ({{license}})"
+  },
+  "arcadeCard": {
+    "best": "Mejor puntuación",
+    "mined": "Monedas minadas",
+    "rankLine": "{{label}} · n.º {{rank}} en la tabla",
+    "shared": "Compartió este juego",
+    "play": "Jugar"
+  },
+  "arcadeShare": {
+    "postCard": "Publicar tu tarjeta de puntuación",
+    "postSnapshot": "Publicar una captura",
+    "shareLink": "Compartir enlace",
+    "snapshotFailed": "No se pudo hacer la captura. Inténtalo de nuevo."
+  },
+  "liveMini": {
+    "minimise": "Minimizar",
+    "minimiseHint": "Sigue viendo mientras navegas",
+    "player": "Reproductor en directo",
+    "soundOnly": "Solo sonido",
+    "showPicture": "Mostrar imagen",
+    "openLive": "Abrir directo",
+    "float": "Flotar sobre otras apps",
+    "play": "Reproducir",
+    "pause": "Pausar",
+    "close": "Cerrar directo",
+    "ended": "Este directo ha terminado"
+  },
+  "liveTimeline": {
+    "backToLive": "Volver al directo"
   }
 }

@@ -168,13 +168,24 @@ describe('edge-rendered pages', () => {
     expectValidTrail(body, 'https://riftn.com/guides/best-decentralized-streaming-apps');
   });
 
-  it('bylines blog posts to the organisation and serves the card as a transformed JPEG', async () => {
+  it('bylines blog posts to their named author and serves the card as a transformed JPEG', async () => {
     network({});
     const post = JSON.parse(MANIFEST)[0];
     const slug = post.slug;
     const { body } = await crawl(`/guides/${slug}`);
     const [article, trail] = (jsonLd(body)[0]['@graph'] as Ld[]);
-    expect(article.author).toEqual({ '@type': 'Organization', name: 'Riftn', url: 'https://riftn.com' });
+    // A person with a bio page, not the company name dressed up as one.
+    expect(post.author).not.toMatch(/team$/i);
+    expect(article.author).toEqual({
+      '@type': 'Person',
+      name: post.author,
+      url: 'https://riftn.com/docs/team',
+      ...(post.author === 'Mal Jan'
+        ? { jobTitle: 'Co-Founder', sameAs: ['https://riftn.com/maldoteth', 'https://x.com/maldoteth'] }
+        : {}),
+      worksFor: { '@type': 'Organization', name: 'Riftn', url: 'https://riftn.com' },
+    });
+    expect(body).toContain(`By <a rel="author" href="https://riftn.com/docs/team">${post.author}</a>`);
     expect(trail['@type']).toBe('BreadcrumbList');
     const image = meta(body, 'og:image')!.replace(/&amp;/g, '&');
     // The post's own banner, read straight from /media and made 1200x630.

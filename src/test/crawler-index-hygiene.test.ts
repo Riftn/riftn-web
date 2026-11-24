@@ -486,6 +486,9 @@ describe('robots.txt', () => {
     expect(everyone).toBeTruthy();
     expect(aiTraining).toMatch(/^Disallow: \/$/m);
   });
+  it('leaves Google-Extended on the rules for everyone, so Gemini can ground answers on Riftn', () => {
+    expect(robots).not.toMatch(/^User-agent: Google-Extended$/im);
+  });
   it('never names a search engine, link previewer or AI search fetcher', () => {
     // A named group replaces the * rules for that crawler, so naming one of
     // these would change what it may read.
@@ -510,18 +513,21 @@ describe('AI training crawlers', () => {
 
   it('get a 403 on pages, relays and files', async () => {
     for (const ua of [GPTBOT, CLAUDEBOT, BYTESPIDER, META_AGENT]) {
-      for (const path of ['/explore', '/maldoteth', '/app/post/7001', '/docsfake', '/_api/api/feed']) {
+      for (const path of ['/explore', '/maldoteth', '/app/post/7001', '/docsfake', '/_api/api/feed',
+        '/premiumfan', '/compare/x', '/creators', '/bridgetjones']) {
         const res = await get(path, ua);
         expect(res.status, `${ua} ${path}`).toBe(403);
       }
     }
   });
   it('may read what Riftn publishes about itself, as robots.txt says', async () => {
-    for (const path of ['/', '/llms.txt', '/docs', '/docs/faq', '/guides/what-is-dehub', '/rss.xml']) {
+    for (const path of ['/', '/llms.txt', '/docs', '/docs/faq', '/guides/what-is-dehub', '/rss.xml',
+      '/compare', '/glossary', '/pricing', '/premium', '/bridge', '/connect', '/connect/claude', '/creator']) {
       expect((await get(path, GPTBOT)).status, path).not.toBe(403);
     }
     const robots = readFileSync(resolve(ROOT, 'public/robots.txt'), 'utf8');
-    for (const allow of ['Allow: /$', 'Allow: /llms.txt', 'Allow: /docs', 'Allow: /guides/', 'Allow: /blog']) {
+    for (const allow of ['Allow: /$', 'Allow: /llms.txt', 'Allow: /docs', 'Allow: /guides/', 'Allow: /blog',
+      'Allow: /compare$', 'Allow: /glossary$', 'Allow: /connect/']) {
       expect(robots).toContain(allow);
     }
   });

@@ -382,7 +382,7 @@
     "faqTitle": "Veelgestelde vragen",
     "googlePlay": "Ontdek het op Google Play",
     "heading": "De Riftn-app",
-    "intro1": "Riftn is een gedecentraliseerd sociaal netwerk en mobiele app, in ontwikkeling sinds 2021, waar posts on-chain kunnen worden gemint en creators hun publiek, hun content en hun inkomsten behouden.",
+    "intro1": "Riftn is een gedecentraliseerd socialemediaprotocol met web- en mobiele apps, in ontwikkeling sinds 2021, waar posts on-chain kunnen worden gemint en creators hun publiek, hun content en hun inkomsten behouden.",
     "intro2": "Het combineert een chronologische feed, livestreaming, end-to-end versleutelde berichten, communities die door gebruikers worden beheerd, een multi-chain wallet en beloningen in tokens voor het kijken. Hetzelfde account werkt op Android, iPhone en in elke moderne browser.",
     "iphone": "iPhone",
     "learnMore": "Wil je het volledige plaatje? <guide>Wat is Riftn?</guide> legt het platform uitgebreid uit.",
@@ -1980,7 +1980,7 @@
     "value": "Waarde"
   },
   "tip": {
-    "appSent": "Fooi van {{amount}} DHB verstuurd!",
+    "appSent": "Fooi van {{amount}} tokens verstuurd!",
     "appFailed": "Je fooi is niet verstuurd. Probeer het opnieuw.",
     "title": "Fooi versturen",
     "toCreator": "Geef {{name}} een fooi",
@@ -4751,6 +4751,20 @@
       "groupDetail": "Chat met veel mensen, openbaar of privé",
       "channelDetail": "Uitzenden naar volgers, gratis of betaald",
       "title": "Start iets"
+    },
+    "catchUp": {
+      "button": "Praat me bij",
+      "menuHint": "Een privé-samenvatting, naar je berichten gestuurd",
+      "last24h": "Laatste 24 uur",
+      "last3d": "Laatste 3 dagen",
+      "sinceRead": "Sinds ik het laatst las",
+      "working": "Je wordt bijgepraat…",
+      "sent": "Samenvatting naar je berichten gestuurd",
+      "sentCount": "{{window}} · {{formattedCount}} berichten",
+      "open": "Openen",
+      "nothing": "Niets nieuws om bij te praten",
+      "busy": "Je samenvatting is onderweg. Probeer het zo opnieuw.",
+      "failed": "Kon je samenvatting niet maken. Probeer het opnieuw."
     }
   },
   "prompt": {
@@ -8321,7 +8335,9 @@
         "low": "Licht",
         "high": "Sterk"
       },
-      "gateHint": "Dempt je microfoon tussen woorden, zodat toetsenbord en ventilatoren niet te horen zijn."
+      "gateHint": "Dempt je microfoon tussen woorden, zodat toetsenbord en ventilatoren niet te horen zijn.",
+      "hearShared": "Gedeeld tabblad horen op deze computer",
+      "hearSharedHint": "Zet uit zodat het geluid van het tabblad naar je kijkers blijft gaan terwijl het bij jou stil is, zodat je iets anders kunt luisteren. Werkt met een gedeeld tabblad in Chrome, Edge of Brave."
     }
   },
   "liveStudio": {
@@ -8348,7 +8364,8 @@
         "connecting": "Verbinden",
         "live": "Live",
         "error": "Fout"
-      }
+      },
+      "addShort": "Toevoegen"
     },
     "vertical": {
       "title": "Verticale weergave",
@@ -8768,6 +8785,18 @@
         "word-timeout_one": "Tijdelijk uitgeschakeld {{target}} voor {{count}} seconde voor \"{{word}}\"",
         "word-timeout_other": "Tijdelijk uitgeschakeld {{target}} voor {{count}} seconden voor \"{{word}}\""
       }
+    },
+    "groups": {
+      "stream": "Live gaan",
+      "streamHint": "Schakelaars voor tijdens de stream, waar je stream naartoe gaat en de link voor OBS.",
+      "overlay": "Overlay",
+      "viewers": "Kijkers",
+      "viewersHint": "Polls, timers, punten en beloningen die je kijkers bij de stream betrekken.",
+      "chat": "Chat",
+      "chatHint": "Je chatbot en de regels voor de chat onder je streams.",
+      "replays": "Na de stream",
+      "replaysTab": "Na",
+      "replaysHint": "Hoe je laatste stream ging en clips die het delen waard zijn."
     }
   },
   "live": {
@@ -9804,7 +9833,8 @@
     "followRequest": "{{name}} verzocht u te volgen",
     "followAccepted": "{{name}} heeft je volgverzoek geaccepteerd",
     "signalFlare": "{{name}} stuurde een signaalflare",
-    "newMessage": "{{name}} heeft je een bericht gestuurd"
+    "newMessage": "{{name}} heeft je een bericht gestuurd",
+    "unlike": "Niet meer leuk"
   },
   "audioPost": {
     "popOut": "Pop out — blijf luisteren terwijl je surft",
@@ -9992,6 +10022,19 @@
     "yourChannelHint": "Plak je kanaaladres — de greep op zijn eigen werkt ook."
   },
   "calls": {
+    "removedByMod": "Een moderator heeft je uit dit gesprek gehaald",
+    "removedFor": "Je kunt over {{count}} min weer meedoen.",
+    "mutedByMod": "Een moderator heeft je gedempt",
+    "mutedByModHint": "Je kunt weer praten zodra een moderator je dempen opheft.",
+    "unmutedByMod": "Een moderator heeft je dempen opgeheven. Tik op de microfoon om te praten.",
+    "modFailed": "Dat lukte niet. Probeer opnieuw.",
+    "modMenu": "{{name}} modereren",
+    "modMute": "{{name}} dempen",
+    "modUnmute": "Dempen van {{name}} opheffen",
+    "modRemove": "Uit gesprek halen",
+    "modRemoved": "Uit het gesprek gehaald",
+    "modMuted": "Gedempt voor iedereen",
+    "modUnmuted": "Dempen opgeheven",
     "voiceCall": "Riftn-spraakoproep",
     "videoCall": "Riftn-videogesprek",
     "incoming": "Inkomende oproep",
@@ -10053,7 +10096,17 @@
     "startGroupVoice": "Groepsspraakoproep starten",
     "startGroupVideo": "Groepsvideogesprek starten",
     "subtitles": "Ondertiteling",
-    "you": "Jij"
+    "you": "Jij",
+    "callFull": "Dit gesprek is vol",
+    "callFullHint": "Er zitten al zoveel mensen in als een gesprek aankan. Je kunt meedoen zodra iemand weggaat.",
+    "camerasFull": "Camera's vol",
+    "townHall": "Zaal",
+    "gridView": "Raster",
+    "unpin": "Losmaken",
+    "townHallTalking": "{{n}} praten",
+    "camerasFullJoin": "Je zit erin met je camera uit. Je kunt hem aanzetten zodra iemand de zijne uitzet.",
+    "camerasFullHint": "Je kunt de jouwe aanzetten zodra iemand de zijne uitzet.",
+    "full": "Vol"
   },
   "badgeAscension": {
     "reached": "Je hebt {{tier}} bereikt",
@@ -13845,6 +13898,7 @@
   },
   "dm": {
     "shareGroups": "Groepen",
+    "opened": {"photoA11y": "Foto, geopend {{time}}", "videoA11y": "Video, geopend {{time}}", "seenAt": "Gezien {{time}}", "replyCamera": "Antwoord met de camera", "quotePhoto": "Foto · Geopend", "quoteVideo": "Video · Geopend", "cameraTitle": "Antwoord op deze foto", "cameraOff": "Cameratoegang staat uit. Upload in plaats daarvan een foto of video.", "takePhoto": "Foto maken", "uploadInstead": "Uploaden"},
     "openTimer": {
       "secs": "{{n}} sec",
       "oneMin": "1 min",
@@ -14250,6 +14304,16 @@
     "reminderLater": "Niet nu"
   },
   "copy": {
+    "1944d5ab19cd": "Vertaal naar",
+    "98cdcf4f2415": "Talen zoeken",
+    "48bec8529d3f": "Vertaald uit het {{language}}",
+    "d80d30a1c7fd": "Al in het {{language}}",
+    "799c26913574": "Besturing",
+    "ff73efa451e4": "Beweeg met W, A, S, D of de pijltjestoetsen. Kijk en schiet met de muis.",
+    "c718a21950e6": "Spatie springt, Shift sprint, C hurkt en Z gaat liggen.",
+    "7d1b81c85706": "R herlaadt, G gooit een granaat, V is een slag van dichtbij, en met Q en E leun je.",
+    "34669ebeeac1": "Met 1, 2 of Tab wissel je van wapen. T is de zaklamp. Escape pauzeert.",
+    "febe50b0a46e": "Op een telefoon beweeg je met de stick op het scherm en sleep je om rond te kijken.",
     "3f9b2c71d0a4": "{{n}} resultaten",
     "8c4e1a6b2f57": "voor “{{query}}”",
     "1d7234ff1b79": "in {{feed}}",
@@ -22102,6 +22166,20 @@
     "notInChat": "Die link is van een privéchat waar je niet in zit."
   },
   "notes": {
+    "background": "Achtergrond",
+    "yourPhoto": "Je foto",
+    "newStatus": "Nieuwe status",
+    "upFor": "{{time}} geleden geplaatst",
+    "postedAgo": "{{time}} geleden",
+    "timeLeft": "nog {{time}}",
+    "like": "Vind ik leuk",
+    "unlike": "Vind ik niet meer leuk",
+    "likedBy": "Leuk gevonden door {{name}}",
+    "likedByMore": "Leuk gevonden door {{name}} en {{others}} anderen",
+    "likes": "{{total}} likes",
+    "edit": "Bewerken",
+    "deleteShort": "Verwijderen",
+    "charsLeft": "Nog {{count}}",
     "add": "Notitie",
     "yourStatus": "Jouw status",
     "whatsUp": "Hoe gaat het?",
@@ -23442,6 +23520,25 @@
       "disclaimer": "SillyCoins zijn gewoon voor de lol en hebben geen waarde. Het is geen cryptomunt, ze komen nooit aan je wallet en je kunt ze niet kopen, verkopen of uitbetalen."
     },
     "gratitude": {
+      "withFriend": "Een vriend",
+      "withComputer": "De computer",
+      "computer": "De computer",
+      "computerNote": "Hij antwoordt binnen een paar seconden. Laat hem door zijn nieuwe ideeën heen raken om te winnen.",
+      "levelLabel": "Niveau",
+      "levelEasy": "Makkelijk",
+      "levelNormal": "Normaal",
+      "levelHard": "Moeilijk",
+      "turnLabel": "Tijd per beurt",
+      "turn1m": "1 min",
+      "turn5m": "5 min",
+      "turn1d": "1 dag",
+      "playComputer": "Speel tegen de computer",
+      "computerEach": "{{level}} · {{time}} per beurt",
+      "statusComputerTurn": "De computer schrijft…",
+      "chipComputerTurn": "Zijn beurt",
+      "writing": "Schrijft…",
+      "playAgain": "Opnieuw spelen",
+      "empty2": "Nog geen spellen. Nodig hierboven een vriend uit of speel tegen de computer.",
       "rule1": "Schrijf één ding waar je dankbaar voor bent en stuur het.",
       "rule2": "De ander antwoordt met het zijne. Zo gaat het heen en weer.",
       "rule3": "Geen herhalingen. Elke nieuwe regel wordt vergeleken met alle eerdere regels in het spel.",
@@ -23891,5 +23988,91 @@
     "cantUse": "Dat nummer kan niet op een profiel. Probeer een ander.",
     "play": "{{title}} afspelen",
     "pause": "{{title}} pauzeren"
+  },
+  "binaryMetal": {
+    "title": "Binary Metal",
+    "cardBlurb": "Typ wat je wilt en hoor het als metalriff. Download als WAV of MP3.",
+    "seoTitle": "Binary Metal: maak van tekst een metalriff | Riftn",
+    "seoDescription": "Typ wat je wilt en hoor het als heavy metal. Elke letter wordt binair, elke 0 een losse snaar en elke 1 het eerste fret, met drums en bas die meespelen. Download als WAV of MP3, gratis.",
+    "typeLabel": "Typ wat je wilt",
+    "placeholder": "Jouw woorden, jouw riff",
+    "empty": "Typ hierboven iets om een riff te maken.",
+    "binaryEyebrow": "Binair · elke letter is één maat van 8 noten",
+    "tabEyebrow": "Gitaartab · lage snaar, 0 = los, 1 = eerste fret",
+    "lanesEyebrow": "Drums en bas volgen de bits",
+    "styleEyebrow": "Stijl",
+    "howEyebrow": "Zo werkt het",
+    "how": "Elke letter wordt zijn 8-bits binaire code en speelt als één maat. Op de lage snaar is 0 de losse snaar en 1 het eerste fret. De bas speelt de gitaar mee, de basdrum volgt de enen en de snaredrum houdt de maat.",
+    "guitar": "Gitaar",
+    "bass": "Bas",
+    "kick": "Basdrum",
+    "snare": "Snaredrum",
+    "tempo": "Tempo",
+    "tuning": "Stemming",
+    "power": "Power chords",
+    "bpm": "{{bpm}} BPM",
+    "slower": "Langzamer",
+    "faster": "Sneller",
+    "play": "Afspelen",
+    "pause": "Pauze",
+    "making": "Bezig",
+    "post": "Plaatsen",
+    "share": "Delen",
+    "linkCopied": "Link gekopieerd",
+    "onDevice": "Gemaakt op je eigen toestel. Er wordt niets geüpload tenzij je het plaatst.",
+    "postCaption": "\"{{text}}\" als metalriff. Maak de jouwe: {{url}}",
+    "loadFailed": "Binary Metal is niet geladen. Vernieuw om het opnieuw te proberen.",
+    "playFailed": "Die riff speelde niet af. Probeer het opnieuw.",
+    "exportFailed": "Het bestand is niet opgeslagen. Probeer het opnieuw.",
+    "saved": "Opgeslagen",
+    "styles": {
+      "thrash": "Thrash",
+      "doom": "Doom",
+      "blast": "Blast",
+      "groove": "Groove"
+    },
+    "tunings": {
+      "e-standard": "E-standaard",
+      "drop-d": "Drop D",
+      "drop-c": "Drop C",
+      "b-standard": "B-standaard"
+    }
+  },
+  "freeImages": {
+    "title": "Gratis afbeeldingen",
+    "search": "Zoek gratis foto's",
+    "note": "Foto's die je vrij mag gebruiken. Een vermelding wordt toegevoegd als de maker dat vraagt.",
+    "empty": "Geen foto's gevonden. Probeer een ander woord.",
+    "failed": "Kon die foto niet toevoegen. Probeer een andere.",
+    "credit": "Foto: {{creator}} ({{license}})"
+  },
+  "arcadeCard": {
+    "best": "Beste score",
+    "mined": "Gedolven munten",
+    "rankLine": "{{label}} · #{{rank}} op het bord",
+    "shared": "Deelde deze game",
+    "play": "Spelen"
+  },
+  "arcadeShare": {
+    "postCard": "Plaats je scorekaart",
+    "postSnapshot": "Momentopname plaatsen",
+    "shareLink": "Link delen",
+    "snapshotFailed": "Momentopname mislukt. Probeer opnieuw."
+  },
+  "liveMini": {
+    "minimise": "Minimaliseren",
+    "minimiseHint": "Blijf kijken terwijl je rondkijkt",
+    "player": "Livespeler",
+    "soundOnly": "Alleen geluid",
+    "showPicture": "Beeld tonen",
+    "openLive": "Live openen",
+    "float": "Zwevend boven andere apps",
+    "play": "Afspelen",
+    "pause": "Pauzeren",
+    "close": "Live sluiten",
+    "ended": "Deze live is afgelopen"
+  },
+  "liveTimeline": {
+    "backToLive": "Terug naar live"
   }
 }

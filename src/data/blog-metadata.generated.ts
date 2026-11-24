@@ -18,7 +18,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/top-100-crypto-projects-2026-banner-r2.jpg",
     "bannerImageAlt": "Top 100 crypto projects 2026 ranked by GitHub activity, by Riftn",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-10-26T23:30:00.000Z",
     "tags": [
@@ -43,14 +43,14 @@ export const blogPostsMetadata: BlogPost[] = [
     "id": "top-50-most-active-open-source-projects-2026",
     "slug": "top-50-most-active-open-source-projects-2026",
     "title": "Top 50 Most Active Open Source Projects 2026, Ranked by GitHub Activity",
-    "seoTitle": "Top 50 Most Active Open Source Projects 2026 (GitHub Data) | Riftn",
-    "seoDescription": "The 50 most active open source projects of 2026, ranked on real GitHub commits and contributors over 90 days. Linux, Chromium, Nixpkgs, LLVM, Firefox, vLLM, PyTorch and more.",
+    "seoTitle": "Top 50 Open Source Projects 2026: Most Active on GitHub, Ranked | Riftn",
+    "seoDescription": "Linux, Chromium and Nixpkgs are the most active open source projects of 2026, and AI projects take 12 of the top 50. The full ranking, on real GitHub commits and contributors over 90 days.",
     "excerpt": "We measured the GitHub history of 205 of the biggest open source projects and ranked the 50 most active on commits and contributors over the last 90 days. Linux, Chromium and Nixpkgs lead, and AI projects take 12 of the 50 spots.",
     "content": "",
     "bannerImage": "/media/top-50-most-active-open-source-projects-2026-banner-manrope.jpg",
     "bannerImageAlt": "Top 50 most active open source projects 2026, ranked by GitHub activity, by Riftn",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-10-26T20:00:00.000Z",
     "tags": [
@@ -81,7 +81,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/top-50-blockchain-projects-2026-banner-manrope.jpg",
     "bannerImageAlt": "Top 50 blockchain projects 2026 ranked by GitHub activity, by Riftn",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-10-26T20:00:00.000Z",
     "tags": [
@@ -111,7 +111,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/top-50-decentralized-social-apps-2026-banner-manrope.jpg",
     "bannerImageAlt": "Top 50 decentralized social apps 2026, the DeSoc Index by Riftn",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-10-25T20:00:00.000Z",
     "tags": [
@@ -140,7 +140,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/maboroshi-how-genjutsu-works-banner-manrope.jpg",
     "bannerImageAlt": "How Higgsfield Genjutsu works, and how Riftn Maboroshi does the same job for less",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-10-24T06:00:00.000Z",
     "tags": [
@@ -171,7 +171,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/maboroshi-genjutsu-alternative-banner-manrope.jpg",
     "bannerImageAlt": "Maboroshi, the Higgsfield Genjutsu alternative on Riftn: swap anyone in a real video, with no subscription",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-10-24T03:00:00.000Z",
     "tags": [
@@ -200,7 +200,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/debate-your-side-banner-manrope.jpg",
     "bannerImageAlt": "Ready to debate your side? Bring it to Riftn.",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-09-14T10:00:00.000Z",
     "tags": [
@@ -225,7 +225,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/social-media-monetization-2026-banner-r2.jpg",
     "bannerImageAlt": "Who pays and when: creator monetization rules across seven social platforms in 2026",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-09-03T09:00:00.000Z",
     "tags": [
@@ -242,8 +242,8 @@ export const blogPostsMetadata: BlogPost[] = [
     "readingTime": 13,
     "featured": true,
     "status": "published",
-    "seoTitle": "How Monetization Works on Social Media Apps: 2026 Rules for Every Platform | Riftn",
-    "seoDescription": "Follower minimums, activity tests, invite walls and payout floors on Instagram, TikTok, YouTube, Facebook, X, Snap and Twitch, plus the 2026 and 2027 changes that reset the numbers."
+    "seoTitle": "Monetization Requirements and Payout Thresholds by App (2026) | Riftn",
+    "seoDescription": "What it takes to get paid on Instagram, TikTok, YouTube, Facebook, X, Snapchat and Twitch in 2026: follower minimums, minimum payout, how often each app pays and which programs are invite-only."
   },
   {
     "id": "young-creators-ground-you-own",
@@ -256,7 +256,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/young-creators-ground-you-own-banner-manrope.jpg",
     "bannerImageAlt": "A young creator publishing on ground they own rather than rent",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-08-28T13:00:00.000Z",
     "updatedAt": "2026-08-28T13:00:00.000Z",
@@ -284,7 +284,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/nil-ends-your-audience-does-not-banner-manrope.jpg",
     "bannerImageAlt": "A college athlete building an audience that outlasts NIL eligibility",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-08-28T12:00:00.000Z",
     "updatedAt": "2026-08-28T12:00:00.000Z",
@@ -312,7 +312,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/teaching-the-creator-economy-banner-manrope.jpg",
     "bannerImageAlt": "A creator economy syllabus examined for what survives a platform change",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-08-28T11:00:00.000Z",
     "updatedAt": "2026-08-28T11:00:00.000Z",
@@ -340,7 +340,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/athlete-is-becoming-a-media-platform-banner-manrope.jpg",
     "bannerImageAlt": "An athlete as a media property, with the fan relationship owned rather than licensed",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-08-28T10:00:00.000Z",
     "updatedAt": "2026-08-28T10:00:00.000Z",
@@ -368,7 +368,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/creators-guide-leaving-instagram-banner-manrope.jpg",
     "bannerImageAlt": "A creator moving from Instagram to a Web3 platform they own on Riftn",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-08-27T13:00:00.000Z",
     "updatedAt": "2026-08-27T13:00:00.000Z",
@@ -396,7 +396,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/creators-guide-leaving-youtube-banner-manrope.jpg",
     "bannerImageAlt": "A creator moving from YouTube to a Web3 platform they own on Riftn",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-08-27T12:00:00.000Z",
     "updatedAt": "2026-08-27T12:00:00.000Z",
@@ -424,7 +424,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/creators-guide-leaving-tiktok-banner-manrope.jpg",
     "bannerImageAlt": "A creator moving from TikTok to a Web3 platform they own on Riftn",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-08-27T11:00:00.000Z",
     "updatedAt": "2026-08-27T11:00:00.000Z",
@@ -449,7 +449,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/ai-creator-studio-banner-r2.jpg",
     "bannerImageAlt": "Riftn Creator, AI credits that never expire, with Veo, Seedance and Kling live",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-08-13T09:00:00.000Z",
     "tags": [
@@ -479,7 +479,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/how-to-buy-dhb-token-uk-banner-r2.jpg",
     "bannerImageAlt": "A guide to buying the DHB token in the UK on the Base network, with the Riftn logo",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-07-03T11:30:00.000Z",
     "updatedAt": "2026-11-15T18:00:00.000Z",
@@ -507,7 +507,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/what-is-dehub-banner-manrope.jpg",
     "bannerImageAlt": "Riftn | the open source, user-owned social platform for creators and communities",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-06-23T10:30:00.000Z",
     "tags": [
@@ -532,7 +532,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/what-is-watch-to-earn-banner-r2.jpg",
     "bannerImageAlt": "Riftn watch-to-earn explained: how viewers earn crypto rewards for watching video on a decentralised social network",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-06-12T14:00:00.000Z",
     "updatedAt": "2026-06-12T14:00:00.000Z",
@@ -560,7 +560,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/best-watch-to-earn-platforms-2026-banner-manrope.jpg",
     "bannerImageAlt": "Illustration ranking the best watch-to-earn platforms of 2026 with Riftn, Theta, XCAD and others",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-05-31T09:45:00.000Z",
     "updatedAt": "2026-05-31T09:45:00.000Z",
@@ -588,7 +588,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/is-watch-to-earn-legit-banner-manrope.jpg",
     "bannerImageAlt": "A viewer weighing up whether watch-to-earn crypto rewards are legitimate on the Riftn decentralised social network",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-05-21T16:20:00.000Z",
     "updatedAt": "2026-05-21T16:20:00.000Z",
@@ -608,14 +608,14 @@ export const blogPostsMetadata: BlogPost[] = [
     "id": "dehub-vs-cheelee-theta-xcad",
     "slug": "dehub-vs-cheelee-theta-xcad-watch-to-earn",
     "title": "Cheelee Alternative: Riftn vs Cheelee vs Theta.tv vs XCAD (2026)",
-    "seoTitle": "Cheelee Alternative: Riftn vs Cheelee, Theta, XCAD | Riftn",
-    "seoDescription": "Looking for a Cheelee alternative? Compare Riftn vs Cheelee, Theta.tv and XCAD Network on cost, payouts and features to pick the best watch-to-earn app in 2026.",
+    "seoTitle": "Cheelee Alternatives and Competitors: Riftn, Theta, XCAD (2026) | Riftn",
+    "seoDescription": "Looking for a Cheelee alternative? Compare Cheelee and its competitors Riftn, Theta.tv and XCAD Network on cost, payouts and features to pick the best watch-to-earn app in 2026.",
     "excerpt": "A head-to-head comparison of Riftn, Cheelee, Theta.tv and XCAD Network on entry cost, payout transparency and features to help you choose the best watch-to-earn app in 2026.",
     "content": "",
     "bannerImage": "/media/dehub-vs-cheelee-theta-xcad-watch-to-earn-banner-r2.jpg",
     "bannerImageAlt": "Riftn compared with Cheelee, Theta.tv and XCAD Network as watch-to-earn alternatives in 2026",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-05-12T10:00:00.000Z",
     "updatedAt": "2026-05-12T10:00:00.000Z",
@@ -643,7 +643,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/tokenized-subscriptions-explained-banner-manrope.jpg",
     "bannerImageAlt": "Tokenised subscriptions on Riftn: an on-chain creator membership held in a wallet, resellable with creator royalties",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-05-02T13:15:00.000Z",
     "updatedAt": "2026-05-02T13:15:00.000Z",
@@ -671,7 +671,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/uk-creators-guide-leaving-tiktok-banner-manrope.jpg",
     "bannerImageAlt": "A UK creator moving from TikTok to a Web3 platform they own on Riftn",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-04-23T11:00:00.000Z",
     "updatedAt": "2026-04-23T11:00:00.000Z",
@@ -699,7 +699,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/free-play-to-earn-games-no-investment-2026-banner-manrope.jpg",
     "bannerImageAlt": "Riftn free play-to-earn arcade featuring the Last Chad Standing MMA battle royale on Base",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-04-13T15:30:00.000Z",
     "updatedAt": "2026-04-13T15:30:00.000Z",
@@ -727,7 +727,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/last-chad-standing-mma-battle-royale-play-to-earn-banner-manrope.jpg",
     "bannerImageAlt": "Last Chad Standing, the Riftn MMA battle-royale play-to-earn game with licensed fighters",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-04-03T10:15:00.000Z",
     "updatedAt": "2026-04-03T10:15:00.000Z",
@@ -755,7 +755,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/watch-to-earn-vs-play-to-earn-vs-move-to-earn-banner-manrope.jpg",
     "bannerImageAlt": "Illustration comparing watch-to-earn, play-to-earn and move-to-earn as branches of x-to-earn",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-03-25T12:40:00.000Z",
     "updatedAt": "2026-03-25T12:40:00.000Z",
@@ -783,7 +783,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/decentralised-social-media-explained-uk-banner-manrope.jpg",
     "bannerImageAlt": "Illustration of a decentralised social media network with user-owned nodes connected across an open protocol",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-03-16T09:30:00.000Z",
     "updatedAt": "2026-03-16T09:30:00.000Z",
@@ -811,7 +811,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/best-decentralised-social-media-platforms-2026-banner-manrope.jpg",
     "bannerImageAlt": "Comparison of the best decentralised social media platforms in 2026 including Riftn, Bluesky, Farcaster, Lens and Mastodon",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-03-06T14:50:00.000Z",
     "updatedAt": "2026-09-15T10:00:00.000Z",
@@ -842,7 +842,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/web3-live-streaming-decentralised-twitch-alternative-banner-manrope.jpg",
     "bannerImageAlt": "Riftn web3 live streaming platform: a decentralised Twitch alternative with on-chain tips",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-02-26T11:20:00.000Z",
     "updatedAt": "2026-02-26T11:20:00.000Z",
@@ -870,7 +870,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/play-to-earn-uk-2026-earnings-hmrc-tax-banner-r2.jpg",
     "bannerImageAlt": "Play-to-earn gaming in the UK with Riftn, showing crypto rewards and HMRC tax considerations",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-02-19T10:00:00.000Z",
     "updatedAt": "2026-02-19T10:00:00.000Z",
@@ -896,7 +896,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/were-finally-here-a-major-dehub-update-banner-r2.jpg",
     "bannerImageAlt": "Riftn Town Hall Overview February 2026 - A Major Riftn Update",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-02-14T12:00:00.000Z",
     "tags": [
@@ -923,7 +923,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/google-playstore-banner-riftn.png",
     "bannerImageAlt": "Riftn Google Play Store listing announcement banner",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2025-12-01T00:00:00.000Z",
     "tags": [
@@ -948,7 +948,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/privacy-first-open-source-e2ee-dehub-banner-r2.jpg",
     "bannerImageAlt": "Riftn End-to-End Encryption Banner - Privacy First Technology",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2025-10-22T00:00:00Z",
     "tags": [
@@ -973,7 +973,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/435d9da9-f69a-405a-92e1-73c030728cd5.png",
     "bannerImageAlt": "Base logo on a blue background, representing the Coinbase integration",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2025-06-15T10:00:00.000Z",
     "tags": [
@@ -996,7 +996,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/443805df-744b-4ab4-80a7-ae59cafe8baa.png",
     "bannerImageAlt": "Riftn UGC Programme banner",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2025-05-10T10:00:00.000Z",
     "tags": [
@@ -1021,7 +1021,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/eeb2e5c9-2347-4865-876e-31f38fe4412a.png",
     "bannerImageAlt": "Riftn Revamped App Feed",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2025-05-03T10:00:00.000Z",
     "tags": [
@@ -1046,7 +1046,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/transparency-hub-dhbscancom-launches-for-contract-activity-t-banner-r2.jpg",
     "bannerImageAlt": "DHBScan.com banner",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2025-04-03T00:00:00.000Z",
     "tags": [
@@ -1071,7 +1071,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/6d868478-769e-4981-b285-4ca5fa215dc5.png",
     "bannerImageAlt": "Last Chad Standing helicopter",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2025-04-01T10:00:00.000Z",
     "tags": [
@@ -1096,7 +1096,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-uptime-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q1 2025 update: Reliability Perfected: 99.99% Uptime for Riftn Streaming",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2025-03-30T10:00:00.000Z",
     "tags": [
@@ -1121,7 +1121,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-livepeer-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q1 2025 update: Scaling New Heights: Livepeer Integration for 50k+ Concurrent Viewers",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2025-03-14T10:00:00.000Z",
     "tags": [
@@ -1146,7 +1146,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/a6275c3d-1dab-43a4-9362-93dd9d96f41c.png",
     "bannerImageAlt": "Riftn Live Streaming logo",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2025-03-10T10:00:00.000Z",
     "tags": [
@@ -1171,7 +1171,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-messaging-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q1 2025 update: Connect and Converse: Advanced Messaging System with Paid/Free DMs",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2025-02-25T10:00:00.000Z",
     "tags": [
@@ -1196,7 +1196,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-ethereum-exit-banner-r2.jpg",
     "bannerImageAlt": "Riftn Q1 2025 update: Strategic Shift: Discontinuing Ethereum Mainnet Support for DHB",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2025-02-01T10:00:00.000Z",
     "tags": [
@@ -1221,7 +1221,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/b632bee7-0228-48be-b4ac-7ac0ab5e9994.png",
     "bannerImageAlt": "Last Chad Standing character helmet",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2025-01-07T00:00:00.000Z",
     "tags": [
@@ -1246,7 +1246,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-cdn-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q1 2025 update: Speed of Light: Custom CDN Achieves Sub-200ms Global Latency",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2025-01-03T00:00:00.000Z",
     "tags": [
@@ -1271,7 +1271,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-depin-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q4 2024 update: The Future of Infrastructure: DePIN Phase 1 Goes Live",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2024-12-13T10:00:00.000Z",
     "tags": [
@@ -1296,7 +1296,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-agency-uk-banner.jpg",
     "bannerImageAlt": "Riftn Q4 2024 update: Leading the Way: Riftn Agency Becomes UK #1 with 1,000 Streamers",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2024-11-22T10:00:00.000Z",
     "tags": [
@@ -1321,7 +1321,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/1-year-review-a-quick-look-back-banner-r2.jpg",
     "bannerImageAlt": "A Look Back In Time",
     "author": {
-      "name": "Riftn"
+      "name": "Mal Jan"
     },
     "publishedAt": "2024-11-12T00:00:00.000Z",
     "tags": [
@@ -1347,7 +1347,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-teaser-1m-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q4 2024 update: The Hype is Real: Last Chad Standing Teaser Hits 1M+ Views",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2024-11-05T10:00:00.000Z",
     "tags": [
@@ -1372,7 +1372,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-subscriptions-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q4 2024 update: Revolutionizing Access: On-Chain Tradable Subscriptions Launch",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2024-10-23T10:00:00.000Z",
     "tags": [
@@ -1397,7 +1397,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/town-hall-ama-october-2024-banner-r2.jpg",
     "bannerImageAlt": "Riftn Town Hall & AMA banner",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2024-10-11T00:00:00.000Z",
     "tags": [
@@ -1423,7 +1423,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/developments-overview-banner-r2.jpg",
     "bannerImageAlt": "Riftn Developments Overview",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2024-09-26T00:00:00.000Z",
     "tags": [
@@ -1448,7 +1448,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-ui-overhaul-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q3 2024 update: Faster and Sleeker: UI Overhaul and 200% Backend Speed Boost",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2024-07-02T00:00:00.000Z",
     "tags": [
@@ -1473,7 +1473,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-positive-feedback-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q3 2024 update: Leveling Up: Major App Upgrade Earns 95% Positive Feedback",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2024-07-01T00:00:00.000Z",
     "tags": [
@@ -1498,7 +1498,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-15-countries-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q2 2024 update: Worldwide Creators: Partnerships Spanning 15 Countries",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2024-04-04T00:00:00.000Z",
     "tags": [
@@ -1523,7 +1523,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-tiktok-agency-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q2 2024 update: Entrepreneurial Spirit: Co-Founders Launch TikTok Agency",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2024-04-03T00:00:00.000Z",
     "tags": [
@@ -1548,7 +1548,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-dubai-banner.jpg",
     "bannerImageAlt": "Riftn Q2 2024 update: Global Footprint: Riftn Expands Middle East Presence via Dubai Event",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2024-04-02T00:00:00.000Z",
     "tags": [
@@ -1573,7 +1573,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-base-listing-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q2 2024 update: Layer 2 Expansion: SDHB Lists on Base",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2024-04-01T00:00:00.000Z",
     "tags": [
@@ -1598,7 +1598,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/bdd1dd4c-eb62-44e7-a205-fced995bdf9f.png",
     "bannerImageAlt": "$1,000,000 Fundraise",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2024-03-08T00:00:00.000Z",
     "tags": [
@@ -1623,7 +1623,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/q1-overview-a-birds-eye-view-banner-r2.jpg",
     "bannerImageAlt": "Q1 Overview: A Bird's Eye View",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2024-02-06T00:00:00.000Z",
     "tags": [
@@ -1648,7 +1648,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-fansite-raise-banner.jpg",
     "bannerImageAlt": "Riftn Q1 2024 update: Fueling Growth: $1M Raised for Fan.site (BJ Fork)",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2024-01-02T00:00:00.000Z",
     "tags": [
@@ -1673,7 +1673,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-eth-listing-banner-r2.jpg",
     "bannerImageAlt": "Riftn Q1 2024 update: Expanding Reach: DHB Lists on Ethereum Mainnet",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2024-01-01T00:00:00.000Z",
     "tags": [
@@ -1698,7 +1698,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-partner-airdrop-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q3 2023 update: Expanding Horizons: Partner Airdrop for Fan.site (BJ Fork)",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2023-11-21T00:00:00.000Z",
     "tags": [
@@ -1723,7 +1723,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/131924d4-97f2-468e-9b52-cbf384e718ea.png",
     "bannerImageAlt": "Bird's Eye Overview",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2023-10-04T00:00:00.000Z",
     "tags": [
@@ -1748,7 +1748,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-auto-liquidity-banner-r2.jpg",
     "bannerImageAlt": "Riftn Q4 2023 update: Smarter Liquidity: Automated Liquidity Provision on DEXs",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2023-10-03T00:00:00.000Z",
     "tags": [
@@ -1773,7 +1773,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-dex-policy-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q4 2023 update: Open and Clear: DEX Policy Implementation and Transparency Commitment",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2023-10-02T00:00:00.000Z",
     "tags": [
@@ -1798,7 +1798,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-gate-delisting-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q4 2023 update: Prioritizing Principles: Voluntary Delisting from Gate.io for Decentralization",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2023-10-01T00:00:00.000Z",
     "tags": [
@@ -1823,7 +1823,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/feature-spotlight-ad-tech-banner-r2.jpg",
     "bannerImageAlt": "Riftn ad tech ecosystem stakeholders",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2023-09-30T10:00:00.000Z",
     "tags": [
@@ -1845,7 +1845,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-fork-framework-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q3 2023 update: Paving the Way: Framework for Community-Driven Forks",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2023-07-04T00:00:00.000Z",
     "tags": [
@@ -1870,7 +1870,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-fork-story-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q3 2023 update: Decentralization in Practice: The Fan.site Fork Story",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2023-07-03T00:00:00.000Z",
     "tags": [
@@ -1895,7 +1895,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-knowledge-transfer-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q3 2023 update: Supporting Growth: Knowledge Transfer to Fan.site Team",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2023-07-02T00:00:00.000Z",
     "tags": [
@@ -1920,7 +1920,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-patents-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q2 2023 update: Protecting Innovation: Patent Applications for Streaming & Watch2Earn Tech",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2023-04-03T00:00:00.000Z",
     "tags": [
@@ -1945,7 +1945,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-press-banner.jpg",
     "bannerImageAlt": "Riftn Q2 2023 update: In the Spotlight: Riftn Featured in TechCrunch and VentureBeat",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2023-04-02T00:00:00.000Z",
     "tags": [
@@ -1970,7 +1970,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-award-banner.jpg",
     "bannerImageAlt": "Riftn Q2 2023 update: Innovation Recognized: Riftn Wins Corporate Livewire Award",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2023-04-01T00:00:00.000Z",
     "tags": [
@@ -1995,7 +1995,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/c1cb14e2-cd34-452e-99c2-ad402724885e.png",
     "bannerImageAlt": "Riftn D'App Test Beta Launch",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2023-01-16T10:00:00.000Z",
     "tags": [
@@ -2020,7 +2020,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-gate-resume-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q1 2023 update: Back in Action: DeHub V2 Trading Resumes on Gate.io",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2023-01-04T00:00:00.000Z",
     "tags": [
@@ -2045,7 +2045,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-analytics-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q1 2023 update: Insights for Creators: Advanced Analytics Dashboard Development Begins",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2023-01-03T00:00:00.000Z",
     "tags": [
@@ -2070,7 +2070,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-tokenized-uploads-banner-r2.jpg",
     "bannerImageAlt": "Riftn Q1 2023 update: Creator Economy Reimagined: Tokenized Uploads & 90% Ad Revenue Share",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2023-01-02T00:00:00.000Z",
     "tags": [
@@ -2095,7 +2095,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/dehub-development-update-dapp-dec-2022-banner-r2.jpg",
     "bannerImageAlt": "Riftn and Binance logos with lightning",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2022-12-12T10:00:00.000Z",
     "tags": [
@@ -2117,7 +2117,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-erc20-banner-r2.jpg",
     "bannerImageAlt": "Riftn Q4 2022 update: Stability First: Adopting Standard ERC20 Tokenomics",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2022-10-03T00:00:00.000Z",
     "tags": [
@@ -2142,7 +2142,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-v2-migration-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q4 2022 update: Moving Forward: Successful Migration of 25,000+ Holders to V2",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2022-10-02T00:00:00.000Z",
     "tags": [
@@ -2167,7 +2167,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-contract-malfunction-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q4 2022 update: The Unforeseen: Navigating a Contract Malfunction and V2 Relaunch",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2022-10-01T00:00:00.000Z",
     "tags": [
@@ -2192,7 +2192,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-raffle-mechanics-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q3 2022 update: Trust and Transparency: On-Chain Verified Raffle Mechanics",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2022-07-05T00:00:00.000Z",
     "tags": [
@@ -2217,7 +2217,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-alliances-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q3 2022 update: Strategic Alliances: Partnering with Real Estate and Legal Experts",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2022-07-04T00:00:00.000Z",
     "tags": [
@@ -2242,7 +2242,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-palawan-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q3 2022 update: Ambitious Ventures: The Palawan Real Estate Tokenization Attempt",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2022-07-03T00:00:00.000Z",
     "tags": [
@@ -2267,7 +2267,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-home-raffle-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q3 2022 update: Dream Big: The $1M Home Crypto Raffle by Riftn",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2022-07-02T00:00:00.000Z",
     "tags": [
@@ -2292,7 +2292,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-nft-marketplace-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q2 2022 update: Empowering Creators: Riftn NFT Marketplace with Royalties",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2022-04-06T00:00:00.000Z",
     "tags": [
@@ -2317,7 +2317,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-compression-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q2 2022 update: Efficient Streaming: Advanced Video Compression Reduces Costs",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2022-04-05T00:00:00.000Z",
     "tags": [
@@ -2342,7 +2342,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-sec-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q2 2022 update: Building Bridges: Philippine SEC Registration Secured",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2022-04-04T00:00:00.000Z",
     "tags": [
@@ -2367,7 +2367,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-chads-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q2 2022 update: The Chads Arrive: Genesis Mint of the Chads NFT Collection",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2022-04-03T00:00:00.000Z",
     "tags": [
@@ -2392,7 +2392,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-documentary-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q2 2022 update: Lights, Camera, Blockchain: Riftn's First Tokenized Documentary",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2022-04-02T00:00:00.000Z",
     "tags": [
@@ -2417,7 +2417,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-4k-streams-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q2 2022 update: Crystal Clear: Riftn Stream App with 4K Support & High Uptime",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2022-04-01T00:00:00.000Z",
     "tags": [
@@ -2442,7 +2442,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-game-engine-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q1 2022 update: Powering Play: Riftn's Custom Mobile Game Engine",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2022-01-05T00:00:00.000Z",
     "tags": [
@@ -2467,7 +2467,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-challenges-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q1 2022 update: Challenge Accepted: Social Features and Friend Challenges Arrive",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2022-01-04T00:00:00.000Z",
     "tags": [
@@ -2492,7 +2492,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-leaderboards-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q1 2022 update: On-Chain Glory: Blockchain Leaderboards and Rewards in Riftn Arcade",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2022-01-03T00:00:00.000Z",
     "tags": [
@@ -2517,7 +2517,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-5000-players-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q1 2022 update: High Score: Riftn Gaming Hits 5,000+ Monthly Active Users",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2022-01-02T00:00:00.000Z",
     "tags": [
@@ -2542,7 +2542,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-arcade-launch-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q1 2022 update: Level Up: Riftn Arcade Launches with 5 Games & Predictions",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2022-01-01T00:00:00.000Z",
     "tags": [
@@ -2567,7 +2567,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-8000-members-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q4 2021 update: Strength in Numbers: Riftn Community Exceeds 8,000 Active Members",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2021-10-05T00:00:00.000Z",
     "tags": [
@@ -2592,7 +2592,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-provably-fair-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q4 2021 update: Fair Play: Provably Fair Randomization in Riftn Games",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2021-10-04T00:00:00.000Z",
     "tags": [
@@ -2617,7 +2617,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-gate-incident-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q4 2021 update: Trials and Tribulations: The Gate.io Listing Agent Incident",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2021-10-03T00:00:00.000Z",
     "tags": [
@@ -2642,7 +2642,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-gate-listing-banner-r2.jpg",
     "bannerImageAlt": "Riftn Q4 2021 update: To the Moon: Gate.io Listing and $10M LP Milestone",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2021-10-02T00:00:00.000Z",
     "tags": [
@@ -2667,7 +2667,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-prediction-games-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q4 2021 update: Game On: Riftn Launches Prediction and Raffle Games",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2021-10-01T00:00:00.000Z",
     "tags": [
@@ -2692,7 +2692,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-team-15-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q3 2021 update: Global Reach: Riftn Team Grows to 15 Strong",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2021-07-05T00:00:00.000Z",
     "tags": [
@@ -2717,7 +2717,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-certik-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q3 2021 update: Fortifying Our Walls: V1 Security Hardened with Certik Audit",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2021-07-04T00:00:00.000Z",
     "tags": [
@@ -2742,7 +2742,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-auto-airdrop-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q3 2021 update: Rewarding Loyalty: Automatic Airdrop for All Holders",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2021-07-03T00:00:00.000Z",
     "tags": [
@@ -2767,7 +2767,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-react-native-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q3 2021 update: Building for All: App Rebuild with React Native",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2021-07-02T00:00:00.000Z",
     "tags": [
@@ -2792,7 +2792,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-rebrand-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q3 2021 update: A New Era: The Rebranding to DeHub",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2021-07-01T00:00:00.000Z",
     "tags": [
@@ -2817,7 +2817,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-v1-security-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q2 2021 update: Navigating Challenges: Addressing a V1 Smart Contract Security Issue",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2021-06-19T10:00:00.000Z",
     "tags": [
@@ -2842,7 +2842,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-pancake-pools-banner-r2.jpg",
     "bannerImageAlt": "Riftn Q2 2021 update: Diving In: First Riftn Liquidity Pools on Pancake Swap",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2021-05-30T10:00:00.000Z",
     "tags": [
@@ -2867,7 +2867,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-governed-listings-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q2 2021 update: Power to the People: Community Governed Listings",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2021-05-15T10:00:00.000Z",
     "tags": [
@@ -2892,7 +2892,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-2000-daus-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q1 2021 update: Early Traction: Riftn's Beta App Hits 2,000 DAUs",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2021-04-20T10:00:00.000Z",
     "tags": [
@@ -2917,7 +2917,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-interviews-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q1 2021 update: Listening to Our Users: 50+ Interviews Shape Riftn",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2021-03-30T10:00:00.000Z",
     "tags": [
@@ -2942,7 +2942,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/7c5ce318-2248-49d4-bb92-dc686c8609f1.png",
     "bannerImageAlt": "FTV - Futurov app on Google Play Store",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2021-03-20T10:00:00.000Z",
     "tags": [
@@ -2964,7 +2964,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/milestone-core-team-banner-manrope.jpg",
     "bannerImageAlt": "Riftn Q1 2021 update: Building the Dream: Riftn's Core Team Assembled",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2021-01-01T00:00:00.000Z",
     "tags": [
@@ -2988,6 +2988,378 @@ export const blogPostsMetadata: BlogPost[] = [
 // arrays at runtime in blogUtils.ts — metadata-only logic, no third copy here.
 export const newPostsMetadata: BlogPost[] = [
   {
+    "id": "redes-sociais-descentralizadas-2026",
+    "slug": "redes-sociais-descentralizadas-2026",
+    "title": "Redes Sociais Descentralizadas em 2026: As Melhores e Como Escolher",
+    "excerpt": "O que é uma rede social descentralizada, quais são as principais em 2026 (Bluesky, Mastodon, Farcaster, Nostr, Lens e Riftn) e como escolher a certa para você.",
+    "content": "",
+    "bannerImage": "/media/redes-sociais-descentralizadas-2026-banner-r2.jpg",
+    "bannerImageAlt": "Redes sociais descentralizadas em 2026: as melhores e como escolher",
+    "author": {
+      "name": "Mal Jan"
+    },
+    "publishedAt": "2026-11-25T00:30:00.000Z",
+    "updatedAt": "2026-11-25T00:30:00.000Z",
+    "tags": [
+      "Redes Sociais Descentralizadas",
+      "Brasil",
+      "Bluesky",
+      "Mastodon",
+      "Fediverso",
+      "Riftn"
+    ],
+    "readingTime": 5,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "Redes Sociais Descentralizadas em 2026: As Melhores e Como Escolher",
+    "seoDescription": "O que é uma rede social descentralizada e quais são as melhores em 2026: Bluesky, Mastodon, Farcaster, Nostr, Lens e Riftn comparados para você escolher."
+  },
+  {
+    "id": "fastest-blockchains-2026",
+    "slug": "fastest-blockchains-2026",
+    "title": "Fastest Blockchains in 2026: Real TPS, Block Time and Finality Compared",
+    "excerpt": "Which blockchain is fastest in 2026? Live transactions per second, peak TPS, block time and finality for 12 major chains, and why the advertised numbers mislead.",
+    "content": "",
+    "bannerImage": "/media/fastest-blockchains-2026-banner-r2.jpg",
+    "bannerImageAlt": "Fastest blockchains in 2026: real TPS, block time and finality for 12 chains compared",
+    "author": {
+      "name": "Mal Jan"
+    },
+    "publishedAt": "2026-11-25T00:00:00.000Z",
+    "updatedAt": "2026-11-25T00:00:00.000Z",
+    "tags": [
+      "Blockchain",
+      "TPS",
+      "Solana",
+      "Ethereum",
+      "Crypto",
+      "Riftn"
+    ],
+    "readingTime": 6,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "Fastest Blockchains in 2026: Real TPS and Finality Compared",
+    "seoDescription": "Fastest blockchains in 2026 ranked by real transactions per second, peak TPS, block time and finality: ICP, Solana, BNB Chain, Sui, Aptos, Base, Ethereum and more."
+  },
+  {
+    "id": "higgsfield-katana-vs-genjutsu",
+    "slug": "higgsfield-katana-vs-genjutsu",
+    "title": "Higgsfield Katana vs Genjutsu: What Each Does, Price and Speed (2026)",
+    "excerpt": "Genjutsu swaps one thing inside a single clip. Katana rebuilds a whole multi-shot edit around your photos. Here is what each one does, what it costs, how fast it is, and a per-clip alternative.",
+    "content": "",
+    "bannerImage": "/media/higgsfield-katana-vs-genjutsu-banner-r2.jpg",
+    "bannerImageAlt": "Higgsfield Katana vs Genjutsu: what each does, price and speed in 2026",
+    "author": {
+      "name": "Mal Jan"
+    },
+    "publishedAt": "2026-11-24T22:30:00.000Z",
+    "updatedAt": "2026-11-24T22:30:00.000Z",
+    "tags": [
+      "AI video",
+      "Higgsfield",
+      "Genjutsu",
+      "Katana",
+      "Maboroshi",
+      "Creator Studio"
+    ],
+    "readingTime": 5,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "Higgsfield Katana vs Genjutsu: Price, Speed and Model (2026)",
+    "seoDescription": "Higgsfield Katana vs Genjutsu in 2026: what each does, what it costs in credits, how long it takes, which model it uses, and a per-clip alternative with no subscription."
+  },
+  {
+    "id": "films-huren-online-2026",
+    "slug": "films-huren-online-2026",
+    "title": "Renting Films Online in the Netherlands in 2026: Where and What It Costs",
+    "excerpt": "Where to rent a film online in the Netherlands, what a rental costs, how long you get to watch it, and how to check every legal option and price for one film in a single search.",
+    "content": "",
+    "bannerImage": "/media/films-huren-online-banner-r2.jpg",
+    "bannerImageAlt": "Renting films online in the Netherlands in 2026: where and what it costs",
+    "author": {
+      "name": "Mal Jan"
+    },
+    "publishedAt": "2026-11-24T23:30:00.000Z",
+    "updatedAt": "2026-11-24T23:30:00.000Z",
+    "tags": [
+      "Films Huren",
+      "Film Rental",
+      "Streaming",
+      "Netherlands",
+      "Riftn Cinema"
+    ],
+    "readingTime": 4,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "Renting Films Online (2026): Where and What It Costs in the Netherlands",
+    "seoDescription": "Where to rent a film online in the Netherlands in 2026, what a rental costs, how long you have to watch, and how to compare every legal option in one search."
+  },
+  {
+    "id": "sell-paid-memberships-instagram-tiktok-followers-2026",
+    "slug": "sell-paid-memberships-instagram-tiktok-followers-2026",
+    "title": "How to Sell Paid Memberships to Your Instagram and TikTok Followers (2026)",
+    "excerpt": "Turn followers into paying members: where to host a membership, what to offer, how to price it and how to promote it on Instagram and TikTok without breaking their rules.",
+    "content": "",
+    "bannerImage": "/media/sell-paid-memberships-banner-r2.jpg",
+    "bannerImageAlt": "How to sell paid memberships to your Instagram and TikTok followers in 2026",
+    "author": {
+      "name": "Mal Jan"
+    },
+    "publishedAt": "2026-11-24T23:00:00.000Z",
+    "updatedAt": "2026-11-24T23:00:00.000Z",
+    "tags": [
+      "Creator Economy",
+      "Memberships",
+      "Instagram",
+      "TikTok",
+      "Monetization",
+      "Riftn"
+    ],
+    "readingTime": 5,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "How to Sell Paid Memberships to Instagram and TikTok Followers (2026)",
+    "seoDescription": "Turn Instagram and TikTok followers into paying members: where to host a membership, what to offer, how to price it and how to promote it without breaking the rules."
+  },
+  {
+    "id": "bluesky-vs-mastodon-vs-farcaster-vs-riftn-privacy",
+    "slug": "bluesky-vs-mastodon-vs-farcaster-vs-riftn-privacy",
+    "title": "Bluesky vs Mastodon vs Farcaster vs Riftn: Which Is Best for Privacy in 2026?",
+    "excerpt": "Four decentralized social networks, compared on what matters for privacy: who can read your messages, what is public by default, who holds your data and who can change the rules.",
+    "content": "",
+    "bannerImage": "/media/bluesky-vs-mastodon-vs-farcaster-vs-riftn-banner-r2.jpg",
+    "bannerImageAlt": "Bluesky vs Mastodon vs Farcaster vs Riftn: which decentralized social network is best for privacy in 2026",
+    "author": {
+      "name": "Mal Jan"
+    },
+    "publishedAt": "2026-11-24T22:00:00.000Z",
+    "updatedAt": "2026-11-24T22:00:00.000Z",
+    "tags": [
+      "Bluesky",
+      "Mastodon",
+      "Farcaster",
+      "Privacy",
+      "Decentralized Social Media",
+      "Riftn"
+    ],
+    "readingTime": 6,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "Bluesky vs Mastodon vs Farcaster vs Riftn: Best for Privacy (2026)",
+    "seoDescription": "Bluesky, Mastodon, Farcaster and Riftn compared on privacy in 2026: encrypted DMs, public likes, hidden follows, who holds your data and who sets the rules."
+  },
+  {
+    "id": "tanrinin-gozu-nedir",
+    "slug": "tanrinin-gozu-nedir",
+    "title": "What Is God's Eye (Tanrının Gözü)? Riftn's Live 3D World Map",
+    "excerpt": "God's Eye, Tanrının Gözü in Turkish, is a free live 3D globe in Riftn's Arcade: flights, satellites, earthquakes and traffic over a spinning Earth. It is not the illegal data panel that uses the same name.",
+    "content": "",
+    "bannerImage": "/media/tanrinin-gozu-nedir-banner-r2.jpg",
+    "bannerImageAlt": "God's Eye, Tanrının Gözü: Riftn's free live 3D world map",
+    "author": {
+      "name": "Mal Jan"
+    },
+    "publishedAt": "2026-11-24T21:00:00.000Z",
+    "updatedAt": "2026-11-24T21:00:00.000Z",
+    "tags": [
+      "God's Eye",
+      "Tanrının Gözü",
+      "3D Globe",
+      "Riftn Arcade",
+      "Online Safety"
+    ],
+    "readingTime": 4,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "God's Eye (Tanrının Gözü): Riftn's Live 3D World Map, Explained",
+    "seoDescription": "What is God's Eye, Tanrının Gözü? A free live 3D globe of flights, satellites and earthquakes on Riftn, and why it has nothing to do with illegal data panels."
+  },
+  {
+    "id": "is-riftn-legit",
+    "slug": "is-riftn-legit",
+    "title": "Is Riftn Legit? Company, Audits, Token and Track Record Since 2021",
+    "excerpt": "Is Riftn safe and legit? Here is what you can check yourself: who runs it, its open source code, its audit, its press coverage, the honest state of its token, and the scams that use its name.",
+    "content": "",
+    "bannerImage": "/media/is-riftn-legit-banner-r2.jpg",
+    "bannerImageAlt": "Is Riftn legit? The company, audit, token and track record since 2021",
+    "author": {
+      "name": "Mal Jan"
+    },
+    "publishedAt": "2026-11-24T20:00:00.000Z",
+    "updatedAt": "2026-11-24T20:00:00.000Z",
+    "tags": [
+      "Riftn",
+      "Is It Legit",
+      "Safety",
+      "Crypto Scams",
+      "DeHub"
+    ],
+    "readingTime": 5,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "Is Riftn Legit? Team, Audit, Token and Track Record (2026)",
+    "seoDescription": "Is Riftn safe and legit? Who runs it, its open source code, CertiK audit, press coverage, the honest state of the $RIFT token and the scams that use its name."
+  },
+  {
+    "id": "claude-of-duty-how-to-play",
+    "slug": "claude-of-duty-how-to-play",
+    "title": "Claude of Duty: How to Play the Browser Shooter (Controls, Tips, FAQ)",
+    "excerpt": "Claude of Duty is a free first-person shooter that runs in your browser and builds every model, texture and sound on your own machine. Here are the controls, the settings that matter and how to get it running smoothly.",
+    "content": "",
+    "bannerImage": "/media/claude-of-duty-how-to-play-banner-r2.jpg",
+    "bannerImageAlt": "Claude of Duty: how to play the free browser shooter, with controls and tips",
+    "author": {
+      "name": "Mal Jan"
+    },
+    "publishedAt": "2026-11-24T19:00:00.000Z",
+    "updatedAt": "2026-11-24T19:00:00.000Z",
+    "tags": [
+      "Claude of Duty",
+      "Browser Games",
+      "FPS",
+      "Riftn Arcade",
+      "Free Games"
+    ],
+    "readingTime": 4,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "Claude of Duty: How to Play, Controls and Tips (Free Browser FPS)",
+    "seoDescription": "How to play Claude of Duty, the free browser shooter: every control, the settings that matter, tips to win fights and why the first load takes a minute."
+  },
+  {
+    "id": "how-does-a-token-get-listed-on-an-exchange-2026",
+    "slug": "how-does-a-token-get-listed-on-an-exchange-2026",
+    "title": "How Does a Token Get Listed on an Exchange? Requirements, Costs and Timeline (2026)",
+    "excerpt": "Anyone can list a token on a decentralised exchange in minutes. A centralised exchange takes weeks or months of legal, technical and liquidity checks. Here is how each route works, what it costs, and the scams to avoid.",
+    "content": "",
+    "bannerImage": "/media/how-a-token-gets-listed-on-an-exchange-banner-r2.jpg",
+    "bannerImageAlt": "Getting listed: how a token gets listed on an exchange, with requirements, costs and timeline for 2026",
+    "author": {
+      "name": "Mal Jan"
+    },
+    "publishedAt": "2026-11-24T18:00:00.000Z",
+    "updatedAt": "2026-11-24T18:00:00.000Z",
+    "tags": [
+      "Token Listing",
+      "Crypto Exchange",
+      "DEX",
+      "MiCA",
+      "Riftn"
+    ],
+    "readingTime": 6,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "How Does a Token Get Listed on an Exchange? (2026 Guide)",
+    "seoDescription": "How tokens get listed on DEX and centralised exchanges in 2026: the requirements, the costs, how long it takes, and the listing scams to avoid."
+  },
+  {
+    "id": "best-free-browser-games-no-download-2026",
+    "slug": "best-free-browser-games-no-download-2026",
+    "title": "Best Free Browser Games With No Download (2026)",
+    "excerpt": "Ten free games that run in a browser tab, from cinematic 3D chess and a neon street brawler to a live 3D globe, a walk through a rainforest and Okey with friends. Nothing to install, nothing to buy.",
+    "content": "",
+    "bannerImage": "/media/best-free-browser-games-no-download-banner-r2.jpg",
+    "bannerImageAlt": "Play in a tab: the best free browser games with no download, in the Riftn Arcade",
+    "author": {
+      "name": "Mal Jan"
+    },
+    "publishedAt": "2026-11-24T17:00:00.000Z",
+    "updatedAt": "2026-11-24T17:00:00.000Z",
+    "tags": [
+      "Browser Games",
+      "Free Games",
+      "Arcade",
+      "Chess",
+      "Riftn"
+    ],
+    "readingTime": 6,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "Best Free Browser Games With No Download (2026)",
+    "seoDescription": "Ten free browser games you can play in a tab with no download: 3D chess, a neon brawler, a live 3D globe, Okey with friends and more, plus five favourites beyond Riftn."
+  },
+  {
+    "id": "how-to-watch-free-live-tv-online-2026",
+    "slug": "how-to-watch-free-live-tv-online-2026",
+    "title": "How to Watch Free Live TV Online in 2026 (Legal Channels, No Sign-Up)",
+    "excerpt": "Free live TV is legal, it plays in any browser, and most of it needs no account. Here is where to find news, sport, film and kids channels from around the world, and how to spot an illegal IPTV deal.",
+    "content": "",
+    "bannerImage": "/media/watch-free-live-tv-online-banner-r2.jpg",
+    "bannerImageAlt": "Free live TV online: legal channels with no sign-up and no subscription, on Riftn TV",
+    "author": {
+      "name": "Mal Jan"
+    },
+    "publishedAt": "2026-11-24T16:00:00.000Z",
+    "updatedAt": "2026-11-24T16:00:00.000Z",
+    "tags": [
+      "Live TV",
+      "Free TV",
+      "Streaming",
+      "IPTV",
+      "Riftn TV"
+    ],
+    "readingTime": 5,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "How to Watch Free Live TV Online (2026): Legal, No Sign-Up",
+    "seoDescription": "Watch free live TV online, legally, in any browser and with no account. Where to find free news, sport, film and kids channels in 2026, and how to avoid illegal IPTV."
+  },
+  {
+    "id": "github-trending-open-source-november-2026",
+    "slug": "github-trending-open-source-november-2026",
+    "title": "GitHub Trending: The 20 Fastest-Rising New Open Source Projects (November 2026)",
+    "excerpt": "The 20 new open source projects that gained the most GitHub stars in their first month, from a tool that explains how any software works to on-device AI agents, a Rust download manager and a container runtime.",
+    "content": "",
+    "bannerImage": "/media/github-trending-open-source-november-2026-banner-r2.jpg",
+    "bannerImageAlt": "GitHub trending: the fastest-rising new open source projects of November 2026",
+    "author": {
+      "name": "Mal Jan"
+    },
+    "publishedAt": "2026-11-24T15:00:00.000Z",
+    "updatedAt": "2026-11-24T15:00:00.000Z",
+    "tags": [
+      "Open Source",
+      "GitHub",
+      "GitHub Trending",
+      "AI Agents",
+      "Rust",
+      "Riftn"
+    ],
+    "readingTime": 6,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "GitHub Trending November 2026: 20 Fastest-Rising Open Source Projects",
+    "seoDescription": "The 20 new open source projects that gained the most GitHub stars between 24 October and 24 November 2026, with what each one does and the trends behind them."
+  },
+  {
+    "id": "creator-payout-thresholds-compared-2026",
+    "slug": "creator-payout-thresholds-compared-2026",
+    "title": "Creator Payout Thresholds and Schedules Compared (2026)",
+    "excerpt": "How many followers you need, the smallest balance you can cash out, and the day the money arrives, for YouTube, TikTok, Twitch, Kick, X, Instagram, Facebook, Snapchat and Riftn.",
+    "content": "",
+    "bannerImage": "/media/creator-payout-thresholds-compared-banner-r2.jpg",
+    "bannerImageAlt": "Who pays first: creator payout thresholds and schedules compared for 2026",
+    "author": {
+      "name": "Mal Jan"
+    },
+    "publishedAt": "2026-11-24T14:00:00.000Z",
+    "updatedAt": "2026-11-24T14:00:00.000Z",
+    "tags": [
+      "Creator Economy",
+      "Monetization",
+      "YouTube",
+      "TikTok",
+      "Twitch",
+      "Kick",
+      "Riftn"
+    ],
+    "readingTime": 7,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "Creator Payout Thresholds Compared (2026): Minimums and Pay Dates",
+    "seoDescription": "Minimum payouts, pay dates and eligibility for YouTube, TikTok, Twitch, Kick, X, Instagram, Facebook, Snapchat and Riftn in 2026, in one table."
+  },
+  {
     "id": "how-to-stream-on-riftn",
     "slug": "how-to-stream-on-riftn",
     "title": "How to Stream on Riftn: Every Way to Go Live, Step by Step",
@@ -2996,7 +3368,7 @@ export const newPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/how-to-stream-on-riftn-banner.jpg",
     "bannerImageAlt": "How to stream on Riftn: every way to go live, step by step",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-11-22T18:00:00.000Z",
     "updatedAt": "2026-11-22T18:00:00.000Z",
@@ -3022,7 +3394,7 @@ export const newPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/youtube-features-users-want-banner-r2.jpg",
     "bannerImageAlt": "YouTube said no: 10 features YouTube users keep asking for that Riftn already built",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-11-20T20:00:00.000Z",
     "updatedAt": "2026-11-20T20:00:00.000Z",
@@ -3048,7 +3420,7 @@ export const newPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/top-10-alternative-social-media-apps-banner-r2.jpg",
     "bannerImageAlt": "Top 10 alternative social media apps in 2026, ranked, with Riftn at number one",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-11-20T15:00:00.000Z",
     "updatedAt": "2026-11-20T15:30:00.000Z",
@@ -3076,7 +3448,7 @@ export const newPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/decentralization-spectrum-banner-r2.jpg",
     "bannerImageAlt": "The decentralization spectrum: how decentralized can social media really get?",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-11-13T22:00:00.000Z",
     "tags": [
@@ -3102,7 +3474,7 @@ export const newPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/is-riftn-the-same-as-dehub-banner-r2.jpg",
     "bannerImageAlt": "DeHub to Riftn, the same platform under a new name",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-11-11T06:00:00.000Z",
     "tags": [
@@ -3127,7 +3499,7 @@ export const newPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/you-will-own-everything-banner-manrope.jpg",
     "bannerImageAlt": "You will own everything, and be happy, the Riftn tagline",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-11-11T04:00:00.000Z",
     "tags": [
@@ -3153,7 +3525,7 @@ export const newPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/open-appeal-binance-876-bnb-banner-manrope.jpg",
     "bannerImageAlt": "Dear Binance, an open appeal from Riftn to recover 876 BNB through the Pioneer Burn",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-11-06T19:26:20.000Z",
     "tags": [
@@ -3179,7 +3551,7 @@ export const newPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/dehub-to-riftn-transition.png",
     "bannerImageAlt": "DeHub to Riftn, the next chapter",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-10-22T18:00:00.000Z",
     "tags": [
@@ -3204,7 +3576,7 @@ export const newPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/dehub-token-exchange-listings-update-2026-banner-r2.jpg",
     "bannerImageAlt": "Riftn listing soon announcement banner",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-09-18T19:32:10.000Z",
     "tags": [
@@ -3229,7 +3601,7 @@ export const newPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/q4-development-overview-banner-manrope.jpg",
     "bannerImageAlt": "Q4 Development Overview - Riftn rocket banner",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-10-17T12:00:00.000Z",
     "tags": [
@@ -3254,7 +3626,7 @@ export const newPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/q3-development-overview-banner-manrope.jpg",
     "bannerImageAlt": "Q3 Development Overview - Riftn rocket banner",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-08-22T12:00:00.000Z",
     "updatedAt": "2026-08-24T12:00:00.000Z",
@@ -3280,7 +3652,7 @@ export const newPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/development-update-dehub-era-starts-final-updates-bug-fixes-banner-r2.jpg",
     "bannerImageAlt": "Riftn Development Update January 2026 - The Riftn Era Starts",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-02-02T14:22:00.000Z",
     "tags": [
@@ -3306,7 +3678,7 @@ export const newPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/town-hall-200k-private-sale-partner-tge-march-2026-banner-r2.jpg",
     "bannerImageAlt": "Riftn Town Hall January 2026 - $200K Private Sale Complete and TGE Announcement",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2026-01-28T12:00:00.000Z",
     "tags": [
@@ -3333,7 +3705,7 @@ export const newPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/yearly-wrap-up-2025-and-2026-roadmap-banner-r2.jpg",
     "bannerImageAlt": "Riftn 2025 Yearly Wrap Up and 2026 Roadmap - fireworks celebration",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2025-12-31T12:00:00.000Z",
     "tags": [
@@ -3362,7 +3734,7 @@ export const newPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/dehub-featured-in-press-banner-manrope.jpg",
     "bannerImageAlt": "Riftn featured in the press, US Weekly, Yahoo Finance, Entrepreneur and Investing.com",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2022-11-18T12:00:00.000Z",
     "tags": [
@@ -3387,7 +3759,7 @@ export const newPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/countdown-begins-dehub-app-store-launch-banner-r2.jpg",
     "bannerImageAlt": "Countdown clock for Riftn app store launch",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2025-11-17T00:00:00.000Z",
     "tags": [
@@ -3412,7 +3784,7 @@ export const newPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/town-hall-ama-banner-new-riftn.png",
     "bannerImageAlt": "Riftn Town Hall and AMA Highlights showcasing major announcements",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2025-11-07T12:00:00.000Z",
     "tags": [
@@ -3439,7 +3811,7 @@ export const newPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/13d7ca20-9fba-4ea4-963d-3b95ec9be963.png",
     "bannerImageAlt": "Mike Hales at TikTok Live Fest event, representing Team First Class Agency's official partnership with TikTok",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2024-11-22T12:00:00.000Z",
     "tags": [
@@ -3465,7 +3837,7 @@ export const newPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/off-ramp-service-revealed-dehub-card-coming-soon-banner-r2.jpg",
     "bannerImageAlt": "Riftn Cards in premium gold finish showcasing modern crypto payment solution",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2025-06-18T12:00:00.000Z",
     "tags": [
@@ -3488,7 +3860,7 @@ export const newPostsMetadata: BlogPost[] = [
     "excerpt": "We're thrilled to unveil a brand new user interface that brings clarity, performance, and creativity to the forefront of your Riftn experience.",
     "content": "",
     "author": {
-      "name": "Riftn Team",
+      "name": "Mal Jan",
       "avatar": "/media/6ad34788-b3fe-4094-bf1b-e930af8eaf62.png"
     },
     "publishedAt": "2025-05-03T00:00:00Z",
@@ -3515,7 +3887,7 @@ export const newPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/interactive-streaming-on-chain-live-streams-with-animated-ti-banner-r2.jpg",
     "bannerImageAlt": "Interactive live streaming with animated tips - Riftn's revolutionary approach to on-chain content creation",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2024-03-10T12:00:00.000Z",
     "tags": [
@@ -3540,7 +3912,7 @@ export const newPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/2022-wrap-up-banner-r2.jpg",
     "bannerImageAlt": "2022 Wrap Up - Riftn year in review with fireworks celebration",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2023-01-04T12:00:00.000Z",
     "tags": [
@@ -3565,7 +3937,7 @@ export const newPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/tokenised-uploads-are-here-banner-r2.jpg",
     "bannerImageAlt": "A glowing Riftn token representing tokenized uploads.",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2023-06-10T12:00:00.000Z",
     "tags": [
@@ -3590,7 +3962,7 @@ export const newPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/award-winning-innovation-dehub-recognised-banner-r2.jpg",
     "bannerImageAlt": "Corporate LiveWire Innovation & Excellence Awards 2023 Winner badge.",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2023-04-20T12:00:00.000Z",
     "tags": [
@@ -3614,7 +3986,7 @@ export const newPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/global-footprint-dehub-expands-middle-east-presence-via-duba-banner-r2.jpg",
     "bannerImageAlt": "Riftn DeTour Dubai event banner",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2024-04-10T12:00:00.000Z",
     "tags": [
@@ -3639,7 +4011,7 @@ export const newPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/base-pool-going-live-soon-banner-r2.jpg",
     "bannerImageAlt": "Riftn launching on Base network announcement banner",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2024-05-14T12:00:00.000Z",
     "tags": [
@@ -3663,7 +4035,7 @@ export const newPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/dehub-takeover-banner-r2.jpg",
     "bannerImageAlt": "Riftn Takeover announcement banner",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2024-08-22T12:00:00.000Z",
     "tags": [
@@ -3687,7 +4059,7 @@ export const newPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/new-multi-year-sponsorship-crusaders-banner-r2.jpg",
     "bannerImageAlt": "Riftn announces new multi-year sponsorship with North Wales Crusaders rugby team",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2024-06-30T12:00:00.000Z",
     "tags": [
@@ -3711,7 +4083,7 @@ export const newPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/public-beta-dapp-report-banner-r2.jpg",
     "bannerImageAlt": "Riftn Beta Overview banner",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2023-03-25T12:00:00.000Z",
     "tags": [
@@ -3736,7 +4108,7 @@ export const newPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/f8cf3fce-cacb-4696-b06d-8b1e2a5d170a.png",
     "bannerImageAlt": "Military helicopter in flight representing the flagship game launch and strategic partnerships",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2025-07-04T12:00:00.000Z",
     "tags": [
@@ -3761,7 +4133,7 @@ export const newPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/coinbase-dhb-banner.png",
     "bannerImageAlt": "$DHB now trading on Coinbase - Riftn leads the decentralized trading revolution",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2025-08-19T12:00:00.000Z",
     "tags": [
@@ -3787,7 +4159,7 @@ export const newPostsMetadata: BlogPost[] = [
     "bannerImage": "/media/bnb-pool-update-banner-new.png",
     "bannerImageAlt": "BNB Pool Update - Riftn's journey to recover 876 BNB stuck from 2022 contract issue",
     "author": {
-      "name": "Riftn Team"
+      "name": "Mal Jan"
     },
     "publishedAt": "2025-09-14T12:00:00.000Z",
     "tags": [
@@ -3807,30 +4179,31 @@ export const newPostsMetadata: BlogPost[] = [
 
 // getLatestPost() result — docs home hero.
 export const latestPostMetadata: BlogPost | undefined = {
-  "id": "how-to-stream-on-riftn",
-  "slug": "how-to-stream-on-riftn",
-  "title": "How to Stream on Riftn: Every Way to Go Live, Step by Step",
-  "excerpt": "Go live from your browser, your phone, the Riftn app, OBS or a capture card. Host audio Stages, bring guests on screen, call your group and multistream to Twitch and YouTube. Then set up alerts, a chat bot, channel points and more in Live Studio. Here is every step.",
+  "id": "redes-sociais-descentralizadas-2026",
+  "slug": "redes-sociais-descentralizadas-2026",
+  "title": "Redes Sociais Descentralizadas em 2026: As Melhores e Como Escolher",
+  "excerpt": "O que é uma rede social descentralizada, quais são as principais em 2026 (Bluesky, Mastodon, Farcaster, Nostr, Lens e Riftn) e como escolher a certa para você.",
   "content": "",
-  "bannerImage": "/media/how-to-stream-on-riftn-banner.jpg",
-  "bannerImageAlt": "How to stream on Riftn: every way to go live, step by step",
+  "bannerImage": "/media/redes-sociais-descentralizadas-2026-banner-r2.jpg",
+  "bannerImageAlt": "Redes sociais descentralizadas em 2026: as melhores e como escolher",
   "author": {
-    "name": "Riftn Team"
+    "name": "Mal Jan"
   },
-  "publishedAt": "2026-11-22T18:00:00.000Z",
-  "updatedAt": "2026-11-22T18:00:00.000Z",
+  "publishedAt": "2026-11-25T00:30:00.000Z",
+  "updatedAt": "2026-11-25T00:30:00.000Z",
   "tags": [
-    "Live Streaming",
-    "How To",
-    "OBS",
-    "Creators",
+    "Redes Sociais Descentralizadas",
+    "Brasil",
+    "Bluesky",
+    "Mastodon",
+    "Fediverso",
     "Riftn"
   ],
-  "readingTime": 11,
+  "readingTime": 5,
   "featured": false,
   "status": "published",
-  "seoTitle": "How to Stream on Riftn (2026): Every Way to Go Live",
-  "seoDescription": "Step-by-step guide to live streaming on Riftn: go live from your browser, phone, the app, OBS or a capture card, host audio Stages, add guests, multistream to Twitch and YouTube, and set up alerts, a chat bot and channel points."
+  "seoTitle": "Redes Sociais Descentralizadas em 2026: As Melhores e Como Escolher",
+  "seoDescription": "O que é uma rede social descentralizada e quais são as melhores em 2026: Bluesky, Mastodon, Farcaster, Nostr, Lens e Riftn comparados para você escolher."
 };
 
 export const excludedTitles: string[] = [

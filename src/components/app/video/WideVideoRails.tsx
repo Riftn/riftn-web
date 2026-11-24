@@ -7,8 +7,15 @@
  * holds only what is new: the title and description, a Follow button, then
  * the top comments and a comment box. Comments load only for a video
  * that has some; follow state loads only for a signed-in viewer.
+ *
+ * The caption here replaces the one under the card, so it carries what that
+ * one has: the card's translation (auto or tapped), clickable links, tags and
+ * mentions, "See more", link cards, and its own Translate button.
  */
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react';
+import { Loader2, RotateCcw } from 'lucide-react';
+import Languages from '@/components/ui/cut-icons/language';
+import { TranslatableText, LANGUAGE_NAMES } from '@/components/app/TranslatableText';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -48,6 +55,9 @@ function RailFollowButton({ video, walletAddress, onLogin }: { video: VideoItem;
       // The theme repaints dark buttons as grey glass, which made Follow look
       // the same as Following. This keeps it dark with its thin white border.
       data-keep-dark={following ? undefined : ''}
+      // Light themes paint it as the house light primary instead (ink with a
+      // white label, light-contrast.css), as the dark slab turned grey there.
+      data-rail-follow={following ? 'following' : 'follow'}
       className={following
         ? 'h-10 w-full rounded-xl border border-white/[0.14] bg-white/[0.06] text-[13.5px] font-bold text-white/85 transition-colors hover:bg-white/[0.1]'
         : 'h-10 w-full rounded-xl border border-white/30 bg-black/50 text-[13.5px] font-bold text-white transition-colors hover:border-white/50 hover:bg-white/[0.06]'}
@@ -129,7 +139,52 @@ function RailCommentBox({ tokenId, walletAddress, onLogin, onPosted, onExpand }:
   );
 }
 
-export function WideVideoPanel({ video, onOpenComments, walletAddress, onLogin, isOwnPost, hideCaption }: {
+/** The card's own translation state, so the panel shows what the card shows. */
+export interface RailTranslate {
+  isTranslated: boolean;
+  isLoading: boolean;
+  error: string | null;
+  onTranslate: () => void;
+  onShowOriginal: () => void;
+  sourceLang?: string | null;
+}
+
+function RailTranslateButton({ control }: { control: RailTranslate }) {
+  const { t } = useTranslation();
+  const lang = control.sourceLang && !['unknown', 'auto', 'und'].includes(control.sourceLang) ? LANGUAGE_NAMES[control.sourceLang] : undefined;
+  const base = 'flex w-fit items-center gap-1.5 text-[12.5px] font-semibold transition-colors';
+  if (control.isTranslated) {
+    return (
+      <div data-rail-translate="translated" className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12.5px] text-white/55">
+        {lang && <span>{t('wideVideo.translatedFrom', { lang, defaultValue: 'Translated from {{lang}}' })}</span>}
+        <button type="button" onClick={(event) => { event.stopPropagation(); control.onShowOriginal(); }} className={`${base} text-white/80 hover:text-white`}>
+          <RotateCcw className="h-3.5 w-3.5" />
+          {t('common.showOriginal', 'Show original')}
+        </button>
+      </div>
+    );
+  }
+  return (
+    <button
+      type="button"
+      data-rail-translate="original"
+      disabled={control.isLoading}
+      onClick={(event) => { event.stopPropagation(); control.onTranslate(); }}
+      className={`${base} ${control.error ? 'text-red-400' : 'text-white/60 hover:text-white'}`}
+    >
+      {control.isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Languages className="h-4 w-4" />}
+      {control.isLoading
+        ? t('common.translating', 'Translating...')
+        : control.error
+          ? control.error
+          : lang
+            ? t('wideVideo.translateFrom', { lang, defaultValue: 'Translate from {{lang}}' })
+            : t('wideVideo.translate', 'Translate')}
+    </button>
+  );
+}
+
+export function WideVideoPanel({ video, onOpenComments, walletAddress, onLogin, isOwnPost, hideCaption, title: shownTitle, body, translate }: {
   video: VideoItem;
   onOpenComments: () => void;
   walletAddress?: string | null;
@@ -137,9 +192,16 @@ export function WideVideoPanel({ video, onOpenComments, walletAddress, onLogin, 
   isOwnPost?: boolean;
   /** Behind a content warning the caption stays closed, same as under the card. */
   hideCaption?: boolean;
+  /** The title as the card shows it: translated once the card has translated it. */
+  title?: string;
+  /** The description as the card renders it (links, "See more", link cards). */
+  body?: ReactNode;
+  /** The card's translate state; leaves out the button when there is nothing to translate. */
+  translate?: RailTranslate;
 }) {
   const { t } = useTranslation();
   const description = (video.description ?? '').trim();
+  const title = shownTitle ?? video.title;
   const tokenId = video.id;
   const [posted, setPosted] = useState(0);
   // Going to write swaps the preview for the full comments panel, so the box
@@ -170,17 +232,30 @@ export function WideVideoPanel({ video, onOpenComments, walletAddress, onLogin, 
       ref={railRef}
       data-wide-rail
       data-no-navigate
-      className="flex min-w-[260px] flex-1 basis-0 flex-col overflow-hidden rounded-2xl border border-white/[0.12] bg-black/40 text-white backdrop-blur-[24px] backdrop-saturate-[160%] shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]"
+      // With comments up, link cards here shrink to their picture (see
+      // media-controls.css) so the comments keep their room.
+      data-rail-compact-links={count > 0 || undefined}
+      // The panel takes the picture's height and never adds its own: size
+      // containment keeps its content out of the row's height. The caption
+      // scrolls, comments clip and the comment box stays pinned.
+      className="flex min-w-[260px] flex-1 basis-0 flex-col overflow-hidden [contain:size] rounded-2xl border border-white/[0.12] bg-black/40 text-white backdrop-blur-[24px] backdrop-saturate-[160%] shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]"
     >
-      <div className="flex flex-col gap-3 p-4">
-        {!hideCaption && video.title && <h3 className="line-clamp-3 break-words text-[17px] font-bold leading-snug">{video.title}</h3>}
-        {!hideCaption && description && description !== video.title && (
-          <p className="line-clamp-4 whitespace-pre-line break-words text-[13.5px] leading-relaxed text-white/80">{description}</p>
+      <div className="flex max-h-[62%] shrink-0 flex-col gap-2.5 p-3">
+        {!hideCaption && (title || body || description) && (
+          // A long caption scrolls inside the panel, so Follow and the comment
+          // box below always stay in view.
+          <div data-rail-caption className="min-h-0 space-y-2 overflow-y-auto overscroll-contain [scrollbar-width:none]">
+            {title && <TranslatableText publicContent text={title} as="h3" hideControls auto={false} className="line-clamp-3 break-words text-[17px] font-bold leading-snug" />}
+            {body ?? (description && description !== video.title && (
+              <p className="line-clamp-4 whitespace-pre-line break-words text-[13.5px] leading-relaxed text-white/80">{description}</p>
+            ))}
+            {translate && <RailTranslateButton control={translate} />}
+          </div>
         )}
-        {!isOwnPost && <RailFollowButton video={video} walletAddress={walletAddress} onLogin={onLogin} />}
+        {!isOwnPost && <div className="shrink-0"><RailFollowButton video={video} walletAddress={walletAddress} onLogin={onLogin} /></div>}
       </div>
 
-      <div className="mx-4 h-px bg-white/[0.08]" />
+      <div className="mx-3 h-px bg-white/[0.08]" />
 
       {writing ? (
         // The same panel and composer as the comments section: attachments,
@@ -203,7 +278,7 @@ export function WideVideoPanel({ video, onOpenComments, walletAddress, onLogin, 
         </div>
       ) : (
         <>
-          <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden p-4">
+          <div className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-hidden px-3 py-2.5">
             <button
               type="button"
               onClick={(event) => { event.stopPropagation(); onOpenComments(); }}
@@ -220,14 +295,15 @@ export function WideVideoPanel({ video, onOpenComments, walletAddress, onLogin, 
                     {row.writor?.avatarUrl && <AvatarImage src={row.writor.avatarUrl} className="rounded-full" />}
                     <AvatarFallback className="rounded-full bg-zinc-700 text-[10px] text-white">{name[0]?.toUpperCase()}</AvatarFallback>
                   </Avatar>
-                  <p className="line-clamp-3 min-w-0 break-words"><b className="mr-1 font-bold">{name}</b>{row.content}</p>
+                  {/* Comments translate on their own, as in the comments section. */}
+                  <p className="line-clamp-3 min-w-0 break-words"><b className="mr-1 font-bold">{name}</b><TranslatableText publicContent text={row.content ?? ''} hideControls /></p>
                 </div>
               );
             })}
             {count === 0 && <p className="text-[13px] text-white/60">{t('wideVideo.noComments', 'No comments yet')}</p>}
           </div>
 
-          <div className="p-4 pt-0">
+          <div className="p-3 pt-0">
             <RailCommentBox tokenId={tokenId} walletAddress={walletAddress} onLogin={onLogin} onPosted={() => setPosted((n) => n + 1)} onExpand={() => setWriting(true)} />
           </div>
         </>

@@ -4,29 +4,29 @@
  * people), and then says "Opened" so it can't be opened again here.
  */
 import { useState } from 'react';
-import { Eye, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { Image as ImageIcon, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { markDmMessageViewed } from '@/lib/api/dehub/dm';
+import { OpenedBubble } from './OpenedMarker';
 
 export function DmViewOncePhoto({
   messageId,
   resolveUrl,
   onOpenImage,
+  onCameraFile,
 }: {
   messageId: string;
   resolveUrl: () => Promise<string | null | undefined> | string | null | undefined;
   onOpenImage?: (url: string) => void;
+  /** Answer it with a photo or video once it has been opened. */
+  onCameraFile?: (file: File) => void;
 }) {
   const { t } = useTranslation();
   const [phase, setPhase] = useState<'closed' | 'starting' | 'done'>('closed');
+  const [openedAt, setOpenedAt] = useState<Date | null>(null);
 
   if (phase === 'done') {
-    return (
-      <div className="flex min-w-[180px] items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5 text-sm text-white/60" data-dm-view-once="done">
-        <Eye className="h-4 w-4 shrink-0" />
-        {t('dm.openTimer.opened', 'Opened')}
-      </div>
-    );
+    return <OpenedBubble kind="image" mine={false} openedAt={openedAt} onCameraFile={onCameraFile} />;
   }
 
   const open = async () => {
@@ -34,6 +34,7 @@ export function DmViewOncePhoto({
     setPhase('starting');
     const url = await Promise.resolve(resolveUrl()).catch(() => null);
     void markDmMessageViewed(messageId).catch(() => undefined);
+    setOpenedAt(new Date());
     setPhase('done');
     if (url) onOpenImage?.(url);
   };

@@ -6,9 +6,9 @@
  *
  * - ambient: the frame runs the full column width and the space beside the
  *   picture shows the playing video itself, blurred and dimmed.
- * - rails:   two panels side by side: the picture at its real shape with
- *   curved corners, and one glass panel beside it with who posted it, what it
- *   is and the top comments. Wide videos already fill the column and show as
+ * - rails:   two panels side by side: one glass panel on the left with what
+ *   it is, a Follow button and the top comments, and the picture on the right
+ *   at its real shape with curved corners. Wide videos already fill the column and show as
  *   normal.
  *
  * Theatre was a choice for a day and was dropped; a stored 'theatre' is not a
@@ -21,6 +21,10 @@ import { useSyncExternalStore } from 'react';
 
 export type WideVideoMode = 'standard' | 'ambient' | 'rails';
 export const WIDE_VIDEO_MODES: readonly WideVideoMode[] = ['standard', 'ambient', 'rails'];
+/**
+ * Ambient for anyone who has not picked one in Settings. A stored pick
+ * (ambient, rails or standard) always wins, so people who chose keep their look.
+ */
 export const DEFAULT_WIDE_VIDEO_MODE: WideVideoMode = 'ambient';
 
 /** Rails need room beside the picture: anything wider than this shows as normal. */

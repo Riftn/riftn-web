@@ -13,6 +13,7 @@
 import { io, Socket } from 'socket.io-client';
 import { DEHUB_API_BASE, getAuthToken } from './core';
 import type { DmMessage, DmConversation, DmMsgType } from './dm';
+import type { DmDestruct } from '@/lib/dm-destruct';
 import { confirmDmSend } from '@/lib/dm-send-confirmation';
 import type { TipBadgeAccount } from '@/lib/tip-badges';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
@@ -65,6 +66,9 @@ export interface DeletedMessage {
   reason?: 'destruct';
   /** "Delete for me": drop it from this person's view entirely. */
   forMe?: boolean;
+  /** An opened view-once / on-open photo was wiped: keep it as an "Opened" marker. */
+  marker?: boolean;
+  destruct?: DmDestruct | null;
 }
 
 export interface DmReactionUpdate {

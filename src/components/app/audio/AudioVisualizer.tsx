@@ -205,7 +205,7 @@ function StudioStylePicker({ style, onPick, title, hue, theme, seed }: { style: 
     </button>
   );
   const grid = (
-    <div data-audio-studio-style-menu role="group" aria-label={title}>
+    <div data-audio-studio-style-menu role="group" aria-label={title} onWheel={event => event.stopPropagation()}>
       {STYLES.slice(0, shown).map(s => (
         <button key={s.value} type="button" data-active={s.value === style || undefined} aria-pressed={s.value === style} onClick={() => { onPick(s.value); setOpen(false); }}>
           <StylePreview style={s.value} hue={hue} theme={theme} seed={seed} />
@@ -391,14 +391,14 @@ export function AudioVisualizer({
   // the artwork behind it, which is why they are banned repo-wide.
   const { ref: chipScrollRef, style: chipFadeStyle } = useScrollFadeMask<HTMLDivElement>();
 
-  // Every card starts on Glass Bars; a pick sticks until it unmounts.
+  // Every card starts on Bars; a pick sticks until it unmounts.
   const styleKey = `dehub.audio.style.${handoffKey || seed}`;
   const readStyle = () => {
     try {
       const saved = window.localStorage.getItem(styleKey);
       if (STYLES.some(item => item.value === saved)) return saved as AnyStyle;
     } catch { /* Storage may be unavailable. */ }
-    return 'glassbars';
+    return 'bars';
   };
   const [style, setStyleState] = useState<AnyStyle>(readStyle);
   useEffect(() => { setStyleState(readStyle()); }, [styleKey, theme]);

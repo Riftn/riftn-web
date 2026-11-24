@@ -9,6 +9,10 @@ const source = vi.hoisted(() => ({ conversations: [] as DeHubConversation[] }));
 vi.mock('@/contexts/AuthContext', async (importOriginal) => ({
   ...await importOriginal<typeof import('@/contexts/AuthContext')>(), useAuth: () => ({ isAuthenticated: true, walletAddress: 'me' }) }));
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
+// Notes translate through the i18n stack this file mocks away; not under test here.
+vi.mock('@/components/app/chat/note-translate', () => ({
+  useNoteWords: (text?: string | null) => ({ shown: text ?? '', isTranslated: false, isLoading: false, offer: false, translate: () => {}, showOriginal: () => {} }),
+}));
 vi.mock('@/hooks/use-room-chat-summaries', () => ({
   useRoomChatSummaries: () => ({}),
   usePublicChatLastLine: () => null,

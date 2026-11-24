@@ -1,5 +1,5 @@
 {
-  "version": "4076c402f13a6204",
+  "version": "0853eae344930965",
   "routes": {
     "/": [
       "ar",
@@ -645,7 +645,21 @@
       "nl",
       "tr"
     ],
+    "/guides/best-free-browser-games-no-download-2026": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
     "/guides/best-watch-to-earn-platforms-2026": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/guides/bluesky-vs-mastodon-vs-farcaster-vs-riftn-privacy": [
       "ar",
       "es",
       "fr",
@@ -687,6 +701,13 @@
       "nl",
       "tr"
     ],
+    "/guides/claude-of-duty-how-to-play": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
     "/guides/community-champions-ugc-ambassadorship-program-launched": [
       "ar",
       "es",
@@ -709,6 +730,13 @@
       "tr"
     ],
     "/guides/creator-economy-reimagined-tokenized-uploads-90-ad-revenue-share": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/guides/creator-payout-thresholds-compared-2026": [
       "ar",
       "es",
       "fr",
@@ -925,7 +953,21 @@
       "nl",
       "tr"
     ],
+    "/guides/fastest-blockchains-2026": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
     "/guides/feature-spotlight-ad-tech": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/guides/films-huren-online-2026": [
       "ar",
       "es",
       "fr",
@@ -974,6 +1016,13 @@
       "nl",
       "tr"
     ],
+    "/guides/github-trending-open-source-november-2026": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
     "/guides/global-footprint-dehub-expands-middle-east-presence-via-dubai-event": [
       "ar",
       "es",
@@ -1016,7 +1065,21 @@
       "vi",
       "zh"
     ],
+    "/guides/higgsfield-katana-vs-genjutsu": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
     "/guides/high-score-dehub-gaming-hits-5000-monthly-active-users": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/guides/how-does-a-token-get-listed-on-an-exchange-2026": [
       "ar",
       "es",
       "fr",
@@ -1065,6 +1128,13 @@
       "nl",
       "tr"
     ],
+    "/guides/how-to-watch-free-live-tv-online-2026": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
     "/guides/insights-for-creators-advanced-analytics-dashboard-development-begins": [
       "ar",
       "es",
@@ -1073,6 +1143,13 @@
       "tr"
     ],
     "/guides/interactive-streaming-on-chain-live-streams-with-animated-tip": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/guides/is-riftn-legit": [
       "ar",
       "es",
       "fr",
@@ -1296,6 +1373,13 @@
       "nl",
       "tr"
     ],
+    "/guides/redes-sociais-descentralizadas-2026": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
     "/guides/reliability-perfected-9999-uptime-for-dehub-streaming": [
       "ar",
       "es",
@@ -1318,6 +1402,13 @@
       "tr"
     ],
     "/guides/scaling-new-heights-livepeer-integration-for-50k-concurrent-viewers": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/guides/sell-paid-memberships-instagram-tiktok-followers-2026": [
       "ar",
       "es",
       "fr",
@@ -1367,6 +1458,13 @@
       "tr"
     ],
     "/guides/supporting-growth-knowledge-transfer-to-fansite-team": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/guides/tanrinin-gozu-nedir": [
       "ar",
       "es",
       "fr",
@@ -1619,6 +1717,13 @@
       "tr"
     ],
     "/music": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/music/binary-metal": [
       "ar",
       "es",
       "fr",

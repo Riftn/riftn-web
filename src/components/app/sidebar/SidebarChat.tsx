@@ -6,18 +6,17 @@ import { InPlaceEditField, editOnClick } from '@/components/app/chat/InPlaceEdit
 import { cn } from '@/lib/utils';
 import { useDraft } from '@/hooks/use-draft';
 import { useStickToBottom } from '@/hooks/use-stick-to-bottom';
-import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
+import { useState, useId, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
 import { Loader2 } from "lucide-react";
 import Reply from "@/components/ui/cut-icons/reply";
 
 import Send from "@/components/ui/cut-icons/send";
-import Mic from "@/components/ui/cut-icons/mic";
+import Plus from "@/components/ui/cut-icons/add";
 import Attach from "@/components/ui/cut-icons/attach";
 import Fullscreen from "@/components/ui/cut-icons/fullscreen";
 import X from "@/components/ui/cut-icons/close";
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { UserMentionDropdown } from '@/components/app/mentions';
 import { useMention } from '@/hooks/use-mention';
@@ -70,6 +69,7 @@ import { ChatTextSizeButton } from '@/components/app/chat/ChatTextSizeButton';
 import { ASSISTANT_PROFILE_PATH, profilePath } from '@/lib/profile-path';
 import { usePublicChatDelete } from '@/components/app/chat/PublicChatDeleteDialog';
 import { useHiddenLines } from '@/lib/public-chat-hidden';
+import { stripBold } from '@/lib/bold-markup';
 
 /**
  * A text message in the side panel, with the same cards every other chat
@@ -222,6 +222,8 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const mediaSendInFlight = useRef(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [composerToolsOpen, setComposerToolsOpen] = useState(false);
+  const composerToolsId = useId();
   useEffect(() => {
     if (!imageFile) { setImagePreview(null); return; }
     const url = URL.createObjectURL(imageFile);
@@ -683,7 +685,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
                     >
                       <CornerDownRight className="w-2.5 h-2.5" />
                       <span className="font-medium">{msg.reply_to.sender_name}</span>
-                      <span className="truncate max-w-[120px]">{msg.reply_to.content}</span>
+                      <span className="truncate max-w-[120px]">{stripBold(msg.reply_to.content)}</span>
                     </button>
                   )}
                   <div className="relative flex items-start gap-2">
@@ -783,7 +785,10 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
       )}
 
       {/* Input */}
-      <div data-sidebar-chat-composer className="pl-3 pr-[14px] py-3">
+      {/* One 12px inset on every side. The 32px buttons keep their hit area but
+          sit out by their 6px of air (-mr/-mb-1.5), so the glyphs land on that
+          inset rather than 6px inside it. */}
+      <div data-sidebar-chat-composer className="p-3">
         {imagePreview && (
           <div className="relative mb-2 w-fit">
             <img src={imagePreview} alt={imageFile?.name || ''} className="h-16 max-w-full rounded-lg object-contain" />
@@ -820,7 +825,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
             }}
             onKeyDown={handleKeyDown}
             maxLength={169}
-            className="chat-text-input min-h-[36px] max-h-32 resize-none text-sm bg-transparent border-none text-white placeholder:text-zinc-500 p-0 pt-1 pr-1 focus-visible:ring-0 focus-visible:ring-offset-0 leading-[1.35]"
+            className="chat-text-input min-h-[36px] max-h-32 resize-none text-sm bg-transparent border-none text-white placeholder:text-zinc-500 p-0 pr-1 focus-visible:ring-0 focus-visible:ring-offset-0 leading-[1.35]"
             rows={1}
             style={{ fieldSizing: 'content' } as React.CSSProperties}
           />
@@ -834,54 +839,82 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
             onSelect={mention.handleSelect}
             onClose={mention.handleClose}
           />
-          <div data-live-chat-toolbar className="flex flex-wrap items-center justify-end gap-2 pt-1">
-            {roomId && (
-              <div className="mr-auto flex items-center gap-3">
-                <LiveChatOnlineCount count={onlineCount} />
-                <ChatTextSizeButton />
-                {/* Opens the full chat page in this tab: it slides in over the
-                    feed (lib/chat-expand), and back / Esc returns here. */}
-                <button
-                  type="button"
-                  data-chat-fullscreen
-                  aria-label={_copy('copy.c461dbb2bab7', { defaultValue: 'Fullscreen' })}
-                  title={_copy('copy.c461dbb2bab7', { defaultValue: 'Fullscreen' })}
-                  onClick={expandChat}
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-700/60 hover:text-white"
-                >
-                  <Fullscreen className="h-4 w-4" />
-                </button>
-              </div>
-            )}
-            <div className="flex max-w-full flex-wrap items-center justify-end gap-2 [&>button]:shrink-0 [&>button]:rounded-lg">
-              <Button type="button" data-chat-composer-action variant="ghost" size="icon" disabled={uploadingImage || isSending} aria-label={_copy("copy.21298c62c8e5", { defaultValue: "Attach a file" })} title={_copy("copy.21298c62c8e5", { defaultValue: "Attach a file" })} onClick={() => {
+          <div data-live-chat-toolbar data-sidebar-composer-toolbar className="-mb-1.5 flex flex-wrap items-center gap-1 pt-1">
+            <div className="mr-auto">
+              {roomId && <LiveChatOnlineCount count={onlineCount} />}
+            </div>
+            <button
+              type="button"
+              aria-label={_copy('chat.moreActions', { defaultValue: 'More chat actions' })}
+              aria-expanded={composerToolsOpen}
+              aria-controls={composerToolsId}
+              onClick={() => setComposerToolsOpen(open => !open)}
+              className="inline-flex h-8 w-8 items-center justify-center"
+            >
+              <Plus className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
+              aria-label={_copy('dm.sendMessage', { defaultValue: 'Send message' })}
+              onClick={(event) => {
+                if (!newMessage.trim() && !imageFile) {
+                  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                    event.currentTarget.animate(
+                      [{ translate: '0' }, { translate: '-4px' }, { translate: '4px' }, { translate: '0' }],
+                      { duration: 220, easing: 'ease-in-out' },
+                    );
+                  }
+                  toast.info(_copy('chat.typeFirst', { defaultValue: 'Type first' }), { id: 'sidebar-chat-type-first' });
+                  return;
+                }
+                void handleSend();
+              }}
+              disabled={isSending || uploadingImage}
+              className="-mr-1.5 inline-flex h-8 w-8 items-center justify-center disabled:opacity-50"
+            >
+              {isSending || uploadingImage ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <Send className="h-5 w-5" />
+              )}
+            </button>
+            <div
+              id={composerToolsId}
+              data-sidebar-composer-tools
+              data-open={composerToolsOpen || undefined}
+              className="w-full flex-wrap items-center justify-end gap-1 data-[open=true]:justify-evenly"
+            >
+              {roomId && (
+                <>
+                  <ChatTextSizeButton className="[&>span>span]:text-xl" />
+                  <button
+                    type="button"
+                    data-chat-fullscreen
+                    aria-label={_copy('copy.c461dbb2bab7', { defaultValue: 'Fullscreen' })}
+                    title={_copy('copy.c461dbb2bab7', { defaultValue: 'Fullscreen' })}
+                    onClick={expandChat}
+                    className="inline-flex h-8 w-8 items-center justify-center"
+                  >
+                    <Fullscreen className="h-4 w-4" />
+                  </button>
+                </>
+              )}
+              <button type="button" disabled={uploadingImage || isSending} aria-label={_copy("copy.21298c62c8e5", { defaultValue: "Attach a file" })} title={_copy("copy.21298c62c8e5", { defaultValue: "Attach a file" })} onClick={() => {
                 if (!isAuthenticated) { openLoginModal(); return; }
                 imageInputRef.current?.click();
-              }} className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-700">
+              }} className="inline-flex h-8 w-8 items-center justify-center disabled:opacity-50">
                 <Attach className="h-5 w-5" />
-              </Button>
+              </button>
               <VoiceRecorder
                 onRecordingComplete={handleVoiceRecordingComplete}
                 disabled={isSending || uploadingImage}
+                triggerLabel={_copy('dm.trayVoice', { defaultValue: 'Voice note' })}
               />
               <EmojiGifPicker
                 onEmojiSelect={handleEmojiSelect}
                 onGifSelect={handleGifSelect}
+                triggerLabel={_copy('chat.emojiAndGifs', { defaultValue: 'Emoji and GIFs' })}
               />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleSend}
-                data-chat-composer-action
-                disabled={(!newMessage.trim() && !imageFile) || isSending || uploadingImage}
-                className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-700"
-              >
-                {isSending || uploadingImage ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <Send className="w-5 h-5" />
-                )}
-              </Button>
             </div>
           </div>
         </div>

@@ -137,6 +137,7 @@ export function PollPanel({ poll, onPoll }: Props) {
               maxLength={POLL_QUESTION_MAX}
               placeholder={t('liveStudio.polls.questionPlaceholder')}
               onChange={(e) => setQuestion(e.target.value)}
+              className={SETTINGS_FIELD_CLASS}
             />
           )}
         </Field>
@@ -144,7 +145,7 @@ export function PollPanel({ poll, onPoll }: Props) {
           <Field key={i} label={t('liveStudio.polls.option', { n: i + 1 })}>
             {(id) => (
               <div className="flex items-center gap-2">
-                <Input id={id} value={option} maxLength={POLL_OPTION_MAX} onChange={(e) => setOption(i, e.target.value)} />
+                <Input id={id} value={option} maxLength={POLL_OPTION_MAX} onChange={(e) => setOption(i, e.target.value)} className={SETTINGS_FIELD_CLASS} />
                 {options.length > POLL_MIN_OPTIONS && (
                   <button
                     type="button"

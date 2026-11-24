@@ -4,6 +4,20 @@ import { isRiftnDehubPost } from './posts/isRiftnDehubPost';
 import { decentralizationSpectrumPost } from './posts/decentralizationSpectrumPost';
 import { topAlternativeSocialAppsPost } from './posts/topAlternativeSocialAppsPost';
 import { howToStreamOnRiftnPost } from './posts/howToStreamOnRiftnPost';
+import { creatorPayoutThresholdsPost } from './posts/creatorPayoutThresholdsPost';
+import { githubTrendingNovember2026Post } from './posts/githubTrendingNovember2026Post';
+import { watchFreeLiveTvOnlinePost } from './posts/watchFreeLiveTvOnlinePost';
+import { bestFreeBrowserGamesPost } from './posts/bestFreeBrowserGamesPost';
+import { tokenListingExplainerPost } from './posts/tokenListingExplainerPost';
+import { claudeOfDutyHowToPlayPost } from './posts/claudeOfDutyHowToPlayPost';
+import { isRiftnLegitPost } from './posts/isRiftnLegitPost';
+import { tanrininGozuPost } from './posts/tanrininGozuPost';
+import { blueskyMastodonFarcasterRiftnPost } from './posts/blueskyMastodonFarcasterRiftnPost';
+import { paidMembershipsPost } from './posts/paidMembershipsPost';
+import { filmsHurenPost } from './posts/filmsHurenPost';
+import { katanaVsGenjutsuPost } from './posts/katanaVsGenjutsuPost';
+import { fastestBlockchainsPost } from './posts/fastestBlockchainsPost';
+import { redesSociaisDescentralizadasPost } from './posts/redesSociaisDescentralizadasPost';
 import { youtubeFeaturesUsersWantPost } from './posts/youtubeFeaturesUsersWantPost';
 import { binancePioneerBurnAppealPost } from './posts/binancePioneerBurnAppealPost';
 import { ownEverythingTaglinePost } from './posts/ownEverythingTaglinePost';
@@ -1422,6 +1436,20 @@ const bnbPoolUpdatePost: BlogPostType = {
 };
 
 export const newPosts: BlogPostType[] = [
+  redesSociaisDescentralizadasPost,
+  fastestBlockchainsPost,
+  katanaVsGenjutsuPost,
+  filmsHurenPost,
+  paidMembershipsPost,
+  blueskyMastodonFarcasterRiftnPost,
+  tanrininGozuPost,
+  isRiftnLegitPost,
+  claudeOfDutyHowToPlayPost,
+  tokenListingExplainerPost,
+  bestFreeBrowserGamesPost,
+  watchFreeLiveTvOnlinePost,
+  githubTrendingNovember2026Post,
+  creatorPayoutThresholdsPost,
   howToStreamOnRiftnPost,
   youtubeFeaturesUsersWantPost,
   topAlternativeSocialAppsPost,

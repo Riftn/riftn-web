@@ -51,7 +51,8 @@ it('shows the destination header and Back before scheduling post content', () =>
   paintThenRender();
   expect(result.current).toBe(to);
   expect(document.querySelector('main')?.style.opacity).toBe('0.8');
-  expect(document.querySelector('main')?.inert).toBe(true);
+  // The cover takes the clicks itself; making the page inert restyled the whole feed.
+  expect(document.querySelector('main')?.inert).toBe(false);
   expect(document.querySelector('.app-route-loading-shell')).not.toBeNull();
   act(() => notifyRouteContentReady(to.key));
   expect(document.querySelector('main')?.style.opacity).toBe('0.8');
@@ -98,7 +99,9 @@ it('keeps only the latest destination and ignores stale ready signals', () => {
   paintThenRender();
   expect(result.current).toBe(profile);
   act(() => notifyRouteContentReady('post'));
-  expect(document.querySelector('main')?.inert).toBe(true);
+  // A stale ready signal leaves the newest cover up.
+  expect(document.querySelectorAll('.app-route-loading-shell')).toHaveLength(1);
+  expect(document.querySelector('.app-route-loading-shell')?.hasAttribute('data-leaving')).toBe(false);
   act(() => notifyRouteContentReady('profile'));
   expect(document.querySelector('main')?.inert).toBe(false);
 });

@@ -704,7 +704,7 @@ function ImageCarousel({
       )}
     </div>
   );
-  return wideRails ? <div data-wide-rails-row className="flex items-stretch gap-3">{gallery}{railPanel}</div> : gallery;
+  return wideRails ? <div data-wide-rails-row className="flex items-stretch gap-3">{railPanel}{gallery}</div> : gallery;
 }
 
 /**
@@ -1026,6 +1026,22 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
     sourceLang,
     isTooShort: nothingToTranslate,
   } = useTranslation(descriptionText, true, viewRef, true);
+  // Glass rails show the caption in the panel beside the photo: same
+  // translated title and description, same Translate button.
+  const [railTitle, railDescription] = useMemo(
+    () => (isTranslated && translatedText
+      ? splitTranslatedTitleAndBody(translatedText, post.title, post.description)
+      : [post.title, post.description]),
+    [isTranslated, translatedText, post.title, post.description],
+  );
+  const translateControl = nothingToTranslate ? undefined : {
+    isTranslated,
+    isLoading: isTranslateLoading,
+    error: translateError,
+    onTranslate: handleTranslate,
+    onShowOriginal: handleShowOriginal,
+    sourceLang,
+  };
   const { isLoading: isTranslating, error: translationError, result: translationResult, translateImage, clearResult } = useImageTranslation();
 
   // Get images array - use imageUrls if available, otherwise fall back to single image
@@ -1657,6 +1673,18 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
                   onLogin={openLoginModal}
                   isOwnPost={isOwnPost}
                   hideCaption={contentWarning.hidden}
+                  title={railTitle}
+                  body={railDescription ? (
+                    <FeedDescription
+                      postId={post.id}
+                      onOpen={openPost}
+                      disabled={matureGate.isGated || isPPV || isW2E || isLocked || isSubGated}
+                      description={railDescription}
+                      hideAssetCards={post.hideAssetCards}
+                      hiddenLinkPreviews={post.hiddenLinkPreviews}
+                    />
+                  ) : null}
+                  translate={translateControl}
                   onOpenComments={() => {
                     if (onOpenComments) { onOpenComments(); return; }
                     setCommentsInitialTab(undefined);
@@ -1733,14 +1761,8 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
           viewCount={post.views}
           tokenId={post.id}
           isOwnPost={isOwnPost}
-          translateControl={nothingToTranslate ? undefined : {
-            isTranslated,
-            isLoading: isTranslateLoading,
-            error: translateError,
-            onTranslate: handleTranslate,
-            onShowOriginal: handleShowOriginal,
-            sourceLang,
-          }}
+          // With Glass rails the Translate button sits in the panel, under the caption it translates.
+          translateControl={widePhotoRails ? undefined : translateControl}
         />
 
         {/* A photo post can carry a poll too, under the caption as on text posts.

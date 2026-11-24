@@ -92,8 +92,8 @@ export function ShareToDmModal({ open, onOpenChange, url, aboveMoment }: ShareTo
   const search = useDebouncedValue(searchInput, 300);
   const [rowStatus, setRowStatus] = useState<Record<string, RowStatus>>({});
 
-  const { conversations, isLoading: convosLoading } = useConversations('');
-  const { data: userSearchResults, isLoading: isSearchingUsers } = useUserSearchForDM(search);
+  const { conversations, isLoading: convosLoading } = useConversations('', open);
+  const { data: userSearchResults, isLoading: isSearchingUsers } = useUserSearchForDM(search, open);
   const { walletAddress, user } = useAuth();
   const { data: memberships } = useUserCommunities();
   const { byId: chatPrefs } = useChatPrefs();

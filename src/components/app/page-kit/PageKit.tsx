@@ -352,6 +352,8 @@ export interface PageTab<T extends string = string> {
   label: ReactNode;
   icon?: IconKey | ReactNode;
   count?: number;
+  /** Hover text for an icon-only tab, so a mouse can learn what it is. */
+  hint?: string;
 }
 
 export function PageTabs<T extends string>({
@@ -430,6 +432,7 @@ export function PageTabs<T extends string>({
                   role="tab"
                   aria-selected={active}
                   data-feed-tab-btn
+                  title={tab.hint}
                   data-active={active ? 'true' : undefined}
                   onClick={() => {
                     if (!active) {
@@ -485,6 +488,7 @@ export function PageTabs<T extends string>({
               role="tab"
               aria-selected={active}
               data-kit-chip
+              title={tab.hint}
               data-size={size}
               data-active={active ? 'true' : undefined}
               onClick={() => onChange(tab.id)}

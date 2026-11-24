@@ -60,6 +60,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useStreamerProgress } from '@/hooks/use-streamer-progress';
 import { hlsUrlFor } from '@/lib/live-ingest';
 import { CaptureCardSetup } from '@/components/app/live/CaptureCardSetup';
+import { requestDisplayCapture } from '@/lib/livepeer/display-capture';
 
 // The WebRTC broadcaster pulls in getUserMedia + peer-connection code that
 // only the browser capture paths need, so it loads on demand rather than
@@ -759,10 +760,7 @@ export function GoLiveModal({ isOpen, onClose, initialSource, initialStream }: G
     // gas, no stream to tear down.
     if (source === 'screen') {
       try {
-        const capture = await navigator.mediaDevices.getDisplayMedia({
-          video: SCREEN_CONSTRAINTS,
-          audio: true,
-        });
+        const capture = await requestDisplayCapture(SCREEN_CONSTRAINTS);
         pendingScreenRef.current = capture;
       } catch (error) {
         logger.info('Screen picker dismissed', error);

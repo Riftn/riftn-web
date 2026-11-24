@@ -377,6 +377,14 @@ export default function ArcadeGamePage() {
             {pct}%
           </p>
           {fault ? <p className="max-w-sm px-8 text-center text-xs text-amber-400">{fault}</p> : null}
+          {game.controls?.length ? (
+            <div className="max-w-sm px-8 text-center">
+              <p className="text-[11px] font-semibold tracking-[0.25em] text-zinc-500">{_copy("copy.799c26913574", { defaultValue: "Controls" })}</p>
+              <ul className="mt-2 space-y-1 text-xs leading-relaxed text-zinc-400">
+                {game.controls.map((line) => <li key={line}>{line}</li>)}
+              </ul>
+            </div>
+          ) : null}
           <button
             type="button"
             onClick={dismiss}

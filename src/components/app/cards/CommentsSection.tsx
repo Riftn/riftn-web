@@ -813,6 +813,7 @@ const CommentItemBody = memo(function CommentItem({ comment, tokenId, onLike, on
           <textarea
             ref={editFieldRef}
             data-keep-dark
+            data-inplace-edit
             data-no-navigate
             rows={1}
             value={editText}
@@ -1516,7 +1517,7 @@ function CommentsSectionForAccount({ tokenId, onClose, initialTab, embedded = fa
    * They show as cards above the list and are kept out of it until a card is
    * opened, so nothing reads twice.
    */
-  const { data: tipWallRows = EMPTY_TIP_WALL, refetch: refetchTipWall } = useQuery({
+  const { data: tipWallRows = EMPTY_TIP_WALL, isLoading: isTipWallLoading, refetch: refetchTipWall } = useQuery({
     queryKey: ['tip-wall', tokenId, walletAddress?.toLowerCase() ?? null],
     queryFn: () => getTipWall(tokenId, walletAddress?.toLowerCase()),
     enabled: !!tokenId,
@@ -2189,6 +2190,12 @@ function CommentsSectionForAccount({ tokenId, onClose, initialTab, embedded = fa
       const bAuthor = isAuthorThreadRoot(b.comment, author);
       if (aAuthor !== bAuthor) return aAuthor ? -1 : 1;
       if (aAuthor) return compareThreadParts(a.comment, b.comment);
+      // Then what the people the post tags wrote (an @assistant answer, a
+      // tagged friend's reply), whichever way the reader sorted. The API sorts
+      // the same way; the flag keeps it through this client-side re-sort.
+      const aTagged = !!a.comment.taggedReplied;
+      const bTagged = !!b.comment.taggedReplied;
+      if (aTagged !== bTagged) return aTagged ? -1 : 1;
       return rest(a, b);
     });
 
@@ -2902,9 +2909,12 @@ function CommentsSectionForAccount({ tokenId, onClose, initialTab, embedded = fa
   // While loading, a post the host knows has no comments stays empty too:
   // showing the header and a spinner only to remove them a moment later moved
   // everything under the post up and down on every open.
+  const showTipWall = !focusOnlyThread && !searchQuery.trim();
+  const isLoadingReplies = isLoading || (!error && filteredGroupedComments.length === 0
+    && tipWallCards.length === 0 && (isPlaceholderData || (showTipWall && isTipWallLoading)));
   const knownEmpty = (stageCount ?? knownCount) === 0;
   const hideEmptyInline = !!page && !error && activeTab === 'replies' && !isAssistantReplying
-    && (isLoading ? knownEmpty : filteredGroupedComments.length === 0);
+    && (isLoadingReplies ? knownEmpty : filteredGroupedComments.length === 0);
 
   return (
     <PostCreatorContext.Provider value={postCreator}>
@@ -3118,7 +3128,7 @@ function CommentsSectionForAccount({ tokenId, onClose, initialTab, embedded = fa
         {/* Replies Tab */}
         {activeTab === 'replies' && (
           <div className={page ? "pb-2" : "absolute inset-0 overflow-y-auto pt-2 pb-2"}>
-            {isLoading ? (
+            {isLoadingReplies ? (
               hideEmptyInline ? null : (
                 // The shape of the thread while it arrives, not a spinner.
                 <div className="px-3 py-2 space-y-5" aria-busy="true" data-comments-skeleton>
@@ -3137,7 +3147,7 @@ function CommentsSectionForAccount({ tokenId, onClose, initialTab, embedded = fa
               <p className="text-zinc-500 text-sm py-6 text-center">{t('comments.loadFailed')}</p>
             ) : (
               <>
-              {!focusOnlyThread && !searchQuery.trim() ? (
+              {showTipWall ? (
                 <TipWall rows={tipWallCards} openId={openTipId} onToggle={toggleTipCard} landedId={landedTipId} />
               ) : null}
               <AnimatePresence mode="popLayout">

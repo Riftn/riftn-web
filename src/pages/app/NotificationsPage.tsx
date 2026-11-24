@@ -2,7 +2,8 @@ import { useTranslation as _useCopy } from 'react-i18next';
 import { localizedNotificationContent } from "@/lib/notification-content";
 import appI18n from '@/i18n';
 import { ThemedIcon } from '@/components/app/war/WarHudIcon';
-import { memo, useState, useEffect, useLayoutEffect, useRef, useCallback, useMemo } from 'react';
+import { memo, useContext, useState, useEffect, useLayoutEffect, useRef, useCallback, useMemo } from 'react';
+import { CachedPageActiveContext } from '@/contexts/CachedPageActiveContext';
 import { toast } from 'sonner';
 import { isDhb } from '@/components/app/DhbAmount';
 import { motion, useReducedMotion } from 'framer-motion';
@@ -1967,6 +1968,8 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
   const { t: _copy } = _useCopy();
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<NotificationTypeFilter>('all');
+  const isPageActive = useContext(CachedPageActiveContext);
+  const isNotificationListActive = inDrawer || isPageActive;
   const { isAuthenticated, walletAddress: pageWalletAddress } = useAuth();
   const navigate = useNavigate();
   // Phones: the search button turns the whole pill into a search box that
@@ -2058,7 +2061,7 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
   // and it keeps the list correct against an API that predates `types`.
   const activeApiTypes = useMemo(() => apiTypesForTab(activeTab), [activeTab]);
   const { notifications: dehubNotifications, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage, isPlaceholderData } =
-    useNotifications(undefined, activeApiTypes, { notifyOnNew: false });
+    useNotifications(undefined, activeApiTypes, { enabled: isNotificationListActive, notifyOnNew: false });
   const { data: unreadCount } = useUnreadNotificationCount();
   const markAllAsRead = useMarkAllNotificationsAsRead();
   const markAsRead = useMarkNotificationAsRead();
@@ -2130,7 +2133,7 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
   // switching tabs shows rows at once rather than waiting on a request.
   const prefetchClient = useQueryClient();
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !isNotificationListActive) return;
     const id = window.setTimeout(() => {
       // The leading tabs only: they are the ones with unread rows, and the
       // ones a thumb reaches first.
@@ -2140,7 +2143,7 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
       }
     }, 1200);
     return () => window.clearTimeout(id);
-  }, [isAuthenticated, orderedTabKeys, prefetchClient]);
+  }, [isAuthenticated, isNotificationListActive, orderedTabKeys, prefetchClient]);
   
   // Batch-avatar enrichment for fresh profile pictures
   // Module-level caches persist across navigations to prevent avatar flashing
@@ -2739,6 +2742,7 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
                   label: <span className="sr-only">{translateFilterLabel(tab.value)}</span>,
                   icon: <tab.icon className={tab.value === 'reposts' ? 'h-[20px] w-[20px]' : 'h-[18px] w-[18px]'} aria-hidden="true" />,
                   count: count > 0 ? count : undefined,
+                  hint: String(translateFilterLabel(tab.value)),
                 };
               })}
             />

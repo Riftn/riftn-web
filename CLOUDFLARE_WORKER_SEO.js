@@ -186,6 +186,7 @@ const OG_CARD_ROUTES = new Set([
   'arcade/street-slayer',
   'arcade/trenchstar', 'arcade/love-lock-bridge',
   'arcade/correspondence-chess', 'arcade/okey', 'arcade/sillycoin', 'arcade/gratitude', 'arcade/chestard',
+  'music/binary-metal',
   'apps', 'apps/dev',
   // App surfaces that had no card of their own and unfurled as the homepage.
   // `superpowers` art was rendered when the page shipped and was never added
@@ -358,7 +359,7 @@ const HOME_INTRO_PRESS = ['US Weekly', 'Yahoo Finance', 'Entrepreneur', 'Investi
 const HOME_INTRO_HTML = `<section style="max-width:600px;margin:24px auto;text-align:left"><!--hl-body-->
 <h2 style="font-size:16px">Welcome to Riftn, the open-source, user-owned social platform</h2>
 ${HOME_INTRO_SLIDES.map(([h, p]) => `<h3 style="font-size:14px">${h}</h3>\n<p>${p}</p>`).join('\n')}
-<p>Riftn, formerly DeHub, is a decentralised social network and mobile app, in development since 2021, where posts can be minted on-chain and creators keep their audience, their content and their revenue. It combines a chronological feed, live streaming, end-to-end encrypted messaging, user-run communities, a multi-chain wallet and watch-to-earn rewards paid in tokens. If you arrived looking for a different DeHub, this is not DePaul University&rsquo;s student portal, Rowan&rsquo;s DEHub or the deHUB Access door-entry app.</p>
+<p>Riftn, formerly DeHub, is a decentralised social media protocol with web and mobile apps, in development since 2021, where posts can be minted on-chain and creators keep their audience, their content and their revenue. It combines a chronological feed, live streaming, end-to-end encrypted messaging, user-run communities, a multi-chain wallet and watch-to-earn rewards paid in tokens. If you arrived looking for a different DeHub, this is not DePaul University&rsquo;s student portal, Rowan&rsquo;s DEHub or the deHUB Access door-entry app.</p>
 <p><a href="${APP_URL}/docs">Read the docs</a></p>
 <p>Featured in ${HOME_INTRO_PRESS.join(', ')}. <a href="${APP_URL}/docs/featured-in">Riftn press coverage</a></p>
 <nav aria-label="Learn more about Riftn"><ul style="list-style:none;padding:0;margin:0">${
@@ -792,11 +793,32 @@ function relatedPostsHtml(manifest, currentSlug, limit = 4) {
  * stays a Person.
  */
 const BRAND_BYLINES = new Set(['', 'dehub', 'dehub team', 'riftn', 'riftn team']);
+// Where a named author's bio lives.
+const BLOG_AUTHOR_URL = `${APP_URL}/docs/team`;
+// What the team page says about the people who sign guides, so search engines
+// and assistants can tell which Mal Jan this is.
+const BLOG_AUTHOR_FACTS = {
+  'mal jan': { jobTitle: 'Co-Founder', sameAs: [`${APP_URL}/maldoteth`, 'https://x.com/maldoteth'] },
+};
 function blogAuthorLd(author) {
   const name = String(author || '').replace(/\s+/g, ' ').trim();
   return BRAND_BYLINES.has(name.toLowerCase())
     ? { '@type': 'Organization', name: 'Riftn', url: APP_URL }
-    : { '@type': 'Person', name };
+    : {
+      '@type': 'Person',
+      name,
+      url: BLOG_AUTHOR_URL,
+      ...(BLOG_AUTHOR_FACTS[name.toLowerCase()] || {}),
+      worksFor: { '@type': 'Organization', name: 'Riftn', url: APP_URL },
+    };
+}
+
+/** The visible byline: a named author links to the team page, as it does in the app. */
+function blogBylineHtml(author) {
+  const name = String(author || '').replace(/\s+/g, ' ').trim() || 'Riftn Team';
+  return BRAND_BYLINES.has(name.toLowerCase())
+    ? escHtml(name)
+    : `<a rel="author" href="${BLOG_AUTHOR_URL}">${escHtml(name)}</a>`;
 }
 
 /**
@@ -955,7 +977,7 @@ ${tagMeta}
 <main>
 <article>
 <h1>${escHtml(post.title)}</h1>
-<p><em>By ${escHtml(post.author || 'Riftn Team')}${published ? `, <time datetime="${escHtml(published)}">${escHtml(published.slice(0, 10))}</time>` : ''}</em></p>
+<p><em>By ${blogBylineHtml(post.author)}${published ? `, <time datetime="${escHtml(published)}">${escHtml(published.slice(0, 10))}</time>` : ''}</em></p>
 ${banner ? `<img src="${escHtml(banner)}" alt="${escHtml(imageAlt)}"${bannerDims} fetchpriority="high" decoding="async" style="max-width:100%;height:auto">` : ''}
 <!--hl-body-->${body}<!--/hl-body-->
 </article>
@@ -1406,6 +1428,14 @@ const MARKETING_PAGES = {
     ...arcadeGameLd('/arcade/claude-of-duty.webp'),
     bodyHtml: `<p>A first-person shooter that ships no art at all: every mesh, texture and sound is generated in JavaScript on your machine while the level loads.</p>
 <p>It is also hidden inside the War theme, where an arrow key offers to deploy you.</p>
+<h2>Controls</h2>
+<ul>
+<li>Move with W, A, S, D or the arrow keys. Look and shoot with the mouse.</li>
+<li>Space jumps, Shift sprints, C crouches and Z goes prone.</li>
+<li>R reloads, G throws a grenade, V is melee, and Q and E lean.</li>
+<li>1, 2 or Tab swap weapons. T is the flashlight. Escape pauses.</li>
+<li>On a phone, move with the on-screen stick and drag to look around.</li>
+</ul>
 <p><a href="${APP_URL}/arcade/claude-of-duty">Play Claude of Duty</a> or <a href="${APP_URL}/arcade">see the whole arcade</a>.</p>`,
   },
   'arcade/jungle-trail': {
@@ -1465,6 +1495,21 @@ const MARKETING_PAGES = {
     bodyHtml: `<p>Invite a friend by their username, or post an open invite anyone can take. You write one thing you are grateful for, they answer with theirs, and it goes back and forth. Pick 1, 2, 3, 5 or 7 days per turn, and get a notification when it is your turn.</p>
 <p>No repeats: every new line is checked against everything already said in the game, so the same blessing in other words is turned away and you get to try again. Whoever runs out of ideas before their turn time is up hands the win to the other player. Only the two players can read the game.</p>
 <p><a href="${APP_URL}/arcade/gratitude">Start a game</a> or <a href="${APP_URL}/arcade">see the whole arcade</a>.</p>`,
+  },
+  'music/binary-metal': {
+    title: 'Binary Metal: turn text into a metal riff | Riftn',
+    description: 'Type anything and hear it as heavy metal. Every letter becomes binary, every 0 an open string and every 1 the first fret, with drums and bass to match. Download WAV or MP3, free.',
+    heading: 'Binary Metal: Text to Metal Riff',
+    jsonLdType: 'WebApplication',
+    jsonLdExtra: {
+      image: `${APP_URL}/og/music-binary-metal.jpg`,
+      applicationCategory: 'MultimediaApplication',
+      operatingSystem: 'Any',
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+    },
+    bodyHtml: `<p>Type a word, a name or a whole sentence. Every letter becomes its 8-bit binary code and plays as one bar of eight notes: on the low string, 0 is the open string and 1 is the first fret. The bass doubles the guitar, the kick drum follows the 1s and the snare keeps the beat.</p>
+<p>Pick Thrash, Doom, Blast or Groove, set the tempo and the tuning, and turn on power chords. Watch the binary and the guitar tab light up as it plays, then download the riff as WAV or MP3 or post it to your feed. It is all made in your browser and in the Riftn app, and nothing is uploaded unless you post it.</p>
+<p><a href="${APP_URL}/music/binary-metal">Make a riff</a> or <a href="${APP_URL}/music">listen to Riftn Music</a>.</p>`,
   },
   'arcade/chestard': {
     title: 'Chestard Dice Drop Game | Riftn Arcade',
@@ -2977,6 +3022,19 @@ function profileHasNoPosts(account, rows) {
   return Array.isArray(rows) && rows.length === 0;
 }
 
+/**
+ * The address a list links a post by: its readable slug where the row carries
+ * one, else its number. /app/post/<number> answers with a 301 to the slug, so
+ * a list that links by number sends a crawler through a redirect for every
+ * post and Search Console files each one under "Page with redirect". Same
+ * shape test as articleSlugOf, so a link written here always resolves.
+ */
+function postLinkSegment(row) {
+  const slug = row && typeof row.articleSlug === 'string' ? row.articleSlug : '';
+  const readable = /^[a-z0-9][a-z0-9-]{0,120}$/.test(slug) && /[a-z]/.test(slug) && !/^[a-f\d]{24}$/.test(slug);
+  return readable ? slug : String(Number(row && row.tokenId));
+}
+
 /** What a feed row is called in a list: its title, else its caption's opening
  *  words (same rule as the post page's own title), else its id. */
 function postLabel(row) {
@@ -2995,7 +3053,7 @@ function postListHtml(heading, rows, { author = true } = {}) {
       const tail = [who && `<span data-public-by>by ${escHtml(who)}</span>`, views > 0 && `<span data-public-views="${views}">${views.toLocaleString('en-US')} views</span>`]
         .filter(Boolean)
         .join(' · ');
-      return `<li><a data-creator-copy href="${APP_URL}/app/post/${Number(r.tokenId)}">${escHtml(postLabel(r))}</a>${tail ? `, ${tail}` : ''}</li>`;
+      return `<li><a data-creator-copy href="${APP_URL}/app/post/${postLinkSegment(r)}">${escHtml(postLabel(r))}</a>${tail ? `, ${tail}` : ''}</li>`;
     });
   if (!items.length) return '';
   return `<section class="dh-list"><h2>${escHtml(heading)}</h2><ul>${items.join('')}</ul></section>`;
@@ -4705,12 +4763,13 @@ export function isAiTrainingBotUa(ua) {
 
 /** The 403 an AI training crawler gets, or null for everyone else. */
 /**
- * Riftn's own pages about itself: the home page, docs, guides, blog and
- * llms.txt. Training crawlers may read these, so that assistants know what
- * Riftn is and that DeHub became Riftn. Nothing a member posted is in here.
- * public/robots.txt carries the same list as Allow lines.
+ * Riftn's own pages about itself: the home page, docs, guides, blog,
+ * llms.txt and the product pages llms.txt points to (compare, glossary,
+ * pricing and the like). Training crawlers may read these, so that assistants
+ * know what Riftn is and that DeHub became Riftn. Nothing a member posted is
+ * in here. public/robots.txt carries the same list as Allow lines.
  */
-const AI_TRAINING_OPEN_PATH = /^\/(?:$|robots\.txt$|llms(?:-full)?\.txt$|rss\.xml$|(?:docs|guides|blog)(?:\/|$))/;
+const AI_TRAINING_OPEN_PATH = /^\/(?:$|robots\.txt$|llms(?:-full)?\.txt$|rss\.xml$|(?:docs|guides|blog|connect)(?:\/|$)|(?:compare|glossary|pricing|premium|bridge|creator|converter|migrate-youtube|dehub-app)$)/;
 
 export function aiTrainingBotRefusal(request) {
   if (!isAiTrainingBotUa(request.headers.get('User-Agent'))) return null;
@@ -4899,7 +4958,7 @@ th{color:#fff;font-weight:700}
 // spent a hop or a duplicate on every page.
 const PRERENDER_HEADER = `<header class="dh-head"><a href="${APP_URL}/"><img src="${APP_URL}/dehub-header-logo.png" alt="Riftn" width="270" height="81"></a><a class="dh-open" href="${APP_URL}/explore">Open Riftn</a></header><main class="dh-main">`;
 
-const PRERENDER_FOOTER = `</main><footer class="dh-foot">Riftn (formerly DeHub) | open source, user owned and censorship resistant media.<br><a href="${APP_URL}/docs">Docs</a> · <a href="${APP_URL}/docs/blog">Blog</a> · <a href="${APP_URL}/explore">Explore</a></footer>`;
+const PRERENDER_FOOTER = `</main><footer class="dh-foot">Riftn (formerly DeHub) | open source, user owned and censorship resistant media.<br><a href="${APP_URL}/docs">Docs</a> · <a href="${APP_URL}/docs/blog">Blog</a> · <a href="${APP_URL}/glossary">Glossary</a> · <a href="${APP_URL}/compare">Compare</a> · <a href="${APP_URL}/explore">Explore</a></footer>`;
 
 /**
  * The other half of the problem: every builder in this file, and the ssr-seo
@@ -5079,18 +5138,23 @@ function articleSlugOf(pathname) {
   return m[1].toLowerCase();
 }
 
-/** Resolve an article slug to its tokenId through the API that owns it. */
+/** Resolve an article slug to its tokenId through the API that owns it.
+ *  Returns the tokenId, null when the API says the slug does not exist, or
+ *  undefined when the lookup failed (rate limit, timeout, 5xx). A failed
+ *  lookup is not a missing post: answering 404 for it told crawlers that
+ *  real articles were gone whenever the API was busy. */
 async function resolveArticleSlugTokenId(slug) {
   try {
     const res = await fetch(`https://api.dehub.io/api/article/${encodeURIComponent(slug)}`, {
       signal: AbortSignal.timeout(6000),
     });
+    if (res.status === 429 || res.status >= 500) return undefined;
     if (!res.ok) return null;
     const data = await res.json();
     const id = data?.tokenId ?? data?.result?.tokenId;
     return Number.isFinite(Number(id)) ? String(Number(id)) : null;
   } catch {
-    return null;
+    return undefined;
   }
 }
 
@@ -6303,6 +6367,9 @@ function urlsetXml(urls) {
  * sitemap of them would be a list of pages that are about to disappear.
  */
 const ENTITY_SITEMAP_MIN_TEXT = 40;
+const FEATURE_SITEMAP_MIN_TEXT = 280;
+const FEATURE_SITEMAP_MIN_COMMENTS = 2;
+const FEATURE_SITEMAP_MIN_VOTES = 3;
 const ENTITY_SITEMAPS = {
   bounties: [{
     // Same rule as the page's own robots (status and deadline), so an open
@@ -6351,10 +6418,20 @@ const ENTITY_SITEMAPS = {
       : null),
   }],
   features: [{
-    query: () => 'feature_requests?status=neq.declined&select=id,title,description,status,image_url,updated_at&order=created_at.asc&limit=5000',
-    entry: (f) => (f.status !== 'declined' && substantiveLength(`${f.title || ''} ${f.description || ''}`) >= ENTITY_SITEMAP_MIN_TEXT
-      ? { loc: `${APP_URL}/build?feature=${f.id}`, lastmod: f.updated_at, changefreq: 'weekly', priority: '0.4', image: absolutizeImage(f.image_url) }
-      : null),
+    // A request earns its own entry by being a page somebody would want to
+    // land on: a proper write-up, or one other people have voted on or
+    // discussed. The sentence-of-text bar let through 786 of them, most a line
+    // or two that nobody had answered, and that many thin pages weigh on how
+    // the rest of the site is judged. The pages themselves still resolve.
+    query: () => 'feature_requests?status=neq.declined&select=id,title,description,status,image_url,vote_count,comment_count,updated_at&order=created_at.asc&limit=5000',
+    entry: (f) => {
+      if (f.status === 'declined') return null;
+      const text = substantiveLength(`${f.title || ''} ${f.description || ''}`);
+      if (text < ENTITY_SITEMAP_MIN_TEXT) return null;
+      const discussed = Number(f.comment_count) >= FEATURE_SITEMAP_MIN_COMMENTS || Number(f.vote_count) >= FEATURE_SITEMAP_MIN_VOTES;
+      if (text < FEATURE_SITEMAP_MIN_TEXT && !discussed) return null;
+      return { loc: `${APP_URL}/build?feature=${f.id}`, lastmod: f.updated_at, changefreq: 'weekly', priority: '0.4', image: absolutizeImage(f.image_url) };
+    },
   }],
 };
 
@@ -7144,6 +7221,16 @@ async function handleRequest(request, env, ctx) {
   // so both spellings are served the file straight from assets.
   if (pathname === '/creator-mesh-preview.html' || pathname === '/creator-mesh-preview') {
     return env.ASSETS.fetch(new Request(new URL('/creator-mesh-preview', url), request));
+  }
+
+  // Binary Metal's renderer: the app draws riffs in a hidden WebView on this
+  // page. Same story as above, the .html path 307s to a bare path that is not
+  // an app route, so both spellings get the file straight from assets.
+  if (pathname === '/binary-metal/render.html' || pathname === '/binary-metal/render') {
+    const resp = await env.ASSETS.fetch(new Request(new URL('/binary-metal/render', url), request));
+    const out = new Response(resp.body, resp);
+    out.headers.set('X-Robots-Tag', 'noindex, nofollow');
+    return out;
   }
 
   if (pathname === '/gods-eye-game/index.html' || pathname === '/gods-eye-game/') {
@@ -8108,6 +8195,8 @@ async function handleRequest(request, env, ctx) {
   const articleSlug = articleSlugOf(pathname);
   if (articleSlug) {
     const tokenId = await resolveArticleSlugTokenId(articleSlug);
+    // Lookup failed: ask crawlers to come back instead of calling it gone.
+    if (tokenId === undefined) return entityUnavailable();
     // Unresolvable: the fn's miss on the slug lands on the 404 below.
     if (tokenId) ssrPath = `/app/post/${tokenId}`;
   } else if (newPostSlug) {
@@ -8556,7 +8645,7 @@ async function handleRequest(request, env, ctx) {
               // the two cannot drift into disagreeing.
               const authorUserRaw = String(p.minterUsername || p.mintername || '').replace(/[^A-Za-z0-9_.-]/g, '');
               const authorUser = couldBeProfileSegment(authorUserRaw.toLowerCase(), SYSTEM_ROUTES) ? authorUserRaw : '';
-              return `<li style="margin:6px 0"><a href="${APP_URL}/app/post/${p.tokenId}">${t}</a>${authorUser ? ` by <a href="${APP_URL}/${authorUser}">${authorName}</a>` : ''}</li>`;
+              return `<li style="margin:6px 0"><a href="${APP_URL}/app/post/${postLinkSegment(p)}">${t}</a>${authorUser ? ` by <a href="${APP_URL}/${authorUser}">${authorName}</a>` : ''}</li>`;
             }).join('');
             html = html.replace('</body>', `<section style="max-width:600px;margin:24px auto;text-align:left"><h2 style="font-size:16px">Latest on Riftn</h2><ul style="list-style:none;padding:0">${links}</ul></section></body>`);
           }

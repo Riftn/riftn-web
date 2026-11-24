@@ -10,6 +10,7 @@ import { buildSoundtrackTag } from '@/lib/soundtrack';
 import type { PollData, LiveStreamHandoff } from './types';
 import { PostContentArea } from './components/PostContentArea';
 import { PostDictationButton } from './components/PostDictationButton';
+import { TranslatedDraftNote } from './components/TranslatedDraftNote';
 import { PostAccessToggles } from './components/PostAccessToggles';
 import { PostActionBar } from './components/PostActionBar';
 import { ArticleComposer } from './components/ArticleComposer';
@@ -45,6 +46,7 @@ const CreatePlanModal = lazy(() =>
 );
 const ScheduledLivestreams = lazy(() => import('./components/ScheduledLivestreams'));
 const PaintingStudio = lazy(() => import('./components/PaintingStudio'));
+const FreeImagesSheet = lazy(() => import('./components/FreeImagesSheet'));
 
 interface PostModalProps {
   isOpen: boolean;
@@ -85,6 +87,7 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
   const [categoryDrawerOpen, setCategoryDrawerOpen] = useState(false);
   const [taggerOpen, setTaggerOpen] = useState(false);
   const [paintingOpen, setPaintingOpen] = useState(false);
+  const [freeImagesOpen, setFreeImagesOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [soundPickerOpen, setSoundPickerOpen] = useState(false);
   const [planDrawerOpen, setPlanDrawerOpen] = useState(false);
@@ -317,12 +320,17 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
         text={state.text}
         maxChars={postTextLimit(computed.postQuota)}
         dictation={isOpen && authUser && !state.isPosting && !state.isRecording && !state.isCameraModalOpen && !state.liveMode && (
+          <>
+          {state.translatedDraft && (
+            <TranslatedDraftNote from={state.translatedDraft.from} onUndo={actions.undoTranslateDraft} />
+          )}
           <PostDictationButton
             key={JSON.stringify([draftScope, openedDraftRef.current?.id])}
             setText={actions.setText}
             maxChars={postTextLimit(computed.postQuota)}
             atLimit={state.text.length >= postTextLimit(computed.postQuota)}
           />
+          </>
         )}
         setText={actions.setText}
         editorRef={refs.editorRef}
@@ -358,6 +366,9 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
         onFileDrop={actions.handleFileDrop}
         scheduledDate={state.scheduledDate}
         onSchedule={actions.setScheduledDate}
+        dripCount={!isQuoting && !comicMode && state.liveMode === null && !computed.hasVideo && !computed.hasAudio ? state.media.filter(m => m.type === 'image').length : 0}
+        dripGap={state.dripGap}
+        onDripChange={actions.setDripGap}
         drafts={state.drafts}
         onSaveDraft={() => {
           // The draft is the copy of record from here on, so the composer is
@@ -512,6 +523,7 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
         onInsertGif={actions.insertGif}
         onCameraCapture={actions.openCameraCapture}
         onEnhanceWithAI={actions.handleEnhanceWithAI}
+        onTranslate={actions.handleTranslateDraft}
         onPost={() => {
           const soundtrackTag = attachedSound ? buildSoundtrackTag(attachedSound) : undefined;
           actions.handlePost({ ...(soundtrackTag ? { soundtrackTag } : {}) });
@@ -544,6 +556,7 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
         onToggleComic={isQuoting ? undefined : () => (comicMode ? exitComicMode() : selectComicMode())}
         isComic={comicMode}
         onOpenPainting={isQuoting ? undefined : () => setPaintingOpen(true)}
+        onOpenFreeImages={() => setFreeImagesOpen(true)}
         onToggleContentWarning={() => actions.setContentWarning(state.contentWarning === null ? '' : null)}
         hasContentWarning={state.contentWarning !== null}
       />
@@ -554,6 +567,19 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
             onDone={(file) => {
               setPaintingOpen(false);
               actions.addImageFiles([file]);
+            }}
+          />
+        </Suspense>
+      )}
+      {freeImagesOpen && (
+        <Suspense fallback={null}>
+          <FreeImagesSheet
+            open={freeImagesOpen}
+            onOpenChange={setFreeImagesOpen}
+            initialQuery={state.text}
+            onPick={(file, credit) => {
+              actions.addImageFiles([file]);
+              if (credit && !state.text.includes(credit)) actions.setText(state.text ? `${state.text}\n\n${credit}` : credit);
             }}
           />
         </Suspense>

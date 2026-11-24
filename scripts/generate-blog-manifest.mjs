@@ -50,8 +50,9 @@ async function loadBlogData() {
   await build({
     stdin: {
       contents: [
-        `import { getPublishedPosts, getLatestPost } from '@/data/blogSource';`,
-        `import { newPosts, excludedTitles } from '@/data/newPosts';`,
+        `import { getPublishedPosts, getLatestPost, withPostAuthor } from '@/data/blogSource';`,
+        `import { newPosts as sourceNewPosts, excludedTitles } from '@/data/newPosts';`,
+        `const newPosts = sourceNewPosts.map(withPostAuthor);`,
         `const bySlug = new Map();`,
         `for (const p of getPublishedPosts()) if (!p.status || p.status === 'published') bySlug.set(p.slug, p);`,
         `for (const p of newPosts) if (!p.status || p.status === 'published') bySlug.set(p.slug, p);`,

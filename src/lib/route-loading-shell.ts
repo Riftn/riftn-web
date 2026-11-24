@@ -50,29 +50,26 @@ export function showRouteLoadingShell(title: string, backLabel: string, backward
   // has finished without asking the browser.
   let firstFrameAt = 0;
   requestAnimationFrame((at) => { firstFrameAt = at; });
-  const inert = main.inert;
-  // Phones: the shell already sits over the whole feed and takes every touch,
-  // and switching `inert` makes the browser restyle each feed card, once on the
-  // way in and once on the way out, while the post is trying to draw. Computers
-  // keep it, for the keyboard.
-  const phone = window.matchMedia?.('(max-width: 1023px)').matches === true;
+  // The shell sits over the page and takes every pointer on its own. It used
+  // to also make the page underneath `inert` on computers, for the keyboard.
+  // Switching `inert` makes the browser restyle every element under it, once
+  // on the way in and once on the way out: on a home feed that was ~0.3 s
+  // each, spent while the post was trying to draw. The cover is up for well
+  // under a second, so the page is left alone.
   let removed = false;
   let timer: ReturnType<typeof setTimeout> | undefined;
-  const restore = () => { main.inert = inert; };
   const remove = () => {
     if (removed) return;
     removed = true;
     clearTimeout(timer);
-    restore();
     node.remove();
   };
   // A lost route or error must never leave the feed hidden behind a shell.
   timer = setTimeout(remove, 5000);
   return {
-    cover() { if (!removed && !phone) main.inert = true; },
+    cover() {},
     reveal() {
       if (removed) return;
-      restore();
       clearTimeout(timer);
       if (document.documentElement.classList.contains('reduce-motion') || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
         remove();

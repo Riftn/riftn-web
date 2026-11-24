@@ -1018,7 +1018,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // code ("Importing a module script failed"), and "Try again" re-reads
       // the same dead file. Only a reload helps; the Supabase session survives
       // it and the sign-in resumes.
-      if (isChunkLoadError(e) && recoverFromChunkError() === 'reloading') return;
+      if (isChunkLoadError(e) && recoverFromChunkError(e) === 'reloading') return;
       // A failed profile login must not escalate to decrypting or signing.
       // The identity session is still good, so retry the exchange in place
       // rather than making the person go through Google or email again.

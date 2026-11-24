@@ -861,6 +861,10 @@ export default function HomePage() {
   const hasInitializedRef = useRef(false);
   
   useLayoutEffect(() => {
+    // A deferred tab can settle after navigation while Home remains cached.
+    // Leave the active page's scroll alone and apply the change on return.
+    if (!pageActive) return;
+
     // Skip scroll-to-top if:
     // 1. First mount AND we're returning via back navigation (browser back button)
     // 2. Tab hasn't actually changed
@@ -902,7 +906,7 @@ export default function HomePage() {
     if (mainContent) {
       mainContent.scrollTop = 0;
     }
-  }, [deferredTab, isBackNavigation]);
+  }, [deferredTab, isBackNavigation, pageActive]);
 
   // --------------------------------------------------------------------------
   // SWIPE GESTURE HANDLERS

@@ -36,6 +36,7 @@ import { useRowLongPress } from '@/hooks/use-row-long-press';
 import { MessageRequestsHeader, MessageRequestsRow } from '@/components/app/chat/MessageRequestBar';
 import { MessagesNavGlyph } from '@/components/app/navigation/MessagesNavGlyph';
 import '@/styles/messages-cards.css';
+import '@/styles/messages-phone-list.css';
 import { useFeedSeparator } from '@/lib/feed-separator';
 
 import { VerifiedBadge } from '@/components/app/VerifiedBadge';
@@ -96,6 +97,7 @@ import { reportCommunityChatMessage } from '@/lib/community-chat-notify';
 import { previewLinks } from '@/lib/dehub-links';
 
 import { formatCount } from '@/lib/format-count';
+import { stripBold } from '@/lib/bold-markup';
 /**
  * The other person's name with their badge sitting on its baseline, the same
  * BadgedName system the feed uses. The badge rides straight after the name
@@ -172,7 +174,7 @@ export function ConversationItem({
     (otherUser?.address ? `${otherUser.address.slice(0, 6)}...${otherUser.address.slice(-4)}` : 'User');
   const lastMessagePreview = conversation.lastMessage?.undecryptable
     ? `🔒 ${t('messages.cannotDecrypt')}`
-    : (conversation.lastMessage?.content && previewLinks(conversation.lastMessage.content)) || _copy("copy.f42e0f66017d", { defaultValue: "No messages yet" });
+    : (conversation.lastMessage?.content && stripBold(previewLinks(conversation.lastMessage.content))) || _copy("copy.f42e0f66017d", { defaultValue: "No messages yet" });
   const lastMessageTime = conversation.lastMessage?.createdAt
     ? (compactTime
       ? formatTimeAgo(conversation.lastMessage.createdAt)
@@ -363,6 +365,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const [newChatKind, setNewChatKind] = useState<NewChatKind | null>(null);
   const { data: myMemberships } = useUserCommunities();
   
+  const isPageActive = useContext(CachedPageActiveContext);
   const [searchQuery, setSearchQuery] = useSurfaceDraft("pages/app/MessagesPage.tsx:searchQuery", '');
   const phonePill = usePhonePill();
   // Both search-backed queries key on the query string — passing the raw
@@ -380,13 +383,14 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // Subscribe to DM realtime updates only when on messages page
   useDMRealtime();
 
+  // A retained search draft should not keep fetching after leaving Messages.
   const{
     conversations,
     isLoading,
     isError,
     refetch,
     isRefetching,
-  } = useConversations(debouncedSearchQuery);
+  } = useConversations(debouncedSearchQuery, isPageActive || !debouncedSearchQuery);
 
   // Phones: pull the chat list down from its top to refresh it.
   const chatListRef = useRef<HTMLDivElement>(null);
@@ -457,7 +461,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
       });
     }, 60);
   }, [conversations]);
-  const { data: userSearchResults, isLoading: isSearchingUsers } = useUserSearchForDM(debouncedSearchQuery);
+  const { data: userSearchResults, isLoading: isSearchingUsers } = useUserSearchForDM(debouncedSearchQuery, isPageActive);
 
   /*
    * Until now deleting a thread meant opening it first and going through its
@@ -1000,7 +1004,6 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // app layout, so each copy only polls and pushes history while it is shown.
   const routeBase = fullscreen ? '/chat' : '/app/messages';
   const isMessagesRouteActive = location.pathname === routeBase;
-  const isPageActive = useContext(CachedPageActiveContext);
   const publicUnread = usePublicChatUnreadCount();
   usePublicChatReading(isMessagesRouteActive && showPublicChat);
   // An open chat's reactions are seen: clear them, including ones that land
@@ -1196,6 +1199,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
       <div style={keyboardStyle} className={`${mobileChatHeight} lg:h-[calc(100dvh-32px)] pt-1 pb-0 sm:pt-1 sm:pb-3 lg:pt-2 overflow-hidden`}>
           <PublicChat
             onBack={closeChat}
+            phoneB={phonePill}
           />
       </div>
     );
@@ -1232,7 +1236,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
 
   // The Notes sheet is mounted in every view, so a note tapped in an open group chat opens too.
   const notesSheetHost = !guest && walletAddress ? (
-    <NotesSheetHost onMessage={(author, reply) => {
+    <NotesSheetHost me={statusMe} onMessage={(author, reply) => {
       // A reply to a note is sent as soon as the chat with them is ready.
       if (reply) pendingAutoSendRef.current = { peerAddress: author.address.toLowerCase(), body: reply };
       handleSelectSearchUser({ ...author, _id: author.address } as unknown as DeHubUser);
@@ -1271,7 +1275,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
        every theme. The rows and composer carry their own inner padding. */
     return (
       <>
-      <div style={keyboardStyle} className={`${mobileChatHeight} lg:h-[calc(100dvh-32px)] pt-1 pb-0 sm:pt-1 sm:pb-3 lg:pt-2 overflow-hidden`}>
+      <div style={keyboardStyle} data-msg-phone-b={phonePill && !fullscreen ? '' : undefined} className={`${mobileChatHeight} lg:h-[calc(100dvh-32px)] pt-1 pb-0 sm:pt-1 sm:pb-3 lg:pt-2 overflow-hidden`}>
         <DirectMessageChat
           /*
            * Keyed on WHO, not on the conversation id. A thread you have never
@@ -1286,6 +1290,10 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
           initialComposerText={composerPrefill?.convId === selectedConversation.id ? composerPrefill.text : undefined}
           focusComposer={composerFocusFor === conversationIdentity(selectedConversation)}
           onBack={closeChat}
+          // Phones (not riftn.com/chat): runs of bubbles join up, one time per
+          // run, B's centred top and the + bar.
+          cozy={phonePill && !fullscreen}
+          phoneB={phonePill && !fullscreen}
         />
       </div>
       {newMessageDrawer}
@@ -1470,7 +1478,8 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // chat and search stay pinned at the end of their row.
   const phoneTop = phonePill ? (
     <PhoneChatListTop
-      title={_copy('settings.chat', { defaultValue: 'Chat' })}
+      title={fullscreen ? _copy('settings.chat', { defaultValue: 'Chat' }) : _copy('messages.title', { defaultValue: 'Messages' })}
+      big={!fullscreen}
       chips={tabBar}
       searchValue={searchQuery}
       onSearch={setSearchQuery}
@@ -1554,7 +1563,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
             [data-page-bento] hook stays: the Osaka and Jungle `#app-root` class
             nets exclude on it, and without it every bg-zinc-8/9 descendant in
             here becomes a frosted rectangle. */}
-        <div data-page-bento data-bento-flat data-msg-cards={cards ? '' : undefined} data-msg-plain={plainList ? '' : undefined} data-msg-cards-picking={deskCards && picking ? '' : undefined} className="relative w-full h-full flex flex-col overflow-hidden">
+        <div data-page-bento data-bento-flat data-msg-phone-b={phonePill && !fullscreen ? '' : undefined} data-msg-cards={cards ? '' : undefined} data-msg-plain={plainList ? '' : undefined} data-msg-cards-picking={deskCards && picking ? '' : undefined} className="relative w-full h-full flex flex-col overflow-hidden">
           {/* Header */}
           {fullscreenTop ?? deskTop ?? phoneTop ?? (<PageIsland
             className={fullscreen ? 'shrink-0 top-0 lg:top-0 px-2 pt-2' : 'shrink-0'}
@@ -1649,7 +1658,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
           {tabSheets}
 
           {/* Conversation List */}
-          <div data-chat-list-scroll data-pull-through ref={chatListRef} {...chatPull.handlers} className={`flex-1 min-h-0 overflow-y-auto ${fullscreen && !phonePill ? 'pt-1 pb-3' : 'pt-3 pb-[76px] lg:pb-0'}`}>
+          <div data-chat-list-scroll data-pull-through ref={chatListRef} {...chatPull.handlers} className={`flex-1 min-h-0 overflow-y-auto ${fullscreen && !phonePill ? 'pt-1 pb-3 lg:overflow-x-hidden' : 'pt-3 pb-[76px] lg:pb-0'}`}>
             {/* Phones: pulled down from the top, the rows lower and a refresh
                 arrow turns in the gap; let go past its full turn to refresh.
                 Every row is a button, so the list opts in with

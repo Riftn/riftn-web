@@ -1,74 +1,48 @@
 /**
- * What a viewer sees of a co-stream on the live player: a way to ask onto
- * the screen, the host's invite when there is one, and the "you're in" moment
- * that opens the guest room.
+ * What a viewer sees of a co-stream on the live player: the host's invite
+ * card, the "you're in" moment that opens the guest room, and the battle bar.
+ * Ask to join lives in the live's own controls (CoStreamAskButton), not on
+ * the picture.
  *
  * The picture itself needs nothing here — the guests are already in the
- * broadcast. This only polls the room, gently: every 15s for an ordinary
- * viewer, every 3s once they have asked or been asked.
+ * broadcast. The room is polled once for every part that shows it
+ * (useCoStreamViewer).
  */
-import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Hand, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { CoStreamBattleBar } from './CoStreamBattleBar';
-import {
-  acceptInvite,
-  battlePhase,
-  declineInvite,
-  getCoStreamForStream,
-  requestToJoin,
-  type CoStreamState,
-} from '@/lib/live/costream-api';
+import { acceptInvite, battlePhase, declineInvite } from '@/lib/live/costream-api';
 import { participantLabel } from '@/hooks/use-costream-host';
+import { buildAvatarUrl } from '@/lib/media-url';
+import { CoStreamInviteCard } from './CoStreamInviteCard';
+import { useCoStreamViewer } from './use-costream-viewer';
 
 const CoStreamGuestRoom = lazy(() => import('./CoStreamGuestRoom'));
 
-const IDLE_POLL_MS = 15_000;
-const ACTIVE_POLL_MS = 3000;
 const PILL =
   'pointer-events-auto inline-flex h-8 items-center gap-1.5 rounded-xl border border-white/20 bg-black/40 px-3 text-[11px] font-medium text-white backdrop-blur-xl hover:bg-black/55 disabled:opacity-60';
 
 export function CoStreamViewerLayer({
   streamId,
   owner,
+  hostAvatar,
   onRoomChange,
 }: {
   streamId: string;
   /** The stream owner's wallet; rows naming anyone else are ignored. */
   owner?: string | null;
+  /** The host's face, for the invite card. */
+  hostAvatar?: string | null;
   /** The guest room opened or closed — the player should go quiet under it. */
   onRoomChange?: (open: boolean) => void;
 }) {
   const { t } = useTranslation();
-  const { walletAddress, user, isAuthenticated, openLoginModal } = useAuth();
-  const me = walletAddress?.toLowerCase() ?? null;
-  const [state, setState] = useState<CoStreamState | null>(null);
+  const { user } = useAuth();
   const [busy, setBusy] = useState(false);
   const [roomOpen, setRoomOpen] = useState(false);
-
-  const seat = me ? state?.seats.find((s) => s.wallet === me) ?? null : null;
-  // A running round moves the bar every few seconds; poll at that pace.
-  const pending = seat?.status === 'requested' || seat?.status === 'invited' || seat?.status === 'accepted'
-    || battlePhase(state?.room) !== 'idle';
-
-  const load = useCallback(async () => {
-    const next = await getCoStreamForStream(streamId, owner);
-    setState(next);
-  }, [streamId, owner]);
-
-  useEffect(() => {
-    if (roomOpen) return;
-    let cancelled = false;
-    const tick = () => {
-      if (document.visibilityState === 'hidden') return;
-      void load().catch(() => { if (!cancelled) setState(null); });
-    };
-    tick();
-    const timer = window.setInterval(tick, pending ? ACTIVE_POLL_MS : IDLE_POLL_MS);
-    return () => { cancelled = true; window.clearInterval(timer); };
-  }, [load, pending, roomOpen]);
+  const { state, seat, me, refresh: load } = useCoStreamViewer(streamId, owner, roomOpen);
 
   useEffect(() => { onRoomChange?.(roomOpen); }, [roomOpen, onRoomChange]);
 
@@ -94,26 +68,21 @@ export function CoStreamViewerLayer({
 
   return (
     <>
-      <div className="pointer-events-none absolute left-1/2 top-[max(3.25rem,calc(env(safe-area-inset-top)+3.25rem))] z-30 flex -translate-x-1/2 flex-col items-center gap-2">
+      <div className="pointer-events-none absolute inset-x-0 top-[max(3.25rem,calc(env(safe-area-inset-top)+3.25rem))] z-30 flex flex-col items-center gap-2">
         {battling && <CoStreamBattleBar state={state} streamId={streamId} />}
         {seat?.status === 'invited' && (
-          <div className="pointer-events-auto flex items-center gap-2 rounded-2xl border border-white/20 bg-black/60 px-3 py-2 text-xs text-white backdrop-blur-xl">
-            <span>{t('costream.hostInvitedYou', { defaultValue: '{{name}} invited you on screen', name: host })}</span>
-            <button
-              type="button"
-              className={PILL}
-              disabled={busy}
-              onClick={() => void act(async () => {
-                await acceptInvite(me!, seat.id, null, user?.username);
-                setRoomOpen(true);
-              })}
-            >
-              {t('costream.join', { defaultValue: 'Join' })}
-            </button>
-            <button type="button" className={PILL} disabled={busy} onClick={() => void act(() => declineInvite(me!, seat.id))}>
-              {t('costream.notNow', { defaultValue: 'Not now' })}
-            </button>
-          </div>
+          <CoStreamInviteCard
+            hostName={host}
+            hostAvatar={hostAvatar}
+            myName={user?.username ?? null}
+            myAvatar={user?.avatarImageUrl && user?.address ? buildAvatarUrl(user.address, user.avatarImageUrl) : null}
+            busy={busy}
+            onJoin={() => void act(async () => {
+              await acceptInvite(me!, seat.id, null, user?.username);
+              setRoomOpen(true);
+            })}
+            onDecline={() => void act(() => declineInvite(me!, seat.id))}
+          />
         )}
 
         {seat?.status === 'accepted' && !roomOpen && (
@@ -122,27 +91,6 @@ export function CoStreamViewerLayer({
           </button>
         )}
 
-        {seat?.status === 'requested' && (
-          <span className={PILL}>
-            <Loader2 className="h-3 w-3 animate-spin" />
-            {t('costream.requestSent', { defaultValue: 'Asked to join' })}
-          </span>
-        )}
-
-        {room.accepting_requests && (!seat || seat.status === 'declined' || seat.status === 'left') && (
-          <button
-            type="button"
-            className={PILL}
-            disabled={busy}
-            onClick={() => {
-              if (!isAuthenticated || !me) { openLoginModal?.(); return; }
-              void act(() => requestToJoin(me, room.id, user?.username));
-            }}
-          >
-            <Hand className="h-3.5 w-3.5" />
-            {t('costream.askToJoin', { defaultValue: 'Ask to join' })}
-          </button>
-        )}
       </div>
 
       {roomOpen && me && (

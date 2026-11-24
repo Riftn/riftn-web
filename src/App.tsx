@@ -29,6 +29,7 @@ import { FeedDefaultsSync } from "@/components/app/FeedDefaultsSync";
 import { useAuth, useLoginSheet } from "@/contexts/AuthContext";
 import { useNotificationClickRouting } from "@/hooks/use-notification-click-routing";
 import { useNotificationRealtime } from "@/hooks/use-notification-realtime";
+import { useLiveListRealtime } from "@/hooks/use-live-list-realtime";
 import { usePageViewAddress, PageViewTracker } from "@/hooks/use-page-view-tracking";
 import { ChatLinkCatcher } from "@/components/app/chat/ChatLinkCatcher";
 import { prefetchUnifiedFeed } from "@/hooks/use-unified-feed";
@@ -231,6 +232,8 @@ const ClipPage = React.lazy(() => import("./pages/app/ClipPage"));
 const DuetsPage = React.lazy(() => import("./pages/app/DuetsPage"));
 const CoStreamJoinPage = React.lazy(() => import("./pages/app/CoStreamJoinPage"));
 const LinkTvPage = React.lazy(() => import("./pages/app/LinkTvPage"));
+// Binary Metal: type text, hear it as a metal riff, download WAV or MP3 (engine in public/binary-metal).
+const BinaryMetalPage = React.lazy(() => import("./pages/app/BinaryMetalPage"));
 const MobilePreview = React.lazy(() => import("./pages/MobilePreview"));
 const GuidePage = React.lazy(() => import("./pages/GuidePage"));
 const BestDecentralizedStreaming = React.lazy(() => import("./pages/BestDecentralizedStreaming"));
@@ -555,6 +558,8 @@ function AppContent() {
   // Session-wide, not page-wide: the bell count and the cached notifications
   // page both go stale while the reader is anywhere else in the app.
   useNotificationRealtime();
+  // Someone going live (or ending) shows on every live surface at once.
+  useLiveListRealtime();
 
   const wallet = walletAddress ?? (user as { walletAddress?: string | null; address?: string | null } | null)?.walletAddress ?? (user as { address?: string | null } | null)?.address ?? null;
 
@@ -976,6 +981,7 @@ function AppContent() {
             <Route path="/post/:postId" element={<Suspense fallback={<PageLoader />}><SinglePostPage /></Suspense>} />
             <Route path="/post/:postId/info" element={<Suspense fallback={<PageLoader />}><PostInfoPage /></Suspense>} />
             <Route path="/post/:postId/reactions" element={<Suspense fallback={<PageLoader />}><PostReactionsPage /></Suspense>} />
+            <Route path="/post/:postId/duets" element={<Suspense fallback={<PageLoader />}><DuetsPage /></Suspense>} />
             <Route path="/video/:tokenId" element={<Suspense fallback={<PageLoader />}><SinglePostPage /></Suspense>} />
 
 
@@ -1028,6 +1034,7 @@ function AppContent() {
             <Route path="/tv" element={null} />
             {/* Where the TV app sends people to sign it in ("or visit riftn.com/link"). */}
             <Route path="/link" element={<Suspense fallback={<PageLoader />}><LinkTvPage /></Suspense>} />
+            <Route path="/music/binary-metal" element={<Suspense fallback={<PageLoader />}><BinaryMetalPage /></Suspense>} />
             <Route path="/bridge" element={null} />
             <Route path="/agents" element={null} />
             <Route path="/assistant" element={null} />

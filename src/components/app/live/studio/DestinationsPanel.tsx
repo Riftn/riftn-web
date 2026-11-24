@@ -15,6 +15,7 @@ import Plus from "@/components/ui/cut-icons/add";
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { SETTINGS_FIELD_CLASS } from '@/components/app/settings/SettingsRow';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PageSection } from '@/components/app/page-kit/PageKit';
@@ -84,7 +85,9 @@ export function DestinationsPanel({ address }: { address: string | null | undefi
         !adding && (
           <Button size="sm" variant="outline" onClick={() => setAdding(true)}>
             <Plus className="mr-1 h-4 w-4" />
-            {t('liveStudio.destinations.add')}
+            {/* A short label on phones, so the section title has room. */}
+            <span className="sm:hidden">{t('liveStudio.destinations.addShort')}</span>
+            <span className="max-sm:hidden">{t('liveStudio.destinations.add')}</span>
           </Button>
         )
       }
@@ -188,7 +191,7 @@ function AddDestination({ onCancel, onAdded }: { onCancel: () => void; onAdded: 
         </label>
         <label className="space-y-1 text-xs text-zinc-400">
           <span>{t('liveStudio.destinations.label')}</span>
-          <Input value={label} maxLength={60} placeholder={preset.name} onChange={(e) => setLabel(e.target.value)} />
+          <Input value={label} maxLength={60} placeholder={preset.name} onChange={(e) => setLabel(e.target.value)} className={SETTINGS_FIELD_CLASS} />
         </label>
       </div>
       <label className="block space-y-1 text-xs text-zinc-400">
@@ -200,6 +203,7 @@ function AddDestination({ onCancel, onAdded }: { onCancel: () => void; onAdded: 
           autoComplete="off"
           spellCheck={false}
           onChange={(e) => setServer(e.target.value)}
+          className={SETTINGS_FIELD_CLASS}
         />
       </label>
       <label className="block space-y-1 text-xs text-zinc-400">
@@ -211,6 +215,7 @@ function AddDestination({ onCancel, onAdded }: { onCancel: () => void; onAdded: 
           autoComplete="new-password"
           spellCheck={false}
           onChange={(e) => setStreamKey(e.target.value)}
+          className={SETTINGS_FIELD_CLASS}
         />
       </label>
       <div className="flex flex-wrap items-center justify-between gap-2">

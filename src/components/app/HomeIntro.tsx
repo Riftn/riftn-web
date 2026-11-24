@@ -133,6 +133,7 @@ export function HomeIntro({ tab }: { tab?: string } = {}) {
 
   return (
     <HomeIntroPanel
+      liveArt
       active={active}
       runId={runId}
       onDismiss={dismiss}
