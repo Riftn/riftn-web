@@ -839,8 +839,9 @@ function WideRailsRow({ enabled, rails, panel, children }: { enabled: boolean; r
   if (!enabled) return <>{children}</>;
   return (
     <div data-wide-rails-row={rails || undefined} className={rails ? 'flex items-stretch gap-3' : 'contents'}>
-      {children}
+      {/* The caption panel reads first on the left; the picture sits on the right. */}
       {rails && panel}
+      {children}
     </div>
   );
 }

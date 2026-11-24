@@ -6,9 +6,9 @@
  *
  * - ambient: the frame runs the full column width and the space beside the
  *   picture shows the playing video itself, blurred and dimmed.
- * - rails:   two panels side by side: the picture at its real shape with
- *   curved corners, and one glass panel beside it with who posted it, what it
- *   is and the top comments. Wide videos already fill the column and show as
+ * - rails:   two panels side by side: one glass panel on the left with what
+ *   it is, a Follow button and the top comments, and the picture on the right
+ *   at its real shape with curved corners. Wide videos already fill the column and show as
  *   normal.
  *
  * Theatre was a choice for a day and was dropped; a stored 'theatre' is not a
