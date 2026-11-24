@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { Archive, Film } from 'lucide-react';
+import { Archive, Film, Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
@@ -21,6 +21,10 @@ export function MomentArchive({ profileAddress }: { profileAddress: string }) {
         className="inline-flex min-h-10 items-center gap-2 rounded-lg px-2 font-medium hover:bg-white/10">
         <Archive aria-hidden size={17} />{t('stories.momentArchive', { defaultValue: 'Moment archive' })}
       </button>
+      {/* Nobody else gets this list from the server; say so. */}
+      <span className="ml-1 inline-flex items-center gap-1 text-xs opacity-60">
+        <Lock aria-hidden size={12} />{t('stories.archiveOnlyYou', { defaultValue: 'Only you can see this' })}
+      </span>
       {open && <ArchiveItems address={address} />}
     </section>
   );
