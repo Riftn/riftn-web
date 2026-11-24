@@ -49,7 +49,7 @@ type Busy = null | 'render' | 'wav' | 'mp3' | 'post';
 const ACTIVE = { background: 'var(--kit-chip-active-bg)', color: 'var(--kit-chip-active-ink)' } as const;
 
 function save(bytes: Uint8Array, name: string, type: string) {
-  const url = URL.createObjectURL(new Blob([bytes], { type }));
+  const url = URL.createObjectURL(new Blob([new Uint8Array(bytes)], { type }));
   const a = document.createElement('a');
   a.href = url;
   a.download = name;
@@ -287,7 +287,7 @@ export default function BinaryMetalPage() {
         return;
       }
       const list = new DataTransfer();
-      list.items.add(new File([mp3], name, { type: 'audio/mpeg' }));
+      list.items.add(new File([new Uint8Array(mp3)], name, { type: 'audio/mpeg' }));
       openPostModalWithFiles(list.files, t('binaryMetal.postCaption', { defaultValue: '"{{text}}" as a metal riff. Make yours: {{url}}', text: clipped, url: PAGE_URL }));
     } catch {
       toast.error(t('binaryMetal.exportFailed', { defaultValue: 'That file did not save. Try again.' }));
