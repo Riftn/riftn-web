@@ -317,3 +317,62 @@ export const SILLY_UPGRADES: Record<SillyUpgradeKind, { base: number; growth: nu
   miner: { base: 50, growth: 1.45, perTap: 0, perSecond: 1 },
   rig: { base: 1500, growth: 1.5, perTap: 0, perSecond: 10 },
 };
+
+// ------------------------------------------------------------ Gratitude pen pals
+// Two players take turns saying one thing they are grateful for. The server
+// turns away repeats (riftn-backend src/games/gratitude.check.ts) without
+// using the turn, and whoever lets their turn time run out loses.
+
+export interface GratitudeLine {
+  n: number;
+  by: string;
+  text: string;
+  at: string;
+}
+
+export interface GratitudeGame {
+  id: string;
+  status: 'pending' | 'active' | 'finished' | 'declined' | 'cancelled';
+  createdBy: GamePlayer | null;
+  invitee: GamePlayer | null;
+  players: GamePlayer[];
+  daysPerTurn: number;
+  lineCount: number;
+  lines?: GratitudeLine[];
+  lastLine: { by: string; text: string; at: string } | null;
+  turn: GamePlayer | null;
+  turnDeadline: string | null;
+  winner: GamePlayer | null;
+  endReason: 'timeout' | 'gave_up' | null;
+  you: string | null;
+  yourTurn: boolean;
+  maxChars: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GratitudeList {
+  games: GratitudeGame[];
+  open: GratitudeGame[];
+  myTurn: number;
+  dayChoices: number[];
+}
+
+export interface GratitudeCheck {
+  ok: boolean;
+  reason?: 'empty' | 'short' | 'long' | 'link' | 'repeat';
+  repeatOf?: number | null;
+  message?: string;
+}
+
+const gratitudePath = (id: string, tail = '') => `/api/games/gratitude/${encodeURIComponent(id)}${tail}`;
+export const gratitudeList = () => apiCall<GratitudeList>('/api/games/gratitude', { requiresAuth: true });
+export const gratitudeGet = (id: string, signedIn: boolean) => apiCall<{ game: GratitudeGame }>(gratitudePath(id), { requiresAuth: signedIn });
+export const gratitudeCreate = (body: { opponent?: string; days: number }) =>
+  apiCall<{ game: GratitudeGame }>('/api/games/gratitude', { method: 'POST', body, requiresAuth: true });
+export const gratitudeAction = (id: string, action: 'accept' | 'decline' | 'give-up') =>
+  apiCall<{ game: GratitudeGame }>(gratitudePath(id, `/${action}`), { method: 'POST', requiresAuth: true });
+export const gratitudeWrite = (id: string, text: string) =>
+  apiCall<{ game: GratitudeGame }>(gratitudePath(id, '/line'), { method: 'POST', body: { text }, requiresAuth: true });
+export const gratitudeCheck = (id: string, text: string) =>
+  apiCall<GratitudeCheck>(gratitudePath(id, '/check'), { method: 'POST', body: { text }, requiresAuth: true });
