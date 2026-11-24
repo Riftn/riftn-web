@@ -39,7 +39,11 @@ const OPTIONS: ReadonlyArray<{ kind: Kind; icon: IconType; label: string; hint: 
 /** Exit motion length; the menu stays mounted until it ends. */
 const CLOSE_MS = 200;
 
-export function StoryCreatePill() {
+/**
+ * The create menu and every flow it opens, shared by the ask bar (empty row)
+ * and the Create tile (row with Moments or lives up).
+ */
+function useCreateMenu() {
   const { t } = useTranslation();
   const { walletAddress, user } = useAuth();
   const { openPostModal } = useGlobalDropZone();
@@ -49,8 +53,7 @@ export function StoryCreatePill() {
   const [liveMounted, setLiveMounted] = useState(false);
   // Bumped on each Status pick; the launcher mounts on the first and stays.
   const [statusNonce, setStatusNonce] = useState(0);
-  const addRef = useRef<HTMLButtonElement>(null);
-  const [anchor, setAnchor] = useState<{ top: number; right: number } | null>(null);
+  const [anchor, setAnchor] = useState<{ top: number; right?: number; left?: number } | null>(null);
 
   const closeMenu = () => setMenu(m => (m === 'open' ? 'closing' : m));
   useEffect(() => {
@@ -85,14 +88,70 @@ export function StoryCreatePill() {
     else if (kind === 'status') setStatusNonce(n => n + 1);
   };
 
-  const openMenu = () => {
-    const r = addRef.current?.getBoundingClientRect();
-    if (r) setAnchor({ top: r.bottom + 8, right: Math.max(12, window.innerWidth - r.right) });
+  // Desktop drops the menu under the button that opened it.
+  const openMenu = (from: HTMLElement | null, align: 'left' | 'right' = 'right') => {
+    const r = from?.getBoundingClientRect();
+    if (r) setAnchor(align === 'right'
+      ? { top: r.bottom + 8, right: Math.max(12, window.innerWidth - r.right) }
+      : { top: r.bottom + 8, left: Math.max(12, r.left) });
     setMenu('open');
   };
+  const toggle = (from: HTMLElement | null, align: 'left' | 'right' = 'right') => (menu === 'open' ? closeMenu() : openMenu(from, align));
 
   const label = (kind: Kind, fallback: string) => t(`stories.ask.${kind}`, { defaultValue: fallback });
   const createLabel = t('stories.ask.create', { defaultValue: 'Create' });
+
+  const elements = (
+    <>
+      {menu !== 'closed' && createPortal(
+        <div data-stories data-ask-layer data-state={menu}>
+          <div data-ask-scrim onClick={closeMenu} />
+          <div
+            data-ask-menu
+            role="menu"
+            aria-label={createLabel}
+            style={anchor ? ({
+              '--ask-top': `${anchor.top}px`,
+              ...(anchor.right != null ? { '--ask-right': `${anchor.right}px` } : { '--ask-left': `${anchor.left}px`, '--ask-right': 'auto' }),
+            } as unknown as CSSProperties) : undefined}
+          >
+            <span data-ask-grab aria-hidden="true" />
+            <div data-ask-title>{createLabel}</div>
+            {OPTIONS.map(({ kind, icon: Icon, label: fallback, hint }) => (
+              <button key={kind} type="button" role="menuitem" data-ask-row={kind} onClick={() => pick(kind)}>
+                <span data-ask-row-icon><Icon className="h-5 w-5" /></span>
+                <span data-ask-row-text>
+                  <b>{label(kind, fallback)}</b>
+                  <span>{t(`stories.ask.${kind}Hint`, { defaultValue: hint })}</span>
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>,
+        document.body,
+      )}
+      {liveMounted && (
+        <Suspense fallback={null}>
+          <PostModal isOpen={liveOpen} onClose={() => setLiveOpen(false)} initialLiveMode="video" />
+        </Suspense>
+      )}
+      {statusNonce > 0 && me && (
+        <Suspense fallback={null}>
+          <StoryStatusLauncher me={me} nonce={statusNonce} />
+        </Suspense>
+      )}
+    </>
+  );
+
+  return { menuOpen: menu === 'open', toggle, pick, label, createLabel, firstName, elements };
+}
+
+
+/** The ask bar that stands in for the row while nobody has a Moment up. */
+export function StoryCreatePill() {
+  const { t } = useTranslation();
+  const { menuOpen, toggle, pick, label, createLabel, firstName, elements } = useCreateMenu();
+  const addRef = useRef<HTMLButtonElement>(null);
 
   return (
     <div data-stories data-create-ask>
@@ -113,49 +172,39 @@ export function StoryCreatePill() {
           type="button"
           data-ask-add
           aria-haspopup="menu"
-          aria-expanded={menu === 'open'}
+          aria-expanded={menuOpen}
           aria-label={createLabel}
-          onClick={() => (menu === 'open' ? closeMenu() : openMenu())}
+          onClick={() => toggle(addRef.current)}
         >
           <span data-ask-key><Add className="h-4 w-4" /></span>
         </button>
       </div>
-
-      {menu !== 'closed' && createPortal(
-        <div data-stories data-ask-layer data-state={menu}>
-          <div data-ask-scrim onClick={closeMenu} />
-          <div
-            data-ask-menu
-            role="menu"
-            aria-label={createLabel}
-            style={anchor ? ({ '--ask-top': `${anchor.top}px`, '--ask-right': `${anchor.right}px` } as CSSProperties) : undefined}
-          >
-            <span data-ask-grab aria-hidden="true" />
-            <div data-ask-title>{createLabel}</div>
-            {OPTIONS.map(({ kind, icon: Icon, label: fallback, hint }) => (
-              <button key={kind} type="button" role="menuitem" data-ask-row={kind} onClick={() => pick(kind)}>
-                <span data-ask-row-icon><Icon className="h-5 w-5" /></span>
-                <span data-ask-row-text>
-                  <b>{label(kind, fallback)}</b>
-                  <span>{t(`stories.ask.${kind}Hint`, { defaultValue: hint })}</span>
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>,
-        document.body,
-      )}
-
-      {liveMounted && (
-        <Suspense fallback={null}>
-          <PostModal isOpen={liveOpen} onClose={() => setLiveOpen(false)} initialLiveMode="video" />
-        </Suspense>
-      )}
-      {statusNonce > 0 && me && (
-        <Suspense fallback={null}>
-          <StoryStatusLauncher me={me} nonce={statusNonce} />
-        </Suspense>
-      )}
+      {elements}
     </div>
+  );
+}
+
+/** First tile of the row while Moments or lives are up: a centred + that opens the same menu. */
+export function StoryCreateTile() {
+  const { menuOpen, toggle, createLabel, elements } = useCreateMenu();
+  const ref = useRef<HTMLButtonElement>(null);
+  return (
+    <>
+      <button
+        ref={ref}
+        type="button"
+        role="listitem"
+        data-story-tile
+        data-kind="create"
+        aria-haspopup="menu"
+        aria-expanded={menuOpen}
+        aria-label={createLabel}
+        onClick={() => toggle(ref.current, 'left')}
+      >
+        <span data-create-key><Add className="h-[18px] w-[18px]" /></span>
+        <span data-create-label>{createLabel}</span>
+      </button>
+      {elements}
+    </>
   );
 }

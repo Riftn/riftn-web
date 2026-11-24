@@ -148,13 +148,70 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-story-shelf] {
 [data-story-tile][data-close-friends][data-seen='false']::after { border: 2px solid #22c55e; }
 /* Settings > Blur Moment previews: nothing shows until the tile is opened. */
 [data-story-tile][data-blur='true'] > [data-st-bg] { filter: blur(22px) saturate(0.8); transform: scale(1.25); }
+/* Live: a glass chip with sound bars moving, like the time chip (no red block). */
 [data-story-tile] [data-st-live] {
-  background: #bf303b;
-  border: 1px solid #d56e78;
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 0 7px;
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.3), rgb(255 255 255 / 0.08));
+  backdrop-filter: blur(10px) saturate(1.8);
+  border: 1px solid rgb(255 255 255 / 0.55);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.45), 0 2px 8px rgb(0 0 0 / 0.22);
 }
+[data-story-tile] [data-st-live] i {
+  display: block;
+  width: 2.5px;
+  height: 12px;
+  border-radius: 2px;
+  background: #fff;
+  transform-origin: 50% 100%;
+  animation: st-live-bar 1s ease-in-out infinite;
+}
+[data-story-tile] [data-st-live] i:nth-child(1) { animation-delay: -0.4s; }
+[data-story-tile] [data-st-live] i:nth-child(2) { animation-delay: -0.15s; }
+[data-story-tile] [data-st-live] i:nth-child(3) { animation-delay: -0.7s; }
+@keyframes st-live-bar {
+  0%, 100% { transform: scaleY(0.45); }
+  50% { transform: scaleY(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-story-tile] [data-st-live] i { animation: none; }
+  [data-story-tile] [data-st-live] i:nth-child(1) { transform: scaleY(0.6); }
+  [data-story-tile] [data-st-live] i:nth-child(3) { transform: scaleY(0.75); }
+}
+
+/* Create: first tile of the row, an outline tile with a centred + (no fill,
+   so no grey slab on the light themes); canvas themes get their glass. */
+[data-story-tile][data-kind='create'] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: transparent;
+  color: var(--st-ink);
+}
+[data-story-tile][data-kind='create']::after { border-color: var(--ask-line, rgb(255 255 255 / 0.16)); }
+html:is([data-theme='light'], [data-system-tone='light']) [data-story-tile][data-kind='create']::after { border-color: rgb(11 11 13 / 0.14); }
+:is([data-theme='hazy'], [data-theme='osaka'], [data-theme='jungle'], [data-theme='cosmic'], [data-theme='glass'], [data-theme='lavalamp'], [data-theme='swarms'], [data-theme='winter'], [data-theme='island'], [data-theme='horror'], [data-theme='hacker']) [data-story-tile][data-kind='create'] {
+  background: rgb(255 255 255 / 0.07);
+  backdrop-filter: blur(18px) saturate(1.4);
+}
+:is([data-theme='hazy'], [data-theme='osaka'], [data-theme='jungle'], [data-theme='cosmic'], [data-theme='glass'], [data-theme='lavalamp'], [data-theme='swarms'], [data-theme='winter'], [data-theme='island'], [data-theme='horror'], [data-theme='hacker']) [data-story-tile][data-kind='create']::after { border-color: rgb(255 255 255 / 0.2); }
+[data-story-tile][data-kind='create'] [data-create-key] {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--st-acc);
+  color: var(--st-btn-ink);
+}
+[data-story-tile][data-kind='create'] [data-create-key] svg { transition: transform 200ms cubic-bezier(0.25, 0.8, 0.25, 1); }
+[data-story-tile][data-kind='create'][aria-expanded='true'] [data-create-key] svg { transform: rotate(45deg); }
+[data-story-tile][data-kind='create'] [data-create-label] { font-size: 12px; font-weight: 600; }
 [data-story-tile] [data-st-plus-corner] {
   width: 24px;
   color: #111;
@@ -1166,10 +1223,10 @@ html:is([data-theme='light'], [data-system-tone='light']) :is([data-create-ask],
   [data-create-ask] { margin: 0 0 16px; }
   [data-ask-scrim] { background: transparent; }
   [data-ask-menu] {
-    left: auto;
     bottom: auto;
     top: var(--ask-top, 120px);
     right: var(--ask-right, 24px);
+    left: var(--ask-left, auto);
     width: 300px;
     padding: 6px 0;
     border: 1px solid var(--ask-line);

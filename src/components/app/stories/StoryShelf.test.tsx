@@ -14,6 +14,7 @@ vi.mock('@/hooks/use-stories-enabled', () => ({ useStoriesEnabled: () => prefs }
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ isAuthenticated: true, walletAddress: 'owner' }) }));
 vi.mock('@/hooks/use-mature-content', () => ({ useMatureContent: () => ({ showMatureContent: false }) }));
 vi.mock('@/hooks/use-kids-mode', () => ({ useKidsModeLock: () => false }));
+vi.mock('@/hooks/use-global-drop-zone', () => ({ useGlobalDropZone: () => ({ openPostModal: vi.fn() }) }));
 vi.mock('@/components/app/feeds/LiveNowBar', () => ({
   useLiveNowItems: () => ({ items: [{ wallet: 'host', id: '1', kind: 'stage', title: 'Live now' }] }),
   faceUrlOf: () => null,
@@ -58,12 +59,14 @@ it('labels moments and live hosts with their display name and visible badge', ()
 it('provides the cover, avatar and badge slots across the carousel', () => {
   prefs.storiesEnabled = true;
   const { container } = render(<StoryShelf />);
-  for (const kind of ['me', 'live', 'person']) {
+  for (const kind of ['live', 'person']) {
     const tile = container.querySelector(`[data-kind="${kind}"]`);
     expect(tile?.querySelector('[data-st-bg]')).toBeTruthy();
     expect(tile?.querySelector('[data-st-avatar]')).toBeTruthy();
     expect(tile?.querySelector('[data-st-label]')).toBeTruthy();
   }
-  expect(container.querySelector('[data-kind="live"] [data-st-live]')).toHaveTextContent('LIVE');
-  expect(container.querySelector('[data-kind="me"] [data-st-plus-corner]')).toBeTruthy();
+  expect(container.querySelector('[data-kind="live"] [data-st-live]')).toHaveAttribute('aria-label', 'LIVE');
+  // Your own tile only shows with a Moment up; the Create tile leads the row.
+  expect(container.querySelector('[data-kind="me"]')).toBeNull();
+  expect(screen.getByRole('listitem', { name: 'Create' })).toHaveAttribute('aria-haspopup', 'menu');
 });
