@@ -1175,16 +1175,14 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
               mention.handleInput(val, cursorPos ?? undefined);
             }}
             onKeyDown={handleKeyDown}
-            onFocus={(e) => {
+            onPointerDown={(e) => {
               // Signed out, the box used to sit there disabled and a click
               // did nothing. Now the click opens sign-in instead.
-              if (!isAuthenticated) {
-                e.currentTarget.blur();
-                openLoginModal();
-                return;
-              }
-              setBoxFocused(true);
+              if (isAuthenticated) return;
+              e.preventDefault();
+              openLoginModal();
             }}
+            onFocus={() => setBoxFocused(true)}
             onBlur={() => setBoxFocused(false)}
             readOnly={!isAuthenticated}
             placeholder={isOffline ? _copy("copy.17529a437b97", { defaultValue: "Chat is offline" }) : !isAuthenticated ? _copy("copy.048ff525a56b", { defaultValue: "Sign in to chat" }) : bannedHere ? t('liveChatModeration.youAreBanned') : muted ? t('liveChatModeration.youAreTimedOut') : replyTo ? t('stories.replyTo', { defaultValue: 'Reply to {{name}}', name: replyTo.sender_display_name || replyTo.sender_username || replyTo.sender_address.slice(0, 8) }) : _copy("copy.69518e684f06", { defaultValue: "Type a message..." })}
