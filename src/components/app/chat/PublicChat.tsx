@@ -866,10 +866,10 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
           <ChatTextSizeButton />
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" data-public-chat-plus aria-label={_copy('chatTabs.menu', { defaultValue: 'Chat options' })}
-                className="h-8 w-8 text-zinc-400 hover:text-white [&_svg]:!h-5 [&_svg]:!w-5">
+              <button type="button" data-public-chat-plus aria-label={_copy('chatTabs.menu', { defaultValue: 'Chat options' })}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:text-white [&_svg]:h-5 [&_svg]:w-5">
                 <Plus />
-              </Button>
+              </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" sideOffset={6} data-chat-options-menu className={cn(CHAT_MENU_CONTENT, 'text-white')}>
               {call && walletAddress && !isBanned && (

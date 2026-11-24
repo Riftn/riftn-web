@@ -977,7 +977,7 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
             >
               {trayOpen ? <X /> : <Plus strokeWidth={2.2} />}
             </button>
-            <div className="relative flex min-w-0 flex-1 items-end rounded-[19px] border border-white/[0.14] pl-3.5 pr-1">
+            <div className="relative flex min-w-0 flex-1 items-end rounded-xl border border-white/[0.14] pl-3.5 pr-1">
               <Textarea
                 ref={textareaRef}
                 data-chat-composer-input
@@ -1018,7 +1018,7 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
                 onClick={handleSend}
                 disabled={sendDisabled || isSendingFee || !hasSomethingToSend}
                 title={sendDisabled ? sendDisabledReason : feeAmount ? t('messages.feePerMessage', { amount: feeAmount.toLocaleString() }) : undefined}
-                className={cn('mb-[3px] ml-1.5 flex h-[30px] shrink-0 items-center justify-center gap-1 rounded-full bg-[var(--pb-accent)] text-[var(--pb-accent-ink)] transition-opacity disabled:opacity-35 [&>svg]:h-[17px] [&>svg]:w-[17px]', feeAmount ? 'px-2.5' : 'w-[30px]')}
+                className={cn('mb-[3px] ml-1.5 flex h-[30px] shrink-0 items-center justify-center gap-1 rounded-lg bg-[var(--pb-accent)] text-[var(--pb-accent-ink)] transition-opacity disabled:opacity-35 [&>svg]:h-[17px] [&>svg]:w-[17px]', feeAmount ? 'px-2.5' : 'w-[30px]')}
               >
                 {isSendingFee ? <Loader2 className="animate-spin" /> : (
                   <>
@@ -1385,14 +1385,14 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
   );
 }
 
-/** One tile in the phone composer's + drawer: the control, squared, with its name under it. */
+/** One tile in the phone composer's + drawer: the icon with its name under it. */
 function TrayCell({ label, wide, children }: { label: string; wide?: boolean; children: ReactNode }) {
   return (
     <div
       data-tray-cell
       className={cn(
         'flex min-w-0 flex-col items-center gap-1.5 text-center',
-        '[&>button]:grid [&>button]:h-[54px] [&>button]:w-[54px] [&>button]:place-items-center [&>button]:rounded-[13px] [&>button]:bg-white/[0.08] [&>button]:text-white [&>button]:transition-opacity [&>button:disabled]:opacity-40 [&>button_svg]:!h-6 [&>button_svg]:!w-6',
+        '[&>button]:grid [&>button]:h-[54px] [&>button]:w-[54px] [&>button]:place-items-center [&>button]:rounded-[13px] [&>button]:text-white [&>button]:transition-opacity [&>button:disabled]:opacity-40 [&>button_svg]:!h-6 [&>button_svg]:!w-6',
         wide && 'has-[[data-voice-recording]]:col-span-4 [&:has([data-voice-recording])>span]:hidden',
       )}
     >
