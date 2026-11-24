@@ -373,6 +373,7 @@ export default function ExplorePage() {
   // Previously, raw searchQuery was passed to some hooks while useDeHubSearch debounced internally,
   // causing results from different hooks to be out of sync (flashing between old/new results)
   const baseEffectiveQuery = isShortSearch ? debouncedShortQuery : debouncedFullQuery;
+  const isDebouncingSearch = trimmedQuery !== baseEffectiveQuery.trim();
 
   // Resolve contract addresses (0x...) to ticker symbols via DexScreener
   const { resolvedTicker, isResolving: isResolvingContract } = useContractToTicker(baseEffectiveQuery);
@@ -506,7 +507,7 @@ export default function ExplorePage() {
     const accounts = flattenSearchAccounts(searchData) || [];
     
     // Get accounts from the dedicated All-tab account search
-    const allTabAccounts = flattenSearchAccounts(allTabAccountData) || [];
+    const allTabAccounts = isAllTabAccountPlaceholder ? [] : (flattenSearchAccounts(allTabAccountData) || []);
     
     // For short search, don't include video results
     const videos = isShortSearch ? [] : (flattenSearchVideos(searchData) || []);
@@ -612,7 +613,7 @@ export default function ExplorePage() {
       posts: filteredPosts,
       total: searchData?.pages?.[0]?.total || 0,
     };
-  }, [searchData, allTabAccountData, exactUser, brandUser, isShortSearch, effectiveQuery, filters]);
+  }, [searchData, allTabAccountData, isAllTabAccountPlaceholder, exactUser, brandUser, isShortSearch, effectiveQuery, filters]);
 
   const handlePeopleCardClick = useCallback((handle: string) => addToHistory(`@${handle}`, 'user'), [addToHistory]);
 
@@ -620,13 +621,16 @@ export default function ExplorePage() {
 
   const resetFilters = () => setFilters(DEFAULT_SEARCH_FILTERS);
 
+  // A new search heading must never show rows from the previous query.
+  const showLoading = isDebouncingSearch || isSearchLoading || isSearchPlaceholder || isUserLoading;
+
   // Infinite scroll ref
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const isFetchingRef = useRef(false);
 
   // Infinite scroll observer
   useEffect(() => {
-    if (!isSearching || activeTab === 'people') return;
+    if (!isSearching || showLoading || activeTab === 'people') return;
     
     const observer = new IntersectionObserver(
       (entries) => {
@@ -649,7 +653,7 @@ export default function ExplorePage() {
     return () => {
       if (currentRef) observer.unobserve(currentRef);
     };
-  }, [isSearching, activeTab, hasNextPage, fetchNextPage]);
+  }, [isSearching, showLoading, activeTab, hasNextPage, fetchNextPage]);
 
   // Map NFTs to feed items
   const mappedFeedItems = useMemo(() => {
@@ -667,14 +671,11 @@ export default function ExplorePage() {
   // in slices, so a page of fifteen cards no longer freezes the screen.
   const resultCardsDrawn = useStagedCount(mappedFeedItems.length, FIRST_RESULT_CARDS, `${effectiveQuery}|${activeTab}`);
 
-  const showLoading = isSearchLoading || isUserLoading;
   const showResults = isSearching && !showLoading && (searchResults.users.length > 0 || searchResults.posts.length > 0);
   const hasPriceResult = !!stockData?.found || dexPairs.length > 0;
-  // Debounced queries, cached results and the separate People lookup can settle
-  // at different times. Keep existing results visible while the new term loads.
-  const isWaitingForSearch = trimmedQuery !== baseEffectiveQuery.trim()
-    || isResolvingContract
-    || isSearchPlaceholder
+  // Supplemental lookups can settle after the main search. Wait for them
+  // before declaring the results empty.
+  const isWaitingForSearch = isResolvingContract
     || isAllTabAccountLoading
     || (activeTab === 'all' && !isShortSearch && isAllTabAccountPlaceholder)
     || isBrandUserLoading
@@ -886,7 +887,7 @@ export default function ExplorePage() {
                 </div>
 
                 {/* Contract address resolving indicator */}
-                {isResolvingContract && (
+                {!isDebouncingSearch && isResolvingContract && (
                   <div className="flex items-center gap-2 px-4 py-3 rounded-2xl bg-zinc-900/80 border border-zinc-800/50 text-sm text-muted-foreground">
                     <Loader2 className="w-4 h-4 animate-spin" />
                     <span>{_copy("copy.614d15e703a1", { defaultValue: "Resolving contract address…" })}</span>
@@ -894,7 +895,7 @@ export default function ExplorePage() {
                 )}
 
                 {/* Resolved ticker badge */}
-                {resolvedTicker && !isResolvingContract && /^0x[a-f0-9]{40}$/i.test(baseEffectiveQuery.trim()) && (
+                {!isDebouncingSearch && resolvedTicker && !isResolvingContract && /^0x[a-f0-9]{40}$/i.test(baseEffectiveQuery.trim()) && (
                   <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-800/60 border border-zinc-700/40 text-xs text-muted-foreground mb-1">
                     <span className="truncate max-w-[120px] font-mono">{baseEffectiveQuery.trim().slice(0, 6)}…{baseEffectiveQuery.trim().slice(-4)}</span>
                     <span>→</span>
@@ -903,7 +904,7 @@ export default function ExplorePage() {
                 )}
 
                 {/* Stock / Crypto Cashtag Result Switcher */}
-                {isDhbQuery ? (
+                {!isDebouncingSearch && (isDhbQuery ? (
                   <DhbListingSoonCard source="explore" />
                 ) : hasPriceResult && (
                   <CashtagResultSwitcher
@@ -912,7 +913,7 @@ export default function ExplorePage() {
                     cmcData={cmcData}
                     symbol={effectiveQuery.trim()}
                   />
-                )}
+                ))}
 
                 {/* Loading State */}
                 {(showLoading || (canShowEmptySearch && isWaitingForSearch)) && (
@@ -925,7 +926,7 @@ export default function ExplorePage() {
                 )}
 
                 {/* Error State */}
-                {searchError && (
+                {!isDebouncingSearch && searchError && (
                   <div className="text-center py-8">
                     <p className="text-red-400">{t('explorePage.searchError')}</p>
                     <Button
