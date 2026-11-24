@@ -428,15 +428,20 @@ function prerenderHomeIntroPlugin() {
  * Lighthouse (which models from an unthrottled trace) then reports a first
  * paint of 6 s on a phone with the panel sitting in the HTML the whole time.
  *
- * This swaps the tag for a `modulepreload` (the download starts just as early,
- * at the same priority) plus an inline starter that import()s the entry after
- * the first frame has painted: requestAnimationFrame fires before that frame
- * paints, a zero-delay timeout inside it lands after. A background tab never
- * gets a frame, so a 4 s timer and a visibility listener start it there.
- * (It was 1.5 s, but PSI's phone run produced no frame for its first ~1.5 s,
- * so the timer started the entry first and every paint waited on the app.
- * The user-timing marks entry-start:frame|timer and first-raf show which
- * path ran in a Lighthouse report.)
+ * This swaps the tag for an inline starter that fetches and import()s the
+ * entry only once the first frame is on screen (the browser's own first-paint
+ * entry; where that is not reported, the frame after the first one).
+ *
+ * Nothing of the app is even downloaded before that paint. An early
+ * modulepreload looked free, but on a one or two core phone (and on PSI's
+ * test machine) compiling 2.3 MB off the main thread starved the compositor:
+ * the main thread sat idle for 600 ms with no frame, then the entry ran and
+ * the frame waited on it again (first paint 2.4 s for a card that is in the
+ * HTML). Lighthouse also bills every script that finished before the LCP
+ * paint to LCP, so the early download alone put its simulated LCP near 11 s.
+ * A background tab never gets a frame, so a 4 s timer and a visibility
+ * listener start it there. The user-timing marks entry-start:paint|frame|timer
+ * and first-raf show which path ran in a Lighthouse report.
  * import() of the same module twice is one evaluation, so both paths are safe.
  *
  * scripts/check-entry-bundle.mjs finds the entry through the data-entry link.
@@ -455,18 +460,29 @@ function startEntryAfterFirstPaintPlugin() {
           return html;
         }
         const entry = m[1];
+        // Every modulepreload (the entry's vendor chunks and the low-priority
+        // wallet set) moves into an inert <template>: nothing in it is fetched
+        // or compiled until the starter copies it into <head>. The tags keep
+        // their exact text, so the build checks that read them still do.
+        const preloads: string[] = [];
+        let out = html.replace(/[ \t]*<link\b[^>]*\brel="modulepreload"[^>]*>\n?/g, (tag) => { preloads.push(tag.trim()); return ''; });
         const starter = [
-          `<link rel="modulepreload" data-entry crossorigin href="${entry}">`,
-          '<script>(function(){var s=0,e=' + JSON.stringify(entry) + ';',
-          'try{performance.mark("boot-vis:"+document.visibilityState);}catch(x){}',
-          'function go(r){if(s)return;s=1;try{performance.mark("entry-start:"+r);}catch(x){}import(e).catch(function(){});}',
-          'function afterPaint(){requestAnimationFrame(function(){performance.mark&&performance.mark("first-raf");setTimeout(function(){go("frame");},0);});}',
-          'if(document.visibilityState==="hidden"){document.addEventListener("visibilitychange",function v(){if(document.visibilityState==="visible"){document.removeEventListener("visibilitychange",v);afterPaint();}});}',
+          `<template id="boot-preloads"><link rel="modulepreload" data-entry crossorigin href="${entry}">${preloads.join('')}</template>`,
+          '<script>(function(){var s=0,d=document,e=' + JSON.stringify(entry) + ';',
+          'function mark(n){try{performance.mark(n);}catch(x){}}',
+          'mark("boot-vis:"+d.visibilityState);',
+          'function add(q){var t=d.getElementById("boot-preloads");if(!t||!t.content)return;var l=t.content.querySelectorAll(q);for(var i=0;i<l.length;i++)d.head.appendChild(l[i].cloneNode(true));}',
+          'function go(r){if(s)return;s=1;mark("entry-start:"+r);add("link:not([data-prefetch-only])");',
+          'import(e).then(function(){setTimeout(function(){add("link[data-prefetch-only]");},1500);},function(){});}',
+          'function afterPaint(){var p=0,sup=0;function f(r){if(p)return;p=1;setTimeout(function(){go(r);},0);}',
+          'try{sup=PerformanceObserver.supportedEntryTypes.indexOf("paint")>=0;if(sup)new PerformanceObserver(function(l,o){o.disconnect();f("paint");}).observe({type:"paint",buffered:true});}catch(x){sup=0;}',
+          'requestAnimationFrame(function(){mark("first-raf");if(sup)setTimeout(function(){f("frame");},1000);else requestAnimationFrame(function(){f("frame");});});}',
+          'if(d.visibilityState==="hidden"){d.addEventListener("visibilitychange",function v(){if(d.visibilityState==="visible"){d.removeEventListener("visibilitychange",v);afterPaint();}});}',
           'else{afterPaint();}',
           'setTimeout(function(){go("timer");},4000);})();</script>',
         ].join('');
         console.log(`[start-entry-after-first-paint] ${entry} now starts after the first frame`);
-        return html.replace(tag, starter);
+        return out.replace(tag, starter);
       },
     },
   };
