@@ -14021,6 +14021,10 @@
     "reminderLater": "Not now"
   },
   "copy": {
+    "1944d5ab19cd": "Translate to",
+    "98cdcf4f2415": "Search languages",
+    "48bec8529d3f": "Translated from {{language}}",
+    "d80d30a1c7fd": "Already in {{language}}",
     "799c26913574": "Controls",
     "ff73efa451e4": "Move with W, A, S, D or the arrow keys. Look and shoot with the mouse.",
     "c718a21950e6": "Space jumps, Shift sprints, C crouches and Z goes prone.",
