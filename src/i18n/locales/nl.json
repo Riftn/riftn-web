@@ -23968,5 +23968,18 @@
     "empty": "Geen foto's gevonden. Probeer een ander woord.",
     "failed": "Kon die foto niet toevoegen. Probeer een andere.",
     "credit": "Foto: {{creator}} ({{license}})"
+  },
+  "arcadeCard": {
+    "best": "Beste score",
+    "mined": "Gedolven munten",
+    "rankLine": "{{label}} · #{{rank}} op het bord",
+    "shared": "Deelde deze game",
+    "play": "Spelen"
+  },
+  "arcadeShare": {
+    "postCard": "Plaats je scorekaart",
+    "postSnapshot": "Momentopname plaatsen",
+    "shareLink": "Link delen",
+    "snapshotFailed": "Momentopname mislukt. Probeer opnieuw."
   }
 }

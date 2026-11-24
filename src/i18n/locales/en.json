@@ -23694,5 +23694,18 @@
     "empty": "No photos found. Try another word.",
     "failed": "Couldn't add that photo. Try another one.",
     "credit": "Photo: {{creator}} ({{license}})"
+  },
+  "arcadeCard": {
+    "best": "Best score",
+    "mined": "Coins mined",
+    "rankLine": "{{label}} · #{{rank}} on the board",
+    "shared": "Shared this game",
+    "play": "Play"
+  },
+  "arcadeShare": {
+    "postCard": "Post your score card",
+    "postSnapshot": "Post a snapshot",
+    "shareLink": "Share link",
+    "snapshotFailed": "Couldn’t take a snapshot. Try again."
   }
 }

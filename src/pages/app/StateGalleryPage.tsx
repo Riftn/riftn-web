@@ -3762,6 +3762,12 @@ const GALLERY_LINK_TEXT = [
   'https://riftn.com/features',
 ];
 
+const ARCADE_CARD_TEXT = [
+  'https://riftn.com/arcade/chestard?by=c0chraniz3r',
+  'https://riftn.com/arcade/sillycoin?by=c0chraniz3r',
+  'https://riftn.com/arcade/chestard?by=c0chraniz3r&snap=1',
+];
+
 function LinkCardsGallery({ mention }: { mention: string | null }) {
   const queryClient = useQueryClient();
   const [selected, setSelected] = useState(0);
@@ -3783,6 +3789,12 @@ function LinkCardsGallery({ mention }: { mention: string | null }) {
       slow_mode_seconds: 0, default_permissions: null, created_at: now, updated_at: now,
     });
   });
+  useState(() => {
+    // Arcade score cards: a shared game naming its sharer.
+    const player = { address: '0x1111111111111111111111111111111111111111', username: 'c0chraniz3r', displayName: 'Jesse', avatarImageUrl: null };
+    queryClient.setQueryData(['arcade-card', 'chestard', 'c0chraniz3r'], { game: 'chestard', player, best: 1240, rank: 3, unit: 'points' });
+    queryClient.setQueryData(['arcade-card', 'sillycoin', 'c0chraniz3r'], { game: 'sillycoin', player, best: 48200, rank: 12, unit: 'coins' });
+  });
   const pairs = [GALLERY_LINK_TEXT.slice(0, 2), GALLERY_LINK_TEXT.slice(2, 4), GALLERY_LINK_TEXT.slice(4, 6)];
   return (
     <section data-page-bento data-link-cards-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
@@ -3792,6 +3804,14 @@ function LinkCardsGallery({ mention }: { mention: string | null }) {
           <div key={i} className="max-w-[340px] rounded-2xl border border-white/[0.08] bg-white/[0.03] p-3">
             <p className="text-sm text-white/80">{i === 0 ? 'have a look at these' : i === 1 ? 'top of the board today' : 'play this one'}</p>
             <DehubLinkEmbeds links={findDehubLinks(pair.join(' '))} compact />
+          </div>
+        ))}
+      </div>
+      <div data-arcade-cards-gallery className="mt-4 grid gap-4 md:grid-cols-3">
+        {ARCADE_CARD_TEXT.map((text) => (
+          <div key={text} className="max-w-[340px] rounded-2xl border border-white/[0.08] bg-white/[0.03] p-3">
+            <p className="text-sm text-white/80">beat my score</p>
+            <DehubLinkEmbeds links={findDehubLinks(text)} compact />
           </div>
         ))}
       </div>

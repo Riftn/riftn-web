@@ -23720,5 +23720,18 @@
     "empty": "No hay fotos. Prueba otra palabra.",
     "failed": "No se pudo añadir esa foto. Prueba otra.",
     "credit": "Foto: {{creator}} ({{license}})"
+  },
+  "arcadeCard": {
+    "best": "Mejor puntuación",
+    "mined": "Monedas minadas",
+    "rankLine": "{{label}} · n.º {{rank}} en la tabla",
+    "shared": "Compartió este juego",
+    "play": "Jugar"
+  },
+  "arcadeShare": {
+    "postCard": "Publicar tu tarjeta de puntuación",
+    "postSnapshot": "Publicar una captura",
+    "shareLink": "Compartir enlace",
+    "snapshotFailed": "No se pudo hacer la captura. Inténtalo de nuevo."
   }
 }
