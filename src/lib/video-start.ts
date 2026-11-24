@@ -10,7 +10,10 @@ export function requestVideoPlayback(
   player: Pick<HTMLVideoElement, 'error' | 'load' | 'play'>,
 ): Promise<void> {
   const recovery = recoveryForVideo(player);
-  if (recovery) { recovery.start(); return Promise.resolve(); }
+  if (recovery) {
+    if (recovery.start()) return Promise.resolve();
+    return Promise.reject(new DOMException('Playback is no longer allowed', 'AbortError'));
+  }
   if (player.error) reloadVideoSource(player);
   return player.play();
 }
