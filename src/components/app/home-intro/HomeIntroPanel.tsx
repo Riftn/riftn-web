@@ -23,7 +23,7 @@ import { useTranslation as _useCopy } from 'react-i18next';
  *   HOME_INTRO_PRESS in CLOUDFLARE_WORKER_SEO.js, and LINKS with
  *   HOME_INTRO_LINKS there.
  */
-import type { CSSProperties, MouseEventHandler, PointerEventHandler, Ref } from 'react';
+import type { CSSProperties, MouseEventHandler, PointerEventHandler } from 'react';
 import { Link } from 'react-router-dom';
 import X from "@/components/ui/cut-icons/close";
 
@@ -166,10 +166,27 @@ export interface HomeIntroPanelProps {
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
   onDescriptionToggle?: (expanded: boolean) => void;
-  /** Holds every hero image at opacity 0 (the prerender leaves it unset). */
-  artHidden?: boolean;
-  /** The hero art box, so HomeIntro can wait for its image to decode. */
-  heroRef?: Ref<HTMLDivElement>;
+  /**
+   * Set by the app (HomeIntro), left off by the build-time prerender. The
+   * prerendered copy draws the hero art as <img>, which is the page's largest
+   * paint and lands in the first frame. When the app mounts it replaces that
+   * copy, and an <img> in the new copy counted as a second, later largest
+   * paint whenever Chrome measured it a few device pixels bigger than the
+   * first one (it varies paint to paint), i.e. after the whole boot bundle:
+   * 11 s on the PageSpeed phone run. The app's copy therefore paints the same
+   * file as a CSS border-image, which Chrome never times as a largest paint,
+   * so the first frame keeps the score.
+   */
+  liveArt?: boolean;
+}
+
+/** The hero file the browser picked from the <img> srcset below, mirrored for
+ *  the app's border-image copy so it reuses the cached file. */
+function heroArtSize(): 240 | 480 {
+  if (typeof window === 'undefined') return 480;
+  const w = window.innerWidth;
+  const slot = w <= 519 ? 112 : w <= 759 ? 180 : 260;
+  return slot * (window.devicePixelRatio || 1) <= 240 ? 240 : 480;
 }
 
 export function HomeIntroPanel({
@@ -182,8 +199,7 @@ export function HomeIntroPanel({
   onMouseEnter,
   onMouseLeave,
   onDescriptionToggle,
-  artHidden,
-  heroRef,
+  liveArt,
 }: HomeIntroPanelProps) {
   const { t: _copy } = _useCopy();
   return (
@@ -225,9 +241,19 @@ export function HomeIntroPanel({
           panel's vertical centre — the banner template is pure art, but this
           panel carries body copy underneath and a centred hero sits straight
           on top of it. */}
-      <div ref={heroRef} aria-hidden="true" className="dehub-intro-hero pointer-events-none absolute">
+      <div aria-hidden="true" className="dehub-intro-hero pointer-events-none absolute">
         <div className="absolute inset-0" style={{ background: GLOW, borderRadius: '50%' }} />
-        {SLIDES.map((slide, index) => (
+        {SLIDES.map((slide, index) => liveArt ? (
+          <div
+            key={slide.artwork}
+            className="dehub-intro-art absolute inset-0"
+            style={{
+              opacity: index === active ? 1 : 0,
+              filter: 'drop-shadow(0 34px 60px rgba(0,0,0,.85))',
+              borderImage: `url(/brand-kit/icons/${slide.artwork}-${heroArtSize()}.webp) 0 fill`,
+            }}
+          />
+        ) : (
         <img
           key={slide.artwork}
           src={`/brand-kit/icons/${slide.artwork}-480.webp`}
@@ -250,7 +276,7 @@ export function HomeIntroPanel({
           {...({ fetchpriority: 'high' } as Record<string, string>)}
           decoding="async"
           className="dehub-intro-art absolute inset-0 h-full w-full object-contain"
-          style={{ opacity: !artHidden && index === active ? 1 : 0, filter: 'drop-shadow(0 34px 60px rgba(0,0,0,.85))' }}
+          style={{ opacity: index === active ? 1 : 0, filter: 'drop-shadow(0 34px 60px rgba(0,0,0,.85))' }}
         />
         ))}
       </div>

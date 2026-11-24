@@ -5,25 +5,28 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { HomeIntroPanel } from './HomeIntroPanel';
 
 const noop = () => {};
-const panel = (artHidden?: boolean) => (
+const panel = (liveArt?: boolean) => (
   <MemoryRouter>
-    <HomeIntroPanel active={0} runId={0} onDismiss={noop} onGoTo={noop} onJoin={noop} artHidden={artHidden} />
+    <HomeIntroPanel active={0} runId={0} onDismiss={noop} onGoTo={noop} onJoin={noop} liveArt={liveArt} />
   </MemoryRouter>
 );
-const opacities = (root: ParentNode) =>
-  [...root.querySelectorAll<HTMLImageElement>('.dehub-intro-art')].map((img) => img.style.opacity);
 
 afterEach(cleanup);
 
 describe('HomeIntroPanel hero art', () => {
-  it('shows the first slide at full opacity in the prerendered markup', () => {
+  it('prerenders the art as <img>, first slide visible, so the first frame is the largest paint', () => {
     const host = document.createElement('div');
     host.innerHTML = renderToStaticMarkup(panel());
-    expect(opacities(host)).toEqual(['1', '0', '0']);
+    const imgs = [...host.querySelectorAll<HTMLImageElement>('img.dehub-intro-art')];
+    expect(imgs.map((img) => img.style.opacity)).toEqual(['1', '0', '0']);
   });
 
-  it('holds every slide at opacity 0 while the app copy waits to fade in', () => {
+  it('draws the app copy as border-image, never <img>, so it cannot become a later largest paint', () => {
     const { container } = render(panel(true));
-    expect(opacities(container)).toEqual(['0', '0', '0']);
+    expect(container.querySelectorAll('img.dehub-intro-art')).toHaveLength(0);
+    const art = [...container.querySelectorAll<HTMLElement>('.dehub-intro-art')];
+    expect(art).toHaveLength(3);
+    expect(art.map((el) => el.style.opacity)).toEqual(['1', '0', '0']);
+    expect(art[0].style.borderImage).toContain('globe-');
   });
 });
