@@ -25,6 +25,7 @@ import { TranslatableText, hasTranslatableText } from '@/components/app/Translat
 import { BioTranslateButton } from '@/components/app/profile/BioTranslateButton';
 import { ProfileLinksPill } from '@/components/app/profile/ProfileSocialLinks';
 import { ProfileFieldsList } from '@/components/app/profile/ProfileFieldsList';
+import { ProfileSong } from './ProfileSong';
 import { MomentArchive } from './MomentArchive';
 import { TotalReachPill } from '@/components/app/profile/TotalReachPill';
 import { localTimeLine, useProfileLocalTime } from '@/hooks/use-profile-local-time';
@@ -555,6 +556,8 @@ export function ProfileHeader({
           {profile.bio && (
             <TranslatableText publicContent text={translatedBio || profile.bio} className="mt-3 text-white/90 text-base leading-6 block" as="p" />
           )}
+          {/* The song under the bio: tap to play; may start by itself for visitors. */}
+          <ProfileSong customs={profile.customs as Record<string, unknown> | undefined} isOwn={!!isViewingOwnProfile} profileKey={profile.walletAddress} />
 
           <ProfileFieldsList fields={profile.profileFields} />
           {localTime && (

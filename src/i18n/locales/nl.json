@@ -23869,5 +23869,21 @@
   },
   "profileImage": {
     "view": "Foto bekijken"
+  },
+  "profileSong": {
+    "title": "Profielnummer",
+    "hint": "Een nummer onder je bio. Mensen tikken erop om te luisteren.",
+    "part": "Speelt {{part}}",
+    "change": "Ander nummer",
+    "remove": "Verwijderen",
+    "removed": "Profielnummer verwijderd",
+    "saved": "Profielnummer opgeslagen",
+    "saveFailed": "Je profielnummer kon niet worden opgeslagen. Probeer het opnieuw.",
+    "autoplay": "Afspelen als mensen je profiel bezoeken",
+    "autoplayHint": "Begint zacht als iemand je profiel opent. Met één tik zetten ze het uit.",
+    "add": "Nummer toevoegen",
+    "cantUse": "Dat nummer kan niet op een profiel. Probeer een ander.",
+    "play": "{{title}} afspelen",
+    "pause": "{{title}} pauzeren"
   }
 }
