@@ -55,6 +55,8 @@ export interface LiveNowItem {
   badgeBalance?: number | null;
   hideBadgeAndBalance?: boolean;
   badgeLock?: BadgeLock | null;
+  /** Everyone who has opened the stream so far (streams only). */
+  views?: number;
 }
 
 /**
@@ -149,6 +151,7 @@ export function useLiveNowItems(): { items: LiveNowItem[]; open: (item: LiveNowI
           hideBadgeAndBalance: (raw as any).account?.hideBadgeAndBalance,
           badgeBalance: stream.creatorBadgeBalance ?? null,
           badgeLock: (raw as any).account?.hideBadgeAndBalance ? null : parseBadgeLock((raw as any).account?.badgeLock),
+          views: Number((raw as any).totalViews) || 0,
         });
       });
     });
