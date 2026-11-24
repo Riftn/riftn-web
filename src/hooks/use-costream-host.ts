@@ -294,13 +294,20 @@ export function useCoStreamHost({
   const settleQueue = useCallback(async (answer: QueueAnswer) => {
     if (answer.status === 'matched') {
       setSearching(null);
+      // Seated in someone else's room: close the empty one we were hosting,
+      // or our viewers keep loading it (hosted rooms win the lookup) and
+      // never see the partner or the battle.
+      const ownRoom = hostRoomRef.current;
+      if (answer.role === 'guest' && ownRoom && ownRoom !== answer.costream_id && me) {
+        await endCoStream(me, ownRoom).catch((error) => logger.warn('Could not close the old room', error));
+      }
       roomIdRef.current = answer.costream_id;
       await refresh(answer.costream_id);
       return true;
     }
     if (answer.status === 'waiting') setSearching({ waiting: answer.waiting });
     return false;
-  }, [refresh]);
+  }, [refresh, me]);
 
   const searchingNow = searching !== null;
   useEffect(() => {
