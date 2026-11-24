@@ -23313,6 +23313,8 @@
       "keysHint": "المسافة أو Enter ترمي النرد أيضًا.",
       "signInNote": "سجّل الدخول لحفظ رقمك القياسي والدخول في أفضل 10.",
       "boardTitle": "أفضل 10",
+      "linesShort_one": "{{count}} صف",
+      "linesShort_other": "{{count}} صفوف",
       "linesShort": "{{count}} صفوف",
       "boardEmpty": "لا توجد نتائج بعد. كن الأول.",
       "howTitle": "طريقة اللعب",
