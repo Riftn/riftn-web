@@ -4,13 +4,17 @@ import { Phone, Users } from 'lucide-react';
 import Video from '@/components/ui/cut-icons/video';
 import { AuthContext } from '@/contexts/AuthContext';
 import { CallContext } from '@/contexts/CallContext';
-import { useGroupCallRoster, groupCallLoad } from '@/lib/group-call';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { withWalletHeader } from '@/lib/supabase-wallet-client';
+import { useGroupCallRoster, groupCallLoad, GROUP_CALL_MAX_RING, PUBLIC_CHAT_CALL_ID } from '@/lib/group-call';
 import { formatCount } from '@/lib/format-count';
 
 /**
  * Voice and video call buttons for a group chat, and the "Join call" pill
- * while one is going. Starting opens the room without ringing or notifying
- * anyone; members join from the pill. A room at its limit shows "Call full".
+ * while one is going. Starting rings the group's members (Riftn's main chat
+ * rings nobody: people join from the pill); joining just steps into the
+ * room. A room at its limit shows "Call full".
  */
 /** `joinOnly`: just the "Join call" pill while a call is on, nothing otherwise (Public Chat on phones starts calls from its + menu). */
 export function GroupCallButtons({ groupId, groupName, canStart = true, joinOnly = false }: { groupId: string; groupName: string; canStart?: boolean; joinOnly?: boolean }) {
@@ -24,7 +28,7 @@ function GroupCallControls({ groupId, groupName, walletAddress, call, canStart }
   groupId: string; groupName: string; walletAddress: string; call: NonNullable<ContextType<typeof CallContext>>; canStart: boolean;
 }) {
   const { t } = useTranslation();
-  const { joinGroupCall, currentCall } = call;
+  const { startGroupCall, joinGroupCall, currentCall } = call;
   const roster = useGroupCallRoster(groupId);
   const [starting, setStarting] = useState(false);
   const me = walletAddress.toLowerCase();
@@ -33,10 +37,30 @@ function GroupCallControls({ groupId, groupName, walletAddress, call, canStart }
   const { full } = groupCallLoad(roster, me);
   const busy = !!currentCall || starting;
 
-  const open = async (callType: 'audio' | 'video') => {
+  const group = { id: groupId, name: groupName };
+  const join = async (callType: 'audio' | 'video') => {
     if (busy) return;
     setStarting(true);
-    try { await joinGroupCall({ id: groupId, name: groupName }, callType); } finally { setStarting(false); }
+    try { await joinGroupCall(group, callType); } finally { setStarting(false); }
+  };
+  const start = async (callType: 'audio' | 'video') => {
+    if (groupId === PUBLIC_CHAT_CALL_ID) return join(callType);
+    if (busy) return;
+    setStarting(true);
+    try {
+      const { data, error } = await withWalletHeader(
+        supabase.from('community_members').select('wallet_address').eq('community_id', groupId).eq('status', 'active')
+          .order('joined_at', { ascending: true }).limit(GROUP_CALL_MAX_RING + 1),
+        walletAddress,
+      );
+      if (error) throw error;
+      await startGroupCall(group, (data ?? []).map((row: { wallet_address: string }) => row.wallet_address), callType);
+    } catch (error) {
+      console.warn('Group call start failed', error);
+      toast.error(t('copy.8786057edfc1', { defaultValue: 'Could not connect to call' }));
+    } finally {
+      setStarting(false);
+    }
   };
 
   if (others.length && !inThisCall) {
@@ -49,7 +73,7 @@ function GroupCallControls({ groupId, groupName, walletAddress, call, canStart }
         data-group-call-join
         data-full={full ? 'true' : undefined}
         disabled={busy || full}
-        onClick={() => { void open(callType); }}
+        onClick={() => { void join(callType); }}
         aria-label={`${label} · ${inCallText}`}
         title={full ? t('calls.callFullHint', "It already has the most people a call can take. You can join once someone leaves.") : undefined}
         className="flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full bg-white/[0.1] px-3 py-1 text-[12px] font-semibold text-white transition-colors hover:bg-white/[0.16] disabled:opacity-50 data-[full=true]:bg-white/[0.06] data-[full=true]:text-white/70 data-[full=true]:opacity-100"
@@ -74,7 +98,7 @@ function GroupCallControls({ groupId, groupName, walletAddress, call, canStart }
         type="button"
         className={button}
         disabled={busy}
-        onClick={() => { void open('audio'); }}
+        onClick={() => { void start('audio'); }}
         aria-label={t('calls.startGroupVoice', 'Start a group voice call')}
         title={t('calls.startGroupVoice', 'Start a group voice call')}
       >
@@ -84,7 +108,7 @@ function GroupCallControls({ groupId, groupName, walletAddress, call, canStart }
         type="button"
         className={button}
         disabled={busy}
-        onClick={() => { void open('video'); }}
+        onClick={() => { void start('video'); }}
         aria-label={t('calls.startGroupVideo', 'Start a group video call')}
         title={t('calls.startGroupVideo', 'Start a group video call')}
       >

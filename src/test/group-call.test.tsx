@@ -68,13 +68,15 @@ beforeEach(() => {
 afterEach(() => { cleanup(); visualActivity.setCall(false, false); vi.clearAllTimers(); vi.useRealTimers(); });
 
 describe('group calls', () => {
-  it('opens the group room under the wallet uid without ringing or notifying anyone, and announces itself', async () => {
+  it('rings every other member, joins the group room under the wallet uid and announces itself', async () => {
     const { result } = renderHook(useCall);
     await act(async () => {
-      void result.current.joinGroupCall({ id: GROUP, name: 'Friends' }, 'audio');
+      void result.current.startGroupCall({ id: GROUP, name: 'Friends' }, [ME, '0xB', '0xc', '0xb'], 'audio');
       await flush();
     });
-    expect(mocks.insert).not.toHaveBeenCalled();
+    const rows = mocks.insert.mock.calls[0][0] as Array<Record<string, string>>;
+    expect(rows.map(row => row.recipient_address)).toEqual(['0xb', '0xc']);
+    expect(rows.every(row => row.group_id === GROUP && row.group_name === 'Friends' && row.status === 'ringing')).toBe(true);
     const uid = groupCallUid(ME);
     expect(mocks.token.mock.calls[0][1].body).toMatchObject({ channelName: `group-call-${GROUP}`, uid });
     expect(mocks.join).toHaveBeenCalledWith('app', `group-call-${GROUP}`, 'token', uid);
@@ -83,10 +85,10 @@ describe('group calls', () => {
     expect(result.current.isRinging).toBe(true);
   });
 
-  it('stays up while others remain and ends when the last one leaves', async () => {
+  it('stays up while others remain, ends when the last one leaves, and never cancels answered rings', async () => {
     const { result } = renderHook(useCall);
     await act(async () => {
-      void result.current.joinGroupCall({ id: GROUP, name: 'Friends' }, 'audio');
+      void result.current.startGroupCall({ id: GROUP, name: 'Friends' }, [ME, '0xb', '0xc'], 'audio');
       await flush();
     });
     act(() => { mocks.handlers['user-joined']({ uid: 7 }); mocks.handlers['user-joined']({ uid: 9 }); });
@@ -97,14 +99,28 @@ describe('group calls', () => {
     await act(async () => { mocks.handlers['user-left']({ uid: 9 }); await flush(); });
     expect(result.current.currentCall).toBeNull();
     expect(result.current.callSummary).toMatchObject({ outcome: 'ended', groupName: 'Friends' });
+    expect(mocks.update).not.toHaveBeenCalled();
   });
 
-  it('keeps the room open while you wait, with no ring timeout', async () => {
+  it('stops every ringing phone when nobody answers', async () => {
+    const { result } = renderHook(useCall);
+    await act(async () => {
+      void result.current.startGroupCall({ id: GROUP, name: 'Friends' }, [ME, '0xb', '0xc'], 'video');
+      await flush();
+    });
+    await act(async () => { vi.advanceTimersByTime(45_000); await flush(); });
+    expect(result.current.currentCall).toBeNull();
+    expect(result.current.callSummary).toMatchObject({ outcome: 'no_answer' });
+    expect(mocks.update).toHaveBeenCalledWith({ status: 'ended' }, ['ring-1', 'ring-2']);
+  });
+
+  it('opens the Public Chat room without ringing anyone and keeps it up while you wait', async () => {
     const { result } = renderHook(useCall);
     await act(async () => {
       void result.current.joinGroupCall({ id: PUBLIC_CHAT_CALL_ID, name: 'Public Chat' }, 'video');
       await flush();
     });
+    expect(mocks.insert).not.toHaveBeenCalled();
     expect(mocks.join).toHaveBeenCalledWith('app', `group-call-${PUBLIC_CHAT_CALL_ID}`, 'token', groupCallUid(ME));
     expect(mocks.track).toHaveBeenLastCalledWith({ uid: groupCallUid(ME), wallet: ME, type: 'video', cam: true });
     await act(async () => { vi.advanceTimersByTime(120_000); await flush(); });
@@ -116,10 +132,11 @@ describe('group calls', () => {
       [`k${i}`, [{ uid: i + 10, wallet: `0x${String(i).padStart(40, '0')}`, type: 'audio' }]]));
     const { result } = renderHook(useCall);
     await act(async () => {
-      void result.current.joinGroupCall({ id: GROUP, name: 'Friends' }, 'audio');
+      void result.current.startGroupCall({ id: GROUP, name: 'Friends' }, [ME, '0xb'], 'audio');
       await flush();
     });
     expect(result.current.currentCall).toBeNull();
+    expect(mocks.insert).not.toHaveBeenCalled();
     expect(mocks.join).not.toHaveBeenCalled();
     expect(toast.error).toHaveBeenCalledWith('This call is full', expect.anything());
   });
