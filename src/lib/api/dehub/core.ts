@@ -3,18 +3,21 @@ import { MAX_ATTACHMENT_SIZE } from '@/lib/attachments';
 import { noteImageSizes } from '@/lib/image-size-hints';
 import { noteCoAuthors } from '@/lib/co-author-store';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
+import { API_ORIGIN, backupRelayBase } from '@/lib/api/api-origin';
 
 // Riftn CDN base URL for media assets
 export const DEHUB_CDN_BASE = "https://dehubcdn.ams3.cdn.digitaloceanspaces.com/";
 
 // Riftn API base URL
-export const DEHUB_API_BASE = "https://api.dehub.io";
+export const DEHUB_API_BASE = API_ORIGIN;
 
 // Keep API access independent of the website's DNS-selected edge address.
 // The relay remains a fallback for reads, never a replay path for mutations.
 export const DEHUB_API_REQUEST_BASE = DEHUB_API_BASE;
 
 function apiRelayBase(): string {
+  const backup = backupRelayBase();
+  if (backup) return backup;
   return typeof window !== 'undefined' && window.location.hostname === 'staging.dehub.io'
     ? 'https://staging.dehub.io/_api' : 'https://riftn.com/_api';
 }

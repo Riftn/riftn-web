@@ -26,13 +26,14 @@ import { memoizeFeedRow } from '@/lib/memoize-feed-row';
 import { displayPostTitle } from '@/lib/post-caption';
 import { isAnonymousFeedResponse } from '@/lib/feed-response-auth';
 
-const DEHUB_API_BASE = "https://api.dehub.io";
+const DEHUB_API_BASE = API_ORIGIN;
 
 import { parseSoundtrackTag } from '@/lib/soundtrack';
 import { toStoryboard } from '@/lib/storyboard';
 import { storedVideoAspect } from '@/lib/video-aspect';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
 import { duetOfPost } from '@/lib/duet';
+import { API_ORIGIN } from '@/lib/api/api-origin';
 export { parseSoundtrackTag } from '@/lib/soundtrack';
 
 const stripSoundtrackTag = (text?: string | null) => text?.replace(/\[soundtrack:[^\]]*\]/g, '').trim() || undefined;

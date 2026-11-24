@@ -118,6 +118,7 @@ import { UsernameVault } from '@/components/app/usernames/UsernameVault';
 import { DataPortability } from '@/components/app/settings/DataPortability';
 import { normaliseAdLoad, useAdLoad, writeAdLoad } from '@/lib/ad-load';
 import { useSkipSegments, writeSkipSegments } from '@/lib/skip-segments';
+import { API_ORIGIN } from '@/lib/api/api-origin';
 import { useVideoGlitch, writeVideoGlitch } from '@/lib/video-glitch';
 import { useUserPreferences } from '@/contexts/UserPreferencesContext';
 import { getCreatorPlaybackRateCount, clearCreatorPlaybackRates } from '@/lib/video-preferences';
@@ -1909,7 +1910,7 @@ function PrivacySettings() {
       const { getAuthToken } = await import('@/lib/api/dehub');
       const token = getAuthToken();
       if (token) {
-        const response = await fetch('https://api.dehub.io/api/batch_token_visibility', {
+        const response = await fetch(`${API_ORIGIN}/api/batch_token_visibility`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

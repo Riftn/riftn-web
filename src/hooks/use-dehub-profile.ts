@@ -20,8 +20,9 @@ import type { DateFilterValue, PostTypeFilterValue } from '@/lib/feed-utils';
 import type { VideoItem, ImagePost, TextPost } from '@/types/feed.types';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
 import { verifiedGithubLogin } from '@/lib/github-link';
+import { API_ORIGIN } from '@/lib/api/api-origin';
 
-const DEHUB_API_BASE = "https://api.dehub.io";
+const DEHUB_API_BASE = API_ORIGIN;
 
 export interface ProfileData {
   id: string;

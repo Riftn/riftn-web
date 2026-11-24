@@ -1,3 +1,4 @@
+import { API_ORIGIN } from '@/lib/api/api-origin';
 /**
  * Where a given live stream's bytes come from.
  *
@@ -216,7 +217,7 @@ export function whepEndpointFor(stream: LiveStreamRef): string | undefined {
  * a POST usually cannot carry UDP media to it either. The relay path is only
  * whole once fetchTurnServers() below returns a relay for the media leg.
  */
-const EDGE_SIGNALING_BASE = 'https://api.dehub.io/live-edge';
+const EDGE_SIGNALING_BASE = `${API_ORIGIN}/live-edge`;
 
 export function edgeWhipEndpointFor(
   stream: LiveStreamRef,
@@ -272,7 +273,7 @@ export function fetchTurnServers(): Promise<RTCIceServer[]> {
   if (!turnServersPromise) {
     turnServersPromise = (async () => {
       try {
-        const res = await fetch('https://api.dehub.io/api/live/turn-credentials', {
+        const res = await fetch(`${API_ORIGIN}/api/live/turn-credentials`, {
           // 15s for the same reason as the probe above: a main thread blocked
           // by wallet crypto lets a short abort timer beat an already-arrived
           // response, and "no relay available" here silently reroutes mints.

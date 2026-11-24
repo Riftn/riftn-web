@@ -21,8 +21,9 @@
 
 import { getAuthToken } from '@/lib/api/dehub';
 import { recordAnonViews, recordAnonViewsBeacon } from '@/lib/anon-views-api';
+import { API_ORIGIN } from '@/lib/api/api-origin';
 
-const DEHUB_API_BASE = "https://api.dehub.io";
+const DEHUB_API_BASE = API_ORIGIN;
 const VIEWED_STORAGE_KEY = 'dehub_viewed_posts';
 const VIEW_EXPIRY_MS = 30 * 60 * 1000; // 30 minutes, matches the API cooldown
 
