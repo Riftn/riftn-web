@@ -7739,6 +7739,9 @@
     "shareTitle": "@{{handle}} est à vendre sur Riftn"
   },
   "stories": {
+    "repliesOff": "Les réponses sont désactivées",
+    "repliesOn": "Les réponses sont activées",
+    "replies": "Réponses",
     "effects": "Effets",
     "backdrop": "Arrière-plan",
     "looks": {

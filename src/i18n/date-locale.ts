@@ -6,9 +6,26 @@ export function applyDateLocale(language: string): void {
   setDefaultOptions({ locale: locales[language as keyof typeof locales] || enUS });
 }
 
-/** Use the viewer's local clock, with midnight displayed as 00:00. */
-export function formatMessageTime(date: Date, locale?: string): string {
-  return date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+/**
+ * Whether the viewer's own region writes times on a 24-hour clock (Turkey and
+ * most of Europe: 14:30) or a 12-hour one (US: 2:30 PM). Read from the
+ * browser's regional settings, not the app language.
+ */
+export function usesRegion24h(): boolean {
+  try {
+    const cycle = (new Intl.DateTimeFormat(undefined, { hour: 'numeric' }).resolvedOptions() as { hourCycle?: string }).hourCycle;
+    if (cycle) return cycle === 'h23' || cycle === 'h24';
+  } catch {
+    // fall through
+  }
+  return true;
+}
+
+/** A message clock in the viewer's local time and regional format (midnight is 00:00 on a 24-hour clock). */
+export function formatMessageTime(date: Date, locale?: string, h24: boolean = usesRegion24h()): string {
+  return h24
+    ? date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
+    : date.toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit', hourCycle: 'h12' });
 }
 
 export function formatRelativeTime(input: string | number | Date | null | undefined, language: string, style: 'long' | 'short' | 'narrow' = 'long'): string {

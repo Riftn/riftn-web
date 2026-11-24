@@ -28,9 +28,14 @@ describe('selected-language dates', () => {
 
 describe('message clock', () => {
   it.each([[0, 0, '00:00'], [1, 34, '01:34'], [13, 34, '13:34'], [23, 59, '23:59']])(
-    'uses a 24-hour clock even in en-US for %i:%i',
+    'uses a 24-hour clock where the region does, even in English, for %i:%i',
     (hour, minute, expected) => {
-      expect(formatMessageTime(new Date(2026, 0, 1, hour, minute), 'en-US')).toBe(expected);
+      expect(formatMessageTime(new Date(2026, 0, 1, hour, minute), 'en-US', true)).toBe(expected);
     }
   );
+
+  it('uses a 12-hour clock where the region does', () => {
+    expect(formatMessageTime(new Date(2026, 0, 1, 16, 57), 'en-US', false)).toBe('4:57 PM');
+    expect(formatMessageTime(new Date(2026, 0, 1, 0, 5), 'en-US', false)).toBe('12:05 AM');
+  });
 });
