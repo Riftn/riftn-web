@@ -9,7 +9,8 @@
 import { useCallback, useContext, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { ChevronDown, MapPin, Music2, Pause, Play, Plus, SendHorizontal, X } from 'lucide-react';
+import { ChevronDown, Loader2, MapPin, Music2, Pause, Play, Plus, SendHorizontal, X } from 'lucide-react';
+import Languages from '@/components/ui/cut-icons/language';
 import { supabase } from '@/integrations/supabase/client';
 import { CachedPageActiveContext } from '@/contexts/CachedPageActiveContext';
 import { withWalletHeader } from '@/lib/supabase-wallet-client';
@@ -21,6 +22,7 @@ import { soundWindow } from '@/lib/sound-window';
 import { SoundPicker } from '@/features/post/components/SoundPicker';
 import type { AttachedSound } from '@/features/post/hooks/usePostSound';
 import { EmojiGifPicker } from './EmojiGifPicker';
+import { useNoteWords } from './note-translate';
 import type { StoryAuthor, StorySong } from '@/lib/api/dehub/stories';
 import {
   deleteNote, getNotes, isNoteGif, NOTE_LOCATION_MAX, NOTE_TEXT_MAX, putNote,
@@ -82,7 +84,8 @@ function songFrom(sound: AttachedSound): StorySong | null {
 const BUBBLE_STYLE = { background: 'var(--kit-chip-bg)', boxShadow: 'inset 0 0 0 1px var(--kit-hairline)' } as const;
 
 /** The small speech bubble above an avatar. */
-function NoteBubble({ note, placeholder }: { note: Note | null; placeholder?: string }) {
+function NoteBubble({ note, placeholder, own }: { note: Note | null; placeholder?: string; own?: boolean }) {
+  const words = useNoteWords(note?.text, own).shown;
   if (!note) {
     return (
       <span data-note-bubble style={BUBBLE_STYLE} className="flex max-w-[84px] items-center gap-1 truncate rounded-[10px] px-2 py-1 text-[11px] text-zinc-400">
@@ -93,7 +96,7 @@ function NoteBubble({ note, placeholder }: { note: Note | null; placeholder?: st
   return (
     <span data-note-bubble style={BUBBLE_STYLE} className="flex max-w-[84px] flex-col items-center gap-0.5 rounded-[10px] px-2 py-1 text-[11px] font-medium leading-tight text-white">
       {note.gifUrl && <img src={note.gifUrl} alt="" className="h-8 w-12 rounded-md object-cover" loading="lazy" />}
-      {note.text && <span className="line-clamp-2 break-words text-center">{note.text}</span>}
+      {note.text && <span className="line-clamp-2 break-words text-center">{words}</span>}
       {!note.text && note.song && <span className="flex max-w-full items-center gap-0.5 truncate"><Music2 className="h-3 w-3 shrink-0" /><span className="truncate">{note.song.title}</span></span>}
       {!note.text && !note.song && note.location && <span className="flex max-w-full items-center gap-0.5 truncate"><MapPin className="h-3 w-3 shrink-0" /><span className="truncate">{note.location}</span></span>}
     </span>
@@ -164,7 +167,7 @@ export function NoteTile({ author, note, label, own, onClick, inCard }: { author
       className="relative flex w-[84px] shrink-0 flex-col items-center gap-1 pt-1 text-center"
     >
       <span className="flex h-9 items-end justify-center">
-        {showBubble && <NoteBubble note={note && gif ? { ...note, gifUrl: null } : note} placeholder={t('notes.add', { defaultValue: 'Note' })} />}
+        {showBubble && <NoteBubble own={own} note={note && gif ? { ...note, gifUrl: null } : note} placeholder={t('notes.add', { defaultValue: 'Note' })} />}
       </span>
       <span className="relative flex h-16 w-16 items-center justify-center">
         {gif ? (
@@ -223,7 +226,14 @@ function SongLine({ song, autoPlay, playToken = 0 }: { song: StorySong; autoPlay
 }
 
 function NoteCard({ note }: { note: Note }) {
+  const { t } = useTranslation();
   const [playToken, setPlayToken] = useState(0);
+  const words = useNoteWords(note.text);
+  const chipLabel = words.isLoading
+    ? t('stories.translating', { defaultValue: 'Translating…' })
+    : words.isTranslated
+      ? t('stories.seeOriginal', { defaultValue: 'See original' })
+      : t('stories.translate', { defaultValue: 'Translate' });
   return (
     <div className="flex flex-col gap-2.5">
       {note.gifUrl && <img src={note.gifUrl} alt="" className="max-h-56 w-full rounded-xl object-contain" />}
@@ -238,7 +248,23 @@ function NoteCard({ note }: { note: Note }) {
           style={BUBBLE_STYLE}
           className="mx-auto max-w-full break-words rounded-[16px] rounded-bl-[6px] px-4 py-2.5 text-left text-[16px] font-medium text-white disabled:cursor-default"
         >
-          {note.text}
+          <span key={words.isTranslated ? 'translated' : 'original'} className="block animate-in fade-in duration-150">{words.shown}</span>
+        </button>
+      )}
+      {/* Translated on sight when it reads as another language; this flips
+          back to the words as written. */}
+      {note.text && words.offer && (
+        <button
+          type="button"
+          data-kit-chip
+          data-size="sm"
+          data-note-translate={words.isTranslated ? 'translated' : 'original'}
+          disabled={words.isLoading}
+          onClick={words.isTranslated ? words.showOriginal : words.translate}
+          className="mx-auto -mt-1"
+        >
+          {words.isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Languages className="h-3.5 w-3.5" />}
+          {chipLabel}
         </button>
       )}
       {note.song && <SongLine song={note.song} autoPlay playToken={playToken} />}
@@ -455,7 +481,8 @@ function cloudText(note: Note | null): string {
 function StatusTile({ author, note, own, label, onClick }: { author: StoryAuthor; note: Note | null; own?: boolean; label: string; onClick: () => void }) {
   const { t } = useTranslation();
   const avatar = buildAvatarUrl(author.address, author.avatarImageUrl, 120);
-  const words = cloudText(note) || (own ? t('notes.whatsUp', { defaultValue: 'What\u2019s up?' }) : '');
+  const said = useNoteWords(note?.text, own).shown;
+  const words = (note?.text ? said : cloudText(note)) || (own ? t('notes.whatsUp', { defaultValue: 'What\u2019s up?' }) : '');
   const gif = note?.gifUrl || null;
   return (
     <button type="button" onClick={onClick} data-status-tile={own ? 'own' : ''} className="flex w-[88px] shrink-0 flex-col items-center text-center">
@@ -578,7 +605,8 @@ function noteLine(note: Note): string {
 
 /** The note as a small tag at the start of a chat's preview line. */
 export function NoteTag({ entry }: { entry: NoteEntry }) {
-  const line = noteLine(entry.note);
+  const said = useNoteWords(entry.note.text).shown;
+  const line = entry.note.text ? said : noteLine(entry.note);
   if (!line && !entry.note.gifUrl) return null;
   return (
     <span
