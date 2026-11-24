@@ -66,6 +66,8 @@ export interface MintPostParams {
    * then skip the chain step. A past date is ignored and the post goes out now.
    */
   scheduledAt?: string;
+  /** 'skip' posts now even when Space my posts is on ("Post now anyway"). */
+  spacing?: 'skip';
   /** Intended broadcast start; live streams remain available before airing. */
   scheduledFor?: string;
   /**
@@ -168,6 +170,8 @@ export interface MintResponse {
   mintAddress?: string;
   scheduled?: boolean;
   scheduledAt?: string;
+  /** The time came from Space my posts, not from a time the creator picked. */
+  spaced?: boolean;
   /**
    * The post was published after the creator's free daily text-post allowance
    * and will not appear in public Home-feed discovery.
@@ -295,6 +299,9 @@ export async function mintPost(
 
   if (params.scheduledAt) {
     formData.append('scheduledAt', params.scheduledAt);
+  }
+  if (params.spacing === 'skip') {
+    formData.append('spacing', 'skip');
   }
   if (params.scheduledFor) {
     formData.append('scheduledFor', params.scheduledFor);

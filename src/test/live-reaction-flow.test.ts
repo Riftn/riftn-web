@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ReactionFlowQueue, liveReactionType, REACTION_STEP_MS, LIVE_REACTION_EMOJI, REACTION_MOTION, reactionPose, type LiveReactionType } from '@/lib/live/reaction-flow';
+import { ReactionFlowQueue, liveReactionType, REACTION_STEP_MS, LIVE_REACTION_EMOJI, REACTION_MOTION, reactionPose, MAX_ACTIVE, type LiveReactionType } from '@/lib/live/reaction-flow';
 
 function drain(queue: ReactionFlowQueue) {
   const seen = new Map<string, string>();
@@ -69,6 +69,39 @@ describe('live reaction flow', () => {
     queue.enqueue('SAD');
     const [first] = queue.tick(0);
     expect(first.expiresAt).toBe(REACTION_MOTION.SAD.duration);
+  });
+  it('puts every own tap up at once, one per tap, never more than the lane holds', () => {
+    const queue = new ReactionFlowQueue();
+    expect(queue.launch('LIKE', 1, 0)).toBe(true);
+    expect(queue.tick(0)).toHaveLength(1);
+    for (let i = 1; i < 60; i++) queue.launch('LIKE', 1, i * 20);
+    const air = queue.tick(60 * 20);
+    expect(air).toHaveLength(MAX_ACTIVE);
+    // The newest tap is always in the air; the oldest gave way.
+    expect(air[air.length - 1].id).toBe('60');
+    expect(queue.launch('nonsense', 1, 0)).toBe(false);
+  });
+  it('lets a badge holder\'s tap trail one more, never a backlog', () => {
+    const queue = new ReactionFlowQueue();
+    for (let i = 0; i < 50; i++) queue.launch('HEART', 14, i);
+    expect(drain(queue).length).toBeLessThanOrEqual(50 + 12);
+  });
+  it('moves without jumps: size, fade and tilt change a little per step', () => {
+    for (const type of Object.keys(LIVE_REACTION_EMOJI) as LiveReactionType[]) {
+      let prev = reactionPose(type, 5, 0);
+      for (let i = 1; i <= 1000; i++) {
+        const next = reactionPose(type, 5, i / 1000);
+        expect(Math.abs(next.scale - prev.scale)).toBeLessThan(0.05);
+        expect(Math.abs(next.opacity - prev.opacity)).toBeLessThan(0.05);
+        expect(Math.abs(next.rotate - prev.rotate)).toBeLessThan(2);
+        expect(Math.abs(next.x - prev.x)).toBeLessThan(1);
+        prev = next;
+      }
+      // It leaves the button from its own column, upright.
+      const start = reactionPose(type, 5, 0);
+      expect(Math.abs(start.x)).toBeLessThan(1e-9);
+      expect(Math.abs(start.rotate)).toBeLessThan(1e-9);
+    }
   });
 });
 

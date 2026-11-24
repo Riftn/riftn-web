@@ -66,6 +66,8 @@ interface MomentFaceProps {
   big?: boolean;
   /** Name for the button label. */
   name?: string;
+  /** Keep the tap that opens their Moments but draw no thumbnail (profiles). */
+  noPeek?: boolean;
 }
 
 /**
@@ -77,12 +79,13 @@ interface MomentFaceProps {
  * working beside it. Put this INSIDE LiveRipple: while they're live, the
  * live stream gets the tap first, like before.
  */
-export function MomentFace({ address, size, children, className, big, name }: MomentFaceProps) {
+export function MomentFace({ address, size, children, className, big, name, noPeek }: MomentFaceProps) {
   const { t } = useTranslation();
   const peek = useFaceMoment(address);
   const blurred = useMomentPreviewsBlurred();
   const open = useOpenMoments(address);
   const thumbRef = useRef<HTMLSpanElement>(null);
+  const faceRef = useRef<HTMLSpanElement>(null);
   const downAt = useRef(0);
   const held = useRef(false);
 
@@ -91,13 +94,14 @@ export function MomentFace({ address, size, children, className, big, name }: Mo
     if (held.current) { held.current = false; return; }
     event.preventDefault();
     event.stopPropagation();
-    void open(thumbRef.current);
+    void open(thumbRef.current ?? faceRef.current);
   };
 
   const w = Math.max(12, Math.round(size * (big ? 0.34 : 0.42)));
   const h = Math.round(w * 1.25);
   return (
     <span
+      ref={faceRef}
       data-moment-face={peek ? peek.state : undefined}
       data-big={big ? '' : undefined}
       onPointerDown={peek ? () => { downAt.current = Date.now(); held.current = false; } : undefined}
@@ -107,7 +111,7 @@ export function MomentFace({ address, size, children, className, big, name }: Mo
       className={cn('relative inline-flex shrink-0 align-top', peek && 'cursor-pointer', className)}
     >
       {children}
-      {peek && (
+      {peek && !noPeek && (
         <span
           ref={thumbRef}
           aria-hidden
@@ -119,7 +123,7 @@ export function MomentFace({ address, size, children, className, big, name }: Mo
           {peek.cover ? <img src={peek.cover} alt="" loading="lazy" decoding="async" draggable={false} /> : <span data-moment-peek-blank />}
         </span>
       )}
-      {peek && big && peek.count > 1 && (
+      {peek && !noPeek && big && peek.count > 1 && (
         <span aria-hidden data-moment-count style={{ right: (big ? -6 : -4) - 9, bottom: (big ? -6 : -4) + h - 12 }}>
           {formatCount(peek.count)}
         </span>

@@ -813,6 +813,7 @@ const CommentItemBody = memo(function CommentItem({ comment, tokenId, onLike, on
           <textarea
             ref={editFieldRef}
             data-keep-dark
+            data-inplace-edit
             data-no-navigate
             rows={1}
             value={editText}

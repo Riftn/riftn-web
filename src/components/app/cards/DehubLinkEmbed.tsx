@@ -32,6 +32,8 @@ import { SharedPostEmbed } from '@/components/app/chat/SharedPostEmbed';
 import { AppLinkEmbed } from '@/components/app/cards/AppLinkEmbed';
 import { ProposalLinkEmbed } from '@/components/app/governance/ProposalLinkEmbed';
 import { PageLinkEmbed } from '@/components/app/links/PageLinkEmbed';
+import { ArcadeLinkEmbed } from '@/components/app/links/ArcadeLinkEmbed';
+import { arcadeSlugOf } from '@/lib/api/dehub/arcade-card';
 
 /**
  * Lazy, unlike its siblings. This switchboard is on the boot path — every feed
@@ -258,8 +260,13 @@ export function DehubLinkEmbed({ link, compact = false, className }: DehubLinkEm
           <FeatureRequestLinkEmbed featureRequestId={link.featureRequestId!} path={link.path} fallback={fallback} />
         </Suspense>
       );
-    case 'page':
+    case 'page': {
+      // An arcade game cards as its score card: the game's art, and the
+      // sharer's best when the link names them.
+      const arcadeSlug = arcadeSlugOf(link.pagePath!);
+      if (arcadeSlug) return <ArcadeLinkEmbed slug={arcadeSlug} pagePath={link.pagePath!} path={link.path} fallback={fallback} />;
       return <PageLinkEmbed pagePath={link.pagePath!} path={link.path} fallback={fallback} />;
+    }
     default:
       return fallback;
   }

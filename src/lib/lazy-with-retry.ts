@@ -29,14 +29,60 @@ const RELOAD_SETTLE_MS = 5_000;
  * leaving finish leaving; the timer simply never fires.
  */
 const RECOVERY_DELAY_MS = 1_500;
+/**
+ * How long a reload waits for the file that failed to start answering.
+ *
+ * A deploy going live can hand a tab the new HTML a few seconds before the new
+ * build's files answer everywhere. A file that is part of the CURRENT build
+ * then fails like a deleted one, and reloading on the spot lands in the same
+ * gap and fails again: the page reloads two or three times in a row, then
+ * settles once the deploy has. Waiting until the file answers turns that into
+ * one reload onto a page that works. A file that really is gone never
+ * answers, so a tab from an old build reloads after the wait as before.
+ */
+const CHUNK_WAIT_MS = 12_000;
+const CHUNK_POLL_MS = 1_500;
 /** A navigation that has not replaced the page after this long was cancelled. */
 const LEAVE_GRACE_MS = 4_000;
 
 // Only this document can have a navigation in flight. A persisted timestamp
 // belongs to the retry budget, not to the new document's navigation state.
 let reloadStartedAt: number | null = null;
-/** A recovery reload is queued (waiting out RECOVERY_DELAY_MS or a hidden tab). */
+/** A recovery reload is queued (waiting out RECOVERY_DELAY_MS, a hidden tab, or the file). */
 let recoveryQueued = false;
+/** The same-origin file whose load failed, when the error named it. */
+let failedChunkUrl: string | null = null;
+
+/** The same-origin script or stylesheet URL a chunk error names, if any. */
+export function chunkUrlFrom(error: unknown): string | null {
+  const err = error as { message?: unknown } | null | undefined;
+  const message = typeof err?.message === 'string' ? err.message : typeof error === 'string' ? error : '';
+  const match = message.match(/https?:\/\/[^\s'"`)]+?\.(?:m?js|css)(?=[\s'"`)]|$)/);
+  if (!match) return null;
+  try {
+    const url = new URL(match[0]);
+    return url.origin === window.location.origin ? url.href : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Resolve once the file answers with code (not the HTML shell), or after CHUNK_WAIT_MS. */
+async function waitForChunk(url: string | null): Promise<void> {
+  if (!url || typeof fetch !== 'function') return;
+  const until = Date.now() + CHUNK_WAIT_MS;
+  while (Date.now() < until) {
+    try {
+      // A fresh query string skips any cached miss at the edge or in the browser.
+      const probe = `${url}${url.includes('?') ? '&' : '?'}chunk-probe=${Date.now()}`;
+      const res = await fetch(probe, { method: 'HEAD', cache: 'no-store' });
+      if (res.ok && !(res.headers.get('content-type') || '').includes('text/html')) return;
+    } catch {
+      // Offline or blocked for a moment: keep waiting.
+    }
+    await new Promise((resolve) => setTimeout(resolve, CHUNK_POLL_MS));
+  }
+}
 /** When this page last started navigating away. 0 = it is not leaving. */
 let leavingAt = 0;
 
@@ -171,20 +217,26 @@ function runQueuedRecovery(): void {
     return;
   }
   const tier = nextTier();
-  recoveryQueued = false;
-  if (!tier) return;
+  if (!tier) { recoveryQueued = false; return; }
   try {
     sessionStorage.setItem(CHUNK_RECOVERY_AT_KEY, String(Date.now()));
     sessionStorage.setItem(CHUNK_RECOVERY_TIER_KEY, String(tier));
   } catch {
+    recoveryQueued = false;
     return;
   }
-  reloadStartedAt = Date.now();
   const reload = () => {
+    recoveryQueued = false;
+    if (isPageLeaving()) return;
+    reloadStartedAt = Date.now();
     try { window.location.reload(); } catch { /* Keep the recovery UI available. */ }
   };
-  if (tier === 1) reload();
-  else void purgeCaches().then(reload);
+  // Stays queued while it waits, so further failures report 'reloading'
+  // rather than escalating to the crash screen mid-wait.
+  const url = failedChunkUrl;
+  failedChunkUrl = null;
+  if (tier === 1) void waitForChunk(url).then(reload);
+  else void Promise.all([waitForChunk(url), purgeCaches()]).then(reload);
 }
 
 /**
@@ -207,7 +259,9 @@ function runQueuedRecovery(): void {
  * Callers must still settle their promises and keep a fallback visible if
  * navigation is blocked.
  */
-export function recoverFromChunkError(): ChunkRecovery {
+export function recoverFromChunkError(error?: unknown): ChunkRecovery {
+  const url = error === undefined ? null : chunkUrlFrom(error);
+  if (url) failedChunkUrl = url;
   if (reloadStartedAt !== null) {
     return Date.now() - reloadStartedAt < RELOAD_SETTLE_MS ? 'reloading' : 'exhausted';
   }
@@ -286,7 +340,7 @@ export function lazyWithRetry<T extends React.ComponentType<any>>(
             importFn()
               .then(resolve)
               .catch((retryError: unknown) => {
-                if (isChunkLoadError(retryError)) recoverFromChunkError();
+                if (isChunkLoadError(retryError)) recoverFromChunkError(retryError);
                 reject(retryError);
               });
           }, 1000);

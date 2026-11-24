@@ -75,9 +75,16 @@
     box-shadow: 0 1px 3px rgb(17 17 17 / 0.08) !important;
   }
 
-  html[data-system-tone='light']:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
-    [data-desktop-right-rail] [data-side-panel-tabs] [data-tab-btn]:hover {
-    background: #f0f1f3 !important;
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    html:is([data-theme='light'], [data-system-tone='light'])
+      [data-desktop-right-rail] [data-side-panel] button[data-tab-btn] {
+      transition: scale 150ms ease-out;
+    }
+
+    html:is([data-theme='light'], [data-system-tone='light'])
+      [data-desktop-right-rail] [data-side-panel] button[data-tab-btn]:enabled:hover {
+      scale: 1.04;
+    }
   }
 
   html[data-system-tone='light']:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)

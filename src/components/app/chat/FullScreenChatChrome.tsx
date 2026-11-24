@@ -227,7 +227,7 @@ function ChatMeMenu({ onOpenSettings }: { onOpenSettings?: () => void }) {
             key={row.key}
             type="button"
             onClick={() => { setMenuOpen(false); row.onSelect(); }}
-            className="flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left text-[14px] text-white transition-colors hover:bg-white/10"
+            className="flex w-full origin-left items-center gap-3 rounded-xl px-2.5 py-2 text-left text-[14px] text-white transition-transform duration-150 hover:scale-[1.03] motion-reduce:transition-none motion-reduce:hover:scale-100"
           >
             <span className="flex h-5 w-5 items-center justify-center">{row.icon}</span>
             {row.label}

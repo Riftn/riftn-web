@@ -28,7 +28,7 @@ const UNCLAIMED_MS = 8000;
 const pending = new Map<string, LiveHandoff>();
 
 /** Grab the current frame so the post page never flashes black or a stock poster. */
-function snapshot(video: HTMLVideoElement): string | undefined {
+export function snapshot(video: HTMLVideoElement): string | undefined {
   try {
     const w = video.videoWidth;
     const h = video.videoHeight;

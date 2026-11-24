@@ -39,6 +39,7 @@ const api = new Function(`
   ${decl('function titleSaysNothing(title) {')}
   ${decl('function decodeFnText(s) {')}
   ${decl('function postCaption(html, nft, templated) {')}
+  ${decl('function postLinkSegment(row) {')}
   ${decl('function postLabel(row) {')}
   ${decl('function postListHtml(heading, rows, { author = true } = {}) {')}
   ${decl('function shortsOf(rows, max = 12) {')}
@@ -101,6 +102,21 @@ describe('post lists', () => {
     expect(out).toContain('19 views');
   });
 
+  it('links a post by its readable address when the row has one, so the link is not a redirect', () => {
+    const out = api.postListHtml('x', [
+      video(8404, 'Live play', { articleSlug: 'live-play' }),
+      video(5660, 'No slug'),
+      video(7, 'Digits only', { articleSlug: '12345' }),
+      video(8, 'Stream id', { articleSlug: '0123456789abcdef01234567' }),
+      video(9, 'Unsafe', { articleSlug: 'a"><script>' }),
+    ]);
+    expect(out).toContain('href="https://riftn.com/app/post/live-play"');
+    expect(out).toContain('href="https://riftn.com/app/post/5660"');
+    expect(out).toContain('href="https://riftn.com/app/post/7"');
+    expect(out).toContain('href="https://riftn.com/app/post/8"');
+    expect(out).toContain('href="https://riftn.com/app/post/9"');
+    expect(out).not.toContain('<script>');
+  });
   it('returns nothing at all when there are no rows or no usable ids', () => {
     expect(api.postListHtml('x', [])).toBe('');
     expect(api.postListHtml('x', [{ name: 'no id' }])).toBe('');

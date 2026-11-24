@@ -97,6 +97,7 @@ import { reportCommunityChatMessage } from '@/lib/community-chat-notify';
 import { previewLinks } from '@/lib/dehub-links';
 
 import { formatCount } from '@/lib/format-count';
+import { stripBold } from '@/lib/bold-markup';
 /**
  * The other person's name with their badge sitting on its baseline, the same
  * BadgedName system the feed uses. The badge rides straight after the name
@@ -173,7 +174,7 @@ export function ConversationItem({
     (otherUser?.address ? `${otherUser.address.slice(0, 6)}...${otherUser.address.slice(-4)}` : 'User');
   const lastMessagePreview = conversation.lastMessage?.undecryptable
     ? `🔒 ${t('messages.cannotDecrypt')}`
-    : (conversation.lastMessage?.content && previewLinks(conversation.lastMessage.content)) || _copy("copy.f42e0f66017d", { defaultValue: "No messages yet" });
+    : (conversation.lastMessage?.content && stripBold(previewLinks(conversation.lastMessage.content))) || _copy("copy.f42e0f66017d", { defaultValue: "No messages yet" });
   const lastMessageTime = conversation.lastMessage?.createdAt
     ? (compactTime
       ? formatTimeAgo(conversation.lastMessage.createdAt)
@@ -1235,7 +1236,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
 
   // The Notes sheet is mounted in every view, so a note tapped in an open group chat opens too.
   const notesSheetHost = !guest && walletAddress ? (
-    <NotesSheetHost onMessage={(author, reply) => {
+    <NotesSheetHost me={statusMe} onMessage={(author, reply) => {
       // A reply to a note is sent as soon as the chat with them is ready.
       if (reply) pendingAutoSendRef.current = { peerAddress: author.address.toLowerCase(), body: reply };
       handleSelectSearchUser({ ...author, _id: author.address } as unknown as DeHubUser);
@@ -1657,7 +1658,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
           {tabSheets}
 
           {/* Conversation List */}
-          <div data-chat-list-scroll data-pull-through ref={chatListRef} {...chatPull.handlers} className={`flex-1 min-h-0 overflow-y-auto ${fullscreen && !phonePill ? 'pt-1 pb-3' : 'pt-3 pb-[76px] lg:pb-0'}`}>
+          <div data-chat-list-scroll data-pull-through ref={chatListRef} {...chatPull.handlers} className={`flex-1 min-h-0 overflow-y-auto ${fullscreen && !phonePill ? 'pt-1 pb-3 lg:overflow-x-hidden' : 'pt-3 pb-[76px] lg:pb-0'}`}>
             {/* Phones: pulled down from the top, the rows lower and a refresh
                 arrow turns in the gap; let go past its full turn to refresh.
                 Every row is a button, so the list opts in with

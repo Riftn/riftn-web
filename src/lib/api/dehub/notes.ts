@@ -19,13 +19,20 @@ export interface Note {
   gifUrl: string | null;
   song: StorySong | null;
   location: string | null;
+  /** Full-screen backdrop: 'photo' (their photo, blurred) or a colour. */
+  background?: string | null;
   postedAt: string;
   expiresAt: string;
+  /** Hearts on it, and whether you gave one. */
+  likeCount?: number;
+  liked?: boolean;
 }
 
 export interface NoteEntry {
   author: StoryAuthor;
   note: Note;
+  /** Your own note only: who hearted it, newest first. */
+  likers?: StoryAuthor[];
 }
 
 export interface NoteInput {
@@ -33,6 +40,7 @@ export interface NoteInput {
   gifUrl?: string;
   song?: StorySong;
   location?: string;
+  background?: string;
 }
 
 export function getNotes(): Promise<{ mine: NoteEntry | null; notes: NoteEntry[] }> {
@@ -45,6 +53,11 @@ export function putNote(input: NoteInput): Promise<{ note: Note }> {
 
 export function deleteNote(): Promise<{ ok: boolean }> {
   return apiCall('/api/notes', { method: 'DELETE', requiresAuth: true });
+}
+
+/** Heart (or un-heart) someone's note. */
+export function likeNote(id: string, liked: boolean): Promise<{ liked: boolean; likeCount: number }> {
+  return apiCall(`/api/notes/${encodeURIComponent(id)}/like`, { method: 'POST', body: { liked }, requiresAuth: true });
 }
 
 /** The GIF hosts a note accepts. */

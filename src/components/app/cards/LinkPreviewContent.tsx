@@ -1,6 +1,7 @@
 import { outsideImage } from '@/lib/outside-image';
 import { useState } from 'react';
 import ExternalLink from "@/components/ui/cut-icons/open-externally";
+import { Link2 } from 'lucide-react';
 
 import { getLinkPreviewFavicon, type LinkPreviewData } from '@/lib/api/link-preview';
 import { PredictionDetails } from './PredictionDetails';
@@ -18,7 +19,7 @@ export function LinkPreviewContent({ preview, chat = false, composer = false }: 
   const hasTitle = !!preview.title && preview.title !== domain;
 
   return <div className={composer && showImage ? 'flex' : undefined} data-link-preview-layout={showImage ? 'image' : sourceTile ? 'source-tile' : 'compact'}>
-    {showImage && <div className={composer ? 'relative w-32 h-24 shrink-0 bg-white/5 overflow-hidden' : 'relative w-full aspect-[1.91/1] bg-white/5 overflow-hidden'}>
+    {showImage && <div data-link-preview-media className={composer ? 'relative w-32 h-24 shrink-0 bg-white/5 overflow-hidden' : 'relative w-full aspect-[1.91/1] bg-white/5 overflow-hidden'}>
       {chat && <img src={outsideImage(preview.image!)} alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover scale-110 blur-xl opacity-40" loading="lazy" />}
       <img
         src={outsideImage(preview.image!)}
@@ -27,8 +28,10 @@ export function LinkPreviewContent({ preview, chat = false, composer = false }: 
         loading="lazy"
         onError={() => setFailedImage(preview.image)}
       />
+      {/* Shown only where the card is cut to its picture (a glass rail with comments). */}
+      {!chat && !composer && <span data-link-preview-badge aria-hidden="true" className="absolute bottom-1.5 right-1.5 hidden h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-sm"><Link2 className="h-3.5 w-3.5" /></span>}
     </div>}
-    <div className={`relative min-w-0 flex flex-1 items-center gap-3 ${chat ? 'p-2.5' : 'px-3 pb-3 pt-3.5 sm:pt-4'}`}>
+    <div data-link-preview-text className={`relative min-w-0 flex flex-1 items-center gap-3 ${chat ? 'p-2.5' : 'px-3 pb-3 pt-3.5 sm:pt-4'}`}>
       {!showImage && favicon && failedFavicon !== favicon && <div
         aria-hidden="true"
         className={sourceTile

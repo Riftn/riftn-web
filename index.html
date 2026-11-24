@@ -194,9 +194,12 @@
           // LCP element — paints with the first frame instead of after the
           // bundle. Hide it exactly when HomeIntro itself would return null.
           if (location.pathname !== '/' || introDismissed || introSignedIn) d.dataset.homeIntro = 'off';
-          // The Moments row's seat (src/lib/story-shelf-seat.ts): held unless
-          // Home had no row last visit, so the posts do not drop when it lands.
-          if (!/^\/(app)?\/?$/.test(location.pathname) || localStorage.getItem('dehub.shelfShown') === '0') d.dataset.bootShelf = 'off';
+          // The Moments seat (src/lib/story-shelf-seat.ts): the row of tiles,
+          // or the ask bar when that is what Home showed last visit, or
+          // nothing, so the posts do not move when the real one lands.
+          var shelfSeat = localStorage.getItem('dehub.shelfShown');
+          if (!/^\/(app)?\/?$/.test(location.pathname) || shelfSeat === '0') d.dataset.bootShelf = 'off';
+          else if (shelfSeat === 'ask') d.dataset.bootShelf = 'ask';
 
           if (location.pathname === '/' && window.innerWidth > 767) {
             var skip = localStorage.getItem('dehub.introFrostSeen') === '1' || introDismissed || introSignedIn;
@@ -406,10 +409,13 @@
             // Feed API is hit at boot via fetch() (CORS) — the warmed socket is
             // reused only when the preconnect is crossorigin (DebugBear 7/14).
             hint("preconnect", "https://api.dehub.io", true);
-            // Posters + avatars stream from DO Spaces via Cloudflare as plain
-            // <img> (non-CORS) — no crossorigin, or the socket wouldn't be reused.
-            hint("preconnect", "https://dehubcdn.ams3.cdn.digitaloceanspaces.com", false);
+            // Video files play straight from DO Spaces, but only after first
+            // paint, so a DNS lookup is enough there (a full preconnect made
+            // five, and PSI flags more than four).
             hint("dns-prefetch", "https://dehubcdn.ams3.cdn.digitaloceanspaces.com", false);
+            // Posters and avatars come through the dehub.io image transform
+            // (cdnImage in media-url.ts) as plain <img>, so no crossorigin.
+            hint("preconnect", "https://dehub.io", false);
           }
 
           // Boot feed fetch: start the page-1 /api/feed request at parse time,
@@ -439,7 +445,8 @@
             plate.rel = "preload";
             plate.as = "image";
             plate.href = "/brand-kit/bg/bg-16.jpg";
-            document.head.appendChild(plate);
+            // Phones never show this plate: they draw the inline crop below.
+            if (!window.matchMedia("(max-width: 639px)").matches) document.head.appendChild(plate);
           }
 
           if (p === "/" || p === "/app" || p === "/app/") {
@@ -457,6 +464,43 @@
               { headers: h }
             ).then(function (r) { return r.ok ? r.json() : null; })
              .catch(function () { return null; });
+
+            // First poster: on phones the first feed card's <video poster> is
+            // the LCP, and the app only names it after the entry bundle has
+            // run and the card has rendered (PSI: 2.3 s resource load delay).
+            // The feed response already says which image it is, so start it
+            // as soon as the response lands. The URL must match the card's
+            // byte for byte or this is a wasted download: it mirrors
+            // mapVideoItem (use-unified-feed.ts), cdnImage + deviceWidth
+            // (media-url.ts) and VideoCard's deviceWidth(isMdUp() ? 680 : 360).
+            // Video and live posts only; photo posts use a srcset.
+            window.__DEHUB_FEED__.then(function (d) {
+              try {
+                var first = d && Array.isArray(d.result) ? d.result[0] : null;
+                if (!first || (first.postType !== "video" && first.postType !== "live")) return;
+                var src = (first.postType === "live" && first.stream && first.stream.thumbnail) || first.imageUrl;
+                if (!src || /\.(svg|gif)(\?|$)/i.test(src)) return;
+                if (sessionStorage.getItem("dehub:image-transforms-down") === "1") return;
+                var cdn = "https://dehubcdn.ams3.cdn.digitaloceanspaces.com/";
+                if (/^https?:\/\//.test(src)) {
+                  if (src.indexOf(cdn) !== 0) return;
+                } else if (/^(images|shorts|live)\//.test(src)) {
+                  src = cdn + src;
+                } else return;
+                var dpr = Math.min(window.devicePixelRatio || 1, 3);
+                var need = (window.matchMedia("(min-width: 768px)").matches ? 680 : 360) * dpr;
+                var ladder = [64, 96, 128, 192, 256, 360, 480, 736, 1100, 1440, 1920];
+                var w = 1920;
+                for (var i = 0; i < ladder.length; i++) if (ladder[i] >= need) { w = ladder[i]; break; }
+                var l = document.createElement("link");
+                l.rel = "preload";
+                l.as = "image";
+                l.href = "https://dehub.io/cdn-cgi/image/format=auto,quality=80,width=" + w + "/" + src;
+                l.setAttribute("fetchpriority", "high");
+                l.setAttribute("data-feed-poster", "");
+                document.head.appendChild(l);
+              } catch (e) { /* hint only */ }
+            });
           }
         } catch (e) { /* never block boot */ }
       })();
@@ -464,6 +508,11 @@
 
     <!-- LCP: header logo — same URL as DesktopSidebar / MobileHeader so browser discovers early -->
     <link rel="preload" as="image" href="/dehub-header-logo.png" fetchpriority="high">
+    <!-- Phone welcome card silk (.dehub-intro-silk in index.css), inlined so the
+         prerendered card paints it in the first frame. It is the page's LCP on
+         phones; fetched, the app could replace the prerendered card before the
+         image arrived, and LCP fell to late app-rendered text instead. -->
+    <style>@media (max-width: 639px) { :root { --silk-phone: url(data:image/jpeg;base64,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JEiRIkSJEiejESJEiRIkSJEnoxEiRIhIkSJE9KJEiRIkSJET0okSJEiRIkT0ZxEiRIkSJEiJ5e8bzERIkSJEiRIk87W/ESJEiRIkSJ5mta1vERIkSJEiRIieXvNrWoiJEiRCRETzda1a3iJEiRIkSJE8zedWreIkSISJEiInma1q1a1qJEISJEiJ0a3wta1rWrVrUiEISIife+PrWtWreJEIQkT71rWt8HWt41rWq1qRCRIiJ92+NvGta1bzIhIiJ961vgbxvG8a1rWq3iRCRE+da1rWtb+vWta1rWta1rWt5kRE6t8DejfrURE6Lzv7d436vTET6vib037iJzrWrW+DreNa1vZOda1q1rWta3t1vO8bxrWta1rWta1rWta1rWt+9a1rWta1rWt6Na3jWt41reNa1rWta1rWta1rWt5361rWtata1rfrWt41reNb9a1rWta1rWta1rWta3p1rWta1rWta1rWta1rWta3jWta1rWta1rWta1rWta1rWt6Na1rWta1rWta1vxrW8a1rWta1rWta1rWta1rWta1rerWta1rWta1rWta1rWta1rWta1rWta1rWta1rWta1rWta1rfrWta1rWta1rWta1rWta1rWta1rWta1rWta1rWta1rWt6ta1rWta1rWta1rWta1rWta1rWta1rWta1rWta1rWta3+G//2gAMAwEAAgADAAAAELFAJJDEssMMNAEtPtnDDCNABEJPEAMOmnprkvvvjgtglupssrlqmspjiguntgphmisjisvgtijlnulpvtjtuoglpnrlmplguojsjpjglrtortpuvjjqhpsgkkthlkrgqlolqrguumpnhqkovqpvugghvhsmpumogmgmqqsvujjjjtnsjjvsippomrplnqnmqqrqmpjggjktmssjlgqoumnrpvvgiqqrnuvhirqnnqgjsmiqsmiiqpnouoruonuksrglpvugnppqrinpppgughkqugovjnsvpolqgumnlshtrppqglulqqtinvqghovglqnmjoohuukinloitiqjvnugguugtqnoulohhtitkluvprkrklvughlgvjlqosjvgioosnvhongtkvrvtvmhkvitlmjsrqvnnipjlsqkulkmstuqqsniqkrtrkkogjikrmkljhsrhvgjtrshirqrmtirksqhrqrhhluntnssplisoitmpmsqrklksrsrkpvlsrkjjshjisphgrgsiplnlngtnqntpqnupjlkrjntllitpgolnnivmgnsojvglmphkstjgqqkrglstljirlsrhuohjuiplkosghpgrgkvnqvitikksnvgtinqtkrvvrsklgvilpjuhvjgqmkukhtljvkggghirovgmpppulphiutqiqgvjuhqsssstllhunoslitsprgsknqrgjqtmkvvvsiqqnmnijthoskgklhrmmhlovnhjjjkmlpqhhvrjmtgoginslqqprqhqgggjrppvmonnlqtjvhvnujuoqijpjjsspmmrvsssvkqrjovpgnvshuhunsvqokromvoitnvgonupolhugluhpsjigqutmsholsjkprrnvsgkugjnomjvvvhpsrjiinohkvninuitsnolvummhjgtljvjgssrhpgpukqqvnpgjtsisnvvgmrjjnlkkuqmhujoqosprmojtmlqlvnmstiukrqgqugslrpolpoisitpuglppmvlrhgnqrjmitjmvgqiphtiilvvuisguqpqvsoimivupnsvhsrkqvqvvqmnngqsnogmkqtqgspogqqpmpljosshkgthsitktmluutjhojhptmrkklgommniukjljtlmisttuonrlmvskiikvshutqqqvlskuloqmgmvvqrvtiqqqghiughqqrtiurgmqrrmmgvhlmmqqqtvsmhilhllgsimpolosgjkqgqqqqrpjjthvqlgijsttprprsqjvqmmnnntkvjumjnmsngosiuvmmtslvvlqqrrtmpjillhjjtohjplomkjqsjjshqnhqlitvklllqojinhpsnighsissjvgvgtjgMsgjqqqmiumlonvAIHAHPPPIHPIHIPIHvPPIIHIIPAIAP/8QAFBEBAAAAAAAAAAAAAAAAAAAAoP/aAAgBAwEBPxAwX//EABQRAQAAAAAAAAAAAAAAAAAAAKD/2gAIAQIBAT8QMF//xAAfEAEBAQEBAAMBAQEBAAAAAAABABEQIDBhcSExQEH/2gAIAQEAAT8QfrP1n6T9OGP0vxfi/HT835+H/wDzfn0D8+P+I+kfSPpEPpH1j6x9Y+t+Y+t+b8z9b8zGP0vx4H8f+X4vxw/WfrNY/WfWD0fjj8X49MfjAYQ+sfWKU+sfWKfS/N+b8355frNfrNY1r5O/SYxjHyB/4GLN/E8/z0IQhT6R9I+kU+sfSJ+L88sYxjGMYx8ga8rWtb+Z+s83/h/+T+L88lPpH0j6RD6R9I+kfSPpH0vxfjn8zWtY15vN72n1mMeBjH0A/IAA+gClKQhCEIQh45jGMY9B9gEkkkmJJJZJZwlnTLOMsssk4yzghCFKUpSlKQ6Mkkkkkkkkss4zyCSSSSSWWWSWWWWcyyyyySyyyyyIQhCEIUpCEIFllkkzM8ZJJJLLLLLLJmf9njx5k9zr8GQQQQRCEIQhAsgsnjMssstsvHjZZZZZZLLLLLb4Xw8222W3wcIIIhAgggggg7sssssxZZbZbbeb15ssxZZbbbbZbbbbbbbbbbbbbeEREEEEEQR3beFmMYxjGPDbbbbbbbbbbZZZbbbbbZbbZbbbbbbbbbYYiOAghEEEc223hjGMYxjwW22222222223hjFtttttltttttttttttiIgggggggiObbbMYxjGMeDFtttttttttttt42WWW2222W222XjbbbbeEQQQggggjm22zGMYxjGMeGy22y222228bwvGy2y222y2y22y2222xERCCCEEERFtvDGMYxjGM2W2222222222W223hm2222y22y22y22228IiCEEHBERbbLLMYxizFllttttttttttttttttttttlttltllttttt4REQQQQQQRHNllllmLMYxZZbbbbbbbbbbbbbeNtttttttt5sttttttscIgghBBBHC22WWWWYxjGLbLbbbbbbbbbbbLbbbLbbbFstttttttttvCIiCCEIIiObbLMYxjGMZstttttttttttstszbbbbbYi2W222W223wRBBCCCEEd22YssxiyzGLbbbbLbbbbbbLbLLLbbb0ggtllltttt8ERBBCCCO7bLLMYxjGLLLbbbbbbbbbbLbbbbbLbbbbHAhbbLbbbbbwiCCEIIIIjmyyyyyzFlllllttttttttttltllllttttiIIQ4bLbbb4IghBCEEERzbZZZZjFllllltttt5ttttstsssssttvTgIdpbZbbbYYiCCCEIIIiLbZZZjGLMWWWWW3m82222WW2WWWW2222IghDwUttttvCIIIIQgiO7bMWYxjGLLLL42222222W2WWWW223hEEIeKv87bbbY4EEIQQggjq2yyyzGLLLLbbbbze7bbLLLLLLLbzeEEIeir/AJltvgiCEEEERzbZZZjGM2WWWW3xvNttltllllltltt6IIQ8VbeqIIIQQggju2yyzGLLLLbL8G2yyyyyyyyy22/3pCEPiKvoiIhCEEEcGW2WWYssssttvNt8bxbZZZZZZZZbenCEPiCooIghCEIII7ssxZjGLLLbbbbzerLbLLLLLLLLbLbbEQg+MK/oERCEIQiO7bLLLLLLLbLbbb4222WZZZZZZZZbbekEIfEVdQIQQQhCCI7tsssxZiy22zzfG92WWWWWWWWW23hwQ+MKugEEQQQhCIjm22yzFtllttt87PNtllllllllllt4RBCHxFVUCCOBCEEERbbLLLLLLbLbbzbbZt4ttssssssssssvgghDxV9XqKBBEWwQgiI5tssxjFtttttt8ttsssssssssstvSIIfGV/8AAggi22CERHNtmLLLLLbbb422222W2WWWWWWWWWW3pBCHw1VUIQRzbeBBHNttlllllltt+HbZZZZZZZZZZZbeEEEPjKqoBERbbLLBEW2y2y2y2y2222+dttltllllllllllt6QQ+MqqgEI5tssxhf+RbbbLLLLbLbb3fGy2y2yyyyyyyyyy9IIPZVH8vFAgiLbbZZZYttttlltlttt87bbbLbbLLLLLLLLLLbwiCHwFRX8ugII8LLLLL3ZZZbbbbfLbbNtttssssssssssvSCCEO1/L3VQEEEHGbZZZm22WW2W2W3jwnxstsssssssssssttvCCEPhqqowggsiePGZm222W2W234dtllllllllllll8EEEPiorqEEFkcePUsstllttt7tttvW22W2WWWWWWWWW2eEQQh6qn/LxQIQWQcZ42WSWWSy22228222222222222WWWWWWWWWehBHyg5egAggss4k2WWWcZbLLLb8O22y22yyyyyyyy+Agg9FX/AGO5/LoDgFlllllllllnGcLLbbb8LbbLLLLLLLLL4CCIfACv/wCXigQgggssssssss4zps/BvdttttlllllltnoQRCHxgv6gcAgggssssgsss4yyy223u22222222y222y2y2z3IIIPlAX/qEEIIIIO5ZZZZZZZZZbbbb7bbbbZbZbbfOQRDof68fr75+voEEIIiyyCyyyyyyyyyz4Xj1bbZl85ZBBHkC/X7/YEIQgiI6eMssssssstt9r1bbZbbepZZBBHAfIVfcAQcBERHTwcOnrfe29X0EEEfKBVVQCEIIiIiI4dOnT4d5tvdl4+MgiHxhV1QgQggiIiIjhw9Fvdt9PF5vN8kEEEfIFVUAhAgiCIiIiIjh6Obbbbb4Xuy+N6EEEeAH0308fp9KgQgQRERERERERwt+Hfger4CCCDwD9ft1QgQWQRBERERERERHN8Hdttt+FbfBBBHxAPcCEJllnMjhERERERERHB97bb1+EIIQfGBuqECD4CIiIiIiOHg5tttvN8tvogg+MD5QIQLIO75IiIiIiI9bb3bbbfe+CCD2Rb/AG8IBBBZ3fRERERERw+DbbbbZfiIIfAAVf04CCCO7b43pEREREcGLbfW2222y+dt6EEPiAvQEEFnN873eEREREdLYfG222222yy+yIQQ+ELABBB52W23m82IiIiOEdObbbbbbbbbLLL7IIQ+IvoAIPCzbLb6IYiI4PDu2+Ntltlllll5tvSCEPhKfAQR4WWWW3yQxERERHDu82222222WWWWXwRBBD4CugQiOsssstvN6RERERERHdttttttlttltlllttiIIIfAVVCCDwyyyyy83wMRDERER3bebbbbbbLbLLLLLLbEQgh8BVEIQRzZZZZZZbbbbejEREMMMRDHdtttttttltllmLMOCEPhiqgIO7LLLLLLbbbbbwiIhiIYhti222222222W2W2WWWYwgiHwFVAgg5/LZZZZZZZbbbeDDDEMQwwwxbwbbbbbbbbbZZZZZjGMYQh8EVUIQRbbbLLLLLbbbbbbwYiIiIYhhthtttttttttlllmLLwYwQj6KIwhHW2WWWWWWW22222HgwwwxDFtsNsNttttttttsssssxjwMCPwFVAiOrLLLLLbLbbbbDbDwhiGGIYebbDbbbbbLbLbLLMWWegWHuiowhES2yyyyyyy222222wwwwxERDDEPNtttttltlllllmMegYw+4KhCObLLLLMYstttttttsMPBhhhhhthhttttttttltllmMYxj0D6QEYQjm2yyzFllltltttththhhhhhh4MMNtttttttstssssssxjHoF9QEYIi22WYxjGLLbbbbbDDDDDbDDDDbDDDbbbbbbbbLLLMYxZjGMUx8ooQ4ObLLLwWWWW222222G2GGGIYYYYYYbbbbbbbbbZZZZZZizGMeBZfERhCObLLLMYxbbZbbbbbbYYYbbYYYYYbbYbbbbbbZZZizFmLMYxjFMXxEIRzZZjGMYx4bbbbbbbDDbDDDDDDDbbDbbbbbbwxjGMYxjGMYxiy8jHg5tssssssxZbbbbbbbYYbYYYbYYYYbbbYbbbbbZZZiyyyyyyzFllllmGMOC22WWWWUsszbbbbf7bbbDbDDDbDDDDDbbbbbbbbLMWYssssspZZZZZZbYxhFtssspZZZZZbbbbbbYbYbYYYYbYYYYbbbbbbbbZZZiyyyyyyyyllllltjf442WYx4GLLLLLbbbbbbDbDbDbDDbDDDbbbbbbLbbMYsxjGLLLLLLLLLLbwQ8MY8DGMYxm22222w2w2wwxCbbxsTfhAGMYxjGMYxjGMWW2WGH+cMYxjGMY+A2222223g4DHAmxDhvwAGPBjGPBjGMWWYsttsPRjWPAxjGLbbbb4G8HDYhNtttt+EAYxjGMYxjGMWWWW2WW3oxjGNax4MfjAAcNj5gAB4MYxjGMYxjFlttttt6ta1rWvQ+Qbbb4GxwPQn7+IgNYxjGMYxi222y2222937z95rXm+cPsAewn7v157937v3595vNrWMYxjwYzbbbbe7Xm15v/AAgAA/fm/wBX6jx/7v3479p4MYx4MZssttstttvd5teT4B8gPjAAfOCAHofAPBZbbbbbbbes8ePh6f8AO/A+n4f/2Q==) } }</style>
 
     <!-- Manrope, served from our own origin. It used to come from Google Fonts:
          a CSS file from fonts.googleapis.com, then the font from
@@ -615,7 +664,11 @@
       html[data-shorts-enabled="false"] .bskel-shorts { display: none; }
       .bskel-island { display: none; }
       .bskel-shelf { display: none; gap: 8px; overflow: hidden; padding: 2px 0; margin: 0 0 10px; }
-      .bskel-shelf > div { flex: none; width: 86px; height: 118px; border-radius: 16px; }
+      .bskel-shelf > div { flex: none; width: 150px; height: 52px; border-radius: 17px; }
+      .bskel-shelf > div:first-child { width: 52px; }
+      html[data-boot-shelf="ask"] .bskel-shelf { padding: 0; margin: 2px 0 12px; }
+      html[data-boot-shelf="ask"] .bskel-shelf > div:first-child { flex: 1 1 auto; width: auto; height: 48px; border-radius: 12px; }
+      html[data-boot-shelf="ask"] .bskel-shelf > div + div { display: none; }
       .bskel-card { height: 300px; margin: 0 8px 12px; border-radius: 16px;
                     background: var(--bskel, rgba(255,255,255,.06));
                     border: 1px solid var(--bskel-b, rgba(255,255,255,.08)); }
@@ -640,6 +693,11 @@
          prerenderHomeIntroPlugin). The boot script sets data-home-intro="off"
          when HomeIntro would not render: off "/", signed in, or dismissed. */
       html[data-home-intro="off"] [data-prerendered-intro] { display: none; }
+      /* Chrome paints while the parser is still inside the panel, so the first
+         frame could show a half-built card (300 px instead of 565). Its silk was
+         then a small LCP candidate, and the app's full-size card a later, larger
+         one. Keep the panel unpainted until its end marker is parsed. */
+      [data-prerendered-intro]:not(:has(> [data-intro-done])) { visibility: hidden; }
       html[data-home-intro="off"] [data-home-intro-slot] { display: none; }
       @media (prefers-reduced-motion: no-preference) {
         .bskel-wash { animation: bskel-pulse 2s ease-in-out infinite; }
