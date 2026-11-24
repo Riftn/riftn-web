@@ -48,9 +48,10 @@
   html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):where(:not([data-theme='minimal'],[data-theme='light'],[data-theme='war'],[data-theme='jungle'])) [data-kit-island] :is(input, textarea) { border-radius: var(--dk-control) !important; }
 
   /* inner: things that sit inside a control or a card */
-  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):where(:not([data-theme='minimal'],[data-theme='light'],[data-theme='war'],[data-theme='jungle'])) [data-desktop-nav-list] :is(a, button) > div.w-9,
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):where(:not([data-theme='minimal'],[data-theme='light'],[data-theme='war'],[data-theme='jungle'])) [data-desktop-nav-list] :is(a, button) > :is(div.w-9, [data-own-avatar]),
   html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):where(:not([data-theme='minimal'],[data-theme='light'],[data-theme='war'],[data-theme='jungle'])) [data-kit-chip],
   html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):where(:not([data-theme='minimal'],[data-theme='light'],[data-theme='war'],[data-theme='jungle'])) [data-feed-item] [data-media-frame-key] { border-radius: var(--dk-inner) !important; }
+  [data-desktop-nav-list] [data-own-avatar] > :is(img, span) { border-radius: inherit; }
   /* the sliding tab pill hugs its bar: bar corner minus its 1px inset */
   html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):where(:not([data-theme='minimal'],[data-theme='light'],[data-theme='war'],[data-theme='jungle'])) [data-feed-nav-indicator],
   html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):where(:not([data-theme='minimal'],[data-theme='light'],[data-theme='war'],[data-theme='jungle'])) [data-kit-tabs] [data-glass-indicator] { border-radius: calc(var(--dk-control) - 1px) !important; }
