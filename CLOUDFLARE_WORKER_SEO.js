@@ -3022,6 +3022,19 @@ function profileHasNoPosts(account, rows) {
   return Array.isArray(rows) && rows.length === 0;
 }
 
+/**
+ * The address a list links a post by: its readable slug where the row carries
+ * one, else its number. /app/post/<number> answers with a 301 to the slug, so
+ * a list that links by number sends a crawler through a redirect for every
+ * post and Search Console files each one under "Page with redirect". Same
+ * shape test as articleSlugOf, so a link written here always resolves.
+ */
+function postLinkSegment(row) {
+  const slug = row && typeof row.articleSlug === 'string' ? row.articleSlug : '';
+  const readable = /^[a-z0-9][a-z0-9-]{0,120}$/.test(slug) && /[a-z]/.test(slug) && !/^[a-f\d]{24}$/.test(slug);
+  return readable ? slug : String(Number(row && row.tokenId));
+}
+
 /** What a feed row is called in a list: its title, else its caption's opening
  *  words (same rule as the post page's own title), else its id. */
 function postLabel(row) {
@@ -3040,7 +3053,7 @@ function postListHtml(heading, rows, { author = true } = {}) {
       const tail = [who && `<span data-public-by>by ${escHtml(who)}</span>`, views > 0 && `<span data-public-views="${views}">${views.toLocaleString('en-US')} views</span>`]
         .filter(Boolean)
         .join(' · ');
-      return `<li><a data-creator-copy href="${APP_URL}/app/post/${Number(r.tokenId)}">${escHtml(postLabel(r))}</a>${tail ? `, ${tail}` : ''}</li>`;
+      return `<li><a data-creator-copy href="${APP_URL}/app/post/${postLinkSegment(r)}">${escHtml(postLabel(r))}</a>${tail ? `, ${tail}` : ''}</li>`;
     });
   if (!items.length) return '';
   return `<section class="dh-list"><h2>${escHtml(heading)}</h2><ul>${items.join('')}</ul></section>`;
@@ -8632,7 +8645,7 @@ async function handleRequest(request, env, ctx) {
               // the two cannot drift into disagreeing.
               const authorUserRaw = String(p.minterUsername || p.mintername || '').replace(/[^A-Za-z0-9_.-]/g, '');
               const authorUser = couldBeProfileSegment(authorUserRaw.toLowerCase(), SYSTEM_ROUTES) ? authorUserRaw : '';
-              return `<li style="margin:6px 0"><a href="${APP_URL}/app/post/${p.tokenId}">${t}</a>${authorUser ? ` by <a href="${APP_URL}/${authorUser}">${authorName}</a>` : ''}</li>`;
+              return `<li style="margin:6px 0"><a href="${APP_URL}/app/post/${postLinkSegment(p)}">${t}</a>${authorUser ? ` by <a href="${APP_URL}/${authorUser}">${authorName}</a>` : ''}</li>`;
             }).join('');
             html = html.replace('</body>', `<section style="max-width:600px;margin:24px auto;text-align:left"><h2 style="font-size:16px">Latest on Riftn</h2><ul style="list-style:none;padding:0">${links}</ul></section></body>`);
           }
