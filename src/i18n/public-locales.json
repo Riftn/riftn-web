@@ -1,5 +1,5 @@
 {
-  "version": "94a97d576947b87f",
+  "version": "a2e31ca2482814a3",
   "routes": {
     "/": [
       "ar",
@@ -1416,6 +1416,13 @@
       "tr"
     ],
     "/guides/supporting-growth-knowledge-transfer-to-fansite-team": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/guides/tanrinin-gozu-nedir": [
       "ar",
       "es",
       "fr",
