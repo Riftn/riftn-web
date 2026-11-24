@@ -20,10 +20,11 @@ export function MomentArchive({ profileAddress }: { profileAddress: string }) {
       <button type="button" aria-expanded={open} onClick={() => setOpen(!open)}
         className="inline-flex min-h-10 items-center gap-2 rounded-lg px-2 font-medium hover:bg-white/10">
         <Archive aria-hidden size={17} />{t('stories.momentArchive', { defaultValue: 'Moment archive' })}
-        {/* Nobody else gets this list from the server; say so. */}
-        <Lock aria-hidden size={12} className="ml-1 opacity-60" />
-        <span className="text-xs font-normal opacity-60">{t('stories.archiveOnlyYou', { defaultValue: 'Only you can see this' })}</span>
       </button>
+      {/* Nobody else gets this list from the server; say so. */}
+      <span className="ml-1 inline-flex items-center gap-1 text-xs opacity-60">
+        <Lock aria-hidden size={12} />{t('stories.archiveOnlyYou', { defaultValue: 'Only you can see this' })}
+      </span>
       {open && <ArchiveItems address={address} />}
     </section>
   );
