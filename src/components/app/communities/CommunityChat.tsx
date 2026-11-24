@@ -76,6 +76,8 @@ import { DeleteMessageDialog, type DeleteScope } from '@/components/app/chat/Del
 import { MemberActionsDialog } from './manage/MemberActionsDialog';
 import { withWalletHeader } from '@/lib/supabase-wallet-client';
 import { useNavigate } from 'react-router-dom';
+import { CatchUpMenu, runCatchUp } from '@/components/app/communities/CatchUpMenu';
+import { isCatchUpCommand } from '@/lib/community-recap';
 import { Skeleton } from '@/components/ui/skeleton';
 import { replaceLinksWithEmoji, TranslatableText, SharedTranslationContext } from '../TranslatableText';
 import { useTranslation } from 'react-i18next';
@@ -230,7 +232,7 @@ interface CommunityChatProps {
 const MAX_READ_SPOT_PAGES = 10;
 
 export function CommunityChat({ communityId, community, membership, isMember, membershipLoading = false, active = true, onJoin, joining, fill = false }: CommunityChatProps) {
-  const { t: _copy } = _useCopy();
+  const { t: _copy, i18n } = _useCopy();
   const [newMessage, setNewMessage] = useSurfaceDraft("components/app/communities/CommunityChat.tsx:newMessage", '', communityId);
   const [replyTo, setReplyTo] = useDraftState<CommunityChatMessage | null>(`community:${communityId}:reply`, null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -810,6 +812,12 @@ export function CommunityChat({ communityId, community, membership, isMember, me
     if (slowModeRemaining > 0) return;
     const trimmed = newMessage.trim();
     if (!trimmed) return;
+    // "catch me up" is never posted: the recap goes to your DMs instead.
+    if (isCatchUpCommand(trimmed) && walletAddress && isMember) {
+      setNewMessage.complete(newMessage, '');
+      void runCatchUp({ communityId, walletAddress, text: trimmed, t: _copy, lang: i18n.language, navigate });
+      return;
+    }
     const replyToId = replyTo?.id;
     sendingRef.current = true;
 
@@ -1100,14 +1108,17 @@ export function CommunityChat({ communityId, community, membership, isMember, me
               />
             </div>
           ) : (
+            <>
+            {isMember && walletAddress ? <CatchUpMenu communityId={communityId} walletAddress={walletAddress} /> : null}
             <button
               data-community-chat-search
               onClick={openSearch}
-              className="ml-auto flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] text-zinc-500 hover:text-white hover:bg-white/[0.04] transition-colors"
+              className={`${isMember && walletAddress ? '' : 'ml-auto '}flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] text-zinc-500 hover:text-white hover:bg-white/[0.04] transition-colors`}
             >
               <Search className="w-3.5 h-3.5" />
               {t('communities.searchMessages', 'Search')}
             </button>
+            </>
           )}
         </div>
         {/* Messages area */}

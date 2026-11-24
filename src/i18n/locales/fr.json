@@ -4566,6 +4566,20 @@
       "groupDetail": "Discuter avec plusieurs personnes, public ou privé",
       "channelDetail": "Diffuser aux abonnés, gratuit ou payant",
       "title": "Démarrer quelque chose"
+    },
+    "catchUp": {
+      "button": "Résume-moi",
+      "menuHint": "Un résumé privé, envoyé dans tes messages",
+      "last24h": "Dernières 24 heures",
+      "last3d": "3 derniers jours",
+      "sinceRead": "Depuis ma dernière lecture",
+      "working": "Préparation du résumé…",
+      "sent": "Résumé envoyé dans tes messages",
+      "sentCount": "{{window}} · {{formattedCount}} messages",
+      "open": "Ouvrir",
+      "nothing": "Rien de nouveau à résumer",
+      "busy": "Ton résumé arrive. Réessaie dans un instant.",
+      "failed": "Impossible de faire ton résumé. Réessaie."
     }
   },
   "prompt": {

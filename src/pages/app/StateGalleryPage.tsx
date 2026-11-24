@@ -180,6 +180,8 @@ import { BulkChatBar } from '@/components/app/chat/BulkChatBar';
 import type { DeHubDMMessage } from '@/lib/api/dehub/dm';
 import { FullScreenChatShell } from '@/components/app/chat/FullScreenChatShell';
 import { DmMessageBubble, CozyDayPill } from '@/components/app/chat/DirectMessageChat';
+import { CatchUpMenu } from '@/components/app/communities/CatchUpMenu';
+import Search from '@/components/ui/cut-icons/search';
 import { ChatReactionArrivalGallery } from './ChatReactionArrivalGallery';
 import { MessageSelectBar } from '@/components/app/chat/MessageSelectBar';
 import { DeleteMessageDialog } from '@/components/app/chat/DeleteMessageDialog';
@@ -648,6 +650,44 @@ function LinesBelowDemo() {
       </div>
       <UnreadJumpButton show={below > 0} up={false} count={below} onClick={() => ref.current && glideToBottom(ref.current)} className="absolute bottom-4 right-4 z-10" />
     </div>
+  );
+}
+
+/** "Catch me up" in group chats: the button beside Search, and the recap DM it sends. */
+function CatchUpGallery() {
+  const me = { _id: 'me', address: '0x0000000000000000000000000000000000000001', username: 'jules_p' };
+  const bot = { _id: 'assistant', address: '0xea0fe14398b96f3ae97f222a6cf0f933c1ccf61c', username: 'assistant', displayName: 'Riftn Assistant' };
+  const recap = [
+    'Catch up: Riftn Builders\nhttps://riftn.com/app/communities/riftn-builders?tab=chat',
+    'Last 24 hours · 1.2K messages from 38 people',
+    'Main topics\n• @kai_dev walked everyone through the new Moments viewer list\n• @ellaverse asked for feedback on the meetup poster',
+    'Decisions and announcements\n• Meetup moved to Friday 18:00 (pinned by @mal)',
+    'Links shared\n• https://riftn.com/arcade/chestard (@kai_dev)',
+    'For you\n• @ellaverse mentioned you, 14:05: "@jules_p can you check the poster?"',
+  ].join('\n\n');
+  const m = {
+    _id: 'recap', conversation: 'gallery-recap', sender: bot, author: 'other', content: recap,
+    msgType: 'msg', mediaUrls: [], voiceDuration: null, isRead: false, isEdited: false, editedAt: null, isForwarded: false,
+    replyTo: null, paymentStatus: null, paymentTxHash: null, tipAmount: null, tipSymbol: null, createdAt: new Date().toISOString(),
+  } as unknown as DmMessage;
+  return (
+    <section data-catch-up-gallery className="mb-5 space-y-3">
+      <h2 className="text-sm font-semibold">Catch me up (group chats)</h2>
+      <div data-catch-up-toolbar-gallery className="max-w-md rounded-2xl border border-white/10 p-2">
+        <div className="px-1 pb-1 flex items-center gap-1">
+          <CatchUpMenu communityId="00000000-0000-0000-0000-000000000000" walletAddress={me.address} />
+          <button type="button" className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] text-zinc-500 hover:text-white hover:bg-white/[0.04] transition-colors">
+            <Search className="w-3.5 h-3.5" />
+            Search
+          </button>
+        </div>
+      </div>
+      <div data-catch-up-dm-gallery className="max-w-md rounded-2xl border border-white/10">
+        <div data-chat-wallpaper className="chat-text-zone px-4 py-4">
+          <DmMessageBubble message={m} isOwnMessage={false} cozy={{ first: true, last: true }} currentUserAddress={me.address} />
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -2443,6 +2483,7 @@ export default function StateGalleryPage() {
         <ReactionRowsGallery />
         <NameBadgesGallery />
         <FullScreenChatGallery />
+        <CatchUpGallery />
         <MessageMenuGallery />
         <ChatReactionArrivalGallery />
         <FollowCardsGallery />
