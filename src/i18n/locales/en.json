@@ -9618,7 +9618,10 @@
     "visualizerColour": "Visualizer colour",
     "lyrics": "Lyrics",
     "lyricsLoading": "Finding lyrics…",
-    "lyricsNone": "No lyrics found"
+    "lyricsNone": "No lyrics found",
+    "shuffle": "Shuffle",
+    "crossfade": "Crossfade",
+    "playAll": "Play all"
   },
   "converter": {
     "seoTitle": "Converter: import a video to Riftn",

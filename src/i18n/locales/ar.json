@@ -9643,7 +9643,10 @@
     "visualizerColour": "لون المؤثرات البصرية",
     "lyrics": "كلمات الأغنية",
     "lyricsLoading": "جارٍ جلب الكلمات…",
-    "lyricsNone": "لا توجد كلمات"
+    "lyricsNone": "لا توجد كلمات",
+    "shuffle": "ترتيب عشوائي",
+    "crossfade": "مزج الانتقال",
+    "playAll": "تشغيل الكل"
   },
   "converter": {
     "seoTitle": "محول: استيراد فيديو إلى Riftn",

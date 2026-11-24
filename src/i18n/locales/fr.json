@@ -9623,7 +9623,10 @@
     "visualizerColour": "Couleur de la visualisation",
     "lyrics": "Paroles",
     "lyricsLoading": "Recherche des paroles…",
-    "lyricsNone": "Aucune parole trouvée"
+    "lyricsNone": "Aucune parole trouvée",
+    "shuffle": "Aléatoire",
+    "crossfade": "Fondu enchaîné",
+    "playAll": "Tout lire"
   },
   "converter": {
     "seoTitle": "Convertisseur: importer une vidéo vers Riftn",

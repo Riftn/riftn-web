@@ -9,7 +9,7 @@ import Repeat2 from "@/components/ui/cut-icons/repost";
 import { ProposalLinkEmbed } from '@/components/app/governance/ProposalLinkEmbed';
 import type { ProfileContentItem } from '@/hooks/use-profile-page';
 
-import { Loader2, Heart, ArrowUpRight, Pin, ListVideo, ChevronLeft } from "lucide-react";
+import { Loader2, Heart, ArrowUpRight, Pin, ListVideo, ChevronLeft, Play, Shuffle } from "lucide-react";
 import Info from "@/components/ui/cut-icons/information";
 import Image from "@/components/ui/cut-icons/images";
 import Pencil from "@/components/ui/cut-icons/edit";
@@ -47,6 +47,7 @@ import { useUserPins } from '@/hooks/use-pins';
 import { useProfileDislikes } from '@/hooks/use-profile-dislikes';
 import { useProfileLikes } from '@/hooks/use-profile-likes';
 import { mapNFTToFeedItem } from '@/lib/nft-to-feed-item';
+import type { AudioPostTrack } from '@/lib/audio-post-playback';
 import { usePublicPlaylists, usePublicPlaylistItems } from '@/hooks/use-bookmark-folders';
 import type { PublicPlaylist } from '@/lib/api/dehub';
 import { buildImageUrl, buildFeedImageUrls, buildAvatarUrl, extractAvatarPath, buildVideoUrl, buildHlsUrl } from '@/lib/media-url';
@@ -969,6 +970,14 @@ function PlaylistPostsPanel({
   const items = query.data?.pages.flatMap((page) => page.result) ?? [];
   const name = firstPage?.playlist.name ?? summary?.name ?? '';
   const description = firstPage?.playlist.description ?? summary?.description ?? '';
+  // The audio posts on it that play for anyone, as a list for the corner player.
+  const tracks = items.flatMap((item): AudioPostTrack[] => {
+    const post: any = (item as any).post || item;
+    const v: any = mapNFTToFeedItem(post);
+    const gated = !!v.isPPV || !!v.isLocked || !!v.subscriberPlans?.length || (!!v.visibility && v.visibility !== 'public');
+    if (!v.audioUrl || gated) return [];
+    return [{ tokenId: v.id, audioUrl: v.audioUrl, title: v.title || t('audioPost.untitled'), artist: v.channel || t('audioPost.creator'), artworkUrl: v.thumbnail || v.channelAvatar || null }];
+  });
 
   return (
     <div className="space-y-3">
@@ -993,6 +1002,19 @@ function PlaylistPostsPanel({
           </span>
         )}
       </div>
+
+      {tracks.length > 0 && (
+        <div className="flex items-center gap-2" data-playlist-play>
+          <Button onClick={() => void import('@/lib/audio-post-playback').then(m => m.playAudioQueue(tracks))}
+            className="h-9 rounded-full bg-white text-black hover:bg-white/90 text-xs font-semibold gap-1.5">
+            <Play className="w-3.5 h-3.5" fill="currentColor" />{t('audioPost.playAll', { defaultValue: 'Play all' })}
+          </Button>
+          <Button variant="ghost" onClick={() => void import('@/lib/audio-post-playback').then(m => m.playAudioQueue(tracks, { shuffle: true }))}
+            className="h-9 rounded-full bg-white/5 border border-white/10 text-zinc-200 hover:bg-white/10 hover:text-white text-xs font-semibold gap-1.5">
+            <Shuffle className="w-3.5 h-3.5" />{t('audioPost.shuffle', { defaultValue: 'Shuffle' })}
+          </Button>
+        </div>
+      )}
 
       {query.isLoading ? (
         <div className="flex items-center justify-center py-10">
