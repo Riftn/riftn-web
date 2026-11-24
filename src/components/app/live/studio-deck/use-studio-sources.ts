@@ -170,7 +170,10 @@ export function useStudioSources(program: ProgramOutput, desk: AudioDesk | null,
       const opened = await open(config, file);
       if (!opened) return false;
       live.current.set(config.id, opened);
-      persist((prev) => [...prev, config]);
+      // Later sources draw on top. A reaction video fills the frame, so it
+      // goes underneath everything: the creator's cameras, logos and images
+      // stay over it instead of vanishing behind it.
+      persist((prev) => (config.reaction ? [config, ...prev] : [...prev, config]));
       return true;
     },
     update: (id, change) => {

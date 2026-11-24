@@ -61,7 +61,7 @@ import { CommentsWrapper } from './CommentsWrapper';
 import { LiveEndedMedia } from './LiveEndedMedia';
 import { StreamShopPinnedCard } from '../live/StreamShop';
 import { ImmersiveLiveChrome } from '../live/ImmersiveLiveChrome';
-import { verticalCropStyle, type VerticalCrop } from '@/lib/live-overlay/vertical-crop';
+import { PASS_THROUGH_STYLE, VERTICAL_FRAME_STYLE, VERTICAL_WINDOW_STYLE, verticalCropStyle, type VerticalCrop } from '@/lib/live-overlay/vertical-crop';
 import { LiveClearedLayer } from '../live/LiveClearedLayer';
 import { LiveViewerActionsProvider } from '../live/live-viewer-actions';
 import { useLiveClip } from '../live/ClipButton';
@@ -2050,6 +2050,10 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
           />
         ) : (
           <>
+            {/* The crop wrappers stay mounted (display: contents when not
+                cropping) so toggling the crop never remounts the player. */}
+            <div style={cropToVertical ? VERTICAL_FRAME_STYLE : PASS_THROUGH_STYLE}>
+            <div style={cropToVertical ? VERTICAL_WINDOW_STYLE : PASS_THROUGH_STYLE}>
             <video
               ref={videoRef}
               className={cropToVertical ? 'object-cover' : 'w-full h-full object-contain'}
@@ -2076,6 +2080,8 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
                  live status flip (liveNow) is what says a live one stopped. */
               onEnded={() => { if (!liveNow) setStreamEnded(true); }}
             />
+            </div>
+            </div>
             {/* No separate "Unmute" pill: the speaker in the control bar is
                 the one sound control, and it showed muted already. */}
             {/* Playback feedback stays visible even when the controls are hidden. */}

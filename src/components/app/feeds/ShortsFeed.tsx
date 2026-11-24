@@ -30,6 +30,7 @@ import { FeedFilterLoader } from '@/components/app/feeds/FeedFilterLoader';
 import { useFeedFilterTransition } from '@/hooks/use-feed-filter-transition';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
+import { useVerticalOptOuts } from '@/hooks/use-stream-overlay';
 import { cn } from '@/lib/utils';
 import { GlassFilterRow } from '@/components/app/feeds/GlassFilterRow';
 import { useScrollFadeMask } from '@/components/app/feeds/useScrollFadeMask';
@@ -461,10 +462,16 @@ export function ShortsFeed({ showFilters = false, isRefreshing = false, refreshK
   // view. Same query (and cache) as the Live tab. Gated or mature streams stay
   // off, as pay-per-view does for shorts.
   const liveQuery = useDeHubLive();
-  const liveShorts = useMemo(() => {
+  const liveCandidates = useMemo(() => {
     const streams = liveQuery.data?.pages.flatMap((page) => page.data || []) || [];
-    return streams.map(mapApiLiveStreamToLocal).filter(isVerticalFeedLive).slice(0, 6);
+    return streams.map(mapApiLiveStreamToLocal).filter(isVerticalFeedLive).slice(0, 8);
   }, [liveQuery.data]);
+  const candidateIds = useMemo(() => liveCandidates.map((s) => s.streamId).filter((id): id is string => !!id), [liveCandidates]);
+  const verticalOff = useVerticalOptOuts(candidateIds);
+  const liveShorts = useMemo(
+    () => liveCandidates.filter((s) => !s.streamId || !verticalOff.has(s.streamId)).slice(0, 6),
+    [liveCandidates, verticalOff],
+  );
   // The live slides the open viewer swipes through. Taken when it opens and
   // held, so a refresh of who is live cannot shift the slides under the viewer.
   const [viewerLive, setViewerLive] = useState<ShortVideo[]>([]);
