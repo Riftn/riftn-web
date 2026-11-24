@@ -8335,7 +8335,9 @@
         "low": "Licht",
         "high": "Sterk"
       },
-      "gateHint": "Dempt je microfoon tussen woorden, zodat toetsenbord en ventilatoren niet te horen zijn."
+      "gateHint": "Dempt je microfoon tussen woorden, zodat toetsenbord en ventilatoren niet te horen zijn.",
+      "hearShared": "Gedeeld tabblad horen op deze computer",
+      "hearSharedHint": "Zet uit zodat het geluid van het tabblad naar je kijkers blijft gaan terwijl het bij jou stil is, zodat je iets anders kunt luisteren. Werkt met een gedeeld tabblad in Chrome, Edge of Brave."
     }
   },
   "liveStudio": {

@@ -8145,7 +8145,9 @@
         "low": "Light",
         "high": "Strong"
       },
-      "gateHint": "Silences your mic between words so keyboard clicks and fans stay off stream."
+      "gateHint": "Silences your mic between words so keyboard clicks and fans stay off stream.",
+      "hearShared": "Hear shared tab on this computer",
+      "hearSharedHint": "Turn off to keep the tab's sound going to viewers while it stays quiet for you, so you can listen to something else. Works on a shared tab in Chrome, Edge or Brave."
     }
   },
   "liveStudio": {

@@ -8150,7 +8150,9 @@
         "low": "Léger",
         "high": "Fort"
       },
-      "gateHint": "Coupe votre micro entre les mots pour que le clavier et les ventilateurs restent hors du live."
+      "gateHint": "Coupe votre micro entre les mots pour que le clavier et les ventilateurs restent hors du live.",
+      "hearShared": "Entendre l'onglet partagé sur cet ordinateur",
+      "hearSharedHint": "Désactivez pour que le son de l'onglet continue d'arriver aux spectateurs sans que vous l'entendiez, pour écouter autre chose. Fonctionne avec un onglet partagé dans Chrome, Edge ou Brave."
     }
   },
   "liveStudio": {
