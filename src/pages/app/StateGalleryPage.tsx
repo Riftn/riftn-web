@@ -130,6 +130,7 @@ import type { PollData } from '@/features/post/types';
 import { LiveClearedLayer } from '@/components/app/live/LiveClearedLayer';
 import { ImmersiveLiveChrome } from '@/components/app/live/ImmersiveLiveChrome';
 import { LivePostChat } from '@/components/app/cards/LivePostChat';
+import { LiveViewerActionsProvider } from '@/components/app/live/live-viewer-actions';
 import { RewardsSheet } from '@/components/app/live/points/RewardsSheet';
 import { RewardsPanel } from '@/components/app/live/studio/RewardsPanel';
 import type { LiveAudience } from '@/lib/api/dehub/livestream';
@@ -1030,6 +1031,9 @@ import { PetSprite } from '@/components/app/pet/PetSprite';
 import StreamPetCorner from '@/components/app/pet/StreamPetCorner';
 import { PetPanel, PetHatch } from '@/components/app/live/studio/PetPanel';
 import type { StreamPet } from '@/lib/api/dehub/stream-pet';
+import { CoStreamInviteCard } from '@/components/app/live/costream/CoStreamInviteCard';
+import { CoStreamAskButton } from '@/components/app/live/costream/CoStreamAskButton';
+import { coStreamViewerKey } from '@/components/app/live/costream/use-costream-viewer';
 const BadgeShowcase = lazy(() => import('@/components/app/badge-showcase/BadgeShowcase'));
 
 // The standard public BIP-39 test vector: owns nothing, safe to show.
@@ -1294,6 +1298,72 @@ function PostOptionsGallery() {
 
 /** AI menu > Translate on a draft, with the Undo line it leaves (sample text, no translator call). */
 const GALLERY_DRAFT = { tr: 'Bir günde bir yıllık yol ilerliyoruz', en: 'We are covering a year\u2019s worth of road in a single day' };
+const ASK_AUTH = { ...GALLERY_AUTH, isAuthenticated: true, walletAddress: '0xgallery' } as unknown as AuthContextType;
+
+/** Ask to join in the live's own controls: asking, and asked (tap again cancels). */
+function CoStreamAskGallery() {
+  const qc = useQueryClient();
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const room = {
+      id: 'room', host_wallet: '0xhost', host_stream_id: 'gallery', host_username: 'dehu_b', accepting_requests: true,
+      status: 'active', battle_started_at: null, battle_ends_at: null, battle_round: 0, created_at: '',
+    };
+    const later = { updatedAt: Date.now() + 3_600_000 };
+    qc.setQueryData(coStreamViewerKey('gallery-ask', null), { room, seats: [] }, later);
+    qc.setQueryData(coStreamViewerKey('gallery-asked', null), {
+      room,
+      seats: [{ id: 's1', costream_id: 'room', wallet: '0xgallery', stream_id: null, username: 'you', status: 'requested', muted: false, updated_at: '' }],
+    }, later);
+    setReady(true);
+  }, [qc]);
+  if (!ready) return null;
+  return (
+    <AuthContext.Provider value={ASK_AUTH}>
+      <div data-costream-ask-gallery className="mt-3 space-y-3">
+        <div className="flex items-start gap-3 px-1">
+          <p className="min-w-0 flex-1 text-sm">Late night ranked with chat</p>
+          <CoStreamAskButton preview streamId="gallery-ask" className="-mt-1.5" />
+        </div>
+        <div className="flex items-start gap-3 px-1">
+          <p className="min-w-0 flex-1 text-sm">Late night ranked with chat</p>
+          <CoStreamAskButton preview streamId="gallery-asked" className="-mt-1.5" />
+        </div>
+        <div className="flex items-center justify-end gap-2 rounded-2xl p-3" style={{ background: '#1d1a24' }} data-on-media>
+          <CoStreamAskButton preview streamId="gallery-ask" variant="square" />
+          <CoStreamAskButton preview streamId="gallery-asked" variant="square" />
+        </div>
+      </div>
+    </AuthContext.Provider>
+  );
+}
+
+/** The host's invite to come on screen, over a live picture: open, and tucked. */
+function CoStreamInviteGallery() {
+  const [busy, setBusy] = useState(false);
+  const frame = 'relative flex h-[260px] items-start justify-center overflow-hidden rounded-2xl pt-12';
+  const picture = { background: 'radial-gradient(circle at 30% 30%, #6b4f3a, #1d1a24 60%), #111' };
+  return (
+    <section data-page-bento data-costream-invite-gallery className="mb-5 max-w-md rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Live invite on screen</h2>
+      <div className={frame} style={picture} data-on-media>
+        <CoStreamInviteCard
+          hostName="@dehu_b"
+          hostAvatar={null}
+          myName="you"
+          busy={busy}
+          onJoin={() => { setBusy(true); window.setTimeout(() => setBusy(false), 1500); }}
+          onDecline={() => {}}
+        />
+      </div>
+      <div className={`${frame} mt-3 h-[120px]`} style={picture} data-on-media>
+        <CoStreamInviteCard hostName="@dehu_b" initiallyTucked onJoin={() => {}} onDecline={() => {}} />
+      </div>
+      <CoStreamAskGallery />
+    </section>
+  );
+}
+
 function PostTranslateGallery() {
   const imageRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLInputElement>(null);
@@ -2779,6 +2849,7 @@ export default function StateGalleryPage() {
         <AudioGallery />
         <PostOptionsGallery />
         <PostTranslateGallery />
+        <CoStreamInviteGallery />
         <FeedFilterLineGallery />
         <AltPillGallery />
         <VoiceNotesGallery />
@@ -3063,7 +3134,16 @@ function LivePointsGallery({ initiallyOpen = false }: { initiallyOpen?: boolean 
             className="relative flex h-[520px] w-[390px] max-w-full flex-col justify-end overflow-hidden rounded-[28px] px-3 pb-3"
             style={{ background: 'radial-gradient(60% 30% at 50% 26%, rgba(255,170,90,.55), transparent 70%), radial-gradient(40% 25% at 85% 12%, rgba(80,120,255,.55), transparent 70%), linear-gradient(180deg, #2a1240 0%, #3b1d4f 40%, #120a1c 100%)' }}
           >
-            <LivePostChat tokenId="0" streamId={GALLERY_STREAM_ID} overlay />
+            {/* The full-bleed row: message box, then gift, share and thumb. */}
+            <LiveViewerActionsProvider
+              value={
+                <div className="flex items-center gap-2">
+                  <ActionBar compact postId="gallery-live" likeCount={26} dislikeCount={0} commentCount={0} tipCount={3} onTip={() => {}} nativeShare={{ title: 'Live' }} />
+                </div>
+              }
+            >
+              <LivePostChat tokenId="0" streamId={GALLERY_STREAM_ID} overlay />
+            </LiveViewerActionsProvider>
           </div>
           <div data-live-points-desktop className="w-[380px] max-w-full rounded-2xl border border-white/10 bg-black/40 p-4">
             <LivePostChat tokenId="0" streamId={GALLERY_STREAM_ID} />
