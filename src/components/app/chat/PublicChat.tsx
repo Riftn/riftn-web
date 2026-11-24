@@ -859,10 +859,10 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
           {/* Search and text size on the bar; calls, translate and room
               settings behind + so the top isn't crowded on phones. "24 online"
               sits under the title (2026-11-24). */}
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-white" data-chat-search-open
+          <button type="button" className="inline-flex h-8 min-w-8 items-center justify-center rounded-lg px-1.5 text-zinc-400 transition-colors hover:bg-zinc-700/60 hover:text-white" data-chat-search-open
             aria-label={t('publicChat.searchMessages')} onClick={() => openSearch()}>
             <Search className="w-4 h-4" />
-          </Button>
+          </button>
           <ChatTextSizeButton />
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
