@@ -127,6 +127,7 @@ const LiveOverlayLayer = lazy(() => import('@/components/app/live/overlay/LiveOv
 const StreamPetCorner = lazy(() => import('@/components/app/pet/StreamPetCorner'));
 const HypeTrainBar = lazy(() => import('@/components/app/live/overlay/hype-train').then((m) => ({ default: m.HypeTrainBar })));
 const CoStreamViewerLayer = lazy(() => import('@/components/app/live/costream/CoStreamViewerLayer'));
+const CoStreamAskButton = lazy(() => import('@/components/app/live/costream/CoStreamAskButton'));
 const ReplayOverlayLayer = lazy(() => import('@/components/app/live/overlay/ReplayOverlayLayer'));
 import { speakTipMessage, warmTipTts, setTipTtsEnabled, MAX_TTS_CHARS } from '@/lib/live/tip-tts';
 import { useAuth } from '@/contexts/AuthContext';
@@ -602,6 +603,9 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
       stream.creatorId &&
       walletAddress.toLowerCase() === stream.creatorId.toLowerCase()
   );
+  // Ask to join sits in the live's own controls (not on the picture); it
+  // hides itself unless the host takes requests.
+  const canAskToJoin = !!stream.streamId && !!stream.isLive && !streamEnded && !isOwnStream;
   /*
    * Counts this tab among the viewers (web was never counted before) and
    * reads the live number back, falling back to the stored total. The
@@ -2150,6 +2154,11 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
                     />
                   </div>
                   )}
+                  {isFullscreen && canAskToJoin && (
+                    <Suspense fallback={null}>
+                      <CoStreamAskButton streamId={stream.streamId} owner={stream.creatorId} variant="square" />
+                    </Suspense>
+                  )}
                   {isFullscreen && chatSlot && (
                     <button
                       type="button"
@@ -2290,7 +2299,7 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
         )}
         {stream.streamId && stream.isLive && !streamEnded && !isOwnStream && (
           <Suspense fallback={null}>
-            <CoStreamViewerLayer streamId={stream.streamId} owner={stream.creatorId} onRoomChange={quietForGuestRoom} />
+            <CoStreamViewerLayer streamId={stream.streamId} owner={stream.creatorId} hostAvatar={stream.avatar?.startsWith('http') ? stream.avatar : null} onRoomChange={quietForGuestRoom} />
           </Suspense>
         )}
 
@@ -2397,6 +2406,11 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
                 onTip={() => setShowGiftDrawer(true)}
                 nativeShare={{ title: stream.title }}
               />
+              {canAskToJoin && (
+                <Suspense fallback={null}>
+                  <CoStreamAskButton streamId={stream.streamId} owner={stream.creatorId} variant="square" />
+                </Suspense>
+              )}
               </div>
               )
             }
@@ -2424,7 +2438,14 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
             onComment={() => setShowComments(prev => !prev)}
             className="p-0 mb-2"
           />
-          <h3 className="text-white text-sm mt-1">{stream.title}</h3>
+          <div className="mt-1 flex items-start gap-3">
+            <h3 className="min-w-0 flex-1 text-white text-sm">{stream.title}</h3>
+            {canAskToJoin && (
+              <Suspense fallback={null}>
+                <CoStreamAskButton streamId={stream.streamId} owner={stream.creatorId} className="-mt-1.5" />
+              </Suspense>
+            )}
+          </div>
           <p className="text-zinc-500 text-xs mt-1">{stream.game}</p>
         </div>
       )}
