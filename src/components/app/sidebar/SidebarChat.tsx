@@ -852,8 +852,20 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
             <button
               type="button"
               aria-label={_copy('dm.sendMessage', { defaultValue: 'Send message' })}
-              onClick={handleSend}
-              disabled={(!newMessage.trim() && !imageFile) || isSending || uploadingImage}
+              onClick={(event) => {
+                if (!newMessage.trim() && !imageFile) {
+                  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                    event.currentTarget.animate(
+                      [{ translate: '0' }, { translate: '-4px' }, { translate: '4px' }, { translate: '0' }],
+                      { duration: 220, easing: 'ease-in-out' },
+                    );
+                  }
+                  toast.info(_copy('chat.typeFirst', { defaultValue: 'Type first' }), { id: 'sidebar-chat-type-first' });
+                  return;
+                }
+                void handleSend();
+              }}
+              disabled={isSending || uploadingImage}
               className="inline-flex h-8 w-8 items-center justify-center disabled:opacity-50"
             >
               {isSending || uploadingImage ? (
@@ -866,11 +878,11 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
               id={composerToolsId}
               data-sidebar-composer-tools
               data-open={composerToolsOpen || undefined}
-              className="w-full flex-wrap items-center justify-end gap-1"
+              className="w-full flex-wrap items-center justify-end gap-1 data-[open=true]:justify-evenly"
             >
               {roomId && (
                 <>
-                  <ChatTextSizeButton />
+                  <ChatTextSizeButton className="[&>span>span]:text-xl" />
                   <button
                     type="button"
                     data-chat-fullscreen
