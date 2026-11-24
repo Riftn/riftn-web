@@ -2988,6 +2988,33 @@ export const blogPostsMetadata: BlogPost[] = [
 // arrays at runtime in blogUtils.ts — metadata-only logic, no third copy here.
 export const newPostsMetadata: BlogPost[] = [
   {
+    "id": "sell-paid-memberships-instagram-tiktok-followers-2026",
+    "slug": "sell-paid-memberships-instagram-tiktok-followers-2026",
+    "title": "How to Sell Paid Memberships to Your Instagram and TikTok Followers (2026)",
+    "excerpt": "Turn followers into paying members: where to host a membership, what to offer, how to price it and how to promote it on Instagram and TikTok without breaking their rules.",
+    "content": "",
+    "bannerImage": "/media/sell-paid-memberships-banner-r2.jpg",
+    "bannerImageAlt": "How to sell paid memberships to your Instagram and TikTok followers in 2026",
+    "author": {
+      "name": "Mal Jan"
+    },
+    "publishedAt": "2026-11-24T23:00:00.000Z",
+    "updatedAt": "2026-11-24T23:00:00.000Z",
+    "tags": [
+      "Creator Economy",
+      "Memberships",
+      "Instagram",
+      "TikTok",
+      "Monetization",
+      "Riftn"
+    ],
+    "readingTime": 5,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "How to Sell Paid Memberships to Instagram and TikTok Followers (2026)",
+    "seoDescription": "Turn Instagram and TikTok followers into paying members: where to host a membership, what to offer, how to price it and how to promote it without breaking the rules."
+  },
+  {
     "id": "bluesky-vs-mastodon-vs-farcaster-vs-riftn-privacy",
     "slug": "bluesky-vs-mastodon-vs-farcaster-vs-riftn-privacy",
     "title": "Bluesky vs Mastodon vs Farcaster vs Riftn: Which Is Best for Privacy in 2026?",
@@ -4045,31 +4072,31 @@ export const newPostsMetadata: BlogPost[] = [
 
 // getLatestPost() result — docs home hero.
 export const latestPostMetadata: BlogPost | undefined = {
-  "id": "bluesky-vs-mastodon-vs-farcaster-vs-riftn-privacy",
-  "slug": "bluesky-vs-mastodon-vs-farcaster-vs-riftn-privacy",
-  "title": "Bluesky vs Mastodon vs Farcaster vs Riftn: Which Is Best for Privacy in 2026?",
-  "excerpt": "Four decentralized social networks, compared on what matters for privacy: who can read your messages, what is public by default, who holds your data and who can change the rules.",
+  "id": "sell-paid-memberships-instagram-tiktok-followers-2026",
+  "slug": "sell-paid-memberships-instagram-tiktok-followers-2026",
+  "title": "How to Sell Paid Memberships to Your Instagram and TikTok Followers (2026)",
+  "excerpt": "Turn followers into paying members: where to host a membership, what to offer, how to price it and how to promote it on Instagram and TikTok without breaking their rules.",
   "content": "",
-  "bannerImage": "/media/bluesky-vs-mastodon-vs-farcaster-vs-riftn-banner-r2.jpg",
-  "bannerImageAlt": "Bluesky vs Mastodon vs Farcaster vs Riftn: which decentralized social network is best for privacy in 2026",
+  "bannerImage": "/media/sell-paid-memberships-banner-r2.jpg",
+  "bannerImageAlt": "How to sell paid memberships to your Instagram and TikTok followers in 2026",
   "author": {
     "name": "Mal Jan"
   },
-  "publishedAt": "2026-11-24T22:00:00.000Z",
-  "updatedAt": "2026-11-24T22:00:00.000Z",
+  "publishedAt": "2026-11-24T23:00:00.000Z",
+  "updatedAt": "2026-11-24T23:00:00.000Z",
   "tags": [
-    "Bluesky",
-    "Mastodon",
-    "Farcaster",
-    "Privacy",
-    "Decentralized Social Media",
+    "Creator Economy",
+    "Memberships",
+    "Instagram",
+    "TikTok",
+    "Monetization",
     "Riftn"
   ],
-  "readingTime": 6,
+  "readingTime": 5,
   "featured": false,
   "status": "published",
-  "seoTitle": "Bluesky vs Mastodon vs Farcaster vs Riftn: Best for Privacy (2026)",
-  "seoDescription": "Bluesky, Mastodon, Farcaster and Riftn compared on privacy in 2026: encrypted DMs, public likes, hidden follows, who holds your data and who sets the rules."
+  "seoTitle": "How to Sell Paid Memberships to Instagram and TikTok Followers (2026)",
+  "seoDescription": "Turn Instagram and TikTok followers into paying members: where to host a membership, what to offer, how to price it and how to promote it without breaking the rules."
 };
 
 export const excludedTitles: string[] = [

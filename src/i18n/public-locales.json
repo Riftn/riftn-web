@@ -1,5 +1,5 @@
 {
-  "version": "d15a7de52e65c005",
+  "version": "9df54b730f54344e",
   "routes": {
     "/": [
       "ar",
@@ -1374,6 +1374,13 @@
       "tr"
     ],
     "/guides/scaling-new-heights-livepeer-integration-for-50k-concurrent-viewers": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/guides/sell-paid-memberships-instagram-tiktok-followers-2026": [
       "ar",
       "es",
       "fr",

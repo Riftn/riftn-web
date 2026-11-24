@@ -13,6 +13,7 @@ import { claudeOfDutyHowToPlayPost } from './posts/claudeOfDutyHowToPlayPost';
 import { isRiftnLegitPost } from './posts/isRiftnLegitPost';
 import { tanrininGozuPost } from './posts/tanrininGozuPost';
 import { blueskyMastodonFarcasterRiftnPost } from './posts/blueskyMastodonFarcasterRiftnPost';
+import { paidMembershipsPost } from './posts/paidMembershipsPost';
 import { youtubeFeaturesUsersWantPost } from './posts/youtubeFeaturesUsersWantPost';
 import { binancePioneerBurnAppealPost } from './posts/binancePioneerBurnAppealPost';
 import { ownEverythingTaglinePost } from './posts/ownEverythingTaglinePost';
@@ -1431,6 +1432,7 @@ const bnbPoolUpdatePost: BlogPostType = {
 };
 
 export const newPosts: BlogPostType[] = [
+  paidMembershipsPost,
   blueskyMastodonFarcasterRiftnPost,
   tanrininGozuPost,
   isRiftnLegitPost,
