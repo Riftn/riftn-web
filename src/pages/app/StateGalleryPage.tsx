@@ -130,6 +130,7 @@ import type { PollData } from '@/features/post/types';
 import { LiveClearedLayer } from '@/components/app/live/LiveClearedLayer';
 import { ImmersiveLiveChrome } from '@/components/app/live/ImmersiveLiveChrome';
 import { LivePostChat } from '@/components/app/cards/LivePostChat';
+import { LiveViewerActionsProvider } from '@/components/app/live/live-viewer-actions';
 import { RewardsSheet } from '@/components/app/live/points/RewardsSheet';
 import { RewardsPanel } from '@/components/app/live/studio/RewardsPanel';
 import type { LiveAudience } from '@/lib/api/dehub/livestream';
@@ -3063,7 +3064,16 @@ function LivePointsGallery({ initiallyOpen = false }: { initiallyOpen?: boolean 
             className="relative flex h-[520px] w-[390px] max-w-full flex-col justify-end overflow-hidden rounded-[28px] px-3 pb-3"
             style={{ background: 'radial-gradient(60% 30% at 50% 26%, rgba(255,170,90,.55), transparent 70%), radial-gradient(40% 25% at 85% 12%, rgba(80,120,255,.55), transparent 70%), linear-gradient(180deg, #2a1240 0%, #3b1d4f 40%, #120a1c 100%)' }}
           >
-            <LivePostChat tokenId="0" streamId={GALLERY_STREAM_ID} overlay />
+            {/* The full-bleed row: message box, then gift, share and thumb. */}
+            <LiveViewerActionsProvider
+              value={
+                <div className="flex items-center gap-2">
+                  <ActionBar compact postId="gallery-live" likeCount={26} dislikeCount={0} commentCount={0} tipCount={3} onTip={() => {}} nativeShare={{ title: 'Live' }} />
+                </div>
+              }
+            >
+              <LivePostChat tokenId="0" streamId={GALLERY_STREAM_ID} overlay />
+            </LiveViewerActionsProvider>
           </div>
           <div data-live-points-desktop className="w-[380px] max-w-full rounded-2xl border border-white/10 bg-black/40 p-4">
             <LivePostChat tokenId="0" streamId={GALLERY_STREAM_ID} />
