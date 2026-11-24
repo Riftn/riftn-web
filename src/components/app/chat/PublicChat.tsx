@@ -58,13 +58,28 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Check } from 'lucide-react';
+import Plus from '@/components/ui/cut-icons/add';
+import { CHAT_MENU_CONTENT } from './ChatOptionsMenu';
+import { CHAT_TEXT_SCALE, setChatTextSize, useChatTextSize } from '@/lib/chat-text-size';
+import { useChatTextSizeOptions } from '@/hooks/use-chat-text-size-options';
+import { cn } from '@/lib/utils';
+import { formatCount } from '@/lib/format-count';
+
+/** A row in the phone + menu, same as the Messages list menu's rows. */
+const PC_ROW = 'flex cursor-pointer items-center gap-3 rounded-xl px-2.5 py-2 text-[14px] text-zinc-100 outline-none focus:bg-white/10 data-[highlighted]:bg-white/10 data-[disabled]:opacity-40 [&>svg]:h-[17px] [&>svg]:w-[17px] [&>svg]:text-zinc-400';
 
 interface PublicChatProps {
   onBack: () => void;
   /** Shown inside another page (the Riftn community's Chat tab): no back button. */
   embedded?: boolean;
+  /** /app/messages on phones: "24 online" moves under the title, call and
+   *  video stay, and text size, translate and search move behind one +. */
+  phoneB?: boolean;
 }
 
 /**
@@ -141,7 +156,7 @@ const LOAD_OLDER_AT = 240;
 /** Older pages (20 lines each) the room may pull in at open to reach where you left off. */
 const MAX_READ_SPOT_PAGES = 10;
 
-export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
+export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicChatProps) {
   // A mention notification names the line that tagged the reader.
   useFocusChatMessage();
   const { t: _copy } = _useCopy();
@@ -160,6 +175,8 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
   // Search: one box for words and people. `list` shows what it found, `chat`
   // shows the room on the result that was opened.
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const textSize = useChatTextSize();
+  const textSizes = useChatTextSizeOptions();
   const [searchText, setSearchText] = useState('');
   const [searchPerson, setSearchPerson] = useState<ChatSearchPerson | null>(null);
   const [searchView, setSearchView] = useState<'list' | 'chat'>('list');
@@ -815,7 +832,15 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
           
           <div className="min-w-0">
             <h2 className="font-bold text-white truncate">{roomName}</h2>
-            {roomDescription ? (
+            {phoneB ? (
+              selectedRoomId ? (
+                <p data-live-chat-online role="status" aria-label={t('publicChat.onlineHint', { count: onlineCount, defaultValue: '{{count}} people are in this chat right now' })}
+                  className="flex items-center gap-1.5 text-xs text-zinc-400 tabular-nums">
+                  <span aria-hidden="true" className="live-chat-lens" />
+                  <span aria-hidden="true">{t('publicChat.online', { count: formatCount(onlineCount) as unknown as number, defaultValue: '{{count}} online' })}</span>
+                </p>
+              ) : null
+            ) : roomDescription ? (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <p className="text-zinc-500 text-xs truncate max-w-[180px]">
@@ -828,11 +853,60 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
           </div>
         </div>
         
+        {phoneB ? (
+        <div data-live-chat-toolbar className="flex shrink-0 items-center gap-1">
+          {!isBanned && (
+            <GroupCallButtons groupId={PUBLIC_CHAT_CALL_ID} groupName={t('publicChat.title')} ring={false} />
+          )}
+          {/* Text size, translate and search: behind + so the top isn't
+              crowded on phones; "24 online" sits under the title (2026-11-24). */}
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" data-public-chat-plus aria-label={_copy('chatTabs.menu', { defaultValue: 'Chat options' })}
+                className="h-8 w-8 text-zinc-400 hover:text-white [&_svg]:!h-5 [&_svg]:!w-5">
+                <Plus />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" sideOffset={6} data-chat-options-menu className={cn(CHAT_MENU_CONTENT, 'text-white')}>
+              <DropdownMenuItem className={PC_ROW} onSelect={() => openSearch()} data-chat-menu-search>
+                <Search />{t('publicChat.searchMessages')}
+              </DropdownMenuItem>
+              <DropdownMenuItem className={PC_ROW} onSelect={handleTranslateAll}>
+                {isAllTranslated ? <RotateCcw /> : <Languages />}
+                {isAllTranslated ? _copy("copy.16194a69c43d", { defaultValue: "Show original" }) : _copy("copy.29a7e1c24c92", { defaultValue: "Translate all" })}
+              </DropdownMenuItem>
+              {ROOM_MANAGEMENT_ENABLED && isRoomModerator && (
+                <>
+                  <DropdownMenuItem className={PC_ROW} onSelect={() => setCreateRoomOpen(true)}>
+                    <MessageSquarePlus />{_copy("copy.af8be239071a", { defaultValue: "Create new room" })}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className={PC_ROW} onSelect={() => setSettingsOpen(true)}>
+                    <Settings />{_copy("copy.eb8482c5ca05", { defaultValue: "Room settings" })}
+                  </DropdownMenuItem>
+                </>
+              )}
+              <DropdownMenuSeparator className="my-1 h-px bg-white/10" />
+              <DropdownMenuLabel className="px-2.5 pb-1 pt-1 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-500">
+                {t('chatTextSize.title', 'Text size')}
+              </DropdownMenuLabel>
+              {textSizes.map((o) => (
+                <DropdownMenuItem key={o.value} className={cn(PC_ROW, 'justify-between')} onSelect={(e) => { e.preventDefault(); setChatTextSize(o.value); }}
+                  role="menuitemradio" aria-checked={o.value === textSize}>
+                  <span style={{ fontSize: `calc(0.875rem * ${CHAT_TEXT_SCALE[o.value]})` }}>{o.label}</span>
+                  {o.value === textSize && <Check className="!text-white" />}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        ) : (
         <div data-live-chat-toolbar className="flex shrink-0 items-center gap-3">
+          {/* Online count first, so the call buttons sit with the other
+              buttons instead of being split from them by the number. */}
+          {selectedRoomId && <LiveChatOnlineCount count={onlineCount} />}
           {!embedded && !isBanned && (
             <GroupCallButtons groupId={PUBLIC_CHAT_CALL_ID} groupName={t('publicChat.title')} ring={false} />
           )}
-          {selectedRoomId && <LiveChatOnlineCount count={onlineCount} />}
           <ChatTextSizeButton />
           {/* Translate all toggle */}
           <Tooltip>
@@ -894,6 +968,7 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
             </Tooltip>
           )}
         </div>
+        )}
       </div>
       )}
 
