@@ -13,7 +13,7 @@ import { useSurfaceDraft } from '@/hooks/use-surface-draft';
  * Full-screen 1:1 direct message chat view.
  */
 
-import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo, useReducer, memo, Fragment, type ReactNode } from 'react';
+import { useContext, useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo, useReducer, memo, Fragment, type ReactNode } from 'react';
 import { DhbAmount, DhbCoin } from '@/components/app/DhbAmount';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
@@ -75,6 +75,7 @@ import { anchorFromReadSpot, newestLineOnScreen } from '@/lib/chat-read-position
 import { useChatReadPosition } from '@/hooks/use-chat-read-position';
 import { countLinesBelow, glideToBottom } from '@/lib/chat-lines-below';
 import { useAuth } from '@/contexts/AuthContext';
+import { CachedPageActiveContext } from '@/contexts/CachedPageActiveContext';
 import { useDmSettings } from '@/hooks/use-dm-settings';
 import { useBannedAccount } from '@/hooks/use-banned-account';
 import { getMediaUrl, forwardDmMessage, blockConversation, unblockConversation, getDMPlanSettings, grantFreeDmAccess, revokeFreeDmAccess, getAccountInfo, pinDmMessage, unpinDmMessage, type DMMessageType, type DeHubConversation, type DmMessage, type DmFee } from '@/lib/api/dehub';
@@ -1680,6 +1681,7 @@ const UNREAD_MARKER_TOP_GAP = 48;
 export function DirectMessageChat({ conversation, onBack, initialComposerText, dock = false, headerActions, focusComposer = false, cozy = false, options }: DirectMessageChatProps) {
   const { t: _copy } = _useCopy();
   const { user, walletAddress, openLoginModal } = useAuth();
+  const isChatActive = useContext(CachedPageActiveContext);
   // The note button shows only where the Notes sheet can open (Messages).
   const notesAvailable = useNotesSheetAvailable() && !dock;
   const { isBanned: accountBanned } = useBannedAccount();
@@ -2191,12 +2193,13 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
   // Register this conversation as "open" so its unread badge is forced to 0
   // in the conversations list while the chat is visible.
   useEffect(() => {
+    if (!isChatActive) return;
     return registerOpenConversation(resolvedConversationId);
-  }, [resolvedConversationId]);
+  }, [isChatActive, resolvedConversationId]);
 
   // Emit markAsRead (socket) + scroll on initial load
   useEffect(() => {
-    if (isInitialMount.current && messages.length > 0 && readSpot.ready) {
+    if (isChatActive && isInitialMount.current && messages.length > 0 && readSpot.ready) {
       const ownAddress = walletAddress?.toLowerCase();
       const ownId = user?._id;
       const lines = messages.map((m) => {
@@ -2249,7 +2252,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
       markAsRead();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages.length, markAsRead, readSpot.ready, isFetchingNextPage]);
+  }, [isChatActive, messages.length, markAsRead, readSpot.ready, isFetchingNextPage]);
 
   /** Saves the newest line that is on screen as where you left off. */
   const reportReadSpot = useCallback(() => {
@@ -2360,23 +2363,23 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
 
   // Re-emit markAsRead when conversation is focused/visible
   useEffect(() => {
-    if (!resolvedConversationId || resolvedConversationId.startsWith('new_') || /^0x[0-9a-fA-F]{40}$/i.test(resolvedConversationId)) return;
-    
+    if (!isChatActive || !resolvedConversationId || resolvedConversationId.startsWith('new_') || /^0x[0-9a-fA-F]{40}$/i.test(resolvedConversationId)) return;
+
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') {
         emitReadReceipt(resolvedConversationId);
       }
     };
     
-    // Emit on mount (covers navigation back to chat)
-    const timer = setTimeout(() => emitReadReceipt(resolvedConversationId), 1000);
+    // Emit when shown, including a return to the cached chat.
+    const timer = setTimeout(handleVisibility, 1000);
     document.addEventListener('visibilitychange', handleVisibility);
     
     return () => {
       clearTimeout(timer);
       document.removeEventListener('visibilitychange', handleVisibility);
     };
-  }, [resolvedConversationId]);
+  }, [isChatActive, resolvedConversationId]);
 
   // Auto-scroll on new messages + auto-mark as read while chat is open.
   //
@@ -2386,7 +2389,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
   // therefore popped a "N new messages" pill whose count climbed with every
   // page fetched, and re-fired markAsRead on each one.
   useEffect(() => {
-    if (isInitialMount.current) return;
+    if (!isChatActive || isInitialMount.current) return;
     const prevLastId = prevLastMessageIdRef.current;
     const prevIndex = prevLastId ? messages.findIndex((m) => m._id === prevLastId) : -1;
     // Anything after the message that used to be last is genuinely new. If the
@@ -2409,7 +2412,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
       }
     }
     prevLastMessageIdRef.current = messages[messages.length - 1]?._id ?? null;
-  }, [messages, markAsRead]);
+  }, [isChatActive, messages, markAsRead]);
 
   // Keep the newest messages pinned above the on-screen keyboard. With
   // `interactive-widget=resizes-content` the layout (and this flex column)
