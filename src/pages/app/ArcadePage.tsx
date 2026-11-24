@@ -57,6 +57,14 @@ const FRIEND_GAMES = [
     blurb: 'Roll the die, drop the checker, clear the bottom row. Retro arcade with a top 10.',
   },
   {
+    href: '/music/binary-metal',
+    art: '/og/music-binary-metal.jpg',
+    titleKey: 'binaryMetal.title',
+    title: 'Binary Metal',
+    blurbKey: 'binaryMetal.cardBlurb',
+    blurb: 'Type anything and hear it as a metal riff. Download WAV or MP3.',
+  },
+  {
     href: '/arcade/gratitude',
     art: '/og/arcade-gratitude.jpg',
     titleKey: 'games.gratitude.title',
