@@ -432,7 +432,11 @@ function prerenderHomeIntroPlugin() {
  * at the same priority) plus an inline starter that import()s the entry after
  * the first frame has painted: requestAnimationFrame fires before that frame
  * paints, a zero-delay timeout inside it lands after. A background tab never
- * gets a frame, so a 1.5 s timer and a visibility listener start it there;
+ * gets a frame, so a 4 s timer and a visibility listener start it there.
+ * (It was 1.5 s, but PSI's phone run produced no frame for its first ~1.5 s,
+ * so the timer started the entry first and every paint waited on the app.
+ * The user-timing marks entry-start:frame|timer and first-raf show which
+ * path ran in a Lighthouse report.)
  * import() of the same module twice is one evaluation, so both paths are safe.
  *
  * scripts/check-entry-bundle.mjs finds the entry through the data-entry link.
@@ -454,11 +458,12 @@ function startEntryAfterFirstPaintPlugin() {
         const starter = [
           `<link rel="modulepreload" data-entry crossorigin href="${entry}">`,
           '<script>(function(){var s=0,e=' + JSON.stringify(entry) + ';',
-          'function go(){if(s)return;s=1;import(e).catch(function(){});}',
-          'function afterPaint(){requestAnimationFrame(function(){setTimeout(go,0);});}',
+          'try{performance.mark("boot-vis:"+document.visibilityState);}catch(x){}',
+          'function go(r){if(s)return;s=1;try{performance.mark("entry-start:"+r);}catch(x){}import(e).catch(function(){});}',
+          'function afterPaint(){requestAnimationFrame(function(){performance.mark&&performance.mark("first-raf");setTimeout(function(){go("frame");},0);});}',
           'if(document.visibilityState==="hidden"){document.addEventListener("visibilitychange",function v(){if(document.visibilityState==="visible"){document.removeEventListener("visibilitychange",v);afterPaint();}});}',
           'else{afterPaint();}',
-          'setTimeout(go,1500);})();</script>',
+          'setTimeout(function(){go("timer");},4000);})();</script>',
         ].join('');
         console.log(`[start-entry-after-first-paint] ${entry} now starts after the first frame`);
         return html.replace(tag, starter);
