@@ -16,6 +16,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
+import { AppState } from '@/components/app/AppState';
 import { ExploreListSection } from '@/components/app/explore/ExploreListSection';
 import { ThemedIcon } from '@/components/app/war/WarHudIcon';
 import { VideoCard } from '@/components/app/cards/VideoCard';
@@ -145,6 +146,13 @@ export function TrendingEarned({ phone }: { phone: boolean }) {
         <div className="space-y-3 py-2" aria-busy="true">
           {[0, 1].map((i) => <div key={i} className="aspect-video w-full animate-pulse rounded-2xl bg-zinc-800/60" />)}
         </div>
+      ) : feed.isError && rows.length === 0 ? (
+        <AppState
+          kind="error"
+          size="compact"
+          title={t('common.failedToLoad')}
+          primaryAction={{ label: t('common.retry'), onClick: () => void feed.refetch() }}
+        />
       ) : rows.length === 0 ? (
         <p data-trending-empty className="px-1 py-4 text-sm text-zinc-400">{empty}</p>
       ) : (

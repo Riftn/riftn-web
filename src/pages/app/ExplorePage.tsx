@@ -1115,6 +1115,12 @@ export default function ExplorePage() {
                         <span>{t('explorePage.searching')}</span>
                       </div>
                     </div>
+                  ) : categoryBrowseFeed.isError && categoryFeedItems.length === 0 ? (
+                    <AppState
+                      kind="error"
+                      title={t('common.failedToLoad')}
+                      primaryAction={{ label: t('common.retry'), onClick: () => void categoryBrowseFeed.refetch() }}
+                    />
                   ) : categoryFeedItems.length === 0 ? (
                     <AppState
                       icon="search"
