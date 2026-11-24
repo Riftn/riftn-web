@@ -48,6 +48,14 @@ const FRIEND_GAMES = [
     blurbKey: 'games.sillycoin.cardBlurb',
     blurb: 'Tap to mine, buy upgrades, send coins to friends. Just for fun, no value.',
   },
+  {
+    href: '/arcade/gratitude',
+    art: '/og/arcade-gratitude.jpg',
+    titleKey: 'games.gratitude.title',
+    title: 'Gratitude pen pals',
+    blurbKey: 'games.gratitude.cardBlurb',
+    blurb: 'Take turns saying what you are grateful for. No repeats. Miss your turn and they win.',
+  },
 ] as const;
 
 /** The games that are a competition, in registry order. */

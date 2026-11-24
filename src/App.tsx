@@ -287,6 +287,8 @@ const ArcadeCorrespondenceChessPage = React.lazy(() => import("./pages/ArcadeCor
 const ArcadeOkeyPage = React.lazy(() => import("./pages/ArcadeOkeyPage"));
 // SillyCoin: tap-to-mine idle game with in-game sending (riftn-backend src/games).
 const ArcadeSillyCoinPage = React.lazy(() => import("./pages/ArcadeSillyCoinPage"));
+// Gratitude pen pals: turn-based, no repeats, miss your turn and lose (riftn-backend src/games).
+const ArcadeGratitudePage = React.lazy(() => import("./pages/ArcadeGratitudePage"));
 // Mini app player: standalone like the arcade player, because the app owns the
 // viewport and dehub draws only its own header above it.
 const MiniAppPage = React.lazy(() => import("./pages/MiniAppPage"));
@@ -759,6 +761,7 @@ function AppContent() {
           <Route path="/arcade/correspondence-chess" element={<Suspense fallback={<PageLoader />}><ArcadeCorrespondenceChessPage /></Suspense>} />
           <Route path="/arcade/okey" element={<Suspense fallback={<PageLoader />}><ArcadeOkeyPage /></Suspense>} />
           <Route path="/arcade/sillycoin" element={<Suspense fallback={<PageLoader />}><ArcadeSillyCoinPage /></Suspense>} />
+          <Route path="/arcade/gratitude" element={<Suspense fallback={<PageLoader />}><ArcadeGratitudePage /></Suspense>} />
           <Route path="/arcade/:slug" element={<Suspense fallback={<PageLoader />}><ArcadeGamePage /></Suspense>} />
 
           {/* Online chess: the King's Gambit lobby and live board. Standalone

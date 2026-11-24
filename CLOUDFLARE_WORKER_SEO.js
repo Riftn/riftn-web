@@ -185,7 +185,7 @@ const OG_CARD_ROUTES = new Set([
   'arcade', 'arcade/kings-gambit', 'arcade/claude-of-duty', 'arcade/jungle-trail',
   'arcade/street-slayer',
   'arcade/trenchstar', 'arcade/love-lock-bridge',
-  'arcade/correspondence-chess', 'arcade/okey', 'arcade/sillycoin',
+  'arcade/correspondence-chess', 'arcade/okey', 'arcade/sillycoin', 'arcade/gratitude',
   'apps', 'apps/dev',
   // App surfaces that had no card of their own and unfurled as the homepage.
   // `superpowers` art was rendered when the page shipped and was never added
@@ -1456,6 +1456,15 @@ const MARKETING_PAGES = {
     bodyHtml: `<p>An idle clicker game. Tap the coin to mine SillyCoins, then spend them on a bigger pick for more coins per tap, or on auto-miners that keep digging while you are away, for up to 8 hours.</p>
 <p>Send SillyCoins to anyone on Riftn by their username, with a short note, and see who has mined the most on the top 10. SillyCoins are just for fun and have no value: no blockchain, no token, nothing to buy or cash out.</p>
 <p><a href="${APP_URL}/arcade/sillycoin">Start mining</a> or <a href="${APP_URL}/arcade">see the whole arcade</a>.</p>`,
+  },
+  'arcade/gratitude': {
+    title: 'Gratitude Pen Pals | Riftn Arcade',
+    description: 'A turn-based game for two: take turns saying what you are grateful for, with 1 to 7 days per turn. No repeats, and whoever runs out of ideas before their turn time is up loses. Free on Riftn.',
+    heading: 'Gratitude Pen Pals: Take Turns Being Grateful',
+    ...arcadeGameLd('/og/arcade-gratitude.jpg'),
+    bodyHtml: `<p>Invite a friend by their username, or post an open invite anyone can take. You write one thing you are grateful for, they answer with theirs, and it goes back and forth. Pick 1, 2, 3, 5 or 7 days per turn, and get a notification when it is your turn.</p>
+<p>No repeats: every new line is checked against everything already said in the game, so the same blessing in other words is turned away and you get to try again. Whoever runs out of ideas before their turn time is up hands the win to the other player. Only the two players can read the game.</p>
+<p><a href="${APP_URL}/arcade/gratitude">Start a game</a> or <a href="${APP_URL}/arcade">see the whole arcade</a>.</p>`,
   },
   'arcade/street-slayer': {
     title: 'Street Slayer | Riftn Arcade',
