@@ -9808,7 +9808,10 @@
     "visualizerColour": "Kleur van de visualisatie",
     "lyrics": "Songtekst",
     "lyricsLoading": "Songtekst zoeken…",
-    "lyricsNone": "Geen songtekst gevonden"
+    "lyricsNone": "Geen songtekst gevonden",
+    "shuffle": "Shuffle",
+    "crossfade": "Crossfade",
+    "playAll": "Alles afspelen"
   },
   "converter": {
     "seoTitle": "Converter: importeer een video naar Riftn",

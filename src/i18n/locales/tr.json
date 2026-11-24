@@ -9619,7 +9619,10 @@
     "visualizerColour": "Görselleştirici rengi",
     "lyrics": "Şarkı sözleri",
     "lyricsLoading": "Sözler aranıyor…",
-    "lyricsNone": "Söz bulunamadı"
+    "lyricsNone": "Söz bulunamadı",
+    "shuffle": "Karıştır",
+    "crossfade": "Geçiş efekti",
+    "playAll": "Tümünü çal"
   },
   "converter": {
     "seoTitle": "Dönüştürücü | Riftn'a video aktarın",

@@ -18,7 +18,7 @@
  */
 
 import { useTranslation } from 'react-i18next';
-import { AudioLines, Loader2 } from "lucide-react";
+import { AudioLines, Loader2, Shuffle, SkipBack, SkipForward } from "lucide-react";
 import Pause from "@/components/ui/cut-icons/pause";
 import Play from "@/components/ui/cut-icons/play";
 import X from "@/components/ui/cut-icons/close";
@@ -27,9 +27,13 @@ import { cn } from '@/lib/utils';
 import { StaticWaveform } from '@/components/app/audio/StaticWaveform';
 import { useStagePlayback } from '@/lib/stage-playback';
 import {
+  CROSSFADE_STEPS,
   seekAudioPost,
+  setAudioCrossfade,
+  skipAudioQueue,
   stopAudioPost,
   toggleAudioPost,
+  toggleAudioQueueShuffle,
   useAudioPostPlayback,
 } from '@/lib/audio-post-playback';
 
@@ -42,7 +46,7 @@ const formatTime = (seconds: number) => {
 
 export function AudioPostMiniPlayer() {
   const { t } = useTranslation();
-  const { tokenId, track, isPlaying, isLoading, progress, currentTime, duration } =
+  const { tokenId, track, isPlaying, isLoading, progress, currentTime, duration, queueLength, queuePos, shuffle, crossfade } =
     useAudioPostPlayback();
   const stage = useStagePlayback();
 
@@ -119,6 +123,30 @@ export function AudioPostMiniPlayer() {
             onSeek={seekAudioPost}
           />
         </div>
+
+        {queueLength > 1 && (
+          <div className="mt-2 flex items-center gap-1 text-white" data-audio-queue-controls>
+            <button type="button" onClick={() => skipAudioQueue(-1)} aria-label={t('common.previous', { defaultValue: 'Previous' })}
+              className="grid size-9 place-items-center rounded-xl hover:bg-white/10">
+              <SkipBack className="size-4" fill="currentColor" />
+            </button>
+            <button type="button" onClick={() => skipAudioQueue(1)} disabled={queuePos + 1 >= queueLength} aria-label={t('common.next', { defaultValue: 'Next' })}
+              className="grid size-9 place-items-center rounded-xl hover:bg-white/10 disabled:opacity-40">
+              <SkipForward className="size-4" fill="currentColor" />
+            </button>
+            <button type="button" onClick={toggleAudioQueueShuffle} aria-pressed={shuffle} aria-label={t('audioPost.shuffle', { defaultValue: 'Shuffle' })}
+              className={cn('grid size-9 place-items-center rounded-xl hover:bg-white/10', shuffle ? 'text-white bg-white/15' : 'text-white/50')}>
+              <Shuffle className="size-4" />
+            </button>
+            <span className="ml-1 text-[11px] text-white/50 tabular-nums">{queuePos + 1}/{queueLength}</span>
+            <button type="button"
+              onClick={() => setAudioCrossfade(CROSSFADE_STEPS[(CROSSFADE_STEPS.indexOf(crossfade as typeof CROSSFADE_STEPS[number]) + 1) % CROSSFADE_STEPS.length])}
+              aria-label={t('audioPost.crossfade', { defaultValue: 'Crossfade' })}
+              className={cn('ml-auto h-8 rounded-xl px-2.5 text-[11px] font-semibold hover:bg-white/10', crossfade ? 'bg-white/15 text-white' : 'text-white/50')}>
+              {t('audioPost.crossfade', { defaultValue: 'Crossfade' })} {crossfade ? `${crossfade}s` : t('assistant.off', { defaultValue: 'Off' })}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
