@@ -800,10 +800,9 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
         'relative',
         overlay
           ? 'flex min-h-0 flex-1 flex-col justify-end'
-          // mt-3 and the 2xl radius match the post page's bento rhythm: without
-          // the margin this card butts straight onto the post above it and the
-          // two glass surfaces read as one slab with a seam through them.
-          : 'mt-3 rounded-2xl border border-white/[0.12] bg-white/[0.03] p-3'
+          // Flat inside the post's own bento: a hairline under the caption
+          // instead of a second card, which read as a box inside a box.
+          : 'mt-3 border-t border-white/[0.08] pt-3'
       )}
     >
       {/* Header — the overlay has none. The host already has the room's
