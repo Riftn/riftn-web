@@ -135,7 +135,7 @@ export default function CallStageGallery() {
         audio: index !== 2, video: video && index % 2 === 0, speaking: index === 1,
       })) : [],
       attachGroupVideo: (uid: number) => paint(['linear-gradient(160deg, #3b2f63, #1f4a5c)', 'linear-gradient(200deg, #5c3b2f, #1f2a5c)', 'linear-gradient(120deg, #2f5c45, #3b1f5c)'][uid % 3]),
-      joinGroupCall: async () => {},
+      startGroupCall: async () => {}, joinGroupCall: async () => {},
       // ?camfull=1: every camera slot taken, yours off.
       groupCamerasFull: params.get('camfull') === '1',
       captionRoom: subs && live ? room : null,

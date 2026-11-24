@@ -3,10 +3,13 @@
  * ===========
  * A group call is the group's own Agora room, `group-call-<group id>`. Any
  * active member can talk in it (agora-token checks membership), so a call
- * started by one member is the call the rest join from the "Join call" pill.
- * Nobody is rung and no notification goes out: joining is up to each member,
- * the same as the Public Chat room. (Older app builds still ring; the
- * incoming screen stays so those rings can be answered.)
+ * started by one member is the call the rest join: by answering the ring, or
+ * from the "Join call" pill while it is going. Riftn's main chat (Public
+ * Chat) is the exception: nobody is rung there, people join from the pill.
+ *
+ * Ringing is the 1:1 machinery fanned out: one ringing `call_sessions` row per
+ * member, tagged with the group, so the realtime ping, the push and the
+ * incoming screen all work as they do for a direct call.
  *
  * Who is in the room rides a realtime presence channel. It drives the join
  * pill, the room limits and puts names on the tiles in the call.
@@ -24,6 +27,8 @@ export const PUBLIC_CHAT_CALL_ID = '03826b47-f2ff-4707-b76c-818791a9b632';
 
 /** Most people in one call room. The next one sees "Call full". */
 export const GROUP_CALL_MAX_PEOPLE = 128;
+/** Members one start rings: everyone the room could hold besides the caller. */
+export const GROUP_CALL_MAX_RING = GROUP_CALL_MAX_PEOPLE - 1;
 /** Most cameras on at once in one call. Past it you join, or stay, with yours off. */
 export const GROUP_CALL_MAX_CAMERAS = 17;
 
