@@ -9877,7 +9877,13 @@
     "startGroupVoice": "Start a group voice call",
     "startGroupVideo": "Start a group video call",
     "subtitles": "Subtitles",
-    "you": "You"
+    "you": "You",
+    "callFull": "This call is full",
+    "callFullHint": "It already has the most people a call can take. You can join once someone leaves.",
+    "camerasFull": "Cameras full",
+    "camerasFullJoin": "You're in with your camera off. You can turn it on when someone turns theirs off.",
+    "camerasFullHint": "You can turn yours on when someone turns theirs off.",
+    "full": "Full"
   },
   "badgeAscension": {
     "reached": "You reached {{tier}}",
