@@ -1498,10 +1498,25 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
     openBrainrotFeed(video.id, videoItemToShort(video));
   }, [pauseVideo, instanceId, video, profileFeed]);
 
+  // The space the player took inline, held open while it is full screen so
+  // the page under it keeps its height and comes back to the same spot.
+  const [inlineBox, setInlineBox] = useState<{ width: number; height: number } | null>(null);
+  const switchFullscreen = useCallback(() => {
+    const frame = containerRef.current;
+    if (frame && !isFullscreen) {
+      const box = frame.getBoundingClientRect();
+      setInlineBox({ width: box.width, height: box.height });
+    }
+    toggleFullscreen();
+    // Focus leaves the Full screen button for the player itself: Space then
+    // plays and pauses instead of pressing the button again, which threw the
+    // viewer straight back out of full screen.
+    if (!isPhone) frame?.focus({ preventScroll: true });
+  }, [isFullscreen, isPhone, toggleFullscreen]);
   const handleFullscreen = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    toggleFullscreen();
-  }, [toggleFullscreen]);
+    switchFullscreen();
+  }, [switchFullscreen]);
 
   const handlePictureInPicture = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -1548,11 +1563,16 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
   // Desktop/tablet feeds: the frame hugs the clip (no black side panels) and
   // the transport bar only shows on hover or while paused, over the picture.
   const desktopFeedHug = !isPhone && !isImmersive && !isFullscreen && !video.isAudio;
-  const splitControls = bareControls && !isContentGated && !feedPreview && !desktopFeedHug;
+  // Full screen on a desktop is the same player: the picture takes the whole
+  // screen and the transport sits over it, fading out with the pointer while
+  // it plays. A black strip under the picture cut 47px off every video.
+  // Touch screens keep the strip: their full screen has its own gestures.
+  const overlayControls = desktopFeedHug || (!isPhone && !isTouchPrimary() && isFullscreen && !video.isAudio);
+  const splitControls = bareControls && !isContentGated && !feedPreview && !overlayControls;
   // Desktop feeds keep mute/unmute in the bottom row beside play time, CC and
   // speed instead of alone in the top corner. Phones never reach this: their
   // feed previews keep the corner mute.
-  const volumeInRow = splitControls || (bareControls && !isContentGated && desktopFeedHug);
+  const volumeInRow = splitControls || (bareControls && !isContentGated && overlayControls);
   const showCenterPlay = !feedPreview && !splitControls && !isLoading && !!video.videoUrl && !video.isAudio && !isVideoNotReady && !(video.isLivePost && video.isLiveNow);
   const controlsVisible = splitControls || !isPlaying || showControls || subsMenuOpen || volumeOpen;
   useEffect(() => {
@@ -1777,8 +1797,9 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
     isImmersive ? THIN_MIN_RATIO : undefined,
     video.id,
     video.storedAspect,
+    video.storedAspectShown,
   );
-  const resolvedVideoAspect = intrinsicAspect ?? getMeasuredMediaAspect(thumbnail) ?? video.storedAspect ?? null;
+  const resolvedVideoAspect = intrinsicAspect ?? (video.storedAspectShown ? video.storedAspect : null) ?? getMeasuredMediaAspect(thumbnail) ?? video.storedAspect ?? null;
   const mediaAspect = useFeedFrameAspect(`video:${video.id}`, video.isAudio ? DEFAULT_ASPECT : measuredAspect, containerRef, !isImmersive && !isFullscreen,
     !video.isAudio && resolvedVideoAspect != null ? measuredAspect : undefined);
   const headerAboveMedia = firstFeedPost && !video.isAudio && !video.isLivePost && mediaAspect >= 1;
@@ -1796,12 +1817,31 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
   const wideVideoMode = useWideVideoMode();
   const inMasonryColumn = useInMasonryColumn();
   const wideViewport = isDesktopViewport && !isPhone && !inMasonryColumn;
-  const wideEligible = wideViewport && !isFullscreen && !video.isAudio && !stage && !hideActions
-    && !(video.isLivePost && video.isLiveNow) && (desktopFeedHug || (isImmersive && !showComments));
+  // Worked out as if the player were inline, so going full screen does not
+  // change which layout the card is in underneath.
+  const wideSlot = wideViewport && !video.isAudio && !stage && !hideActions
+    && !(video.isLivePost && video.isLiveNow) && ((!isPhone && !isImmersive) || (isImmersive && !showComments));
+  const wideEligible = wideSlot && !isFullscreen;
   const wideAmbient = wideEligible && wideVideoMode === 'ambient';
-  const wideRails = wideEligible && wideVideoMode === 'rails' && mediaAspect < WIDE_RAILS_MAX_ASPECT;
+  // The row and its panel stay mounted while the player is full screen: the
+  // panel keeps a half-written comment and the page keeps its height, so
+  // leaving full screen lands on the same spot instead of a rebuilt card.
+  const wideRailsRow = wideSlot && wideVideoMode === 'rails' && mediaAspect < WIDE_RAILS_MAX_ASPECT;
+  const wideRails = wideRailsRow && !isFullscreen;
   const wideCentered = wideAmbient || wideRails;
   const wideMaxHeight = desktopFeedHug ? DESKTOP_FEED_MAX_HEIGHT : IMMERSIVE_MAX_MEDIA_HEIGHT;
+
+  // Desktop only: a custom cover whose shape is not the clip's (a wide still on
+  // a tall clip). Read off the poster as it loads, so nothing extra is fetched.
+  const [posterShape, setPosterShape] = useState<{ url: string; ratio: number } | null>(null);
+  const notePosterShape = useCallback((event: React.SyntheticEvent<HTMLImageElement>) => {
+    const { naturalWidth: w, naturalHeight: h } = event.currentTarget;
+    if (w && h && thumbnail) setPosterShape((previous) => (previous?.url === thumbnail ? previous : { url: thumbnail, ratio: w / h }));
+  }, [thumbnail]);
+  // Only where the frame is exactly the clip's shape (Glass rails), so the
+  // filled cover never shows around the playing picture.
+  const posterOffShape = wideRails && resolvedVideoAspect != null && Math.abs(resolvedVideoAspect / mediaAspect - 1) < 0.02
+    && posterShape?.url === thumbnail && Math.abs(posterShape.ratio / mediaAspect - 1) > 0.08;
 
   // Before the handoff assigns `src`, so a refreshed signature resumes in place.
   useResumeAcrossRefresh(videoRef, mediaAttached && !isVideoNotReady ? playableVideoUrl : undefined);
@@ -1816,7 +1856,9 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
     hlsSrc: ladderUrl,
     startLow: ladderStartsLow,
     aspect: video.storedAspect,
-    poster: thumbnail || undefined,
+    // A cover of another shape stays off the element, which would letterbox
+    // it: the picture behind the slot shows it filling the frame instead.
+    poster: posterOffShape ? undefined : thumbnail || undefined,
     muted: isMuted,
     loop: !!(video.isAd || isLooping),
     preload: videoPreload,
@@ -2338,15 +2380,33 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
   // Keyboard shortcuts
   useEffect(() => {
     // A feed preview has no transport: its only control is mute.
-    if (!isFocused || !isPlaying || feedPreview) return;
-    
+    // Full screen is the whole screen, so its keys work wherever focus sits.
+    if ((!isFocused && !isFullscreen) || feedPreview) return;
+    // Inline and paused, only Space (resume) and F answer: the arrows go back
+    // to scrolling the page.
+    const transportKeys = isPlaying || isFullscreen;
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      const tag = (e.target as HTMLElement)?.tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || (e.target as HTMLElement)?.isContentEditable) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const target = e.target as HTMLElement | null;
+      const tag = target?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target?.isContentEditable) return;
+      // A focused button or slider keeps its own keys.
+      const onControl = !!target?.closest?.('button, a, [role="button"], [role="slider"], [role="menu"], [role="dialog"]');
+      if (onControl && (e.key === ' ' || e.key.startsWith('Arrow'))) return;
+      if (!transportKeys && e.key !== ' ' && e.key !== 'k' && e.key !== 'f') return;
+      // A key in full screen brings the transport up for a moment, as a pointer move does.
+      if (isFullscreen && [' ', 'k', 'm', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) showControlsBriefly();
       switch (e.key) {
         case ' ':
+        case 'k':
           e.preventDefault();
           handlePlayClick();
+          break;
+        case 'f':
+          if (isPhone || video.isAudio) return;
+          e.preventDefault();
+          switchFullscreen();
           break;
         case 'ArrowLeft':
           e.preventDefault();
@@ -2389,7 +2449,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
     
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isFocused, isPlaying, feedPreview, handlePlayClick, seekBy, adjustVolume]);
+  }, [isFocused, isFullscreen, isPlaying, feedPreview, isPhone, video.isAudio, handlePlayClick, switchFullscreen, showControlsBriefly, seekBy, adjustVolume]);
   // Navigate to single post page when clicking non-interactive areas (header only)
   // Pre-cache video data for instant display on the single post page
   const handleCardClick = useCallback((e: React.MouseEvent) => {
@@ -2544,7 +2604,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
             theme rules select the frame as a direct child of the card. */}
       <WideRailsRow
         enabled={wideViewport}
-        rails={wideRails}
+        rails={wideRailsRow}
         panel={(
           <WideVideoPanel
             video={video}
@@ -2584,7 +2644,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
         data-video-split-controls={splitControls || undefined}
         data-video-fullscreen={isFullscreen || undefined}
         data-media-full
-        className={`bg-black cursor-pointer group/thumb outline-none focus:outline-none focus-visible:outline-none overflow-hidden ${mediaRadius} ${isFullscreen ? 'fixed inset-0 z-[9999] w-screen h-[100dvh] flex items-center justify-center' : `relative ${isImmersive ? 'mx-auto' : ''} ${isImmersive && showComments ? 'aspect-[2/1]' : ''}`}`}
+        className={`bg-black cursor-pointer group/thumb outline-none focus:outline-none focus-visible:outline-none overflow-hidden ${mediaRadius} ${isFullscreen ? `fixed inset-0 z-[9999] w-screen h-[100dvh] flex items-center justify-center ${overlayControls && !controlsVisible ? 'cursor-none' : ''}` : `relative ${isImmersive ? 'mx-auto' : ''} ${isImmersive && showComments ? 'aspect-[2/1]' : ''}`}`}
         /* Inline footage fills the width and crops within its height budget.
            The transport stays below it; fullscreen retains the full picture. */
         style={{ ...(
@@ -2661,7 +2721,11 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
           controlsTimerRef.current = setTimeout(() => setShowControls(false), CONTROLS_HIDE_MS);
         }}
         onMouseMove={() => {
-          if (!isHoveringRef.current) return;
+          // Full screen opened from the keyboard never saw the pointer come in.
+          if (!isHoveringRef.current) {
+            if (!isFullscreen) return;
+            isHoveringRef.current = true;
+          }
           setShowControls(true);
           if (controlsTimerRef.current) clearTimeout(controlsTimerRef.current);
           controlsTimerRef.current = setTimeout(() => setShowControls(false), CONTROLS_HIDE_MS);
@@ -2934,7 +2998,12 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
                     src={thumbnail} srcSet={cdnImageSrcSet(thumbnail, [320, 480, 640, 960, 1280])} sizes="(min-width: 1024px) 600px, 100vw" decoding="async"
                     alt=""
                     aria-hidden="true"
-                    className={`absolute inset-0 w-full h-full ${isFullscreen ? 'object-contain' : isPhone ? 'object-cover' : wideCentered ? 'object-contain' : 'object-contain object-left'}`}
+                    onLoad={notePosterShape}
+                    // Full screen shows the clip alone once this card holds the
+                    // player: a cover of another shape used to spill out behind
+                    // a tall clip, filling the screen on both sides of it. A cover that is not the clip's shape
+                    // fills the inline frame instead of sitting in it with bars.
+                    className={`absolute inset-0 w-full h-full ${isFullscreen ? (ownsVideoElement ? 'object-contain opacity-0' : 'object-contain') : isPhone || posterOffShape ? 'object-cover' : wideCentered ? 'object-contain' : 'object-contain object-left'}`}
                     loading={aboveFold ? 'eager' : 'lazy'}
                     fetchPriority={aboveFold ? 'high' : 'auto'}
                   />
@@ -3174,7 +3243,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
             from the centered Play button; seeking enables once the length is
             known. Audio posts and live streams own their transport. */}
         {!feedPreview && !video.isAudio && !(video.isLivePost && video.isLiveNow) && (
-          <div data-video-controls data-video-control-strip={splitControls || undefined} data-no-swipe data-controls-hidden={!controlsVisible ? "true" : undefined} data-video-scrubber={bareControls ? 'line' : undefined} className={cn("absolute bottom-0 left-0 right-0 z-10", bareControls ? "pb-1.5" : "px-2 pb-3 pt-6 bg-gradient-to-t from-black/80 to-transparent", bareControls && desktopFeedHug && "pt-8 bg-gradient-to-t from-black/60 to-transparent")}>
+          <div data-video-controls data-video-control-strip={splitControls || undefined} data-no-swipe data-controls-hidden={!controlsVisible ? "true" : undefined} data-video-scrubber={bareControls ? 'line' : undefined} className={cn("absolute bottom-0 left-0 right-0 z-10", bareControls ? "pb-1.5" : "px-2 pb-3 pt-6 bg-gradient-to-t from-black/80 to-transparent", bareControls && overlayControls && "pt-8 bg-gradient-to-t from-black/60 to-transparent")}>
 
             {bareControls && <div data-video-scrub-surface className="absolute bottom-0 left-0 right-0 h-16 touch-pan-y" />}
 
@@ -3375,6 +3444,11 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
         )}
         
       </div>
+      {/* Desktop: the player is fixed over the page while full screen, so this
+          holds its place in the card. */}
+      {isFullscreen && wideViewport && inlineBox && (
+        <div aria-hidden="true" data-video-inline-hold style={{ width: inlineBox.width, height: inlineBox.height, flex: 'none' }} />
+      )}
       </WideRailsRow>
 
       {/* Compact avatar row for carousel mode (hideActions) - avatar + AI + dots below thumbnail */}
