@@ -28,6 +28,7 @@ export function useBattleTally(wallet: string | null | undefined, state: CoStrea
     ? {
         id: room.id,
         key: `${room.id}:${room.battle_round}`,
+        number: room.battle_round,
         endsAt: Date.parse(room.battle_ends_at),
         hostStream: sides.host.streamId,
         guestStream: sides.guest.streamId,
@@ -61,7 +62,7 @@ export function useBattleTally(wallet: string | null | undefined, state: CoStrea
     const flush = () => {
       if (!dirty) return;
       dirty = false;
-      void reportBattleScores(me, round.id, tally.host, tally.guest).catch((error) => {
+      void reportBattleScores(me, round.id, tally.host, tally.guest, round.number).catch((error) => {
         dirty = true;
         logger.warn('Battle score write failed', error);
       });

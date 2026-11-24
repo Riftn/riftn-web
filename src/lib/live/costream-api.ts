@@ -278,10 +278,17 @@ export async function startBattle(host: string, roomId: string, seconds: number)
 }
 
 /** Host: the running tally for this round. */
-export async function reportBattleScores(host: string, roomId: string, hostScore: number, guestScore: number): Promise<void> {
-  const { error } = await table(writer(host), 'live_costreams')
+/**
+ * Pinned to the round the totals were counted for: the last write of a round
+ * can land after the host has started the next one, and must not carry the
+ * old score into it.
+ */
+export async function reportBattleScores(host: string, roomId: string, hostScore: number, guestScore: number, round?: number): Promise<void> {
+  let query = table(writer(host), 'live_costreams')
     .update({ battle_host_score: Math.max(0, hostScore), battle_guest_score: Math.max(0, guestScore) })
     .eq('id', roomId);
+  if (typeof round === 'number') query = query.eq('battle_round', round);
+  const { error } = await query;
   if (error && !/battle_(host|guest)_score/.test(error.message || '')) fail(error, 'Could not save the battle score');
 }
 
