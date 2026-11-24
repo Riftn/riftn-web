@@ -35,6 +35,7 @@ export type NotificationType =
   | 'fraction_gift'
   | 'story_like'
   | 'story_mention'
+  | 'story_comment'
   | 'video_milestone'
   | 'livestream_start'
   | 'signal_flare'

@@ -2743,7 +2743,9 @@
       "sentNotification": "{{name}} heeft je een melding gestuurd",
       "fractionGift": "{{name}} heeft je fracties gestuurd",
       "storyLiked": "{{name}} vindt je moment leuk",
-      "storyMention": "{{name}} noemde je in hun moment"
+      "storyMention": "{{name}} noemde je in hun moment",
+      "storyComment": "{{name}} reageerde op je moment",
+      "storyCommentReply": "{{name}} reageerde op je opmerking bij een moment"
     }
   },
   "leaderboard": {

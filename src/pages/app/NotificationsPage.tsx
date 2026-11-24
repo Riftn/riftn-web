@@ -302,7 +302,7 @@ const filterTypeMap: Record<NotificationTypeFilter, string[] | null> = {
   all: null,
   likes: ['generation_like', 'generation_comment_like', 'like', 'comment_like', 'story_like', 'feature_request_like', 'feature_request_comment_like', 'governance_vote', 'governance_comment_like'],
   follows: ['following', 'follow_request', 'follow_request_accepted', 'followRequest', 'follow-request'],
-  comments: ['generation_comment', 'generation_reply', 'comment', 'comment_reply', 'mention', 'story_mention', 'community_mention', 'feature_request_comment', 'feature_request_reply', 'feature_request_mention', 'feature_request_activity', 'governance_comment', 'governance_reply', 'work_application_reply'],
+  comments: ['generation_comment', 'generation_reply', 'comment', 'comment_reply', 'mention', 'story_mention', 'story_comment', 'community_mention', 'feature_request_comment', 'feature_request_reply', 'feature_request_mention', 'feature_request_activity', 'governance_comment', 'governance_reply', 'work_application_reply'],
   reposts: ['repost', 'quote', 'remix'],
   features: ['feature_request_like', 'feature_request_comment', 'feature_request_reply', 'feature_request_mention', 'feature_request_activity', 'feature_request_new', 'feature_request_comment_like', 'feature_request_status'],
   communities: ['community_chat', 'community_mention', 'community_here', 'community_join'],
@@ -321,7 +321,7 @@ const filterTypeMap: Record<NotificationTypeFilter, string[] | null> = {
  * quietly undo the narrowing for any tab that mixes the two sources.
  */
 const API_BACKED_TYPES = new Set([
-  'like', 'comment_like', 'comment', 'comment_reply', 'mention', 'story_like', 'story_mention',
+  'like', 'comment_like', 'comment', 'comment_reply', 'mention', 'story_like', 'story_mention', 'story_comment',
   'following', 'follow_request', 'follow_request_accepted',
   'repost', 'quote',
   'tip', 'bounty_available', 'bounty_claimed',
@@ -402,6 +402,7 @@ function getNotificationIcon(type: string, reaction?: PostReaction) {
     case 'comment_reply':
     case 'mention':
     case 'story_mention':
+    case 'story_comment':
     case 'feature_request_comment':
     case 'feature_request_reply':
     case 'feature_request_mention':
@@ -1062,7 +1063,7 @@ function getNavigationLink(notification: DeHubNotification): string | null {
   }
 
   // A moment opens on its own page, which plays it.
-  if ((notification.type as string) === 'story_like' || (notification.type as string) === 'story_mention') {
+  if (['story_like', 'story_mention', 'story_comment'].includes(notification.type as string)) {
     const storyId = notification.metadata?.storyId;
     return typeof storyId === 'string' && /^[a-f0-9]{24}$/i.test(storyId) ? `/moment/${storyId}` : null;
   }
@@ -1316,7 +1317,7 @@ export const NotificationItem = memo(function NotificationItem({
   // actor — even one whose picture fails to load — keeps its own avatar.
   const isPlatformNotice = !notification.actorAddress && !notification.actorUsername && !avatarUrl;
     
-  const isMomentRow = (notification.type as string) === 'story_like' || (notification.type as string) === 'story_mention';
+  const isMomentRow = ['story_like', 'story_mention', 'story_comment'].includes(notification.type as string);
   const momentLink = isMomentRow ? getNavigationLink(notification) : null;
   const momentPosterRaw = isMomentRow ? notification.metadata?.storyPoster : undefined;
   const momentPoster = typeof momentPosterRaw === 'string' && momentPosterRaw.startsWith('https://') ? momentPosterRaw : null;

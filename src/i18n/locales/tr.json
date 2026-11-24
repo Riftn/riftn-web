@@ -2554,7 +2554,9 @@
       "sentNotification": "{{name}} size bir bildirim gönderdi",
       "fractionGift": "{{name}} sana parça gönderdi",
       "storyLiked": "{{name}} Anını beğendi",
-      "storyMention": "{{name}} Anında senden bahsetti"
+      "storyMention": "{{name}} Anında senden bahsetti",
+      "storyComment": "{{name}} Anına yorum yaptı",
+      "storyCommentReply": "{{name}} bir Andaki yorumuna yanıt verdi"
     }
   },
   "leaderboard": {
