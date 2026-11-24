@@ -9895,6 +9895,10 @@
     "callFull": "Esta llamada está llena",
     "callFullHint": "Ya tiene el máximo de personas posible. Podrás unirte cuando alguien salga.",
     "camerasFull": "Cámaras completas",
+    "townHall": "Asamblea",
+    "gridView": "Cuadrícula",
+    "unpin": "Desfijar",
+    "townHallTalking": "{{n}} hablando",
     "camerasFullJoin": "Estás dentro con la cámara apagada. Podrás encenderla cuando alguien apague la suya.",
     "camerasFullHint": "Podrás encender la tuya cuando alguien apague la suya.",
     "full": "Llena"

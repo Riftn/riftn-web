@@ -9899,6 +9899,10 @@
     "callFull": "Cet appel est complet",
     "callFullHint": "Il a déjà le maximum de personnes possible. Vous pourrez rejoindre quand quelqu'un partira.",
     "camerasFull": "Caméras au complet",
+    "townHall": "Assemblée",
+    "gridView": "Grille",
+    "unpin": "Désépingler",
+    "townHallTalking": "{{n}} parlent",
     "camerasFullJoin": "Vous êtes dans l'appel, caméra coupée. Vous pourrez l'activer quand quelqu'un coupera la sienne.",
     "camerasFullHint": "Vous pourrez activer la vôtre quand quelqu'un coupera la sienne.",
     "full": "Complet"
