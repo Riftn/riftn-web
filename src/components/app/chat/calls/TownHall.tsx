@@ -4,13 +4,16 @@ import { Pin, User } from 'lucide-react';
 import MicOff from '@/components/ui/cut-icons/mic-off';
 import type { GroupParticipant } from '@/hooks/use-call';
 import { createStageDirector, TALK_LEVEL, type TownHallKey, type TownHallState } from '@/lib/town-hall';
+import type { CallModAction } from '@/lib/api/dehub/group-call-moderation';
 import { peerInitial, usePeerIdentity } from './CallChrome';
+import { CallModMenu } from './CallModMenu';
 
 /**
  * Town hall: whoever is talking fills the stage, everyone else sits in the
  * strip underneath. When several people talk at once the loudest has the
  * stage. A new speaker fades in. Tap someone in the strip to pin them to the
- * stage; tap Unpin to let go.
+ * stage; tap Unpin to let go. The chat's moderators get a menu on whoever is
+ * on stage to mute or remove them.
  */
 export interface TownHallProps {
   isVideo: boolean;
@@ -19,11 +22,13 @@ export interface TownHallProps {
   attachLocalVideo: (node: HTMLDivElement | null) => void;
   attachGroupVideo: (uid: number) => (node: HTMLDivElement | null) => void;
   readGroupLevels: () => Map<number, number>;
+  /** Set for the chat's moderators: mute, unmute or remove someone. */
+  onModerate?: (wallet: string, action: CallModAction) => void;
 }
 
 const TICK_MS = 90;
 
-export function TownHall({ isVideo, self, participants, attachLocalVideo, attachGroupVideo, readGroupLevels }: TownHallProps) {
+export function TownHall({ isVideo, self, participants, attachLocalVideo, attachGroupVideo, readGroupLevels, onModerate }: TownHallProps) {
   const { t } = useTranslation();
   const [pinned, setPinned] = React.useState<TownHallKey | null>(null);
   const [state, setState] = React.useState<TownHallState>({ stage: null, talkers: [], cut: 0 });
@@ -82,6 +87,9 @@ export function TownHall({ isVideo, self, participants, attachLocalVideo, attach
           muted={stage === 0 ? self.muted : !onStage?.audio}
           talking={talking.has(stage)}
         />
+        {onModerate && onStage?.wallet ? (
+          <StageModMenu participant={onStage} onModerate={onModerate} />
+        ) : null}
         {pinned != null ? (
           <button type="button" className="th-pin" onClick={() => setPinned(null)} aria-label={t('calls.unpin', 'Unpin')}>
             <Pin className="h-3.5 w-3.5" />
@@ -140,6 +148,18 @@ function StageShot({ name, avatarUrl, attach, mirrored }: { name: string; avatar
 function RemoteStageShot({ participant, attach }: { participant: GroupParticipant; attach: (node: HTMLDivElement | null) => void }) {
   const peer = usePeerIdentity(participant.wallet ?? '');
   return <StageShot name={peer.name} avatarUrl={peer.avatarUrl} attach={participant.video ? attach : null} />;
+}
+
+function StageModMenu({ participant, onModerate }: { participant: GroupParticipant; onModerate: (wallet: string, action: CallModAction) => void }) {
+  const peer = usePeerIdentity(participant.wallet ?? '');
+  return (
+    <CallModMenu
+      className="th-mod"
+      name={peer.name}
+      modMuted={!!participant.modMuted}
+      onModerate={action => participant.wallet && onModerate(participant.wallet, action)}
+    />
+  );
 }
 
 function StageName({ name, participant, muted, talking }: { name: string | null; participant: GroupParticipant | null; muted: boolean; talking: boolean }) {
