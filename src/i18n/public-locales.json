@@ -1,5 +1,5 @@
 {
-  "version": "3e9a1557f70612c9",
+  "version": "8a4f3463a1a02801",
   "routes": {
     "/": [
       "ar",
@@ -975,6 +975,13 @@
       "tr"
     ],
     "/guides/get-ready-players-final-snapshot-for-last-chad-standing-airdrop": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/guides/github-trending-open-source-november-2026": [
       "ar",
       "es",
       "fr",

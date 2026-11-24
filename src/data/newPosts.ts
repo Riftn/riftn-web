@@ -5,6 +5,7 @@ import { decentralizationSpectrumPost } from './posts/decentralizationSpectrumPo
 import { topAlternativeSocialAppsPost } from './posts/topAlternativeSocialAppsPost';
 import { howToStreamOnRiftnPost } from './posts/howToStreamOnRiftnPost';
 import { creatorPayoutThresholdsPost } from './posts/creatorPayoutThresholdsPost';
+import { githubTrendingNovember2026Post } from './posts/githubTrendingNovember2026Post';
 import { youtubeFeaturesUsersWantPost } from './posts/youtubeFeaturesUsersWantPost';
 import { binancePioneerBurnAppealPost } from './posts/binancePioneerBurnAppealPost';
 import { ownEverythingTaglinePost } from './posts/ownEverythingTaglinePost';
@@ -1423,6 +1424,7 @@ const bnbPoolUpdatePost: BlogPostType = {
 };
 
 export const newPosts: BlogPostType[] = [
+  githubTrendingNovember2026Post,
   creatorPayoutThresholdsPost,
   howToStreamOnRiftnPost,
   youtubeFeaturesUsersWantPost,
