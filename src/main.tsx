@@ -143,8 +143,9 @@ if (dhHost !== "riftn.com" && dhHost !== "localhost" && dhHost !== "127.0.0.1") 
 // rejection here too: an audio post's listen count failing reloaded the page
 // on the first tap of play.
 window.addEventListener('vite:preloadError', (event) => {
-  if (!isChunkLoadError((event as Event & { payload?: unknown }).payload)) return;
-  recoverFromChunkError();
+  const payload = (event as Event & { payload?: unknown }).payload;
+  if (!isChunkLoadError(payload)) return;
+  recoverFromChunkError(payload);
 });
 
 // Two things are awaited before the first render, both so that the HTML shell

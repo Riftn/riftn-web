@@ -97,6 +97,7 @@ import { reportCommunityChatMessage } from '@/lib/community-chat-notify';
 import { previewLinks } from '@/lib/dehub-links';
 
 import { formatCount } from '@/lib/format-count';
+import { stripBold } from '@/lib/bold-markup';
 /**
  * The other person's name with their badge sitting on its baseline, the same
  * BadgedName system the feed uses. The badge rides straight after the name
@@ -173,7 +174,7 @@ export function ConversationItem({
     (otherUser?.address ? `${otherUser.address.slice(0, 6)}...${otherUser.address.slice(-4)}` : 'User');
   const lastMessagePreview = conversation.lastMessage?.undecryptable
     ? `🔒 ${t('messages.cannotDecrypt')}`
-    : (conversation.lastMessage?.content && previewLinks(conversation.lastMessage.content)) || _copy("copy.f42e0f66017d", { defaultValue: "No messages yet" });
+    : (conversation.lastMessage?.content && stripBold(previewLinks(conversation.lastMessage.content))) || _copy("copy.f42e0f66017d", { defaultValue: "No messages yet" });
   const lastMessageTime = conversation.lastMessage?.createdAt
     ? (compactTime
       ? formatTimeAgo(conversation.lastMessage.createdAt)

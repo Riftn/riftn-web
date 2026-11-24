@@ -143,6 +143,7 @@ import { BuyAlertCard } from '../chat/BuyAlertCard';
 import { useBuyBotHidden } from '@/hooks/use-buy-bot-hidden';
 import { SendStatus } from '@/components/app/chat/SendStatus';
 import { profilePath } from '@/lib/profile-path';
+import { BoldText, stripBold } from '@/lib/bold-markup';
 
 function ChatAvatar({ src, address, name }: { src?: string | null; address?: string; name: string }) {
   const [failed, setFailed] = useState(false);
@@ -1308,7 +1309,7 @@ export function CommunityChat({ communityId, community, membership, isMember, me
                       >
                         <CornerDownRight className="w-2.5 h-2.5" />
                         <span className="font-medium">{msg.reply_to.sender_name}</span>
-                        <span className="truncate max-w-[200px]">{msg.reply_to.content}</span>
+                        <span className="truncate max-w-[200px]">{stripBold(msg.reply_to.content)}</span>
                       </button>
                     )}
                     <div className="flex items-start gap-2">
@@ -1349,7 +1350,7 @@ export function CommunityChat({ communityId, community, membership, isMember, me
                               <img src={msg.image_url} alt={msg.content || t('communities.chat.photo', { defaultValue: 'Photo' })} className="max-w-[280px] max-h-72 rounded-lg object-cover" loading="lazy" />
                             </a>
                             {!!msg.content && (
-                              <p className="text-sm text-zinc-200 mt-1 whitespace-pre-wrap break-words">{msg.content}</p>
+                              <p className="text-sm text-zinc-200 mt-1 whitespace-pre-wrap break-words"><BoldText text={msg.content} /></p>
                             )}
                           </div>
                         ) : msg.message_type === 'voice' && msg.image_url ? (

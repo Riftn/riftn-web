@@ -44,6 +44,18 @@ export interface DmDestruct {
   /** On-open: replays the sender allowed (0 or 1) and how many were started. */
   replaysAllowed?: number;
   replaysUsed?: number;
+  /**
+   * A view-once or on-open photo/video that was opened and then wiped: no
+   * file and no text left, it stays in the chat for both people as "Opened".
+   */
+  marker?: boolean;
+  /** What the wiped attachment was, for the Opened marker's icon. */
+  kind?: 'image' | 'video';
+}
+
+/** A view-once or on-open photo/video: the kind that is gone once seen. */
+export function isSeenOnce(d: DmDestruct | null | undefined): boolean {
+  return d?.mode === 'view' || d?.mode === 'open';
 }
 
 /** Replays still left on an on-open message, as the server last said. */

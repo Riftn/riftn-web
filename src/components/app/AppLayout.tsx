@@ -83,6 +83,9 @@ const RadioMiniPlayer = React.lazy(() =>
 );
 // Only fetched once a video post is actually being prepared.
 const PostProcessingDock = React.lazy(() => import('@/components/app/PostProcessingDock'));
+// The live you minimised: hls.js and the window only load once one is.
+const LiveMiniPlayer = React.lazy(() => import('@/components/app/live/LiveMiniPlayer'));
+import { useLiveMini } from '@/lib/live-mini';
 import { StageMiniPlayer } from '@/components/app/spaces/StageMiniPlayer';
 import { StageRecordingMiniPlayer } from '@/components/app/stages/StageRecordingMiniPlayer';
 import { useAudioPostPoppedOut } from '@/lib/audio-post-popout';
@@ -261,6 +264,7 @@ function AppLayoutContent({ children }: AppLayoutContentProps) {
   // Gate for the corner player's chunk — see its lazy import above.
   const hasPoppedOutAudio = useAudioPostPoppedOut();
   const spotifyOpen = useSpotifyPlayer().current !== null;
+  const liveMiniOpen = useLiveMini() !== null;
   const brainrotOpened = useBrainrotEverOpened();
   const storiesMounted = useStoriesStore(st => st.mounted);
 
@@ -666,6 +670,11 @@ function AppLayoutContent({ children }: AppLayoutContentProps) {
       {spotifyOpen && (
         <Suspense fallback={null}>
           <SpotifyMiniPlayer />
+        </Suspense>
+      )}
+      {liveMiniOpen && (
+        <Suspense fallback={null}>
+          <LiveMiniPlayer />
         </Suspense>
       )}
       <AudioSpacesModal />

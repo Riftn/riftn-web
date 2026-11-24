@@ -366,6 +366,9 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
         onFileDrop={actions.handleFileDrop}
         scheduledDate={state.scheduledDate}
         onSchedule={actions.setScheduledDate}
+        dripCount={!isQuoting && !comicMode && state.liveMode === null && !computed.hasVideo && !computed.hasAudio ? state.media.filter(m => m.type === 'image').length : 0}
+        dripGap={state.dripGap}
+        onDripChange={actions.setDripGap}
         drafts={state.drafts}
         onSaveDraft={() => {
           // The draft is the copy of record from here on, so the composer is

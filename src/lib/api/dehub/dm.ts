@@ -90,6 +90,11 @@ export interface ReplyPreview {
   mediaUrls: Array<{ url: string; type: string; mimeType: string; name?: string; size?: number; encrypted?: boolean }>;
   voiceDuration: number | null;
   sender: DmSender;
+  /**
+   * The replied-to line was a view-once / on-open photo or video: the quote
+   * shows "Photo · Opened", never the picture.
+   */
+  destruct?: DmDestruct | null;
 }
 
 /**
