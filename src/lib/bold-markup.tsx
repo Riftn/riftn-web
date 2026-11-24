@@ -118,7 +118,7 @@ export function applyBold(parts: readonly ReactNode[]): ReactNode[] {
   if (!mayContainBold(joined)) return [...parts];
   const result = runs(tokenize(parts));
   if (!result.some((r) => r.bold)) return [...parts];
-  return result.flatMap((r, i) =>
+  return result.flatMap<ReactNode>((r, i) =>
     r.bold
       ? [<strong key={`bold-${i}`}>{toNodes(r.tokens).map((n, k) => <Fragment key={k}>{n}</Fragment>)}</strong>]
       : toNodes(r.tokens),
