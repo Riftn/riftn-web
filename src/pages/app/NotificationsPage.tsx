@@ -2742,6 +2742,7 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
                   label: <span className="sr-only">{translateFilterLabel(tab.value)}</span>,
                   icon: <tab.icon className={tab.value === 'reposts' ? 'h-[20px] w-[20px]' : 'h-[18px] w-[18px]'} aria-hidden="true" />,
                   count: count > 0 ? count : undefined,
+                  hint: String(translateFilterLabel(tab.value)),
                 };
               })}
             />

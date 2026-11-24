@@ -11,6 +11,8 @@ import { tokenLabel } from '@/lib/token-label';
  */
 
 import { lazy, Suspense, useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import { getNFTInfo } from '@/lib/api/dehub/feed';
+import { extractReplayUrl } from '@/lib/live-replay';
 import { useFeedPlaybackAllowed, useLivePlaybackAllowed, visualActivity } from '@/lib/visual-activity';
 import { canPictureInPicture, catchUpToLiveEdge, onReturnToTab, togglePictureInPicture, useAutoPictureInPicture } from '@/lib/live-background';
 import { usePictureInPicture } from '@/hooks/use-picture-in-picture';
@@ -213,8 +215,16 @@ interface LiveStreamCardProps {
 /** What a gift of `dhb` costs in a dollar stablecoin, at the DHB sale peg. */
 const giftCostIn = (dhb: number) => Math.round(dhb * DHB_PRELISTING_USD * 1e6) / 1e6;
 
-export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed }: LiveStreamCardProps) {
+export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false, swipeFeed }: LiveStreamCardProps) {
   const { t: _copy } = _useCopy();
+  // A replay is saved a minute or so after the End button. A card loaded in
+  // that gap (the creator's own profile, straight after ending) used to sit on
+  // the cover for good; the late recording now swaps in without a reload.
+  const [lateReplay, setLateReplay] = useState<string | undefined>();
+  const stream = useMemo(
+    () => (lateReplay && !streamProp.replayUrl ? { ...streamProp, replayUrl: lateReplay } : streamProp),
+    [streamProp, lateReplay],
+  );
   const keyboardOpen = useKeyboardOpen(immersive);
   // Live is a dark room in every theme: a light theme runs as its dark twin
   // while the stream is open, chat, sheets and portals included.
@@ -343,6 +353,27 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
   const { broadcastPaused, broadcastEnded, waitingTooLong } = useLivePlaybackFeedback(stream.streamId, isBuffering, liveNow && !streamEnded, stream.liveStatus);
   // The room says it is over: show the ended state now, not on the next refetch.
   useEffect(() => { if (broadcastEnded) setStreamEnded(true); }, [broadcastEnded]);
+  const replayTokenId = stream.tokenId;
+  const waitingForReplay = streamEnded && !stream.replayUrl && !!replayTokenId && !stream.isPPV && !stream.isLocked;
+  useEffect(() => {
+    if (!waitingForReplay) return;
+    let cancelled = false;
+    let tries = 0;
+    let timer: number | undefined;
+    const check = async () => {
+      tries += 1;
+      try {
+        const nft = await getNFTInfo(String(replayTokenId));
+        const url = extractReplayUrl((nft as { stream?: unknown })?.stream);
+        if (cancelled) return;
+        if (url) { setLateReplay(url); return; }
+      } catch { /* try again on the next beat */ }
+      // About five minutes: a replay that is not ready by then is not coming.
+      if (!cancelled && tries < 20) timer = window.setTimeout(check, 15000);
+    };
+    timer = window.setTimeout(check, 5000);
+    return () => { cancelled = true; if (timer) window.clearTimeout(timer); };
+  }, [waitingForReplay, replayTokenId]);
   // The viewer's own thumb, played on tap rather than on the echo — see
   // LiveReactionFlow's `self`. The room still gets theirs off the broadcast.
   const [selfReaction, setSelfReaction] = useState<SelfReaction | null>(null);
