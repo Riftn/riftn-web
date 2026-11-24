@@ -221,8 +221,8 @@ function LiveTile({ item, spotlight, onOpen }: { item: LiveNowItem; spotlight?: 
   const { t } = useTranslation();
   const face = faceUrlOf(item);
   const audience = item.kind === 'stage'
-    ? t('stories.spot.listening', { count: item.count, defaultValue: '{{count}} listening' })
-    : t('stories.spot.watching', { count: item.count, defaultValue: '{{count}} watching' });
+    ? t('stories.spot.listening', { n: item.count, defaultValue: '{{n}} listening' })
+    : t('stories.spot.watching', { n: item.count, defaultValue: '{{n}} watching' });
   return (
     <button type="button" role="listitem" data-story-tile data-kind="live" data-spotlight={spotlight ? '' : undefined} onClick={onOpen} aria-label={item.title}>
       <span data-st-bg style={bg(item.cover)} />
@@ -265,7 +265,7 @@ function PersonTile({ entry, spotlight, onOpen }: { entry: ShelfEntry; spotlight
             entry.latestAt ? formatTimeAgo(entry.latestAt) : '',
             entry.items.length === 1
               ? t('stories.spot.oneMoment', { defaultValue: '1 Moment' })
-              : t('stories.spot.moments', { count: formatCount(entry.items.length), defaultValue: '{{count}} Moments' }),
+              : t('stories.spot.moments', { n: formatCount(entry.items.length), defaultValue: '{{n}} Moments' }),
           ].filter(Boolean).join(' · ')}
         </span>
       )}
