@@ -110,6 +110,40 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-story-shelf] {
   font-weight: 700;
 }
 [data-st-name] { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+/* 1 to 3 things up: the first live (else Moment) grows into the spare room
+   and, once it is wide enough, says what it is under a bigger name. */
+[data-story-shelf][data-few] > [data-spotlight] {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 86px;
+  container-type: inline-size;
+}
+[data-st-spot] { display: none; }
+@container (min-width: 150px) {
+  [data-spotlight] [data-st-label] {
+    left: 12px;
+    right: 12px;
+    bottom: 29px;
+    font-size: 16px;
+    letter-spacing: -0.01em;
+  }
+  [data-spotlight] [data-st-spot] {
+    display: block;
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 11px;
+    z-index: 2;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: rgb(255 255 255 / 0.82);
+    text-shadow: 0 1px 4px rgb(0 0 0 / 0.6);
+    font-size: 12px;
+    font-weight: 600;
+  }
+}
 [data-st-badge] { flex: none; width: 1.15em; height: 1.15em; object-fit: contain; }
 
 /* Corner chips match the face on the other side: 24 px, 8 px corners, 7 px in. */
