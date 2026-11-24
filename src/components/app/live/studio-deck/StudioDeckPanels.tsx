@@ -12,6 +12,11 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Switch } from '@/components/ui/switch';
 import {
+  canSilenceSharedAudioLocally,
+  hearSharedAudioLocally,
+  setHearSharedAudioLocally,
+} from '@/lib/livepeer/display-capture';
+import {
   SCENE_BACKGROUNDS,
   SCENE_IDS,
   SCENES,
@@ -499,6 +504,28 @@ function Meter({ desk, channel }: { desk: AudioDesk; channel: DeskChannel }) {
   );
 }
 
+/** Keep sending a shared tab's sound to viewers while it stays quiet here. */
+function HearSharedToggle() {
+  const { t } = useTranslation();
+  const [hear, setHear] = useState(hearSharedAudioLocally);
+  if (!canSilenceSharedAudioLocally()) return null;
+  return (
+    <div className="space-y-1">
+      <label className="flex items-center justify-between gap-3 text-sm text-white">
+        <span>{t('studioDeck.audio.hearShared')}</span>
+        <Switch
+          checked={hear}
+          onCheckedChange={(on) => {
+            setHear(on);
+            void setHearSharedAudioLocally(on);
+          }}
+        />
+      </label>
+      <p className="text-[11px] text-white/50">{t('studioDeck.audio.hearSharedHint')}</p>
+    </div>
+  );
+}
+
 export interface DeskState {
   volume: Record<DeskChannel, number>;
   muted: Record<DeskChannel, boolean>;
@@ -558,6 +585,7 @@ export function AudioPanel({
           })}
         </div>
       </Section>
+      <HearSharedToggle />
       {desk.gateSupported() && (
         <Section title={t('studioDeck.audio.gate')}>
           <div className="flex gap-1.5">

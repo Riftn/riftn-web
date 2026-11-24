@@ -95,3 +95,68 @@ describe('chunk recovery', () => {
     expect(sessionStorage.getItem('chunk-reload-tier')).toBe('1');
   });
 });
+
+describe('chunk recovery waits for the file during a deploy', () => {
+  const reload = vi.fn();
+  const missing = 'https://riftn.com/assets/arrival-concepts-DX4lAu1E.js';
+  const error = new Error(`Failed to fetch dynamically imported module: ${missing}`);
+  const answer = (ok: boolean) => ({ ok, headers: { get: () => (ok ? 'text/javascript' : 'text/plain') } });
+  beforeEach(() => {
+    vi.resetModules();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-11-24T18:00:00Z'));
+    sessionStorage.clear();
+    reload.mockReset();
+    vi.stubGlobal('window', { location: { reload, origin: 'https://riftn.com' }, addEventListener: () => {} });
+    vi.stubGlobal('navigator', {});
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+  });
+
+  it('reads the failed same-origin file from the error, and ignores other origins', async () => {
+    const { chunkUrlFrom } = await import('../lazy-with-retry');
+    expect(chunkUrlFrom(error)).toBe(missing);
+    expect(chunkUrlFrom(new Error('Importing a module script failed.'))).toBeNull();
+    expect(chunkUrlFrom(new Error('Failed to fetch dynamically imported module: https://evil.example/x.js'))).toBeNull();
+  });
+
+  it('holds the reload until the file answers, then reloads once', async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(answer(false))
+      .mockResolvedValueOnce(answer(false))
+      .mockResolvedValue(answer(true));
+    vi.stubGlobal('fetch', fetchMock);
+    const { recoverFromChunkError } = await import('../lazy-with-retry');
+    expect(recoverFromChunkError(error)).toBe('reloading');
+    await vi.advanceTimersByTimeAsync(1500);
+    expect(reload).not.toHaveBeenCalled();
+    // Still mid-wait: a second failure must not escalate to the crash screen.
+    expect(recoverFromChunkError(error)).toBe('reloading');
+    await vi.advanceTimersByTimeAsync(3000);
+    expect(reload).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.calls[0][0]).toContain(`${missing}?chunk-probe=`);
+    expect(fetchMock.mock.calls[0][1]).toMatchObject({ method: 'HEAD', cache: 'no-store' });
+  });
+
+  it('reloads after the wait when the file never comes back (an old tab)', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(answer(false)));
+    const { recoverFromChunkError } = await import('../lazy-with-retry');
+    recoverFromChunkError(error);
+    await vi.advanceTimersByTimeAsync(1500 + 11_000);
+    expect(reload).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(3000);
+    expect(reload).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not wait when the error names no file', async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    const { recoverFromChunkError } = await import('../lazy-with-retry');
+    recoverFromChunkError(new Error('Importing a module script failed.'));
+    await vi.advanceTimersByTimeAsync(1500);
+    expect(reload).toHaveBeenCalledTimes(1);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+});

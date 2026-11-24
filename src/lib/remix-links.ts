@@ -129,6 +129,9 @@ export function saveRemixSettings(values: { tokenId?: string | number | null; al
 /** How a tip on a remix divides: the source creator's part first. Amounts are in the token's display units. */
 export function splitRemixTip(amount: number, link: Pick<RemixLink, 'splitBps' | 'sourceAddress' | 'remixerAddress'> | null) {
   if (!link || link.splitBps <= 0 || link.sourceAddress === link.remixerAddress) return { source: 0, remixer: amount };
-  const source = Math.floor(amount * link.splitBps) / 10000;
-  return { source, remixer: amount - source };
+  // Work in millionths: `amount * bps` in floats lands just under whole
+  // numbers (2.01 * 1000 = 2009.999…) and floor then shorted the source.
+  const micros = Math.round(amount * 1e6);
+  const sourceMicros = Math.floor((micros * link.splitBps) / 10000);
+  return { source: sourceMicros / 1e6, remixer: (micros - sourceMicros) / 1e6 };
 }

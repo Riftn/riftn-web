@@ -30,7 +30,7 @@ import {
 } from '@/lib/media-session';
 import { useNavigate } from 'react-router-dom';
 import MoreVertical from "@/components/ui/cut-icons/morevertical";
-import { Heart, StopCircle, Activity, Loader2 } from "lucide-react";
+import { Heart, StopCircle, Activity, Loader2, ChevronDown, Headphones } from "lucide-react";
 import AssistantNavIcon from "@/components/ui/AssistantNavIcon";
 import Flag from "@/components/ui/cut-icons/report";
 import Ban from "@/components/ui/cut-icons/blocked";
@@ -97,8 +97,11 @@ import {
 import type { WhepState, WhepSubscription } from '@/lib/livepeer/whep';
 import { nativeLiveEdge, watchLiveProgress } from '@/lib/live/stall-watchdog';
 import { NO_RELAY_CANDIDATE, firstWhepRoute, forgetWhepRouteBlocked, forgetWhepSilent, hasRealPicture, rememberWhepRouteBlocked, rememberWhepSilent, whepRecentlySilent, whepRouteBlocked, type WhepRoute } from '@/lib/live/whep-memory';
+import { behindForRatio, liveEdgeSnap, timeForBehind, timelineSnap, type TimeshiftSnap } from '@/lib/live/timeshift';
+import { LiveTimelineBar, type LiveTimeshift } from '@/components/app/live/LiveTimeline';
 import { dropWarmLiveHls, LIVE_HLS_CONFIG, playsNativeHls, SLOW_KEYFRAME_SEC, takeWarmLiveHls, warmLiveHls } from '@/lib/live/hls-standby';
-import { peekLiveSession, takeLiveSession } from '@/lib/live-handoff';
+import { peekLiveSession, snapshot as snapshotLiveFrame, takeLiveSession } from '@/lib/live-handoff';
+import { claimLiveMini, getLiveMiniVideo, openLiveMini, type LiveMiniMode } from '@/lib/live-mini';
 import { useStreamActions, useStreamActivities } from '@/hooks/use-livestream';
 import { useBlockAuthor } from '@/hooks/use-block-author';
 import { useNotifyWhenLive } from '@/hooks/use-notify-when-live';
@@ -124,6 +127,7 @@ const LiveOverlayLayer = lazy(() => import('@/components/app/live/overlay/LiveOv
 const StreamPetCorner = lazy(() => import('@/components/app/pet/StreamPetCorner'));
 const HypeTrainBar = lazy(() => import('@/components/app/live/overlay/hype-train').then((m) => ({ default: m.HypeTrainBar })));
 const CoStreamViewerLayer = lazy(() => import('@/components/app/live/costream/CoStreamViewerLayer'));
+const CoStreamAskButton = lazy(() => import('@/components/app/live/costream/CoStreamAskButton'));
 const ReplayOverlayLayer = lazy(() => import('@/components/app/live/overlay/ReplayOverlayLayer'));
 import { speakTipMessage, warmTipTts, setTipTtsEnabled, MAX_TTS_CHARS } from '@/lib/live/tip-tts';
 import { useAuth } from '@/contexts/AuthContext';
@@ -176,6 +180,49 @@ const WHEP_ANSWER_TIMEOUT_MS = 3500;
 const WHEP_CONNECT_TIMEOUT_MS = 2000;
 /** Connected: the first picture waits on the broadcast's next keyframe. */
 const WHEP_FRAME_TIMEOUT_MS = 2500;
+
+/** Where "live" is for this element: hls.js's sync point, or the native seekable end. */
+function liveEdgeOf(video: HTMLVideoElement, hls: Hls | null | undefined): number | null {
+  const sync = hls?.liveSyncPosition;
+  if (typeof sync === 'number' && Number.isFinite(sync)) return sync;
+  return nativeLiveEdge(video);
+}
+
+/**
+ * The oldest moment that can still be played, i.e. the far left of the
+ * timeline: the start of the server's playlist, or of what this player still
+ * holds from before it if that reaches further back.
+ */
+function seekStartOf(video: HTMLVideoElement, hls?: Hls | null): number {
+  const ranges = video.seekable;
+  let start = ranges && ranges.length ? ranges.start(0) : 0;
+  const windowStart = hls?.latestLevelDetails?.fragmentStart;
+  if (typeof windowStart === 'number' && Number.isFinite(windowStart)) {
+    start = windowStart;
+    const held = video.buffered;
+    for (let i = 0; i < held.length; i++) {
+      if (held.start(i) < start && held.end(i) >= start) start = held.start(i);
+    }
+  }
+  return start;
+}
+
+/**
+ * Keep the picture the viewer paused on while the element swaps sources:
+ * WebRTC's frame goes with its stream, so draw it into the poster first.
+ */
+function holdFrame(video: HTMLVideoElement): void {
+  try {
+    if (!video.videoWidth || !video.videoHeight) return;
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d')?.drawImage(video, 0, 0);
+    video.poster = canvas.toDataURL('image/jpeg', 0.8);
+  } catch {
+    /* A frame we may not read: the stream's cover stays the poster. */
+  }
+}
 
 /** What the player overlay says while playback is struggling; worded at render. */
 type PlaybackError = 'reconnecting' | 'alternateSource' | 'connecting' | 'unavailable' | 'playFailed';
@@ -305,6 +352,9 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
   // before any new effect does, so it is there by now. Declared ahead of the
   // WebRTC effect below, which takes it.
   useEffect(() => {
+    // The same live playing in the corner hands its session and seat back to
+    // this viewer; any other minimised live closes (one live at a time).
+    claimLiveMini(streamProp.streamId, getLiveMiniVideo());
     if (handoff) return;
     const late = peekLiveSession(handoffPlaybackId);
     if (late) setHandoff(late);
@@ -350,6 +400,19 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
     playbackRequestedRef.current = wanted;
     setPlaybackWantedState(wanted);
   }, []);
+  const transportRef = useRef(transport);
+  transportRef.current = transport;
+  const whepPlaybackIdRef = useRef(whepPlaybackId);
+  whepPlaybackIdRef.current = whepPlaybackId;
+  const bigEventRef = useRef(bigEvent);
+  bigEventRef.current = bigEvent;
+  /**
+   * Watching behind the live edge on purpose: paused, or moved back along the
+   * timeline. `resume` is where to stand once the HLS copy is loaded (WebRTC
+   * keeps nothing to go back to, so a pause or a rewind there swaps to HLS),
+   * as seconds behind live at a moment in time; the wait since then is added.
+   */
+  const timeshiftRef = useRef<{ active: boolean; fromWhep: boolean; resume: { behind: number; at: number } | null }>({ active: false, fromWhep: false, resume: null });
   // If stream.isLive is false, treat as ended immediately — don't try to play a dead HLS URL
   const [streamEnded, setStreamEnded] = useState(!liveNow);
   const { broadcastPaused, broadcastEnded, waitingTooLong } = useLivePlaybackFeedback(stream.streamId, isBuffering, liveNow && !streamEnded, stream.liveStatus);
@@ -540,6 +603,9 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
       stream.creatorId &&
       walletAddress.toLowerCase() === stream.creatorId.toLowerCase()
   );
+  // Ask to join sits in the live's own controls (not on the picture); it
+  // hides itself unless the host takes requests.
+  const canAskToJoin = !!stream.streamId && !!stream.isLive && !streamEnded && !isOwnStream;
   /*
    * Counts this tab among the viewers (web was never counted before) and
    * reads the live number back, falling back to the stored total. The
@@ -607,6 +673,9 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
     if (stream.isLive && !streamEnded) warmTipTts();
   }, [stream.isLive, streamEnded]);
   const hlsRef = useRef<Hls | null>(null);
+  /** The WebRTC session on screen, and the one handed to the corner window. */
+  const whepSessionRef = useRef<WhepSubscription | null>(null);
+  const handedToMiniRef = useRef<WhepSubscription | null>(null);
   /** One WebRTC attempt per card: once it fails, HLS keeps the element. */
   const whepFailedRef = useRef(false);
   /** The WebRTC route the picture on screen came by, for the network memory. */
@@ -641,7 +710,7 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
   // A handed-over session also overrides the Android HLS preference, since it
   // is already delivering frames.
   useEffect(() => {
-    if (!bigEvent && whepPlaybackId && (handoff || (!preferAndroidHls() && !whepRecentlySilent(whepPlaybackId) && firstWhepRoute(whepSource?.provider === 'mediamtx') !== null)) && !whepFailedRef.current) setTransport('whep');
+    if (!bigEvent && whepPlaybackId && (handoff || (!preferAndroidHls() && !whepRecentlySilent(whepPlaybackId) && firstWhepRoute(whepSource?.provider === 'mediamtx') !== null)) && !whepFailedRef.current && !timeshiftRef.current.active) setTransport('whep');
   }, [whepPlaybackId, whepSource?.provider, handoff, bigEvent]);
 
   // Fetch DHB balance when gift drawer opens
@@ -801,6 +870,7 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
           return;
         }
         session = opened;
+        whepSessionRef.current = opened;
         video.srcObject = opened.stream;
         if (!hasRealPicture(video)) {
           if (connected) arm(WHEP_FRAME_TIMEOUT_MS, 'no frames');
@@ -873,6 +943,12 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
       video.removeEventListener('resize', onPicture);
       video.removeEventListener('loadeddata', onPicture);
       videoPlaybackManager.unregister(videoId);
+      if (whepSessionRef.current === session) whepSessionRef.current = null;
+      // Minimised: the corner window owns the session now.
+      if (session && handedToMiniRef.current === session) {
+        if (video.srcObject) video.srcObject = null;
+        return;
+      }
       releaseAfterPictureInPicture(video, () => {
         void session?.stop();
         // Leaving a dead srcObject attached stops the HLS path from ever
@@ -903,6 +979,33 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
       if (!playbackRequestedRef.current || !visualActivity.isLivePlaybackAllowed()) return;
       setIsBuffering(true);
       void video.play().catch(() => setIsBuffering(false));
+    };
+    // Where the viewer asked to be (a pause or a rewind that came from
+    // WebRTC, or a reload after a long freeze), applied once the playlist
+    // says where live is. Until then the element is left alone.
+    let hlsForEdge: Hls | null = null;
+    const applyResume = () => {
+      const want = timeshiftRef.current.resume;
+      if (!want) return;
+      const edge = liveEdgeOf(video, hlsForEdge);
+      if (edge == null) return;
+      timeshiftRef.current.resume = null;
+      const behind = want.behind + (Date.now() - want.at) / 1000;
+      video.currentTime = timeForBehind(edge, seekStartOf(video, hlsForEdge), behind);
+    };
+    video.addEventListener('loadedmetadata', applyResume);
+    video.addEventListener('loadeddata', applyResume);
+    video.addEventListener('canplay', applyResume);
+    const stopResumeListeners = () => {
+      video.removeEventListener('loadedmetadata', applyResume);
+      video.removeEventListener('loadeddata', applyResume);
+      video.removeEventListener('canplay', applyResume);
+    };
+    /** Remember the spot before a reload, so the reload carries on from it. */
+    const holdPlace = () => {
+      const edge = liveEdgeOf(video, hlsForEdge);
+      if (edge == null) return;
+      timeshiftRef.current.resume = { behind: Math.max(0, edge - video.currentTime), at: Date.now() };
     };
 
     // Native HLS where the browser has it (Safari, iOS): cooler than hls.js
@@ -956,14 +1059,26 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
         scheduleNative(loadCurrent, 1500);
       };
       // Native HLS has no stall recovery of its own: a missed segment leaves
-      // the picture frozen on `waiting` forever. Jump to the live edge first,
-      // reload the playlist if that does not get it moving.
+      // the picture frozen on `waiting` forever. A slow connection should not
+      // cost the viewer what they were watching, so first step just past the
+      // hole, then reload the playlist and carry on from the same spot. Only
+      // a third freeze in a row jumps to live.
       const stopWatch = watchLiveProgress(video, {
         stallMs: 8000,
         shouldWatch: () => playbackRequestedRef.current,
         onStall: (count) => {
-          const edge = count === 1 ? nativeLiveEdge(video) : null;
           logger.info('Live picture frozen', { streamId: stream.id, count, native: true });
+          if (count === 1) {
+            video.currentTime = video.currentTime + 0.25;
+            resumePlayback();
+            return;
+          }
+          if (count === 2) {
+            holdPlace();
+            loadCurrent();
+            return;
+          }
+          const edge = nativeLiveEdge(video);
           if (edge != null && edge > video.currentTime + 1) {
             video.currentTime = edge;
             resumePlayback();
@@ -985,6 +1100,7 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
       return () => {
         nativeTimeouts.forEach(clearTimeout);
         stopWatch();
+        stopResumeListeners();
         video.removeEventListener('error', onNativeError);
         video.removeEventListener('playing', onNativePlaying);
         video.removeEventListener('ended', onNativeEnded);
@@ -1021,6 +1137,8 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
         ...(bigEvent ? BIG_EVENT_HLS_CONFIG : {}),
       });
 
+      hlsForEdge = hls;
+      hls.on(Hls.Events.LEVEL_LOADED, applyResume);
       const tryLoad = () => {
         const streamUrl = currentUrl();
         logger.info('HLS loading source...', { urlIndex, streamUrl });
@@ -1103,15 +1221,29 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
         }
       });
 
-      // hls.js nudges small gaps itself; a longer freeze gets the live sync
-      // point, then a fresh playlist load.
+      // hls.js nudges small gaps itself. A longer freeze keeps the viewer's
+      // place: load again from where the picture stopped, then a fresh
+      // playlist that carries on from the same spot. Only a third freeze in
+      // a row gives up on it and jumps to live.
       stopHlsWatch = watchLiveProgress(video, {
         stallMs: 10000,
         shouldWatch: () => playbackRequestedRef.current && stream.isLive,
         onStall: (count) => {
           if (disposed) return;
+          logger.info('Live picture frozen', { streamId: stream.id, count, native: false });
+          if (count === 1) {
+            hls.startLoad(video.currentTime);
+            resumePlayback();
+            return;
+          }
+          if (count === 2) {
+            holdPlace();
+            hls.loadSource(currentUrl());
+            hls.startLoad();
+            return;
+          }
           const sync = hls.liveSyncPosition;
-          if (count === 1 && sync != null && sync > video.currentTime + 1) {
+          if (sync != null && sync > video.currentTime + 1) {
             video.currentTime = sync;
             resumePlayback();
           } else {
@@ -1139,6 +1271,7 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
     return () => {
       disposed = true;
       stopHlsWatch?.();
+      stopResumeListeners();
       retryTimeouts.forEach(clearTimeout);
       retryTimeouts.clear();
       const hls = hlsRef.current;
@@ -1159,6 +1292,21 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
     if (isPlaying || isBuffering) {
       setPlaybackWanted(false);
       setIsBuffering(false);
+      // A pause is a place to come back to. WebRTC keeps nothing behind the
+      // edge, so the paused frame stays up while the HLS copy loads under it
+      // and Play carries on from here instead of from live.
+      if (!streamEnded && stream.isLive && hasPlaybackUrl) {
+        const onWhep = transportRef.current === 'whep';
+        timeshiftRef.current = {
+          active: true,
+          fromWhep: onWhep || timeshiftRef.current.fromWhep,
+          resume: onWhep ? { behind: 0, at: Date.now() } : null,
+        };
+        if (onWhep) {
+          holdFrame(video);
+          setTransport('hls');
+        }
+      }
       video.pause();
       videoPlaybackManager.stop(videoId);
     } else {
@@ -1172,7 +1320,78 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
         setError('playFailed');
       });
     }
-  }, [isPlaying, isBuffering, videoId]);
+  }, [isPlaying, isBuffering, videoId, streamEnded, stream.isLive, hasPlaybackUrl, setPlaybackWanted]);
+
+  /**
+   * Pause, rewind and back-to-live, for the timeline and the LIVE tag. Built
+   * once: the controls poll `snapshot` themselves, so moving along the
+   * timeline never re-renders this card around the playing video.
+   */
+  const togglePlayRef = useRef(togglePlay);
+  togglePlayRef.current = togglePlay;
+  const timeshiftLiveRef = useRef(false);
+  timeshiftLiveRef.current = !!stream.isLive && !streamEnded && hasPlaybackUrl;
+  const timeshift = useMemo<LiveTimeshift>(() => {
+    const play = (video: HTMLVideoElement) => {
+      setPlaybackWanted(true);
+      setError(null);
+      videoPlaybackManager.play(videoId);
+      void video.play().catch(() => setIsBuffering(false));
+    };
+    return {
+      snapshot: (): TimeshiftSnap | null => {
+        const video = videoRef.current;
+        if (!video || !timeshiftLiveRef.current) return null;
+        const paused = video.paused || !playbackRequestedRef.current;
+        const want = timeshiftRef.current.resume;
+        if (want) return liveEdgeSnap(paused, want.behind + (paused ? (Date.now() - want.at) / 1000 : 0));
+        if (video.srcObject) return liveEdgeSnap(paused);
+        const edge = liveEdgeOf(video, hlsRef.current);
+        if (edge == null) return liveEdgeSnap(paused);
+        const snap = timelineSnap(video.currentTime, edge, seekStartOf(video, hlsRef.current), paused);
+        // Caught back up by itself (a short freeze that cleared): live again.
+        if (!paused && snap.behind < 1) timeshiftRef.current.active = false;
+        return snap;
+      },
+      seek: (ratio: number) => {
+        const video = videoRef.current;
+        if (!video || !timeshiftLiveRef.current) return;
+        const edge = video.srcObject ? null : liveEdgeOf(video, hlsRef.current);
+        const windowSec = edge != null ? timelineSnap(video.currentTime, edge, seekStartOf(video, hlsRef.current), video.paused).windowSec : liveEdgeSnap(false).windowSec;
+        const behind = behindForRatio(ratio, windowSec);
+        if (transportRef.current === 'whep' || edge == null) {
+          // Nothing behind the edge here yet: swap to HLS and stand there once it loads.
+          timeshiftRef.current = { active: true, fromWhep: transportRef.current === 'whep' || timeshiftRef.current.fromWhep, resume: { behind, at: Date.now() } };
+          if (transportRef.current === 'whep') {
+            holdFrame(video);
+            setTransport('hls');
+          }
+        } else {
+          timeshiftRef.current.active = true;
+          video.currentTime = timeForBehind(edge, seekStartOf(video, hlsRef.current), behind);
+        }
+        if (playbackRequestedRef.current || !video.paused) play(video);
+      },
+      goLive: () => {
+        const video = videoRef.current;
+        if (!video) return;
+        const { fromWhep } = timeshiftRef.current;
+        timeshiftRef.current = { active: false, fromWhep: false, resume: null };
+        // Came off WebRTC to look back: go back to it, a second behind live
+        // instead of HLS's few.
+        if (fromWhep && transportRef.current === 'hls' && whepPlaybackIdRef.current && !whepFailedRef.current && !bigEventRef.current) {
+          setPlaybackWanted(true);
+          setIsBuffering(true);
+          setTransport('whep');
+          return;
+        }
+        const edge = liveEdgeOf(video, hlsRef.current);
+        if (edge != null && !video.srcObject) video.currentTime = edge;
+        play(video);
+      },
+      togglePlay: () => togglePlayRef.current(),
+    };
+  }, [videoId, setPlaybackWanted]);
 
   /**
    * Back from another tab or app: still the same player and the same room,
@@ -1185,7 +1404,8 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
     const resume = () => {
       const video = videoRef.current;
       if (!video || !playbackRequestedRef.current || !visualActivity.isLivePlaybackAllowed()) return;
-      catchUpToLiveEdge(video, hlsRef.current);
+      // Behind on purpose (rewound along the timeline): stay there.
+      if (!timeshiftRef.current.active) catchUpToLiveEdge(video, hlsRef.current);
       if (video.paused) void video.play().catch(() => undefined);
     };
     const stopListening = onReturnToTab(resume);
@@ -1206,6 +1426,42 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
   const [pipAvailable, setPipAvailable] = useState(false);
   useEffect(() => { setPipAvailable(canPictureInPicture(videoRef.current)); }, [streamEnded, transport]);
   const togglePip = useCallback(() => { void togglePictureInPicture(videoRef.current); }, []);
+
+  /*
+   * Minimise: keep the live playing in a corner window (or as a listen bar)
+   * while the viewer browses. The running WebRTC session and an audience
+   * seat go with it, so the picture never drops and the creator never sees
+   * a leave and a join.
+   */
+  const canMinimise = !swipeFeed && !!stream.streamId && !!stream.isLive && !streamEnded && hasPlaybackUrl;
+  const minimiseLive = useCallback(async (mode: LiveMiniMode = 'video') => {
+    const streamId = stream.streamId;
+    if (!streamId) return;
+    let seat: { leave: () => void } | null = null;
+    if (!isOwnStream) {
+      const { joinStreamPresence } = await import('@/lib/api/dehub/stream-presence');
+      seat = joinStreamPresence(streamId);
+    }
+    const video = videoRef.current;
+    const session = transport === 'whep' ? whepSessionRef.current : null;
+    if (session) handedToMiniRef.current = session;
+    openLiveMini({
+      streamId,
+      playbackId: whepPlaybackId,
+      urls: urlsToTry,
+      title: stream.title,
+      host: stream.creatorUsername ? `@${stream.creatorUsername}` : stream.streamer,
+      avatar: stream.avatar,
+      path: `${window.location.pathname}${window.location.search}`,
+      session,
+      poster: video ? snapshotLiveFrame(video) : undefined,
+      seat,
+      mode,
+    });
+    if (isFullscreen) toggleFullscreen();
+    if (window.history.length > 1) navigate(-1);
+    else navigate('/app');
+  }, [stream.streamId, stream.title, stream.creatorUsername, stream.streamer, stream.avatar, isOwnStream, transport, whepPlaybackId, urlsToTry, isFullscreen, toggleFullscreen, navigate]);
 
   /**
    * Hold the OS media session while this stream is audible, keyed on the
@@ -1509,6 +1765,22 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
                 >
                   <PictureInPicture2 className="w-4 h-4" />
                   {_copy("copy.c49677dc5ccd", { defaultValue: "Picture in picture" })}
+                </DropdownMenuItem>
+              )}
+              {canMinimise && (
+                <DropdownMenuItem
+                  onClick={() => { void minimiseLive('video'); }}
+                  className="text-white hover:bg-zinc-700 cursor-pointer gap-2"
+                >
+                  <ChevronDown className="w-4 h-4" /> {t('liveMini.minimiseHint', 'Keep watching while you browse')}
+                </DropdownMenuItem>
+              )}
+              {canMinimise && (
+                <DropdownMenuItem
+                  onClick={() => { void minimiseLive('listen'); }}
+                  className="text-white hover:bg-zinc-700 cursor-pointer gap-2"
+                >
+                  <Headphones className="w-4 h-4" /> {t('liveMini.soundOnly', 'Sound only')}
                 </DropdownMenuItem>
               )}
               {clippable && (
@@ -1831,9 +2103,14 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
             <div className={cn('absolute inset-0 flex items-center justify-center transition-opacity',
               (isBuffering && !error && !broadcastPaused) || ((isBuffering || error || broadcastPaused) && isPlaying)
                 ? 'opacity-0'
-                : isPlaying ? 'bg-black/30 opacity-0 hover:opacity-100 focus-within:opacity-100' : 'bg-black/30 opacity-100')}>
+                : isPlaying ? 'bg-black/30 opacity-0 hover:opacity-100 focus-within:opacity-100' : 'bg-black/30 opacity-100',
+              // Full-bleed: a tap on the picture clears the chrome, so only a
+              // paused live's Play sits above that layer and takes the tap.
+              immersive && 'pointer-events-none z-[16]')}>
               <button
                 onClick={togglePlay}
+                data-no-navigate
+                style={immersive ? { pointerEvents: isPlaying ? 'none' : 'auto' } : undefined}
                 aria-label={isPlaying ? t('audioPost.pause', 'Pause') : t('audioPost.play', 'Play')}
                 className="w-16 h-16 rounded-xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] flex items-center justify-center border border-white/10 hover:bg-black/60 transition-colors"
               >
@@ -1846,9 +2123,10 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
                 mute to a chrome circle beside it. */}
             <div className={cn('absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent', immersive && 'hidden', isFullscreen && fullscreenChat && chatSlot && 'right-[min(380px,40%)]')}>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span data-live-badge className="px-2 py-0.5 bg-red-500 text-white text-xs font-semibold rounded">{_copy("copy.35e0d0360a0a", { defaultValue: "LIVE" })}</span>
-                </div>
+                {/* Pause, the LIVE tag and the last few minutes as a timeline:
+                    behind live the tag goes white, and a click on it (or the
+                    red end of the line) is back to live. */}
+                <LiveTimelineBar timeshift={timeshift} className="mr-3" />
                 <div className="flex items-center gap-2">
                   {/* Like (tap again and again, every tap floats one), the
                       emoji tray (hover or hold) and share, on the picture only
@@ -1882,6 +2160,11 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
                     />
                   </div>
                   )}
+                  {isFullscreen && canAskToJoin && (
+                    <Suspense fallback={null}>
+                      <CoStreamAskButton streamId={stream.streamId} owner={stream.creatorId} variant="square" />
+                    </Suspense>
+                  )}
                   {isFullscreen && chatSlot && (
                     <button
                       type="button"
@@ -1909,6 +2192,18 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
                   >
                     {isMuted || volume === 0 ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
                   </VideoVolumeControl>
+                  {canMinimise && !immersive && (
+                    <button
+                      type="button"
+                      data-live-minimise
+                      onClick={(e) => { e.stopPropagation(); void minimiseLive('video'); }}
+                      aria-label={t('liveMini.minimiseHint', 'Keep watching while you browse')}
+                      title={t('liveMini.minimiseHint', 'Keep watching while you browse')}
+                      className="p-2 text-white hover:bg-white/20 rounded transition-colors"
+                    >
+                      <ChevronDown className="w-5 h-5" />
+                    </button>
+                  )}
                   <button
                     onClick={toggleFullscreen}
                     aria-label={isFullscreen ? t('stages.exitFullscreen', 'Exit fullscreen') : t('stages.fullscreen', 'Fullscreen')}
@@ -2010,7 +2305,7 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
         )}
         {stream.streamId && stream.isLive && !streamEnded && !isOwnStream && (
           <Suspense fallback={null}>
-            <CoStreamViewerLayer streamId={stream.streamId} owner={stream.creatorId} onRoomChange={quietForGuestRoom} />
+            <CoStreamViewerLayer streamId={stream.streamId} owner={stream.creatorId} hostAvatar={stream.avatar?.startsWith('http') ? stream.avatar : null} onRoomChange={quietForGuestRoom} />
           </Suspense>
         )}
 
@@ -2065,6 +2360,8 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
             hidden={chromeHidden}
             streamId={stream.streamId}
             onClose={swipeFeed?.onClose}
+            onMinimise={canMinimise ? () => { void minimiseLive('video'); } : undefined}
+            timeshift={timeshift}
           />
         )}
       </div>
@@ -2115,6 +2412,11 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
                 onTip={() => setShowGiftDrawer(true)}
                 nativeShare={{ title: stream.title }}
               />
+              {canAskToJoin && (
+                <Suspense fallback={null}>
+                  <CoStreamAskButton streamId={stream.streamId} owner={stream.creatorId} variant="square" />
+                </Suspense>
+              )}
               </div>
               )
             }
@@ -2142,7 +2444,14 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
             onComment={() => setShowComments(prev => !prev)}
             className="p-0 mb-2"
           />
-          <h3 className="text-white text-sm mt-1">{stream.title}</h3>
+          <div className="mt-1 flex items-start gap-3">
+            <h3 className="min-w-0 flex-1 text-white text-sm">{stream.title}</h3>
+            {canAskToJoin && (
+              <Suspense fallback={null}>
+                <CoStreamAskButton streamId={stream.streamId} owner={stream.creatorId} className="-mt-1.5" />
+              </Suspense>
+            )}
+          </div>
           <p className="text-zinc-500 text-xs mt-1">{stream.game}</p>
         </div>
       )}
