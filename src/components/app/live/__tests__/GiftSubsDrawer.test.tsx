@@ -73,6 +73,14 @@ describe('GiftSubsDrawer payment safety', () => {
     expect(mocks.confirm).not.toHaveBeenCalled();
   });
 
+  it('records and confirms the mined hash after a gas-price bump', async () => {
+    mocks.send.mockResolvedValue({ hash: '0xoriginal', wait: () => Promise.resolve({ status: 1, hash: '0xmined' }) });
+    open();
+    await waitFor(() => expect(mocks.clear).toHaveBeenCalledWith('g1'));
+    expect(mocks.remember).toHaveBeenLastCalledWith({ giftId: 'g1', hash: '0xmined', chainId: 8453 });
+    expect(mocks.confirm).toHaveBeenCalledWith('g1', '0xmined', 8453);
+  });
+
   it('confirms and clears a paid gift', async () => {
     mocks.send.mockResolvedValue({ hash: '0xok', wait: () => Promise.resolve({ status: 1, hash: '0xok' }) });
     open();

@@ -69,6 +69,7 @@ import { ChatTextSizeButton } from '@/components/app/chat/ChatTextSizeButton';
 import { ASSISTANT_PROFILE_PATH, profilePath } from '@/lib/profile-path';
 import { usePublicChatDelete } from '@/components/app/chat/PublicChatDeleteDialog';
 import { useHiddenLines } from '@/lib/public-chat-hidden';
+import { stripBold } from '@/lib/bold-markup';
 
 /**
  * A text message in the side panel, with the same cards every other chat
@@ -684,7 +685,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
                     >
                       <CornerDownRight className="w-2.5 h-2.5" />
                       <span className="font-medium">{msg.reply_to.sender_name}</span>
-                      <span className="truncate max-w-[120px]">{msg.reply_to.content}</span>
+                      <span className="truncate max-w-[120px]">{stripBold(msg.reply_to.content)}</span>
                     </button>
                   )}
                   <div className="relative flex items-start gap-2">

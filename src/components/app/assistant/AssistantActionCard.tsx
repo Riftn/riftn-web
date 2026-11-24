@@ -23,6 +23,7 @@ import {
 import { POST_REACTIONS, reactionMeta, type PostReaction } from '@/lib/reactions';
 import { cn } from '@/lib/utils';
 import { profilePath } from '@/lib/profile-path';
+import { gapLabel } from '@/features/post/lib/post-spacing';
 
 type Choice = PostReaction | 'fitting';
 
@@ -68,6 +69,41 @@ function ChoiceChip({ choice, selected, disabled, onPick }: { choice: Choice; se
     >
       {choice === 'fitting' ? <span className="text-xs font-medium text-white/90">{label}</span> : reactionMeta(choice).emoji}
     </button>
+  );
+}
+
+/** "Wed 26 Nov, 3:00 PM" in the viewer's own time zone, or "Straight away". */
+function PlanTime({ at }: { at: string | null }) {
+  const { t, i18n } = useTranslation();
+  if (!at) return <>{t('assistantCards.straightAway', { defaultValue: 'Straight away' })}</>;
+  const d = new Date(at);
+  const locale = i18n.language || undefined;
+  return (
+    <time dateTime={at}>
+      {d.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' })}, {d.toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' })}
+    </time>
+  );
+}
+
+/** The posts a schedule card will make, in order, each with its time. */
+function PlanList({ items }: { items: NonNullable<AssistantAction['preview']['items']> }) {
+  const { t } = useTranslation();
+  return (
+    <ol className="max-h-72 space-y-2 overflow-y-auto pr-1" data-assistant-plan>
+      {items.map((item, i) => (
+        <li key={i} className="flex items-center gap-2.5 min-w-0">
+          {item.photo ? (
+            <img src={getMediaUrl(item.photo)} alt="" loading="lazy" className="h-10 w-10 shrink-0 rounded-lg object-cover" />
+          ) : (
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-[11px] font-semibold text-white/60 ring-1 ring-white/15">{i + 1}</span>
+          )}
+          <span className="flex min-w-0 flex-1 flex-col">
+            <span className="text-xs font-semibold text-white"><PlanTime at={item.at} /></span>
+            <span className="truncate text-xs text-white/60">{item.text || t('assistantCards.photoOnly', { defaultValue: 'Photo, no text' })}</span>
+          </span>
+        </li>
+      ))}
+    </ol>
   );
 }
 
@@ -149,6 +185,14 @@ export function AssistantActionCard({ actionId, initial }: { actionId: string; i
           ? t('assistantCards.unfollow', { count, defaultValue: 'Unfollow {{count}}' })
           : kind === 'request_post'
             ? t('assistantCards.requestDraft', { defaultValue: 'Public request draft' })
+            : kind === 'schedule_posts'
+            ? count === 1
+              ? t('assistantCards.planOne', { defaultValue: 'Plan 1 post' })
+              : t('assistantCards.planMany', { count, defaultValue: 'Plan {{count}} posts' })
+            : kind === 'post_spacing'
+            ? preview.gapMinutes
+              ? t('assistantCards.spacingOn', { gap: gapLabel(preview.gapMinutes, t), defaultValue: 'Space my posts: {{gap}} apart' })
+              : t('assistantCards.spacingOff', { defaultValue: 'Turn off Space my posts?' })
             : preview.allow
             ? t('assistantCards.allowChats', { defaultValue: 'Let the assistant read your chats?' })
             : t('assistantCards.stopChats', { defaultValue: 'Stop the assistant reading your chats?' });
@@ -162,6 +206,12 @@ export function AssistantActionCard({ actionId, initial }: { actionId: string; i
           ? t('assistantCards.confirmUnfollow', { defaultValue: 'Unfollow' })
           : kind === 'request_post'
             ? t('assistantCards.postRequest', { defaultValue: 'Post to Build' })
+            : kind === 'schedule_posts'
+            ? t('assistantCards.confirmPlan', { defaultValue: 'Plan them' })
+            : kind === 'post_spacing'
+            ? preview.gapMinutes
+              ? t('assistantCards.confirmSpacingOn', { defaultValue: 'Turn on' })
+              : t('assistantCards.confirmSpacingOff', { defaultValue: 'Turn off' })
             : preview.allow
             ? t('assistantCards.confirmAllow', { defaultValue: 'Allow' })
             : t('assistantCards.confirmStop', { defaultValue: 'Stop' });
@@ -204,6 +254,19 @@ export function AssistantActionCard({ actionId, initial }: { actionId: string; i
           ))}
         </div>
       )}
+      {kind === 'schedule_posts' && !!preview.items?.length && <PlanList items={preview.items} />}
+      {kind === 'schedule_posts' && status === 'pending' && (
+        <div className="text-xs text-white/60 leading-relaxed">
+          {t('assistantCards.planWhy', { defaultValue: 'Each one waits in Planned, where you can move or cancel it.' })}
+        </div>
+      )}
+      {kind === 'post_spacing' && status === 'pending' && (
+        <div className="text-xs text-white/60 leading-relaxed">
+          {preview.gapMinutes
+            ? t('assistantCards.spacingWhy', { gap: gapLabel(preview.gapMinutes, t), defaultValue: 'Every post you make without a time waits {{gap}} after your last one.' })
+            : t('assistantCards.spacingOffWhy', { defaultValue: 'Posts go out as soon as you send them again.' })}
+        </div>
+      )}
       {kind === 'chat_access' && preview.allow && (
         <div className="text-xs text-white/60 leading-relaxed">
           {t('assistantCards.allowChatsWhy', {
@@ -240,12 +303,24 @@ export function AssistantActionCard({ actionId, initial }: { actionId: string; i
           {t('assistantCards.viewPostedRequest', { defaultValue: 'View posted request' })}
         </a>
       )}
-      {status === 'done' && kind !== 'request_post' && (
+      {status === 'done' && kind === 'schedule_posts' && (
+        <Link to="/app/planned" className="inline-flex items-center gap-2 text-xs text-white underline">
+          <CutCheck className="h-3.5 w-3.5 shrink-0" />
+          {result?.failed
+            ? t('assistantCards.donePlanSome', { count: result?.ok ?? 0, failed: result.failed, defaultValue: 'Planned {{count}}, {{failed}} could not be made. See Planned' })
+            : t('assistantCards.donePlan', { count: result?.ok ?? 0, defaultValue: 'Planned {{count}}. See Planned' })}
+        </Link>
+      )}
+      {status === 'done' && kind !== 'request_post' && kind !== 'schedule_posts' && (
         <div className="flex items-center gap-2 text-xs text-white/80">
           <CutCheck className="w-3.5 h-3.5 shrink-0" />
           <span>
             {kind === 'react'
               ? t('assistantCards.doneReact', { count: result?.added ?? 0, defaultValue: 'Reacted to {{count}} posts' })
+              : kind === 'post_spacing'
+                ? result?.gapMinutes
+                  ? t('assistantCards.doneSpacingOn', { defaultValue: 'Space my posts is on' })
+                  : t('assistantCards.doneSpacingOff', { defaultValue: 'Space my posts is off' })
               : kind === 'chat_access'
                 ? result?.allowed
                   ? t('assistantCards.doneAllow', { defaultValue: 'Allowed. Ask your question again.' })

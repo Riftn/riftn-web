@@ -80,24 +80,26 @@ export function GiftSubsDrawer({ open, onOpenChange, creatorAddress, creatorName
       // times out or the tab closes, the next open still grants the gift.
       rememberPendingGift({ giftId: quote.giftId, hash: tx.hash, chainId });
       setStage('confirming');
-      let receipt: { status: number } | undefined;
+      let receipt: Awaited<ReturnType<typeof tx.wait>>;
       try {
         receipt = await tx.wait();
       } catch (err) {
-        // A replaced transfer paid nothing, so there is nothing to finish later.
-        if ((err as { code?: string })?.code === 'TRANSACTION_REPLACED') clearPendingGift(quote.giftId);
+        const replacement = err as { code?: string; cancelled?: boolean };
+        if (replacement?.code === 'TRANSACTION_REPLACED' && replacement.cancelled) clearPendingGift(quote.giftId);
         throw err;
       }
-      if (receipt?.status === 0) {
+      if (receipt.status === 0) {
         clearPendingGift(quote.giftId);
         throw Object.assign(new Error(t('liveHype.gift.failed')), { code: 'TRANSACTION_REVERTED' });
       }
+      // A gas-price bump can mine the same transfer under a new hash.
+      if (receipt.hash !== tx.hash) rememberPendingGift({ giftId: quote.giftId, hash: receipt.hash, chainId });
       setStage('recording');
       // The API reads the chain, which can lag the receipt by a block or two.
       let result: GiftResult | null = null;
       for (let attempt = 0; attempt < 5 && !result; attempt++) {
         try {
-          result = await confirmSubscriptionGift(quote.giftId, tx.hash, chainId);
+          result = await confirmSubscriptionGift(quote.giftId, receipt.hash, chainId);
         } catch (err: any) {
           if (attempt === 4 || !/not visible|pending/i.test(String(err?.message || ''))) throw err;
           await new Promise((r) => setTimeout(r, 3000));

@@ -31,6 +31,7 @@ import {
   deleteNote, getNotes, isNoteGif, likeNote, NOTE_LOCATION_MAX, NOTE_TEXT_MAX, putNote,
   type Note, type NoteEntry, type NoteInput,
 } from '@/lib/api/dehub/notes';
+import { BoldText, stripBold } from '@/lib/bold-markup';
 
 // A tiny shared store instead of react-query, so the row also renders where
 // there is no QueryClientProvider (tests, the state gallery).
@@ -99,7 +100,7 @@ function NoteBubble({ note, placeholder, own }: { note: Note | null; placeholder
   return (
     <span data-note-bubble style={BUBBLE_STYLE} className="flex max-w-[84px] flex-col items-center gap-0.5 rounded-[10px] px-2 py-1 text-[11px] font-medium leading-tight text-white">
       {note.gifUrl && <img src={note.gifUrl} alt="" className="h-8 w-12 rounded-md object-cover" loading="lazy" />}
-      {note.text && <span className="line-clamp-2 break-words text-center">{words}</span>}
+      {note.text && <span className="line-clamp-2 break-words text-center"><BoldText text={words} /></span>}
       {!note.text && note.song && <span className="flex max-w-full items-center gap-0.5 truncate"><Music2 className="h-3 w-3 shrink-0" /><span className="truncate">{note.song.title}</span></span>}
       {!note.text && !note.song && note.location && <span className="flex max-w-full items-center gap-0.5 truncate"><MapPin className="h-3 w-3 shrink-0" /><span className="truncate">{note.location}</span></span>}
     </span>
@@ -352,8 +353,8 @@ function StatusWords({ note, words, autoPlay, footer }: { note: Note; words: str
     <div className="flex w-full max-w-[420px] flex-col items-center gap-3 px-6 text-center">
       {note.gifUrl && <img src={note.gifUrl} alt="" className="max-h-44 rounded-[16px] object-contain" />}
       {note.text && (
-        <p key={words} data-note-words className="break-words font-extrabold leading-[1.18] text-white animate-in fade-in duration-200" style={{ fontSize: wordSize(words), textShadow: WORD_SHADOW }}>
-          {words}
+        <p key={words} data-note-words className="break-words font-extrabold leading-[1.18] text-white animate-in fade-in duration-200" style={{ fontSize: wordSize(stripBold(words)), textShadow: WORD_SHADOW }}>
+          <BoldText text={words} />
         </p>
       )}
       {note.song && <StatusSong song={note.song} autoPlay={autoPlay} />}
@@ -922,7 +923,7 @@ function noteLine(note: Note): string {
 /** The note as a small tag at the start of a chat's preview line. */
 export function NoteTag({ entry }: { entry: NoteEntry }) {
   const said = useNoteWords(entry.note.text).shown;
-  const line = entry.note.text ? said : noteLine(entry.note);
+  const line = entry.note.text ? stripBold(said) : noteLine(entry.note);
   if (!line && !entry.note.gifUrl) return null;
   return (
     <span

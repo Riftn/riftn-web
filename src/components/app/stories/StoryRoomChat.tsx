@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { buildAvatarUrl, buildAvatarCdnFallbackUrl } from '@/lib/media-url';
 import { getStoryComments, type StoryComment } from '@/lib/api/dehub/stories';
 import { localAge } from './story-utils';
+import { BoldText } from '@/lib/bold-markup';
 
 const FLOATING = 4;
 
@@ -70,7 +71,7 @@ export function StoryRoomChat({ comments, onOpen }: { comments: StoryComment[]; 
           <Face c={c} />
           <span>
             <b>{nameOfComment(c)}</b>
-            {c.text}
+            <BoldText text={c.text} />
           </span>
         </span>
       ))}
@@ -94,7 +95,7 @@ export function StoryRoomRows({ comments, onOpenProfile, emptyLabel }: { comment
           </button>
           <div>
             <b>{nameOfComment(c)}</b>
-            <p>{c.text}</p>
+            <p><BoldText text={c.text} /></p>
             <small>{localAge(c.createdAt, i18n.language)}</small>
           </div>
         </div>
