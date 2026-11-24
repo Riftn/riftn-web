@@ -15,8 +15,12 @@
  * - A shared window or whole screen is treated as moving video (a game, a
  *   player), not a page of text. Chrome's default for screen captures keeps
  *   every pixel sharp and drops frames instead, which on a game reads as a
- *   stuttering, glitchy picture. Tabs keep the default (they are usually
- *   pages, where sharp text matters more).
+ *   stuttering, glitchy picture. Tabs get the same treatment: on a live a
+ *   shared tab is usually a video or music player.
+ * - Shared sound is music, not a voice call. Asked for plainly, the browser
+ *   runs the tab's or system's sound through its call processing (echo
+ *   cancelling, noise removal, automatic gain), which strips the bass out of
+ *   a song and pumps its volume. It is taken untouched, in stereo.
  */
 
 export type DisplaySurface = 'browser' | 'window' | 'monitor' | 'unknown';
@@ -32,15 +36,33 @@ export function displaySurfaceOf(track: MediaStreamTrack | null | undefined): Di
 }
 
 /**
- * Window and screen shares carry games and video: keep the frame rate and let
- * sharpness give under pressure. Tabs keep the browser's text-friendly default.
+ * A share on a live carries games and video (a tab is most often a player):
+ * keep the frame rate and let sharpness give under pressure. The browser's
+ * text-friendly default drops frames instead, which glitches on every scene
+ * change.
  */
 export function tuneDisplayTrack(track: MediaStreamTrack | null | undefined): void {
   if (!track) return;
-  const surface = displaySurfaceOf(track);
-  if (surface !== 'window' && surface !== 'monitor') return;
   try {
     track.contentHint = 'motion';
+  } catch {
+    /* read-only on older engines */
+  }
+}
+
+/** Shared sound exactly as it plays: no call processing, both channels. */
+export const SHARED_AUDIO_CONSTRAINTS: MediaTrackConstraints = {
+  echoCancellation: false,
+  noiseSuppression: false,
+  autoGainControl: false,
+  channelCount: { ideal: 2 },
+};
+
+/** Tells the encoder the shared sound is music, so it is not squeezed like speech. */
+export function tuneDisplayAudio(track: MediaStreamTrack | null | undefined): void {
+  if (!track) return;
+  try {
+    track.contentHint = 'music';
   } catch {
     /* read-only on older engines */
   }
@@ -66,7 +88,7 @@ export async function requestDisplayCapture(video: MediaTrackConstraints): Promi
 
   const options = {
     video,
-    audio: true,
+    audio: SHARED_AUDIO_CONSTRAINTS,
     // Sharing the Riftn tab itself only shows the stream inside the stream.
     selfBrowserSurface: 'exclude',
     // Lets the creator switch to another tab from Chrome's sharing bar
@@ -76,7 +98,15 @@ export async function requestDisplayCapture(video: MediaTrackConstraints): Promi
     ...(controller ? { controller } : {}),
   } as DisplayMediaStreamOptions;
 
-  const stream = await navigator.mediaDevices.getDisplayMedia(options);
+  let stream: MediaStream;
+  try {
+    stream = await navigator.mediaDevices.getDisplayMedia(options);
+  } catch (error) {
+    // A browser that rejects the sound settings still gets its share.
+    if ((error as { name?: string } | null)?.name !== 'OverconstrainedError' && !(error instanceof TypeError)) throw error;
+    stream = await navigator.mediaDevices.getDisplayMedia({ ...options, audio: true });
+  }
   tuneDisplayTrack(stream.getVideoTracks()[0]);
+  tuneDisplayAudio(stream.getAudioTracks?.()[0]);
   return stream;
 }
