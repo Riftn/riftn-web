@@ -43,7 +43,7 @@ describe('immersive video card — the wrapper draws no surface of its own', () 
     // in the fullscreen branch AND `lg:rounded-2xl` in the immersive one, the
     // responsive variant wins at desktop widths and rounds a fullscreen video.
     expect(VIDEO_CARD).toMatch(/const mediaRadius = isFullscreen\s*\?\s*'rounded-none'/);
-    const fullscreenBranch = VIDEO_CARD.match(/isFullscreen \? 'fixed inset-0[^']*'/);
+    const fullscreenBranch = VIDEO_CARD.match(/isFullscreen \? [`']fixed inset-0[^`']*[`']/);
     expect(fullscreenBranch).not.toBeNull();
     expect(fullscreenBranch![0]).not.toContain('rounded');
   });
