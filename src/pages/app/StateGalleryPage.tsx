@@ -92,6 +92,7 @@ import { TipWall, TipChip } from '@/components/app/comments/TipWall';
 import type { Comment as GalleryComment } from '@/lib/comment-mapper';
 import { KitButton, PageEmpty, PageSection, PageTabs } from '@/components/app/page-kit/PageKit';
 import { ScheduleSheet, type ScheduleKind } from '@/features/post/components/ScheduleSheet';
+import { POST_SPACING_KEY } from '@/features/post/components/PostSpacingSection';
 import { ChatInput } from '@/components/app/chat/ChatInput';
 import { MessageRequestBarView, MessageRequestsHeader, MessageRequestsRow } from '@/components/app/chat/MessageRequestBar';
 import { PostEditHistoryLineView, PostEditHistoryViewer } from '@/components/app/post-info/PostEditHistory';
@@ -1843,10 +1844,18 @@ function MintChainGallery() {
   );
 }
 
+/** Signed in as a stand-in wallet, so Space my posts shows (it hides when signed out). */
+const SPACING_AUTH = { ...GALLERY_AUTH, walletAddress: '0x0000000000000000000000000000000000000001' } as AuthContextType;
+
 function WhenSheetGallery() {
   const { t } = useTranslation();
   const [kind, setKind] = useState<ScheduleKind | null>(null);
+  const qc = useQueryClient();
+  // Space my posts, as an account with it on and two posts waiting.
+  useState(() => qc.setQueryData([POST_SPACING_KEY, SPACING_AUTH.walletAddress], { gapMinutes: 60, nextAt: new Date(Date.now() + 2 * 3_600_000).toISOString(), waiting: 2 }));
+  const [dripGap, setDripGap] = useState<number | null>(1440);
   return (
+    <AuthContext.Provider value={SPACING_AUTH}>
     <section data-page-bento data-when-sheet-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
       <h2 className="mb-3 text-sm font-semibold">{t('whenSheet.title', { defaultValue: 'When?' })}</h2>
       <div className="flex flex-wrap gap-2">
@@ -1854,8 +1863,9 @@ function WhenSheetGallery() {
           <button key={k} type="button" data-kit-button="quiet" data-when-open={k} onClick={() => setKind(k)}>{k}</button>
         ))}
       </div>
-      <ScheduleSheet isOpen={!!kind} onClose={() => setKind(null)} scheduledDate={null} onSchedule={() => {}} kind={kind ?? 'post'} minimumMinutes={kind === 'live' ? 30 : 0} />
+      <ScheduleSheet isOpen={!!kind} onClose={() => setKind(null)} scheduledDate={null} onSchedule={() => {}} kind={kind ?? 'post'} minimumMinutes={kind === 'live' ? 30 : 0} dripCount={12} dripGap={dripGap} onDripChange={setDripGap} />
     </section>
+    </AuthContext.Provider>
   );
 }
 
