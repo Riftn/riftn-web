@@ -468,7 +468,7 @@ export function NotesStrip() {
 // under the tabs and above the chat cards: a white thought cloud over each
 // face, yours first so you can post one.
 
-const CLOUD_STYLE = { background: '#fff', color: '#0b0b0c', boxShadow: '0 0 0 1px var(--kit-hairline), 0 4px 14px rgb(0 0 0 / 0.28)' } as const;
+const CLOUD_STYLE = { background: '#fff', color: '#0b0b0c', boxShadow: '0 0 0 1px var(--kit-hairline), var(--status-cloud-shadow, 0 4px 14px rgb(0 0 0 / 0.28))' } as const;
 
 function cloudText(note: Note | null): string {
   if (!note) return '';
