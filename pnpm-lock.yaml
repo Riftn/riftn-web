@@ -219,7 +219,7 @@ importers:
         version: 5.83.0(react@18.3.1)
       '@toruslabs/base-controllers':
         specifier: ^8.17.0
-        version: 8.17.0(@babel/runtime@7.28.6)(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(utf-8-validate@5.0.10)
+        version: 8.17.0(@babel/runtime@7.29.15)(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(utf-8-validate@5.0.10)
       '@types/dompurify':
         specifier: ^3.2.0
         version: 3.2.0
@@ -252,19 +252,19 @@ importers:
         version: 2.23.9(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7)
       '@web3auth/account-abstraction-provider':
         specifier: ^9.7.0
-        version: 9.7.0(@babel/runtime@7.28.6)(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7)
+        version: 9.7.0(@babel/runtime@7.29.15)(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7)
       '@web3auth/base':
         specifier: ^9.7.0
-        version: 9.7.0(@babel/runtime@7.28.6)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+        version: 9.7.0(@babel/runtime@7.29.15)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
       '@web3auth/ethereum-provider':
         specifier: 9.7.0
-        version: 9.7.0(@babel/runtime@7.28.6)(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7)
+        version: 9.7.0(@babel/runtime@7.29.15)(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7)
       '@web3auth/modal':
         specifier: 10.5.6
-        version: 10.5.6(@babel/runtime@7.28.6)(@coinbase/wallet-sdk@4.3.7(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7))(@sentry/core@9.47.1)(@solana/web3.js@1.98.4(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10))(bufferutil@4.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.44.4(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7))(zod@4.6.7)
+        version: 10.5.6(@babel/runtime@7.29.15)(@coinbase/wallet-sdk@4.3.7(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7))(@sentry/core@9.47.1)(@solana/web3.js@1.98.4(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10))(bufferutil@4.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.44.4(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7))(zod@4.6.7)
       '@web3auth/no-modal':
         specifier: 10.5.6
-        version: 10.5.6(@babel/runtime@7.28.6)(@coinbase/wallet-sdk@4.3.7(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7))(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.44.4(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7))(zod@4.6.7)
+        version: 10.5.6(@babel/runtime@7.29.15)(@coinbase/wallet-sdk@4.3.7(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7))(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.44.4(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7))(zod@4.6.7)
       '@xyflow/react':
         specifier: ^12.11.6
         version: 12.11.6(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -314,8 +314,8 @@ importers:
         specifier: ^1.4.1
         version: 1.4.1
       i18next:
-        specifier: ^25.8.10
-        version: 25.8.10(typescript@5.8.3)
+        specifier: ^26.3.4
+        version: 26.3.4(typescript@5.8.3)
       idb:
         specifier: ^8.0.3
         version: 8.0.3
@@ -363,7 +363,7 @@ importers:
         version: 7.61.1(react@18.3.1)
       react-i18next:
         specifier: ^16.5.4
-        version: 16.5.4(i18next@25.8.10(typescript@5.8.3))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)
+        version: 16.5.4(i18next@26.3.4(typescript@5.8.3))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)
       react-markdown:
         specifier: ^10.1.0
         version: 10.1.0(@types/react@18.3.23)(react@18.3.1)
@@ -517,6 +517,10 @@ packages:
 
   '@babel/runtime@7.28.6':
     resolution: {integrity: sha512-05WQkdpL9COIMz4LjTxGpPNCdlpyimKppYNoJ5Di5EUObifl8t4tuLuUBBZEpoLYOmfvIWrsp9fCl0HoPRVTdA==}
+    engines: {node: '>=6.9.0'}
+
+  '@babel/runtime@7.29.15':
+    resolution: {integrity: sha512-304gsbbGVmQc+cNGHzwHBlqepYdWLKj3VXCQBGt/EGcV7PUPfKI7kAUNW1FZEOCwlQiLvQjg1JEaAlRQ616h+Q==}
     engines: {node: '>=6.9.0'}
 
   '@base-org/account@1.1.1':
@@ -1274,6 +1278,14 @@ packages:
     resolution: {integrity: sha512-5yb2gMI1BDm0JybZezeoX/3XhPDOtTbcFvpTXM9kxsoZjPZFh4XciqRbpD6N86HYZqWDhEaKUDuOyR0sQHEjMA==}
     engines: {node: '>=12.0.0'}
 
+  '@metamask/safe-event-emitter@3.1.3':
+    resolution: {integrity: sha512-Pnl74ukgoOkSItBRmZ9nnhdBbRtBI1ZvpeYjKNgxjVzDWa/AtruKZc+7LjfZ0iO8iYqh7Ts3bPs2Gu7M2hSf7g==}
+    engines: {node: '>=12.0.0'}
+
+  '@metamask/scure-bip39@2.1.1':
+    resolution: {integrity: sha512-1K8aBsAqr6+8jWhguVl06n8e+zjV9sUnys+5PLyVU4mb8LbulQ60F6cq7iQys3xX/yCwKt1+7c7j2nuTEpW+ZQ==}
+    engines: {node: ^16.20 || ^18.16 || >=20}
+
   '@metamask/sdk-analytics@0.0.5':
     resolution: {integrity: sha512-fDah+keS1RjSUlC8GmYXvx6Y26s3Ax1U9hGpWb6GSY5SAdmTSIqp2CvYy6yW0WgLhnYhW+6xERuD0eVqV63QIQ==}
     deprecated: No longer maintained, superseded by @metamask/connect-analytics
@@ -1312,6 +1324,10 @@ packages:
 
   '@metamask/utils@11.11.0':
     resolution: {integrity: sha512-0nF2CWjWQr/m0Y2t2lJnBTU1/CZPPTvKvcESLplyWe/tyeb8zFOi/FeneDmaFnML6LYRIGZU6f+xR0jKAIUZfw==}
+    engines: {node: ^18.18 || ^20.14 || >=22}
+
+  '@metamask/utils@11.12.1':
+    resolution: {integrity: sha512-X97J5AEcaKDTIAfKb4X93ZTLfvOahzDVadlveQW+7OZ7yhXjMxXoFmhX2d9UKv48iS2Dxq9kbGJ1lUfphu9ebQ==}
     engines: {node: ^18.18 || ^20.14 || >=22}
 
   '@metamask/utils@5.0.2':
@@ -1409,6 +1425,10 @@ packages:
 
   '@noble/hashes@1.3.2':
     resolution: {integrity: sha512-MVC8EAQp7MvEcm30KWENFjgR+Mkmf+D189XJTkFIlwohU5hcBbn1ZkKq7KVTi2Hme3PMGF390DaL52beVrIihQ==}
+    engines: {node: '>= 16'}
+
+  '@noble/hashes@1.3.3':
+    resolution: {integrity: sha512-V7/fPHgl+jsVPXqqeOzT8egNj2iBIVt+ECeMMG8TdcnTikP3oaBtUVqpT/gYCR68aEBJSF+XbYUxStjbFMqIIA==}
     engines: {node: '>= 16'}
 
   '@noble/hashes@1.4.0':
@@ -3175,6 +3195,9 @@ packages:
   '@types/debug@4.1.12':
     resolution: {integrity: sha512-vIChWdVG3LG1SMxEvI/AK+FWJthlrqlTu7fbrlywTkkaONwk/UAGaULXRlf8vkzFBLVm0zkMdCquhL5aOjhXPQ==}
 
+  '@types/debug@4.1.13':
+    resolution: {integrity: sha512-KSVgmQmzMwPlmtljOomayoR89W4FynCAi3E8PPs7vmDVPe84hT+vGPKkJfThkmXs0x0jAaa9U8uW8bbfyS2fWw==}
+
   '@types/deep-eql@4.0.2':
     resolution: {integrity: sha512-c9h9dVVMigMPc4bwTvC5dxqtqJZwQPePsWjPlpSOnojbor6pGqdk541lfA7AqFQr5pB1BRdq0juY9db81BwyFw==}
 
@@ -3894,6 +3917,7 @@ packages:
 
   axios-retry@4.5.0:
     resolution: {integrity: sha512-aR99oXhpEDGo0UuAlYcn2iGRds30k366Zfa05XWScR9QaQD4JYiP3/1Qt1u7YlefUOK+cn0CcwoL1oefavQUlQ==}
+    deprecated: axios-retry is no longer maintained. See https://github.com/softonic/axios-retry for alternatives.
     peerDependencies:
       axios: 1.20.0
 
@@ -5059,10 +5083,18 @@ packages:
   humanize-ms@1.2.1:
     resolution: {integrity: sha512-Fl70vYtsAFb/C06PTS9dZBo7ihau+Tu/DNCk/OyHhea07S+aeMWpFFkUaXRa8fI+ScZbEI8dfSxwY7gxZ9SAVQ==}
 
-  i18next@25.8.10:
-    resolution: {integrity: sha512-CtPJLMAz1G8sxo+mIzfBjGgLxWs7d6WqIjlmmv9BTsOat4pJIfwZ8cm07n3kFS6bP9c6YwsYutYrwsEeJVBo2g==}
+  i18next@25.10.10:
+    resolution: {integrity: sha512-cqUW2Z3EkRx7NqSyywjkgCLK7KLCL6IFVFcONG7nVYIJ3ekZ1/N5jUsihHV6Bq37NfhgtczxJcxduELtjTwkuQ==}
     peerDependencies:
-      typescript: ^5
+      typescript: ^5 || ^6
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
+  i18next@26.3.4:
+    resolution: {integrity: sha512-pa7m0d7pBDqGHZxljT+WPFeyFgQ7P7SciPPo1tTqYuO0z4sqADYhwnBESmmGp/wEof1inwdls/k8ZgTg8rxFHA==}
+    peerDependencies:
+      typescript: ^5 || ^6
     peerDependenciesMeta:
       typescript:
         optional: true
@@ -6562,6 +6594,11 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
+  semver@7.8.6:
+    resolution: {integrity: sha512-9lpSSU4Mly3mrtruwLs1eLK6+gzbzqeBFwRNjIjE+9LuDpWdYctrQlQ3ej1Ilgi7gknpsTRnPoLP8DpCHqHIJw==}
+    engines: {node: '>=10'}
+    hasBin: true
+
   send@1.2.1:
     resolution: {integrity: sha512-1gnZf7DFcoIcajTjTwjwuDjzuz4PPcY2StKPlsGAQ1+YH20IRVrBaXSWmdjowTJ6u8Rc01PoYOGHXfP1mYcZNQ==}
     engines: {node: '>= 18'}
@@ -6876,6 +6913,9 @@ packages:
 
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
+
+  tslib@2.9.1:
+    resolution: {integrity: sha512-a4Ux9VKuIMHsOS7ENbEq6hK2ZGYIT27Rtl0E4eD9KqwxhKiQeMZE/9xb3IdYwWaSOyIBQLExhQgXDTYoiCxnWA==}
 
   type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
@@ -7584,6 +7624,8 @@ snapshots:
 
   '@babel/runtime@7.28.6': {}
 
+  '@babel/runtime@7.29.15': {}
+
   '@base-org/account@1.1.1(@types/react@18.3.23)(bufferutil@4.1.0)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@5.0.10)(zod@4.6.7)':
     dependencies:
       '@noble/hashes': 1.4.0
@@ -7738,7 +7780,7 @@ snapshots:
 
   '@emnapi/runtime@1.11.3':
     dependencies:
-      tslib: 2.8.1
+      tslib: 2.9.1
     optional: true
 
   '@emotion/hash@0.9.2': {}
@@ -8446,7 +8488,7 @@ snapshots:
   '@metamask/abi-utils@3.0.0':
     dependencies:
       '@metamask/superstruct': 3.2.1
-      '@metamask/utils': 11.11.0
+      '@metamask/utils': 11.12.1
     transitivePeerDependencies:
       - supports-color
 
@@ -8455,7 +8497,7 @@ snapshots:
   '@metamask/delegation-core@0.3.0':
     dependencies:
       '@metamask/abi-utils': 3.0.0
-      '@metamask/utils': 11.11.0
+      '@metamask/utils': 11.12.1
       '@noble/hashes': 1.8.0
     transitivePeerDependencies:
       - supports-color
@@ -8465,7 +8507,7 @@ snapshots:
   '@metamask/eth-json-rpc-provider@1.0.1':
     dependencies:
       '@metamask/json-rpc-engine': 7.3.3
-      '@metamask/safe-event-emitter': 3.1.2
+      '@metamask/safe-event-emitter': 3.1.3
       '@metamask/utils': 5.0.2
     transitivePeerDependencies:
       - supports-color
@@ -8473,7 +8515,7 @@ snapshots:
   '@metamask/json-rpc-engine@7.3.3':
     dependencies:
       '@metamask/rpc-errors': 6.4.0
-      '@metamask/safe-event-emitter': 3.1.2
+      '@metamask/safe-event-emitter': 3.1.3
       '@metamask/utils': 8.5.0
     transitivePeerDependencies:
       - supports-color
@@ -8538,6 +8580,13 @@ snapshots:
   '@metamask/safe-event-emitter@2.0.0': {}
 
   '@metamask/safe-event-emitter@3.1.2': {}
+
+  '@metamask/safe-event-emitter@3.1.3': {}
+
+  '@metamask/scure-bip39@2.1.1':
+    dependencies:
+      '@noble/hashes': 1.3.3
+      '@scure/base': 1.1.9
 
   '@metamask/sdk-analytics@0.0.5':
     dependencies:
@@ -8649,12 +8698,29 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@metamask/utils@11.12.1':
+    dependencies:
+      '@ethereumjs/tx': 4.2.0
+      '@metamask/scure-bip39': 2.1.1
+      '@metamask/superstruct': 3.2.1
+      '@noble/hashes': 1.8.0
+      '@scure/base': 1.2.6
+      '@types/debug': 4.1.13
+      '@types/lodash': 4.17.23
+      debug: 4.4.3
+      lodash: 4.18.1
+      pony-cause: 2.1.11
+      semver: 7.8.6
+      uuid: 11.1.1
+    transitivePeerDependencies:
+      - supports-color
+
   '@metamask/utils@5.0.2':
     dependencies:
       '@ethereumjs/tx': 4.2.0
-      '@types/debug': 4.1.12
+      '@types/debug': 4.1.13
       debug: 4.4.3
-      semver: 7.8.5
+      semver: 7.8.6
       superstruct: 1.0.4
     transitivePeerDependencies:
       - supports-color
@@ -8728,13 +8794,13 @@ snapshots:
   '@motionone/easing@10.18.0':
     dependencies:
       '@motionone/utils': 10.18.0
-      tslib: 2.8.1
+      tslib: 2.9.1
 
   '@motionone/generators@10.18.0':
     dependencies:
       '@motionone/types': 10.17.1
       '@motionone/utils': 10.18.0
-      tslib: 2.8.1
+      tslib: 2.9.1
 
   '@motionone/svelte@10.16.4':
     dependencies:
@@ -8795,6 +8861,8 @@ snapshots:
       '@noble/hashes': 2.0.1
 
   '@noble/hashes@1.3.2': {}
+
+  '@noble/hashes@1.3.3': {}
 
   '@noble/hashes@1.4.0': {}
 
@@ -10937,13 +11005,13 @@ snapshots:
 
   '@tootallnate/once@2.0.1': {}
 
-  '@toruslabs/base-controllers@7.4.0(@babel/runtime@7.28.6)(bufferutil@4.1.0)(utf-8-validate@5.0.10)':
+  '@toruslabs/base-controllers@7.4.0(@babel/runtime@7.29.15)(bufferutil@4.1.0)(utf-8-validate@5.0.10)':
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.15
       '@ethereumjs/util': 9.1.0
       '@toruslabs/broadcast-channel': 11.0.0(bufferutil@4.1.0)(utf-8-validate@5.0.10)
-      '@toruslabs/http-helpers': 7.0.1(@babel/runtime@7.28.6)
-      '@web3auth/auth': 9.6.4(@babel/runtime@7.28.6)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+      '@toruslabs/http-helpers': 7.0.1(@babel/runtime@7.29.15)
+      '@web3auth/auth': 9.6.4(@babel/runtime@7.29.15)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
       async-mutex: 0.5.0
       bignumber.js: 9.3.1
       bowser: 2.13.1
@@ -10955,13 +11023,13 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@toruslabs/base-controllers@8.17.0(@babel/runtime@7.28.6)(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(utf-8-validate@5.0.10)':
+  '@toruslabs/base-controllers@8.17.0(@babel/runtime@7.29.15)(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(utf-8-validate@5.0.10)':
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.15
       '@ethereumjs/util': 10.1.1
       '@toruslabs/broadcast-channel': 12.0.0(@sentry/core@9.47.1)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
-      '@toruslabs/http-helpers': 8.1.1(@babel/runtime@7.28.6)(@sentry/core@9.47.1)
-      '@web3auth/auth': 10.8.0(@babel/runtime@7.28.6)(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(utf-8-validate@5.0.10)
+      '@toruslabs/http-helpers': 8.1.1(@babel/runtime@7.29.15)(@sentry/core@9.47.1)
+      '@web3auth/auth': 10.8.0(@babel/runtime@7.29.15)(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(utf-8-validate@5.0.10)
       async-mutex: 0.5.0
       bignumber.js: 9.3.1
       bowser: 2.13.1
@@ -10978,9 +11046,9 @@ snapshots:
 
   '@toruslabs/broadcast-channel@11.0.0(bufferutil@4.1.0)(utf-8-validate@5.0.10)':
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.15
       '@toruslabs/eccrypto': 5.0.4
-      '@toruslabs/metadata-helpers': 6.0.0(@babel/runtime@7.28.6)
+      '@toruslabs/metadata-helpers': 6.0.0(@babel/runtime@7.29.15)
       loglevel: 1.9.2
       oblivious-set: 1.4.0
       socket.io-client: 4.8.3(bufferutil@4.1.0)(utf-8-validate@5.0.10)
@@ -11008,30 +11076,34 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@toruslabs/bs58@1.0.0(@babel/runtime@7.28.6)':
+  '@toruslabs/bs58@1.0.0(@babel/runtime@7.29.15)':
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.15
 
   '@toruslabs/constants@14.2.0(@babel/runtime@7.28.6)':
     dependencies:
       '@babel/runtime': 7.28.6
 
-  '@toruslabs/constants@15.0.0(@babel/runtime@7.28.6)':
+  '@toruslabs/constants@14.2.0(@babel/runtime@7.29.15)':
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.15
 
-  '@toruslabs/customauth@21.3.2(@babel/runtime@7.28.6)(@sentry/core@9.47.1)(bufferutil@4.1.0)(utf-8-validate@5.0.10)':
+  '@toruslabs/constants@15.0.0(@babel/runtime@7.29.15)':
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.15
+
+  '@toruslabs/customauth@21.3.2(@babel/runtime@7.29.15)(@sentry/core@9.47.1)(bufferutil@4.1.0)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@babel/runtime': 7.29.15
       '@chaitanyapotti/register-service-worker': 1.7.4
       '@toruslabs/broadcast-channel': 12.0.0(@sentry/core@9.47.1)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
-      '@toruslabs/constants': 15.0.0(@babel/runtime@7.28.6)
+      '@toruslabs/constants': 15.0.0(@babel/runtime@7.29.15)
       '@toruslabs/eccrypto': 6.2.0
-      '@toruslabs/fetch-node-details': 15.0.0(@babel/runtime@7.28.6)(@sentry/core@9.47.1)
-      '@toruslabs/http-helpers': 8.1.1(@babel/runtime@7.28.6)(@sentry/core@9.47.1)
-      '@toruslabs/metadata-helpers': 7.0.2(@babel/runtime@7.28.6)(@sentry/core@9.47.1)
-      '@toruslabs/session-manager': 4.0.2(@babel/runtime@7.28.6)(@sentry/core@9.47.1)
-      '@toruslabs/torus.js': 16.0.0(@babel/runtime@7.28.6)(@sentry/core@9.47.1)
+      '@toruslabs/fetch-node-details': 15.0.0(@babel/runtime@7.29.15)(@sentry/core@9.47.1)
+      '@toruslabs/http-helpers': 8.1.1(@babel/runtime@7.29.15)(@sentry/core@9.47.1)
+      '@toruslabs/metadata-helpers': 7.0.2(@babel/runtime@7.29.15)(@sentry/core@9.47.1)
+      '@toruslabs/session-manager': 4.0.2(@babel/runtime@7.29.15)(@sentry/core@9.47.1)
+      '@toruslabs/torus.js': 16.0.0(@babel/runtime@7.29.15)(@sentry/core@9.47.1)
       base64url: 3.0.1
       bowser: 2.13.1
       deepmerge: 4.3.1
@@ -11052,17 +11124,17 @@ snapshots:
     dependencies:
       elliptic: 6.6.1
 
-  '@toruslabs/ethereum-controllers@8.17.1(@babel/runtime@7.28.6)(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(utf-8-validate@5.0.10)(viem@2.44.4(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7))':
+  '@toruslabs/ethereum-controllers@8.17.1(@babel/runtime@7.29.15)(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(utf-8-validate@5.0.10)(viem@2.44.4(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7))':
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.15
       '@ethereumjs/common': 10.1.1
       '@ethereumjs/rlp': 10.1.1
       '@ethereumjs/tx': 10.1.1
       '@ethereumjs/util': 10.1.1
       '@metamask/smart-accounts-kit': 0.3.0(viem@2.44.4(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7))
-      '@toruslabs/base-controllers': 8.17.0(@babel/runtime@7.28.6)(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(utf-8-validate@5.0.10)
-      '@toruslabs/http-helpers': 8.1.1(@babel/runtime@7.28.6)(@sentry/core@9.47.1)
-      '@web3auth/auth': 10.8.0(@babel/runtime@7.28.6)(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(utf-8-validate@5.0.10)
+      '@toruslabs/base-controllers': 8.17.0(@babel/runtime@7.29.15)(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(utf-8-validate@5.0.10)
+      '@toruslabs/http-helpers': 8.1.1(@babel/runtime@7.29.15)(@sentry/core@9.47.1)
+      '@web3auth/auth': 10.8.0(@babel/runtime@7.29.15)(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(utf-8-validate@5.0.10)
       async-mutex: 0.5.0
       bignumber.js: 9.3.1
       bn.js: 5.2.5
@@ -11084,12 +11156,12 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@toruslabs/fetch-node-details@15.0.0(@babel/runtime@7.28.6)(@sentry/core@9.47.1)':
+  '@toruslabs/fetch-node-details@15.0.0(@babel/runtime@7.29.15)(@sentry/core@9.47.1)':
     dependencies:
-      '@babel/runtime': 7.28.6
-      '@toruslabs/constants': 15.0.0(@babel/runtime@7.28.6)
-      '@toruslabs/fnd-base': 15.0.0(@babel/runtime@7.28.6)
-      '@toruslabs/http-helpers': 8.1.1(@babel/runtime@7.28.6)(@sentry/core@9.47.1)
+      '@babel/runtime': 7.29.15
+      '@toruslabs/constants': 15.0.0(@babel/runtime@7.29.15)
+      '@toruslabs/fnd-base': 15.0.0(@babel/runtime@7.29.15)
+      '@toruslabs/http-helpers': 8.1.1(@babel/runtime@7.29.15)(@sentry/core@9.47.1)
       loglevel: 1.9.2
     transitivePeerDependencies:
       - '@sentry/core'
@@ -11098,14 +11170,14 @@ snapshots:
 
   '@toruslabs/ffjavascript@5.0.0': {}
 
-  '@toruslabs/fnd-base@15.0.0(@babel/runtime@7.28.6)':
+  '@toruslabs/fnd-base@15.0.0(@babel/runtime@7.29.15)':
     dependencies:
-      '@babel/runtime': 7.28.6
-      '@toruslabs/constants': 15.0.0(@babel/runtime@7.28.6)
+      '@babel/runtime': 7.29.15
+      '@toruslabs/constants': 15.0.0(@babel/runtime@7.29.15)
 
-  '@toruslabs/http-helpers@7.0.1(@babel/runtime@7.28.6)':
+  '@toruslabs/http-helpers@7.0.1(@babel/runtime@7.29.15)':
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.15
       deepmerge: 4.3.1
       loglevel: 1.9.2
 
@@ -11117,17 +11189,25 @@ snapshots:
     optionalDependencies:
       '@sentry/core': 9.47.1
 
-  '@toruslabs/loglevel-sentry@8.1.0(@babel/runtime@7.28.6)':
+  '@toruslabs/http-helpers@8.1.1(@babel/runtime@7.29.15)(@sentry/core@9.47.1)':
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.15
+      deepmerge: 4.3.1
+      loglevel: 1.9.2
+    optionalDependencies:
+      '@sentry/core': 9.47.1
+
+  '@toruslabs/loglevel-sentry@8.1.0(@babel/runtime@7.29.15)':
+    dependencies:
+      '@babel/runtime': 7.29.15
       '@sentry/core': 9.47.1
       loglevel: 1.9.2
 
-  '@toruslabs/metadata-helpers@6.0.0(@babel/runtime@7.28.6)':
+  '@toruslabs/metadata-helpers@6.0.0(@babel/runtime@7.29.15)':
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.15
       '@toruslabs/eccrypto': 5.0.4
-      '@toruslabs/http-helpers': 7.0.1(@babel/runtime@7.28.6)
+      '@toruslabs/http-helpers': 7.0.1(@babel/runtime@7.29.15)
       elliptic: 6.6.1
       ethereum-cryptography: 2.2.1
       json-stable-stringify: 1.3.0
@@ -11145,13 +11225,24 @@ snapshots:
     transitivePeerDependencies:
       - '@sentry/core'
 
-  '@toruslabs/secure-pub-sub@1.1.0(@babel/runtime@7.28.6)(bufferutil@4.1.0)(utf-8-validate@5.0.10)':
+  '@toruslabs/metadata-helpers@7.0.2(@babel/runtime@7.29.15)(@sentry/core@9.47.1)':
     dependencies:
-      '@babel/runtime': 7.28.6
-      '@toruslabs/constants': 14.2.0(@babel/runtime@7.28.6)
+      '@babel/runtime': 7.29.15
+      '@toruslabs/eccrypto': 6.2.0
+      '@toruslabs/http-helpers': 8.1.1(@babel/runtime@7.29.15)(@sentry/core@9.47.1)
+      elliptic: 6.6.1
+      ethereum-cryptography: 3.2.0
+      json-stable-stringify: 1.3.0
+    transitivePeerDependencies:
+      - '@sentry/core'
+
+  '@toruslabs/secure-pub-sub@1.1.0(@babel/runtime@7.29.15)(bufferutil@4.1.0)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@babel/runtime': 7.29.15
+      '@toruslabs/constants': 14.2.0(@babel/runtime@7.29.15)
       '@toruslabs/eccrypto': 5.0.4
-      '@toruslabs/http-helpers': 7.0.1(@babel/runtime@7.28.6)
-      '@toruslabs/metadata-helpers': 6.0.0(@babel/runtime@7.28.6)
+      '@toruslabs/http-helpers': 7.0.1(@babel/runtime@7.29.15)
+      '@toruslabs/metadata-helpers': 6.0.0(@babel/runtime@7.29.15)
       loglevel: 1.9.2
       socket.io-client: 4.8.3(bufferutil@4.1.0)(utf-8-validate@5.0.10)
     transitivePeerDependencies:
@@ -11160,13 +11251,13 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@toruslabs/secure-pub-sub@3.0.2(@babel/runtime@7.28.6)(@sentry/core@9.47.1)(bufferutil@4.1.0)(utf-8-validate@5.0.10)':
+  '@toruslabs/secure-pub-sub@3.0.2(@babel/runtime@7.29.15)(@sentry/core@9.47.1)(bufferutil@4.1.0)(utf-8-validate@5.0.10)':
     dependencies:
-      '@babel/runtime': 7.28.6
-      '@toruslabs/constants': 14.2.0(@babel/runtime@7.28.6)
+      '@babel/runtime': 7.29.15
+      '@toruslabs/constants': 14.2.0(@babel/runtime@7.29.15)
       '@toruslabs/eccrypto': 6.2.0
-      '@toruslabs/http-helpers': 8.1.1(@babel/runtime@7.28.6)(@sentry/core@9.47.1)
-      '@toruslabs/metadata-helpers': 7.0.2(@babel/runtime@7.28.6)(@sentry/core@9.47.1)
+      '@toruslabs/http-helpers': 8.1.1(@babel/runtime@7.29.15)(@sentry/core@9.47.1)
+      '@toruslabs/metadata-helpers': 7.0.2(@babel/runtime@7.29.15)(@sentry/core@9.47.1)
       loglevel: 1.9.2
       socket.io-client: 4.8.3(bufferutil@4.1.0)(utf-8-validate@5.0.10)
     transitivePeerDependencies:
@@ -11175,33 +11266,33 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@toruslabs/session-manager@3.2.0(@babel/runtime@7.28.6)':
+  '@toruslabs/session-manager@3.2.0(@babel/runtime@7.29.15)':
     dependencies:
-      '@toruslabs/constants': 14.2.0(@babel/runtime@7.28.6)
+      '@toruslabs/constants': 14.2.0(@babel/runtime@7.29.15)
       '@toruslabs/eccrypto': 5.0.4
-      '@toruslabs/http-helpers': 7.0.1(@babel/runtime@7.28.6)
-      '@toruslabs/metadata-helpers': 6.0.0(@babel/runtime@7.28.6)
+      '@toruslabs/http-helpers': 7.0.1(@babel/runtime@7.29.15)
+      '@toruslabs/metadata-helpers': 6.0.0(@babel/runtime@7.29.15)
     optionalDependencies:
       '@rollup/rollup-linux-x64-gnu': 4.63.5
     transitivePeerDependencies:
       - '@babel/runtime'
       - '@sentry/types'
 
-  '@toruslabs/session-manager@4.0.2(@babel/runtime@7.28.6)(@sentry/core@9.47.1)':
+  '@toruslabs/session-manager@4.0.2(@babel/runtime@7.29.15)(@sentry/core@9.47.1)':
     dependencies:
-      '@toruslabs/constants': 14.2.0(@babel/runtime@7.28.6)
+      '@toruslabs/constants': 14.2.0(@babel/runtime@7.29.15)
       '@toruslabs/eccrypto': 6.2.0
-      '@toruslabs/http-helpers': 8.1.1(@babel/runtime@7.28.6)(@sentry/core@9.47.1)
-      '@toruslabs/metadata-helpers': 7.0.2(@babel/runtime@7.28.6)(@sentry/core@9.47.1)
+      '@toruslabs/http-helpers': 8.1.1(@babel/runtime@7.29.15)(@sentry/core@9.47.1)
+      '@toruslabs/metadata-helpers': 7.0.2(@babel/runtime@7.29.15)(@sentry/core@9.47.1)
     optionalDependencies:
       '@rollup/rollup-linux-x64-gnu': 4.63.5
     transitivePeerDependencies:
       - '@babel/runtime'
       - '@sentry/core'
 
-  '@toruslabs/starkware-crypto@4.0.1(@babel/runtime@7.28.6)':
+  '@toruslabs/starkware-crypto@4.0.1(@babel/runtime@7.29.15)':
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.15
       assert: 2.1.0
       bip39: 3.1.0
       bn.js: 5.2.5
@@ -11210,9 +11301,9 @@ snapshots:
       ethereum-cryptography: 2.2.1
       hash.js: 1.1.7
 
-  '@toruslabs/starkware-crypto@5.0.0(@babel/runtime@7.28.6)':
+  '@toruslabs/starkware-crypto@5.0.0(@babel/runtime@7.29.15)':
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.15
       assert: 2.1.0
       bip39: 3.1.0
       bn.js: 5.2.5
@@ -11221,13 +11312,13 @@ snapshots:
       ethereum-cryptography: 3.2.0
       hash.js: 1.1.7
 
-  '@toruslabs/torus.js@16.0.0(@babel/runtime@7.28.6)(@sentry/core@9.47.1)':
+  '@toruslabs/torus.js@16.0.0(@babel/runtime@7.29.15)(@sentry/core@9.47.1)':
     dependencies:
-      '@babel/runtime': 7.28.6
-      '@toruslabs/bs58': 1.0.0(@babel/runtime@7.28.6)
-      '@toruslabs/constants': 15.0.0(@babel/runtime@7.28.6)
+      '@babel/runtime': 7.29.15
+      '@toruslabs/bs58': 1.0.0(@babel/runtime@7.29.15)
+      '@toruslabs/constants': 15.0.0(@babel/runtime@7.29.15)
       '@toruslabs/eccrypto': 6.2.0
-      '@toruslabs/http-helpers': 8.1.1(@babel/runtime@7.28.6)(@sentry/core@9.47.1)
+      '@toruslabs/http-helpers': 8.1.1(@babel/runtime@7.29.15)(@sentry/core@9.47.1)
       bn.js: 5.2.5
       elliptic: 6.6.1
       ethereum-cryptography: 3.2.0
@@ -11295,6 +11386,10 @@ snapshots:
       '@types/d3-selection': 3.0.11
 
   '@types/debug@4.1.12':
+    dependencies:
+      '@types/ms': 2.1.0
+
+  '@types/debug@4.1.13':
     dependencies:
       '@types/ms': 2.1.0
 
@@ -12885,15 +12980,15 @@ snapshots:
       '@walletconnect/window-getters': 1.0.1
       tslib: 1.14.1
 
-  '@web3auth/account-abstraction-provider@9.7.0(@babel/runtime@7.28.6)(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7)':
+  '@web3auth/account-abstraction-provider@9.7.0(@babel/runtime@7.29.15)(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7)':
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.15
       '@ethereumjs/util': 9.1.0
-      '@toruslabs/base-controllers': 7.4.0(@babel/runtime@7.28.6)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
-      '@web3auth/auth': 9.6.4(@babel/runtime@7.28.6)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
-      '@web3auth/base': 9.7.0(@babel/runtime@7.28.6)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
-      '@web3auth/base-provider': 9.7.0(@babel/runtime@7.28.6)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
-      '@web3auth/ethereum-provider': 9.7.0(@babel/runtime@7.28.6)(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7)
+      '@toruslabs/base-controllers': 7.4.0(@babel/runtime@7.29.15)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+      '@web3auth/auth': 9.6.4(@babel/runtime@7.29.15)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+      '@web3auth/base': 9.7.0(@babel/runtime@7.29.15)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+      '@web3auth/base-provider': 9.7.0(@babel/runtime@7.29.15)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+      '@web3auth/ethereum-provider': 9.7.0(@babel/runtime@7.29.15)(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7)
       ethers: 6.16.0(bufferutil@4.1.0)(utf-8-validate@5.0.10)
       permissionless: 0.2.57(viem@2.44.4(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7))
       viem: 2.44.4(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7)
@@ -12906,17 +13001,17 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@web3auth/auth@10.8.0(@babel/runtime@7.28.6)(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(utf-8-validate@5.0.10)':
+  '@web3auth/auth@10.8.0(@babel/runtime@7.29.15)(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(utf-8-validate@5.0.10)':
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.15
       '@ethereumjs/util': 10.1.1
-      '@toruslabs/constants': 15.0.0(@babel/runtime@7.28.6)
-      '@toruslabs/customauth': 21.3.2(@babel/runtime@7.28.6)(@sentry/core@9.47.1)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+      '@toruslabs/constants': 15.0.0(@babel/runtime@7.29.15)
+      '@toruslabs/customauth': 21.3.2(@babel/runtime@7.29.15)(@sentry/core@9.47.1)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
       '@toruslabs/ffjavascript': 5.0.0
-      '@toruslabs/metadata-helpers': 7.0.2(@babel/runtime@7.28.6)(@sentry/core@9.47.1)
-      '@toruslabs/secure-pub-sub': 3.0.2(@babel/runtime@7.28.6)(@sentry/core@9.47.1)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
-      '@toruslabs/session-manager': 4.0.2(@babel/runtime@7.28.6)(@sentry/core@9.47.1)
-      '@toruslabs/starkware-crypto': 5.0.0(@babel/runtime@7.28.6)
+      '@toruslabs/metadata-helpers': 7.0.2(@babel/runtime@7.29.15)(@sentry/core@9.47.1)
+      '@toruslabs/secure-pub-sub': 3.0.2(@babel/runtime@7.29.15)(@sentry/core@9.47.1)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+      '@toruslabs/session-manager': 4.0.2(@babel/runtime@7.29.15)(@sentry/core@9.47.1)
+      '@toruslabs/starkware-crypto': 5.0.0(@babel/runtime@7.29.15)
       '@toruslabs/tweetnacl-js': 1.0.4
       base64url: 3.0.1
       bip39: 3.1.0
@@ -12942,16 +13037,16 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@web3auth/auth@9.6.4(@babel/runtime@7.28.6)(bufferutil@4.1.0)(utf-8-validate@5.0.10)':
+  '@web3auth/auth@9.6.4(@babel/runtime@7.29.15)(bufferutil@4.1.0)(utf-8-validate@5.0.10)':
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.15
       '@ethereumjs/util': 9.1.0
-      '@toruslabs/constants': 14.2.0(@babel/runtime@7.28.6)
+      '@toruslabs/constants': 14.2.0(@babel/runtime@7.29.15)
       '@toruslabs/ffjavascript': 4.0.0
-      '@toruslabs/metadata-helpers': 6.0.0(@babel/runtime@7.28.6)
-      '@toruslabs/secure-pub-sub': 1.1.0(@babel/runtime@7.28.6)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
-      '@toruslabs/session-manager': 3.2.0(@babel/runtime@7.28.6)
-      '@toruslabs/starkware-crypto': 4.0.1(@babel/runtime@7.28.6)
+      '@toruslabs/metadata-helpers': 6.0.0(@babel/runtime@7.29.15)
+      '@toruslabs/secure-pub-sub': 1.1.0(@babel/runtime@7.29.15)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+      '@toruslabs/session-manager': 3.2.0(@babel/runtime@7.29.15)
+      '@toruslabs/starkware-crypto': 4.0.1(@babel/runtime@7.29.15)
       '@toruslabs/tweetnacl-js': 1.0.4
       base64url: 3.0.1
       bip39: 3.1.0
@@ -12978,12 +13073,12 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@web3auth/base-provider@9.7.0(@babel/runtime@7.28.6)(bufferutil@4.1.0)(utf-8-validate@5.0.10)':
+  '@web3auth/base-provider@9.7.0(@babel/runtime@7.29.15)(bufferutil@4.1.0)(utf-8-validate@5.0.10)':
     dependencies:
-      '@babel/runtime': 7.28.6
-      '@toruslabs/base-controllers': 7.4.0(@babel/runtime@7.28.6)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
-      '@web3auth/auth': 9.6.4(@babel/runtime@7.28.6)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
-      '@web3auth/base': 9.7.0(@babel/runtime@7.28.6)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+      '@babel/runtime': 7.29.15
+      '@toruslabs/base-controllers': 7.4.0(@babel/runtime@7.29.15)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+      '@web3auth/auth': 9.6.4(@babel/runtime@7.29.15)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+      '@web3auth/base': 9.7.0(@babel/runtime@7.29.15)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
       json-rpc-random-id: 1.0.1
     transitivePeerDependencies:
       - '@sentry/types'
@@ -12991,13 +13086,13 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@web3auth/base@9.7.0(@babel/runtime@7.28.6)(bufferutil@4.1.0)(utf-8-validate@5.0.10)':
+  '@web3auth/base@9.7.0(@babel/runtime@7.29.15)(bufferutil@4.1.0)(utf-8-validate@5.0.10)':
     dependencies:
-      '@babel/runtime': 7.28.6
-      '@toruslabs/base-controllers': 7.4.0(@babel/runtime@7.28.6)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
-      '@toruslabs/constants': 14.2.0(@babel/runtime@7.28.6)
-      '@toruslabs/http-helpers': 7.0.1(@babel/runtime@7.28.6)
-      '@web3auth/auth': 9.6.4(@babel/runtime@7.28.6)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+      '@babel/runtime': 7.29.15
+      '@toruslabs/base-controllers': 7.4.0(@babel/runtime@7.29.15)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+      '@toruslabs/constants': 14.2.0(@babel/runtime@7.29.15)
+      '@toruslabs/http-helpers': 7.0.1(@babel/runtime@7.29.15)
+      '@web3auth/auth': 9.6.4(@babel/runtime@7.29.15)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
       jwt-decode: 4.0.0
       loglevel: 1.9.2
       ts-custom-error: 3.3.1
@@ -13007,16 +13102,16 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@web3auth/ethereum-provider@9.7.0(@babel/runtime@7.28.6)(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7)':
+  '@web3auth/ethereum-provider@9.7.0(@babel/runtime@7.29.15)(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7)':
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.15
       '@ethereumjs/util': 9.1.0
-      '@toruslabs/base-controllers': 7.4.0(@babel/runtime@7.28.6)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+      '@toruslabs/base-controllers': 7.4.0(@babel/runtime@7.29.15)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
       '@toruslabs/eccrypto': 5.0.4
-      '@toruslabs/http-helpers': 7.0.1(@babel/runtime@7.28.6)
-      '@web3auth/auth': 9.6.4(@babel/runtime@7.28.6)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
-      '@web3auth/base': 9.7.0(@babel/runtime@7.28.6)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
-      '@web3auth/base-provider': 9.7.0(@babel/runtime@7.28.6)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+      '@toruslabs/http-helpers': 7.0.1(@babel/runtime@7.29.15)
+      '@web3auth/auth': 9.6.4(@babel/runtime@7.29.15)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+      '@web3auth/base': 9.7.0(@babel/runtime@7.29.15)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+      '@web3auth/base-provider': 9.7.0(@babel/runtime@7.29.15)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
       assert: 2.1.0
       bignumber.js: 9.3.1
       bn.js: 5.2.5
@@ -13031,25 +13126,25 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@web3auth/modal@10.5.6(@babel/runtime@7.28.6)(@coinbase/wallet-sdk@4.3.7(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7))(@sentry/core@9.47.1)(@solana/web3.js@1.98.4(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10))(bufferutil@4.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.44.4(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7))(zod@4.6.7)':
+  '@web3auth/modal@10.5.6(@babel/runtime@7.29.15)(@coinbase/wallet-sdk@4.3.7(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7))(@sentry/core@9.47.1)(@solana/web3.js@1.98.4(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10))(bufferutil@4.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.44.4(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7))(zod@4.6.7)':
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.15
       '@hcaptcha/react-hcaptcha': 1.17.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@solana/web3.js': 1.98.4(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@toruslabs/base-controllers': 8.17.0(@babel/runtime@7.28.6)(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(utf-8-validate@5.0.10)
-      '@toruslabs/http-helpers': 8.1.1(@babel/runtime@7.28.6)(@sentry/core@9.47.1)
-      '@web3auth/auth': 10.8.0(@babel/runtime@7.28.6)(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(utf-8-validate@5.0.10)
-      '@web3auth/no-modal': 10.5.6(@babel/runtime@7.28.6)(@coinbase/wallet-sdk@4.3.7(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7))(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.44.4(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7))(zod@4.6.7)
+      '@toruslabs/base-controllers': 8.17.0(@babel/runtime@7.29.15)(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(utf-8-validate@5.0.10)
+      '@toruslabs/http-helpers': 8.1.1(@babel/runtime@7.29.15)(@sentry/core@9.47.1)
+      '@web3auth/auth': 10.8.0(@babel/runtime@7.29.15)(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(utf-8-validate@5.0.10)
+      '@web3auth/no-modal': 10.5.6(@babel/runtime@7.29.15)(@coinbase/wallet-sdk@4.3.7(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7))(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.44.4(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7))(zod@4.6.7)
       bowser: 2.13.1
       classnames: 2.5.1
       clsx: 2.1.1
       color: 5.0.3
       copy-to-clipboard: 3.3.3
       deepmerge: 4.3.1
-      i18next: 25.8.10(typescript@5.8.3)
+      i18next: 25.10.10(typescript@5.8.3)
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      react-i18next: 15.7.4(i18next@25.8.10(typescript@5.8.3))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)
+      react-i18next: 15.7.4(i18next@25.10.10(typescript@5.8.3))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)
       react-qrcode-logo: 3.0.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       tailwind-merge: 3.4.1
     optionalDependencies:
@@ -13085,22 +13180,22 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@web3auth/no-modal@10.5.6(@babel/runtime@7.28.6)(@coinbase/wallet-sdk@4.3.7(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7))(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.44.4(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7))(zod@4.6.7)':
+  '@web3auth/no-modal@10.5.6(@babel/runtime@7.29.15)(@coinbase/wallet-sdk@4.3.7(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7))(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.44.4(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7))(zod@4.6.7)':
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.15
       '@ethereumjs/util': 9.1.0
       '@metamask/sdk': 0.33.1(bufferutil@4.1.0)(utf-8-validate@5.0.10)
       '@segment/analytics-next': 1.84.1
       '@solana/wallet-standard-features': 1.3.0
       '@solana/web3.js': 1.98.4(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@toruslabs/base-controllers': 8.17.0(@babel/runtime@7.28.6)(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(utf-8-validate@5.0.10)
-      '@toruslabs/bs58': 1.0.0(@babel/runtime@7.28.6)
-      '@toruslabs/constants': 15.0.0(@babel/runtime@7.28.6)
+      '@toruslabs/base-controllers': 8.17.0(@babel/runtime@7.29.15)(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(utf-8-validate@5.0.10)
+      '@toruslabs/bs58': 1.0.0(@babel/runtime@7.29.15)
+      '@toruslabs/constants': 15.0.0(@babel/runtime@7.29.15)
       '@toruslabs/eccrypto': 6.2.0
-      '@toruslabs/ethereum-controllers': 8.17.1(@babel/runtime@7.28.6)(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(utf-8-validate@5.0.10)(viem@2.44.4(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7))
-      '@toruslabs/http-helpers': 8.1.1(@babel/runtime@7.28.6)(@sentry/core@9.47.1)
-      '@toruslabs/loglevel-sentry': 8.1.0(@babel/runtime@7.28.6)
-      '@toruslabs/secure-pub-sub': 3.0.2(@babel/runtime@7.28.6)(@sentry/core@9.47.1)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+      '@toruslabs/ethereum-controllers': 8.17.1(@babel/runtime@7.29.15)(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(utf-8-validate@5.0.10)(viem@2.44.4(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7))
+      '@toruslabs/http-helpers': 8.1.1(@babel/runtime@7.29.15)(@sentry/core@9.47.1)
+      '@toruslabs/loglevel-sentry': 8.1.0(@babel/runtime@7.29.15)
+      '@toruslabs/secure-pub-sub': 3.0.2(@babel/runtime@7.29.15)(@sentry/core@9.47.1)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
       '@toruslabs/tweetnacl-js': 1.0.4
       '@wallet-standard/app': 1.1.0
       '@wallet-standard/base': 1.1.0
@@ -13108,8 +13203,8 @@ snapshots:
       '@walletconnect/sign-client': 2.23.9(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.6.7)
       '@walletconnect/types': 2.23.9
       '@walletconnect/utils': 2.23.9(typescript@5.8.3)(zod@4.6.7)
-      '@web3auth/auth': 10.8.0(@babel/runtime@7.28.6)(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(utf-8-validate@5.0.10)
-      '@web3auth/ws-embed': 5.6.0(@babel/runtime@7.28.6)(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(utf-8-validate@5.0.10)
+      '@web3auth/auth': 10.8.0(@babel/runtime@7.29.15)(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(utf-8-validate@5.0.10)
+      '@web3auth/ws-embed': 5.6.0(@babel/runtime@7.29.15)(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(utf-8-validate@5.0.10)
       assert: 2.1.0
       bignumber.js: 9.3.1
       bn.js: 5.2.5
@@ -13159,13 +13254,13 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@web3auth/ws-embed@5.6.0(@babel/runtime@7.28.6)(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(utf-8-validate@5.0.10)':
+  '@web3auth/ws-embed@5.6.0(@babel/runtime@7.29.15)(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(utf-8-validate@5.0.10)':
     dependencies:
-      '@babel/runtime': 7.28.6
-      '@toruslabs/base-controllers': 8.17.0(@babel/runtime@7.28.6)(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(utf-8-validate@5.0.10)
-      '@toruslabs/constants': 15.0.0(@babel/runtime@7.28.6)
-      '@toruslabs/http-helpers': 8.1.1(@babel/runtime@7.28.6)(@sentry/core@9.47.1)
-      '@web3auth/auth': 10.8.0(@babel/runtime@7.28.6)(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(utf-8-validate@5.0.10)
+      '@babel/runtime': 7.29.15
+      '@toruslabs/base-controllers': 8.17.0(@babel/runtime@7.29.15)(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(utf-8-validate@5.0.10)
+      '@toruslabs/constants': 15.0.0(@babel/runtime@7.29.15)
+      '@toruslabs/http-helpers': 8.1.1(@babel/runtime@7.29.15)(@sentry/core@9.47.1)
+      '@web3auth/auth': 10.8.0(@babel/runtime@7.29.15)(@sentry/core@9.47.1)(bufferutil@4.1.0)(color@5.0.3)(utf-8-validate@5.0.10)
       deepmerge: 4.3.1
       fast-deep-equal: 3.1.3
       loglevel: 1.9.2
@@ -13369,7 +13464,7 @@ snapshots:
 
   async-mutex@0.2.6:
     dependencies:
-      tslib: 2.8.1
+      tslib: 2.9.1
 
   async-mutex@0.5.0:
     dependencies:
@@ -13942,7 +14037,7 @@ snapshots:
 
   dom-helpers@5.2.1:
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.15
       csstype: 3.1.3
 
   domexception@4.0.0:
@@ -14202,7 +14297,7 @@ snapshots:
   eth-block-tracker@7.1.0:
     dependencies:
       '@metamask/eth-json-rpc-provider': 1.0.1
-      '@metamask/safe-event-emitter': 3.1.2
+      '@metamask/safe-event-emitter': 3.1.3
       '@metamask/utils': 5.0.2
       json-rpc-random-id: 1.0.1
       pify: 3.0.0
@@ -14211,7 +14306,7 @@ snapshots:
 
   eth-json-rpc-filters@6.0.1:
     dependencies:
-      '@metamask/safe-event-emitter': 3.1.2
+      '@metamask/safe-event-emitter': 3.1.3
       async-mutex: 0.2.6
       eth-query: 2.1.2
       json-rpc-engine: 6.1.0
@@ -14658,9 +14753,13 @@ snapshots:
     dependencies:
       ms: 2.1.3
 
-  i18next@25.8.10(typescript@5.8.3):
+  i18next@25.10.10(typescript@5.8.3):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.15
+    optionalDependencies:
+      typescript: 5.8.3
+
+  i18next@26.3.4(typescript@5.8.3):
     optionalDependencies:
       typescript: 5.8.3
 
@@ -15956,21 +16055,21 @@ snapshots:
     dependencies:
       react: 18.3.1
 
-  react-i18next@15.7.4(i18next@25.8.10(typescript@5.8.3))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3):
+  react-i18next@15.7.4(i18next@25.10.10(typescript@5.8.3))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3):
     dependencies:
       '@babel/runtime': 7.28.6
       html-parse-stringify: 3.0.1
-      i18next: 25.8.10(typescript@5.8.3)
+      i18next: 25.10.10(typescript@5.8.3)
       react: 18.3.1
     optionalDependencies:
       react-dom: 18.3.1(react@18.3.1)
       typescript: 5.8.3
 
-  react-i18next@16.5.4(i18next@25.8.10(typescript@5.8.3))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3):
+  react-i18next@16.5.4(i18next@26.3.4(typescript@5.8.3))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3):
     dependencies:
       '@babel/runtime': 7.28.6
       html-parse-stringify: 3.0.1
-      i18next: 25.8.10(typescript@5.8.3)
+      i18next: 26.3.4(typescript@5.8.3)
       react: 18.3.1
       use-sync-external-store: 1.6.0(react@18.3.1)
     optionalDependencies:
@@ -16075,7 +16174,7 @@ snapshots:
 
   react-transition-group@4.4.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.15
       dom-helpers: 5.2.1
       loose-envify: 1.4.0
       prop-types: 15.8.1
@@ -16307,6 +16406,8 @@ snapshots:
   semver@7.7.2: {}
 
   semver@7.8.5: {}
+
+  semver@7.8.6: {}
 
   send@1.2.1:
     dependencies:
@@ -16684,6 +16785,8 @@ snapshots:
   tslib@2.7.0: {}
 
   tslib@2.8.1: {}
+
+  tslib@2.9.1: {}
 
   type-check@0.4.0:
     dependencies:
