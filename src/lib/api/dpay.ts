@@ -7,8 +7,9 @@
 import { rejectCardPayment } from './card-payment';
 import { DHB_SALES_PAUSED, DHB_SALES_PAUSED_MESSAGE } from '@/lib/dhb-sales';
 import { getAuthToken } from './dehub';
+import { API_ORIGIN } from '@/lib/api/api-origin';
 
-const DEHUB_API_BASE = "https://api.dehub.io";
+const DEHUB_API_BASE = API_ORIGIN;
 
 // Types
 export interface DPayToken {

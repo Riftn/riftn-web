@@ -2,6 +2,7 @@ import { getAuthToken } from './dehub';
 import type { PurchaseApi } from '@/hooks/use-crypto-purchase';
 import type { PaymentAsset, Purchase } from '@/lib/crypto-purchase';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
+import { API_ORIGIN } from '@/lib/api/api-origin';
 
 async function request<T>(path: string, body?: unknown, authenticated = false): Promise<T> {
   const token = authenticated ? getAuthToken() : null;
@@ -9,7 +10,7 @@ async function request<T>(path: string, body?: unknown, authenticated = false): 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 40_000);
   try {
-    const response = await fetch(`https://api.dehub.io/api/dpay/crypto/${path}`, {
+    const response = await fetch(`${API_ORIGIN}/api/dpay/crypto/${path}`, {
       method: body ? 'POST' : 'GET',
       headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       ...(body ? { body: JSON.stringify(body) } : {}),
