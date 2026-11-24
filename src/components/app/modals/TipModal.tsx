@@ -232,7 +232,7 @@ function TipModalBody({
         tokenId: postId ?? null,
         commentId: commentId ?? null,
       }).finally(() => afterTipConfirmed(res.receipt));
-      toast.success(t('tip.appSent', '{{amount}} DHB tip sent!', { amount: paid.toLocaleString() }));
+      toast.success(t('tip.appSent', 'Tip of {{amount}} tokens sent!', { amount: paid.toLocaleString() }));
       afterTipSent();
     } catch (err: any) {
       // The server answered (not enough DHB, tips off…): that attempt is over,

@@ -1791,7 +1791,7 @@
     "remove": "Remove"
   },
   "tip": {
-    "appSent": "{{amount}} DHB tip sent!",
+    "appSent": "Tip of {{amount}} tokens sent!",
     "appFailed": "Your tip was not sent. Try again.",
     "title": "Send Tip",
     "toCreator": "Tip {{name}}",

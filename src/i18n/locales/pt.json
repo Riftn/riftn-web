@@ -1369,7 +1369,7 @@
     "remove": "Remover"
   },
   "tip": {
-    "appSent": "Gorjeta de {{amount}} DHB enviada!",
+    "appSent": "Gorjeta de {{amount}} tokens enviada!",
     "appFailed": "Sua gorjeta não foi enviada. Tente de novo.",
     "title": "Enviar gorjeta",
     "toCreator": "Gorjeta para {{name}}",

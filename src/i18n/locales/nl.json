@@ -1980,7 +1980,7 @@
     "value": "Waarde"
   },
   "tip": {
-    "appSent": "Fooi van {{amount}} DHB verstuurd!",
+    "appSent": "Fooi van {{amount}} tokens verstuurd!",
     "appFailed": "Je fooi is niet verstuurd. Probeer het opnieuw.",
     "title": "Fooi versturen",
     "toCreator": "Geef {{name}} een fooi",
