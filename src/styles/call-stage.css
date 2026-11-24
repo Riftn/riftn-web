@@ -377,6 +377,14 @@ html[data-theme="hacker"] .call-card__go { background: #39ff88; color: #001a0a; 
   backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
 }
 .th-pin { left: 12px; cursor: pointer; }
+/* Moderators: mute or remove whoever is on stage. */
+.th-mod, .group-call-tile__mod {
+  position: absolute; top: 12px; right: 12px; z-index: 3; display: grid; place-items: center; width: 32px; height: 32px; padding: 0;
+  border-radius: 999px; border: 0; background: rgb(18 18 22 / 0.55); color: #fff; cursor: pointer;
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+}
+.group-call-tile__mod { top: 8px; right: 8px; width: 28px; height: 28px; }
+.th-mod:focus-visible, .group-call-tile__mod:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
 .th-strip { flex: 0 0 auto; display: flex; gap: 8px; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; padding: 2px 0; }
 .th-strip::-webkit-scrollbar { display: none; }
