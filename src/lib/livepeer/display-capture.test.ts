@@ -44,7 +44,8 @@ describe('display capture', () => {
     expect(setFocusBehavior).toHaveBeenCalledWith('no-focus-change');
     const opts = getDisplayMedia.mock.calls[0][0];
     expect(opts.selfBrowserSurface).toBe('exclude');
-    expect(opts.audio).toBe(true);
+    // Share audio arrives untouched: speech processing thins out music.
+    expect(opts.audio).toEqual({ echoCancellation: false, noiseSuppression: false, autoGainControl: false });
     expect(opts.controller).toBeInstanceOf(FakeController);
     expect(video.contentHint).toBe('motion');
   });

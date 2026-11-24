@@ -66,7 +66,15 @@ export async function requestDisplayCapture(video: MediaTrackConstraints): Promi
 
   const options = {
     video,
-    audio: true,
+    // Tab or system audio is music and game sound, not a voice: the speech
+    // processing a browser may put on it (echo cancelling, noise suppression,
+    // auto gain) strips the bass and pumps the level, so a YouTube tab came
+    // through thin. Asked for untouched; browsers that ignore it keep theirs.
+    audio: {
+      echoCancellation: false,
+      noiseSuppression: false,
+      autoGainControl: false,
+    },
     // Sharing the Riftn tab itself only shows the stream inside the stream.
     selfBrowserSurface: 'exclude',
     // Lets the creator switch to another tab from Chrome's sharing bar
