@@ -2905,7 +2905,11 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
                     fetchPriority={aboveFold ? 'high' : 'auto'}
                   />
                 )}
-                <div ref={attachVideoSlot} className={cn("absolute inset-0 w-full h-full", hasError && "invisible")} />
+                <div
+                  ref={attachVideoSlot}
+                  aria-hidden={!mediaAttached || undefined}
+                  className={cn("absolute inset-0 w-full h-full", hasError && "invisible")}
+                />
                 <AltTextBadge text={video.mediaDescriptions?.[0]} className="absolute left-2 top-2" />
               </>
             ) : video.isLivePost && video.isLiveNow ? (
