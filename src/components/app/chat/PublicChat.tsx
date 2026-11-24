@@ -859,17 +859,17 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
           {/* Search and text size on the bar; calls, translate and room
               settings behind + so the top isn't crowded on phones. "24 online"
               sits under the title (2026-11-24). */}
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-white" data-chat-search-open
+          <button type="button" className="inline-flex h-8 min-w-8 items-center justify-center rounded-lg px-1.5 text-zinc-400 transition-colors hover:bg-zinc-700/60 hover:text-white" data-chat-search-open
             aria-label={t('publicChat.searchMessages')} onClick={() => openSearch()}>
             <Search className="w-4 h-4" />
-          </Button>
+          </button>
           <ChatTextSizeButton />
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" data-public-chat-plus aria-label={_copy('chatTabs.menu', { defaultValue: 'Chat options' })}
-                className="h-8 w-8 text-zinc-400 hover:text-white [&_svg]:!h-5 [&_svg]:!w-5">
+              <button type="button" data-public-chat-plus aria-label={_copy('chatTabs.menu', { defaultValue: 'Chat options' })}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:text-white [&_svg]:h-5 [&_svg]:w-5">
                 <Plus />
-              </Button>
+              </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" sideOffset={6} data-chat-options-menu className={cn(CHAT_MENU_CONTENT, 'text-white')}>
               {call && walletAddress && !isBanned && (

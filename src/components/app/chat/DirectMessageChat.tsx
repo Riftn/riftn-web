@@ -1198,6 +1198,7 @@ const MessageBubble = memo(function MessageBubble({
                   <textarea
                     ref={editTextareaRef}
                     autoFocus
+                    data-dm-edit-field
                     dir="auto"
                     value={draftText}
                     onChange={(e) => setDraftText(e.target.value)}
@@ -1241,18 +1242,8 @@ const MessageBubble = memo(function MessageBubble({
                   {textContent && <p dir="auto" className="whitespace-pre-wrap break-words text-sm">{renderChatTextWithLinks(isTranslated ? translatedText : textContent)}</p>}
                 </div>
               ) : isPostShare && sharedLink!.kind !== 'post' ? (
-                /* One bubble, card first and caption after, like a photo with a
-                   caption. The card is inset 4px with an 8px radius under the
-                   bubble's 12px so the corners share a centre; its own outline
-                   and top margin are dropped, or it reads as a box in a box.
-                   Fixed width because the bubble is inline-block and a w-full
-                   card has nothing definite to resolve against. */
-                <div className={`w-[288px] max-w-full flex flex-col rounded-xl p-1 text-left ${
-                  isOwnMessage
-                    ? 'bg-white/[0.11] text-white rounded-br-sm'
-                    : 'border border-white/[0.16] text-zinc-100 rounded-bl-sm'
-                }`}>
-                  <div className="[&>*]:!mt-0 [&>*]:!rounded-lg [&>*]:!border-0">
+                <div className="flex w-[288px] max-w-full flex-col text-left">
+                  <div className="[&>*]:!mt-0 [&>*]:!rounded-lg [&>*]:!shadow-none">
                     <DehubLinkEmbed link={sharedLink!} compact />
                   </div>
                   {shareCaption ? (
