@@ -21848,6 +21848,8 @@
     "notInChat": "That link is to a private chat you're not in."
   },
   "notes": {
+    "background": "Background",
+    "yourPhoto": "Your photo",
     "newStatus": "New status",
     "upFor": "Up {{time}}",
     "postedAgo": "{{time}} ago",

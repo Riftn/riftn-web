@@ -21918,6 +21918,8 @@
     "notInChat": "هذا الرابط لمحادثة خاصة لست مشتركًا فيها."
   },
   "notes": {
+    "background": "الخلفية",
+    "yourPhoto": "صورتك",
     "newStatus": "حالة جديدة",
     "upFor": "منشورة منذ {{time}}",
     "postedAgo": "منذ {{time}}",

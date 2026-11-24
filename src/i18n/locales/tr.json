@@ -21874,6 +21874,8 @@
     "notInChat": "Bu bağlantı, içinde olmadığın özel bir sohbete ait."
   },
   "notes": {
+    "background": "Arka plan",
+    "yourPhoto": "Fotoğrafın",
     "newStatus": "Yeni durum",
     "upFor": "{{time}} önce paylaşıldı",
     "postedAgo": "{{time}} önce",
