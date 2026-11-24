@@ -181,6 +181,74 @@ function center(r: DOMRect) {
   return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
 }
 
+type Pt = { x: number; y: number };
+
+/**
+ * Whether a point of `el` is on screen: inside the viewport and inside every
+ * scroll box or clipped panel around it. A chip in a hidden tab, a collapsed
+ * side panel or a line scrolled out of its list has nowhere to land on.
+ */
+function onScreen(el: HTMLElement, at: Pt): boolean {
+  const r = el.getBoundingClientRect();
+  if (r.width === 0 && r.height === 0) return false;
+  if (at.x < 0 || at.y < 0 || at.x > window.innerWidth || at.y > window.innerHeight) return false;
+  for (let up = el.parentElement; up && up !== document.body; up = up.parentElement) {
+    const cs = getComputedStyle(up);
+    if (!/auto|scroll|hidden|clip/.test(`${cs.overflowX} ${cs.overflowY}`)) continue;
+    const b = up.getBoundingClientRect();
+    if (at.x < b.left - 1 || at.x > b.right + 1 || at.y < b.top - 1 || at.y > b.bottom + 1) return false;
+  }
+  return true;
+}
+
+/**
+ * Keeps a flight pinned to its chip while it is in the air.
+ *
+ * The landing spot used to be read once, the moment the reaction arrived. But
+ * the chip keeps moving after that: a chat that follows the newest line
+ * scrolls up a frame later to make room for the new chip row (the side panel
+ * chat does this on every fresh reaction), other chips wrap, the count rolls,
+ * a panel slides. The emoji then landed where the chip used to be.
+ *
+ * Every moving piece sits in `group`, and each frame the group is shifted by
+ * how far the chip has moved since take-off, weighted by `weight(progress)`:
+ * 0 keeps a point fixed on screen (where you tapped), 1 moves it with the
+ * chip. At the end the weight is always 1, so it lands exactly on the chip.
+ * `now()` hands the landing effects the chip's current spot.
+ */
+function followChip(glyph: HTMLElement, start: Pt, toLayer: (p: Pt) => Pt, total: number, weight: (t: number) => number) {
+  const group = document.createElement('div');
+  Object.assign(group.style, { position: 'absolute', left: '0', top: '0', width: '0', height: '0', overflow: 'visible', willChange: 'transform' });
+  getLayer().appendChild(group);
+  let last: Pt = start;
+  const read = (): Pt => {
+    if (glyph.isConnected) {
+      const r = glyph.getBoundingClientRect();
+      // Gone from layout mid-flight (tab hidden, list re-rendered): keep the last good spot.
+      if (r.width > 0 || r.height > 0) last = toLayer(center(r));
+    }
+    return last;
+  };
+  const t0 = performance.now();
+  const end = total + LAND_COVER_MS + 20;
+  let frame = 0;
+  const tick = () => {
+    const ms = performance.now() - t0;
+    if (ms >= end || !group.isConnected) { group.remove(); return; }
+    const p = read();
+    const k = weight(Math.min(1, ms / total));
+    group.style.transform = `translate(${(p.x - start.x) * k}px, ${(p.y - start.y) * k}px)`;
+    frame = requestAnimationFrame(tick);
+  };
+  frame = requestAnimationFrame(tick);
+  window.setTimeout(() => { cancelAnimationFrame(frame); group.remove(); }, end + 50);
+  return { group, now: read };
+}
+
+/** Eases a fixed start into following the chip: 0 at take-off, 1 on landing. */
+const easeIn = (t: number) => t * t * (3 - 2 * t);
+const always = () => 1;
+
 /** The moving emoji sits in a box this many times the still one's font size. */
 export const CLIP_BOX_EM = 1.35;
 /** A flying emoji is drawn with a font this share of its box. */
@@ -338,7 +406,10 @@ export function paintReactionArrival({ chip, glyph, emoji, mine, clip, fresh = t
   // The layer can sit under CSS zoom; rects and pointers come in screen pixels.
   const z = (getLayer() as HTMLElement & { currentCSSZoom?: number }).currentCSSZoom || 1;
   const toLayer = (p: { x: number; y: number }) => ({ x: p.x / z, y: p.y / z });
-  const target = toLayer(center(glyph.getBoundingClientRect()));
+  const glyphAt = center(glyph.getBoundingClientRect());
+  // Nowhere visible to land: just count it, never fly to a corner or off the panel.
+  if (!onScreen(glyph, glyphAt)) return none;
+  const target = toLayer(glyphAt);
   // The size the flying copy has to shrink to so it lands exactly on the chip's emoji.
   const fontPx = parseFloat(getComputedStyle(glyph).fontSize) || 16;
   const art = clip?.poster ? clip : null;
@@ -362,8 +433,10 @@ export function paintReactionArrival({ chip, glyph, emoji, mine, clip, fresh = t
     const ctrl = { x: (from.x + target.x) / 2 + (mine ? -30 : 0), y: Math.min(from.y, target.y) - (mine ? 60 : 40) };
     const pts = arc(from, ctrl, target);
     const total = mine ? 640 : 760;
+    // Yours leaves from your finger (fixed) and is pulled onto the chip; theirs rises with it.
+    const pin = followChip(glyph, target, toLayer, total, mine && recent ? easeIn : always);
     const lead = makeEmoji(emoji, art, size);
-    getLayer().appendChild(lead);
+    pin.group.appendChild(lead);
     const end = landScale(size);
     const a = lead.animate(
       pts.map((p) => ({
@@ -381,7 +454,7 @@ export function paintReactionArrival({ chip, glyph, emoji, mine, clip, fresh = t
         const ghostSize = size * (0.6 - i * 0.15) / TEXT_FILL;
         const ghost = makeEmoji(emoji, art, ghostSize);
         ghost.style.opacity = '0';
-        getLayer().appendChild(ghost);
+        pin.group.appendChild(ghost);
         const g = ghost.animate(
           pts.map((p) => ({ transform: `translate(${p.x}px, ${p.y}px)`, opacity: p.t > 0.85 ? 0 : 0.35 - i * 0.12 })),
           { duration: total, delay, easing: 'cubic-bezier(.45,.05,.35,1)' },
@@ -392,7 +465,7 @@ export function paintReactionArrival({ chip, glyph, emoji, mine, clip, fresh = t
     if (fresh) hideFor(glyph, total);
     window.setTimeout(() => {
       chipBump(chip, mine ? 1 : 0.7);
-      sparks(target, color, mine ? 6 : 4, mine ? 18 : 13);
+      sparks(pin.now(), color, mine ? 6 : 4, mine ? 18 : 13);
     }, total - 30);
     return { landMs: total, played: false };
   }
@@ -402,12 +475,14 @@ export function paintReactionArrival({ chip, glyph, emoji, mine, clip, fresh = t
     const size = 58;
     const bloom = { x: target.x, y: Math.max(size, target.y - 44) };
     const big = makeEmoji(emoji, art, size, 'once');
-    getLayer().appendChild(big);
     // It blooms, plays its whole motion up there, then drops into the chip.
     const dropAt = Math.max(850, art ? art.ms + 140 : 0);
     const total = dropAt + 400;
     const end = landScale(size);
     const at = (ms: number) => ms / total;
+    // The bloom hangs over the chip, so the whole thing moves with it.
+    const pin = followChip(glyph, target, toLayer, total, always);
+    pin.group.appendChild(big);
     const a = big.animate(
       [
         { transform: `translate(${bloom.x}px, ${bloom.y}px) scale(.2)`, easing: 'cubic-bezier(.3,1.2,.5,1)' },
@@ -422,9 +497,11 @@ export function paintReactionArrival({ chip, glyph, emoji, mine, clip, fresh = t
     window.setTimeout(() => big.remove(), total + LAND_COVER_MS + 20);
     a.oncancel = () => big.remove();
     window.setTimeout(() => {
-      ring(bloom, color, 24, 112, 620);
-      sparks(bloom, color, 8, 54);
-      sparks(bloom, color, 5, 70, { char: emoji, size: 13 });
+      const now = pin.now();
+      const here = { x: bloom.x + now.x - target.x, y: bloom.y + now.y - target.y };
+      ring(here, color, 24, 112, 620);
+      sparks(here, color, 8, 54);
+      sparks(here, color, 5, 70, { char: emoji, size: 13 });
     }, 220);
     if (fresh) hideFor(glyph, total);
     window.setTimeout(() => chipBump(chip, 1), total - 20);
