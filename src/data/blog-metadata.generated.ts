@@ -2988,6 +2988,32 @@ export const blogPostsMetadata: BlogPost[] = [
 // arrays at runtime in blogUtils.ts — metadata-only logic, no third copy here.
 export const newPostsMetadata: BlogPost[] = [
   {
+    "id": "best-free-browser-games-no-download-2026",
+    "slug": "best-free-browser-games-no-download-2026",
+    "title": "Best Free Browser Games With No Download (2026)",
+    "excerpt": "Ten free games that run in a browser tab, from cinematic 3D chess and a neon street brawler to a live 3D globe, a walk through a rainforest and Okey with friends. Nothing to install, nothing to buy.",
+    "content": "",
+    "bannerImage": "/media/best-free-browser-games-no-download-banner-r2.jpg",
+    "bannerImageAlt": "Play in a tab: the best free browser games with no download, in the Riftn Arcade",
+    "author": {
+      "name": "Mal Jan"
+    },
+    "publishedAt": "2026-11-24T17:00:00.000Z",
+    "updatedAt": "2026-11-24T17:00:00.000Z",
+    "tags": [
+      "Browser Games",
+      "Free Games",
+      "Arcade",
+      "Chess",
+      "Riftn"
+    ],
+    "readingTime": 6,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "Best Free Browser Games With No Download (2026)",
+    "seoDescription": "Ten free browser games you can play in a tab with no download: 3D chess, a neon brawler, a live 3D globe, Okey with friends and more, plus five favourites beyond Riftn."
+  },
+  {
     "id": "how-to-watch-free-live-tv-online-2026",
     "slug": "how-to-watch-free-live-tv-online-2026",
     "title": "How to Watch Free Live TV Online in 2026 (Legal Channels, No Sign-Up)",
@@ -3888,30 +3914,30 @@ export const newPostsMetadata: BlogPost[] = [
 
 // getLatestPost() result — docs home hero.
 export const latestPostMetadata: BlogPost | undefined = {
-  "id": "how-to-watch-free-live-tv-online-2026",
-  "slug": "how-to-watch-free-live-tv-online-2026",
-  "title": "How to Watch Free Live TV Online in 2026 (Legal Channels, No Sign-Up)",
-  "excerpt": "Free live TV is legal, it plays in any browser, and most of it needs no account. Here is where to find news, sport, film and kids channels from around the world, and how to spot an illegal IPTV deal.",
+  "id": "best-free-browser-games-no-download-2026",
+  "slug": "best-free-browser-games-no-download-2026",
+  "title": "Best Free Browser Games With No Download (2026)",
+  "excerpt": "Ten free games that run in a browser tab, from cinematic 3D chess and a neon street brawler to a live 3D globe, a walk through a rainforest and Okey with friends. Nothing to install, nothing to buy.",
   "content": "",
-  "bannerImage": "/media/watch-free-live-tv-online-banner-r2.jpg",
-  "bannerImageAlt": "Free live TV online: legal channels with no sign-up and no subscription, on Riftn TV",
+  "bannerImage": "/media/best-free-browser-games-no-download-banner-r2.jpg",
+  "bannerImageAlt": "Play in a tab: the best free browser games with no download, in the Riftn Arcade",
   "author": {
     "name": "Mal Jan"
   },
-  "publishedAt": "2026-11-24T16:00:00.000Z",
-  "updatedAt": "2026-11-24T16:00:00.000Z",
+  "publishedAt": "2026-11-24T17:00:00.000Z",
+  "updatedAt": "2026-11-24T17:00:00.000Z",
   "tags": [
-    "Live TV",
-    "Free TV",
-    "Streaming",
-    "IPTV",
-    "Riftn TV"
+    "Browser Games",
+    "Free Games",
+    "Arcade",
+    "Chess",
+    "Riftn"
   ],
-  "readingTime": 5,
+  "readingTime": 6,
   "featured": false,
   "status": "published",
-  "seoTitle": "How to Watch Free Live TV Online (2026): Legal, No Sign-Up",
-  "seoDescription": "Watch free live TV online, legally, in any browser and with no account. Where to find free news, sport, film and kids channels in 2026, and how to avoid illegal IPTV."
+  "seoTitle": "Best Free Browser Games With No Download (2026)",
+  "seoDescription": "Ten free browser games you can play in a tab with no download: 3D chess, a neon brawler, a live 3D globe, Okey with friends and more, plus five favourites beyond Riftn."
 };
 
 export const excludedTitles: string[] = [
