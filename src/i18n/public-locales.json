@@ -1,5 +1,5 @@
 {
-  "version": "4076c402f13a6204",
+  "version": "2070dbc381745f9b",
   "routes": {
     "/": [
       "ar",
@@ -709,6 +709,13 @@
       "tr"
     ],
     "/guides/creator-economy-reimagined-tokenized-uploads-90-ad-revenue-share": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/guides/creator-payout-thresholds-compared-2026": [
       "ar",
       "es",
       "fr",
