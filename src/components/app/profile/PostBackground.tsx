@@ -5,7 +5,9 @@ import {
   POST_BACKGROUNDS,
   POST_BG_PHOTO_ID,
   POST_BG_VIDEO_HINT,
+  parsePostBg,
   postBgById,
+  postBgFromStored,
   postBgIsVideo,
   postBgPaletteIndex,
   postBgVariant,
@@ -13,6 +15,7 @@ import {
   type PostBg,
   type PostBgPalette,
 } from '@/lib/post-backgrounds';
+import { useDeHubProfile } from '@/hooks/use-dehub-profile';
 import '@/styles/post-backgrounds.css';
 
 /** The backdrop for the profile being viewed (null = plain posts). */
@@ -37,6 +40,22 @@ export function usePostBgResolver(): (postId: string | number | null | undefined
 
 /** The profile picture of the profile being viewed, for the backdrop that blurs it (Profile Echo). */
 export const ProfilePostBgArtContext = createContext<string | null>(null);
+
+/**
+ * One opened text post's backdrop, away from the profile (the post page): the
+ * post's own if it has one, else the author's profile backdrop, so the post
+ * opens on the same look its profile tile shows. `art` is the author's picture
+ * for Profile Echo. Pass null for anything that is not a plain text post.
+ */
+export function useAuthorPostBg(post: { minter?: string | null; postBg?: unknown } | null | undefined): { bg: PostBg | null; art: string | null } {
+  const own = useMemo(() => (post ? postBgFromStored(post.postBg) : null), [post]);
+  const minter = post?.minter || undefined;
+  const { data: author } = useDeHubProfile({ userId: minter, enabled: !!minter });
+  return useMemo(() => {
+    const art = author?.avatarUrl && /^https?:/.test(author.avatarUrl) ? author.avatarUrl : null;
+    return { bg: own ?? (post ? parsePostBg(author?.customs) : null), art };
+  }, [own, post, author?.customs, author?.avatarUrl]);
+}
 
 /** Phones with little memory get a still frame instead of motion. */
 const lowEndDevice = (() => {
