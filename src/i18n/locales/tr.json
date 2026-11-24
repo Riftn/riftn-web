@@ -2552,7 +2552,9 @@
       "bountySubmittedNamed": "{{name}}, “{{title}}” ödülünüz için çalışma gönderdi",
       "bountySubmitted": "{{name}} ödülünüz için çalışma gönderdi",
       "sentNotification": "{{name}} size bir bildirim gönderdi",
-      "fractionGift": "{{name}} sana parça gönderdi"
+      "fractionGift": "{{name}} sana parça gönderdi",
+      "storyLiked": "{{name}} Anını beğendi",
+      "storyMention": "{{name}} Anında senden bahsetti"
     }
   },
   "leaderboard": {
@@ -7790,6 +7792,8 @@
     "moreActions": "Hikâye seçenekleri",
     "remixing": "{{name}} adlı kişinin hikâyesi remiksleniyor",
     "watchOriginal": "Orijinal hikâyeyi izle",
+    "hiddenCount": "Gizli ({{count}})",
+    "showHidden": "Gizlileri göster ({{count}})",
     "translate": "Çevir",
     "seeOriginal": "Orijinali gör",
     "translating": "Çevriliyor…",
@@ -7847,7 +7851,11 @@
     "fromYourPost": "Gönderinden",
     "fromAPost": "Bir gönderiden",
     "postNotPublic": "Yalnızca herkese açık gönderiler An'a paylaşılabilir.",
-    "postNotMedia": "Yalnızca fotoğraf ve video gönderileri An'a paylaşılabilir."
+    "postNotMedia": "Yalnızca fotoğraf ve video gönderileri An'a paylaşılabilir.",
+    "mentionedYou": "Anında senden bahsetti",
+    "watchMomentsOf": "{{name}} kişisinin Anlarını izle",
+    "momentEnded": "O An sona erdi",
+    "momentOpenFailed": "O An açılamadı"
   },
   "subscriptions": {
     "subscribersOnly": "Yalnızca aboneler",
@@ -21832,6 +21840,8 @@
   },
   "notes": {
     "add": "Not",
+    "yourStatus": "Durumun",
+    "whatsUp": "Neler oluyor?",
     "yourNote": "Notun",
     "count": "Notlar {{count}}",
     "hide": "Gizle",
@@ -23497,6 +23507,16 @@
     "imageOnly": "Bir resim veya GIF seç. Video, müzik veya dosyaları mint ettikten sonra sahiplere özel ekstra olarak ekle.",
     "tooBig": "Bu dosya 42 MB'tan büyük",
     "minted": "NFT mint edildi. Bir dakika içinde pazarda görünür.",
-    "failed": "NFT oluşturulamadı"
+    "failed": "NFT oluşturulamadı",
+    "newNft": "Yeni NFT",
+    "untitled": "Adsız",
+    "addArt": "Bir resim veya GIF ekle",
+    "tileEarn": "Yeniden satışlarda sana {{pct}}",
+    "otherCopies": "Diğer",
+    "otherPlaceholder": "Herhangi bir sayı, örneğin 250 veya 50000",
+    "chain": "Zincir"
+  },
+  "profileImage": {
+    "view": "Fotoğrafı gör"
   }
 }

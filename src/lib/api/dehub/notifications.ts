@@ -33,6 +33,8 @@ export type NotificationType =
   | 'username_offer_declined'
   | 'fraction_purchased'
   | 'fraction_gift'
+  | 'story_like'
+  | 'story_mention'
   | 'video_milestone'
   | 'livestream_start'
   | 'signal_flare'
@@ -138,6 +140,9 @@ export interface NotificationComment {
 /** Only the keys the client reads; the server sends more. */
 export interface NotificationMetadata {
   articleUrl?: string;
+  /** story_like / story_mention: the moment, and its public poster frame when it has one. */
+  storyId?: string;
+  storyPoster?: string;
   /** Badge lending: the tier that was lent, as it stood on the day. */
   tier?: string;
   /** Which end of that loan the reader was on. */

@@ -48,6 +48,7 @@ import { useDecryptedMedia } from '@/hooks/use-decrypted-media';
 import dehubCoin from '@/assets/dehub-coin.png';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { MomentFace } from '@/components/app/stories/MomentFace';
 import { ChatInput, type ChatInputSendArgs } from './ChatInput';
 import { DmVideoBubble } from './DmVideo';
 import type { DmVideoOptions } from '@/lib/dm-video-options';
@@ -55,12 +56,13 @@ import type { DmDestruct, DmDestructChoice } from '@/lib/dm-destruct';
 import { markDmMessageViewed } from '@/lib/api/dehub/dm';
 import { DmTimeLeft } from './DmTimeLeft';
 import { DmOpenTimerMedia } from './DmOpenTimerMedia';
+import { DmViewOncePhoto } from './DmViewOncePhoto';
 import { DmUndecryptableMessages } from './DmLockedState';
 import { useChatPrefs } from '@/hooks/use-chat-prefs';
 import { DehubLinkEmbed } from '@/components/app/cards/DehubLinkEmbed';
 import { AssetRefCards, useAssetRefsInText } from '@/components/app/cards/AssetRefCards';
 import { MomentReplyPreview } from './MomentReplyPreview';
-import { parseMomentReply } from '@/lib/moment-reply';
+import { parseMomentMention, parseMomentReply } from '@/lib/moment-reply';
 import { findDehubLinks, stripDehubLinkMatches } from '@/lib/dehub-links';
 import { conversationIdentity } from '@/lib/conversation-identity';
 import { useTranslation, renderChatTextWithLinks } from '../TranslatableText';
@@ -337,13 +339,37 @@ function EncryptedMediaBody({
   onOpenImage?: (url: string) => void;
 }) {
   const { t: _copy } = _useCopy();
-  const eager = media.kind === 'image' || media.kind === 'audio';
+  // A view-once photo sent to me is only opened on a tap, never drawn in the chat.
+  const viewOnce = destruct?.mode === 'view' && !isOwn && media.kind === 'image';
+  const eager = (media.kind === 'image' && !viewOnce) || media.kind === 'audio';
   const { url, status, load, retry } = useDecryptedMedia(mediaUrl, media, { messageId, enabled: eager });
+  const [viewOnceWaiting, setViewOnceWaiting] = useState(false);
+  useEffect(() => {
+    if (viewOnceWaiting && url) {
+      setViewOnceWaiting(false);
+      onOpenImage?.(url);
+    }
+  }, [viewOnceWaiting, url, onOpenImage]);
   const [fileBusy, setFileBusy] = useState(false);
   const [fileFailed, setFileFailed] = useState(false);
   // A video only starts by itself once the viewer has tapped it.
   const [requested, setRequested] = useState(false);
   const uploading = !mediaUrl && !url;
+
+  if (viewOnce) {
+    return (
+      <DmViewOncePhoto
+        messageId={messageId}
+        resolveUrl={() => {
+          if (url) return url;
+          setViewOnceWaiting(true);
+          load();
+          return null;
+        }}
+        onOpenImage={onOpenImage}
+      />
+    );
+  }
 
   // Gone a few seconds after the first open: a closed tile until tapped.
   if (destruct?.mode === 'open' && !isOwn && (media.kind === 'image' || media.kind === 'video')) {
@@ -700,8 +726,12 @@ const MessageBubble = memo(function MessageBubble({
     : assistantActions.length > 0
       ? withoutAssistantActionLinks(message.content || '')
       : message.content;
-  const momentReply = useMemo(() => message.msgType === 'msg' && !message.isDeleted
-    ? parseMomentReply(message.content, typeof window === 'undefined' ? undefined : window.location.origin) : null, [message.msgType, message.isDeleted, message.content]);
+  const momentReply = useMemo(() => {
+    if (message.msgType !== 'msg' || message.isDeleted) return null;
+    const origin = typeof window === 'undefined' ? undefined : window.location.origin;
+    const mention = parseMomentMention(message.content, origin);
+    return mention ? { id: mention.id, text: '', mention: true } : parseMomentReply(message.content, origin);
+  }, [message.msgType, message.isDeleted, message.content]);
   const sharedLink = useMemo(
     () => (message.msgType === 'msg' && !momentReply ? findDehubLinks(bodyContent)[0] ?? null : null),
     [message.msgType, bodyContent, momentReply],
@@ -1026,12 +1056,14 @@ const MessageBubble = memo(function MessageBubble({
       {!isOwnMessage && !cozyShowAvatar && <div aria-hidden className="w-8 flex-shrink-0" />}
       {!isOwnMessage && cozyShowAvatar && (() => {
         const avatar = (
-          <Avatar className="w-8 h-8 flex-shrink-0">
-            {avatarUrl && <AvatarImage src={avatarUrl} />}
-            <AvatarFallback className="bg-zinc-700 text-white text-xs font-medium">
-              {(displayName.startsWith('0x') ? displayName.charAt(2) : displayName.charAt(0)).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+          <MomentFace address={message.sender?.address} size={32} name={displayName} className="rounded-lg">
+            <Avatar className="w-8 h-8 flex-shrink-0">
+              {avatarUrl && <AvatarImage src={avatarUrl} />}
+              <AvatarFallback className="bg-zinc-700 text-white text-xs font-medium">
+                {(displayName.startsWith('0x') ? displayName.charAt(2) : displayName.charAt(0)).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          </MomentFace>
         );
         return senderProfilePath ? (
           <Link
@@ -1159,7 +1191,7 @@ const MessageBubble = memo(function MessageBubble({
                 </div>
               ) : momentReply ? (
                 <div className="flex w-52 max-w-full flex-col gap-2 text-start">
-                  <MomentReplyPreview id={momentReply.id} />
+                  <MomentReplyPreview id={momentReply.id} mention={'mention' in momentReply} />
                   {textContent && <p dir="auto" className="whitespace-pre-wrap break-words text-sm">{renderChatTextWithLinks(isTranslated ? translatedText : textContent)}</p>}
                 </div>
               ) : isPostShare && sharedLink!.kind !== 'post' ? (
@@ -1339,6 +1371,12 @@ const MessageBubble = memo(function MessageBubble({
                         audioUrl={getMediaUrl(primaryMediaUrl) || primaryMediaUrl}
                         duration={message.voiceDuration}
                         isPending={false}
+                      />
+                    ) : message.destruct?.mode === 'view' && !isOwnMessage ? (
+                      <DmViewOncePhoto
+                        messageId={message._id}
+                        resolveUrl={() => getMediaUrl(primaryMediaUrl)}
+                        onOpenImage={onOpenImage}
                       />
                     ) : (
                     <DmTimeLeft destruct={message.destruct}>
@@ -3296,12 +3334,14 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
           )}
 
           <Link to={profileLink} className={`flex items-center min-w-0 ${dock ? 'gap-2' : 'gap-3'}`}>
-            <Avatar className={dock ? 'w-8 h-8 shrink-0' : 'w-10 h-10'}>
-              {avatarUrl && <AvatarImage src={avatarUrl} />}
-              <AvatarFallback className="bg-zinc-700 text-white font-medium">
-                {(displayName.startsWith('0x') ? displayName.charAt(2) : displayName.charAt(0)).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+            <MomentFace address={otherUser?.address} size={dock ? 32 : 40} name={displayName} className="rounded-lg">
+              <Avatar className={dock ? 'w-8 h-8 shrink-0' : 'w-10 h-10'}>
+                {avatarUrl && <AvatarImage src={avatarUrl} />}
+                <AvatarFallback className="bg-zinc-700 text-white font-medium">
+                  {(displayName.startsWith('0x') ? displayName.charAt(2) : displayName.charAt(0)).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </MomentFace>
 
             <div className="min-w-0">
               <h2 className={`font-semibold text-white flex items-center gap-1.5 truncate ${dock ? 'text-sm' : ''}`}>

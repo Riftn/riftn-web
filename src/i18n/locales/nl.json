@@ -2741,7 +2741,9 @@
       "bountySubmittedNamed": "{{name}} heeft werk ingediend voor uw bounty \"{{title}}\"",
       "bountySubmitted": "{{name}} heeft werk ingediend voor je bounty",
       "sentNotification": "{{name}} heeft je een melding gestuurd",
-      "fractionGift": "{{name}} heeft je fracties gestuurd"
+      "fractionGift": "{{name}} heeft je fracties gestuurd",
+      "storyLiked": "{{name}} vindt je moment leuk",
+      "storyMention": "{{name}} noemde je in hun moment"
     }
   },
   "leaderboard": {
@@ -7979,6 +7981,8 @@
     "moreActions": "Verhaalopties",
     "remixing": "Remix van het verhaal van {{name}}",
     "watchOriginal": "Oorspronkelijk verhaal bekijken",
+    "hiddenCount": "Verborgen ({{count}})",
+    "showHidden": "Verborgen tonen ({{count}})",
     "translate": "Vertalen",
     "seeOriginal": "Origineel bekijken",
     "translating": "Vertalen…",
@@ -8036,7 +8040,11 @@
     "fromYourPost": "Uit je bericht",
     "fromAPost": "Uit een bericht",
     "postNotPublic": "Alleen openbare berichten kunnen als Moment worden gedeeld.",
-    "postNotMedia": "Alleen foto- en videoberichten kunnen als Moment worden gedeeld."
+    "postNotMedia": "Alleen foto- en videoberichten kunnen als Moment worden gedeeld.",
+    "mentionedYou": "Noemde je in hun moment",
+    "watchMomentsOf": "Bekijk de Momenten van {{name}}",
+    "momentEnded": "Dat Moment is voorbij",
+    "momentOpenFailed": "Kon dat Moment niet openen"
   },
   "subscriptions": {
     "subscribersOnly": "Alleen voor abonnees",
@@ -22080,6 +22088,8 @@
   },
   "notes": {
     "add": "Notitie",
+    "yourStatus": "Jouw status",
+    "whatsUp": "Hoe gaat het?",
     "yourNote": "Jouw notitie",
     "count": "Notities {{count}}",
     "hide": "Verbergen",
@@ -23745,6 +23755,16 @@
     "imageOnly": "Kies een afbeelding of GIF. Voeg video, muziek of bestanden na het minten toe als extra's voor eigenaren.",
     "tooBig": "Dat bestand is groter dan 42 MB",
     "minted": "NFT gemint. Hij staat binnen een minuut op de markt.",
-    "failed": "Kon de NFT niet maken"
+    "failed": "Kon de NFT niet maken",
+    "newNft": "Nieuwe NFT",
+    "untitled": "Zonder titel",
+    "addArt": "Voeg een afbeelding of GIF toe",
+    "tileEarn": "{{pct}} voor jou bij doorverkoop",
+    "otherCopies": "Anders",
+    "otherPlaceholder": "Elk getal, zoals 250 of 50000",
+    "chain": "Chain"
+  },
+  "profileImage": {
+    "view": "Foto bekijken"
   }
 }

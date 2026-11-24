@@ -425,6 +425,79 @@ export function NotesStrip() {
   );
 }
 
+// ── Status row ───────────────────────────────────────────────────────────
+// Statuses (notes) from people you follow sit in one row at the top of Chat,
+// under the tabs and above the chat cards: a white thought cloud over each
+// face, yours first so you can post one.
+
+const CLOUD_STYLE = { background: '#fff', color: '#0b0b0c', boxShadow: '0 0 0 1px var(--kit-hairline), 0 4px 14px rgb(0 0 0 / 0.28)' } as const;
+
+function cloudText(note: Note | null): string {
+  if (!note) return '';
+  if (note.text) return note.text;
+  if (note.song) return `🎧 ${note.song.title}`;
+  if (note.location) return `📍 ${note.location}`;
+  return note.gifUrl ? 'GIF' : '';
+}
+
+function StatusTile({ author, note, own, label, onClick }: { author: StoryAuthor; note: Note | null; own?: boolean; label: string; onClick: () => void }) {
+  const { t } = useTranslation();
+  const avatar = buildAvatarUrl(author.address, author.avatarImageUrl, 120);
+  const words = cloudText(note) || (own ? t('notes.whatsUp', { defaultValue: 'What\u2019s up?' }) : '');
+  const gif = note?.gifUrl || null;
+  return (
+    <button type="button" onClick={onClick} data-status-tile={own ? 'own' : ''} className="flex w-[88px] shrink-0 flex-col items-center text-center">
+      <span className="flex h-[58px] w-full flex-col items-center justify-end">
+        {words && (
+          <>
+            <span style={{ ...CLOUD_STYLE, borderRadius: 16 }} className="max-w-[86px] px-2.5 py-[7px]">
+              <span className="line-clamp-2 break-words text-[11.5px] font-semibold leading-[1.25]" style={{ color: own && !note ? '#71717a' : '#0b0b0c' }}>{words}</span>
+            </span>
+            <span aria-hidden className="flex w-full flex-col items-start pl-[26px]">
+              <span style={{ ...CLOUD_STYLE, borderRadius: 9999 }} className="mt-0.5 h-2 w-2" />
+              <span style={{ ...CLOUD_STYLE, borderRadius: 9999 }} className="ml-1.5 mt-px h-1 w-1" />
+            </span>
+          </>
+        )}
+      </span>
+      <span className="relative mt-0.5 block">
+        {gif ? (
+          <img src={gif} alt="" loading="lazy" style={{ borderRadius: 17 }} className="h-[60px] w-[60px] object-cover" />
+        ) : (
+          <Avatar style={{ borderRadius: 17 }} className="h-[60px] w-[60px]">
+            {avatar && <AvatarImage src={avatar} style={{ borderRadius: 17 }} className="object-cover" />}
+            <AvatarFallback style={{ borderRadius: 17 }} className="bg-zinc-700 text-white">{nameOf(author).charAt(0).toUpperCase()}</AvatarFallback>
+          </Avatar>
+        )}
+        {own && (
+          <span aria-hidden data-keep-dark className="absolute -bottom-1 -right-1 grid h-[22px] w-[22px] place-items-center" style={{ borderRadius: 8, background: '#fff', color: '#0b0b0c', boxShadow: '0 0 0 3px hsl(var(--background)), 0 0 0 1px var(--kit-hairline)' }}>
+            <Plus className="h-3.5 w-3.5" strokeWidth={3} style={{ color: '#0b0b0c', stroke: '#0b0b0c' }} />
+          </span>
+        )}
+      </span>
+      <span className="mt-1.5 w-full truncate text-[11.5px] font-semibold text-foreground" style={own ? { opacity: 0.6 } : undefined}>{label}</span>
+    </button>
+  );
+}
+
+/** The Status row at the top of Chat, for signed-in people. */
+export function StatusRow({ me }: { me: StoryAuthor | null }) {
+  const { t } = useTranslation();
+  const data = useNotes();
+  const mine = data?.mine ?? null;
+  const notes = data?.notes ?? [];
+  const self = mine?.author ?? me;
+  if (!self) return null;
+  return (
+    <div data-status-row className="-mx-0.5 flex gap-1 overflow-x-auto px-0.5 pb-1 [scrollbar-width:none] [mask-image:linear-gradient(90deg,#000_calc(100%-28px),transparent)]">
+      <StatusTile own author={self} note={mine?.note ?? null} label={t('notes.yourStatus', { defaultValue: 'Your status' })} onClick={() => openNotesSheet()} />
+      {notes.map(entry => (
+        <StatusTile key={entry.note.id} author={entry.author} note={entry.note} label={nameOf(entry.author)} onClick={() => openNotesSheet(entry)} />
+      ))}
+    </div>
+  );
+}
+
 // ── Notes in the chat list ───────────────────────────────────────────────
 // A person's note rides in their own chat card; notes from members of a
 // group ride in that group's card (and atop the open group chat). There is no

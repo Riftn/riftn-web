@@ -15,7 +15,7 @@ import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } fr
 import { createPortal } from 'react-dom';
 import { cn } from '@/lib/utils';
 import { BadgeIcon } from '@/components/app/BadgeIcon';
-import { Loader2, RotateCcw, Pin, CornerDownRight } from "lucide-react";
+import { Loader2, RotateCcw, Pin, CornerDownRight, ArrowUp } from "lucide-react";
 import { MessageMenu, type MessageMenuAction } from '@/components/app/chat/MessageMenu';
 import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreButton, copyMediaWithToast } from '@/components/app/chat/message-menu-kit';
 import { ReactionGlyph, RollingCount, useReactionHost } from '@/components/app/chat/ReactionArrival';
@@ -30,7 +30,6 @@ import Ban from "@/components/ui/cut-icons/blocked";
 import ShieldCheck from "@/components/ui/cut-icons/security";
 
 import MessageSquare from "@/components/ui/cut-icons/messages";
-import Send from "@/components/ui/cut-icons/send";
 import Mic from "@/components/ui/cut-icons/mic";
 import X from "@/components/ui/cut-icons/close";
 
@@ -59,6 +58,8 @@ import { LiveAudienceSheet } from '@/components/app/live/LiveAudienceSheet';
 import { useAuth } from '@/contexts/AuthContext';
 import { SendStatus } from '@/components/app/chat/SendStatus';
 import '@/styles/tip-wall.css';
+import '@/styles/live-chat-send.css';
+import { flyChatLine, prefersReducedMotion, type FlyFrom } from '@/lib/live-chat-fly';
 import { buildAvatarUrl, buildAvatarCdnFallbackUrl } from '@/lib/media-url';
 import { getMediaUrl, getAuthToken, uploadLiveChatVoice } from '@/lib/api/dehub';
 import { addStreamModerator, banFromStreams, pinLiveChatMessage, timeOutInStream, unpinLiveChatMessage, streamChatRoomId } from '@/lib/api/dehub/livechat';
@@ -252,16 +253,69 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   // The box grows with the message (up to 128px, like the other chat boxes)
-  // so everything typed stays in view; a fixed one-line box scrolled the
-  // start of a long message out of sight while you were still typing it.
-  // Over the picture only (the phone's full-screen live); the desktop panel
-  // keeps its two-line box.
+  // so everything typed stays in view, and it eases to each new height
+  // instead of jumping a line at a time. The words stay put while it grows:
+  // the box is held at its old height scrolled to the caret, then eased up,
+  // so its top edge glides over the lines above.
+  const [replyTo, setReplyTo] = useState<SupabaseLiveChatMessage | null>(null);
+  const boxHeightRef = useRef<number | null>(null);
   useLayoutEffect(() => {
     const el = textareaRef.current;
-    if (!el || !overlay) return;
+    if (!el) return;
+    const before = el.offsetHeight;
+    const keepScroll = el.scrollTop;
+    const atEnd = el.selectionStart === el.value.length;
+    el.style.transition = 'none';
     el.style.height = 'auto';
-    el.style.height = `${Math.min(el.scrollHeight + (el.offsetHeight - el.clientHeight), 128)}px`;
-  }, [newMessage, overlay]);
+    const target = Math.min(el.scrollHeight + (el.offsetHeight - el.clientHeight), 128);
+    if (boxHeightRef.current === null || Math.abs(before - target) < 1) {
+      el.style.height = `${target}px`;
+      el.scrollTop = atEnd ? el.scrollHeight : keepScroll;
+      el.style.transition = '';
+      boxHeightRef.current = target;
+      return;
+    }
+    el.style.height = `${before}px`;
+    el.scrollTop = atEnd ? el.scrollHeight : keepScroll;
+    void el.offsetHeight;
+    el.style.transition = '';
+    el.style.height = `${target}px`;
+    boxHeightRef.current = target;
+  }, [newMessage, overlay, replyTo]);
+  // While you type, the whole row is the message box: the viewer's buttons
+  // slide away and the box widens into their space, then they slide back
+  // when the keyboard goes. Focus counts, so the first letter moves nothing.
+  const [boxFocused, setBoxFocused] = useState(false);
+  const typing = boxFocused || newMessage.trim().length > 0;
+  // The send key stays mounted while it folds away.
+  const [keyLeaving, setKeyLeaving] = useState(false);
+  const wasTypingRef = useRef(typing);
+  useEffect(() => {
+    if (wasTypingRef.current && !typing) {
+      setKeyLeaving(true);
+      const id = window.setTimeout(() => setKeyLeaving(false), 180);
+      wasTypingRef.current = typing;
+      return () => window.clearTimeout(id);
+    }
+    wasTypingRef.current = typing;
+    setKeyLeaving(false);
+    return undefined;
+  }, [typing]);
+  // The viewer's buttons' own width, so folding them eases from exactly there.
+  const actionsRef = useRef<HTMLDivElement>(null);
+  const [actionsWidth, setActionsWidth] = useState<number | null>(null);
+  useEffect(() => {
+    const el = actionsRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(() => { if (el.offsetWidth > 0) setActionsWidth(el.offsetWidth); });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [overlay]);
+  // Sending: your words fly from the box into their line in the chat.
+  const rootRef = useRef<HTMLDivElement>(null);
+  const pendingFlightRef = useRef<{ text: string; from: FlyFrom } | null>(null);
+  const flownKeysRef = useRef<Set<string>>(new Set());
+  const startedFlightsRef = useRef<Set<string>>(new Set());
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messageRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const { isAuthenticated, walletAddress, openLoginModal } = useAuth();
@@ -282,7 +336,7 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
     onMentionInsert: (_user, newText) => setNewMessage(newText),
   });
 
-  const { messages: chatMessages, isLoading, isSending, send, retrySend, discardSend, editMessage, deleteMessage, addReaction, removeReaction, isModerator, isBanned: bannedHere, mutedUntil, staff, isSuperModerator } = useLiveChatMessages(streamId);
+  const { messages: chatMessages, isLoading, send, retrySend, discardSend, editMessage, deleteMessage, addReaction, removeReaction, isModerator, isBanned: bannedHere, mutedUntil, staff, isSuperModerator } = useLiveChatMessages(streamId);
   // The stream's creator and the moderators they appointed act on other people's lines.
   const canModerate = isHost || isModerator;
   // Platform moderators can only be timed out or banned by a super moderator.
@@ -342,16 +396,38 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
     const a = (address || '').toLowerCase();
     return !!giving && !isHost && !!a && a !== (walletAddress || '').toLowerCase() && a !== givingCreator;
   };
-  const showInlinePoints = overlay && !isHost && !isOffline && isAuthenticated && !!liveStreamId && newMessage.trim().length === 0;
+  const showInlinePoints = overlay && !isHost && !isOffline && isAuthenticated && !!liveStreamId && !typing;
   // Lines already in the chat when it loaded sit still; anything after glides
   // in, and your own line or gift lands with its text softly glowing (no ring).
   const settledIdsRef = useRef<Set<string> | null>(null);
   if (settledIdsRef.current === null && !isLoading) settledIdsRef.current = new Set(messages.map((m) => m.id));
   const landClass = (msg: SupabaseLiveChatMessage) => {
+    // Your line that is flying in from the box lands by the flight, not this.
+    const key = msg.client_key;
+    if (key && flownKeysRef.current.has(key)) return '';
+    const flight = pendingFlightRef.current;
+    if (key && flight && msg.send_state === 'sending' && isMine(msg) && (msg.content || '').trim() === flight.text) {
+      flownKeysRef.current.add(key);
+      return '';
+    }
     const settled = settledIdsRef.current;
     if (!settled || settled.has(msg.id)) return '';
     return isMine(msg) ? ' dh-chat-land dh-sent-text-glow' : ' dh-chat-land';
   };
+  // A line of yours marked to fly (landClass) takes off once it is drawn.
+  useLayoutEffect(() => {
+    const host = rootRef.current;
+    const flight = pendingFlightRef.current;
+    if (!host || !flight) return;
+    const msg = chatMessages.find((m) => m.client_key && flownKeysRef.current.has(m.client_key) && !startedFlightsRef.current.has(m.client_key));
+    if (!msg?.client_key) return;
+    const row = messageRefs.current.get(msg.id);
+    if (!row) return;
+    startedFlightsRef.current.add(msg.client_key);
+    pendingFlightRef.current = null;
+    const words = row.querySelector(':scope > div > .flex-1 > .flex.items-baseline')?.nextElementSibling as HTMLElement | null;
+    flyChatLine({ row, host, list: messagesContainerRef.current, from: flight.from, words, styleFrom: messagesContainerRef.current });
+  }, [chatMessages]);
   // Tapping the count opens Who's here, the same sheet the phone live page
   // and the app open from their "N here" pill. Fetched only while open.
   const [audienceOpen, setAudienceOpen] = useState(false);
@@ -514,7 +590,6 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
   // Right-click (or the "..." on hover) on a computer.
   const menuPoint = useMenuPoint();
   const [menuMsg, setMenuMsg] = useState<SupabaseLiveChatMessage | null>(null);
-  const [replyTo, setReplyTo] = useState<SupabaseLiveChatMessage | null>(null);
   useEffect(() => { setReplyTo(null); }, [streamId]);
   const messageHold = useHoldMenu((point, target) => {
     const row = target.closest<HTMLElement>('[data-live-msg]');
@@ -562,6 +637,15 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
     // round trip took, which reads as a send that did nothing.
     const sent = newMessage;
     const answering = replyTo;
+    const box = textareaRef.current;
+    if (box && sent.trim() && !prefersReducedMotion()) {
+      const r = box.getBoundingClientRect();
+      const cs = getComputedStyle(box);
+      pendingFlightRef.current = {
+        text: sent.trim(),
+        from: { x: r.left + parseFloat(cs.paddingLeft || '0'), y: Math.max(r.top, r.top + parseFloat(cs.paddingTop || '0') - box.scrollTop) },
+      };
+    }
     setNewMessage('');
     setReplyTo(null);
     try {
@@ -711,7 +795,9 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
 
   return (
     <div
+      ref={rootRef}
       className={cn(
+        'relative',
         overlay
           ? 'flex min-h-0 flex-1 flex-col justify-end'
           // mt-3 and the 2xl radius match the post page's bento rhythm: without
@@ -1031,19 +1117,6 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
         meta={heldMsg ? messageMenuMeta(heldMsg.created_at, heldMsg.is_edited) ?? undefined : undefined}
       />
 
-      {replyTo && (
-        <div data-keep-dark={overlay ? '' : undefined} className={cn('mb-2 flex items-center gap-1.5 rounded-xl px-2.5 py-1.5', overlay ? 'bg-black/45 backdrop-blur-md' : 'bg-white/[0.06]')}>
-          <Reply className="h-3.5 w-3.5 shrink-0 text-white" />
-          <div className="min-w-0 flex-1 text-[11px] leading-tight">
-            <span className="font-semibold text-white">{replyTo.sender_display_name || replyTo.sender_username || replyTo.sender_address.slice(0, 8)}</span>
-            <p className="truncate text-zinc-400">{(!replyTo.message_type || replyTo.message_type === 'text') && replyTo.content ? replyTo.content : _copy('copy.d357175cfe89', { defaultValue: 'Media' })}</p>
-          </div>
-          <button type="button" onClick={() => setReplyTo(null)} aria-label={_copy('copy.19766ed6ccb2', { defaultValue: 'Cancel' })} className="shrink-0 p-0.5 text-zinc-400 hover:text-white">
-            <X className="h-3.5 w-3.5" />
-          </button>
-        </div>
-      )}
-
       {/* Input */}
       <div className={overlay ? '' : 'pt-2'}>
         {!isOffline && (
@@ -1060,14 +1133,38 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
             }}
           />
         )}
-        {/* One row at the foot of the screen. Typing hands the whole width
-            to the message box and puts the send button on the end; the
-            moment it is empty again the box gives the width back and the
-            viewer's three buttons return. Nothing is ever on this row
-            that the viewer is not about to use. */}
+        {/* One row at the foot of the screen. Tapping the box turns the whole
+            row into it: the viewer's buttons fold into the box's end, where
+            the send key comes up, and fold back out when the keyboard goes
+            with nothing left to send. A reply sits inside the box, on top of
+            what you type. Nothing is ever on this row that the viewer is not
+            about to use. */}
         <div className="flex items-end gap-2">
         <div className="relative flex-1 min-w-0">
 
+          {replyTo && (
+            <div
+              data-keep-dark={overlay ? '' : undefined}
+              data-live-reply-quote
+              className={cn('live-reply-quote absolute left-3 top-2 z-[1] flex items-center gap-1.5 border-l-2 pl-2 text-[11px] leading-tight', overlay ? 'right-12 border-white' : 'right-12 border-current')}
+            >
+              <div className="min-w-0 flex-1 truncate">
+                <span className={cn('font-semibold', overlay ? 'text-white' : 'text-foreground')}>
+                  {t('features.replyingTo', { defaultValue: 'Replying to {{name}}', name: replyTo.sender_display_name || replyTo.sender_username || replyTo.sender_address.slice(0, 8) })}
+                </span>
+                <span className={cn('ml-1.5', overlay ? 'text-white/70' : 'text-muted-foreground')}>{(!replyTo.message_type || replyTo.message_type === 'text') && replyTo.content ? replyTo.content : _copy('copy.d357175cfe89', { defaultValue: 'Media' })}</span>
+              </div>
+              <button
+                type="button"
+                onPointerDown={(e) => e.preventDefault()}
+                onClick={() => setReplyTo(null)}
+                aria-label={_copy('copy.19766ed6ccb2', { defaultValue: 'Cancel' })}
+                className={cn('shrink-0 p-0.5', overlay ? 'text-white/70 hover:text-white' : 'text-muted-foreground hover:text-foreground')}
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )}
           <Textarea
             ref={textareaRef}
             value={newMessage}
@@ -1078,16 +1175,20 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
               mention.handleInput(val, cursorPos ?? undefined);
             }}
             onKeyDown={handleKeyDown}
-            placeholder={isOffline ? _copy("copy.17529a437b97", { defaultValue: "Chat is offline" }) : bannedHere ? t('liveChatModeration.youAreBanned') : muted ? t('liveChatModeration.youAreTimedOut') : _copy("copy.69518e684f06", { defaultValue: "Type a message..." })}
+            onFocus={() => setBoxFocused(true)}
+            onBlur={() => setBoxFocused(false)}
+            placeholder={isOffline ? _copy("copy.17529a437b97", { defaultValue: "Chat is offline" }) : bannedHere ? t('liveChatModeration.youAreBanned') : muted ? t('liveChatModeration.youAreTimedOut') : replyTo ? t('stories.replyTo', { defaultValue: 'Reply to {{name}}', name: replyTo.sender_display_name || replyTo.sender_username || replyTo.sender_address.slice(0, 8) }) : _copy("copy.69518e684f06", { defaultValue: "Type a message..." })}
             disabled={isOffline || !isAuthenticated || bannedHere || muted}
+            data-live-chat-box
             className={cn(
-              'chat-text-input max-h-32 resize-none text-white text-sm',
-              overlay ? (newMessage.trim() ? 'pr-14' : showInlinePoints ? 'pr-20' : 'pr-4') : 'pr-24',
+              'live-chat-box chat-text-input max-h-32 resize-none text-white text-sm scrollbar-hide',
+              overlay ? (typing ? 'pr-14' : showInlinePoints ? 'pr-20' : 'pr-4') : 'pr-14',
+              replyTo && '!pt-9',
               overlay
                 ? 'min-h-[46px] rounded-xl border-white/15 bg-black/40 py-3 pl-4 backdrop-blur-md placeholder:text-white/50'
-                : 'min-h-[56px] rounded-xl border-white/10 bg-white/5 placeholder:text-zinc-500'
+                : 'min-h-[46px] rounded-xl border-white/10 bg-white/5 py-3 placeholder:text-zinc-500'
             )}
-            rows={overlay ? 1 : 2}
+            rows={1}
           />
           <UserMentionDropdown
             query={mention.query}
@@ -1099,42 +1200,55 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
             onSelect={mention.handleSelect}
             onClose={mention.handleClose}
           />
-          <div className="absolute bottom-2 right-2 flex items-center gap-1">
+          <div className={cn('absolute right-2 flex items-center gap-1', overlay ? 'bottom-[7px]' : 'bottom-[7px]')}>
             {/* No voice notes over a broadcast. The row is the stream's and
                 it is already three buttons and a message box wide; holding
                 a mic down to talk over someone else talking is not what
-                anyone is doing here. The panel keeps it. */}
-            {!overlay && (
-              <VoiceRecorder
-                onRecordingComplete={handleVoiceRecordingComplete}
-                disabled={isOffline || !isAuthenticated || bannedHere || muted}
-              />
+                anyone is doing here. The panel keeps it, until you start
+                typing: then it folds into the send key. */}
+            {!overlay && !typing && (
+              <div className="live-fold-in">
+                <VoiceRecorder
+                  onRecordingComplete={handleVoiceRecordingComplete}
+                  disabled={isOffline || !isAuthenticated || bannedHere || muted}
+                />
+              </div>
             )}
             {/* Channel points, at the end of the empty box: the viewer's
                 balance with this creator, and the rewards behind it. */}
             {showInlinePoints && <PointsButton streamId={liveStreamId} variant="inline" />}
-            {(!overlay || newMessage.trim().length > 0) && (
+            {(typing || keyLeaving) && (
               <button
+                type="button"
+                onPointerDown={(e) => e.preventDefault()}
                 onClick={handleSend}
-                disabled={isSending || !newMessage.trim() || isOffline}
-                className={cn(
-                  'p-2 text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed',
-                  overlay ? 'rounded-xl bg-white/15 hover:bg-white/25' : 'rounded-xl bg-white/10 hover:bg-white/20'
-                )}
+                disabled={!typing || !newMessage.trim() || isOffline}
+                aria-label={t('tip.send', { defaultValue: 'Send' })}
+                data-keep-dark={overlay ? '' : undefined}
+                data-state={newMessage.trim() ? 'on' : 'off'}
+                data-enter=""
+                data-leaving={typing ? undefined : ''}
+                className="live-send-key"
               >
-                {isSending ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Send className="w-4 h-4" />
-                )}
+                <ArrowUp className="h-[18px] w-[18px]" strokeWidth={2.2} />
               </button>
             )}
           </div>
         </div>
-        {overlay && viewerActions && newMessage.trim().length === 0 ? (
+        {overlay && viewerActions ? (
           // No padding of its own: the row is `items-end` and the buttons are
           // the box's height, so anything here lifts them off its baseline.
-          <div className="shrink-0">{viewerActions}</div>
+          // While typing they fold into the box (width to 0, sliding into
+          // its end) and are out of reach until they unfold.
+          <div
+            className="live-row-actions shrink-0"
+            data-folded={typing ? '' : undefined}
+            aria-hidden={typing || undefined}
+            {...(typing ? { inert: '' } : {})}
+            style={{ maxWidth: typing ? 0 : (actionsWidth ?? undefined) }}
+          >
+            <div ref={actionsRef}>{viewerActions}</div>
+          </div>
         ) : null}
         </div>
       </div>

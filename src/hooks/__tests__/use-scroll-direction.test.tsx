@@ -72,4 +72,59 @@ describe('useStickyNavVisibility', () => {
 
     unmount();
   });
+
+  it('shows the chrome on arrival and keeps it through the restore scroll until the reader moves', async () => {
+    vi.stubGlobal('matchMedia', (query: string) => ({ matches: true, media: query, addEventListener: vi.fn(), removeEventListener: vi.fn() }));
+    const { useScrollDirection, revealNavChrome } = await import('../use-scroll-direction');
+    const { result, unmount } = renderHook(() => useScrollDirection());
+
+    // Scrolled down a profile: the bars hide.
+    act(() => {
+      scrollY = 300;
+      window.dispatchEvent(new Event('scroll'));
+      flushFrame();
+      scrollY = 900;
+      window.dispatchEvent(new Event('scroll'));
+      flushFrame();
+    });
+    expect(result.current).toBe(false);
+
+    // Back to the feed: shown at once, and the feed's own offset coming back
+    // (a big jump down) must not hide them again.
+    act(() => revealNavChrome());
+    expect(result.current).toBe(true);
+    act(() => {
+      scrollY = 2600;
+      window.dispatchEvent(new Event('scroll'));
+      flushFrame();
+    });
+    expect(result.current).toBe(true);
+
+    // The reader scrolls down again: they hide as usual.
+    act(() => {
+      window.dispatchEvent(Object.assign(new Event('touchstart'), { touches: [{ clientY: 500 }] }));
+      window.dispatchEvent(Object.assign(new Event('touchmove'), { touches: [{ clientY: 480 }] }));
+    });
+    expect(result.current).toBe(false);
+
+    unmount();
+  });
+
+  it('leaves desktop alone', async () => {
+    vi.stubGlobal('matchMedia', (query: string) => ({ matches: false, media: query, addEventListener: vi.fn(), removeEventListener: vi.fn() }));
+    const { useScrollDirection, revealNavChrome } = await import('../use-scroll-direction');
+    const { result, unmount } = renderHook(() => useScrollDirection());
+    act(() => {
+      scrollY = 300;
+      window.dispatchEvent(new Event('scroll'));
+      flushFrame();
+      scrollY = 900;
+      window.dispatchEvent(new Event('scroll'));
+      flushFrame();
+    });
+    expect(result.current).toBe(false);
+    act(() => revealNavChrome());
+    expect(result.current).toBe(false);
+    unmount();
+  });
 });

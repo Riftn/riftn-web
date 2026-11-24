@@ -1,18 +1,25 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useContext } from 'react';
+import { QueryClient, QueryClientContext, useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '@/contexts/AuthContext';
+import { AuthContext } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { withWalletHeader } from '@/lib/supabase-wallet-client';
 import { toast } from 'sonner';
 
+// Faces with a Moment mark ask this too, and some of them render in places
+// with no query client or sign-in (tests, the state gallery): there it reads
+// as on, from a client of its own that never fetches.
+const standalone = new QueryClient();
+
 export function useStoriesEnabled() {
-  const { isAuthenticated, walletAddress } = useAuth();
-  const wallet = isAuthenticated ? walletAddress?.toLowerCase() : undefined;
+  const auth = useContext(AuthContext);
+  const wallet = auth?.isAuthenticated ? auth.walletAddress?.toLowerCase() : undefined;
   const { t } = useTranslation();
-  const client = useQueryClient();
+  const provided = useContext(QueryClientContext);
+  const client = provided ?? standalone;
   const query = useQuery({
     queryKey: ['stories-enabled', wallet],
-    enabled: !!wallet,
+    enabled: !!wallet && !!provided,
     queryFn: async () => {
       const { data, error } = await withWalletHeader(
         supabase.from('user_display_preferences').select('stories_enabled').eq('wallet_address', wallet!).maybeSingle(),
@@ -21,7 +28,7 @@ export function useStoriesEnabled() {
       if (error) throw error;
       return data?.stories_enabled !== false;
     },
-  });
+  }, client);
   const save = useMutation({
     mutationFn: async ({ address, enabled }: { address: string; enabled: boolean }) => {
       const { error } = await withWalletHeader(
@@ -38,7 +45,7 @@ export function useStoriesEnabled() {
       client.setQueryData(queryKey, enabled);
     },
     onError: () => toast.error(t('settings.storiesSaveFailed', 'Could not save your Stories setting.')),
-  });
+  }, client);
   return {
     storiesEnabled: wallet && query.isLoading ? false : query.data ?? true,
     canChange: !!wallet && !query.isLoading && !save.isPending,

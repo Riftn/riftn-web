@@ -15,3 +15,18 @@ it('leaves unrelated DM text and lookalike URLs untouched', () => {
     expect(parseMomentReply(content)).toBeNull();
   }
 });
+
+describe('parseMomentMention', () => {
+  const id = '0123456789abcdef01234567';
+  it('reads the mention DM the server sends', async () => {
+    const { parseMomentMention, parseMomentReply } = await import('../moment-reply');
+    const text = `Mentioned you in their moment\nhttps://riftn.com/moment/${id}?mention=1`;
+    expect(parseMomentMention(text)).toEqual({ id, mention: true });
+    expect(parseMomentReply(text)).toBeNull();
+  });
+  it('ignores links that are not mentions or not ours', async () => {
+    const { parseMomentMention } = await import('../moment-reply');
+    expect(parseMomentMention(`look\nhttps://riftn.com/moment/${id}`)).toBeNull();
+    expect(parseMomentMention(`Mentioned you\nhttps://evil.example/moment/${id}?mention=1`)).toBeNull();
+  });
+});

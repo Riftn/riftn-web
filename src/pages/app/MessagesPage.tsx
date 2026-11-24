@@ -9,7 +9,7 @@ import { IslandAction, PageIsland, usePhonePill } from '@/components/app/page-ki
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
 import { PULL_REFRESH_THRESHOLD } from '@/lib/pill-pull-motion';
 import { DhbCoin } from '@/components/app/DhbAmount';
-import { lazy, Suspense, useContext, useState, useEffect, useRef, useCallback, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react';
+import { lazy, Suspense, useContext, useState, useEffect, useRef, useCallback, useMemo, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react';
 import CloseIcon from '@/components/ui/cut-icons/close';
 import { useTranslation } from 'react-i18next';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
@@ -81,9 +81,10 @@ import dehubLogo from '@/assets/dehub-logo.png';
 import { SEOHead } from '@/components/SEOHead';
 import { blockUser } from '@/lib/api/dehub/blocks';
 import { toast } from 'sonner';
-import { GroupChatNotesRow, NoteFaceRing, NoteTag, NotesSheetHost, openNotesSheet, useGroupNotes, useNotesByAuthor } from '@/components/app/chat/NotesRow';
-import type { NoteEntry } from '@/lib/api/dehub/notes';
+import { NotesSheetHost, openNotesSheet, StatusRow } from '@/components/app/chat/NotesRow';
+import type { StoryAuthor } from '@/lib/api/dehub/stories';
 import { LiveRipple } from '@/components/app/LiveRipple';
+import { MomentFace } from '@/components/app/stories/MomentFace';
 import { NewGroupChannelSheet, type NewChatKind } from '@/components/app/chat/NewGroupChannelSheet';
 import { GroupChatRow } from '@/components/app/chat/GroupChatRow';
 import { ChatPinStrip } from '@/components/app/chat/ChatPinStrip';
@@ -142,7 +143,6 @@ export function ConversationItem({
   onLongPress,
   compactTime = false,
   reactions,
-  note,
 }: {
   conversation: DeHubConversation;
   onClick: (e: React.MouseEvent) => void;
@@ -160,8 +160,6 @@ export function ConversationItem({
   compactTime?: boolean;
   /** Reactions to your messages here that you haven't seen yet. */
   reactions?: ChatReactionSummary | null;
-  /** Their note (last 24 hours): a tag on the preview line and a ring on the face. */
-  note?: NoteEntry | null;
 }) {
   const { t: _copy } = _useCopy();
   const hold = useRowLongPress(onLongPress);
@@ -238,14 +236,15 @@ export function ConversationItem({
       )}
       <span className="relative shrink-0">
       <LiveRipple ids={[otherUser?.address, otherUser?.username]} className="relative rounded-lg">
-        <Avatar className="w-12 h-12">
-          {avatarUrl && <AvatarImage src={avatarUrl} />}
-          <AvatarFallback className="bg-zinc-700 text-white font-medium">
-            {(fallbackName.startsWith('0x') ? fallbackName.charAt(2) : fallbackName.charAt(0)).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
+        <MomentFace address={otherUser?.address} size={48} name={displayName || fallbackName} className="rounded-lg">
+          <Avatar className="w-12 h-12">
+            {avatarUrl && <AvatarImage src={avatarUrl} />}
+            <AvatarFallback className="bg-zinc-700 text-white font-medium">
+              {(fallbackName.startsWith('0x') ? fallbackName.charAt(2) : fallbackName.charAt(0)).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+        </MomentFace>
       </LiveRipple>
-      {note && <NoteFaceRing note={note.note} />}
       </span>
 
       <div className="flex-1 min-w-0">
@@ -288,7 +287,7 @@ export function ConversationItem({
           <p data-reaction-alert-line className="text-sm truncate text-white font-bold">{reactionLine}</p>
         ) : (
           <p className={`text-sm truncate text-white ${conversation.unreadCount > 0 ? 'font-bold' : 'font-normal'}`}>
-            {note && <NoteTag entry={note} />}
+            
             {conversation.lastMessage?.encMedia
               ? encryptedMediaLabel(conversation.lastMessage.encMedia, _copy) :
              conversation.lastMessage?.type === 'image' ? _copy("copy.1b13ff986443", { defaultValue: "📷 Photo" }) :
@@ -633,8 +632,6 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // Newest line + unread number for each group row, and General Chat's newest line.
   const roomSummaries = useRoomChatSummaries(groupChats.map(c => c.id), isAuthenticated ? walletAddress : null);
   // Notes ride in the chat cards: a person's in their chat, members' in a group's.
-  const notesByAuthor = useNotesByAuthor();
-  const groupNotes = useGroupNotes(isAuthenticated ? groupChats.map(c => c.id) : [], isAuthenticated ? walletAddress : null);
   const publicLastLine = usePublicChatLastLine(isAuthenticated);
   const publicPreview = publicLastLine ? roomPreviewLine(publicLastLine, walletAddress || '', (key, options) => _copy(key, options)) : '';
   // Computer tabs: Unread keeps chats with something new (or marked unread),
@@ -642,6 +639,11 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const convHasUnread = (c: DeHubConversation) => (c.unreadCount || 0) > 0 || !!chatPrefs.get(c.id)?.markedUnread || !!chatPrefs.get(c.id)?.reactions;
   const roomHasUnread = (c: (typeof groupChats)[number]) => !!roomPref(c)?.markedUnread || !!roomPref(c)?.reactions || (roomSummaries[c.id]?.unread ?? 0) > 0;
   const publicReactions = chatPrefs.get(PUBLIC_CHAT_PREF_ID)?.reactions ?? null;
+  const statusMe = useMemo<StoryAuthor | null>(() => {
+    if (!walletAddress) return null;
+    const u = user as { username?: string; displayName?: string; avatarImageUrl?: string; avatarUrl?: string } | null;
+    return { address: walletAddress, username: u?.username ?? null, displayName: u?.displayName ?? null, avatarImageUrl: u?.avatarImageUrl || u?.avatarUrl || null };
+  }, [walletAddress, user]);
   const tabFilter = tabsOn && activeTab === 'unread' && !showArchived && !inRequests ? 'unread' : 'all';
   const shownConversations = tabFilter === 'unread' ? listedConversations.filter(convHasUnread) : listedConversations;
   const shownRooms = tabFilter === 'unread' ? listedRooms.filter(roomHasUnread) : listedRooms;
@@ -1659,6 +1661,10 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
               </div>
             </div>
             <div ref={chatPullRef} data-chat-list-body>
+            {/* Statuses from people you follow, Instagram style, above the chat cards. */}
+            {!guest && walletAddress && !inRequests && !showArchived && (!tabsOn || activeTab === 'all') && (
+              <StatusRow me={statusMe} />
+            )}
             <ChatPinStrip
               conversations={pinStrip}
               selectedId={selectedConversation?.id}
@@ -1708,7 +1714,6 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                   summary={roomSummaries[chat.id]}
                   me={walletAddress || ''}
                   reactions={selectedRoom?.id === chat.id ? null : roomPref(chat)?.reactions}
-                  notes={groupNotes[chat.id]}
                   selected={fullscreen && selectedRoom?.id === chat.id}
                   onClick={() => {
                     if (picking) { toggleBulk(roomChatId(chat.id)); return; }
@@ -1796,7 +1801,6 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                   onLongPress={richList ? undefined : () => holdToPick(conv.id)}
                   compactTime={cards}
                   reactions={selectedConversation?.id === conv.id ? null : chatPrefs.get(conv.id)?.reactions}
-                  note={notesByAuthor.get((conv.otherUser || conv.participants?.[0])?.address?.toLowerCase() || '')}
                 />
               );
               return richList ? (

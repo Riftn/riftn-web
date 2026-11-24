@@ -12,7 +12,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { AtSign, Sticker, Wand2, Timer, Pencil, RefreshCw, RotateCw, Type, Undo2, Users, Globe2, Volume2, VolumeX, Scissors } from 'lucide-react';
+import { AtSign, EyeOff, Sticker, Wand2, Timer, Pencil, RefreshCw, RotateCw, Type, Undo2, Users, Globe2, Volume2, VolumeX, Scissors } from 'lucide-react';
 import Back from '@/components/ui/cut-icons/back';
 import Close from '@/components/ui/cut-icons/close';
 import Images from '@/components/ui/cut-icons/images';
@@ -321,11 +321,13 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
   const { t } = useTranslation();
   const areaRef = useRef<HTMLDivElement>(null);
   const box = useStageBox(areaRef);
+
   const imgRef = useRef<HTMLImageElement>(null);
   const drawRef = useRef<HTMLCanvasElement>(null);
   const strokesRef = useRef<number>(0);
   const [drew, setDrew] = useState(false);
   const [layers, setLayers] = useState<TextLayer[]>([]);
+  const hiddenCount = layers.filter(l => l.hidden && l.text.trim()).length;
   const [tool, setTool] = useState<Tool>(null);
   const [editing, setEditing] = useState<string | null>(null);
   const [penColor, setPenColor] = useState(TEXT_COLORS[0]);
@@ -417,26 +419,38 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
     setTool(null);
   };
 
-  const dragRef = useRef<{ id: string; dx: number; dy: number; moved: boolean } | null>(null);
+  const dragRef = useRef<{ id: string; dx: number; dy: number; moved: boolean; off: boolean } | null>(null);
+  // The layer being carried past the edge of the picture: it fades, and hides on release.
+  const [leavingId, setLeavingId] = useState<string | null>(null);
   const onLayerDown = (e: React.PointerEvent, layer: TextLayer) => {
     if (tool === 'draw') return;
     e.stopPropagation();
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
     const stage = areaRef.current!.querySelector('[data-sc-canvas]')!.getBoundingClientRect();
-    dragRef.current = { id: layer.id, dx: e.clientX - (stage.left + layer.x * stage.width), dy: e.clientY - (stage.top + layer.y * stage.height), moved: false };
+    dragRef.current = { id: layer.id, dx: e.clientX - (stage.left + layer.x * stage.width), dy: e.clientY - (stage.top + layer.y * stage.height), moved: false, off: false };
   };
   const onLayerMove = (e: React.PointerEvent) => {
     const d = dragRef.current;
     if (!d) return;
     const stage = areaRef.current!.querySelector('[data-sc-canvas]')!.getBoundingClientRect();
-    const x = Math.min(0.95, Math.max(0.05, (e.clientX - d.dx - stage.left) / stage.width));
-    const y = Math.min(0.95, Math.max(0.05, (e.clientY - d.dy - stage.top) / stage.height));
+    const rawX = (e.clientX - d.dx - stage.left) / stage.width;
+    const rawY = (e.clientY - d.dy - stage.top) / stage.height;
+    const x = Math.min(0.95, Math.max(0.05, rawX));
+    const y = Math.min(0.95, Math.max(0.05, rawY));
     d.moved = true;
+    const off = rawX < 0 || rawX > 1 || rawY < 0 || rawY > 1;
+    if (off !== d.off) { d.off = off; setLeavingId(off ? d.id : null); }
     patch(d.id, { x, y });
   };
   const onLayerUp = (layer: TextLayer) => {
     const d = dragRef.current;
     dragRef.current = null;
+    setLeavingId(null);
+    // Let go past the edge: the layer hides and the Hidden pill brings it back.
+    if (d?.moved && d.off) {
+      patch(layer.id, { hidden: true });
+      return;
+    }
     if (d && !d.moved && layer.kind === 'text') {
       setEditing(layer.id);
       setTool('text');
@@ -498,8 +512,9 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
     setBusy(true);
     try {
       try { if (!restrictPeople) localStorage.setItem(AUDIENCE_KEY, audience); } catch { /* private mode */ }
-      const visible = layers.filter(l => l.text.trim());
-      const mentions = mentionBoxes(visible);
+      const written = layers.filter(l => l.text.trim());
+      const visible = written.filter(l => !l.hidden);
+      const mentions = mentionBoxes(written);
       let songField: StorySong | null = null;
       if (song) {
         const raw = song.url.split('#')[0];
@@ -567,11 +582,12 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
             onPointerUp={onDrawUp}
             onPointerCancel={onDrawUp}
           />
-          {layers.map(l => (
+          {layers.filter(l => !l.hidden).map(l => (
             <div
               key={l.id}
               data-sc-text
               style={{
+                opacity: leavingId === l.id ? 0.35 : undefined,
                 left: `${l.x * 100}%`,
                 top: `${l.y * 100}%`,
                 transform: `translate(-50%, -50%) rotate(${l.rotation ?? 0}deg)`,
@@ -583,12 +599,23 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
               }}
               onPointerDown={e => onLayerDown(e, l)}
               onPointerUp={() => onLayerUp(l)}
+              onPointerCancel={() => { dragRef.current = null; setLeavingId(null); }}
             >
               <span style={{ background: l.box ? (l.color.toLowerCase() === '#ffffff' ? 'rgba(0,0,0,.45)' : 'rgba(255,255,255,.92)') : undefined }}>
                 {l.text || ' '}
               </span>
             </div>
           ))}
+          {hiddenCount > 0 && tool !== 'text' && (
+            <button type="button" data-sc-hidden-pill data-st-dark-glass
+              className="absolute bottom-3 left-1/2 z-10 inline-flex h-8 -translate-x-1/2 items-center gap-1.5 rounded-full px-3 text-[13px] font-semibold text-white"
+              onPointerDown={e => e.stopPropagation()}
+              onClick={() => setLayers(ls => ls.map(l => (l.hidden ? { ...l, hidden: false } : l)))}
+              aria-label={t('stories.showHidden', { defaultValue: 'Show hidden ({{count}})', count: hiddenCount })}>
+              <EyeOff className="h-3.5 w-3.5" aria-hidden />
+              {t('stories.hiddenCount', { defaultValue: 'Hidden ({{count}})', count: hiddenCount })}
+            </button>
+          )}
           {song && (
             <div data-sv-song data-st-dark-glass style={{ top: 72 }}>
               <Music className="w-4 h-4" />

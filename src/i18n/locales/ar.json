@@ -2552,7 +2552,9 @@
       "bountySubmittedNamed": "قدم {{name}} عملًا على مكافأتك \\\"{{title}}\\\"",
       "bountySubmitted": "قدم {{name}} عملًا على مكافأتك",
       "sentNotification": "أرسل لك {{name}} إشعارًا",
-      "fractionGift": "{{name}} أرسل لك حصصًا"
+      "fractionGift": "{{name}} أرسل لك حصصًا",
+      "storyLiked": "أعجب {{name}} بلحظتك",
+      "storyMention": "ذكرك {{name}} في لحظته"
     }
   },
   "leaderboard": {
@@ -7814,6 +7816,8 @@
     "moreActions": "خيارات القصة",
     "remixing": "إعادة مزج قصة {{name}}",
     "watchOriginal": "مشاهدة القصة الأصلية",
+    "hiddenCount": "مخفي ({{count}})",
+    "showHidden": "إظهار المخفي ({{count}})",
     "translate": "ترجمة",
     "seeOriginal": "عرض الأصل",
     "translating": "جارٍ الترجمة…",
@@ -7871,7 +7875,11 @@
     "fromYourPost": "من منشورك",
     "fromAPost": "من منشور",
     "postNotPublic": "يمكن مشاركة المنشورات العامة فقط في لحظة.",
-    "postNotMedia": "يمكن مشاركة منشورات الصور والفيديو فقط في لحظة."
+    "postNotMedia": "يمكن مشاركة منشورات الصور والفيديو فقط في لحظة.",
+    "mentionedYou": "ذكرك في لحظته",
+    "watchMomentsOf": "شاهد لحظات {{name}}",
+    "momentEnded": "انتهت تلك اللحظة",
+    "momentOpenFailed": "تعذّر فتح تلك اللحظة"
   },
   "subscriptions": {
     "subscribersOnly": "للمشتركين فقط",
@@ -21876,6 +21884,8 @@
   },
   "notes": {
     "add": "ملاحظة",
+    "yourStatus": "حالتك",
+    "whatsUp": "ما الجديد؟",
     "yourNote": "ملاحظتك",
     "count": "الملاحظات {{count}}",
     "hide": "إخفاء",
@@ -23557,6 +23567,16 @@
     "imageOnly": "اختر صورة أو GIF. أضف الفيديو أو الموسيقى أو الملفات كإضافات للمالكين بعد السكّ.",
     "tooBig": "هذا الملف أكبر من 42 ميغابايت",
     "minted": "تم سكّ الـ NFT. سيظهر في السوق خلال دقيقة.",
-    "failed": "تعذّر إنشاء الـ NFT"
+    "failed": "تعذّر إنشاء الـ NFT",
+    "newNft": "NFT جديد",
+    "untitled": "بدون عنوان",
+    "addArt": "أضف صورة أو GIF",
+    "tileEarn": "{{pct}} لك عند إعادة البيع",
+    "otherCopies": "غير ذلك",
+    "otherPlaceholder": "أي رقم، مثل 250 أو 50000",
+    "chain": "الشبكة"
+  },
+  "profileImage": {
+    "view": "عرض الصورة"
   }
 }
