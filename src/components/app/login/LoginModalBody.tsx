@@ -339,7 +339,7 @@ function LoginModalBodyInner({ open, step, setStep, layout = 'default', signingU
         setPasskeyError(t('loginModal.passkeyNotLinked', 'No account is linked to that fingerprint yet. Create a new account instead.'));
       } else if (error instanceof PasskeyLoginError && error.code === 'ALREADY_REGISTERED') {
         setPasskeyError(t('loginModal.passkeyAlreadyRegistered', 'That fingerprint already has an account. Use Sign in instead.'));
-      } else if (isChunkLoadError(error) && recoverFromChunkError() === 'reloading') {
+      } else if (isChunkLoadError(error) && recoverFromChunkError(error) === 'reloading') {
         // A tab from before a deploy: reloading fetches the passkey code again.
       } else {
         console.error('Passkey login failed:', error);
