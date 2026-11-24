@@ -7,7 +7,6 @@
  */
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
-import Add from '@/components/ui/cut-icons/add';
 import Refresh from '@/components/ui/cut-icons/refresh';
 import { useBadgeBalance, useBadgeVisual } from '@/hooks/use-badge-balance';
 import { useAuth } from '@/contexts/AuthContext';
@@ -21,7 +20,7 @@ import { buildAvatarUrl, buildAvatarCdnFallbackUrl, deviceWidth } from '@/lib/me
 import type { ShelfEntry } from '@/lib/api/dehub/stories';
 import { coverOf, handleOf, nameOf, playable } from './story-utils';
 import { rememberShelfSeat } from '@/lib/story-shelf-seat';
-import { StoryCreatePill } from './StoryCreatePill';
+import { StoryCreatePill, StoryCreateTile } from './StoryCreatePill';
 import { useMomentPreviewsBlurred } from '@/lib/moment-preview-blur';
 import '@/styles/stories.css';
 
@@ -82,7 +81,8 @@ export function StoryShelf() {
 
   return (
     <div data-stories data-story-shelf data-no-swipe role="list">
-      {storiesEnabled && isAuthenticated && (
+      {storiesEnabled && isAuthenticated && <StoryCreateTile />}
+      {storiesEnabled && isAuthenticated && (pending || ownWatchable) && (
         <MeTile
           address={walletAddress ?? ''}
           avatar={user?.avatarImageUrl ?? own?.author.avatarImageUrl ?? null}
@@ -130,7 +130,6 @@ function MeTile({ address, avatar, entry, processing, pending, onAdd, onOpen }: 
   const { t } = useTranslation();
   const face = avatar ? buildAvatarUrl(address, avatar, deviceWidth(68)) : buildAvatarCdnFallbackUrl(address, undefined);
   const cover = pending ? pending.preview : entry && coverOf(entry);
-  const empty = !pending && !entry;
   const busy = pending && pending.state !== 'failed';
   const fill = busy ? `${Math.max(6, pending.state === 'processing' ? 100 : pending.progress)}%` : undefined;
 
@@ -147,19 +146,8 @@ function MeTile({ address, avatar, entry, processing, pending, onAdd, onOpen }: 
       <span data-st-shade />
       {pending?.state !== 'failed' && <ShelfAvatar src={face} />}
       {fill && <span data-st-fill style={{ '--st-upload-progress': fill } as CSSProperties} />}
-      {empty ? (
-        <span data-st-plus-corner><Add className="w-3.5 h-3.5" /></span>
-      ) : pending?.state === 'failed' ? (
+      {pending?.state === 'failed' && (
         <span data-st-glass data-st-retry><Refresh className="w-5 h-5" /></span>
-      ) : (
-        <span
-          data-st-plus-corner
-          role="button"
-          aria-label={t('stories.addMoment', { defaultValue: 'Add a moment' })}
-          onClick={e => { e.stopPropagation(); onAdd(); }}
-        >
-          <Add className="w-3.5 h-3.5" />
-        </span>
       )}
       <span data-st-label>
         {pending?.state === 'failed'
@@ -203,7 +191,9 @@ function LiveTile({ item, onOpen }: { item: LiveNowItem; onOpen: () => void }) {
     <button type="button" role="listitem" data-story-tile data-kind="live" onClick={onOpen} aria-label={item.title}>
       <span data-st-bg style={bg(item.cover)} />
       <span data-st-shade />
-      <span data-st-live>{t('stages.liveBadge', { defaultValue: 'LIVE' })}</span>
+      <span data-st-live role="img" aria-label={t('stages.liveBadge', { defaultValue: 'LIVE' })}>
+        <i /><i /><i />
+      </span>
       <ShelfAvatar src={face} />
       <TileIdentity address={item.wallet} username={item.username} displayName={item.displayName} live={item} />
     </button>
