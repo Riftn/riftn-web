@@ -105,6 +105,11 @@ describe('article slug URLs', () => {
     expect(WORKER).toContain('const articleSlug = articleSlugOf(pathname);');
   });
 
+  it('answers a failed slug lookup with a retry, not a 404', () => {
+    expect(WORKER).toContain('if (tokenId === undefined) return entityUnavailable();');
+    expect(WORKER).toContain('if (res.status === 429 || res.status >= 500) return undefined;');
+  });
+
   it('moves numeric links onto the slug, keeping the query', () => {
     expect(WORKER).toContain('/app/post/${recordSlug}${search}');
   });
