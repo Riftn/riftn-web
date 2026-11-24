@@ -37,6 +37,16 @@ describe('trim range', () => {
     expect(clampRange(29, 30, 0, 30, 'start')).toEqual([27, 30]);
     expect(clampRange(0, 1, 0, 30, 'end')).toEqual([0, 3]);
   });
+
+  it('never rounds an edge past a window that ends between tenths', () => {
+    for (let hund = 300; hund <= 9000; hund++) {
+      const hi = hund / 100;
+      const [s, e] = clampRange(hi - 30, hi, 0, hi, 'end');
+      expect(e).toBeLessThanOrEqual(hi);
+      expect(s).toBeGreaterThanOrEqual(0);
+    }
+    expect(clampRange(29.85, 59.85, 0, 59.85, 'end')).toEqual([29.9, 59.85]);
+  });
 });
 
 const clip = (over: Partial<LiveClip> = {}): LiveClip => ({
