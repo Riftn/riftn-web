@@ -11,7 +11,7 @@ interface MobileAccountButtonProps {
 export function MobileAccountButton({ action, onClick, onPointerDown, tabIndex }: MobileAccountButtonProps) {
   const { t } = useTranslation();
   const signingUp = action === 'signup';
-  const label = signingUp ? t('creator.signUp') : t('copy.c189840cf7e2', { defaultValue: 'Log in' });
+  const label = signingUp ? t('creator.signUp', { defaultValue: 'Sign up' }) : t('copy.c189840cf7e2', { defaultValue: 'Log in' });
 
   return (
     <button
