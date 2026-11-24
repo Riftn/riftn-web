@@ -194,9 +194,12 @@
           // LCP element — paints with the first frame instead of after the
           // bundle. Hide it exactly when HomeIntro itself would return null.
           if (location.pathname !== '/' || introDismissed || introSignedIn) d.dataset.homeIntro = 'off';
-          // The Moments row's seat (src/lib/story-shelf-seat.ts): held unless
-          // Home had no row last visit, so the posts do not drop when it lands.
-          if (!/^\/(app)?\/?$/.test(location.pathname) || localStorage.getItem('dehub.shelfShown') === '0') d.dataset.bootShelf = 'off';
+          // The Moments seat (src/lib/story-shelf-seat.ts): the row of tiles,
+          // or the ask bar when that is what Home showed last visit, or
+          // nothing, so the posts do not move when the real one lands.
+          var shelfSeat = localStorage.getItem('dehub.shelfShown');
+          if (!/^\/(app)?\/?$/.test(location.pathname) || shelfSeat === '0') d.dataset.bootShelf = 'off';
+          else if (shelfSeat === 'ask') d.dataset.bootShelf = 'ask';
 
           if (location.pathname === '/' && window.innerWidth > 767) {
             var skip = localStorage.getItem('dehub.introFrostSeen') === '1' || introDismissed || introSignedIn;
@@ -662,6 +665,9 @@
       .bskel-island { display: none; }
       .bskel-shelf { display: none; gap: 8px; overflow: hidden; padding: 2px 0; margin: 0 0 10px; }
       .bskel-shelf > div { flex: none; width: 86px; height: 118px; border-radius: 16px; }
+      html[data-boot-shelf="ask"] .bskel-shelf { padding: 0; margin: 2px 0 12px; }
+      html[data-boot-shelf="ask"] .bskel-shelf > div:first-child { flex: 1 1 auto; height: 48px; border-radius: 12px; }
+      html[data-boot-shelf="ask"] .bskel-shelf > div + div { display: none; }
       .bskel-card { height: 300px; margin: 0 8px 12px; border-radius: 16px;
                     background: var(--bskel, rgba(255,255,255,.06));
                     border: 1px solid var(--bskel-b, rgba(255,255,255,.08)); }

@@ -8173,7 +8173,8 @@
         "connecting": "Conectando",
         "live": "En vivo",
         "error": "Error"
-      }
+      },
+      "addShort": "Añadir"
     },
     "vertical": {
       "title": "Vista vertical",
@@ -8593,6 +8594,18 @@
         "word-timeout_one": "Puso en *timeout* a {{target}} por {{count}} segundo por \"{{word}}\"",
         "word-timeout_other": "Puso en *timeout* a {{target}} por {{count}} segundos por \"{{word}}\""
       }
+    },
+    "groups": {
+      "stream": "En directo",
+      "streamHint": "Interruptores para durante el directo, adónde se envía tu emisión y el enlace para OBS.",
+      "overlay": "Overlay",
+      "viewers": "Espectadores",
+      "viewersHint": "Encuestas, temporizadores, puntos y recompensas que meten en el directo a quien lo ve.",
+      "chat": "Chat",
+      "chatHint": "Tu bot de chat y las reglas del chat bajo tus emisiones.",
+      "replays": "Después del directo",
+      "replaysTab": "Después",
+      "replaysHint": "Cómo fue tu último directo y clips para compartir."
     }
   },
   "live": {

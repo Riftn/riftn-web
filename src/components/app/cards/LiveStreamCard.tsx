@@ -1558,7 +1558,9 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
             // the page: the post page still scrolls under it, and a stream
             // is not a thing you scroll past on a phone.
             'fixed inset-0 z-[55] bg-black isolate overscroll-contain'
-          : 'rounded-xl border border-white/[0.08] bg-transparent p-3 isolate'
+          // No box of its own: the post page's bento already frames the
+          // live post, and a second border inside it read as a card in a card.
+          : 'isolate'
       )}
     >
       {/* Header with AI and menu buttons. Full-bleed has its own, drawn
@@ -1830,10 +1832,13 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
                   <span data-live-badge className="px-2 py-0.5 bg-red-500 text-white text-xs font-semibold rounded">{_copy("copy.35e0d0360a0a", { defaultValue: "LIVE" })}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  {/* Like (tap again and again, every tap floats one) and the
-                      emoji tray (hover or hold), on the picture itself, as on
-                      the phone. In fullscreen the share sheet can't draw
-                      over the player, so share reposts straight away there. */}
+                  {/* Like (tap again and again, every tap floats one), the
+                      emoji tray (hover or hold) and share, on the picture only
+                      in fullscreen: the action row under the player has the
+                      same buttons, so inline they were a second copy. In
+                      fullscreen the share sheet can't draw over the player,
+                      so share reposts straight away there. */}
+                  {isFullscreen && (
                   <div
                     data-no-navigate
                     data-live-player-actions
@@ -1858,6 +1863,7 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
                       nativeShare={{ title: stream.title }}
                     />
                   </div>
+                  )}
                   {isFullscreen && chatSlot && (
                     <button
                       type="button"
