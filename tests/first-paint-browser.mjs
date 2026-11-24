@@ -8,7 +8,8 @@
 //  - every route: once something is on screen the screen is never empty
 //    again (the boot skeleton handing over to a placeholder that fades in
 //    later left a blank gap);
-//  - no raw translation key ("creator.signUp") is ever shown.
+//  - no raw translation key ("creator.signUp") is ever shown;
+//  - with the stylesheet held back, the first screen still paints at once.
 //
 // Outside requests are blocked so the run is the same every time and only
 // tests this branch's own load path (the feed then draws its placeholders).
@@ -30,6 +31,9 @@ const JUMP_PX = 3;
 const RUNS = [
   { name: 'home-phone', path: '/', phone: true, cpu: 4, intro: true },
   { name: 'home-desktop', path: '/', phone: false, cpu: 2, intro: true },
+  // The full stylesheet held back: the first frame must come from the HTML's
+  // own inlined rules, and nothing may move or restyle when the sheet lands.
+  { name: 'home-phone-slow-css', path: '/', phone: true, cpu: 4, intro: true, cssDelay: 1500 },
   { name: 'explore-phone', path: '/explore', phone: true, cpu: 4 },
   { name: 'leaderboard-phone', path: '/leaderboard', phone: true, cpu: 4 },
 ];
@@ -89,6 +93,9 @@ try {
       serviceWorkers: 'block',
     });
     await context.route(/^https?:\/\/(?!127\.0\.0\.1|localhost)/, (r) => r.abort());
+    if (run.cssDelay) {
+      await context.route(/\/assets\/index-[^/]+\.css$/, async (r) => { await new Promise((done) => setTimeout(done, run.cssDelay)); await r.continue(); });
+    }
     const page = await context.newPage();
     await page.addInitScript(sampler);
     const cdp = await context.newCDPSession(page);
@@ -122,6 +129,7 @@ try {
       const first = frames.findIndex((f) => f[1] > 0);
       if (first < 0) fail('the welcome card never showed');
       else {
+        if (run.cssDelay && frames[first][0] > run.cssDelay) fail(`the welcome card waited for the stylesheet (first shown at ${frames[first][0]} ms)`);
         const lost = frames.slice(first).find((f) => f[1] === 0);
         if (lost) fail(`the welcome card disappeared at ${lost[0]} ms (first shown at ${frames[first][0]} ms)`);
         const top = frames[first][2];

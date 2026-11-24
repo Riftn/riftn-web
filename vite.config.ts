@@ -416,6 +416,67 @@ function prerenderHomeIntroPlugin() {
 }
 
 /**
+ * First paint from the HTML alone.
+ *
+ * The main stylesheet (~130 KB compressed) was render-blocking, so the boot
+ * skeleton and the prerendered welcome card, both already in index.html,
+ * waited on it. The rules those two need (scripts/critical-css.mjs, ~11 KB
+ * compressed) are inlined in its place and the full sheet loads beside them
+ * without blocking: the first frame is drawn from the document itself.
+ * (PSI's test machine also draws nothing for ~2.4 s on any page with a
+ * blocking external stylesheet, ours or anyone's, and paints at once without.)
+ *
+ * Only for the look the inlined rules were picked for: a new visitor, System
+ * theme, dark tone, default settings. Anything else (a saved theme, dimmed
+ * lights, line separators, an OBS overlay) keeps the blocking stylesheet,
+ * written by the same inline script, so nobody ever sees a restyle.
+ *
+ * window.__mainCss resolves when the full sheet has applied; the entry
+ * starter below waits for it, so the app never renders against partial CSS.
+ */
+function inlineCriticalCssPlugin() {
+  return {
+    name: 'inline-critical-css',
+    apply: 'build' as const,
+    transformIndexHtml: {
+      order: 'post' as const,
+      async handler(html: string, ctx: { bundle?: Record<string, { type: string; fileName: string; source?: string | Uint8Array }> }) {
+        const tag = /<link rel="stylesheet" crossorigin href="(\/assets\/index-[^"]+\.css)">/;
+        const m = html.match(tag);
+        const asset = m && ctx.bundle?.[m[1].slice(1)];
+        if (!m || !asset || asset.type !== 'asset' || asset.source == null) {
+          console.warn('[inline-critical-css] main stylesheet not found; leaving it render-blocking');
+          return html;
+        }
+        try {
+          // @ts-expect-error plain .mjs build script, no types
+          const { extractCriticalCss } = await import('./scripts/critical-css.mjs');
+          const css = typeof asset.source === 'string' ? asset.source : Buffer.from(asset.source).toString('utf8');
+          const critical: string = await extractCriticalCss(html, css);
+          if (critical.includes('</style')) throw new Error('critical CSS contains a closing style tag');
+          const href = m[1];
+          const loader = [
+            `<style data-critical>${critical}</style>`,
+            `<link rel="preload" as="style" crossorigin href="${href}">`,
+            '<script>(function(){var d=document,s=d.documentElement.dataset,h=' + JSON.stringify(href) + ';',
+            'if(s.theme==="system"&&s.systemTone==="dark"&&s.shortsEnabled==="true"&&s.sidebarCollapsed==="false"&&s.dimLights==="false"&&!("feedSep" in s)&&!("chatOwnBubble" in s)&&!("obsOverlay" in s)){',
+            'var l=d.createElement("link");l.rel="stylesheet";l.crossOrigin="";l.href=h;l.setAttribute("data-main-css","");',
+            'window.__mainCss=new Promise(function(r){l.onload=l.onerror=r;});d.head.appendChild(l);}',
+            `else{d.write('<link rel="stylesheet" crossorigin href="'+h+'">');}})();</script>`,
+            `<noscript><link rel="stylesheet" crossorigin href="${href}"></noscript>`,
+          ].join('');
+          console.log(`[inline-critical-css] ${Math.round(css.length / 1024)} KB stylesheet, ${Math.round(critical.length / 1024)} KB inlined for the first frame`);
+          return html.replace(tag, () => loader);
+        } catch (e) {
+          console.warn('[inline-critical-css] failed; leaving the stylesheet render-blocking', e);
+          return html;
+        }
+      },
+    },
+  };
+}
+
+/**
  * Let the first frame paint before the entry chunk runs.
  *
  * Vite emits `<script type="module" src=entry>`. A module script is deferred,
@@ -473,7 +534,8 @@ function startEntryAfterFirstPaintPlugin() {
           'mark("boot-vis:"+d.visibilityState);',
           'function add(q){var t=d.getElementById("boot-preloads");if(!t||!t.content)return;var l=t.content.querySelectorAll(q);for(var i=0;i<l.length;i++)d.head.appendChild(l[i].cloneNode(true));}',
           'function go(r){if(s)return;s=1;mark("entry-start:"+r);add("link:not([data-prefetch-only])");',
-          'import(e).then(function(){setTimeout(function(){add("link[data-prefetch-only]");},1500);},function(){});}',
+          'var c=window.__mainCss;function run(){import(e).then(function(){setTimeout(function(){add("link[data-prefetch-only]");},1500);},function(){});}',
+          'if(c)c.then(run);else run();}',
           'function afterPaint(){var p=0,sup=0;function f(r){if(p)return;p=1;setTimeout(function(){go(r);},0);}',
           'try{sup=PerformanceObserver.supportedEntryTypes.indexOf("paint")>=0;if(sup)new PerformanceObserver(function(l,o){o.disconnect();f("paint");}).observe({type:"paint",buffered:true});}catch(x){sup=0;}',
           'requestAnimationFrame(function(){mark("first-raf");if(sup)setTimeout(function(){f("frame");},1000);else requestAnimationFrame(function(){f("frame");});});}',
@@ -514,6 +576,7 @@ export default defineConfig(({ mode }) => ({
     preloadWalletChunkPlugin(),
     postLinkCodePlugin(),
     prerenderHomeIntroPlugin(),
+    inlineCriticalCssPlugin(),
     startEntryAfterFirstPaintPlugin(),
     warGameCorsPlugin(),
     mcpPlugin(),

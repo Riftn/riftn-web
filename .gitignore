@@ -98,6 +98,7 @@ scripts/*
 !scripts/build-developer-docs-content.mjs
 !scripts/seo-i18n-copy/
 !scripts/check-entry-bundle.mjs
+!scripts/critical-css.mjs
 !scripts/generate-blog-manifest.mjs
 !scripts/generate-guide-content.mjs
 !scripts/build-home-intro-html.mjs
