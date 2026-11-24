@@ -166,7 +166,6 @@ html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-chat
     border-radius: 12px !important;
     height: 40px !important;
   }
-  [data-msg-cards] [data-msg-cards-glyph] .messages-nav-glyph { width: 22px; height: 22px; }
   [data-msg-cards] [data-msg-cards-action] {
     display: inline-flex;
     align-items: center;

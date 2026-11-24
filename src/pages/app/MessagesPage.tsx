@@ -3,7 +3,6 @@ import { clearPendingChatLink, peekPendingChatLink, toastNotInLinkedChat } from 
 import { UnreadCountChip } from '@/components/app/chat/UnreadCountChip';
 import { ReactionAlertBadge, reactionAlertLine } from '@/components/app/chat/ReactionAlertBadge';
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
-import { BrandIcon } from '@/components/app/war/WarHudIcon';
 import { AppState } from '@/components/app/AppState';
 import { IslandAction, PageIsland, usePhonePill } from '@/components/app/page-kit/PageKit';
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
@@ -34,7 +33,6 @@ import { Archive, BellOff, Pin, ChevronLeft, ListChecks } from 'lucide-react';
 import { BulkChatBar } from '@/components/app/chat/BulkChatBar';
 import { useRowLongPress } from '@/hooks/use-row-long-press';
 import { MessageRequestsHeader, MessageRequestsRow } from '@/components/app/chat/MessageRequestBar';
-import { MessagesNavGlyph } from '@/components/app/navigation/MessagesNavGlyph';
 import '@/styles/messages-cards.css';
 import '@/styles/messages-phone-list.css';
 import { useFeedSeparator } from '@/lib/feed-separator';
@@ -77,7 +75,6 @@ import { usePublicChatLastLine, useRoomChatSummaries } from '@/hooks/use-room-ch
 import { roomPreviewLine } from '@/lib/room-chat-read';
 import { prepareOutgoing } from '@/lib/dm-e2ee/keys';
 import chatBubbleIcon from '@/assets/icons/chat-bubble.webp';
-import messagesBubbleIcon from '@/assets/icons/messages-3d-icon.webp';
 import dehubLogo from '@/assets/dehub-logo.png';
 import { SEOHead } from '@/components/SEOHead';
 import { blockUser } from '@/lib/api/dehub/blocks';
@@ -1493,12 +1490,10 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     />
   ) : null;
 
-  // Same total as the nav icon: requests never light it.
-  const dmUnread = liveConversations.reduce((sum, c) => sum + (c.isRequest ? 0 : c.unreadCount || 0), 0);
   const deskTop = deskCards ? (
     <PageIsland
       className="shrink-0"
-      icon={<span data-msg-cards-glyph className="flex h-8 w-8 items-center justify-center text-white"><MessagesNavGlyph unread={dmUnread} className="h-[22px] w-[22px]" /></span>}
+      icon="messages"
       title={picking
         ? _copy('chatBulk.selected', { defaultValue: '{{count}} selected', count: bulkCount })
         : _copy('settings.chat', { defaultValue: 'Chat' })}
@@ -1566,7 +1561,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
           {/* Header */}
           {fullscreenTop ?? deskTop ?? phoneTop ?? (<PageIsland
             className={fullscreen ? 'shrink-0 top-0 lg:top-0 px-2 pt-2' : 'shrink-0'}
-            icon={<BrandIcon src={messagesBubbleIcon} alt={_copy("copy.04d7b4833927", { defaultValue: "Messages" })} className="h-8 w-8 object-contain" />}
+            icon="messages"
             title={_copy('settings.chat', { defaultValue: 'Chat' })}
             actions={fullscreen ? (
               // Only phones reach this header (computers get fullscreenTop).
