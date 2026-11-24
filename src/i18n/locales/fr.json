@@ -23631,5 +23631,21 @@
   },
   "profileImage": {
     "view": "Voir la photo"
+  },
+  "profileSong": {
+    "title": "Chanson du profil",
+    "hint": "Une chanson sous ta bio. On la touche pour l'écouter.",
+    "part": "Joue {{part}}",
+    "change": "Changer de chanson",
+    "remove": "Retirer",
+    "removed": "Chanson du profil retirée",
+    "saved": "Chanson du profil enregistrée",
+    "saveFailed": "Impossible d'enregistrer la chanson du profil. Réessaie.",
+    "autoplay": "Jouer quand on visite mon profil",
+    "autoplayHint": "Démarre en douceur quand quelqu'un ouvre ton profil. Un seul appui suffit pour l'arrêter.",
+    "add": "Ajouter une chanson",
+    "cantUse": "Cette chanson ne peut pas être utilisée sur un profil. Essaie-en une autre.",
+    "play": "Lire {{title}}",
+    "pause": "Mettre {{title}} en pause"
   }
 }

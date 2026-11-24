@@ -67,6 +67,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { readPublicTimeZone } from '@/hooks/use-profile-local-time';
 import { BadgeMuseumSetting } from '@/components/app/settings/BadgeMuseumSetting';
+import { ProfileSongSetting } from '@/components/app/settings/ProfileSongSetting';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { LiquidGlassBubble2 } from '@/components/ui/liquid-glass-bubble-2';
@@ -1222,6 +1223,9 @@ function ProfileSettings() {
           className="min-h-[100px] rounded-xl border-zinc-700 bg-zinc-800 text-white placeholder:text-zinc-500"
         />
       </div>
+
+      {/* Profile song — one song under the bio; saves on its own */}
+      <ProfileSongSetting />
 
       {/* Profile fields — label/value lines under the bio, links verified by rel="me" */}
       <ProfileFieldsSetting />
