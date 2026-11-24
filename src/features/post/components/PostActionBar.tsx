@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useCrossPostAccountCount } from './CrossPostPicker';
-import { Eye, Loader2, SpellCheck, Palette, Paintbrush, ChevronLeft, Type, Hash, BarChart2, MonitorPlay, Cable, AlertTriangle, ScreenShare, GraduationCap, UserRound } from "lucide-react";
+import { Eye, Loader2, SpellCheck, Palette, Paintbrush, ChevronLeft, Type, Hash, BarChart2, MonitorPlay, Cable, AlertTriangle, ScreenShare, GraduationCap, UserRound, ImagePlus } from "lucide-react";
 import BookOpen from "@/components/ui/cut-icons/docs";
 import Check from "@/components/ui/cut-icons/check";
 import More from "@/components/ui/cut-icons/more";
@@ -98,6 +98,8 @@ interface PostActionBarProps {
   isComic?: boolean;
   /** Open the Painting canvas; the finished painting joins the post as a photo. */
   onOpenPainting?: () => void;
+  /** Search free pictures (Openverse, Wikimedia) for the caption and add one. */
+  onOpenFreeImage?: () => void;
   /** Add or take off a content warning. */
   onToggleContentWarning?: () => void;
   hasContentWarning?: boolean;
@@ -153,6 +155,7 @@ export function PostActionBar({
   onToggleComic,
   isComic,
   onOpenPainting,
+  onOpenFreeImage,
   extraTool,
   hideLive = false,
 }: PostActionBarProps) {
@@ -641,7 +644,7 @@ export function PostActionBar({
           triggerClassName="h-auto w-auto p-2 rounded-xl text-white backdrop-blur-none hover:bg-white/10 [&_svg]:size-5"
         />
 
-        {(!isLive && (onTogglePoll || onToggleQuiz || onTagPeople || onToggleComic || onOpenPainting || onToggleContentWarning || extraTool)) && (
+        {(!isLive && (onTogglePoll || onToggleQuiz || onTagPeople || onToggleComic || onOpenPainting || onOpenFreeImage || onToggleContentWarning || extraTool)) && (
           <button
             type="button"
             onClick={() => setPostOptionsOpen(true)}
@@ -708,6 +711,16 @@ export function PostActionBar({
                 >
                   <Paintbrush className="h-5 w-5" />
                   <span className="flex-1">{t('painting.title', { defaultValue: 'Painting' })}</span>
+                </button>
+              )}
+              {!isLive && !hasVideo && onOpenFreeImage && (
+                <button type="button"
+                  onClick={() => { setPostOptionsOpen(false); onOpenFreeImage(); }}
+                  className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm text-white hover:bg-white/10"
+                  data-free-image-option
+                >
+                  <ImagePlus className="h-5 w-5" />
+                  <span className="flex-1">{t('freeImage.title', { defaultValue: 'Free image' })}</span>
                 </button>
               )}
               {!isLive && onToggleContentWarning && (

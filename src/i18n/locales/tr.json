@@ -1,4 +1,12 @@
 {
+  "freeImage": {
+    "title": "Ücretsiz görsel",
+    "search": "Ücretsiz görsel ara",
+    "hint": "Herkesin paylaşabileceği görseller, Openverse ve Wikimedia Commons'tan.",
+    "none": "Bunun için ücretsiz görsel yok. Başka kelimeler dene.",
+    "failed": "Bu görsel eklenemedi. Başka birini dene.",
+    "credit": "Fotoğraf: {{name}}, {{license}}"
+  },
   "painting": {
     "title": "Resim",
     "close": "Kapat",

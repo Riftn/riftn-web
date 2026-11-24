@@ -1,4 +1,12 @@
 {
+  "freeImage": {
+    "title": "Gratis afbeelding",
+    "search": "Zoek gratis afbeeldingen",
+    "hint": "Afbeeldingen die iedereen mag delen, van Openverse en Wikimedia Commons.",
+    "none": "Geen gratis afbeeldingen hiervoor. Probeer andere woorden.",
+    "failed": "Die afbeelding kon niet worden toegevoegd. Probeer een andere.",
+    "credit": "Foto: {{name}}, {{license}}"
+  },
   "painting": {
     "title": "Schilderen",
     "close": "Sluiten",

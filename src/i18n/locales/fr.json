@@ -1,4 +1,12 @@
 {
+  "freeImage": {
+    "title": "Image gratuite",
+    "search": "Rechercher des images gratuites",
+    "hint": "Des images que tout le monde peut partager, depuis Openverse et Wikimedia Commons.",
+    "none": "Aucune image gratuite pour ça. Essaie d'autres mots.",
+    "failed": "Impossible d'ajouter cette image. Essaie une autre.",
+    "credit": "Photo : {{name}}, {{license}}"
+  },
   "painting": {
     "title": "Peinture",
     "close": "Fermer",

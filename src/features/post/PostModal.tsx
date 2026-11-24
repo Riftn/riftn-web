@@ -45,6 +45,7 @@ const CreatePlanModal = lazy(() =>
 );
 const ScheduledLivestreams = lazy(() => import('./components/ScheduledLivestreams'));
 const PaintingStudio = lazy(() => import('./components/PaintingStudio'));
+const FreeImageSheet = lazy(() => import('./components/FreeImageSheet'));
 
 interface PostModalProps {
   isOpen: boolean;
@@ -85,6 +86,7 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
   const [categoryDrawerOpen, setCategoryDrawerOpen] = useState(false);
   const [taggerOpen, setTaggerOpen] = useState(false);
   const [paintingOpen, setPaintingOpen] = useState(false);
+  const [freeImageOpen, setFreeImageOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [soundPickerOpen, setSoundPickerOpen] = useState(false);
   const [planDrawerOpen, setPlanDrawerOpen] = useState(false);
@@ -544,6 +546,7 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
         onToggleComic={isQuoting ? undefined : () => (comicMode ? exitComicMode() : selectComicMode())}
         isComic={comicMode}
         onOpenPainting={isQuoting ? undefined : () => setPaintingOpen(true)}
+        onOpenFreeImage={isQuoting ? undefined : () => setFreeImageOpen(true)}
         onToggleContentWarning={() => actions.setContentWarning(state.contentWarning === null ? '' : null)}
         hasContentWarning={state.contentWarning !== null}
       />
@@ -554,6 +557,23 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
             onDone={(file) => {
               setPaintingOpen(false);
               actions.addImageFiles([file]);
+            }}
+          />
+        </Suspense>
+      )}
+      {freeImageOpen && (
+        <Suspense fallback={null}>
+          <FreeImageSheet
+            open={freeImageOpen}
+            onOpenChange={setFreeImageOpen}
+            caption={state.text}
+            onPick={(file, asset) => {
+              actions.addImageFiles([file]);
+              // CC BY pictures are shared on the condition that the maker is named.
+              if (asset.attributionRequired || /^CC BY/i.test(asset.license)) {
+                const credit = _copy('freeImage.credit', { defaultValue: 'Photo: {{name}}, {{license}}', name: asset.creator, license: asset.license });
+                if (!state.text.includes(credit)) actions.setText(state.text.trim() ? `${state.text.trimEnd()}\n\n${credit}` : credit);
+              }
             }}
           />
         </Suspense>

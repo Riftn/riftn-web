@@ -1,4 +1,12 @@
 {
+  "freeImage": {
+    "title": "Free image",
+    "search": "Search free pictures",
+    "hint": "Pictures anyone may share, from Openverse and Wikimedia Commons.",
+    "none": "No free pictures for that. Try other words.",
+    "failed": "That picture couldn't be added. Try another one.",
+    "credit": "Photo: {{name}}, {{license}}"
+  },
   "painting": {
     "title": "Painting",
     "close": "Close",
