@@ -9642,7 +9642,8 @@
     "followRequest": "{{name}} ha solicitado seguirte",
     "followAccepted": "{{name}} aceptó tu solicitud de seguimiento",
     "signalFlare": "{{name}} ha enviado una bengala de señal",
-    "newMessage": "{{name}} te ha enviado un mensaje"
+    "newMessage": "{{name}} te ha enviado un mensaje",
+    "unlike": "Ya no me gusta"
   },
   "audioPost": {
     "popOut": "Pop out — sigue escuchando mientras navegas",
@@ -9895,6 +9896,10 @@
     "callFull": "Esta llamada está llena",
     "callFullHint": "Ya tiene el máximo de personas posible. Podrás unirte cuando alguien salga.",
     "camerasFull": "Cámaras completas",
+    "townHall": "Asamblea",
+    "gridView": "Cuadrícula",
+    "unpin": "Desfijar",
+    "townHallTalking": "{{n}} hablando",
     "camerasFullJoin": "Estás dentro con la cámara apagada. Podrás encenderla cuando alguien apague la suya.",
     "camerasFullHint": "Podrás encender la tuya cuando alguien apague la suya.",
     "full": "Llena"
@@ -14035,6 +14040,10 @@
     "reminderLater": "Ahora no"
   },
   "copy": {
+    "1944d5ab19cd": "Traducir a",
+    "98cdcf4f2415": "Buscar idiomas",
+    "48bec8529d3f": "Traducido del {{language}}",
+    "d80d30a1c7fd": "Ya está en {{language}}",
     "799c26913574": "Controles",
     "ff73efa451e4": "Muévete con W, A, S, D o las flechas. Mira y dispara con el ratón.",
     "c718a21950e6": "Espacio salta, Shift esprinta, C te agacha y Z te tumba.",

@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { buildAvatarUrl, buildAvatarCdnFallbackUrl } from '@/lib/media-url';
 import { formatCount } from '@/lib/format-count';
 import { addStoryComment, deleteStoryComment, getStoryComments, type StoryComment, type StoryItem } from '@/lib/api/dehub/stories';
-import { ageLabel } from './story-utils';
+import { localAge } from './story-utils';
 import { MomentComment } from './moment-icons';
 
 /** Public comments under a moment: everyone who can see it can read them. */
@@ -19,7 +19,7 @@ export function StoryComments({ item, signedIn, onOpen, onClose, onSignIn, onCou
   onSignIn: () => void;
   onCount: (n: number) => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [rows, setRows] = useState<StoryComment[] | null>(null);
   const [next, setNext] = useState<string | null>(null);
   const [count, setCount] = useState(item.commentCount ?? 0);
@@ -104,7 +104,7 @@ export function StoryComments({ item, signedIn, onOpen, onClose, onSignIn, onCou
           <button type="button" className="text-[13px] font-semibold truncate max-w-full" onClick={() => onOpen(a.address)}>
             {name}
             {c.isCreator && <span className="ml-1.5 rounded-full bg-white/15 px-1.5 py-px text-[11px] font-semibold align-middle">{t('postInfo.creator', { defaultValue: 'Creator' })}</span>}
-            {' '}<span className="font-normal opacity-50">{ageLabel(c.createdAt)}</span>
+            {' '}<span className="font-normal opacity-50">{localAge(c.createdAt, i18n.language)}</span>
           </button>
           <p className="text-[14px] break-words whitespace-pre-wrap">{c.text}</p>
           {allow && (

@@ -48,6 +48,7 @@ import type { ChatReactionSummary } from '@/lib/api/dehub/chat-prefs';
 import { POST_LOOK_EVENT, type PostLook } from '@/lib/post-menu';
 import { PostMenuGate } from '@/components/app/post-menu/PostMenuGate';
 import { PostActionBar } from '@/features/post/components/PostActionBar';
+import { TranslatedDraftNote } from '@/features/post/components/TranslatedDraftNote';
 import { createPortal } from 'react-dom';
 import { PenSquare, Cable, ThumbsDown, Undo2 } from 'lucide-react';
 import MenuSearchIcon from "@/components/ui/cut-icons/search";
@@ -1211,6 +1212,49 @@ function PostOptionsGallery() {
         isComic={comic}
         onToggleContentWarning={() => setWarning((v) => !v)}
         hasContentWarning={warning}
+      />
+      </AuthContext.Provider>
+    </section>
+  );
+}
+
+/** AI menu > Translate on a draft, with the Undo line it leaves (sample text, no translator call). */
+const GALLERY_DRAFT = { tr: 'Bir günde bir yıllık yol ilerliyoruz', en: 'We are covering a year\u2019s worth of road in a single day' };
+function PostTranslateGallery() {
+  const imageRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLInputElement>(null);
+  const audioRef = useRef<HTMLInputElement>(null);
+  const [translated, setTranslated] = useState(false);
+  const noop = () => {};
+  return (
+    <section data-page-bento data-post-translate-gallery className="mb-5 max-w-md rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Translate a draft</h2>
+      <p className="px-1 pb-3 text-[15px] leading-snug">{translated ? GALLERY_DRAFT.en : GALLERY_DRAFT.tr}</p>
+      <div className="flex min-h-5 items-center px-1 pb-2">
+        {translated && <TranslatedDraftNote from="tr" onUndo={() => setTranslated(false)} />}
+      </div>
+      <AuthContext.Provider value={GALLERY_AUTH}>
+      <PostActionBar
+        imageInputRef={imageRef}
+        videoInputRef={videoRef}
+        audioInputRef={audioRef}
+        onImageSelect={noop}
+        onVideoSelect={noop}
+        onAudioSelect={noop}
+        onStartRecording={noop}
+        liveMode={null}
+        setLiveMode={noop}
+        onInsertFormatting={noop}
+        onInsertEmoji={noop}
+        onInsertGif={noop}
+        onCameraCapture={noop}
+        onEnhanceWithAI={noop}
+        onTranslate={() => setTranslated(true)}
+        onPost={noop}
+        canPost
+        isEnhancing={false}
+        isPosting={false}
+        hasText
       />
       </AuthContext.Provider>
     </section>
@@ -2650,6 +2694,7 @@ export default function StateGalleryPage() {
         <AppTokensGallery />
         <AudioGallery />
         <PostOptionsGallery />
+        <PostTranslateGallery />
         <FeedFilterLineGallery />
         <AltPillGallery />
         <VoiceNotesGallery />

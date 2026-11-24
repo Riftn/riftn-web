@@ -9641,7 +9641,8 @@
     "followRequest": "{{name}} requested to follow you",
     "followAccepted": "{{name}} accepted your follow request",
     "signalFlare": "{{name}} sent a Signal Flare",
-    "newMessage": "{{name}} sent you a message"
+    "newMessage": "{{name}} sent you a message",
+    "unlike": "Unlike"
   },
   "audioPost": {
     "popOut": "Pop out — keep listening while you browse",
@@ -9894,6 +9895,10 @@
     "callFull": "This call is full",
     "callFullHint": "It already has the most people a call can take. You can join once someone leaves.",
     "camerasFull": "Cameras full",
+    "townHall": "Town hall",
+    "gridView": "Grid",
+    "unpin": "Unpin",
+    "townHallTalking": "{{n}} talking",
     "camerasFullJoin": "You're in with your camera off. You can turn it on when someone turns theirs off.",
     "camerasFullHint": "You can turn yours on when someone turns theirs off.",
     "full": "Full"
@@ -14034,6 +14039,10 @@
     "reminderLater": "Not now"
   },
   "copy": {
+    "1944d5ab19cd": "Translate to",
+    "98cdcf4f2415": "Search languages",
+    "48bec8529d3f": "Translated from {{language}}",
+    "d80d30a1c7fd": "Already in {{language}}",
     "799c26913574": "Controls",
     "ff73efa451e4": "Move with W, A, S, D or the arrow keys. Look and shoot with the mouse.",
     "c718a21950e6": "Space jumps, Shift sprints, C crouches and Z goes prone.",

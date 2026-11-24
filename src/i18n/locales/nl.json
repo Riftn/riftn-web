@@ -9831,7 +9831,8 @@
     "followRequest": "{{name}} verzocht u te volgen",
     "followAccepted": "{{name}} heeft je volgverzoek geaccepteerd",
     "signalFlare": "{{name}} stuurde een signaalflare",
-    "newMessage": "{{name}} heeft je een bericht gestuurd"
+    "newMessage": "{{name}} heeft je een bericht gestuurd",
+    "unlike": "Niet meer leuk"
   },
   "audioPost": {
     "popOut": "Pop out — blijf luisteren terwijl je surft",
@@ -10084,6 +10085,10 @@
     "callFull": "Dit gesprek is vol",
     "callFullHint": "Er zitten al zoveel mensen in als een gesprek aankan. Je kunt meedoen zodra iemand weggaat.",
     "camerasFull": "Camera's vol",
+    "townHall": "Zaal",
+    "gridView": "Raster",
+    "unpin": "Losmaken",
+    "townHallTalking": "{{n}} praten",
     "camerasFullJoin": "Je zit erin met je camera uit. Je kunt hem aanzetten zodra iemand de zijne uitzet.",
     "camerasFullHint": "Je kunt de jouwe aanzetten zodra iemand de zijne uitzet.",
     "full": "Vol"
@@ -14283,6 +14288,10 @@
     "reminderLater": "Niet nu"
   },
   "copy": {
+    "1944d5ab19cd": "Vertaal naar",
+    "98cdcf4f2415": "Talen zoeken",
+    "48bec8529d3f": "Vertaald uit het {{language}}",
+    "d80d30a1c7fd": "Al in het {{language}}",
     "799c26913574": "Besturing",
     "ff73efa451e4": "Beweeg met W, A, S, D of de pijltjestoetsen. Kijk en schiet met de muis.",
     "c718a21950e6": "Spatie springt, Shift sprint, C hurkt en Z gaat liggen.",

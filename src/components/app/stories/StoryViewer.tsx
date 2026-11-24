@@ -42,7 +42,7 @@ import {
   type StoryViewer as StoryViewerRow,
 } from '@/lib/api/dehub/stories';
 import { useRefreshStoryShelf } from '@/hooks/use-story-shelf';
-import { ageLabel, coverOf, nameOf, startIndex } from './story-utils';
+import { ageLabel, coverOf, localAge, nameOf, startIndex } from './story-utils';
 import { sendStoryReply } from './story-reply';
 import { muteUser } from '@/lib/api/dehub/mutes';
 import { unfollowUser } from '@/lib/api/dehub/social';
@@ -122,7 +122,7 @@ const REPORT_REASONS = [
 ] as const;
 
 export function StoryViewer({ entries: initial, startAuthor, startItem, onClose }: Props) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { isAuthenticated, walletAddress, openLoginModal } = useAuth();
   const refreshShelf = useRefreshStoryShelf();
@@ -683,7 +683,10 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
           <button type="button" data-sv-who onClick={() => openProfile(a.address)}>
             <b>{own ? t('stories.yourDay', { defaultValue: 'Your day' }) : nameOf(a)}</b>
             <small>
-              {t('stories.agoLabel', { time: ageLabel(item.createdAt), defaultValue: '{{time}} ago' })}
+              {/* Other languages bring their own "ago" ("9 sa. önce"); "now" never takes one. */}
+              {!i18n.language?.startsWith('en') || ageLabel(item.createdAt) === 'now'
+                ? localAge(item.createdAt, i18n.language)
+                : t('stories.agoLabel', { time: ageLabel(item.createdAt), defaultValue: '{{time}} ago' })}
               {item.audience === 'followers' ? ` · ${t('stories.followersOnly', { defaultValue: 'Followers' })}` : ''}
               {item.closeFriends || item.audience === 'close_friends' ? (
                 <span data-sv-close-friends> <Star className="inline size-3 -mt-px" fill="currentColor" aria-hidden /> {t('stories.closeFriends', { defaultValue: 'Close friends' })}</span>

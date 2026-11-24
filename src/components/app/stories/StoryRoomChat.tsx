@@ -11,7 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { buildAvatarUrl, buildAvatarCdnFallbackUrl } from '@/lib/media-url';
 import { getStoryComments, type StoryComment } from '@/lib/api/dehub/stories';
-import { ageLabel } from './story-utils';
+import { localAge } from './story-utils';
 
 const FLOATING = 4;
 
@@ -80,6 +80,7 @@ export function StoryRoomChat({ comments, onOpen }: { comments: StoryComment[]; 
 
 /** Rows for the side panel: the whole list, newest at the bottom, with times. */
 export function StoryRoomRows({ comments, onOpenProfile, emptyLabel }: { comments: StoryComment[]; onOpenProfile: (address: string) => void; emptyLabel: string }) {
+  const { i18n } = useTranslation();
   const rows = useMemo(() => [...comments].reverse(), [comments]);
   const endRef = useRef<HTMLDivElement>(null);
   useEffect(() => { endRef.current?.scrollIntoView({ block: 'end' }); }, [rows.length]);
@@ -94,7 +95,7 @@ export function StoryRoomRows({ comments, onOpenProfile, emptyLabel }: { comment
           <div>
             <b>{nameOfComment(c)}</b>
             <p>{c.text}</p>
-            <small>{ageLabel(c.createdAt)}</small>
+            <small>{localAge(c.createdAt, i18n.language)}</small>
           </div>
         </div>
       ))}

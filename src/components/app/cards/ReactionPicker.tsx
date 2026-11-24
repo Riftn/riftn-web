@@ -51,6 +51,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import Info from "@/components/ui/cut-icons/information";
+import X from "@/components/ui/cut-icons/close";
 
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
@@ -106,6 +107,12 @@ interface ReactionPickerProps {
    * `positive` and `negative` show one side only.
    */
   polarity?: 'all' | 'positive' | 'negative';
+  /**
+   * Takes your reaction off. Only a live passes it: there a tap on the thumb,
+   * or on the emoji you already hold, sends it again as applause, so the tray
+   * is the one place to take it back.
+   */
+  onRemove?: () => void;
 }
 
 export function ReactionPicker({
@@ -117,6 +124,7 @@ export function ReactionPicker({
   align = 'right',
   onShowInfo,
   polarity = 'all',
+  onRemove,
 }: ReactionPickerProps) {
   const { t: _copy } = _useCopy();
   const { t } = useTranslation();
@@ -335,6 +343,22 @@ export function ReactionPicker({
                   );
                 })}
               </div>
+              {onRemove && current && (
+                <button
+                  role="menuitem"
+                  type="button"
+                  data-reaction-remove
+                  onClick={onRemove}
+                  className={cn(
+                    'mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-white/15 py-3',
+                    'text-sm font-medium text-white/80 active:scale-[0.98]',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60',
+                  )}
+                >
+                  <X className="h-[18px] w-[18px]" aria-hidden="true" />
+                  {t('reactionInfo.unlike', { defaultValue: 'Unlike' })}
+                </button>
+              )}
               {onShowInfo && (
                 <button
                   role="menuitem"
@@ -511,6 +535,38 @@ export function ReactionPicker({
             <span aria-hidden="true" data-reaction-divider className="mx-0.5 h-6 w-px shrink-0 self-center bg-white/15" />
           )}
           {negatives.map(renderOption)}
+
+          {/* Take your reaction off (lives only, where tapping repeats). */}
+          {onRemove && current && (
+            <>
+              <span aria-hidden="true" className="mx-0.5 h-5 w-px shrink-0 bg-white/15" />
+              <button
+                role="menuitem"
+                type="button"
+                data-reaction-remove
+                data-keep-round
+                aria-label={t('reactionInfo.unlike', { defaultValue: 'Unlike' })}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (e.detail === 0) onRemove();
+                }}
+                onPointerUp={(e) => {
+                  e.stopPropagation();
+                  if (endGesture()) return;
+                  onRemove();
+                }}
+                className={cn(
+                  'flex h-9 shrink-0 items-center gap-1 rounded-full px-2.5',
+                  'text-xs font-semibold text-white/70 transition-[transform,color] duration-150 ease-out',
+                  'hover:-translate-y-0.5 hover:text-white active:translate-y-0 active:scale-95',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60',
+                )}
+              >
+                <X className="h-3.5 w-3.5" aria-hidden="true" />
+                {t('reactionInfo.unlike', { defaultValue: 'Unlike' })}
+              </button>
+            </>
+          )}
 
           {/* Author-only breakdown. Same pointerup handling as the reactions
               above so a single hold-and-slide can land on it. */}

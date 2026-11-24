@@ -9642,7 +9642,8 @@
     "followRequest": "{{name}} seni takip etmek istiyor",
     "followAccepted": "{{name}} takip isteğini kabul etti",
     "signalFlare": "{{name}} bir Sinyal Fişeği gönderdi",
-    "newMessage": "{{name}} sana bir mesaj gönderdi"
+    "newMessage": "{{name}} sana bir mesaj gönderdi",
+    "unlike": "Beğenmekten vazgeç"
   },
   "audioPost": {
     "popOut": "Açılır pencere — göz atarken dinlemeye devam edin",
@@ -9895,6 +9896,10 @@
     "callFull": "Bu arama dolu",
     "callFullHint": "Bir aramanın alabileceği en fazla kişiye ulaştı. Biri ayrılınca katılabilirsin.",
     "camerasFull": "Kameralar dolu",
+    "townHall": "Meclis",
+    "gridView": "Izgara",
+    "unpin": "Sabitlemeyi kaldır",
+    "townHallTalking": "{{n}} kişi konuşuyor",
     "camerasFullJoin": "Kameran kapalı olarak katıldın. Biri kamerasını kapatınca açabilirsin.",
     "camerasFullHint": "Biri kamerasını kapatınca seninkini açabilirsin.",
     "full": "Dolu"
@@ -14035,6 +14040,10 @@
     "reminderLater": "Şimdi değil"
   },
   "copy": {
+    "1944d5ab19cd": "Şuraya çevir",
+    "98cdcf4f2415": "Dilleri ara",
+    "48bec8529d3f": "{{language}}'dan çevrildi",
+    "d80d30a1c7fd": "Zaten {{language}} içinde",
     "799c26913574": "Kontroller",
     "ff73efa451e4": "W, A, S, D veya ok tuşlarıyla hareket et. Fareyle bak ve ateş et.",
     "c718a21950e6": "Boşluk zıplar, Shift koşar, C çömelir ve Z yere yatar.",

@@ -49,6 +49,8 @@ export interface UseCallReturn {
   /** Every camera slot in this group call is taken by someone else: yours stays off until one frees up. */
   groupCamerasFull: boolean;
   attachGroupVideo: (uid: number) => (node: HTMLDivElement | null) => void;
+  /** Live voice levels (0..1) in a group call: each uid that is sending sound, and you as 0. Cheap enough to read every frame. */
+  readGroupLevels: () => Map<number, number>;
   /**
    * Ring the group's members (notification + incoming screen) and open its
    * room. Refused with a toast when the room is full; a video call starts
@@ -913,6 +915,16 @@ export const useCall = (): UseCallReturn => {
       : [currentCall.caller_address, currentCall.recipient_address];
     return [...new Set(wallets.map(w => w.toLowerCase()).filter(Boolean))];
   }, [currentCall, groupParticipants, userAddress]);
+  const readGroupLevels = useCallback((): Map<number, number> => {
+    const levels = new Map<number, number>();
+    const media = mediaRef.current;
+    if (!media || media.closed) return levels;
+    try { if (media.audio && !media.audio.muted && media.audio.enabled !== false) levels.set(0, Number(media.audio.getVolumeLevel?.()) || 0); } catch { /* track gone */ }
+    for (const [uid, remote] of media.remotes) {
+      try { if (remote.audio) levels.set(uid, Number(remote.audio.getVolumeLevel?.()) || 0); } catch { /* track gone */ }
+    }
+    return levels;
+  }, []);
   const getMicStream = useCallback((): MediaStream | null => {
     const track = mediaRef.current?.audio?.getMediaStreamTrack?.();
     return track ? new MediaStream([track]) : null;
@@ -926,14 +938,14 @@ export const useCall = (): UseCallReturn => {
   }, []);
   return useMemo(() => ({
     captionRoom, captionSpeakers, getMicStream, setCallVolume,
-    isGroupCall, groupParticipants, selfSpeaking, groupCamerasFull, attachGroupVideo, startGroupCall, joinGroupCall,
+    isGroupCall, groupParticipants, selfSpeaking, groupCamerasFull, attachGroupVideo, readGroupLevels, startGroupCall, joinGroupCall,
     isRinging, callSummary, dismissCallSummary,
     isCallActive, isIncoming, currentCall, isConnecting, isMuted, isCameraOff, isUserOffline, callFailureReason,
     clearCallFailure, isMinimized, minimizeCall, maximizeCall, callStartedAt, mediaRevision, peerAddress, localVideoRef, remoteVideoRef,
     attachLocalVideo, attachRemoteVideo, remoteAudioRef, startCall, endCall, acceptCall, rejectCall: endCall, toggleMute, toggleCamera, switchCamera,
     localVideoTrack, debugCallState, checkForCalls, setCallMessageHandler,
     callBackground, callBackgroundBusy, setCallBackground, callFaceFilter, setCallFaceFilter,
-  }), [callBackground, callBackgroundBusy, setCallBackground, callFaceFilter, setCallFaceFilter, captionRoom, captionSpeakers, getMicStream, setCallVolume, isGroupCall, groupParticipants, selfSpeaking, groupCamerasFull, attachGroupVideo, startGroupCall, joinGroupCall,
+  }), [callBackground, callBackgroundBusy, setCallBackground, callFaceFilter, setCallFaceFilter, captionRoom, captionSpeakers, getMicStream, setCallVolume, isGroupCall, groupParticipants, selfSpeaking, groupCamerasFull, attachGroupVideo, readGroupLevels, startGroupCall, joinGroupCall,
     isRinging, callSummary, dismissCallSummary, isCallActive, isIncoming, currentCall, isConnecting, isMuted, isCameraOff, isUserOffline, callFailureReason,
     clearCallFailure, isMinimized, minimizeCall, maximizeCall, callStartedAt, mediaRevision, peerAddress, startCall, endCall, acceptCall,
     attachLocalVideo, attachRemoteVideo, toggleMute, toggleCamera, switchCamera, debugCallState, checkForCalls, setCallMessageHandler]);

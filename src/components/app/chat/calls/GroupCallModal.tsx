@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Phone, PhoneOff, RotateCcw, User, Users } from 'lucide-react';
+import { LayoutGrid, Presentation, Phone, PhoneOff, RotateCcw, User, Users } from 'lucide-react';
 import MicOff from '@/components/ui/cut-icons/mic-off';
 import Mic from '@/components/ui/cut-icons/mic';
 import Video from '@/components/ui/cut-icons/video';
@@ -21,6 +21,8 @@ import {
 } from './CallChrome';
 import { CallCaptionsControl, CallCaptionsOverlay } from './CallCaptions';
 import { CallBackgroundPanel, CallFxButton, useCallBackgroundAvailable } from './CallBackgroundPicker';
+import { TownHall } from './TownHall';
+import { readTownHallMode, saveTownHallMode, TOWN_HALL_FROM, type TownHallMode } from '@/lib/town-hall';
 
 /**
  * A group call, voice or video, on the same stage as a direct call.
@@ -28,7 +30,9 @@ import { CallBackgroundPanel, CallFxButton, useCallBackgroundAvailable } from '.
  * Before anyone else is in the room it is the ringing screen with the group's
  * name (Public Chat: the waiting screen, nobody is rung). Once somebody joins it becomes a grid: one tile per person,
  * their camera when it is on and their picture when it is not, outlined while
- * they talk. Leaving is the one solid control; the call carries on for
+ * they talk. From three people it is a town hall instead (see TownHall): the
+ * talker fills the stage over a strip of everyone else; the corner button
+ * switches between the two and is remembered. Leaving is the one solid control; the call carries on for
  * whoever is still in it.
  */
 const GroupCallModal: React.FC = () => {
@@ -46,6 +50,7 @@ const GroupCallModal: React.FC = () => {
     groupParticipants,
     attachLocalVideo,
     attachGroupVideo,
+    readGroupLevels,
     endCall,
     acceptCall,
     rejectCall,
@@ -62,6 +67,7 @@ const GroupCallModal: React.FC = () => {
   } = useCall();
   const fxAvailable = useCallBackgroundAvailable();
   const [fxOpen, setFxOpen] = React.useState(false);
+  const [layout, setLayout] = React.useState<TownHallMode>(readTownHallMode);
   const { walletAddress } = useAuth();
   const { t } = useTranslation();
   const caller = usePeerIdentity(isIncoming ? peerAddress : '');
@@ -108,6 +114,14 @@ const GroupCallModal: React.FC = () => {
   }
 
   const count = groupParticipants.length + 1;
+  // Town hall from three people unless the person picked a layout themselves.
+  const hall = layout === 'hall' || (layout === 'auto' && count >= TOWN_HALL_FROM);
+  const flipLayout = () => {
+    const next: TownHallMode = hall ? 'grid' : 'hall';
+    saveTownHallMode(next);
+    setLayout(next);
+  };
+  const layoutLabel = hall ? t('calls.gridView', 'Grid') : t('calls.townHall', 'Town hall');
   return (
     <CallStage peer={stagePeer} video={isVideo} onMinimize={minimizeCall} minimizeLabel={t('calls.minimize')}>
       <div className="call-stage__top">
@@ -120,20 +134,43 @@ const GroupCallModal: React.FC = () => {
         <CallFxButton open={fxOpen} onToggle={() => setFxOpen(open => !open)} active={callBackground !== 'none' || callFaceFilter !== 'none'} />
       ) : null}
 
-      <div className="group-call-grid" data-count={Math.min(count, 5)} data-video={isVideo ? 'true' : 'false'}>
-        <div className="group-call-tile" data-speaking={selfSpeaking && !isMuted ? 'true' : 'false'}>
-          {isVideo && !isCameraOff ? <div ref={attachLocalVideo} className="group-call-tile__video group-call-tile__video--self" /> : (
-            <TileFace name={self.name} avatarUrl={self.avatarUrl} />
-          )}
-          <span className="group-call-tile__name">
-            {isMuted ? <MicOff className="h-3 w-3" /> : null}
-            <span>{t('calls.you', 'You')}</span>
-          </span>
+      {/* Layout switch: town hall (talker on the big stage) or the even grid. */}
+      <button
+        type="button"
+        className="call-stage__layout"
+        data-beside-fx={isVideo && fxAvailable ? 'true' : 'false'}
+        onClick={flipLayout}
+        aria-label={layoutLabel}
+        title={layoutLabel}
+      >
+        {hall ? <LayoutGrid className="h-[18px] w-[18px]" /> : <Presentation className="h-[18px] w-[18px]" />}
+      </button>
+
+      {hall ? (
+        <TownHall
+          isVideo={isVideo}
+          self={{ name: self.name, avatarUrl: self.avatarUrl, camera: isVideo && !isCameraOff, muted: isMuted }}
+          participants={groupParticipants}
+          attachLocalVideo={attachLocalVideo}
+          attachGroupVideo={attachGroupVideo}
+          readGroupLevels={readGroupLevels}
+        />
+      ) : (
+        <div className="group-call-grid" data-count={Math.min(count, 5)} data-video={isVideo ? 'true' : 'false'}>
+          <div className="group-call-tile" data-speaking={selfSpeaking && !isMuted ? 'true' : 'false'}>
+            {isVideo && !isCameraOff ? <div ref={attachLocalVideo} className="group-call-tile__video group-call-tile__video--self" /> : (
+              <TileFace name={self.name} avatarUrl={self.avatarUrl} />
+            )}
+            <span className="group-call-tile__name">
+              {isMuted ? <MicOff className="h-3 w-3" /> : null}
+              <span>{t('calls.you', 'You')}</span>
+            </span>
+          </div>
+          {groupParticipants.map(participant => (
+            <GroupTile key={participant.uid} participant={participant} attach={attachGroupVideo(participant.uid)} />
+          ))}
         </div>
-        {groupParticipants.map(participant => (
-          <GroupTile key={participant.uid} participant={participant} attach={attachGroupVideo(participant.uid)} />
-        ))}
-      </div>
+      )}
 
       <div className="call-stage__foot">
         <CallCaptionsOverlay />

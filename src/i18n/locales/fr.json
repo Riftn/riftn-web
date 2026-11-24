@@ -9646,7 +9646,8 @@
     "followRequest": "{{name}} a demandé à vous suivre",
     "followAccepted": "{{name}} a accepté votre demande de suivi",
     "signalFlare": "{{name}} a envoyé une fusée éclairante",
-    "newMessage": "{{name}} vous a envoyé un message"
+    "newMessage": "{{name}} vous a envoyé un message",
+    "unlike": "Je n'aime plus"
   },
   "audioPost": {
     "popOut": "Sortez — continuez à écouter pendant que vous naviguez",
@@ -9899,6 +9900,10 @@
     "callFull": "Cet appel est complet",
     "callFullHint": "Il a déjà le maximum de personnes possible. Vous pourrez rejoindre quand quelqu'un partira.",
     "camerasFull": "Caméras au complet",
+    "townHall": "Assemblée",
+    "gridView": "Grille",
+    "unpin": "Désépingler",
+    "townHallTalking": "{{n}} parlent",
     "camerasFullJoin": "Vous êtes dans l'appel, caméra coupée. Vous pourrez l'activer quand quelqu'un coupera la sienne.",
     "camerasFullHint": "Vous pourrez activer la vôtre quand quelqu'un coupera la sienne.",
     "full": "Complet"
@@ -14039,6 +14044,10 @@
     "reminderLater": "Pas maintenant"
   },
   "copy": {
+    "1944d5ab19cd": "Traduire en",
+    "98cdcf4f2415": "Rechercher des langues",
+    "48bec8529d3f": "Traduit de {{language}}",
+    "d80d30a1c7fd": "Déjà dans {{language}}",
     "799c26913574": "Commandes",
     "ff73efa451e4": "Déplacez-vous avec W, A, S, D ou les flèches. Visez et tirez à la souris.",
     "c718a21950e6": "Espace pour sauter, Maj pour sprinter, C pour s'accroupir et Z pour se coucher.",
