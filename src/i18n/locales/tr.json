@@ -23712,5 +23712,13 @@
       "drop-c": "Drop C",
       "b-standard": "Si standart"
     }
+  },
+  "freeImages": {
+    "title": "Ücretsiz görseller",
+    "search": "Ücretsiz fotoğraf ara",
+    "note": "Kullanımı serbest fotoğraflar. Sahibi isterse kaynak eklenir.",
+    "empty": "Fotoğraf bulunamadı. Başka bir kelime dene.",
+    "failed": "Bu fotoğraf eklenemedi. Başka birini dene.",
+    "credit": "Fotoğraf: {{creator}} ({{license}})"
   }
 }

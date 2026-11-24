@@ -45,6 +45,7 @@ const CreatePlanModal = lazy(() =>
 );
 const ScheduledLivestreams = lazy(() => import('./components/ScheduledLivestreams'));
 const PaintingStudio = lazy(() => import('./components/PaintingStudio'));
+const FreeImagesSheet = lazy(() => import('./components/FreeImagesSheet'));
 
 interface PostModalProps {
   isOpen: boolean;
@@ -85,6 +86,7 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
   const [categoryDrawerOpen, setCategoryDrawerOpen] = useState(false);
   const [taggerOpen, setTaggerOpen] = useState(false);
   const [paintingOpen, setPaintingOpen] = useState(false);
+  const [freeImagesOpen, setFreeImagesOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [soundPickerOpen, setSoundPickerOpen] = useState(false);
   const [planDrawerOpen, setPlanDrawerOpen] = useState(false);
@@ -544,6 +546,7 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
         onToggleComic={isQuoting ? undefined : () => (comicMode ? exitComicMode() : selectComicMode())}
         isComic={comicMode}
         onOpenPainting={isQuoting ? undefined : () => setPaintingOpen(true)}
+        onOpenFreeImages={() => setFreeImagesOpen(true)}
         onToggleContentWarning={() => actions.setContentWarning(state.contentWarning === null ? '' : null)}
         hasContentWarning={state.contentWarning !== null}
       />
@@ -554,6 +557,19 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
             onDone={(file) => {
               setPaintingOpen(false);
               actions.addImageFiles([file]);
+            }}
+          />
+        </Suspense>
+      )}
+      {freeImagesOpen && (
+        <Suspense fallback={null}>
+          <FreeImagesSheet
+            open={freeImagesOpen}
+            onOpenChange={setFreeImagesOpen}
+            initialQuery={state.text}
+            onPick={(file, credit) => {
+              actions.addImageFiles([file]);
+              if (credit && !state.text.includes(credit)) actions.setText(state.text ? `${state.text}\n\n${credit}` : credit);
             }}
           />
         </Suspense>

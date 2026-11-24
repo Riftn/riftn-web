@@ -23712,5 +23712,13 @@
       "drop-c": "Drop C",
       "b-standard": "Si estándar"
     }
+  },
+  "freeImages": {
+    "title": "Imágenes gratis",
+    "search": "Busca fotos gratis",
+    "note": "Fotos de uso libre. Añadimos el crédito cuando el autor lo pide.",
+    "empty": "No hay fotos. Prueba otra palabra.",
+    "failed": "No se pudo añadir esa foto. Prueba otra.",
+    "credit": "Foto: {{creator}} ({{license}})"
   }
 }

@@ -23686,5 +23686,13 @@
       "drop-c": "Drop C",
       "b-standard": "B standard"
     }
+  },
+  "freeImages": {
+    "title": "Free images",
+    "search": "Search free photos",
+    "note": "Free to use photos. A credit is added when the owner asks for one.",
+    "empty": "No photos found. Try another word.",
+    "failed": "Couldn't add that photo. Try another one.",
+    "credit": "Photo: {{creator}} ({{license}})"
   }
 }
