@@ -1235,7 +1235,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
 
   // The Notes sheet is mounted in every view, so a note tapped in an open group chat opens too.
   const notesSheetHost = !guest && walletAddress ? (
-    <NotesSheetHost onMessage={(author, reply) => {
+    <NotesSheetHost me={statusMe} onMessage={(author, reply) => {
       // A reply to a note is sent as soon as the chat with them is ready.
       if (reply) pendingAutoSendRef.current = { peerAddress: author.address.toLowerCase(), body: reply };
       handleSelectSearchUser({ ...author, _id: author.address } as unknown as DeHubUser);

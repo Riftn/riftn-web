@@ -21,11 +21,16 @@ export interface Note {
   location: string | null;
   postedAt: string;
   expiresAt: string;
+  /** Hearts on it, and whether you gave one. */
+  likeCount?: number;
+  liked?: boolean;
 }
 
 export interface NoteEntry {
   author: StoryAuthor;
   note: Note;
+  /** Your own note only: who hearted it, newest first. */
+  likers?: StoryAuthor[];
 }
 
 export interface NoteInput {
@@ -45,6 +50,11 @@ export function putNote(input: NoteInput): Promise<{ note: Note }> {
 
 export function deleteNote(): Promise<{ ok: boolean }> {
   return apiCall('/api/notes', { method: 'DELETE', requiresAuth: true });
+}
+
+/** Heart (or un-heart) someone's note. */
+export function likeNote(id: string, liked: boolean): Promise<{ liked: boolean; likeCount: number }> {
+  return apiCall(`/api/notes/${encodeURIComponent(id)}/like`, { method: 'POST', body: { liked }, requiresAuth: true });
 }
 
 /** The GIF hosts a note accepts. */

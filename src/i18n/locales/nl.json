@@ -22122,6 +22122,18 @@
     "notInChat": "Die link is van een privéchat waar je niet in zit."
   },
   "notes": {
+    "newStatus": "Nieuwe status",
+    "upFor": "{{time}} geleden geplaatst",
+    "postedAgo": "{{time}} geleden",
+    "timeLeft": "nog {{time}}",
+    "like": "Vind ik leuk",
+    "unlike": "Vind ik niet meer leuk",
+    "likedBy": "Leuk gevonden door {{name}}",
+    "likedByMore": "Leuk gevonden door {{name}} en {{others}} anderen",
+    "likes": "{{total}} likes",
+    "edit": "Bewerken",
+    "deleteShort": "Verwijderen",
+    "charsLeft": "Nog {{count}}",
     "add": "Notitie",
     "yourStatus": "Jouw status",
     "whatsUp": "Hoe gaat het?",

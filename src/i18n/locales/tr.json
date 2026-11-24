@@ -21874,6 +21874,18 @@
     "notInChat": "Bu bağlantı, içinde olmadığın özel bir sohbete ait."
   },
   "notes": {
+    "newStatus": "Yeni durum",
+    "upFor": "{{time}} önce paylaşıldı",
+    "postedAgo": "{{time}} önce",
+    "timeLeft": "{{time}} kaldı",
+    "like": "Beğen",
+    "unlike": "Beğenmekten vazgeç",
+    "likedBy": "{{name}} beğendi",
+    "likedByMore": "{{name}} ve {{others}} kişi daha beğendi",
+    "likes": "{{total}} beğeni",
+    "edit": "Düzenle",
+    "deleteShort": "Sil",
+    "charsLeft": "{{count}} kaldı",
     "add": "Not",
     "yourStatus": "Durumun",
     "whatsUp": "Neler oluyor?",
