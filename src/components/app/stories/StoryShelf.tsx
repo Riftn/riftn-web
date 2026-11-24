@@ -22,6 +22,8 @@ import { coverOf, handleOf, nameOf, playable } from './story-utils';
 import { expectedShelfSeat, rememberShelfSeat, type ShelfSeat } from '@/lib/story-shelf-seat';
 import { StoryCreatePill, StoryCreateTile } from './StoryCreatePill';
 import { useMomentPreviewsBlurred } from '@/lib/moment-preview-blur';
+import { formatCount } from '@/lib/format-count';
+import { formatTimeAgo } from '@/lib/feed-utils';
 import '@/styles/stories.css';
 
 const bg = (url?: string | null) => (url ? { backgroundImage: `url("${url.replace(/"/g, '%22')}")` } : undefined);
@@ -99,11 +101,20 @@ export function StoryShelf() {
 
   const addMoment = () => (isAuthenticated ? openCreator() : openLoginModal());
 
+  // With only 1 to 3 things up the row would end in empty space, so the first
+  // live (else the first Moment) grows into it and says a little more.
+  const showMe = storiesEnabled && isAuthenticated && !!(pending || ownWatchable);
+  const shownOthers = storiesEnabled ? others : [];
+  const upCount = (showMe ? 1 : 0) + eligibleLive.length + shownOthers.length;
+  const few = !isLoading && upCount >= 1 && upCount <= 3;
+  const spotlight = !few ? null : eligibleLive[0] ? 'live' : shownOthers[0] ? 'person' : 'me';
+
   return (
-    <div data-stories data-story-shelf data-no-swipe role="list">
+    <div data-stories data-story-shelf data-no-swipe role="list" data-few={few ? upCount : undefined}>
       {storiesEnabled && isAuthenticated && <StoryCreateTile />}
-      {storiesEnabled && isAuthenticated && (pending || ownWatchable) && (
+      {showMe && (
         <MeTile
+          spotlight={spotlight === 'me'}
           address={walletAddress ?? ''}
           avatar={user?.avatarImageUrl ?? own?.author.avatarImageUrl ?? null}
           entry={ownWatchable}
@@ -113,8 +124,8 @@ export function StoryShelf() {
           onOpen={el => ownWatchable && openEntry(ownWatchable, el)}
         />
       )}
-      {eligibleLive.map(item => (
-        <LiveTile key={`${item.kind}-${item.id}`} item={item} onOpen={() => openLive(item)} />
+      {eligibleLive.map((item, index) => (
+        <LiveTile key={`${item.kind}-${item.id}`} item={item} spotlight={spotlight === 'live' && index === 0} onOpen={() => openLive(item)} />
       ))}
       {storiesEnabled && isLoading && [0, 1, 2, 3].map(index => (
         <div key={index} data-story-tile aria-hidden="true" className="!bg-foreground/[0.04]">
@@ -122,8 +133,8 @@ export function StoryShelf() {
           <span className="absolute bottom-2 left-2 h-2 w-10 rounded bg-foreground/10" />
         </div>
       ))}
-      {storiesEnabled && others.map(entry => (
-        <PersonTile key={entry.author.address} entry={entry} onOpen={el => openEntry(entry, el)} />
+      {shownOthers.map((entry, index) => (
+        <PersonTile key={entry.author.address} entry={entry} spotlight={spotlight === 'person' && index === 0} onOpen={el => openEntry(entry, el)} />
       ))}
     </div>
   );
@@ -138,7 +149,8 @@ function ShelfAvatar({ src }: { src?: string | null }) {
   );
 }
 
-function MeTile({ address, avatar, entry, processing, pending, onAdd, onOpen }: {
+function MeTile({ address, avatar, entry, processing, pending, spotlight, onAdd, onOpen }: {
+  spotlight?: boolean;
   address: string;
   avatar: string | null;
   entry: ShelfEntry | null;
@@ -159,6 +171,7 @@ function MeTile({ address, avatar, entry, processing, pending, onAdd, onOpen }: 
       role="listitem"
       data-story-tile
       data-kind="me"
+      data-spotlight={spotlight ? '' : undefined}
       aria-label={t('stories.yourDay', { defaultValue: 'Your day' })}
       onClick={e => (entry && !pending ? onOpen(e.currentTarget) : !busy ? (pending?.retry ? pending.retry() : onAdd()) : undefined)}
     >
@@ -204,11 +217,14 @@ function TileIdentity({ address, username, displayName, live }: {
   );
 }
 
-function LiveTile({ item, onOpen }: { item: LiveNowItem; onOpen: () => void }) {
+function LiveTile({ item, spotlight, onOpen }: { item: LiveNowItem; spotlight?: boolean; onOpen: () => void }) {
   const { t } = useTranslation();
   const face = faceUrlOf(item);
+  const audience = item.kind === 'stage'
+    ? t('stories.spot.listening', { count: item.count, defaultValue: '{{count}} listening' })
+    : t('stories.spot.watching', { count: item.count, defaultValue: '{{count}} watching' });
   return (
-    <button type="button" role="listitem" data-story-tile data-kind="live" onClick={onOpen} aria-label={item.title}>
+    <button type="button" role="listitem" data-story-tile data-kind="live" data-spotlight={spotlight ? '' : undefined} onClick={onOpen} aria-label={item.title}>
       <span data-st-bg style={bg(item.cover)} />
       <span data-st-shade />
       <span data-st-live role="img" aria-label={t('stages.liveBadge', { defaultValue: 'LIVE' })}>
@@ -216,11 +232,13 @@ function LiveTile({ item, onOpen }: { item: LiveNowItem; onOpen: () => void }) {
       </span>
       <ShelfAvatar src={face} />
       <TileIdentity address={item.wallet} username={item.username} displayName={item.displayName} live={item} />
+      {spotlight && <span data-st-spot>{[item.title, item.count ? audience : ''].filter(Boolean).join(' · ')}</span>}
     </button>
   );
 }
 
-function PersonTile({ entry, onOpen }: { entry: ShelfEntry; onOpen: (el: HTMLElement) => void }) {
+function PersonTile({ entry, spotlight, onOpen }: { entry: ShelfEntry; spotlight?: boolean; onOpen: (el: HTMLElement) => void }) {
+  const { t } = useTranslation();
   const a = entry.author;
   const face = a.avatarImageUrl ? buildAvatarUrl(a.address, a.avatarImageUrl, deviceWidth(68)) : buildAvatarCdnFallbackUrl(a.address, undefined);
   const blurred = useMomentPreviewsBlurred();
@@ -230,6 +248,7 @@ function PersonTile({ entry, onOpen }: { entry: ShelfEntry; onOpen: (el: HTMLEle
       role="listitem"
       data-story-tile
       data-kind="person"
+      data-spotlight={spotlight ? '' : undefined}
       data-seen={entry.seen ? 'true' : 'false'}
       data-close-friends={entry.closeFriends && !entry.own ? '' : undefined}
       data-blur={blurred ? 'true' : undefined}
@@ -240,6 +259,16 @@ function PersonTile({ entry, onOpen }: { entry: ShelfEntry; onOpen: (el: HTMLEle
       <span data-st-shade />
       <ShelfAvatar src={face} />
       <TileIdentity address={a.address} username={a.username} displayName={a.displayName} />
+      {spotlight && (
+        <span data-st-spot>
+          {[
+            entry.latestAt ? formatTimeAgo(entry.latestAt) : '',
+            entry.items.length === 1
+              ? t('stories.spot.oneMoment', { defaultValue: '1 Moment' })
+              : t('stories.spot.moments', { count: formatCount(entry.items.length), defaultValue: '{{count}} Moments' }),
+          ].filter(Boolean).join(' · ')}
+        </span>
+      )}
     </button>
   );
 }
