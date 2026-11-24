@@ -1272,7 +1272,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
        every theme. The rows and composer carry their own inner padding. */
     return (
       <>
-      <div style={keyboardStyle} data-msg-phone-b={phonePill ? '' : undefined} className={`${mobileChatHeight} lg:h-[calc(100dvh-32px)] pt-1 pb-0 sm:pt-1 sm:pb-3 lg:pt-2 overflow-hidden`}>
+      <div style={keyboardStyle} data-msg-phone-b={phonePill && !fullscreen ? '' : undefined} className={`${mobileChatHeight} lg:h-[calc(100dvh-32px)] pt-1 pb-0 sm:pt-1 sm:pb-3 lg:pt-2 overflow-hidden`}>
         <DirectMessageChat
           /*
            * Keyed on WHO, not on the conversation id. A thread you have never
@@ -1287,8 +1287,10 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
           initialComposerText={composerPrefill?.convId === selectedConversation.id ? composerPrefill.text : undefined}
           focusComposer={composerFocusFor === conversationIdentity(selectedConversation)}
           onBack={closeChat}
-          // Phones: runs of bubbles from one side join up, one time per run.
-          cozy={phonePill}
+          // Phones (not riftn.com/chat): runs of bubbles join up, one time per
+          // run, B's centred top and the + bar.
+          cozy={phonePill && !fullscreen}
+          phoneB={phonePill && !fullscreen}
         />
       </div>
       {newMessageDrawer}

@@ -10,6 +10,10 @@
 @media (max-width: 1023px) {
   [data-msg-phone-b] {
     --pb-accent: color-mix(in srgb, var(--tint-accent, rgb(161 161 170)) 70%, white);
+    --pb-accent-ink: #0b0b0c;
+    --pb-tile: rgb(255 255 255 / 0.08);
+    --pb-tile-ink: #fff;
+    --pb-field-line: rgb(255 255 255 / 0.14);
     --pb-muted: rgb(161 161 170);
     --pb-line: rgb(255 255 255 / 0.08);
     --pb-me: color-mix(in srgb, var(--tint-accent, rgb(161 161 170)) 72%, black);
@@ -24,6 +28,10 @@
   }
   html:is([data-system-tone='light'], [data-theme='light'], [data-theme='minimal']) [data-msg-phone-b] {
     --pb-accent: #0b0b0c;
+    --pb-accent-ink: #fff;
+    --pb-tile: #efeff1;
+    --pb-tile-ink: #0b0b0c;
+    --pb-field-line: rgb(11 11 13 / 0.14);
     --pb-muted: rgb(107 107 116);
     --pb-line: rgb(11 11 13 / 0.08);
     --pb-me: #0b0b0c;
@@ -89,13 +97,13 @@
     box-shadow: none;
   }
 
-  /* Photos: 52px rounded squares, the house avatar shape (same as the app). */
+  /* Photos: 52px squares with button-like corners (10px), same as the app. */
   html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-list-row] :is(.w-12.h-12) {
     width: 52px !important;
     height: 52px !important;
-    border-radius: 14px !important;
+    border-radius: 10px !important;
   }
-  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-list-row] :is(.w-12.h-12) * { border-radius: 14px !important; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-list-row] :is(.w-12.h-12) * { border-radius: 10px !important; }
   /* Text: name 16px, time 13px (theme colour when unread), preview up to two
      lines, softer once read. */
   [data-msg-phone-b] [data-chat-list-row] .font-semibold,
@@ -123,6 +131,9 @@
     color: var(--pb-muted) !important;
   }
   /* Statuses ride above the list, in line with the rows. */
+  /* Status faces get the same squared-off corners as the chat photos. */
+  html:not(#_):not(#_):not(#_) [data-msg-phone-b] [data-status-tile] :is(img.h-\[60px\], .h-\[60px\], .h-\[60px\] *) { border-radius: 12px !important; }
+  html:not(#_):not(#_):not(#_) [data-msg-phone-b] [data-status-tile] .h-\[22px\] { border-radius: 6px !important; }
   html:not(#_):not(#_):not(#_) [data-msg-phone-b] [data-status-row] { margin: 0 !important; padding: 4px 14px 6px !important; }
 
   /* ---- Inside a chat ---- */
@@ -153,4 +164,17 @@
   html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-dm-bubble='me'][data-dm-bubble-last] { border-bottom-right-radius: 4px !important; }
   html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-dm-bubble='them'][data-dm-bubble-last] { border-bottom-left-radius: 4px !important; }
   [data-msg-phone-b] [data-cozy-meta] { font-size: 11.5px; margin-top: 4px; }
+
+  /* ---- The + bar and its drawer ---- */
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-plus]:not([aria-expanded='true']),
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-tray] [data-tray-cell] > button {
+    background: var(--pb-tile) !important;
+    color: var(--pb-tile-ink) !important;
+  }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-plus] { border-radius: 10px !important; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-tray] [data-tray-cell] > button { border-radius: 13px !important; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-bar-b] > div { border-radius: 19px !important; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-tray] [data-tray-cell] > span { color: var(--pb-tile-ink) !important; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-bar-b] > div { border-color: var(--pb-field-line) !important; background: transparent !important; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-send] { border-radius: 999px !important; background: var(--pb-accent) !important; color: var(--pb-accent-ink) !important; }
 }
