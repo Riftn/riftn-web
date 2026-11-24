@@ -3489,8 +3489,8 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
             )}
             {!isGroupChat && otherUser?.address && !isAssistantAddress(otherUser.address) && (
               <>
-                <DmVoiceCallButton recipientAddress={otherUser.address} className="text-zinc-300 hover:text-white hover:bg-zinc-800" />
-                <DmVideoCallButton recipientAddress={otherUser.address} className="text-zinc-300 hover:text-white hover:bg-zinc-800" />
+                <DmVoiceCallButton recipientAddress={otherUser.address} className="text-zinc-300 hover:text-white hover:bg-zinc-800 [html:is([data-theme=light],[data-system-tone=light])_&]:hover:!bg-transparent [html:is([data-theme=light],[data-system-tone=light])_&]:motion-safe:hover:scale-105" />
+                <DmVideoCallButton recipientAddress={otherUser.address} className="text-zinc-300 hover:text-white hover:bg-zinc-800 [html:is([data-theme=light],[data-system-tone=light])_&]:hover:!bg-transparent [html:is([data-theme=light],[data-system-tone=light])_&]:motion-safe:hover:scale-105" />
               </>
             )}
             {headerMenu}
@@ -3571,11 +3571,11 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
             <>
               <DmVoiceCallButton
                 recipientAddress={otherUser.address}
-                className={`text-zinc-400 hover:text-white hover:bg-zinc-800 ${dock ? 'h-8 w-8' : ''}`}
+                className={`text-zinc-400 hover:text-white hover:bg-zinc-800 [html:is([data-theme=light],[data-system-tone=light])_&]:hover:!bg-transparent [html:is([data-theme=light],[data-system-tone=light])_&]:motion-safe:hover:scale-105 ${dock ? 'h-8 w-8' : ''}`}
               />
               <DmVideoCallButton
                 recipientAddress={otherUser.address}
-                className={`text-zinc-400 hover:text-white hover:bg-zinc-800 ${dock ? 'h-8 w-8' : ''}`}
+                className={`text-zinc-400 hover:text-white hover:bg-zinc-800 [html:is([data-theme=light],[data-system-tone=light])_&]:hover:!bg-transparent [html:is([data-theme=light],[data-system-tone=light])_&]:motion-safe:hover:scale-105 ${dock ? 'h-8 w-8' : ''}`}
               />
             </>
           )}
