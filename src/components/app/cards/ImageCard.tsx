@@ -14,6 +14,7 @@ import { useSurfaceDraft, draftIdentity } from '@/hooks/use-surface-draft';
 
 import { useState, memo, useCallback, useEffect, useRef, useMemo, lazy, Suspense, type ReactNode } from 'react';
 const BountyClaimActions = lazy(() => import('./BountyClaimActions'));
+const PhotoTagger = lazy(() => import('@/components/app/photo-tags/PhotoTagger').then((module) => ({ default: module.PhotoTagger })));
 import { DhbAmount } from '@/components/app/DhbAmount';
 import { useImageSoundtrack } from '@/hooks/use-image-soundtrack';
 import { useHorizontalBitmap } from '@/hooks/use-horizontal-bitmap';
@@ -28,7 +29,6 @@ import { usePostMenuContext } from '@/lib/post-menu';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { ChevronDown, ChevronUp, ChevronLeft, Globe, Ticket, BarChart2, Star, UserRound, UserX } from "lucide-react";
-import { PhotoTagger } from "@/components/app/photo-tags/PhotoTagger";
 import { setPhotoTags as savePhotoTags, removeMyPhotoTag } from "@/lib/api/dehub";
 import Eye from "@/components/ui/cut-icons/visibility";
 import Flag from "@/components/ui/cut-icons/report";
@@ -2127,22 +2127,24 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
       />
 
       {showTagger && postTokenId && (
-        <PhotoTagger
-          open={showTagger}
-          onOpenChange={setShowTagger}
-          images={images}
-          value={imageTags}
-          onDone={async (tags) => {
-            try {
-              const { imageTags: saved } = await savePhotoTags(Number(postTokenId), tags);
-              setTagsOverride(saved);
-              toast.success(t('photoTags.saved', { defaultValue: 'Tags saved' }));
-            } catch (err: any) {
-              toast.error(err?.message || t('photoTags.saveFailed', { defaultValue: 'Could not save tags' }));
-              throw err;
-            }
-          }}
-        />
+        <Suspense fallback={null}>
+          <PhotoTagger
+            open={showTagger}
+            onOpenChange={setShowTagger}
+            images={images}
+            value={imageTags}
+            onDone={async (tags) => {
+              try {
+                const { imageTags: saved } = await savePhotoTags(Number(postTokenId), tags);
+                setTagsOverride(saved);
+                toast.success(t('photoTags.saved', { defaultValue: 'Tags saved' }));
+              } catch (err: any) {
+                toast.error(err?.message || t('photoTags.saveFailed', { defaultValue: 'Could not save tags' }));
+                throw err;
+              }
+            }}
+          />
+        </Suspense>
       )}
 
       {/* Poll Creator Drawer */}
