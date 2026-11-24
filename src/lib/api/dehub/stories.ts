@@ -205,14 +205,20 @@ export interface StoryComment {
   createdAt: string;
   author: StoryAuthor;
   canDelete: boolean;
+  /** Set on a reply: the comment it sits under. */
+  parentId?: string | null;
+  /** Written by the moment's owner. */
+  isCreator?: boolean;
+  /** With `threaded`, a top comment's replies, oldest first. */
+  replies?: StoryComment[];
 }
 
-export function getStoryComments(id: string, cursor?: string, signedIn = false): Promise<{ commentCount: number; allowComments: boolean; comments: StoryComment[]; next: string | null }> {
-  return apiCall(`/api/stories/${encodeURIComponent(id)}/comments`, { params: { cursor }, requiresAuth: signedIn });
+export function getStoryComments(id: string, cursor?: string, signedIn = false, threaded = false): Promise<{ commentCount: number; allowComments: boolean; comments: StoryComment[]; next: string | null }> {
+  return apiCall(`/api/stories/${encodeURIComponent(id)}/comments`, { params: { cursor, threaded: threaded ? '1' : undefined }, requiresAuth: signedIn });
 }
 
-export function addStoryComment(id: string, text: string): Promise<StoryComment> {
-  return apiCall(`/api/stories/${encodeURIComponent(id)}/comments`, { method: 'POST', body: { text }, requiresAuth: true });
+export function addStoryComment(id: string, text: string, parentId?: string): Promise<StoryComment> {
+  return apiCall(`/api/stories/${encodeURIComponent(id)}/comments`, { method: 'POST', body: parentId ? { text, parentId } : { text }, requiresAuth: true });
 }
 
 export function deleteStoryComment(id: string, commentId: string): Promise<{ ok: boolean }> {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Loader2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -26,10 +26,13 @@ export function StoryComments({ item, signedIn, onOpen, onClose, onSignIn, onCou
   const [allow, setAllow] = useState(item.allowReplies);
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
+  // The comment a reply goes under, while the person is answering one.
+  const [replyTo, setReplyTo] = useState<{ id: string; name: string } | null>(null);
+  const input = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     let alive = true;
-    getStoryComments(item.id, undefined, signedIn).then(r => {
+    getStoryComments(item.id, undefined, signedIn, true).then(r => {
       if (!alive) return;
       setRows(r.comments);
       setNext(r.next);
@@ -41,7 +44,7 @@ export function StoryComments({ item, signedIn, onOpen, onClose, onSignIn, onCou
 
   const more = async () => {
     if (!next) return;
-    const r = await getStoryComments(item.id, next, signedIn).catch(() => null);
+    const r = await getStoryComments(item.id, next, signedIn, true).catch(() => null);
     if (!r) return;
     setRows(list => [...(list ?? []), ...r.comments]);
     setNext(r.next);
@@ -52,9 +55,14 @@ export function StoryComments({ item, signedIn, onOpen, onClose, onSignIn, onCou
     if (!body || busy) return;
     setBusy(true);
     try {
-      const row = await addStoryComment(item.id, body);
-      setRows(list => [row, ...(list ?? [])]);
+      const row = await addStoryComment(item.id, body, replyTo?.id);
+      if (row.parentId) {
+        setRows(list => (list ?? []).map(r => (r.id === row.parentId ? { ...r, replies: [...(r.replies ?? []), row] } : r)));
+      } else {
+        setRows(list => [{ ...row, replies: row.replies ?? [] }, ...(list ?? [])]);
+      }
       setText('');
+      setReplyTo(null);
       setCount(c => { onCount(c + 1); return c + 1; });
     } catch (e) {
       toast.error((e as Error)?.message || t('stories.commentFailed', { defaultValue: "Your comment didn't go up. Try again." }));
@@ -64,9 +72,54 @@ export function StoryComments({ item, signedIn, onOpen, onClose, onSignIn, onCou
   };
 
   const remove = async (c: StoryComment) => {
-    setRows(list => (list ?? []).filter(r => r.id !== c.id));
-    setCount(n => { const v = Math.max(0, n - 1); onCount(v); return v; });
+    // A top comment takes its replies with it.
+    const gone = 1 + (c.parentId ? 0 : c.replies?.length ?? 0);
+    setRows(list => (list ?? [])
+      .filter(r => r.id !== c.id)
+      .map(r => (c.parentId && r.id === c.parentId ? { ...r, replies: (r.replies ?? []).filter(x => x.id !== c.id) } : r)));
+    if (replyTo && (replyTo.id === c.id)) setReplyTo(null);
+    setCount(n => { const v = Math.max(0, n - gone); onCount(v); return v; });
     await deleteStoryComment(item.id, c.id).catch(() => {});
+  };
+
+  const answer = (c: StoryComment, name: string) => {
+    if (!signedIn) { onSignIn(); return; }
+    setReplyTo({ id: c.parentId || c.id, name });
+    setTimeout(() => input.current?.focus(), 0);
+  };
+
+  const line = (c: StoryComment, reply: boolean) => {
+    const a = c.author;
+    const face = a.avatarImageUrl ? buildAvatarUrl(a.address, a.avatarImageUrl) : buildAvatarCdnFallbackUrl(a.address, undefined);
+    const name = a.displayName || a.username || a.address.slice(0, 8);
+    return (
+      <div key={c.id} className={`grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3 py-2 ${reply ? 'pl-11' : ''}`} data-sv-comment-reply={reply ? '' : undefined}>
+        <button type="button" onClick={() => onOpen(a.address)} aria-label={name}>
+          <Avatar className={reply ? 'size-6' : 'size-8'}>
+            {face && <AvatarImage src={face} alt="" className="object-cover" />}
+            <AvatarFallback className="bg-white/15 text-[12px] text-white">{name.slice(0, 1).toUpperCase()}</AvatarFallback>
+          </Avatar>
+        </button>
+        <div className="min-w-0">
+          <button type="button" className="text-[13px] font-semibold truncate max-w-full" onClick={() => onOpen(a.address)}>
+            {name}
+            {c.isCreator && <span className="ml-1.5 rounded-full bg-white/15 px-1.5 py-px text-[11px] font-semibold align-middle">{t('postInfo.creator', { defaultValue: 'Creator' })}</span>}
+            {' '}<span className="font-normal opacity-50">{ageLabel(c.createdAt)}</span>
+          </button>
+          <p className="text-[14px] break-words whitespace-pre-wrap">{c.text}</p>
+          {allow && (
+            <button type="button" className="mt-0.5 min-h-[28px] text-[12px] font-semibold opacity-60 hover:opacity-100" onClick={() => answer(c, name)}>
+              {t('messages.reply', { defaultValue: 'Reply' })}
+            </button>
+          )}
+        </div>
+        {c.canDelete && (
+          <button type="button" className="grid size-9 place-items-center rounded-full opacity-60 hover:opacity-100" onClick={() => remove(c)} aria-label={t('common.delete', { defaultValue: 'Delete' })}>
+            <Trash2 className="size-4" />
+          </button>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -86,32 +139,12 @@ export function StoryComments({ item, signedIn, onOpen, onClose, onSignIn, onCou
           <p className="py-4 text-[14px] opacity-70">{t('stories.noCommentsYet', { defaultValue: 'No comments yet. Say something everyone can see.' })}</p>
         ) : (
           <div className="flex flex-col">
-            {rows.map(c => {
-              const a = c.author;
-              const face = a.avatarImageUrl ? buildAvatarUrl(a.address, a.avatarImageUrl) : buildAvatarCdnFallbackUrl(a.address, undefined);
-              const name = a.displayName || a.username || a.address.slice(0, 8);
-              return (
-                <div key={c.id} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3 py-2">
-                  <button type="button" onClick={() => onOpen(a.address)} aria-label={name}>
-                    <Avatar className="size-8">
-                      {face && <AvatarImage src={face} alt="" className="object-cover" />}
-                      <AvatarFallback className="bg-white/15 text-[12px] text-white">{name.slice(0, 1).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                  </button>
-                  <div className="min-w-0">
-                    <button type="button" className="text-[13px] font-semibold truncate max-w-full" onClick={() => onOpen(a.address)}>
-                      {name} <span className="font-normal opacity-50">{ageLabel(c.createdAt)}</span>
-                    </button>
-                    <p className="text-[14px] break-words whitespace-pre-wrap">{c.text}</p>
-                  </div>
-                  {c.canDelete && (
-                    <button type="button" className="grid size-9 place-items-center rounded-full opacity-60 hover:opacity-100" onClick={() => remove(c)} aria-label={t('common.delete', { defaultValue: 'Delete' })}>
-                      <Trash2 className="size-4" />
-                    </button>
-                  )}
-                </div>
-              );
-            })}
+            {rows.map(c => (
+              <div key={c.id}>
+                {line(c, false)}
+                {(c.replies ?? []).map(r => line(r, true))}
+              </div>
+            ))}
             {next && <button type="button" className="py-3 text-[14px] font-semibold" onClick={more}>{t('common.showMore', { defaultValue: 'Show more' })}</button>}
           </div>
         )}
@@ -121,14 +154,24 @@ export function StoryComments({ item, signedIn, onOpen, onClose, onSignIn, onCou
           {t('stories.signInToComment', { defaultValue: 'Sign in to comment' })}
         </button>
       ) : allow ? (
+        <>
+        {replyTo && (
+          <div className="mt-2 flex items-center gap-2 px-1 text-[12px] opacity-80">
+            <span className="truncate">{t('governance.discussion.replyingTo', { name: replyTo.name, defaultValue: 'Replying to {{name}}' })}</span>
+            <button type="button" className="ml-auto min-h-[28px] font-semibold" onClick={() => setReplyTo(null)}>
+              {t('common.cancel', { defaultValue: 'Cancel' })}
+            </button>
+          </div>
+        )}
         <div className="mt-2 flex items-center gap-2">
           <input
+            ref={input}
             data-st-dark-glass
             className="h-11 flex-1 min-w-0 rounded-full px-4 text-[14px] bg-transparent outline-none"
             value={text}
             maxLength={300}
             onChange={e => setText(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter') void send(); }}
+            onKeyDown={e => { if (e.key === 'Enter') void send(); if (e.key === 'Escape' && replyTo) { e.stopPropagation(); setReplyTo(null); } }}
             placeholder={t('stories.addComment', { defaultValue: 'Add a comment for everyone' })}
           />
           {text.trim() && (
@@ -137,6 +180,7 @@ export function StoryComments({ item, signedIn, onOpen, onClose, onSignIn, onCou
             </button>
           )}
         </div>
+        </>
       ) : (
         <p className="mt-2 text-[13px] opacity-60">{t('stories.commentsOff', { defaultValue: 'Comments are off for this moment' })}</p>
       )}
