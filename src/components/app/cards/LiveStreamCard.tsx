@@ -1799,17 +1799,20 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
                   <span data-live-badge className="px-2 py-0.5 bg-red-500 text-white text-xs font-semibold rounded">{_copy("copy.35e0d0360a0a", { defaultValue: "LIVE" })}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  {/* Like (tap again and again, every tap floats one) and the
-                      emoji tray (hover or hold), on the picture itself, as on
-                      the phone. In fullscreen the share sheet can't draw
-                      over the player, so share reposts straight away there. */}
+                  {/* Desktop uses the action row below the player. Keep the
+                      in-player actions in fullscreen, where that row is offscreen.
+                      The share sheet cannot appear over fullscreen, so Share
+                      reposts directly there. */}
                   <div
                     data-no-navigate
                     data-live-player-actions
                     onClick={(e) => e.stopPropagation()}
                     // The bar's own size: the composer-sized 46px squares read as
                     // a second, heavier control row next to mute and fullscreen.
-                    className="[&>div>button]:!h-9 [&>div>button]:!w-9 [&>div>span>button]:!h-9 [&>div>span>button]:!w-9"
+                    className={cn(
+                      '[&>div>button]:!h-9 [&>div>button]:!w-9 [&>div>span>button]:!h-9 [&>div>span>button]:!w-9',
+                      !isFullscreen && 'lg:hidden',
+                    )}
                   >
                     <ActionBar
                       compact
