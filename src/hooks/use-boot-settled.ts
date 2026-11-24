@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { startTransition, useEffect, useState } from 'react';
 
 /**
  * "The page has loaded and had one idle moment."
@@ -78,8 +78,20 @@ function markInteracted(event: Event) {
   if (interacted || !event.isTrusted) return;
   interacted = true;
   for (const ev of INTERACTION_EVENTS) window.removeEventListener(ev, markInteracted, { capture: true });
-  for (const l of interactionListeners) l();
-  interactionListeners.clear();
+  // Not inside the event: an update made here renders before the browser may
+  // answer the tap, and home and every card on screen listen, so the first tap
+  // of every visit waited ~200 ms on a slow phone. Let the tap's own frame out
+  // first, then tell them as a transition, which a second tap can cut in on.
+  const tell = () => {
+    startTransition(() => {
+      for (const l of interactionListeners) l();
+      interactionListeners.clear();
+    });
+  };
+  let told = false;
+  const once = () => { if (!told) { told = true; tell(); } };
+  requestAnimationFrame(() => setTimeout(once, 0));
+  setTimeout(once, 250); // a frame that never comes (tab hidden mid-tap)
 }
 
 if (typeof window !== 'undefined') {
