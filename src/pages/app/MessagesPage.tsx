@@ -1657,7 +1657,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
           {tabSheets}
 
           {/* Conversation List */}
-          <div data-chat-list-scroll data-pull-through ref={chatListRef} {...chatPull.handlers} className={`flex-1 min-h-0 overflow-y-auto ${fullscreen && !phonePill ? 'pt-1 pb-3' : 'pt-3 pb-[76px] lg:pb-0'}`}>
+          <div data-chat-list-scroll data-pull-through ref={chatListRef} {...chatPull.handlers} className={`flex-1 min-h-0 overflow-y-auto ${fullscreen && !phonePill ? 'pt-1 pb-3 lg:overflow-x-hidden' : 'pt-3 pb-[76px] lg:pb-0'}`}>
             {/* Phones: pulled down from the top, the rows lower and a refresh
                 arrow turns in the gap; let go past its full turn to refresh.
                 Every row is a button, so the list opts in with
