@@ -5,7 +5,7 @@
  * everyone live right now as tiles (it replaces the Live now row), then
  * people's moments, with viewed ones at the end. A tile opens the full-screen viewer.
  */
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import Refresh from '@/components/ui/cut-icons/refresh';
 import { useBadgeBalance, useBadgeVisual } from '@/hooks/use-badge-balance';
@@ -30,13 +30,13 @@ const bg = (url?: string | null) => (url ? { backgroundImage: `url("${url.replac
 
 export function StoryShelf() {
   const { isAuthenticated, walletAddress, user, openLoginModal } = useAuth();
-  const { items: live, open: openLive } = useLiveNowItems();
+  const { items: live, open: openLive, loading: liveLoading } = useLiveNowItems();
   const { showMatureContent } = useMatureContent();
   const kidsMode = useKidsModeLock();
   const canSeeMature = isAuthenticated && showMatureContent && !kidsMode;
   const liveHosts = [...new Set(live.map(item => (item.wallet || '').toLowerCase()).filter(Boolean))].sort().slice(0, 100).join(',');
   const { storiesEnabled, storiesSettingLoading } = useStoriesEnabled();
-  const { data, isLoading } = useStoryShelf(liveHosts, canSeeMature, storiesEnabled || !!liveHosts);
+  const { data, isLoading, isError } = useStoryShelf(liveHosts, canSeeMature, storiesEnabled || !!liveHosts);
   const eligibleLive = live.filter(item => data?.liveHosts?.includes((item.wallet || '').toLowerCase()));
   const openViewer = useStoriesStore(s => s.openViewer);
   const openCreator = useStoriesStore(s => s.openCreator);
@@ -62,8 +62,7 @@ export function StoryShelf() {
 
   // Until the Stories setting and the first shelf are in, the seat keeps the
   // shape it had last visit (row of loading tiles, ask bar, or nothing), the
-  // same one the boot skeleton drew, so the feed under it never moves.
-  const [lastSeat] = useState<ShelfSeat>(expectedShelfSeat);
+  // same one the boot skeleton drew.
   const waiting = storiesSettingLoading || (isLoading && !data);
   const hidden = (!storiesEnabled || (!isAuthenticated && others.length === 0 && !isLoading)) && eligibleLive.length === 0;
   // Signed in and nobody has a Moment up (yours included): a thin pill that
@@ -71,11 +70,21 @@ export function StoryShelf() {
   const bare = storiesEnabled && isAuthenticated && !isLoading && !pending && !own?.items.length
     && others.length === 0 && eligibleLive.length === 0;
   const seat: ShelfSeat = hidden ? 'none' : bare ? 'ask' : 'row';
+  // Lives arrive a beat after the shelf, and the shelf then checks their
+  // hosts again. Until both are in, "nothing up" is not an answer yet.
+  const vetting = !!data && !isError && (data.askedHosts ?? '') !== liveHosts;
+  const nothingYet = eligibleLive.length === 0 && others.length === 0 && !own?.items.length;
+  const holding = eligibleLive.length === 0 && (waiting || ((liveLoading || vetting) && nothingYet));
+  // The seat on screen stays put while holding: what the last visit (or the
+  // last settled answer this visit) had, so the feed under it never moves.
+  const heldSeat = useRef<ShelfSeat>(expectedShelfSeat());
+  if (!holding) heldSeat.current = seat;
   // The loading skeletons read this to hold the right seat on the next visit.
   useEffect(() => {
-    if (!waiting) rememberShelfSeat(seat);
-  }, [waiting, seat]);
-  if (waiting && eligibleLive.length === 0) {
+    if (!holding) rememberShelfSeat(seat);
+  }, [holding, seat]);
+  if (holding) {
+    const lastSeat = heldSeat.current;
     if (lastSeat === 'none') return null;
     if (lastSeat === 'ask' && isAuthenticated) return <StoryCreatePill />;
     if (lastSeat === 'ask') return null;

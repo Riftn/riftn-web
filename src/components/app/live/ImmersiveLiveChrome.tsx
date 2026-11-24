@@ -47,6 +47,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLiveAudience } from '@/hooks/use-live-audience';
 import { LiveAudienceSheet, audienceAvatar, audienceName } from './LiveAudienceSheet';
 import { profilePath } from '@/lib/profile-path';
+import { LivePlayPause, LiveTag, LiveTimelineLine, useTimeshiftSnap, type LiveTimeshift } from './LiveTimeline';
 
 const compact = (n: number) => {
   try {
@@ -117,6 +118,8 @@ export interface ImmersiveLiveChromeProps {
   onClose?: () => void;
   /** Keep the live playing in a corner window while the viewer browses. */
   onMinimise?: () => void;
+  /** Pause, rewind and back-to-live for a broadcast on air. */
+  timeshift?: LiveTimeshift;
 }
 
 export function ImmersiveLiveChrome({
@@ -140,6 +143,7 @@ export function ImmersiveLiveChrome({
   streamId,
   onClose,
   onMinimise,
+  timeshift,
 }: ImmersiveLiveChromeProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -197,6 +201,8 @@ export function ImmersiveLiveChrome({
     return Number.isFinite(ms) ? ms : null;
   }, [startedAt]);
   const running = isLive && !isEnded && startedMs != null;
+  const onAir = isLive && !isEnded;
+  const timeshiftSnap = useTimeshiftSnap(onAir ? timeshift : undefined);
 
 
   const [audienceOpen, setAudienceOpen] = useState(false);
@@ -361,9 +367,16 @@ export function ImmersiveLiveChrome({
         {/* Live and how long, in one tag: red is the only hue on the frame. */}
         {isLive && !isEnded ? (
           <span className={PILL}>
-            <span className="rounded-[5px] bg-red-500 px-1.5 py-px text-[9.5px] font-black tracking-wider text-white">
-              {t('stages.live', 'LIVE')}
-            </span>
+            {/* Pause and back-to-live sit on the tag itself: red at the
+                live edge, white with how far back once behind. */}
+            {timeshift && timeshiftSnap ? (
+              <>
+                <LivePlayPause snap={timeshiftSnap} onToggle={timeshift.togglePlay} className="-ml-0.5 h-7 w-6 [filter:drop-shadow(0_1px_2px_rgb(0_0_0/0.7))]" />
+                <LiveTag snap={timeshiftSnap} onGoLive={timeshift.goLive} />
+              </>
+            ) : (
+              <LiveTag snap={null} />
+            )}
             {running && startedMs != null ? (
               <LiveElapsed startedMs={startedMs} />
             ) : null}
@@ -451,6 +464,10 @@ export function ImmersiveLiveChrome({
             />
           </div>
         </div>
+      ) : null}
+
+      {!seekable && timeshift && timeshiftSnap ? (
+        <LiveTimelineLine timeshift={timeshift} snap={timeshiftSnap} hidden={hidden} />
       ) : null}
 
       <LiveAudienceSheet open={audienceOpen} onOpenChange={setAudienceOpen} audience={audience} loading={audienceLoading} />
