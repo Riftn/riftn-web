@@ -2988,6 +2988,33 @@ export const blogPostsMetadata: BlogPost[] = [
 // arrays at runtime in blogUtils.ts — metadata-only logic, no third copy here.
 export const newPostsMetadata: BlogPost[] = [
   {
+    "id": "higgsfield-katana-vs-genjutsu",
+    "slug": "higgsfield-katana-vs-genjutsu",
+    "title": "Higgsfield Katana vs Genjutsu: What Each Does, Price and Speed (2026)",
+    "excerpt": "Genjutsu swaps one thing inside a single clip. Katana rebuilds a whole multi-shot edit around your photos. Here is what each one does, what it costs, how fast it is, and a per-clip alternative.",
+    "content": "",
+    "bannerImage": "/media/higgsfield-katana-vs-genjutsu-banner-r2.jpg",
+    "bannerImageAlt": "Higgsfield Katana vs Genjutsu: what each does, price and speed in 2026",
+    "author": {
+      "name": "Mal Jan"
+    },
+    "publishedAt": "2026-11-24T22:30:00.000Z",
+    "updatedAt": "2026-11-24T22:30:00.000Z",
+    "tags": [
+      "AI video",
+      "Higgsfield",
+      "Genjutsu",
+      "Katana",
+      "Maboroshi",
+      "Creator Studio"
+    ],
+    "readingTime": 5,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "Higgsfield Katana vs Genjutsu: Price, Speed and Model (2026)",
+    "seoDescription": "Higgsfield Katana vs Genjutsu in 2026: what each does, what it costs in credits, how long it takes, which model it uses, and a per-clip alternative with no subscription."
+  },
+  {
     "id": "films-huren-online-2026",
     "slug": "films-huren-online-2026",
     "title": "Renting Films Online in the Netherlands in 2026: Where and What It Costs",
