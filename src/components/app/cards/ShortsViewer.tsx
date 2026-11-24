@@ -2964,11 +2964,10 @@ export function ShortsViewer({ shorts: entries, initialIndex, onClose, onLoadMor
             )}
             {!!currentShort.videoUrl && !currentShort.imageUrls?.length && !currentShort.gated
               && !downloadGate.isGated && !currentShort.spoilerText
-              && visibility === 'public' && (!currentShort.visibility || currentShort.visibility === 'public')
-              && (isOwnShort || !currentShort.quotePolicy || currentShort.quotePolicy === 'public') && (
+              && visibility === 'public' && (!currentShort.visibility || currentShort.visibility === 'public') && (
               <RemixMenuItems source={{ videoUrl: currentShort.videoUrl, sourceUrl: `https://riftn.com/app/post/${currentShort.id}`,
                 title: currentShort.title || 'Video', creator: currentShort.creatorUsername || currentShort.username,
-                tokenId: String(currentShort.id), creatorAddress: currentShort.creatorId }}
+                tokenId: String(currentShort.id), creatorAddress: currentShort.creatorId, quotePolicy: currentShort.quotePolicy }}
                 isOwner={!!isOwnShort}
                 onStart={() => { setIsPaused(true); setShareSheetOpen(false); onClose(); }} />
             )}
