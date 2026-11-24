@@ -43,6 +43,9 @@ html:is([data-theme='light'], [data-theme='system'][data-system-tone='light']) .
   transition: max-width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), margin-left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 .live-row-actions > div {
+  /* Its own width, not the clip's: measured while folding it read 1px,
+     and the buttons came back 1px wide (gone) after you clicked off. */
+  width: max-content;
   transform-origin: left center;
   transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.22s ease-out;
 }

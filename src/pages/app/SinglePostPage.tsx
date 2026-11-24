@@ -109,7 +109,7 @@ import { POST_STAGE_COMPOSE_EVENT, type PostStageValue } from '@/components/app/
 import { viewerShareUrl } from '@/lib/share-url';
 import { trackShare } from '@/lib/analytics';
 import { toStoryboard } from '@/lib/storyboard';
-import { storedVideoAspect } from '@/lib/video-aspect';
+import { storedVideoAspect, storedVideoSizeShown } from '@/lib/video-aspect';
 import { profilePath } from '@/lib/profile-path';
 
 /*
@@ -311,6 +311,7 @@ function toVideoItem(nft: DeHubNFT): VideoItem {
     transcodingStatus: nft.transcodingStatus,
     storyboard: toStoryboard(nft.storyboard),
     storedAspect: storedVideoAspect(nft.videoInfo),
+    storedAspectShown: storedVideoSizeShown(nft.videoInfo),
     creatorId: resolvedAddress,
     creatorUsername: nft.minterUsername || nft.mintername || creatorObj?.username || ownerObj?.username,
     // Same source the feed normalizer reads (use-unified-feed). Without it the

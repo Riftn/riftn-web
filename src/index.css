@@ -2369,6 +2369,12 @@ html:is([data-theme="glass"], [data-theme="cosmic"], [data-theme="hazy"], [data-
 [data-feed-root] > [data-feed-item] {
   padding-bottom: 1.5rem !important;
 }
+/* Bentos are boxed, not divided, so the divider spacing above left a deep
+   bottom under the action row. Inside a bento the row sits as far from the
+   bottom edge as the like count sits from the right edge (14px). */
+[data-feed-root] > [data-feed-item]:is(.rounded-xl, .rounded-2xl) {
+  padding-bottom: 0.875rem !important;
+}
 
 /* A feed image is inset inside its bento, but it is still the bento's media
    face. Keep its clipping radius tied to the card variant instead of leaving
@@ -6763,6 +6769,17 @@ html[data-theme="horror"] [data-creator-page] { --cr-accent: linear-gradient(135
   .dehub-intro .dehub-intro-plate,
   .dehub-intro .dehub-intro-sub,
   .dehub-intro .dehub-intro-foot { display: none; }
+  /* The silk stays, dimmed under the glass. Without it the card's biggest
+     painted piece is the 120 px globe, so Chrome timed the first sliver of
+     feed media below it as the page's LCP, and that waits on the whole app. */
+  .dehub-intro .dehub-intro-plate.dehub-intro-silk {
+    display: block; opacity: .32;
+    background-image: var(--silk-phone, url(/brand-kit/bg/bg-16-phone.jpg)) !important;
+  }
+  /* The app's copy keeps the silk as a background too, so it is an LCP
+     candidate: when the entry runs before the first frame (PSI's observed run
+     paints first at 2.4 s), the app's card is what paints first, and without
+     this the LCP fell to the welcome text after the whole app had run. */
   .dehub-intro .dehub-intro-tail { display: block; margin-top: 0; }
   .dehub-intro .dehub-intro-hero {
     top: 54px; left: 50%; right: auto; width: 120px; height: 118px; opacity: 1;

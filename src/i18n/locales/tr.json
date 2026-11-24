@@ -8146,7 +8146,9 @@
         "low": "Hafif",
         "high": "Güçlü"
       },
-      "gateHint": "Konuşmaların arasında mikrofonunu susturur; klavye ve fan sesi yayına girmez."
+      "gateHint": "Konuşmaların arasında mikrofonunu susturur; klavye ve fan sesi yayına girmez.",
+      "hearShared": "Paylaşılan sekmeyi bu bilgisayarda duy",
+      "hearSharedHint": "Kapatınca sekmenin sesi izleyicilere gitmeye devam eder ama sende sessiz olur, böylece başka bir şey dinleyebilirsin. Chrome, Edge veya Brave'de paylaşılan bir sekmede çalışır."
     }
   },
   "liveStudio": {
@@ -8173,7 +8175,8 @@
         "connecting": "Bağlanıyor",
         "live": "Canlı",
         "error": "Hata"
-      }
+      },
+      "addShort": "Ekle"
     },
     "vertical": {
       "title": "Dikey görünüm",
@@ -8593,6 +8596,18 @@
         "word-timeout_one": "\"{{word}}\" için {{count}} saniye {{target}} zaman aşımına uğradı",
         "word-timeout_other": "\"{{word}}\" için {{count}} saniye boyunca {{target}} zaman aşımına uğradı"
       }
+    },
+    "groups": {
+      "stream": "Canlı yayın",
+      "streamHint": "Yayın sırasındaki anahtarlar, yayınının gideceği yerler ve OBS bağlantısı.",
+      "overlay": "Kaplama",
+      "viewers": "İzleyiciler",
+      "viewersHint": "İzleyenleri yayına katan anketler, sayaçlar, puanlar ve ödüller.",
+      "chat": "Sohbet",
+      "chatHint": "Sohbet botun ve yayınlarının altındaki sohbetin kuralları.",
+      "replays": "Yayından sonra",
+      "replaysTab": "Sonra",
+      "replaysHint": "Son yayının nasıl geçti ve paylaşmaya değer klipler."
     }
   },
   "live": {
@@ -9629,7 +9644,8 @@
     "followRequest": "{{name}} seni takip etmek istiyor",
     "followAccepted": "{{name}} takip isteğini kabul etti",
     "signalFlare": "{{name}} bir Sinyal Fişeği gönderdi",
-    "newMessage": "{{name}} sana bir mesaj gönderdi"
+    "newMessage": "{{name}} sana bir mesaj gönderdi",
+    "unlike": "Beğenmekten vazgeç"
   },
   "audioPost": {
     "popOut": "Açılır pencere — göz atarken dinlemeye devam edin",
@@ -9817,6 +9833,19 @@
     "yourChannelHint": "Kanal adresinizi yapıştırın — tanıtıcı da kendi üzerinde çalışır."
   },
   "calls": {
+    "removedByMod": "Bir moderatör seni bu aramadan çıkardı",
+    "removedFor": "{{count}} dk sonra tekrar katılabilirsin.",
+    "mutedByMod": "Bir moderatör sesini kapattı",
+    "mutedByModHint": "Bir moderatör sesini açınca tekrar konuşabilirsin.",
+    "unmutedByMod": "Bir moderatör sesini açtı. Konuşmak için mikrofona dokun.",
+    "modFailed": "Bu yapılamadı. Tekrar dene.",
+    "modMenu": "{{name}} için moderasyon",
+    "modMute": "{{name}} sesini kapat",
+    "modUnmute": "{{name}} sesini aç",
+    "modRemove": "Aramadan çıkar",
+    "modRemoved": "Aramadan çıkarıldı",
+    "modMuted": "Herkes için sesi kapatıldı",
+    "modUnmuted": "Sesi açıldı",
     "voiceCall": "Riftn sesli arama",
     "videoCall": "Riftn görüntülü arama",
     "incoming": "Gelen arama",
@@ -9878,7 +9907,17 @@
     "startGroupVoice": "Grup sesli araması başlat",
     "startGroupVideo": "Grup görüntülü araması başlat",
     "subtitles": "Altyazı",
-    "you": "Sen"
+    "you": "Sen",
+    "callFull": "Bu arama dolu",
+    "callFullHint": "Bir aramanın alabileceği en fazla kişiye ulaştı. Biri ayrılınca katılabilirsin.",
+    "camerasFull": "Kameralar dolu",
+    "townHall": "Meclis",
+    "gridView": "Izgara",
+    "unpin": "Sabitlemeyi kaldır",
+    "townHallTalking": "{{n}} kişi konuşuyor",
+    "camerasFullJoin": "Kameran kapalı olarak katıldın. Biri kamerasını kapatınca açabilirsin.",
+    "camerasFullHint": "Biri kamerasını kapatınca seninkini açabilirsin.",
+    "full": "Dolu"
   },
   "badgeAscension": {
     "reached": "{{tier}} seviyesine ulaştınız",
@@ -13611,6 +13650,7 @@
   },
   "dm": {
     "shareGroups": "Gruplar",
+    "opened": {"photoA11y": "Fotoğraf, {{time}} açıldı", "videoA11y": "Video, {{time}} açıldı", "seenAt": "Görüldü {{time}}", "replyCamera": "Kamerayla yanıtla", "quotePhoto": "Fotoğraf · Açıldı", "quoteVideo": "Video · Açıldı", "cameraTitle": "Bu fotoğrafa yanıt ver", "cameraOff": "Kamera erişimi kapalı. Bunun yerine fotoğraf veya video yükle.", "takePhoto": "Fotoğraf çek", "uploadInstead": "Bunun yerine yükle"},
     "openTimer": {
       "secs": "{{n}} sn",
       "oneMin": "1 dk",
@@ -14016,6 +14056,10 @@
     "reminderLater": "Şimdi değil"
   },
   "copy": {
+    "1944d5ab19cd": "Şuraya çevir",
+    "98cdcf4f2415": "Dilleri ara",
+    "48bec8529d3f": "{{language}}'dan çevrildi",
+    "d80d30a1c7fd": "Zaten {{language}} içinde",
     "799c26913574": "Kontroller",
     "ff73efa451e4": "W, A, S, D veya ok tuşlarıyla hareket et. Fareyle bak ve ateş et.",
     "c718a21950e6": "Boşluk zıplar, Shift koşar, C çömelir ve Z yere yatar.",
@@ -21874,6 +21918,8 @@
     "notInChat": "Bu bağlantı, içinde olmadığın özel bir sohbete ait."
   },
   "notes": {
+    "background": "Arka plan",
+    "yourPhoto": "Fotoğrafın",
     "newStatus": "Yeni durum",
     "upFor": "{{time}} önce paylaşıldı",
     "postedAgo": "{{time}} önce",
@@ -23226,6 +23272,25 @@
       "disclaimer": "SillyCoin’ler sadece eğlence içindir ve değeri yoktur. Kripto para değildir, cüzdanına asla dokunmaz; satın alınamaz, satılamaz veya nakde çevrilemez."
     },
     "gratitude": {
+      "withFriend": "Bir arkadaş",
+      "withComputer": "Bilgisayar",
+      "computer": "Bilgisayar",
+      "computerNote": "Birkaç saniyede cevap verir. Kazanmak için yeni fikirlerini tüket.",
+      "levelLabel": "Seviye",
+      "levelEasy": "Kolay",
+      "levelNormal": "Normal",
+      "levelHard": "Zor",
+      "turnLabel": "Tur süresi",
+      "turn1m": "1 dk",
+      "turn5m": "5 dk",
+      "turn1d": "1 gün",
+      "playComputer": "Bilgisayara karşı oyna",
+      "computerEach": "{{level}} · tur başına {{time}}",
+      "statusComputerTurn": "Bilgisayar yazıyor…",
+      "chipComputerTurn": "Onun sırası",
+      "writing": "Yazıyor…",
+      "playAgain": "Tekrar oyna",
+      "empty2": "Henüz oyun yok. Yukarıdan bir arkadaşını davet et ya da bilgisayara karşı oyna.",
       "rule1": "Minnettar olduğun bir şeyi yaz ve gönder.",
       "rule2": "O da kendisininkiyle cevap verir. Karşılıklı devam eder.",
       "rule3": "Tekrar yok. Her yenisi oyundaki önceki tüm satırlarla karşılaştırılır.",
@@ -23745,5 +23810,21 @@
     "postSnapshot": "Ekran görüntüsü paylaş",
     "shareLink": "Bağlantıyı paylaş",
     "snapshotFailed": "Ekran görüntüsü alınamadı. Tekrar dene."
+  },
+  "liveMini": {
+    "minimise": "Küçült",
+    "minimiseHint": "Gezinirken izlemeye devam et",
+    "player": "Canlı oynatıcı",
+    "soundOnly": "Yalnızca ses",
+    "showPicture": "Görüntüyü göster",
+    "openLive": "Canlıyı aç",
+    "float": "Diğer uygulamaların üzerinde yüzdür",
+    "play": "Oynat",
+    "pause": "Duraklat",
+    "close": "Canlıyı kapat",
+    "ended": "Bu canlı yayın sona erdi"
+  },
+  "liveTimeline": {
+    "backToLive": "Canlıya dön"
   }
 }

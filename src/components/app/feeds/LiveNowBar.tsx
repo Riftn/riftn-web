@@ -55,13 +55,15 @@ export interface LiveNowItem {
   badgeBalance?: number | null;
   hideBadgeAndBalance?: boolean;
   badgeLock?: BadgeLock | null;
+  /** Everyone who has opened the stream so far (streams only). */
+  views?: number;
 }
 
 /**
  * Everyone live right now, people you follow first, and how to open one.
  * Shared by this row and the story shelf, which shows each one as a tile.
  */
-export function useLiveNowItems(): { items: LiveNowItem[]; open: (item: LiveNowItem) => void } {
+export function useLiveNowItems(): { items: LiveNowItem[]; open: (item: LiveNowItem) => void; loading: boolean } {
   const { walletAddress, isAuthenticated } = useAuth();
   const { openModal, joinSpace } = useStage();
   const navigate = useNavigate();
@@ -84,7 +86,7 @@ export function useLiveNowItems(): { items: LiveNowItem[]; open: (item: LiveNowI
   // Live stages from StageProvider's single fetch + realtime channel; live
   // streams from the same /api/live query the Live tab and home carousel use.
   const liveStages = useLiveSpaces();
-  const { data: liveData } = useDeHubLive(DEFAULT_DEHUB_LIVE_QUERY_OPTIONS);
+  const { data: liveData, isLoading: liveLoading } = useDeHubLive(DEFAULT_DEHUB_LIVE_QUERY_OPTIONS);
 
   const stageIds = liveStages.map(s => s.id);
   const { data: allParticipants = [] } = useQuery({
@@ -149,6 +151,7 @@ export function useLiveNowItems(): { items: LiveNowItem[]; open: (item: LiveNowI
           hideBadgeAndBalance: (raw as any).account?.hideBadgeAndBalance,
           badgeBalance: stream.creatorBadgeBalance ?? null,
           badgeLock: (raw as any).account?.hideBadgeAndBalance ? null : parseBadgeLock((raw as any).account?.badgeLock),
+          views: Number((raw as any).totalViews) || 0,
         });
       });
     });
@@ -167,7 +170,7 @@ export function useLiveNowItems(): { items: LiveNowItem[]; open: (item: LiveNowI
     }
   };
 
-  return { items, open };
+  return { items, open, loading: liveLoading };
 }
 
 export function LiveNowBar() {

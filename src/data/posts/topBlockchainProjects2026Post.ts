@@ -196,7 +196,7 @@ These projects had zero commits on the default branch of their main public repo 
 
 ## For scale: Riftn
 
-Riftn is a social and streaming app, not a blockchain, so it is not ranked here. But for scale, its public web and mobile apps took 5,558 commits in the same 90 days, about twice as many as Solana, the busiest blockchain on this list. On Riftn, anyone can request a feature on [riftn.com/features](https://riftn.com/features) and watch the community build it.
+Riftn is a social media protocol, not a blockchain, so it is not ranked here. But for scale, its public web and mobile apps took 5,558 commits in the same 90 days, about twice as many as Solana, the busiest blockchain on this list. On Riftn, anyone can request a feature on [riftn.com/features](https://riftn.com/features) and watch the community build it.
 
 ![For scale: Riftn 5,558 commits in 90 days, Solana 2,618, Dash 1,222, Base 1,185](/media/fig-chains-dehub-riftn.jpg)
 

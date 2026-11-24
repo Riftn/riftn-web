@@ -403,9 +403,75 @@ function prerenderHomeIntroPlugin() {
           });
           if (!markup.includes('dehub-intro')) throw new Error('no panel markup in output');
           console.log(`[prerender-home-intro] injected ${(markup.length / 1024).toFixed(1)} KB of welcome-panel HTML`);
-          return html.replace(slot, `<div data-prerendered-intro>${markup}</div>`);
+          // The trailing marker lets index.html keep the panel unpainted until
+          // the parser has reached its end (see [data-intro-done] there).
+          return html.replace(slot, `<div data-prerendered-intro>${markup}<i data-intro-done hidden></i></div>`);
         } catch (e) {
           console.warn('[prerender-home-intro] failed — keeping the skeleton card', e);
+          return html;
+        }
+      },
+    },
+  };
+}
+
+/**
+ * First paint from the HTML alone.
+ *
+ * The main stylesheet (~130 KB compressed) was render-blocking, so the boot
+ * skeleton and the prerendered welcome card, both already in index.html,
+ * waited on it. The rules those two need (scripts/critical-css.mjs, ~11 KB
+ * compressed) are inlined in its place and the full sheet loads after the
+ * first frame: that frame is drawn from the document itself.
+ * (PSI's test machine also draws nothing for ~2.4 s on any page with a
+ * blocking external stylesheet, ours or anyone's, and paints at once without.)
+ *
+ * Only for the look the inlined rules were picked for: a new visitor, System
+ * theme, dark tone, default settings. Anything else (a saved theme, dimmed
+ * lights, line separators, an OBS overlay) keeps the blocking stylesheet,
+ * written by the same inline script, so nobody ever sees a restyle.
+ *
+ * window.__mainCss() starts the full sheet and resolves when it has applied.
+ * The entry starter below calls it once the first frame is on screen and
+ * waits for it, so the app never renders against partial CSS. It is not even
+ * requested before that frame: Lighthouse bills to FCP and LCP whatever
+ * finished downloading before the paint, and on its test machine the first
+ * frame comes late enough that a preloaded sheet always had.
+ */
+function inlineCriticalCssPlugin() {
+  return {
+    name: 'inline-critical-css',
+    apply: 'build' as const,
+    transformIndexHtml: {
+      order: 'post' as const,
+      async handler(html: string, ctx: { bundle?: Record<string, { type: string; fileName: string; source?: string | Uint8Array }> }) {
+        const tag = /<link rel="stylesheet" crossorigin href="(\/assets\/index-[^"]+\.css)">/;
+        const m = html.match(tag);
+        const asset = m && ctx.bundle?.[m[1].slice(1)];
+        if (!m || !asset || asset.type !== 'asset' || asset.source == null) {
+          console.warn('[inline-critical-css] main stylesheet not found; leaving it render-blocking');
+          return html;
+        }
+        try {
+          // @ts-expect-error plain .mjs build script, no types
+          const { extractCriticalCss } = await import('./scripts/critical-css.mjs');
+          const css = typeof asset.source === 'string' ? asset.source : Buffer.from(asset.source).toString('utf8');
+          const critical: string = await extractCriticalCss(html, css);
+          if (critical.includes('</style')) throw new Error('critical CSS contains a closing style tag');
+          const href = m[1];
+          const loader = [
+            `<style data-critical>${critical}</style>`,
+            '<script>(function(){var d=document,s=d.documentElement.dataset,h=' + JSON.stringify(href) + ',p;',
+            'if(s.theme==="system"&&s.systemTone==="dark"&&s.shortsEnabled==="true"&&s.sidebarCollapsed==="false"&&s.dimLights==="false"&&!("feedSep" in s)&&!("chatOwnBubble" in s)&&!("obsOverlay" in s)){',
+            'window.__mainCss=function(){if(p)return p;var l=d.createElement("link"),c=d.querySelector("style[data-critical]");l.rel="stylesheet";l.crossOrigin="";l.href=h;l.setAttribute("data-main-css","");',
+            'p=new Promise(function(r){l.onload=l.onerror=r;});if(c)c.insertAdjacentElement("afterend",l);else d.head.appendChild(l);return p;};}',
+            `else{d.write('<link rel="stylesheet" crossorigin href="'+h+'">');}})();</script>`,
+            `<noscript><link rel="stylesheet" crossorigin href="${href}"></noscript>`,
+          ].join('');
+          console.log(`[inline-critical-css] ${Math.round(css.length / 1024)} KB stylesheet, ${Math.round(critical.length / 1024)} KB inlined for the first frame`);
+          return html.replace(tag, () => loader);
+        } catch (e) {
+          console.warn('[inline-critical-css] failed; leaving the stylesheet render-blocking', e);
           return html;
         }
       },
@@ -426,11 +492,20 @@ function prerenderHomeIntroPlugin() {
  * Lighthouse (which models from an unthrottled trace) then reports a first
  * paint of 6 s on a phone with the panel sitting in the HTML the whole time.
  *
- * This swaps the tag for a `modulepreload` (the download starts just as early,
- * at the same priority) plus an inline starter that import()s the entry after
- * the first frame has painted: requestAnimationFrame fires before that frame
- * paints, a zero-delay timeout inside it lands after. A background tab never
- * gets a frame, so a 1.5 s timer and a visibility listener start it there;
+ * This swaps the tag for an inline starter that fetches and import()s the
+ * entry only once the first frame is on screen (the browser's own first-paint
+ * entry; where that is not reported, the frame after the first one).
+ *
+ * Nothing of the app is even downloaded before that paint. An early
+ * modulepreload looked free, but on a one or two core phone (and on PSI's
+ * test machine) compiling 2.3 MB off the main thread starved the compositor:
+ * the main thread sat idle for 600 ms with no frame, then the entry ran and
+ * the frame waited on it again (first paint 2.4 s for a card that is in the
+ * HTML). Lighthouse also bills every script that finished before the LCP
+ * paint to LCP, so the early download alone put its simulated LCP near 11 s.
+ * A background tab never gets a frame, so a 4 s timer and a visibility
+ * listener start it there. The user-timing marks entry-start:paint|frame|timer
+ * and first-raf show which path ran in a Lighthouse report.
  * import() of the same module twice is one evaluation, so both paths are safe.
  *
  * scripts/check-entry-bundle.mjs finds the entry through the data-entry link.
@@ -449,17 +524,30 @@ function startEntryAfterFirstPaintPlugin() {
           return html;
         }
         const entry = m[1];
+        // Every modulepreload (the entry's vendor chunks and the low-priority
+        // wallet set) moves into an inert <template>: nothing in it is fetched
+        // or compiled until the starter copies it into <head>. The tags keep
+        // their exact text, so the build checks that read them still do.
+        const preloads: string[] = [];
+        let out = html.replace(/[ \t]*<link\b[^>]*\brel="modulepreload"[^>]*>\n?/g, (tag) => { preloads.push(tag.trim()); return ''; });
         const starter = [
-          `<link rel="modulepreload" data-entry crossorigin href="${entry}">`,
-          '<script>(function(){var s=0,e=' + JSON.stringify(entry) + ';',
-          'function go(){if(s)return;s=1;import(e).catch(function(){});}',
-          'function afterPaint(){requestAnimationFrame(function(){setTimeout(go,0);});}',
-          'if(document.visibilityState==="hidden"){document.addEventListener("visibilitychange",function v(){if(document.visibilityState==="visible"){document.removeEventListener("visibilitychange",v);afterPaint();}});}',
+          `<template id="boot-preloads"><link rel="modulepreload" data-entry crossorigin href="${entry}">${preloads.join('')}</template>`,
+          '<script>(function(){var s=0,d=document,e=' + JSON.stringify(entry) + ';',
+          'function mark(n){try{performance.mark(n);}catch(x){}}',
+          'mark("boot-vis:"+d.visibilityState);',
+          'function add(q){var t=d.getElementById("boot-preloads");if(!t||!t.content)return;var l=t.content.querySelectorAll(q);for(var i=0;i<l.length;i++)d.head.appendChild(l[i].cloneNode(true));}',
+          'function go(r){if(s)return;s=1;mark("entry-start:"+r);add("link:not([data-prefetch-only])");',
+          'var c=window.__mainCss;function run(){import(e).then(function(){setTimeout(function(){add("link[data-prefetch-only]");},1500);},function(){});}',
+          'if(c)c().then(run);else run();}',
+          'function afterPaint(){var p=0,sup=0;function f(r){if(p)return;p=1;setTimeout(function(){go(r);},0);}',
+          'try{sup=PerformanceObserver.supportedEntryTypes.indexOf("paint")>=0;if(sup)new PerformanceObserver(function(l,o){o.disconnect();f("paint");}).observe({type:"paint",buffered:true});}catch(x){sup=0;}',
+          'requestAnimationFrame(function(){mark("first-raf");if(sup)setTimeout(function(){f("frame");},1000);else requestAnimationFrame(function(){f("frame");});});}',
+          'if(d.visibilityState==="hidden"){d.addEventListener("visibilitychange",function v(){if(d.visibilityState==="visible"){d.removeEventListener("visibilitychange",v);afterPaint();}});}',
           'else{afterPaint();}',
-          'setTimeout(go,1500);})();</script>',
+          'setTimeout(function(){go("timer");},4000);})();</script>',
         ].join('');
         console.log(`[start-entry-after-first-paint] ${entry} now starts after the first frame`);
-        return html.replace(tag, starter);
+        return out.replace(tag, starter);
       },
     },
   };
@@ -491,6 +579,7 @@ export default defineConfig(({ mode }) => ({
     preloadWalletChunkPlugin(),
     postLinkCodePlugin(),
     prerenderHomeIntroPlugin(),
+    inlineCriticalCssPlugin(),
     startEntryAfterFirstPaintPlugin(),
     warGameCorsPlugin(),
     mcpPlugin(),

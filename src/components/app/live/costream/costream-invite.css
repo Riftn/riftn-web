@@ -1,0 +1,240 @@
+/* The on-screen invite card (CoStreamInviteCard.tsx).
+   Sits on the live picture: dark glass on dark and canvas themes, white
+   frosted glass on Light and System Light. Join wears the theme's selected-chip
+   fill (white on System, ink on light, the theme accent on canvas themes).
+   The :not(#_) pairs lift these over the theme sheets' #app-root nets. */
+
+.costream-invite,
+.costream-invite-chip {
+  --ci-bg: rgb(16 16 18 / 0.66);
+  --ci-edge: rgb(255 255 255 / 0.14);
+  --ci-ink: #fff;
+  --ci-muted: rgb(255 255 255 / 0.74);
+  --ci-quiet-bg: rgb(255 255 255 / 0.1);
+  --ci-shadow: 0 18px 48px rgb(0 0 0 / 0.38);
+  --ci-arrive: cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+html:is([data-theme='light'], [data-system-tone='light']) :is(.costream-invite, .costream-invite-chip) {
+  --ci-bg: rgb(255 255 255 / 0.86);
+  --ci-edge: rgb(0 0 0 / 0.08);
+  --ci-ink: #0b0b0d;
+  --ci-muted: rgb(11 11 13 / 0.76);
+  --ci-quiet-bg: rgb(0 0 0 / 0.05);
+  --ci-shadow: 0 18px 48px rgb(0 0 0 / 0.22);
+}
+
+.costream-invite:not(#_):not(#_) {
+  pointer-events: auto;
+  width: min(360px, calc(100% - 24px));
+  padding: 12px;
+  border-radius: 16px;
+  background: var(--ci-bg);
+  color: var(--ci-ink);
+  box-shadow: inset 0 0 0 1px var(--ci-edge), var(--ci-shadow);
+  backdrop-filter: blur(24px) saturate(1.6);
+  animation: costream-invite-in 320ms var(--ci-arrive) both;
+  text-align: left;
+}
+
+.costream-invite__top { display: flex; align-items: center; gap: 12px; }
+
+.costream-invite__faces { position: relative; display: flex; flex: none; align-items: center; }
+/* The host's face wears a red live ring that breathes out once a second. */
+.costream-invite__host { position: relative; border-radius: 10px; box-shadow: 0 0 0 2px #ef4444; }
+.costream-invite__host::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 12px;
+  box-shadow: 0 0 0 2px #ef4444;
+  animation: costream-invite-ring 1.6s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes costream-invite-ring {
+  from { opacity: 0.7; transform: scale(1); }
+  to { opacity: 0; transform: scale(1.25); }
+}
+.costream-invite__you {
+  position: relative;
+  margin-left: -8px;
+  border-radius: 10px;
+  box-shadow: 0 0 0 2px var(--ci-bg-solid, rgb(16 16 18));
+  animation: costream-invite-you 420ms var(--ci-arrive) 140ms both;
+}
+html:is([data-theme='light'], [data-system-tone='light']) .costream-invite__you { --ci-bg-solid: #fff; }
+.costream-invite__cam:not(#_):not(#_) {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  box-shadow: 0 0 0 2px var(--ci-bg-solid, rgb(16 16 18));
+}
+
+.costream-invite__title:not(#_):not(#_) {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--ci-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+.costream-invite__title strong:not(#_):not(#_) { font-weight: 700; color: var(--ci-ink); }
+.costream-invite__sub:not(#_):not(#_) {
+  margin: 2px 0 0;
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: var(--ci-muted);
+}
+
+.costream-invite__actions { display: flex; gap: 8px; margin-top: 12px; }
+
+.costream-invite__join:not(#_):not(#_),
+.costream-invite__later:not(#_):not(#_) {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 42px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: transform 150ms, opacity 150ms;
+}
+.costream-invite__join:not(#_):not(#_) {
+  flex: 1;
+  background: var(--kit-chip-active-bg, #fff);
+  color: var(--kit-chip-active-ink, #0b0b0c);
+}
+.costream-invite__join:not(#_):not(#_) svg { color: inherit !important; }
+.costream-invite__later:not(#_):not(#_) {
+  padding: 0 14px;
+  background: var(--ci-quiet-bg);
+  color: var(--ci-ink);
+  box-shadow: inset 0 0 0 1px var(--ci-edge);
+}
+:is(.costream-invite__join, .costream-invite__later):active:not(#_):not(#_) { transform: scale(0.97); }
+:is(.costream-invite__join, .costream-invite__later):disabled:not(#_):not(#_) { opacity: 0.45; }
+
+/* The countdown: a hairline along the foot of Join that runs out, then the
+   card tucks away. Hovering the card holds it. */
+.costream-invite__timer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: currentColor;
+  opacity: 0.28;
+  transform-origin: left center;
+  animation-name: costream-invite-timer;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+}
+@media (hover: hover) {
+  .costream-invite:hover .costream-invite__timer { animation-play-state: paused; }
+  .costream-invite__later:hover:not(#_):not(#_) { background: color-mix(in srgb, var(--ci-quiet-bg), var(--ci-ink) 6%); }
+}
+
+.costream-invite-chip:not(#_):not(#_) {
+  pointer-events: auto;
+  display: inline-flex;
+  max-width: min(320px, calc(100% - 24px));
+  height: 36px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px 0 6px;
+  border-radius: 12px;
+  background: var(--ci-bg);
+  color: var(--ci-ink);
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px var(--ci-edge), var(--ci-shadow);
+  backdrop-filter: blur(24px) saturate(1.6);
+  animation: costream-invite-in 280ms var(--ci-arrive) both;
+}
+
+@keyframes costream-invite-in {
+  from { opacity: 0; transform: translateY(-10px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes costream-invite-you {
+  from { opacity: 0; transform: translateX(12px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes costream-invite-timer {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .costream-invite:not(#_):not(#_),
+  .costream-invite-chip:not(#_):not(#_),
+  .costream-invite__you { animation-duration: 1ms; animation-delay: 0ms; }
+  .costream-invite__host::after { animation: none; opacity: 0; }
+}
+
+/* Light themes paint everything on the picture white (system-light.css,
+   [data-on-media] *). The card brings its own paper there, so its words go
+   back to ink. Five ids to clear that net. */
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_) :is(.costream-invite, .costream-invite-chip) {
+  color: var(--ci-ink) !important;
+}
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_) :is(.costream-invite, .costream-invite-chip) :is(*, svg) {
+  color: inherit !important;
+}
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_) .costream-invite :is(.costream-invite__title, .costream-invite__sub) {
+  color: var(--ci-muted) !important;
+}
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_) .costream-invite .costream-invite__title strong {
+  color: var(--ci-ink) !important;
+}
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_) .costream-invite .costream-invite__join {
+  color: var(--kit-chip-active-ink, #fff) !important;
+}
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_) .costream-invite .costream-invite__cam,
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_) .costream-invite .costream-invite__cam svg {
+  color: #fff !important;
+}
+
+/* Ask to join as a square in the on-picture rows (CoStreamAskButton). Always
+   on media: dark glass with a white hand; once asked it turns into a white
+   key with an ink cross, which takes the ask back. */
+.costream-ask-sq:not(#_):not(#_) {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgb(16 16 18 / 0.5);
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.16);
+  backdrop-filter: blur(20px) saturate(1.5);
+  transition: transform 150ms, background-color 200ms, color 200ms;
+}
+.costream-ask-sq:active:not(#_):not(#_) { transform: scale(0.97); }
+.costream-ask-sq:disabled:not(#_):not(#_) { opacity: 0.45; }
+html:not(#_):not(#_):not(#_):not(#_):not(#_) .costream-ask-sq[data-costream-ask='asked'] {
+  background: #fff !important;
+  color: #0b0b0c !important;
+  box-shadow: none !important;
+}
+html:not(#_):not(#_):not(#_):not(#_):not(#_) .costream-ask-sq[data-costream-ask='asked'] :is(*, svg) { color: #0b0b0c !important; }
+@media (hover: hover) {
+  .costream-ask-sq[data-costream-ask='idle']:hover:not(#_):not(#_) { background: rgb(16 16 18 / 0.68); }
+}

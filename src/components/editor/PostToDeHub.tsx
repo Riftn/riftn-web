@@ -98,8 +98,18 @@ export function PostToDeHub({ iconOnly = false }: { iconOnly?: boolean }) {
     void startRender();
   };
 
-  /** Re-checked here, right before posting: the creator may have turned duets or stitches off since recording. */
+  // A reaction is its own post; once it exists it is linked to the original,
+  // which credits it, notifies its creator and shares tips with them.
+  const reactionSourceId = settings.remixSource?.mode === 'react'
+    ? settings.remixSource.tokenId ?? tokenIdFromPostUrl(settings.remixSource.url)
+    : null;
+  /** Re-checked here, right before posting: the creator may have turned duets, stitches or reactions off since recording. */
   const prepareDuet = async (): Promise<boolean> => {
+    if (reactionSourceId) {
+      const verdict = await checkRemix(reactionSourceId, 'react');
+      if (!verdict.allowed) toast.error(verdict.reason || _copy('remixLinks.react.unavailable', { defaultValue: 'This video is no longer available for reactions.' }));
+      return verdict.allowed;
+    }
     if (stitch?.tokenId) {
       const verdict = await checkRemix(stitch.tokenId, 'stitch');
       if (!verdict.allowed) toast.error(verdict.reason || _copy('remixLinks.stitch.unavailable', { defaultValue: 'This video is no longer available for stitches.' }));
@@ -133,11 +143,6 @@ export function PostToDeHub({ iconOnly = false }: { iconOnly?: boolean }) {
       });
   };
 
-  // A reaction is its own post; once it exists it is linked to the original,
-  // which credits it, notifies its creator and shares tips with them.
-  const reactionSourceId = settings.remixSource?.mode === 'react'
-    ? settings.remixSource.tokenId ?? tokenIdFromPostUrl(settings.remixSource.url)
-    : null;
   const linkReaction = (tokenId: string) => {
     if (!reactionSourceId) return;
     void recordRemixLink({ kind: 'react', sourceTokenId: reactionSourceId, remixTokenId: tokenId })
