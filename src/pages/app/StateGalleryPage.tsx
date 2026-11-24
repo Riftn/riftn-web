@@ -904,8 +904,43 @@ function ThreadedComposerGallery() {
   }), []);
   const media = useMemo(() => ({ upload: () => Promise.reject(new Error('gallery')) }), []);
   const noop = () => Promise.resolve();
+  // One of your own comments with a reply of yours under it: tap the words
+  // to edit in place and check the typing line shows in every theme.
+  const [own, setOwn] = useState(() => {
+    const row = (id: string, content: string, parent: string | null) => ({
+      id, wallet_address: GALLERY_THREAD_AUTHOR, username: 'you', avatar: null, content,
+      created_at: new Date(Date.now() - 20 * 60_000).toISOString(), parent_id: parent, updated_at: null,
+      reactionCounts: {}, likes: 0, dislikes: 0, myReaction: null,
+    });
+    return [{ comment: row('gallery-own-1', 'Can the live chat keep my place when I scroll up?', null), replies: [row('gallery-own-2', 'Same on the app please', 'gallery-own-1')] }];
+  });
+  const editOwn = (comment: { id: string }, content: string) => {
+    setOwn((threads) => threads.map((t) => ({
+      comment: t.comment.id === comment.id ? { ...t.comment, content } : t.comment,
+      replies: t.replies.map((r) => (r.id === comment.id ? { ...r, content } : r)),
+    })));
+    return Promise.resolve();
+  };
   return (
     <AuthContext.Provider value={GALLERY_THREAD_AUTHOR_AUTH}>
+      <section data-threaded-own-gallery className="mb-5 max-w-2xl rounded-xl border border-white/[0.12] bg-white/[0.03] p-3">
+        <ThreadedComments
+          draftScope="gallery:threaded-own"
+          threads={own}
+          isLoading={false}
+          isError={false}
+          isFetching={false}
+          onRetry={() => {}}
+          entityAuthorAddress={GALLERY_THREAD_AUTHOR}
+          labels={labels}
+          busy={false}
+          submitting={false}
+          onSubmit={noop}
+          onEdit={editOwn}
+          onDelete={() => {}}
+          onReact={() => {}}
+        />
+      </section>
       <section data-threaded-composer-gallery className="mb-5 max-w-2xl rounded-xl border border-white/[0.12] bg-white/[0.03] p-3">
         <ThreadedComments
           draftScope="gallery:threaded-composer"
