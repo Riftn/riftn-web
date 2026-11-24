@@ -1,6 +1,7 @@
 import { translateCopy as _translateCopy } from '@/i18n/copy';
 import { useTranslation as _useCopy } from 'react-i18next';
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+import { useSessionText } from '@/hooks/use-session-text';
 import { tokenLabel } from '@/lib/token-label';
 ﻿import { ThemedIcon } from '@/components/app/war/WarHudIcon';
 import { useState, useRef, useEffect, useCallback, useMemo, type CSSProperties } from 'react';
@@ -331,7 +332,7 @@ export default function SettingsPage({ initialTab }: { initialTab?: string } = {
 
   const { t } = useTranslation();
 
-  const [settingsSearch, setSettingsSearch] = useSurfaceDraft("pages/app/SettingsPage.tsx:settingsSearch", '');
+  const [settingsSearch, setSettingsSearch] = useSessionText("settings-search");
   const [settingsSearchFocused, setSettingsSearchFocused] = useState(false);
   const [searchCursor, setSearchCursor] = useState(0);
   const settingsSearchResults = useMemo(

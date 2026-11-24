@@ -1,4 +1,4 @@
-import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+import { useSessionText } from '@/hooks/use-session-text';
 import React, { Suspense, lazy, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { flushSync } from 'react-dom';
@@ -87,7 +87,7 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
   // Menu search. Unlike the desktop rail this field is always shown: the sheet
   // is opened deliberately and closed again straight away, so there is no
   // resting state to keep uncluttered.
-  const [menuQuery, setMenuQuery] = useSurfaceDraft("components/app/AppSidebar.tsx:menuQuery", '');
+  const [menuQuery, setMenuQuery] = useSessionText("menu-search");
   const { addToHistory } = useSearchHistory();
   // `isKidsMode` is in the deps because `filterNavItems` reads the lock
   // directly rather than taking it as an argument — without it here the sheet
