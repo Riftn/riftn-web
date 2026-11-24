@@ -26,7 +26,7 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { searchNFTs, getMediaUrl, DEHUB_CDN_BASE } from '@/lib/api/dehub';
 import type { DeHubNFT } from '@/lib/api/dehub';
 import { DEHUB_API_BASE } from '@/lib/api/dehub/core';
-import { buildAvatarUrl } from '@/lib/media-url';
+import { buildAvatarUrl, buildImageUrl } from '@/lib/media-url';
 import { outsideImage } from '@/lib/outside-image';
 import { bindSoundWindow, clock, soundWindow, suggestedSoundStart, withSoundWindow, SOUND_SOURCE_NAMES } from '@/lib/sound-window';
 import { AppState } from '@/components/app/AppState';
@@ -110,7 +110,8 @@ async function fetchRiftn(q: string, page: number) {
       url: getMediaUrl(raw) ?? `${DEHUB_CDN_BASE}feed-audio/${tokenId}-audio.mp3`,
       title: nft.name?.trim() || nft.title?.trim() || nft.description?.split('\n')[0]?.trim() || 'Untitled',
       creator: nft.minterUsername || nft.minterDisplayName || nft.mintername || 'Unknown',
-      artwork: buildAvatarUrl(nft.minter || nft.creator?.id || '', nft.minterAvatarUrl),
+      // The song's own cover photo when the post has one, else the uploader's photo.
+      artwork: (nft.imageUrl ? buildImageUrl(tokenId, nft.imageUrl, 160) : '') || buildAvatarUrl(nft.minter || nft.creator?.id || '', nft.minterAvatarUrl),
       duration: nft.audioDuration || nft.videoDuration || nft.duration,
     }];
   });
