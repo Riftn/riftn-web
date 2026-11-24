@@ -8172,7 +8172,8 @@
         "connecting": "Connecting",
         "live": "Live",
         "error": "Error"
-      }
+      },
+      "addShort": "Add"
     },
     "vertical": {
       "title": "Vertical view",
@@ -8592,6 +8593,18 @@
         "word-timeout_one": "Timed out {{target}} for {{count}} second for \"{{word}}\"",
         "word-timeout_other": "Timed out {{target}} for {{count}} seconds for \"{{word}}\""
       }
+    },
+    "groups": {
+      "stream": "Go live",
+      "streamHint": "Switches for mid-stream, where your stream is sent, and the link for OBS.",
+      "overlay": "Overlay",
+      "viewers": "Viewers",
+      "viewersHint": "Polls, timers, points and rewards that bring the people watching into the stream.",
+      "chat": "Chat",
+      "chatHint": "Your chat bot and the rules for the chat under your streams.",
+      "replays": "After the stream",
+      "replaysTab": "After",
+      "replaysHint": "How your last stream went, and clips worth sharing."
     }
   },
   "live": {

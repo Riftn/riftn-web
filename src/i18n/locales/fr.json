@@ -8177,7 +8177,8 @@
         "connecting": "Connexion",
         "live": "En direct",
         "error": "Erreur"
-      }
+      },
+      "addShort": "Ajouter"
     },
     "vertical": {
       "title": "Vue verticale",
@@ -8597,6 +8598,18 @@
         "word-timeout_one": "{{target}} a été mis en pause {{count}} seconde pour \"{{word}}\"",
         "word-timeout_other": "{{target}} a été mis en pause {{count}} secondes pour \"{{word}}\""
       }
+    },
+    "groups": {
+      "stream": "Direct",
+      "streamHint": "Les interrupteurs pendant le direct, où part votre stream et le lien pour OBS.",
+      "overlay": "Overlay",
+      "viewers": "Spectateurs",
+      "viewersHint": "Sondages, minuteurs, points et récompenses qui font participer ceux qui regardent.",
+      "chat": "Chat",
+      "chatHint": "Votre bot de chat et les règles du chat sous vos streams.",
+      "replays": "Après le stream",
+      "replaysTab": "Après",
+      "replaysHint": "Le bilan de votre dernier stream et les clips à partager."
     }
   },
   "live": {
