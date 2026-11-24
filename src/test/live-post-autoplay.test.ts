@@ -25,3 +25,10 @@ describe('live post HLS startup', () => {
     expect(source).not.toContain('setIsPlaying(!isPlaying)');
   });
 });
+
+describe('live player actions', () => {
+  it('keeps the overlay action bar in fullscreen only', () => {
+    expect(source.match(/\bdata-live-player-actions\b/g)).toHaveLength(1);
+    expect(source).toMatch(/\{isFullscreen && \(\s*<div\s+data-no-navigate\s+data-live-player-actions/);
+  });
+});
