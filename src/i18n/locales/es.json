@@ -13635,6 +13635,7 @@
   },
   "dm": {
     "shareGroups": "Grupos",
+    "opened": {"photoA11y": "Foto, abierta {{time}}", "videoA11y": "Video, abierto {{time}}", "seenAt": "Visto {{time}}", "replyCamera": "Responder con la cámara", "quotePhoto": "Foto · Abierta", "quoteVideo": "Video · Abierto", "cameraTitle": "Responder a esta foto", "cameraOff": "El acceso a la cámara está desactivado. Sube una foto o un video.", "takePhoto": "Tomar foto", "uploadInstead": "Subir archivo"},
     "openTimer": {
       "secs": "{{n}} s",
       "oneMin": "1 min",
