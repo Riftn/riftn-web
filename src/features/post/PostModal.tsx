@@ -2,6 +2,7 @@ import { useTranslation as _useCopy } from 'react-i18next';
 import { useAccountDraftKey, useDraftState } from '@/hooks/use-draft-state';
 import { lazy, Suspense, useEffect, useState, useCallback, useRef } from 'react';
 import { postTextLimit } from '@/lib/post-text-limit';
+import { licenceLabel } from '@/lib/caption-query';
 import { Drawer, DrawerContent, DrawerTitle } from '@/components/ui/drawer';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { usePostForm } from './hooks/usePostForm';
@@ -570,8 +571,8 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
             onPick={(file, asset) => {
               actions.addImageFiles([file]);
               // CC BY pictures are shared on the condition that the maker is named.
-              if (asset.attributionRequired || /^CC BY/i.test(asset.license)) {
-                const credit = _copy('freeImage.credit', { defaultValue: 'Photo: {{name}}, {{license}}', name: asset.creator, license: asset.license });
+              if (asset.attributionRequired || /^(CC )?BY\b/i.test(asset.license)) {
+                const credit = _copy('freeImage.credit', { defaultValue: 'Photo: {{name}}, {{license}}', name: asset.creator, license: licenceLabel(asset.license) });
                 if (!state.text.includes(credit)) actions.setText(state.text.trim() ? `${state.text.trimEnd()}\n\n${credit}` : credit);
               }
             }}

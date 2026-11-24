@@ -12,3 +12,8 @@ export function captionQuery(caption: string): string {
     .filter((w) => w.length > 2);
   return words.slice(0, 6).join(' ');
 }
+
+/** A licence as people know it: Openverse says "BY 2.0" for CC BY 2.0. */
+export function licenceLabel(licence: string): string {
+  return /^BY\b/i.test(licence) ? `CC ${licence}` : licence;
+}

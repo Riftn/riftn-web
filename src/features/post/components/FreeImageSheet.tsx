@@ -6,7 +6,7 @@ import Search from '@/components/ui/cut-icons/search';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { cn } from '@/lib/utils';
 import { downloadFreeAsset, searchFreeAssets, type FreeAsset } from '@/lib/editor/freeAssets';
-import { captionQuery } from '@/lib/caption-query';
+import { captionQuery, licenceLabel } from '@/lib/caption-query';
 
 interface FreeImageSheetProps {
   open: boolean;
@@ -117,7 +117,7 @@ export default function FreeImageSheet({ open, onOpenChange, caption, onPick }: 
                 >
                   <img src={asset.thumbnailUrl} alt="" loading="lazy" className="h-full w-full object-cover transition-transform group-hover:scale-105" />
                   <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/70 to-transparent px-1.5 pb-1 pt-3 text-left text-[10px] text-white/80">
-                    {asset.license}
+                    {licenceLabel(asset.license)}
                   </span>
                   {picking === asset.id && (
                     <span className="absolute inset-0 flex items-center justify-center bg-black/50"><Loader2 className="h-5 w-5 animate-spin text-white" /></span>

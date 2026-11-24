@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { captionQuery } from './caption-query';
+import { captionQuery, licenceLabel } from './caption-query';
 
 describe('captionQuery', () => {
   it('keeps the words a caption is about', () => {
@@ -10,5 +10,11 @@ describe('captionQuery', () => {
   });
   it('is empty for a caption with nothing to search', () => {
     expect(captionQuery('@someone #tag 123')).toBe('');
+  });
+  it('names Creative Commons licences the usual way', () => {
+    expect(licenceLabel('BY 2.0')).toBe('CC BY 2.0');
+    expect(licenceLabel('BY-SA 4.0')).toBe('CC BY-SA 4.0');
+    expect(licenceLabel('CC0 1.0')).toBe('CC0 1.0');
+    expect(licenceLabel('Public domain')).toBe('Public domain');
   });
 });
