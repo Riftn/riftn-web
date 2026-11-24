@@ -67,6 +67,7 @@ import { findDehubLinks, stripDehubLinkMatches } from '@/lib/dehub-links';
 import { conversationIdentity } from '@/lib/conversation-identity';
 import { useTranslation, renderChatTextWithLinks } from '../TranslatableText';
 import { useTranslateUp } from '@/hooks/use-translate-up';
+import { useOwnLineTranslate } from './own-line-translate';
 import { useMessages, useSendMessage, useDeleteConversation, useCreateAndStart, messagesKeys, registerOpenConversation, createTransientBlobUrl, peerAddressForConversation, failedSendRetry, discardFailedSend } from '@/hooks/use-messages';
 import { SendStatus } from './SendStatus';
 import { UnreadMarker, UnreadJumpButton } from './UnreadJump';
@@ -800,7 +801,7 @@ const MessageBubble = memo(function MessageBubble({
   const {
     isTranslated: autoTranslated,
     translatedText: autoTranslatedText,
-    isLoading: isTranslating,
+    isLoading: autoTranslating,
     isTooShort,
     handleTranslate: autoTranslate,
     handleShowOriginal: autoShowOriginal,
@@ -812,15 +813,26 @@ const MessageBubble = memo(function MessageBubble({
   } = useTranslation(textContent, isOwnMessage || sentPair ? false : 'chat');
   // A line that already went out in their language carries both versions, so
   // flipping is local: no translator call.
-  const isTranslated = sentPair ? pairFlipped : autoTranslated;
-  const translatedText = sentPair ? (isOwnMessage ? message.content : sentPair.content) : autoTranslatedText;
+  // Your own line translates only when you ask (menu or the button under it),
+  // into your language, or your composer language when it is already in yours.
+  const ownLine = isOwnMessage && !sentPair && (message.msgType === 'msg' || (message.msgType === 'media' && !!message.content));
+  const {
+    isTranslated: ownTranslated,
+    translatedText: ownTranslatedText,
+    isLoading: ownTranslating,
+    translate: ownTranslate,
+    showOriginal: ownShowOriginal,
+  } = useOwnLineTranslate(textContent, ownLine && !message.isDeleted && !message.undecryptable);
+  const isTranslated = sentPair ? pairFlipped : ownLine ? ownTranslated : autoTranslated;
+  const translatedText = sentPair ? (isOwnMessage ? message.content : sentPair.content) : ownLine ? ownTranslatedText : autoTranslatedText;
+  const isTranslating = ownLine ? ownTranslating : autoTranslating;
   const handleTranslate = useCallback(
-    () => (sentPair ? setPairFlipped(true) : autoTranslate()),
-    [sentPair, autoTranslate],
+    () => (sentPair ? setPairFlipped(true) : ownLine ? void ownTranslate() : autoTranslate()),
+    [sentPair, ownLine, ownTranslate, autoTranslate],
   );
   const handleShowOriginal = useCallback(
-    () => (sentPair ? setPairFlipped(false) : autoShowOriginal()),
-    [sentPair, autoShowOriginal],
+    () => (sentPair ? setPairFlipped(false) : ownLine ? ownShowOriginal() : autoShowOriginal()),
+    [sentPair, ownLine, ownShowOriginal, autoShowOriginal],
   );
   const { t: tr, i18n } = useI18n();
 
@@ -880,10 +892,13 @@ const MessageBubble = memo(function MessageBubble({
     return { url, kind };
   })();
   const copyMediaNow = () => { if (copyMediaTarget) copyMediaWithToast(copyMediaTarget.url, copyMediaTarget.kind, _copy); };
-  const canTranslate = !!sentPair || (!isOwnMessage && message.msgType === 'msg' && !!textContent.trim() && !isTooShort);
+  const canTranslate = !!sentPair
+    || ((message.msgType === 'msg' || ownLine) && !!textContent.trim() && !isTooShort && !message.undecryptable);
   // Translate also translates every message above this one that still needs it.
-  const translateUpAll = useTranslateUp('dm', message._id, message.createdAt, !sentPair && canTranslate && !isTranslated && !isTranslating, handleTranslate);
-  const translateUp = sentPair ? handleTranslate : translateUpAll;
+  // Your own lines never join that, and a Translate on one only does that one.
+  const theirs = !isOwnMessage && !sentPair;
+  const translateUpAll = useTranslateUp('dm', message._id, message.createdAt, theirs && canTranslate && !isTranslated && !isTranslating, handleTranslate);
+  const translateUp = theirs ? translateUpAll : handleTranslate;
   // What the flip on a line sent in their language does next.
   const pairToggleLabel = !sentPair ? ''
     : isOwnMessage
