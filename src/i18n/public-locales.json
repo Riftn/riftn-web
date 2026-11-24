@@ -1,5 +1,5 @@
 {
-  "version": "a2e31ca2482814a3",
+  "version": "d15a7de52e65c005",
   "routes": {
     "/": [
       "ar",
@@ -653,6 +653,13 @@
       "tr"
     ],
     "/guides/best-watch-to-earn-platforms-2026": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/guides/bluesky-vs-mastodon-vs-farcaster-vs-riftn-privacy": [
       "ar",
       "es",
       "fr",

@@ -2988,6 +2988,33 @@ export const blogPostsMetadata: BlogPost[] = [
 // arrays at runtime in blogUtils.ts — metadata-only logic, no third copy here.
 export const newPostsMetadata: BlogPost[] = [
   {
+    "id": "bluesky-vs-mastodon-vs-farcaster-vs-riftn-privacy",
+    "slug": "bluesky-vs-mastodon-vs-farcaster-vs-riftn-privacy",
+    "title": "Bluesky vs Mastodon vs Farcaster vs Riftn: Which Is Best for Privacy in 2026?",
+    "excerpt": "Four decentralized social networks, compared on what matters for privacy: who can read your messages, what is public by default, who holds your data and who can change the rules.",
+    "content": "",
+    "bannerImage": "/media/bluesky-vs-mastodon-vs-farcaster-vs-riftn-banner-r2.jpg",
+    "bannerImageAlt": "Bluesky vs Mastodon vs Farcaster vs Riftn: which decentralized social network is best for privacy in 2026",
+    "author": {
+      "name": "Mal Jan"
+    },
+    "publishedAt": "2026-11-24T22:00:00.000Z",
+    "updatedAt": "2026-11-24T22:00:00.000Z",
+    "tags": [
+      "Bluesky",
+      "Mastodon",
+      "Farcaster",
+      "Privacy",
+      "Decentralized Social Media",
+      "Riftn"
+    ],
+    "readingTime": 6,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "Bluesky vs Mastodon vs Farcaster vs Riftn: Best for Privacy (2026)",
+    "seoDescription": "Bluesky, Mastodon, Farcaster and Riftn compared on privacy in 2026: encrypted DMs, public likes, hidden follows, who holds your data and who sets the rules."
+  },
+  {
     "id": "tanrinin-gozu-nedir",
     "slug": "tanrinin-gozu-nedir",
     "title": "What Is God's Eye (Tanrının Gözü)? Riftn's Live 3D World Map",
@@ -4018,30 +4045,31 @@ export const newPostsMetadata: BlogPost[] = [
 
 // getLatestPost() result — docs home hero.
 export const latestPostMetadata: BlogPost | undefined = {
-  "id": "tanrinin-gozu-nedir",
-  "slug": "tanrinin-gozu-nedir",
-  "title": "What Is God's Eye (Tanrının Gözü)? Riftn's Live 3D World Map",
-  "excerpt": "God's Eye, Tanrının Gözü in Turkish, is a free live 3D globe in Riftn's Arcade: flights, satellites, earthquakes and traffic over a spinning Earth. It is not the illegal data panel that uses the same name.",
+  "id": "bluesky-vs-mastodon-vs-farcaster-vs-riftn-privacy",
+  "slug": "bluesky-vs-mastodon-vs-farcaster-vs-riftn-privacy",
+  "title": "Bluesky vs Mastodon vs Farcaster vs Riftn: Which Is Best for Privacy in 2026?",
+  "excerpt": "Four decentralized social networks, compared on what matters for privacy: who can read your messages, what is public by default, who holds your data and who can change the rules.",
   "content": "",
-  "bannerImage": "/media/tanrinin-gozu-nedir-banner-r2.jpg",
-  "bannerImageAlt": "God's Eye, Tanrının Gözü: Riftn's free live 3D world map",
+  "bannerImage": "/media/bluesky-vs-mastodon-vs-farcaster-vs-riftn-banner-r2.jpg",
+  "bannerImageAlt": "Bluesky vs Mastodon vs Farcaster vs Riftn: which decentralized social network is best for privacy in 2026",
   "author": {
     "name": "Mal Jan"
   },
-  "publishedAt": "2026-11-24T21:00:00.000Z",
-  "updatedAt": "2026-11-24T21:00:00.000Z",
+  "publishedAt": "2026-11-24T22:00:00.000Z",
+  "updatedAt": "2026-11-24T22:00:00.000Z",
   "tags": [
-    "God's Eye",
-    "Tanrının Gözü",
-    "3D Globe",
-    "Riftn Arcade",
-    "Online Safety"
+    "Bluesky",
+    "Mastodon",
+    "Farcaster",
+    "Privacy",
+    "Decentralized Social Media",
+    "Riftn"
   ],
-  "readingTime": 4,
+  "readingTime": 6,
   "featured": false,
   "status": "published",
-  "seoTitle": "God's Eye (Tanrının Gözü): Riftn's Live 3D World Map, Explained",
-  "seoDescription": "What is God's Eye, Tanrının Gözü? A free live 3D globe of flights, satellites and earthquakes on Riftn, and why it has nothing to do with illegal data panels."
+  "seoTitle": "Bluesky vs Mastodon vs Farcaster vs Riftn: Best for Privacy (2026)",
+  "seoDescription": "Bluesky, Mastodon, Farcaster and Riftn compared on privacy in 2026: encrypted DMs, public likes, hidden follows, who holds your data and who sets the rules."
 };
 
 export const excludedTitles: string[] = [
