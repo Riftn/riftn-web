@@ -28,6 +28,8 @@ import { TxLink, statusBadgeClass, statusLabelKey } from '@/features/work/compon
 import { WorkUser } from '@/features/work/components/WorkUser';
 import { BountyShareButton } from '@/features/work/components/BountyShareButton';
 import { ApplicationComments } from '@/features/work/components/ApplicationComments';
+import { TranslationControl } from '@/components/app/cards/PostMetadata';
+import { useTranslation as useTextTranslation } from '@/components/app/TranslatableText';
 import { useJobApplicationComments } from '@/features/work/hooks/use-application-comments';
 import type { WorkJob, WorkSubmission } from '@/features/work/types';
 
@@ -53,6 +55,38 @@ function isAwaitingPayment(s: WorkSubmission): boolean {
 
 function amount(n: number, currency: string): string {
   return `${n.toLocaleString(undefined, { maximumFractionDigits: 4 })} ${tokenLabel(currency)}`;
+}
+
+function ContractJobText({ job }: { job: WorkJob }) {
+  const { t } = useTranslation();
+  const title = useTextTranslation(job.title, false);
+  const description = useTextTranslation(job.description, false);
+  const isLoading = title.isLoading || description.isLoading;
+
+  return (
+    <div className="mb-4">
+      <h1 className="text-2xl font-bold text-white mb-2">{title.isTranslated ? title.translatedText : job.title}</h1>
+      <p className="text-sm text-white/70 whitespace-pre-wrap">{description.isTranslated ? description.translatedText : job.description}</p>
+      {(!title.isTooShort || !description.isTooShort) && (
+        <div data-post-metadata className="mt-2 text-xs">
+          <TranslationControl
+            label={t('common.translate')}
+            isTranslated={!isLoading && (title.isTranslated || description.isTranslated)}
+            isLoading={isLoading}
+            error={title.error || description.error}
+            onTranslate={() => {
+              void title.handleTranslate();
+              void description.handleTranslate();
+            }}
+            onShowOriginal={() => {
+              title.handleShowOriginal();
+              description.handleShowOriginal();
+            }}
+          />
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function WorkJobDetailPage() {
@@ -169,8 +203,14 @@ export default function WorkJobDetailPage() {
           )}
           </div>
         </div>
-        <h1 className="text-2xl font-bold text-white mb-2">{job.title}</h1>
-        <p className="text-sm text-white/70 whitespace-pre-wrap mb-4">{job.description}</p>
+        {job.job_type === 'contract' && job.status !== 'draft' ? (
+          <ContractJobText key={job.id} job={job} />
+        ) : (
+          <>
+            <h1 className="text-2xl font-bold text-white mb-2">{job.title}</h1>
+            <p className="text-sm text-white/70 whitespace-pre-wrap mb-4">{job.description}</p>
+          </>
+        )}
         {job.target_url && (
           <a href={job.target_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-white/60 hover:text-white mb-4">
             <ExternalLink className="w-3 h-3" /> {job.target_url}
