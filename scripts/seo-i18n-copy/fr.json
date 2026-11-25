@@ -1,4 +1,8 @@
 {
+  "/stores": {
+    "h1": "Boutiques Riftn",
+    "body": "<p>Les créateurs gèrent leurs propres boutiques sur Riftn. Ils peuvent y proposer des produits numériques, des articles, des œuvres d’art et des services à côté de leurs publications.</p>"
+  },
   "/": {
     "h1": "Riftn | Réseau social open source, détenu par ses utilisateurs",
     "lede": "riftn.com est un média open source, détenu par ses utilisateurs et résistant à la censure. Rejoignez l’avenir de la liberté d’expression et de la portée.",

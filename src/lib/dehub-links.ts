@@ -2,8 +2,8 @@
  * Riftn Entity Links
  * ==================
  * One parser for every in-app URL that deserves to render as a card instead of
- * as a link: posts, profiles, communities, community invites, events and
- * bounties.
+ * as a link: posts, profiles, communities, community invites, stores, store
+ * listings, events and bounties.
  *
  * Before this module the same job was done by three separate pairs of
  * `hasXLink`/`extractX` helpers living next to their own embed components, each
@@ -35,6 +35,8 @@ export type DehubLinkKind =
   | 'profile'
   | 'community'
   | 'communityInvite'
+  | 'store'
+  | 'listing'
   | 'event'
   | 'stage'
   | 'film'
@@ -61,6 +63,8 @@ export interface DehubLinkMatch {
   username?: string;
   slug?: string;
   code?: string;
+  storeId?: string;
+  listingId?: string;
   eventNumber?: string;
   stageId?: string;
   /** Set when the link used the short form (/stages/7) instead of the uuid. */
@@ -272,6 +276,17 @@ export function parseDehubLink(input: string): DehubLinkMatch | null {
   if (scoped[0] === 'communities' && scoped[1]) {
     if (!/^[a-zA-Z0-9_-]+$/.test(scoped[1])) return null;
     return { ...base, kind: 'community', slug: scoped[1] };
+  }
+
+  // ── /app/stores/:storeId  (+ ?listing=<id>) ──
+  if (scoped[0] === 'stores' && scoped.length === 2) {
+    const storeId = scoped[1];
+    if (!/^[a-fA-F0-9-]{8,}$/.test(storeId)) return null;
+    const listingId = new URLSearchParams(search).get('listing');
+    if (listingId && /^[a-fA-F0-9-]{8,}$/.test(listingId)) {
+      return { ...base, kind: 'listing', storeId, listingId };
+    }
+    return { ...base, kind: 'store', storeId };
   }
 
   // ── /app/events/:eventNumber ──
@@ -504,6 +519,9 @@ export const dehubLinkFor = {
   profile: (username: string) => `${shareOrigin()}/${encodeURIComponent(username)}`,
   community: (slug: string) => `${shareOrigin()}/app/communities/${encodeURIComponent(slug)}`,
   communityInvite: (code: string) => `${shareOrigin()}/app/communities/join/${encodeURIComponent(code)}`,
+  store: (storeId: string) => `${shareOrigin()}/app/stores/${storeId}`,
+  listing: (storeId: string, listingId: string) =>
+    `${shareOrigin()}/app/stores/${storeId}?listing=${listingId}`,
   event: (eventNumber: string | number) => `${shareOrigin()}/app/events/${eventNumber}`,
   /**
    * Prefers the short numeric form when the row carries one; the uuid form

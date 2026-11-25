@@ -1,4 +1,8 @@
 {
+  "/stores": {
+    "h1": "Riftn Mağazaları",
+    "body": "<p>İçerik üreticileri Riftn'de kendi mağazalarını yönetir. Dijital ürünlerini, hediyelik eşyalarını, sanat eserlerini ve hizmetlerini profillerinde paylaştıkları çalışmaların yanında sunabilirler.</p>"
+  },
   "/": {
     "h1": "Riftn | Açık kaynaklı, kullanıcıların sahibi olduğu sosyal medya",
     "lede": "riftn.com açık kaynaklı, kullanıcılarına ait ve sansüre dirençli bir medya platformudur. İfade özgürlüğünün ve erişimin geleceğine katılın.",
