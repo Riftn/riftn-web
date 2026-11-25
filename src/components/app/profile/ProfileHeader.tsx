@@ -310,8 +310,8 @@ export function ProfileHeader({
               <svg data-profile-pull-ring aria-hidden viewBox="0 0 100 100" preserveAspectRatio="none">
                 <rect x="2" y="2" width="96" height="96" rx="33.3333%" pathLength="100" />
               </svg>
-              <LiveRipple ids={[apiProfile?.walletAddress ?? profile.walletAddress, profile.handle]} size="lg" orbit className="rounded-[var(--profile-avatar-radius)]">
-                <MomentFace address={apiProfile?.walletAddress ?? profile.walletAddress} size={96} noPeek name={profile.name} className="rounded-[var(--profile-avatar-radius)]">
+              <MomentFace address={apiProfile?.walletAddress ?? profile.walletAddress} size={96} outline name={profile.name} className="rounded-[var(--profile-avatar-radius)]">
+                <LiveRipple ids={[apiProfile?.walletAddress ?? profile.walletAddress, profile.handle]} size="lg" orbit className="rounded-[var(--profile-avatar-radius)]">
                 <button 
                   data-keep-dark
                   data-pull-through
@@ -340,8 +340,8 @@ export function ProfileHeader({
                   )}
                   {savingImage === 'avatar' && <span className="contents [&>span]:rounded-[calc(var(--profile-avatar-radius)-2px)]">{savingSpinner}</span>}
                 </button>
-                </MomentFace>
-              </LiveRipple>
+                </LiveRipple>
+              </MomentFace>
           </div>
           <div data-profile-actions className="-mr-1 sm:-mr-3 mt-[60px] sm:mt-[68px] self-start flex items-center gap-2">
               {isViewingOwnProfile ? (

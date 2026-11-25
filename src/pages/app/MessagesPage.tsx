@@ -234,16 +234,16 @@ export function ConversationItem({
         </span>
       )}
       <span className="relative shrink-0">
-      <LiveRipple ids={[otherUser?.address, otherUser?.username]} className="relative rounded-lg">
-        <MomentFace address={otherUser?.address} size={48} name={displayName || fallbackName} className="rounded-lg">
-          <Avatar className="w-12 h-12">
-            {avatarUrl && <AvatarImage src={avatarUrl} />}
-            <AvatarFallback className="bg-zinc-700 text-white font-medium">
-              {(fallbackName.startsWith('0x') ? fallbackName.charAt(2) : fallbackName.charAt(0)).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+        <MomentFace address={selecting ? null : otherUser?.address} size={48} outline name={displayName || fallbackName} className="rounded-lg">
+          <LiveRipple ids={selecting ? [] : [otherUser?.address, otherUser?.username]} className="relative rounded-lg">
+            <Avatar className="w-12 h-12">
+              {avatarUrl && <AvatarImage src={avatarUrl} />}
+              <AvatarFallback className="bg-zinc-700 text-white font-medium">
+                {(fallbackName.startsWith('0x') ? fallbackName.charAt(2) : fallbackName.charAt(0)).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          </LiveRipple>
         </MomentFace>
-      </LiveRipple>
       </span>
 
       <div className="flex-1 min-w-0">
