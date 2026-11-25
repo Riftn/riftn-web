@@ -310,7 +310,7 @@ export function ProfileHeader({
               <svg data-profile-pull-ring aria-hidden viewBox="0 0 100 100" preserveAspectRatio="none">
                 <rect x="2" y="2" width="96" height="96" rx="15" pathLength="100" />
               </svg>
-              <LiveRipple ids={[apiProfile?.walletAddress ?? profile.walletAddress, profile.handle]} size="lg" className="rounded-xl">
+              <LiveRipple ids={[apiProfile?.walletAddress ?? profile.walletAddress, profile.handle]} size="lg" orbit className="rounded-xl">
                 <MomentFace address={apiProfile?.walletAddress ?? profile.walletAddress} size={96} noPeek name={profile.name} className="rounded-xl">
                 <button 
                   data-keep-dark

@@ -184,7 +184,7 @@ export function CardHeader({
           aria-label={t('feed.viewProfile', { name: username })}
           className={`flex shrink-0 ${isClickable ? 'cursor-pointer' : 'cursor-default'}`}
         >
-          <LiveRipple ids={[creatorId, creatorUsername, handle]} className="rounded-md">
+          <LiveRipple ids={[creatorId, creatorUsername, handle]} orbit className="rounded-md">
             {/* A Moment up: its small corner peek sits on the face and a tap
                 opens it (co-authored posts keep their own corner badge). */}
             <MomentFace address={coAuthors.length ? null : creatorId} size={36} name={username} className="rounded-md">

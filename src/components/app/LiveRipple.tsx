@@ -15,20 +15,20 @@ interface LiveRippleProps {
    * gets a quieter ripple (one thin outline that barely leaves the edge).
    */
   size?: 'sm' | 'md' | 'lg';
+  /** Follow the avatar edge on profile and feed headers. */
+  orbit?: boolean;
   /** Must carry the avatar's own rounded-* class so the ripple matches its shape. */
   className?: string;
 }
 
 /**
- * Wraps an avatar and, while that person is broadcasting, sends outlines of
- * its shape rippling outward behind it. Renders the avatar untouched when
- * they are not live.
+ * Wraps an avatar with the surface's live effect while its owner broadcasts.
  *
  * While they are live, a tap on the avatar opens their stream (or Stage)
  * instead of whatever the avatar normally does: the click is caught on the
  * way down, so the profile button around or inside it never sees it.
  */
-export function LiveRipple({ children, ids = [], live, size = 'md', className }: LiveRippleProps) {
+export function LiveRipple({ children, ids = [], live, size = 'md', orbit = false, className }: LiveRippleProps) {
   const target = useLiveTarget(...ids);
   const isLive = live ?? target !== null;
   const navigate = useNavigate();
@@ -48,11 +48,13 @@ export function LiveRipple({ children, ids = [], live, size = 'md', className }:
   // avatar's button taller than the avatar, dropping the name beside it.
   return (
     <span
-      data-live-ripple={isLive ? size : undefined}
+      data-live-ripple={isLive && !orbit ? size : undefined}
+      data-live-orbit={isLive && orbit ? size : undefined}
       onClickCapture={opensLive ? openLive : undefined}
       className={cn('inline-flex shrink-0 align-top', opensLive && 'cursor-pointer', className)}
     >
-      {isLive && (
+      {isLive && orbit && <span data-live-orbit-ring aria-hidden />}
+      {isLive && !orbit && (
         <>
           <span data-live-ripple-ring aria-hidden />
           <span data-live-ripple-ring aria-hidden />

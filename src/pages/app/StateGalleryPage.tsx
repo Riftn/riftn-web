@@ -1118,7 +1118,7 @@ const SAMPLE_LIVE_NOW: LiveNowItem[] = [
 ];
 
 /**
- * The ripple a live person's avatar wears, at the sizes it ships in: feed
+ * The effects a live person's avatar wears, at the sizes they ship in: feed
  * header (36), side panel Live tab (32), post page (40), chat list (48) and
  * profile (112), with a non-live avatar for comparison.
  */
@@ -1134,10 +1134,10 @@ function LiveAvatarsGallery() {
       <h2 className="mb-5 text-sm font-semibold">{_copy("copy.7b97685eb19d", { defaultValue: "Live avatars" })}</h2>
       <div className="flex flex-wrap items-end gap-8 px-3 pb-3">
         <LiveRipple live size="sm" className="rounded-lg">{face('w-8 h-8', 'K')}</LiveRipple>
-        <LiveRipple live className="rounded-md">{face('w-9 h-9 rounded-md', 'M')}</LiveRipple>
+        <LiveRipple live orbit className="rounded-md">{face('w-9 h-9 rounded-md', 'M')}</LiveRipple>
         <LiveRipple live className="rounded-lg">{face('w-10 h-10', 'D')}</LiveRipple>
         <LiveRipple live className="rounded-lg">{face('w-12 h-12', 'L')}</LiveRipple>
-        <LiveRipple live size="lg" className="rounded-xl">{face('w-28 h-28 rounded-xl text-3xl', 'S')}</LiveRipple>
+        <LiveRipple live size="lg" orbit className="rounded-xl">{face('w-28 h-28 rounded-xl text-3xl', 'S')}</LiveRipple>
         <div className="flex flex-col items-center gap-2">
           {face('w-12 h-12', 'T')}
           <span className="text-[11px] text-zinc-500">{_copy("copy.cf7d0ae846cb", { defaultValue: "Not live" })}</span>

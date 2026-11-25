@@ -6,7 +6,7 @@
  * last. Pills share the row's width; with one or two up they also show who
  * is watching or the Moments themselves. A pill opens the full-screen viewer.
  */
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import Refresh from '@/components/ui/cut-icons/refresh';
@@ -27,6 +27,7 @@ import { useMomentPreviewsBlurred } from '@/lib/moment-preview-blur';
 import { formatCount } from '@/lib/format-count';
 import { useLiveAudience } from '@/hooks/use-live-audience';
 import '@/styles/stories.css';
+import '@/styles/live-ripple.css';
 
 
 export function StoryShelf() {
@@ -243,12 +244,11 @@ function MeTile({ address, avatar, entry, processing, pending, roomy, onAdd, onO
   );
 }
 
-function TileIdentity({ address, username, displayName, live, children }: {
+function TileIdentity({ address, username, displayName, live }: {
   address: string;
   username: string | null;
   displayName?: string | null;
   live?: LiveNowItem;
-  children?: ReactNode;
 }) {
   const account = useBadgeBalance(address, live?.badgeBalance);
   const badge = useBadgeVisual({
@@ -264,7 +264,6 @@ function TileIdentity({ address, username, displayName, live, children }: {
       {badge.url && !live?.hideBadgeAndBalance && !account.hideBadgeAndBalance && (
         <img data-st-badge src={badge.url} alt={badge.name ?? ''} />
       )}
-      {children}
     </span>
   );
 }
@@ -280,11 +279,12 @@ function LiveTile({ item, roomy, onOpen }: { item: LiveNowItem; roomy: boolean; 
       ];
   return (
     <button type="button" role="listitem" data-story-tile data-kind="live" onClick={onOpen} aria-label={item.title}>
-      <ShelfAvatar src={face} />
+      <span data-live-orbit="shelf" role="img" aria-label={t('stages.liveBadge', { defaultValue: 'LIVE' })}>
+        <span data-live-orbit-ring aria-hidden />
+        <ShelfAvatar src={face} />
+      </span>
       <span data-st-text>
-        <TileIdentity address={item.wallet} username={item.username} displayName={item.displayName} live={item}>
-          <span data-st-live role="img" aria-label={t('stages.liveBadge', { defaultValue: 'LIVE' })}><i /><i /><i /></span>
-        </TileIdentity>
+        <TileIdentity address={item.wallet} username={item.username} displayName={item.displayName} live={item} />
         <span data-st-line>{line.filter(Boolean).join(' · ') || item.title}</span>
       </span>
       {roomy && item.kind === 'stream' && <LiveWatchers streamId={item.id} />}

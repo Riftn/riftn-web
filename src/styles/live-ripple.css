@@ -63,3 +63,36 @@
   [data-live-ripple='lg'] > [data-live-ripple-ring] { transform: scale(1.04); opacity: 0.6; }
   [data-live-ripple] > [data-live-ripple-ring] + [data-live-ripple-ring] { display: none; }
 }
+
+/* The mask stays fixed to the avatar while the light rotates behind it. */
+[data-live-orbit] {
+  position: relative;
+  flex: none;
+  --live-orbit-radius: 12px;
+}
+[data-live-orbit='md'] { --live-orbit-radius: calc(var(--radius) - 2px); }
+[data-live-orbit] > [data-live-orbit-ring] {
+  position: absolute;
+  inset: -3.5px;
+  z-index: 1;
+  padding: 1.5px;
+  overflow: hidden;
+  border-radius: calc(var(--live-orbit-radius) + 3.5px);
+  background: #e7354a;
+  pointer-events: none;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+[data-live-orbit] > [data-live-orbit-ring]::before {
+  content: '';
+  position: absolute;
+  inset: -25%;
+  background: conic-gradient(#e7354a 0deg 268deg, #ff4e61 301deg, #ff9aa3 326deg, #ff576a 339deg, #e7354a 360deg);
+  animation: live-avatar-orbit 3s linear infinite;
+}
+@keyframes live-avatar-orbit {
+  to { transform: rotate(1turn); }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-live-orbit] > [data-live-orbit-ring]::before { display: none; }
+}
