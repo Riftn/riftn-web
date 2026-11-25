@@ -45,22 +45,22 @@ it('shows the visible Moments as small covers when there is room, and keeps live
   expect(screen.getByRole('listitem', { name: 'Live now' })).toBeTruthy();
 });
 
-it('opens the stage context menu from the keyboard and joins the selected stage', () => {
+it('opens the stage context menu from the keyboard and joins the selected stage', async () => {
   prefs.storiesEnabled = true;
   render(<StoryShelf />);
   fireEvent.keyDown(screen.getByRole('listitem', { name: 'Live now' }), { key: 'F10', shiftKey: true });
-  expect(screen.getByRole('menuitem', { name: 'Hide live' })).toBeTruthy();
+  expect(await screen.findByRole('menuitem', { name: 'Hide live' })).toBeTruthy();
   expect(screen.queryByRole('menuitem', { name: 'Hide story' })).toBeNull();
   fireEvent.click(screen.getByRole('menuitem', { name: 'Join' }));
   expect(actions.openLive).toHaveBeenCalledWith(expect.objectContaining({ id: '1', kind: 'stage' }));
 });
 
-it('hides a story without hiding live activity and can restore the full bar', () => {
+it('hides a story without hiding live activity and can restore the full bar', async () => {
   prefs.storiesEnabled = true;
   const view = render(<StoryShelf />);
   try {
     fireEvent.contextMenu(screen.getByRole('listitem', { name: 'River Song' }));
-    expect(screen.getByRole('menuitem', { name: 'Watch' })).toBeTruthy();
+    expect(await screen.findByRole('menuitem', { name: 'Watch' })).toBeTruthy();
     expect(screen.getByRole('menuitem', { name: 'Mute creator' })).toBeTruthy();
     expect(screen.getByRole('menuitem', { name: 'Block creator' })).toBeTruthy();
     fireEvent.click(screen.getByRole('menuitem', { name: 'Hide story' }));

@@ -6,7 +6,7 @@
  * last. Pills share the row's width; with one or two up they also show who
  * is watching or the Moments themselves. A pill opens the full-screen viewer.
  */
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent } from 'react';
 import { Eye } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
@@ -28,10 +28,11 @@ import { useMomentPreviewsBlurred } from '@/lib/moment-preview-blur';
 import { formatCount } from '@/lib/format-count';
 import { useLiveAudience } from '@/hooks/use-live-audience';
 import { setActivityBarHidden, useActivityShelfPreferences } from '@/lib/activity-shelf-preferences';
-import { ActivityShelfMenu, type ActivityMenuRequest, type ActivityTarget } from './ActivityShelfMenu';
+import type { ActivityMenuRequest, ActivityTarget } from './ActivityShelfMenu';
 import '@/styles/stories.css';
 import '@/styles/live-ripple.css';
 
+const ActivityShelfMenu = lazy(() => import('./ActivityShelfMenu').then(module => ({ default: module.ActivityShelfMenu })));
 
 export function StoryShelf() {
   const { t } = useTranslation();
@@ -88,7 +89,9 @@ function VisibleStoryShelf({ dismissed }: { dismissed: string[] }) {
       : { x: rect.left, y: rect.bottom };
     setMenu({ point, target });
   };
-  const menuElement = menu !== undefined && <ActivityShelfMenu request={menu} onClose={closeMenu} />;
+  const menuElement = menu !== undefined && (
+    <Suspense fallback={null}><ActivityShelfMenu request={menu} onClose={closeMenu} /></Suspense>
+  );
   const createPill = () => <><div {...menuEvents(openMenu)}><StoryCreatePill /></div>{menuElement}</>;
 
   const shelf = useMemo(() => data?.shelf ?? [], [data]);
