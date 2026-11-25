@@ -64,6 +64,7 @@ function EntryRow({ entry }: { entry: AppTokenEntry }) {
 export function AppTokensRow({ onSend }: { onSend: () => void }) {
   const { t } = useTranslation();
   const { data, isLoading } = useAppTokens();
+  const label = data?.symbol === 'RIFT' ? '$RIFT' : tokenLabel();
   const [open, setOpen] = useState(false);
 
   return (
@@ -75,7 +76,7 @@ export function AppTokensRow({ onSend }: { onSend: () => void }) {
       >
         <img src={dehubCoin} alt="" className="w-9 h-9 rounded-full shrink-0" />
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-white capitalize">{tokenLabel()}</p>
+          <p className="text-sm font-medium text-white capitalize">{label}</p>
           <p className="text-xs text-zinc-500 truncate">{t('appTokens.rowHint')}</p>
         </div>
         <span className="text-sm font-medium text-white">
@@ -86,7 +87,7 @@ export function AppTokensRow({ onSend }: { onSend: () => void }) {
       <Drawer open={open} onOpenChange={setOpen}>
         <DrawerContent data-wallet-page className="bg-zinc-950 border-zinc-800">
           <DrawerHeader>
-            <DrawerTitle className="text-white">{t('appTokens.title')}</DrawerTitle>
+            <DrawerTitle className="text-white">{data?.symbol === 'RIFT' ? '$RIFT' : t('appTokens.title')}</DrawerTitle>
           </DrawerHeader>
           <div className="px-4 pb-6 space-y-4 max-h-[70vh] overflow-y-auto">
             <div className="rounded-xl bg-white/5 border border-white/10 p-4">
