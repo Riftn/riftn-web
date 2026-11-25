@@ -21,7 +21,10 @@ it('opens the owner’s expired Moments on demand, paginates, and excludes other
   expect(screen.queryByRole('button')).toBeNull();
   view.rerender(app('OWNER'));
   expect(read).not.toHaveBeenCalled();
-  fireEvent.click(screen.getByRole('button', { name: 'stories.momentArchive' }));
+  const archiveToggle = screen.getByRole('button', { name: 'stories.momentArchive' });
+  expect(archiveToggle).toHaveAccessibleDescription('stories.archiveOnlyYou');
+  expect(screen.getByText('stories.archiveOnlyYou')).not.toBeVisible();
+  fireEvent.click(archiveToggle);
   expect(await screen.findByRole('link', { name: /yesterday/ })).toHaveAttribute('href', '/app/moment/expired');
   expect(screen.getAllByRole('link')).toHaveLength(1);
   fireEvent.click(screen.getByRole('button', { name: 'common.loadMore' }));
