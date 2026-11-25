@@ -70,7 +70,7 @@ function ContractJobText({ job }: { job: WorkJob }) {
       {(!title.isTooShort || !description.isTooShort) && (
         <div data-post-metadata className="mt-2 text-xs">
           <TranslationControl
-            label={t('common.translate')}
+            label={t('comments.translate')}
             isTranslated={!isLoading && (title.isTranslated || description.isTranslated)}
             isLoading={isLoading}
             error={title.error || description.error}
