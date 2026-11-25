@@ -69,7 +69,7 @@ import { ContentWarningGate, useContentWarning } from './ContentWarningGate';
 import { ActionBar } from './ActionBar';
 import { ShopBoardLazy } from '../live/ShopBoardLazy';
 import { PollCard } from './PollCard';
-import { QuizCard } from '@/components/app/quiz/QuizCard';
+import { LazyQuizCard } from '@/components/app/quiz/LazyQuizCard';
 import { PhotoTagsOverlay } from '@/components/app/photo-tags/PhotoTagsOverlay';
 import type { PhotoTag } from '@/lib/api/dehub';
 import { CommentsWrapper } from './CommentsWrapper';
@@ -1768,7 +1768,7 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
         {/* A photo post can carry a poll too, under the caption as on text posts.
             On the post page the page itself places it. */}
         {!postPage && !isLocked && !isSubGated && !isPPV && parseInt(post.id, 10) > 0 && <PollCard tokenId={parseInt(post.id, 10)} />}
-        {!postPage && !isLocked && !isSubGated && !isPPV && post.hasQuiz && parseInt(post.id, 10) > 0 && <QuizCard tokenId={parseInt(post.id, 10)} />}
+        {!postPage && !isLocked && !isSubGated && !isPPV && post.hasQuiz && parseInt(post.id, 10) > 0 && <LazyQuizCard tokenId={parseInt(post.id, 10)} />}
 
         {/* The creator's Shop board — affiliate links, opened in place. */}
         <ShopBoardLazy tokenId={post.id} links={post.shopLinks} listingCount={post.shopListingCount} variant="inline" />
