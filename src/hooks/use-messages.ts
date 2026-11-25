@@ -66,6 +66,7 @@ import { messageHistoryItems, mergeMessageHead, needsMessageHistoryRecovery, nex
 import { translateCopy as _translateCopy } from '@/i18n/copy';
 import { setChatPref } from '@/lib/api/dehub/chat-prefs';
 import { lockDhbForUsd } from '@/lib/dm-lock-price';
+import { dismissReadMessageNotifications } from '@/lib/web-push';
 
 /**
  * Blob URL for an optimistic message with auto-revoke. The optimistic entry is
@@ -861,6 +862,7 @@ export function useMessages(conversationId: string | null) {
     mutationFn: () => {
       if (conversationId && !conversationId.startsWith('new_') && !/^0x[0-9a-fA-F]{40}$/i.test(conversationId)) {
         emitReadReceipt(conversationId);
+        void dismissReadMessageNotifications(conversationId);
         // Persist to localStorage so it survives page refresh
         persistReadConversation(conversationId);
       }

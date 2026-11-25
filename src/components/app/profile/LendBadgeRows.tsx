@@ -14,6 +14,7 @@
  * wording, and reusing it keeps the two surfaces from drifting apart in 110
  * locales.
  */
+import { useBadgeTierLabel } from '@/i18n/badge-tier-label';
 import { useEffect, useState } from 'react';
 import { ChevronLeft, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -36,6 +37,7 @@ interface LendBadgeRowsProps {
 
 export function LendBadgeRows({ address, handle, onBack, onDone }: LendBadgeRowsProps) {
   const { t } = useTranslation();
+  const tierLabel = useBadgeTierLabel();
   const { data, isLoading } = useBadgeDelegations();
   const grant = useGrantDelegation();
   const revoke = useRevokeDelegation();
@@ -75,7 +77,7 @@ export function LendBadgeRows({ address, handle, onBack, onDone }: LendBadgeRows
       ) : lentToThem ? (
         <>
           <p className="px-3 py-2 text-sm leading-5 text-white/60">
-            {t('settings.badgeDelegationGranted', { to: handle, tier: lentToThem.tier })}
+            {t('settings.badgeDelegationGranted', { to: handle, tier: tierLabel(lentToThem.tier) })}
           </p>
           <button
             onClick={() => revoke.mutate(lentToThem.address, { onSuccess: onDone })}
@@ -101,7 +103,7 @@ export function LendBadgeRows({ address, handle, onBack, onDone }: LendBadgeRows
           <p className="px-3 py-2 text-sm leading-5 text-white/60">
             {t('settings.badgeDelegationSlots', {
               count: data.slots,
-              tier: data.ownTier ?? data.grantableTier,
+              tier: tierLabel(data.ownTier ?? data.grantableTier ?? ''),
               free: slotsFree,
             })}{' '}
             {t('settings.badgeDelegationRaisesOnlyTier')}
@@ -135,7 +137,7 @@ export function LendBadgeRows({ address, handle, onBack, onDone }: LendBadgeRows
                       }`}
                     >
                       {src ? <img src={src} alt="" className="w-4 h-4 shrink-0" /> : null}
-                      {name}
+                      {tierLabel(name)}
                     </button>
                   );
                 })}

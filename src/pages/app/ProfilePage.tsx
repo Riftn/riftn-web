@@ -70,8 +70,8 @@ import { ArticleTilePicker, ProfileArticleTileContext } from '@/components/app/p
 import { articleReadMinutes, mergeArticleTile, parseArticleTile, type ArticleTileLook } from '@/lib/article-tile';
 import { buildFeedImageUrls as articleTileCover } from '@/lib/media-url';
 import { updateProfile, setPostBackground } from '@/lib/api/dehub';
-import { PROFILE_VIEW_DEFAULT_KEY, PROFILE_VIEW_READER_KEY, ProfileViewModeContext, parseProfileViewDefault, parseProfileViewReaderPref, startingProfileView, useProfileViewState } from '@/lib/profile-view-mode';
-import { useDeHubProfile } from '@/hooks/use-dehub-profile';
+import { PROFILE_VIEW_DEFAULT_KEY, ProfileViewModeContext, parseProfileViewDefault, startingProfileView, useProfileViewState, type ProfileViewMode } from '@/lib/profile-view-mode';
+import { usePrivacySettings } from '@/hooks/use-privacy-settings';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { checkUsernameAvailability } from '@/lib/api/dehub/auth';
 
@@ -312,22 +312,20 @@ export default function ProfilePage() {
   const appliedDefaultTabFor = useRef<string | null>(null);
   const profileKey = data.apiProfile?.walletAddress || null;
 
-  // All, Images and Videos share this reader's saved layout for the profile.
-  // The reader can also pick grid or list for every profile they open
-  // (their own customs.profileViewOthers); "owner" keeps each owner's pick.
-  const { data: readerProfile } = useDeHubProfile({
-    userId: data.currentWalletAddress || undefined,
-    enabled: !!data.currentWalletAddress && data.isAuthenticated,
+  const { defaultProfileView, readerProfileView, updateSettings } = usePrivacySettings({
+    refreshOnMount: false,
   });
-  const profileView = useProfileViewState(
-    profileKey,
-    startingProfileView(
-      parseProfileViewDefault((data.apiProfile?.customs as Record<string, unknown> | undefined)?.[PROFILE_VIEW_DEFAULT_KEY]),
-      parseProfileViewReaderPref((readerProfile?.customs as Record<string, unknown> | undefined)?.[PROFILE_VIEW_READER_KEY]),
-      !!data.isViewingOwnProfile,
-    ),
-    data.currentWalletAddress,
+  const hasAccount = data.isAuthenticated && !!data.currentWalletAddress;
+  const ownerDefault = parseProfileViewDefault(
+    data.apiProfile?.defaultProfileView ?? data.apiProfile?.customs?.[PROFILE_VIEW_DEFAULT_KEY],
   );
+  const localProfileView = useProfileViewState(hasAccount ? null : profileKey, ownerDefault);
+  const profileView = hasAccount ? {
+    mode: startingProfileView(data.isViewingOwnProfile ? defaultProfileView : ownerDefault, readerProfileView, !!data.isViewingOwnProfile),
+    setMode: (mode: ProfileViewMode) => updateSettings(data.isViewingOwnProfile
+      ? { default_profile_view: mode }
+      : { reader_profile_view: mode }),
+  } : localProfileView;
 
   // Text-post backdrop the owner picked (customs.postBg). A save shows at once
   // through the override and the profile query catches up behind it.

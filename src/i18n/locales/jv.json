@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Sunting video", "hiddenTag": "Didhelikake", "tapToEdit": "Tutul kanggo nyunting", "cover": "Sampul", "trim": "Potong", "mirror": "Cermin", "rotate": "Rotasi", "hide": "Singidake", "timer": "Timer", "sheetTitleAny": "Sunting sadurunge ngirim", "close": "Tutup", "replace": "Ganti", "hiddenUntilTap": "Singidake nganti diklik", "pause": "Jeda", "play": "Puter video", "mute": "Bisu", "unmute": "Swara", "scrub": "Geser video", "addMore": "Tambah foto utawa video", "trimAria": "Seret pucuk kanggo motong", "coverAria": "Klik pigura kanggo nyetel sampul", "coverHint": "Klik pigura kanggo nyetel sampul", "coverOwn": "Gambar sampeyan", "coverAuto": "Otomatis", "uploadCover": "Unggah gambar sampul", "mirrored": "Dicermin", "original": "Asli", "rotate90": "Rotasi 90°", "showNormally": "Tampilake kaya biasane", "showNormallyBody": "Langsung katon", "hideUntilTap": "Singidake nganti diklik", "hideUntilTapBody": "Blur nganti diklik", "hidePrice": "Singidake ing mburi rega", "hidePriceBody": "Blur nganti mbayar", "priceUnavailable": "Ora ing obrolan iki", "timerOff": "Mati", "timerOffBody": "Tetep ana ing obrolan.", "timerViewBody": "Ilang kanggo sampeyan sakloron sawise dideleng.", "confirm": "Konfirmasi", "lockedFor": "Bukak kunci kanggo {{value1}} token", "lockedForUsd": "Bukak kunci kanggo {{value1}}", "editItem": "Sunting barang {{value1}}", "kept": "{{time}} disimpen", "timerTimeBody": "Ilang kanggo sampeyan sakloron {{value1}} sawise dikirim."},
+  "dmVideo": {"edit": "Sunting video", "hiddenTag": "Didhelikake", "tapToEdit": "Tutul kanggo nyunting", "cover": "Sampul", "trim": "Potong", "mirror": "Cermin", "rotate": "Rotasi", "hide": "Singidake", "timer": "Timer", "sheetTitleAny": "Sunting sadurunge ngirim", "close": "Tutup", "replace": "Ganti", "hiddenUntilTap": "Singidake nganti diklik", "pause": "Jeda", "play": "Puter video", "mute": "Bisu", "unmute": "Swara", "scrub": "Geser video", "addMore": "Tambah foto utawa video", "trimAria": "Seret pucuk kanggo motong", "coverAria": "Klik pigura kanggo nyetel sampul", "coverHint": "Klik pigura kanggo nyetel sampul", "coverOwn": "Gambar sampeyan", "coverAuto": "Otomatis", "uploadCover": "Unggah gambar sampul", "mirrored": "Dicermin", "original": "Asli", "rotate90": "Rotasi 90°", "showNormally": "Tampilake kaya biasane", "showNormallyBody": "Langsung katon", "hideUntilTap": "Singidake nganti diklik", "hideUntilTapBody": "Blur nganti diklik", "hidePrice": "Singidake ing mburi rega", "hidePriceBody": "Blur nganti mbayar", "priceUnavailable": "Ora ing obrolan iki", "timerOff": "Mati", "timerOffBody": "Tetep ana ing obrolan.", "timerViewBody": "Ilang kanggo sampeyan sakloron sawise dideleng.", "confirm": "Konfirmasi", "lockedFor": "Bukak kunci kanggo {{value1}} token", "lockedForUsd": "Bukak kunci kanggo {{value1}}", "editItem": "Sunting barang {{value1}}", "kept": "{{time}} disimpen", "timerTimeBody": "Ilang kanggo sampeyan sakloron {{value1}} sawise dikirim.", "destruct": {"60":"1 menit","3600":"1 jam","43200":"12 jam","86400":"1 dina","604800":"1 minggu","31536000":"1 taun","view":"1 tayangan"}, "destructShort": {"view":"1 tayangan"}, "destructSecs": "{{n}} detik", "destructShortSecs": "{{n}}d"},
   "postBg": {
     "addMedia": "Tambah gambar, GIF, utawa video",
     "changeMedia": "Ganti gambar, GIF, utawa video",
@@ -664,7 +664,9 @@
       "main": "Utama",
       "money": "Dhuwit",
       "riftn": "Riftn"
-    }
+    },
+    "moveGroupHint": "Selehna ing tab liyane kanggo mindhah menyang kana",
+    "reorderHintGroups": "Pencet lan seret lambang apa wae kanggo ngatur maneh, utawa lebokake menyang tab liyane kanggo mindhah."
   },
   "feed": {
     "viewProfile": "Deleng profil {{name}}",
@@ -1320,7 +1322,12 @@
     "menuLayoutSectionsDesc": "Kabeh kaca bebarengan, ing sangisore judhul klompok",
     "menuLayoutFoldersDesc": "Kaca utama sampeyan, banjur folder kanggo saben klompok",
     "publicChatInBar": "Obrolan Umum ing bar ngisor",
-    "publicChatInBarDesc": "Sepisan tutul menyang Obrolan Umum saka bar ing ngisor layar"
+    "publicChatInBarDesc": "Sepisan tutul menyang Obrolan Umum saka bar ing ngisor layar",
+    "notificationShowCount": "Tampilake angka ing lonceng",
+    "notificationShowCountDesc": "Deleng pira notifikasi sing durung diwaca, ora mung cahyane",
+    "messagesShowCount": "Tampilake angka ing Pesen",
+    "messagesShowCountDesc": "Deleng pira pesen sing durung diwaca, ora mung cahyane",
+    "chatTextSize": "Ukuran teks obrolan"
   },
   "common": {
     "confirm": "Kuwuwus ngarani.",
@@ -1353,7 +1360,8 @@
     "next": "Neks",
     "previous": "Sebelumnya",
     "redo": "Ulangi",
-    "remove": "Hapus"
+    "remove": "Hapus",
+    "copy": "Salin"
   },
   "tip": {
     "title": "Kirim Hadiah",
@@ -1660,7 +1668,8 @@
     "roomSettings": "Setelan Ruang",
     "messagePinned": "Pesen wis disematake",
     "messageUnpinned": "Pesen wis dicopot sematan",
-    "online": "{{count}} online"
+    "online": "{{count}} online",
+    "onlineHint": "{{count}} wong ana ing obrolan iki saiki"
   },
   "aiChat": {
     "title": "Asisten",
@@ -2338,7 +2347,11 @@
     "sending": "Sedane dikirim.",
     "retrySend": "Coba maneh",
     "discardSend": "Busak",
-    "notSent": "Ora kekirim"
+    "notSent": "Ora kekirim",
+    "unreadMarkerOne": "1 pesen durung diwaca",
+    "unreadMarkerMany": "{{value}} pesen durung diwaca",
+    "jumpToUnread": "Menyang pesen pisanan sing durung diwaca",
+    "jumpToLatest": "Menyang pesen paling anyar"
   },
   "music": {
     "listeningCount_one": "{{count}} ngelakoni",
@@ -4064,7 +4077,8 @@
       "memberCount": "{{n}} anggota"
     },
     "bannedFromCommunity": "Kamu dilarang di komunitas ini.",
-    "manageMembers": "Atur anggota"
+    "manageMembers": "Atur anggota",
+    "newChat": {"channelRow":"Kanal · {{formattedCount}} anggota","groupRow":"Grup · {{formattedCount}} anggota","newChannel":"Kanal anyar","newGroup":"Grup anyar","channelName":"Jeneng kanal","groupName":"Jeneng grup","description":"Babagan apa? (opsional)","whoCanJoin":"Sapa sing bisa gabung","public":"Umum","publicDetail":"Sapa wae bisa nemokake lan gabung","inviteOnly":"Mung undhangan","private":"Pribadi","privateDetail":"Wong gabung nganggo undhanganmu utawa persetujuanmu","entry":"Mlebu","free":"Ganjaran gratis","freeDetail":"Gratis gabung","paid":"Dibayar","paidDetail":"Siji pembayaran nganggo token, langsung menyang sampeyan","price":"Rega ing token","channelNote":"Mung sampeyan lan admin-mu sing bisa ngirim. Anggota maca lan menehi reaksi.","createChannel":"Gawe kanal","createGroup":"Gawe grup","message":"Pesen anyar","messageDetail":"Obrolan pribadi karo siji wong","groupDetail":"Ngobrol karo akeh wong, umum utawa pribadi","channelDetail":"Siaran menyang pengikut, gratis utawa mbayar","title":"Wiwiti sawijining"}
   },
   "prompt": {
     "seoTitle": "Wenehi feed sampeyan | Riftn",
@@ -12843,7 +12857,8 @@
     "shareKindCommunity": "Komunitas",
     "shareGroups": "Grup",
     "shareKindChannel": "Kanal",
-    "reportMessage": "Laporake pesen"
+    "reportMessage": "Laporake pesen",
+    "attachAnything": "Lampirake foto, video, audio utawa file"
   },
   "credits": {
     "earningsWorth": "Nilai {{amount}}",
@@ -20976,5 +20991,17 @@
     "addQuestion": "Tambah pitakonan",
     "pointsLabel": "Poin saben jawaban bener",
     "attachFailed": "Kiriman sampeyan wis tayang, nanging kuis gagal ditambahake"
-  }
+  },
+  "ownKeys": {"working":"Nglakoni","invalid":"Ditolak, ganti","noCredit":"Kredit entek","disabled":"Dipateni dening Riftn","failed":"Ana sing salah. Coba maneh.","savedNoCredit":"Kunci {{name}} wis disimpen, nanging kredit akune entek.","saved":"Kunci {{name}} wis disimpen. Piranti ing {{name}} saiki nganggo akunmu.","removed":"Kunci {{name}} wis dibusak.","title":"Kunci AI-mu dhewe","description":"Tambahna kunci saka panyedhiya AI lan piranti Creator bakal mlaku ing akunmu. Riftn ora narik biaya kanggo tugas kuwi. Kunci dienkripsi lan ora bakal ditampilake maneh.","check":"Kecèk","remove":"Busak","add":"Tambah kunci","paste":"Tempel kunci {{name}}-mu","save":"Simpen","cancel":"Batal","getKey":"Njupuk kunci {{name}}","showLess":"Tampilake kunciku wae","addAnother":"Tambah panyedhiya liyane"},
+  "resetWallet": {"mismatch":"Kata sandi gak cocok","tooShort":"Sandhi kudu paling ora {{count}} karakter","breached":"Sandhi iki tau katon ing bocoran data. Pilih sing liyane","weak":"Pilih sandhi sing luwih kuwat (campur aksara, angka lan simbol)","failed":"Ora bisa reset dompetmu. Ora ana sing dipindhah. Coba maneh.","twoFactor":"Lebokake kode saka aplikasi authenticator-mu kanggo mindhah akunmu.","funds":"Token, NFT lan saldo liyane ora pindhah. Tetep ana ing alamat lawas. Yen sampeyan isih bisa mbukak dompet lawas, kirim metu dhisik.","doneTitle":"Akunmu saiki ana ing dompet anyare","logOut":"Metu","intro":"Nggawe dompet Riftn anyar lan mindhah username, kiriman, pengikut lan pesenmu menyang kono. Gunakake iki yen dompetmu ilang utawa wong liya nduwe kuncine. Dompet lawas ora bisa dienggo mlebu maneh.","password":"Sandhi dompet anyar (min {{count}} karakter)","confirm":"Konfirmasi sandi","twoFactorPlaceholder":"Kode authenticator","ack":"Kulah ngerti, uangku lan pinangku lané ngendi waléku lané.","submit":"Reset dompet","title":"Reset dompet","rowDesc":"Dompetmu ilang, utawa wong liya nduwe kuncine? Pindhahake akunmu menyang dompet anyar. Username, kiriman lan pengikutmu melu."},
+  "twoFactor": {"turnOn":"Aktifake","wrongCode":"Kode kasebut ora cocog. Coba sing paling anyar ing aplikasi sampeyan.","signingInAs":"Mlebu minangka","signIn":"Mlebu","trustDevice":"Aja takon maneh ing piranti iki sajrone 30 dina","useBackupShort":"Gunakake kode cadangan","useApp":"Gunakake aplikasi authenticator kula","useAnotherShort":"Akun beda","lostEverything":"Kehilangan ponsel lan kode cadangan sampeyan? Hubungi dhukungan","turnedOff":"Mlebu kanthi rong langkah dipateni","introTitle":"Tambah kunci kaping loro","linkTitle":"Tautake aplikasi authenticator sampeyan","codesTitle":"Simpen kode cadangan sampeyan","newCodesTitle":"Entuk kode cadangan anyar","turnOff":"Mateni","backupCodes":"Kode cadangan"},
+  "chatTextSize": {"title":"Géngéngan tulisan"},
+  "notes": {"replyTo":"Kasih tau {{name}}…"},
+  "chatBulk": {"toolbar":"Obrolan sing dipilih","selected":"{{count}} dipilih","cancel":"Batal","read":"Tandhani wis diwaca","unread":"Tandhani durung diwaca","reply":"Balasan","delete":"Busak","replyHint":"Saben wong nampa iki minangka pesen biasa ing obrolane dhewe.","replyPlaceholder":"Tulis pesen…","sendAll":"Kirim menyang {{count}}","partSent":"Dikirim menyang {{ok}} saka {{total}} obrolan","notSent":"Ora bisa ngirim. Coba maneh."},
+  "chatTabs": {"addToTab":"Tambah menyang tab","newWith":"Tab anyar…","hide":"Dhelikake tab","edit":"Sunting tab","renameEdit":"Ganti jeneng lan sunting","addChats":"Tambah obrolan","moveLeft":"Pindhah ngiwa","moveRight":"Pindhah nengen","delete":"Busak tab","new":"Tab anyar","editTab":"Sunting tab","create":"Gawe tab","emoji":"Pilih emoji","namePlaceholder":"Jeneng tab","noEmoji":"Tanpa emoji","sFriends":"Kanca","sWork":"Gawean","sTrading":"Perdagangan","sCreators":"Kreator","sGaming":"Game","chatsInTab":"Obrolan ing tab iki","picked":"{{n}} dipilih","deleteTitle":"Busak “{{name}}”?","deleteBody":"Tab ilang. Obrolane tetep ana ing Kabeh lan pesene tetep.","builtIn":"Bawaan","chatCount":"{{n}} obrolan","moveUp":"Njupuk dhuwur","moveDown":"Pindhah mudhun","alwaysOn":"Gwé kanggo ngaweni","show":"Tampilake tab","emptyTitle":"{{name}} kosong","emptyBody":"Tambahna obrolan ing kene lan tetep ana ing Kabeh uga.","removedFrom":"Dibusak saka {{name}}","addedTo":"Ditambahake menyang {{name}}","kindPublic":"Umum","kindChannel":"Kanal","kindGroup":"Golongan","kindCommunity":"Komunitas","kindDirect":"langsung","tooMany":"Sampeyan bisa duwe nganti 10 tab","deleted":"{{name}} wis dibusak"},
+  "msgSelect": {"partForwarded":"Diterusake {{ok}} saka {{total}}","nothingToCopy":"Ora ana sing bisa disalin ing pesen sing dipilih","toolbar":"Pesen sing dipilih","selected":"{{count}} dipilih","copy":"Salin","forward":"Terusaké","deleteSome":"Busak {{count}}"},
+  "dmSafety": {"notReal":"Iki dudu {{name}} sing asli.","neverLink":"Tim Riftn ora bakal ngirim DM link kanggo ndandani profil utawa dompetmu. Aja mbukak link, nyambungake dompet utawa tandha tangan apa wae. Blokir lan laporake akun iki."},
+  "post": {"destruct":{"offBody":"Kiriman tetep ana.","onBody":"Kiriman bakal mbusak dhewe {{value1}} sawise diunggah."}},
+  "dmPaidLock": {"lockOnUsd":"Dikunci · {{price}}","lockVideo":"Kunci video","lockPhoto":"Kunci foto","lockCustom":"Liyane","lockCustomUsdLabel":"Rega khusus ing dolar","lockHint":"Dheweke ndeleng burem nganti mbayar sampeyan. File sing dikunci ora dienkripsi end-to-end."},
+  "chatReactions": {"oneNamed":"{{name}} menehi reaksi {{emoji}} marang pesenmu","one":"Menehi reaksi {{emoji}} marang pesenmu"}
 }

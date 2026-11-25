@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Edita el vídeo", "hiddenTag": "Ocult", "tapToEdit": "Toca per editar", "cover": "Coberta", "trim": "Retalla", "mirror": "Reflecteix", "rotate": "Gira", "hide": "Amaga", "timer": "Temporitzador", "sheetTitleAny": "Edita abans d'enviar", "close": "Tanca", "replace": "Substitueix", "hiddenUntilTap": "Ocult fins que hi toquin", "pause": "Pausa", "play": "Reprodueix el vídeo", "mute": "Silencia", "unmute": "Activa el so", "scrub": "Fes un recorregut pel vídeo", "addMore": "Afegeix fotos o vídeos", "trimAria": "Arrossega els extrems per retallar", "coverAria": "Toca un fotograma per establir-lo com a portada", "coverHint": "Toca un fotograma per establir-lo com a portada", "coverOwn": "La teva foto", "coverAuto": "Automàtic", "uploadCover": "Puja una imatge de portada", "mirrored": "Reflectit", "original": "Original", "rotate90": "Gira 90°", "showNormally": "Mostra normalment", "showNormallyBody": "Ho veuen de seguida", "hideUntilTap": "Amaga fins que s’hi toqui", "hideUntilTapBody": "Es veurà borrosa fins que hi toquin", "hidePrice": "Amaga-ho darrere d'un preu", "hidePriceBody": "Es mostra borrosa fins que et paguin", "priceUnavailable": "No en aquest xat", "timerOff": "Desactivat", "timerOffBody": "Es queda al xat.", "timerViewBody": "Desapareixerà per a tots dos un cop l'hagin vist.", "confirm": "Confirma", "lockedFor": "Desbloqueja per {{value1}} fitxes", "lockedForUsd": "Desbloqueja per a {{value1}}", "editItem": "Modifica l'element {{value1}}", "kept": "{{time}} mantingut", "timerTimeBody": "Desapareixerà per a tots dos {{value1}} després d'enviar-ho."},
+  "dmVideo": {"edit": "Edita el vídeo", "hiddenTag": "Ocult", "tapToEdit": "Toca per editar", "cover": "Coberta", "trim": "Retalla", "mirror": "Reflecteix", "rotate": "Gira", "hide": "Amaga", "timer": "Temporitzador", "sheetTitleAny": "Edita abans d'enviar", "close": "Tanca", "replace": "Substitueix", "hiddenUntilTap": "Ocult fins que hi toquin", "pause": "Pausa", "play": "Reprodueix el vídeo", "mute": "Silencia", "unmute": "Activa el so", "scrub": "Fes un recorregut pel vídeo", "addMore": "Afegeix fotos o vídeos", "trimAria": "Arrossega els extrems per retallar", "coverAria": "Toca un fotograma per establir-lo com a portada", "coverHint": "Toca un fotograma per establir-lo com a portada", "coverOwn": "La teva foto", "coverAuto": "Automàtic", "uploadCover": "Puja una imatge de portada", "mirrored": "Reflectit", "original": "Original", "rotate90": "Gira 90°", "showNormally": "Mostra normalment", "showNormallyBody": "Ho veuen de seguida", "hideUntilTap": "Amaga fins que s’hi toqui", "hideUntilTapBody": "Es veurà borrosa fins que hi toquin", "hidePrice": "Amaga-ho darrere d'un preu", "hidePriceBody": "Es mostra borrosa fins que et paguin", "priceUnavailable": "No en aquest xat", "timerOff": "Desactivat", "timerOffBody": "Es queda al xat.", "timerViewBody": "Desapareixerà per a tots dos un cop l'hagin vist.", "confirm": "Confirma", "lockedFor": "Desbloqueja per {{value1}} fitxes", "lockedForUsd": "Desbloqueja per a {{value1}}", "editItem": "Modifica l'element {{value1}}", "kept": "{{time}} mantingut", "timerTimeBody": "Desapareixerà per a tots dos {{value1}} després d'enviar-ho.", "destruct": {"3600":"1 hora","43200":"12 hores","86400":"1 dia","604800":"1 setmana","31536000":"1 any","view":"1 visualització"}, "destructShort": {"view":"1 visualització"}, "destructSecs": "{{n}} seg"},
   "postBg": {
     "addMedia": "Afegeix una imatge, un GIF o un vídeo",
     "changeMedia": "Canvia la imatge, el GIF o el vídeo",
@@ -657,7 +657,9 @@
       "main": "Principal",
       "money": "Diners",
       "riftn": "Riftn"
-    }
+    },
+    "moveGroupHint": "Deixa-ho anar en una altra pestanya per moure-ho allà",
+    "reorderHintGroups": "Mantén premuda i arrossega qualsevol icona per reordenar-la, o bé porta-la a una altra pestanya per moure-la"
   },
   "feed": {
     "viewProfile": "Veure el perfil de {{name}}",
@@ -1313,7 +1315,12 @@
     "menuLayoutSectionsDesc": "Totes les pàgines alhora, sota capçaleres de grup",
     "menuLayoutFoldersDesc": "Les teves pàgines principals i després una carpeta per a cada grup",
     "publicChatInBar": "Xat públic a la barra inferior",
-    "publicChatInBarDesc": "Un toc per entrar al Xat públic des de la barra de la part inferior de la pantalla"
+    "publicChatInBarDesc": "Un toc per entrar al Xat públic des de la barra de la part inferior de la pantalla",
+    "notificationShowCount": "Mostra el número a la campana",
+    "notificationShowCountDesc": "Mira quantes notificacions no has llegit en lloc de només la llum",
+    "messagesShowCount": "Mostra el número a Missatges",
+    "messagesShowCountDesc": "Mira quants missatges no has llegit en lloc de només la llum",
+    "chatTextSize": "Mida del text del xat"
   },
   "common": {
     "confirm": "Confirma",
@@ -1346,7 +1353,8 @@
     "next": "Següent",
     "previous": "Anterior",
     "redo": "Reduir",
-    "remove": "Eliminar"
+    "remove": "Eliminar",
+    "copy": "Copia"
   },
   "tip": {
     "title": "Enviar propina",
@@ -1653,7 +1661,8 @@
     "roomSettings": "Configuració de la sala",
     "messagePinned": "Missatge fixat",
     "messageUnpinned": "Missatge desafixat",
-    "online": "{{count}} en línia"
+    "online": "{{count}} en línia",
+    "onlineHint": "Ara mateix hi ha {{count}} persones en aquest xat"
   },
   "aiChat": {
     "title": "Assistent",
@@ -2331,7 +2340,11 @@
     "sending": "Enviant",
     "retrySend": "Torna-ho a provar",
     "discardSend": "Treu",
-    "notSent": "No enviat"
+    "notSent": "No enviat",
+    "unreadMarkerOne": "1 missatge no llegit",
+    "unreadMarkerMany": "{{value}} missatges no llegits",
+    "jumpToUnread": "Ves al primer missatge no llegit",
+    "jumpToLatest": "Ves a l'últim missatge"
   },
   "music": {
     "listeningCount_one": "{{count}} escoltant",
@@ -4047,7 +4060,8 @@
       "memberCount": "Membres de {{n}}",
       "approvalNote": "Un administrador ha d'aprovar la teva sol·licitud abans que puguis unir-te."
     },
-    "bannedFromCommunity": "Tens prohibit entrar a aquesta comunitat"
+    "bannedFromCommunity": "Tens prohibit entrar a aquesta comunitat",
+    "newChat": {"channelRow":"Canal · {{formattedCount}} membres","groupRow":"Grup · {{formattedCount}} membres","newChannel":"Canal nou","newGroup":"Grup nou","channelName":"Nom del canal","groupName":"Nom del grup","description":"De què va? (opcional)","whoCanJoin":"Qui s'hi pot unir","public":"Públic","publicDetail":"Qualsevol el pot trobar i unir-s'hi","inviteOnly":"Només amb invitació","private":"Privat","privateDetail":"La gent s'hi uneix amb la teva invitació o aprovació","entry":"Entrada","free":"Gratis","freeDetail":"Unir-s'hi és gratuït","paid":"Pagat","paidDetail":"Un sol pagament en tokens, directament a tu","price":"Preu en tokens","channelNote":"Només tu i els teus administradors podeu publicar. Els membres llegeixen i reaccionen.","createChannel":"Crea el canal","createGroup":"Crea el grup","message":"Missatge nou","messageDetail":"Un xat privat amb una persona","groupDetail":"Xateja amb molta gent, en públic o en privat","channelDetail":"Difon als seguidors, gratis o de pagament","title":"Comença alguna cosa"}
   },
   "prompt": {
     "seoTitle": "Demana al teu feed | Riftn",
@@ -12825,7 +12839,8 @@
     "shareKindCommunity": "Comunitat",
     "shareGroups": "Grups",
     "shareKindChannel": "Canal",
-    "reportMessage": "Denuncia el missatge"
+    "reportMessage": "Denuncia el missatge",
+    "attachAnything": "Adjunta una foto, un vídeo, un àudio o un fitxer"
   },
   "credits": {
     "earningsWorth": "Val {{amount}}",
@@ -20979,5 +20994,17 @@
     "addQuestion": "Afegeix una pregunta",
     "pointsLabel": "Punts per resposta correcta",
     "attachFailed": "La teva publicació s'ha penjat, però no s'ha pogut afegir el qüestionari"
-  }
+  },
+  "ownKeys": {"working":"En curs","invalid":"Rebutjada, substitueix-la","noCredit":"Sense crèdit","disabled":"Desactivada per Riftn","failed":"S'ha produït un error. Torna-ho a provar","savedNoCredit":"S'ha desat la clau de {{name}}, però el compte no té crèdit.","saved":"S'ha desat la clau de {{name}}. Les eines de {{name}} ara fan servir el teu compte.","removed":"S'ha eliminat la clau de {{name}}.","title":"Les teves pròpies claus d'IA","description":"Afegeix una clau d'un proveïdor d'IA i les eines de Creator s'executaran al teu compte. Riftn no cobra res per aquestes tasques. Les claus estan xifrades i no es tornen a mostrar.","check":"Verifica","remove":"Treu","add":"Afegeix una clau","paste":"Enganxa la teva clau de {{name}}","save":"Desa","cancel":"Cancel·la","getKey":"Obtén una clau de {{name}}","showLess":"Mostra només les meves claus","addAnother":"Afegeix un altre proveïdor"},
+  "resetWallet": {"mismatch":"Les contrasenyes no coincideixen","tooShort":"La contrasenya ha de tenir com a mínim {{count}} caràcters","breached":"Aquesta contrasenya ha aparegut en una filtració de dades. Tria'n una altra","weak":"Tria una contrasenya més segura (combina lletres, números i símbols)","failed":"No s'ha pogut restablir la cartera. No s'ha mogut res. Torna-ho a provar.","twoFactor":"Introdueix el codi de l'app d'autenticació per moure el compte.","funds":"Els tokens, NFT i altres saldos no es mouen. Es queden a l'adreça antiga. Si encara pots obrir la cartera antiga, primer envia'ls fora.","doneTitle":"El teu compte ja és a la nova cartera","logOut":"Tanca la sessió","intro":"Crea una cartera de Riftn nova i hi mou el teu nom d'usuari, publicacions, seguidors i missatges. Fes-ho servir si has perdut la cartera o algú altre en té la clau. La cartera antiga deixa de servir per iniciar la sessió.","password":"Contrasenya de la nova cartera (mín. {{count}} caràcters)","confirm":"Confirmar contrasenya","twoFactorPlaceholder":"Codi d'autenticació","ack":"Entenc que els meus fons antics es queden a l'antic carter.","submit":"Restableix la cartera","title":"Restableix la cartera","rowDesc":"Has perdut la cartera o algú altre en té la clau? Mou el compte a una cartera nova. El teu nom d'usuari, publicacions i seguidors venen amb tu."},
+  "twoFactor": {"turnOn":"Activa","wrongCode":"Això codi no coincidia. Prova el més nou a la teva app.","signingInAs":"Iniciant sessió com a","signIn":"Inicia sessió","trustDevice":"No preguntis més en aquest dispositiu durant 30 dies","useBackupShort":"Utilitza un codi de còpia de seguretat","useApp":"Utilitza la meva app d'autenticació","useAnotherShort":"Compte diferent","lostEverything":"Has perdut el teu telèfon i els teus codis de còpia de seguretat? Contacta amb el suport","turnedOff":"Inici de sessió en dos passos està desactivat","introTitle":"Afegeix una segona serradura","linkTitle":"Enllaça la teva app d'autenticació","codesTitle":"Guarda els teus codis de còpia de seguretat","newCodesTitle":"Aconsegueix codis de còpia de","turnOff":"Desactiva","backupCodes":"Codi de còpia de seguretat"},
+  "chatTextSize": {"title":"Mida del text"},
+  "notes": {"replyTo":"Respon a {{name}}…"},
+  "chatBulk": {"toolbar":"Xats seleccionats","selected":"{{count}} seleccionat","cancel":"Cancel·la","read":"Marca com a llegits","unread":"Marca com a no llegits","reply":"Resposta","delete":"Eliminar","replyHint":"Cada persona el rep com un missatge normal al seu propi xat.","replyPlaceholder":"Escriu un missatge…","sendAll":"Envia a {{count}}","partSent":"Enviat a {{ok}} de {{total}} xats","notSent":"No s'ha pogut enviar. Torna-ho a provar."},
+  "chatTabs": {"addToTab":"Afegeix a la pestanya","newWith":"Pestanya nova…","hide":"Amaga la pestanya","edit":"Edita les pestanyes","renameEdit":"Canvia el nom i edita","addChats":"Afegeix xats","moveLeft":"Mou a l'esquerra","moveRight":"Mou a la dreta","delete":"Elimina la pestanya","new":"Pestanya nova","editTab":"Edita la pestanya","create":"Crea una pestanya","emoji":"Tria un emoji","namePlaceholder":"Nom de la pestanya","noEmoji":"Sense emoji","sFriends":"Amics","sWork":"Feina","sTrading":"Operació","sCreators":"Creadors","sGaming":"Jocs","chatsInTab":"Xats d'aquesta pestanya","picked":"{{n}} triats","deleteTitle":"Vols eliminar «{{name}}»?","deleteBody":"La pestanya desapareix. Els seus xats es queden a Tots i conserven els missatges.","builtIn":"Integrada","chatCount":"{{n}} xats","moveUp":"Mou amunt","moveDown":"Mou avall","alwaysOn":"Sempre activat","show":"Mostra la pestanya","emptyTitle":"{{name}} és buida","emptyBody":"Afegeix xats aquí i també es quedaran a Tots.","removedFrom":"S'ha tret de {{name}}","addedTo":"S'ha afegit a {{name}}","kindPublic":"Públic","kindChannel":"Canal","kindGroup":"Agrupar","kindCommunity":"Comunitat","kindDirect":"Directe","tooMany":"Pots tenir fins a 10 pestanyes","deleted":"S'ha eliminat {{name}}"},
+  "msgSelect": {"partForwarded":"S'han reenviat {{ok}} de {{total}}","nothingToCopy":"No hi ha res per copiar als missatges triats","toolbar":"Missatges seleccionats","selected":"{{count}} seleccionat","copy":"Copia","forward":"Reenvia","deleteSome":"Elimina'n {{count}}"},
+  "dmSafety": {"notReal":"Aquest no és el veritable {{name}}.","neverLink":"L'equip de Riftn mai no t'enviarà un missatge directe amb un enllaç per arreglar el perfil o la cartera. No obris enllaços, no connectis la cartera ni signis res. Bloqueja i denuncia aquest compte."},
+  "post": {"destruct":{"offBody":"La publicació es manté.","onBody":"La publicació s'elimina sola {{value1}} després de publicar-se."}},
+  "dmPaidLock": {"lockOnUsd":"Bloquejat · {{price}}","lockVideo":"Bloqueja el vídeo","lockPhoto":"Bloqueja la foto","lockCustom":"Altre","lockCustomUsdLabel":"Preu personalitzat en dòlars","lockHint":"El veuen borrós fins que et paguen. Els fitxers bloquejats no estan xifrats d'extrem a extrem."},
+  "chatReactions": {"oneNamed":"{{name}} ha reaccionat amb {{emoji}} al teu missatge","one":"Ha reaccionat amb {{emoji}} al teu missatge"}
 }

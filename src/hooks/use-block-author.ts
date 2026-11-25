@@ -25,7 +25,7 @@ export function useBlockAuthor() {
   const queryClient = useQueryClient();
   const [isBlocking, setIsBlocking] = useState(false);
 
-  const blockAuthor = useCallback(async (address?: string | null, displayName?: string) => {
+  const blockAuthor = useCallback(async (address?: string | null, displayName?: string, onChange?: () => void) => {
     const target = lowerAddress(address);
     if (!target || isBlocking) return;
     setIsBlocking(true);
@@ -52,9 +52,11 @@ export function useBlockAuthor() {
       }
 
       queryClient.invalidateQueries({ queryKey: ['block-list'] });
+      queryClient.invalidateQueries({ queryKey: ['story-shelf'] });
       toast.success(displayName
         ? _copy("copy.b2f9daafb41e", { defaultValue: "Blocked {{value1}} — they can no longer see you either", value1: displayName })
         : _copy("copy.789fe7653aa0", { defaultValue: "Blocked account — they can no longer see you either" }));
+      onChange?.();
     } catch (error) {
       console.error('[blockAuthor]', error);
       toast.error(_copy("copy.5ce62627732e", { defaultValue: "Failed to block account" }));

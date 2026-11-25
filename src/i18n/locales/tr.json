@@ -7995,6 +7995,7 @@
     "creatorEarnsDirect": "Aboneler Riftn tokenleri ile ödeme yapar. Payınız, abone oldukları anda cüzdanınıza düşer ve rozet seviyenizin platform ücreti düşülür."
   },
   "liveOverlay": {
+    "showCreatorChat": "İçerik üreticisinin sohbet katmanını göster",
     "eyebrow": {
       "follow": "Yeni takipçi",
       "subscribe": "Yeni abone",

@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "ቪዲዮ ያርትዑ", "hiddenTag": "የተደበቀ", "tapToEdit": "ለማርትዕ ይንኩ", "cover": "መሸፈኛ", "trim": "ቁረጥ", "mirror": "አንጸባራቂ", "rotate": "አሽከርክር", "hide": "ይደብቁ", "timer": "ቆጣሪ", "sheetTitleAny": "ከመላክዎ በፊት ያርትዑ", "close": "ይዝጉ", "replace": "ይተኩ", "hiddenUntilTap": "እስከሚነኩት ድረስ የተደበቀ", "pause": "አቁም", "play": "ቪዲዮን አጫውት", "mute": "ድምጸ-ከል ያድርጉ", "unmute": "ድምጸ-ከል ያንሱ", "scrub": "በቪዲዮው ውስጥ ይሸብልሉ", "addMore": "ፎቶዎችን ወይም ቪዲዮዎችን ያክሉ", "trimAria": "ለመቁረጥ ጫፎቹን ይጎትቱ", "coverAria": "ሽፋኑን ለማዘጋጀት አንድ ክፈፍን መታ ያድርጉ", "coverHint": "ሽፋኑን ለማዘጋጀት አንድ ክፈፍን መታ ያድርጉ", "coverOwn": "የእርስዎ ምስል", "coverAuto": "አውቶማቲክ", "uploadCover": "የሽፋን ምስል ይስቀሉ", "mirrored": "ተንጸባርቋል", "original": "ዋናው", "rotate90": "በ90° ያዙሩ", "showNormally": "በተለመደው መንገድ ያሳዩ", "showNormallyBody": "ወዲያውኑ ያዩታል", "hideUntilTap": "እስኪታተም ድረስ ይደበቅ", "hidePrice": "በዋጋ ጀርባ ይደበቅ", "priceUnavailable": "በዚህ ውይይት ውስጥ የለም", "timerOff": "አጥፋ", "timerOffBody": "በቻት ውስጥ ይቆያል።", "timerViewBody": "አንዴ ካዩት በኋላ ለሁለታችሁም ይጠፋል።", "confirm": "ያረጋግጡ", "lockedFor": "ለ {{value1}} ቶከኖች ይክፈቱ", "lockedForUsd": "ለ{{value1}} ይክፈቱ", "editItem": "ንጥል ነገርን ያርትዑ {{value1}}", "kept": "{{time}} ተይዟል", "timerTimeBody": "ከላኩት በኋላ ለሁለታችሁም {{value1}} ይጠፋል።"},
+  "dmVideo": {"edit": "ቪዲዮ ያርትዑ", "hiddenTag": "የተደበቀ", "tapToEdit": "ለማርትዕ ይንኩ", "cover": "መሸፈኛ", "trim": "ቁረጥ", "mirror": "አንጸባራቂ", "rotate": "አሽከርክር", "hide": "ይደብቁ", "timer": "ቆጣሪ", "sheetTitleAny": "ከመላክዎ በፊት ያርትዑ", "close": "ይዝጉ", "replace": "ይተኩ", "hiddenUntilTap": "እስከሚነኩት ድረስ የተደበቀ", "pause": "አቁም", "play": "ቪዲዮን አጫውት", "mute": "ድምጸ-ከል ያድርጉ", "unmute": "ድምጸ-ከል ያንሱ", "scrub": "በቪዲዮው ውስጥ ይሸብልሉ", "addMore": "ፎቶዎችን ወይም ቪዲዮዎችን ያክሉ", "trimAria": "ለመቁረጥ ጫፎቹን ይጎትቱ", "coverAria": "ሽፋኑን ለማዘጋጀት አንድ ክፈፍን መታ ያድርጉ", "coverHint": "ሽፋኑን ለማዘጋጀት አንድ ክፈፍን መታ ያድርጉ", "coverOwn": "የእርስዎ ምስል", "coverAuto": "አውቶማቲክ", "uploadCover": "የሽፋን ምስል ይስቀሉ", "mirrored": "ተንጸባርቋል", "original": "ዋናው", "rotate90": "በ90° ያዙሩ", "showNormally": "በተለመደው መንገድ ያሳዩ", "showNormallyBody": "ወዲያውኑ ያዩታል", "hideUntilTap": "እስኪታተም ድረስ ይደበቅ", "hidePrice": "በዋጋ ጀርባ ይደበቅ", "priceUnavailable": "በዚህ ውይይት ውስጥ የለም", "timerOff": "አጥፋ", "timerOffBody": "በቻት ውስጥ ይቆያል።", "timerViewBody": "አንዴ ካዩት በኋላ ለሁለታችሁም ይጠፋል።", "confirm": "ያረጋግጡ", "lockedFor": "ለ {{value1}} ቶከኖች ይክፈቱ", "lockedForUsd": "ለ{{value1}} ይክፈቱ", "editItem": "ንጥል ነገርን ያርትዑ {{value1}}", "kept": "{{time}} ተይዟል", "timerTimeBody": "ከላኩት በኋላ ለሁለታችሁም {{value1}} ይጠፋል።", "destruct": {"60":"1 ደቂቃ","3600":"1 ሰዓት","43200":"12 ሰዓታት","86400":"1 ቀን","604800":"1 ሳምንት","31536000":"1 ዓመት","view":"1 እይታ"}, "destructShort": {"view":"1 እይታ"}, "destructSecs": "{{n}} ሰከንድ"},
   "postBg": {
     "addMedia": "ፎቶ፣ GIF ወይም ቪዲዮ ያክሉ",
     "changeMedia": "ፎቶ፣ GIF ወይም ቪዲዮ ይቀይሩ",
@@ -664,7 +664,9 @@
       "main": "ዋና",
       "money": "ገንዘብ",
       "riftn": "Riftn"
-    }
+    },
+    "moveGroupHint": "ወደ ሌላ ትር ለማዛወር እዚያ ጣለው",
+    "reorderHintGroups": "ማንኛውንም ምልክት (icon) እንደያዙ በመጎተት ቦታውን መቀየር፣ ወይም ወደ ሌላ ትር (tab) በመውሰድ ማዛወር ይችላሉ።"
   },
   "feed": {
     "viewProfile": "የ {{name}} መገለጫ ይመልከቱ",
@@ -1320,7 +1322,12 @@
     "menuLayoutSectionsDesc": "ሁሉም ገጾች በአንድ ጊዜ፣ በቡድን ርዕሶች ስር",
     "menuLayoutFoldersDesc": "ዋና ገጾችዎ፣ ከዚያም ለእያንዳንዱ ቡድን አንድ ፎልደር",
     "publicChatInBar": "ይፋዊ ውይይት በታችኛው አሞሌ",
-    "publicChatInBarDesc": "ከማያ ገጹ ግርጌ ካለው አሞሌ በአንድ መታ ወደ ይፋዊ ውይይት"
+    "publicChatInBarDesc": "ከማያ ገጹ ግርጌ ካለው አሞሌ በአንድ መታ ወደ ይፋዊ ውይይት",
+    "notificationShowCount": "ቁጥሩን በደወሉ ላይ አሳይ",
+    "notificationShowCountDesc": "ብርሃኑን ብቻ ሳይሆን ምን ያህል ማሳወቂያዎች እንዳልተነበቡ ይመልከቱ",
+    "messagesShowCount": "ቁጥሩን በመልዕክቶች ላይ አሳይ",
+    "messagesShowCountDesc": "ብርሃኑን ብቻ ሳይሆን ምን ያህል መልዕክቶች እንዳልተነበቡ ይመልከቱ",
+    "chatTextSize": "የውይይት ጽሑፍ መጠን"
   },
   "common": {
     "confirm": "ያረጋግጡ",
@@ -1353,7 +1360,8 @@
     "next": "ቀጣይ",
     "previous": "ቀዳሚ",
     "redo": "አድርግ",
-    "remove": "አስወግድ"
+    "remove": "አስወግድ",
+    "copy": "ቅዳ"
   },
   "tip": {
     "title": "ጥቆማ ላክ",
@@ -1660,7 +1668,8 @@
     "roomSettings": "የክፍል ቅንብሮች",
     "messagePinned": "መልዕክት ተሰክቷል",
     "messageUnpinned": "መልዕክት ተስቷል",
-    "online": "{{count}} በመስመር ላይ"
+    "online": "{{count}} በመስመር ላይ",
+    "onlineHint": "አሁን በዚህ ውይይት ውስጥ {{count}} ሰዎች አሉ"
   },
   "aiChat": {
     "title": "ረዳት",
@@ -2338,7 +2347,11 @@
     "sending": "መላክ",
     "retrySend": "እንደገና ሞክር",
     "discardSend": "አስወግድ",
-    "notSent": "አልተላከም"
+    "notSent": "አልተላከም",
+    "unreadMarkerOne": "1 ያልተነበበ መልዕክት",
+    "unreadMarkerMany": "{{value}} ያልተነበቡ መልዕክቶች",
+    "jumpToUnread": "ወደ መጀመሪያው ያልተነበበ መልዕክት ዝለል",
+    "jumpToLatest": "ወደ የቅርብ ጊዜው መልዕክት ዝለል"
   },
   "music": {
     "listeningCount_one": "{{count}} ማዳመጥ",
@@ -4094,7 +4107,8 @@
       "memberCount": "{{n}} አባላት",
       "approvalNote": "ከመቀላቀልዎ በፊት አስተዳዳሪ ጥያቄዎን ማጽደቅ አለበት።"
     },
-    "bannedFromCommunity": "ከዚህ ማህበረሰብ ታግደዋል።"
+    "bannedFromCommunity": "ከዚህ ማህበረሰብ ታግደዋል።",
+    "newChat": {"channelRow":"ቻናል · {{formattedCount}} አባላት","groupRow":"ቡድን · {{formattedCount}} አባላት","newChannel":"አዲስ ቻናል","newGroup":"አዲስ ቡድን","channelName":"የቻናል ስም","groupName":"የቡድን ስም","description":"ስለምንድን ነው? (አማራጭ)","whoCanJoin":"ማን መቀላቀል ይችላል","public":"ይፋ","publicDetail":"ማንኛውም ሰው ሊያገኘው እና ሊቀላቀል ይችላል","inviteOnly":"በግብዣ ብቻ","private":"የግል","privateDetail":"ሰዎች በእርስዎ ግብዣ ወይም ፈቃድ ይቀላቀላሉ","entry":"መግቢያ","free":"ነጻ","freeDetail":"ለመቀላቀል ክፍያ የለም","paid":"የተከፈለ","paidDetail":"በቶከኖች አንድ ክፍያ፣ በቀጥታ ለእርስዎ","price":"ዋጋ በቶከኖች","channelNote":"መለጠፍ የሚችሉት እርስዎ እና አስተዳዳሪዎችዎ ብቻ ናቸው። አባላት ያነባሉ እና ምላሽ ይሰጣሉ።","createChannel":"ቻናል ፍጠር","createGroup":"ቡድን ፍጠር","message":"አዲስ መልዕክት","messageDetail":"ከአንድ ሰው ጋር የግል ውይይት","groupDetail":"ከብዙ ሰዎች ጋር ይወያዩ፣ ይፋዊ ወይም የግል","channelDetail":"ለተከታዮች ያሰራጩ፣ ነጻ ወይም የሚከፈልበት","title":"አንድ ነገር ይጀምሩ"}
   },
   "prompt": {
     "seoTitle": "የእርስዎን ምግብ ይጠይቁ | Riftn",
@@ -12872,7 +12886,8 @@
     "shareKindCommunity": "ማህበረሰብ",
     "shareGroups": "ቡድኖች",
     "shareKindChannel": "ቻናል",
-    "reportMessage": "መልዕክቱን ሪፖርት አድርግ"
+    "reportMessage": "መልዕክቱን ሪፖርት አድርግ",
+    "attachAnything": "ፎቶ፣ ቪዲዮ፣ ድምፅ ወይም ፋይል ያያይዙ"
   },
   "credits": {
     "earningsWorth": "ዋጋ {{amount}}",
@@ -21008,5 +21023,17 @@
     "addQuestion": "ጥያቄ ያክሉ",
     "pointsLabel": "ለአንድ ትክክለኛ መልስ የሚሰጥ ነጥብ",
     "attachFailed": "ልጥፍዎ ተለጥፏል፣ ነገር ግን ጥያቄውን መጨመር አልተቻለም"
-  }
+  },
+  "ownKeys": {"working":"መስራት","invalid":"ውድቅ ተደርጓል፣ ይተኩት","noCredit":"ክሬዲት አልቋል","disabled":"በRiftn ጠፍቷል","failed":"የሆነ ነገር ተሳስቷል እንደገና ሞክር ።","savedNoCredit":"የ{{name}} ቁልፍ ተቀምጧል፣ ነገር ግን መለያው ክሬዲት አልቆበታል።","saved":"የ{{name}} ቁልፍ ተቀምጧል። በ{{name}} ላይ ያሉ መሳሪያዎች አሁን መለያዎን ይጠቀማሉ።","removed":"የ{{name}} ቁልፍ ተወግዷል።","title":"የእርስዎ የራስ AI ቁልፎች","description":"ከAI አቅራቢ ቁልፍ ያክሉ እና የፈጣሪ መሳሪያዎች በምትኩ በመለያዎ ላይ ይሰራሉ። Riftn ለእነዚያ ሥራዎች ምንም አያስከፍልም። ቁልፎች የተመሰጠሩ ናቸው እና ዳግም አይታዩም።","check":"አረጋግጥ","remove":"አስወግድ","add":"ቁልፍ ያክሉ","paste":"የ{{name}} ቁልፍዎን ይለጥፉ","save":"አስቀምጥ","cancel":"ሰርዝ","getKey":"የ{{name}} ቁልፍ ያግኙ","showLess":"የእኔን ቁልፎች ብቻ አሳይ","addAnother":"ሌላ አቅራቢ ያክሉ"},
+  "resetWallet": {"mismatch":"የይለፍ ቃሎች አይዛመዱም","tooShort":"የይለፍ ቃል ቢያንስ {{count}} ቁምፊዎች መሆን አለበት","breached":"ይህ የይለፍ ቃል በውሂብ ጥሰት ውስጥ ታይቷል። የተለየ ይምረጡ","weak":"የበለጠ ጠንካራ የይለፍ ቃል ይምረጡ (ፊደላትን፣ ቁጥሮችን እና ምልክቶችን ያቀላቅሉ)","failed":"የኪስ ቦርሳዎን ዳግም ማስጀመር አልተቻለም። ምንም አልተዛወረም። እንደገና ይሞክሩ።","twoFactor":"መለያዎን ለማዛወር ከማረጋገጫ መተግበሪያዎ ኮዱን ያስገቡ።","funds":"ቶከኖች፣ NFTዎች እና ሌሎች ቀሪ ሂሳቦች አይዛወሩም። በቀድሞው አድራሻ ይቆያሉ። የቀድሞውን የኪስ ቦርሳ አሁንም መክፈት ከቻሉ፣ መጀመሪያ ያውጧቸው።","doneTitle":"መለያዎ በአዲሱ የኪስ ቦርሳው ላይ ነው","logOut":"ወደ ውጭ ይግቡ","intro":"አዲስ የRiftn የኪስ ቦርሳ ይሰራል እና የተጠቃሚ ስምዎን፣ ልጥፎችዎን፣ ተከታዮችዎን እና መልዕክቶችዎን ወደ እሱ ያዛውራል። የኪስ ቦርሳዎ ከጠፋ ወይም ሌላ ሰው ቁልፉን ከያዘ ይህን ይጠቀሙ። የቀድሞው የኪስ ቦርሳ ለመግቢያ መስራት ያቆማል።","password":"አዲስ የኪስ ቦርሳ የይለፍ ቃል (ቢያንስ {{count}} ቁምፊዎች)","confirm":"የይለፍ ቃል ያረጋግጡ","twoFactorPlaceholder":"የማረጋገጫ ኮድ","ack":"ቆንጆ ገንዘብ በቆንጆ ዋሊት ውስጥ ይቆያል ብዬ ተረድቻለሁ።","submit":"የኪስ ቦርሳን ዳግም አስጀምር","title":"የኪስ ቦርሳን ዳግም አስጀምር","rowDesc":"የኪስ ቦርሳዎ ጠፍቷል፣ ወይም ሌላ ሰው ቁልፉን ይዟል? መለያዎን ወደ አዲስ የኪስ ቦርሳ ያዛውሩ። የተጠቃሚ ስምዎ፣ ልጥፎችዎ እና ተከታዮችዎ አብረውዎት ይመጣሉ።"},
+  "twoFactor": {"turnOn":"አብራሪ","wrongCode":"ያን ኮድ አልተዛለቀም። በመተግበሪያዎ ውስጥ አዲሱን ይሞክሩ።","signingInAs":"እንደ ... በመግባት","signIn":"ግባ","trustDevice":"በዚህ መሣሪያ ላይ ለ30 ቀናት እንደገና አትጠይቅ።","useBackupShort":"የተተከለ ኮድ ይጠቀሙ።","useApp":"የኔን አርቲፊሻል መተግበሪያ ይጠቀሙ።","useAnotherShort":"ሌላ መለያ","lostEverything":"ስልክዎን እና የተተከለ ኮዶችዎን ጠፍተውብዎት? ድጋፍን ያነጋግሩ።","turnedOff":"ሁለት-እርምጃ ግባ ተሰናክሏል።","introTitle":"ሁለተኛ ቁልፍ ያክሉ","linkTitle":"አርቲፊሻል መተግበሪያዎን አገናኝ","codesTitle":"የተተከለ ኮዶችዎን ያስቀምጡ","newCodesTitle":"አዲስ የመጠባበቂያ ኮዶችን ያግኙ","turnOff":"አጥፋ","backupCodes":"የመጠባበቂያ ኮዶች"},
+  "chatTextSize": {"title":"የጽሑፍ መጠን"},
+  "notes": {"replyTo":"ለ{{name}} መልስ ይስጡ…"},
+  "chatBulk": {"toolbar":"የተመረጡ ውይይቶች","selected":"{{count}} ተመርጧል","cancel":"ሰርዝ","read":"እንደተነበበ ምልክት አድርግ","unread":"እንዳልተነበበ ምልክት አድርግ","reply":"መልስ","delete":"ሰርዝ","replyHint":"እያንዳንዱ ሰው ይህን በራሱ ውይይት ውስጥ እንደ መደበኛ መልዕክት ያገኛል።","replyPlaceholder":"መልዕክት ይጻፉ…","sendAll":"ለ{{count}} ላክ","partSent":"ከ{{total}} ውይይቶች ለ{{ok}} ተልኳል","notSent":"መላክ አልተቻለም። እንደገና ይሞክሩ።"},
+  "chatTabs": {"addToTab":"ወደ ትር ያክሉ","newWith":"አዲስ ትር…","hide":"ትሩን ደብቅ","edit":"ትሮችን አርትዕ","renameEdit":"እንደገና ሰይም እና አርትዕ","addChats":"ውይይቶችን ያክሉ","moveLeft":"ወደ ግራ አንቀሳቅስ","moveRight":"ወደ ቀኝ አንቀሳቅስ","delete":"ትሩን ሰርዝ","new":"አዲስ ትር","editTab":"ትሩን አርትዕ","create":"ትር ፍጠር","emoji":"ኢሞጂ ይምረጡ","namePlaceholder":"የትር ስም","noEmoji":"ኢሞጂ የለም","sFriends":"ጓደኞች","sWork":"ሥራ","sTrading":"ትሬዲንግ","sCreators":"ፈጣሪዎች","sGaming":"ጨዋታ","chatsInTab":"በዚህ ትር ውስጥ ያሉ ውይይቶች","picked":"{{n}} ተመርጠዋል","deleteTitle":"«{{name}}» ይሰረዝ?","deleteBody":"ትሩ ይጠፋል። ውይይቶቹ በ«ሁሉም» ውስጥ ይቆያሉ እና መልዕክቶቻቸውን ይጠብቃሉ።","builtIn":"አብሮ የተሰራ","chatCount":"{{n}} ውይይቶች","moveUp":"ወደ ላይ ያንቀሳቅሱ","moveDown":"ወደ ታች ያንቀሳቅሱ","alwaysOn":"ሁልጊዜ ላይ","show":"ትሩን አሳይ","emptyTitle":"{{name}} ባዶ ነው","emptyBody":"ውይይቶችን እዚህ ያክሉ እና በ«ሁሉም» ውስጥም ይቆያሉ።","removedFrom":"ከ{{name}} ተወግዷል","addedTo":"ወደ {{name}} ታክሏል","kindPublic":"ይፋ","kindChannel":"ቻናል","kindGroup":"ቡድን","kindCommunity":"ማህበረሰብ","kindDirect":"ቀጥታ","tooMany":"እስከ 10 ትሮች ሊኖሩዎት ይችላሉ","deleted":"{{name}} ተሰርዟል"},
+  "msgSelect": {"partForwarded":"ከ{{total}} {{ok}} ተላልፈዋል","nothingToCopy":"በተመረጡት መልዕክቶች ውስጥ የሚቀዳ ነገር የለም","toolbar":"የተመረጡ መልዕክቶች","selected":"{{count}} ተመርጧል","copy":"ቅዳ","forward":"አስተላልፍ","deleteSome":"{{count}} ሰርዝ"},
+  "dmSafety": {"notReal":"ይህ እውነተኛው {{name}} አይደለም።","neverLink":"የRiftn ቡድን መገለጫዎን ወይም የኪስ ቦርሳዎን ለማስተካከል አገናኝ በDM በፍጹም አይልክልዎትም። አገናኞችን አይክፈቱ፣ የኪስ ቦርሳዎን አያገናኙ ወይም ምንም ነገር አይፈርሙ። ይህን መለያ ያግዱ እና ሪፖርት ያድርጉ።"},
+  "post": {"destruct":{"offBody":"ልጥፉ እንዳለ ይቆያል።","onBody":"ልጥፉ ከወጣ ከ{{value1}} በኋላ ራሱን ይሰርዛል።"}},
+  "dmPaidLock": {"lockOnUsd":"ተቆልፏል · {{price}}","lockVideo":"ቪዲዮ ቆልፍ","lockPhoto":"ፎቶ ቆልፍ","lockCustom":"ሌላ","lockCustomUsdLabel":"ብጁ ዋጋ በዶላር","lockHint":"እስኪከፍሉዎት ድረስ ደብዝዞ ያዩታል። የተቆለፉ ፋይሎች ከጫፍ እስከ ጫፍ የተመሰጠሩ አይደሉም።"},
+  "chatReactions": {"oneNamed":"{{name}} ለመልዕክትዎ {{emoji}} ምላሽ ሰጥቷል","one":"ለመልዕክትዎ {{emoji}} ምላሽ ሰጥቷል"}
 }

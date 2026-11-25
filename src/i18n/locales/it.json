@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Modifica video", "hiddenTag": "Nascosto", "tapToEdit": "Tocca per modificare", "cover": "Copertina", "trim": "Ritaglia", "mirror": "Specchia", "rotate": "Ruota", "hide": "Nascondi", "timer": "Timer", "sheetTitleAny": "Modifica prima di inviare", "close": "Chiudi", "replace": "Sostituisci", "hiddenUntilTap": "Nascosto finché non ci toccano sopra", "pause": "Pausa", "play": "Riproduci video", "mute": "Disattiva audio", "unmute": "Attiva audio", "scrub": "Scorri il video", "addMore": "Aggiungi foto o video", "trimAria": "Trascina le estremità per ritagliare", "coverAria": "Tocca un fotogramma per impostare la copertina", "coverHint": "Tocca un fotogramma per impostare la copertina", "coverOwn": "La tua foto", "coverAuto": "Automatico", "uploadCover": "Carica un'immagine di copertina", "mirrored": "Specchiato", "original": "Originale", "rotate90": "Ruota di 90°", "showNormally": "Mostra normalmente", "showNormallyBody": "Lo vedono subito", "hideUntilTap": "Nascondi finché non viene toccato", "hideUntilTapBody": "Sfocato finché non ci toccano sopra", "hidePrice": "Nascondi dietro un prezzo", "hidePriceBody": "Sfocato finché non ti pagano", "priceUnavailable": "Non in questa chat", "timerOff": "Disattivato", "timerOffBody": "Resta nella chat.", "timerViewBody": "Scompare per entrambi una volta visualizzato.", "confirm": "Conferma", "lockedFor": "Sblocca per {{value1}} token", "lockedForUsd": "Sblocca per {{value1}}", "editItem": "Modifica elemento {{value1}}", "kept": "{{time}} conservato", "timerTimeBody": "Scompare per entrambi {{value1}} dopo l'invio."},
+  "dmVideo": {"edit": "Modifica video", "hiddenTag": "Nascosto", "tapToEdit": "Tocca per modificare", "cover": "Copertina", "trim": "Ritaglia", "mirror": "Specchia", "rotate": "Ruota", "hide": "Nascondi", "timer": "Timer", "sheetTitleAny": "Modifica prima di inviare", "close": "Chiudi", "replace": "Sostituisci", "hiddenUntilTap": "Nascosto finché non ci toccano sopra", "pause": "Pausa", "play": "Riproduci video", "mute": "Disattiva audio", "unmute": "Attiva audio", "scrub": "Scorri il video", "addMore": "Aggiungi foto o video", "trimAria": "Trascina le estremità per ritagliare", "coverAria": "Tocca un fotogramma per impostare la copertina", "coverHint": "Tocca un fotogramma per impostare la copertina", "coverOwn": "La tua foto", "coverAuto": "Automatico", "uploadCover": "Carica un'immagine di copertina", "mirrored": "Specchiato", "original": "Originale", "rotate90": "Ruota di 90°", "showNormally": "Mostra normalmente", "showNormallyBody": "Lo vedono subito", "hideUntilTap": "Nascondi finché non viene toccato", "hideUntilTapBody": "Sfocato finché non ci toccano sopra", "hidePrice": "Nascondi dietro un prezzo", "hidePriceBody": "Sfocato finché non ti pagano", "priceUnavailable": "Non in questa chat", "timerOff": "Disattivato", "timerOffBody": "Resta nella chat.", "timerViewBody": "Scompare per entrambi una volta visualizzato.", "confirm": "Conferma", "lockedFor": "Sblocca per {{value1}} token", "lockedForUsd": "Sblocca per {{value1}}", "editItem": "Modifica elemento {{value1}}", "kept": "{{time}} conservato", "timerTimeBody": "Scompare per entrambi {{value1}} dopo l'invio.", "destruct": {"3600":"1 ora","43200":"12 ore","86400":"1 giorno","604800":"1 settimana","31536000":"1 anno","view":"1 visualizzazione"}, "destructShort": {"view":"1 visualizzazione"}},
   "postBg": {
     "addMedia": "Aggiungi un'immagine, una GIF o un video",
     "changeMedia": "Cambia immagine, GIF o video",
@@ -664,7 +664,9 @@
       "discover": "Scopri",
       "money": "Soldi",
       "riftn": "Riftn"
-    }
+    },
+    "moveGroupHint": "Trascina su un'altra scheda per spostarlo lì",
+    "reorderHintGroups": "Tieni premuta e trascina un'icona per riordinarla, oppure trascinala su un'altra scheda per spostarla"
   },
   "feed": {
     "viewProfile": "Visualizza il profilo di {{name}}",
@@ -1321,7 +1323,12 @@
     "chatDeleteMeDesc": "Sparisce dalla tua chat, gli altri lo vedono ancora",
     "chatDeleteEveryone": "Elimina per tutti",
     "chatDeleteEveryoneDesc": "Quando possibile. Il messaggio di un'altra persona in un gruppo viene eliminato solo per te",
-    "tipsOffNote": "Mance e invii a te sono disattivati mentre questa opzione è attiva. Disattivala per ricevere di nuovo mance."
+    "tipsOffNote": "Mance e invii a te sono disattivati mentre questa opzione è attiva. Disattivala per ricevere di nuovo mance.",
+    "notificationShowCount": "Mostra il numero sulla campanella",
+    "notificationShowCountDesc": "Vedi quante notifiche non hai letto invece del solo bagliore",
+    "messagesShowCount": "Mostra il numero su Messaggi",
+    "messagesShowCountDesc": "Vedi quanti messaggi non hai letto invece del solo bagliore",
+    "chatTextSize": "Dimensione del testo della chat"
   },
   "common": {
     "confirm": "Conferma",
@@ -1354,7 +1361,8 @@
     "next": "Avanti",
     "previous": "Precedente",
     "redo": "Rifai",
-    "remove": "Rimuovi"
+    "remove": "Rimuovi",
+    "copy": "Copia"
   },
   "tip": {
     "title": "Invia mancia",
@@ -1661,7 +1669,8 @@
     "roomSettings": "Impostazioni stanza",
     "messagePinned": "Messaggio fissato",
     "messageUnpinned": "Messaggio rimosso",
-    "online": "{{count}} online"
+    "online": "{{count}} online",
+    "onlineHint": "{{count}} persone sono in questa chat adesso"
   },
   "aiChat": {
     "title": "Assistente",
@@ -2339,7 +2348,11 @@
     "sending": "Invio in corso",
     "retrySend": "Riprova",
     "discardSend": "Rimuovi",
-    "notSent": "Non inviato"
+    "notSent": "Non inviato",
+    "unreadMarkerOne": "1 messaggio non letto",
+    "unreadMarkerMany": "{{value}} messaggi non letti",
+    "jumpToUnread": "Vai al primo messaggio non letto",
+    "jumpToLatest": "Vai all'ultimo messaggio"
   },
   "music": {
     "listeningCount_one": "{{count}} in ascolto",
@@ -4065,7 +4078,8 @@
       "memberCount": "{{n}} membri",
       "approvalNote": "Un amministratore deve approvare la tua richiesta prima che tu possa unirti."
     },
-    "bannedFromCommunity": "Sei stato bannato da questa comunità"
+    "bannedFromCommunity": "Sei stato bannato da questa comunità",
+    "newChat": {"channelRow":"Canale · {{formattedCount}} membri","groupRow":"Gruppo · {{formattedCount}} membri","newChannel":"Nuovo canale","newGroup":"Nuovo gruppo","channelName":"Nome del canale","groupName":"Nome del gruppo","description":"Di cosa si tratta? (facoltativo)","whoCanJoin":"Chi può unirsi","public":"Pubblico","publicDetail":"Chiunque può trovarlo e unirsi","inviteOnly":"Solo su invito","private":"Privato","privateDetail":"Si entra con il tuo invito o la tua approvazione","entry":"Ingresso","free":"Gratis","freeDetail":"Ingresso gratuito","paid":"Pagato","paidDetail":"Un unico pagamento in token, direttamente a te","price":"Prezzo in token","channelNote":"Solo tu e i tuoi admin potete pubblicare. I membri leggono e reagiscono.","createChannel":"Crea canale","createGroup":"Crea gruppo","message":"Nuovo messaggio","messageDetail":"Una chat privata con una persona","groupDetail":"Chatta con tante persone, in pubblico o in privato","channelDetail":"Trasmetti ai follower, gratis o a pagamento","title":"Crea qualcosa"}
   },
   "prompt": {
     "seoTitle": "Personalizza il tuo feed | Riftn",
@@ -12843,7 +12857,8 @@
     "shareKindGroup": "Gruppo",
     "shareKindChannel": "Canale",
     "shareKindCommunity": "Comunità",
-    "reportMessage": "Segnala messaggio"
+    "reportMessage": "Segnala messaggio",
+    "attachAnything": "Allega una foto, un video, un audio o un file"
   },
   "credits": {
     "earningsWorth": "Vale {{amount}}",
@@ -20980,5 +20995,17 @@
     "addQuestion": "Aggiungi domanda",
     "pointsLabel": "Punti per risposta corretta",
     "attachFailed": "Il tuo post è online, ma non è stato possibile aggiungere il quiz"
-  }
+  },
+  "ownKeys": {"working":"In elaborazione","invalid":"Rifiutata, sostituiscila","noCredit":"Credito esaurito","disabled":"Disattivata da Riftn","failed":"Si è verificato un errore. Riprova.","savedNoCredit":"Chiave {{name}} salvata, ma l'account ha esaurito il credito.","saved":"Chiave {{name}} salvata. Gli strumenti su {{name}} ora usano il tuo account.","removed":"Chiave {{name}} rimossa.","title":"Le tue chiavi IA","description":"Aggiungi una chiave di un provider di IA e gli strumenti Creator verranno eseguiti sul tuo account. Riftn non addebita nulla per quei job. Le chiavi sono crittografate e non vengono più mostrate.","check":"Verifica","remove":"Rimuovi","add":"Aggiungi chiave","paste":"Incolla la tua chiave {{name}}","save":"Salva","cancel":"Annulla","getKey":"Ottieni una chiave {{name}}","showLess":"Mostra solo le mie chiavi","addAnother":"Aggiungi un altro provider"},
+  "resetWallet": {"mismatch":"Le password non corrispondono","tooShort":"La password deve contenere almeno {{count}} caratteri","breached":"Questa password è comparsa in una violazione di dati. Scegline un'altra","weak":"Scegli una password più sicura (combina lettere, numeri e simboli)","failed":"Impossibile reimpostare il portafoglio. Non è stato spostato nulla. Riprova.","twoFactor":"Inserisci il codice dell'app di autenticazione per spostare il tuo account.","funds":"Token, NFT e altri saldi non vengono spostati. Restano al vecchio indirizzo. Se puoi ancora aprire il vecchio portafoglio, trasferiscili prima.","doneTitle":"Il tuo account è sul nuovo portafoglio","logOut":"Esci","intro":"Crea un nuovo portafoglio Riftn e vi sposta username, post, follower e messaggi. Usalo se hai perso il portafoglio o se qualcun altro ne ha la chiave. Il vecchio portafoglio non funzionerà più per l'accesso.","password":"Password del nuovo portafoglio (min. {{count}} caratteri)","confirm":"Conferma la password","twoFactorPlaceholder":"Codice di autenticazione","ack":"Capisco che i miei vecchi fondi rimangono nel vecchio portafoglio.","submit":"Reimposta portafoglio","title":"Reimposta portafoglio","rowDesc":"Hai perso il portafoglio o qualcun altro ne ha la chiave? Sposta il tuo account su un nuovo portafoglio. Username, post e follower vengono con te."},
+  "twoFactor": {"turnOn":"Attiva","wrongCode":"Quel codice non corrispondeva. Prova l'ultimo nella tua app.","signingInAs":"Accesso come","signIn":"Accedi","trustDevice":"Non chiedere di nuovo su questo dispositivo per 30 giorni","useBackupShort":"Usa un codice di backup","useApp":"Usa la mia app di autenticazione","useAnotherShort":"Account diverso","lostEverything":"Hai perso il telefono e i codici di backup? Contatta l'assistenza","turnedOff":"Accesso a due fattori è disattivato","introTitle":"Aggiungi un secondo blocco","linkTitle":"Collega la tua app di autenticazione","codesTitle":"Salva i tuoi codici di backup","newCodesTitle":"Ottieni nuovi codici di backup","turnOff":"Disattiva","backupCodes":"Codici di backup"},
+  "chatTextSize": {"title":"Dimensione del testo"},
+  "notes": {"replyTo":"Rispondi a {{name}}…"},
+  "chatBulk": {"toolbar":"Chat selezionate","selected":"{{count}} selezionato","cancel":"Annulla","read":"Segna come letto","unread":"Segna come non letto","reply":"Rispondi","delete":"Elimina","replyHint":"Ogni persona lo riceve come un normale messaggio nella propria chat.","replyPlaceholder":"Scrivi un messaggio…","sendAll":"Invia a {{count}}","partSent":"Inviato a {{ok}} chat su {{total}}","notSent":"Invio non riuscito. Riprova."},
+  "chatTabs": {"addToTab":"Aggiungi a scheda","newWith":"Nuova scheda…","hide":"Nascondi scheda","edit":"Modifica schede","renameEdit":"Rinomina e modifica","addChats":"Aggiungi chat","moveLeft":"Sposta a sinistra","moveRight":"Sposta a destra","delete":"Elimina scheda","new":"Nuova scheda","editTab":"Modifica scheda","create":"Crea scheda","emoji":"Scegli un’emoji","namePlaceholder":"Nome scheda","noEmoji":"Nessuna emoji","sFriends":"Amici","sWork":"Lavoro","sCreators":"Creator","chatsInTab":"Chat in questa scheda","picked":"{{n}} scelte","deleteTitle":"Eliminare “{{name}}”?","deleteBody":"La scheda sparisce. Le sue chat restano in Tutte con i loro messaggi.","builtIn":"Predefinita","chatCount":"{{n}} chat","moveUp":"Sposta su","moveDown":"Sposta giù","alwaysOn":"Sempre attiva","show":"Mostra scheda","emptyTitle":"{{name}} è vuota","emptyBody":"Aggiungi chat qui, restano anche in Tutte.","removedFrom":"Rimossa da {{name}}","addedTo":"Aggiunta a {{name}}","kindPublic":"Pubblica","kindChannel":"Canale","kindGroup":"Gruppo","kindDirect":"Diretta","tooMany":"Puoi avere fino a 10 schede","deleted":"{{name}} eliminata"},
+  "msgSelect": {"partForwarded":"Inoltrati {{ok}} su {{total}}","nothingToCopy":"Niente da copiare nei messaggi scelti","toolbar":"Messaggi selezionati","selected":"{{count}} selezionato","copy":"Copia","forward":"Inoltra","deleteSome":"Elimina {{count}}"},
+  "dmSafety": {"notReal":"Questo non è il vero {{name}}.","neverLink":"Il team di Riftn non ti invierà mai in DM un link per sistemare il tuo profilo o portafoglio. Non aprire link, non collegare il portafoglio e non firmare nulla. Blocca e segnala questo account."},
+  "post": {"destruct":{"offBody":"Il post resta online.","onBody":"Il post si elimina da solo {{value1}} dopo la pubblicazione."}},
+  "dmPaidLock": {"lockOnUsd":"Bloccato · {{price}}","lockVideo":"Blocca video","lockPhoto":"Blocca foto","lockCustom":"Altro","lockCustomUsdLabel":"Prezzo personalizzato in dollari","lockHint":"Lo vedono sfocato finché non ti pagano. I file bloccati non sono crittografati end-to-end."},
+  "chatReactions": {"oneNamed":"{{name}} ha reagito con {{emoji}} al tuo messaggio","one":"Ha reagito con {{emoji}} al tuo messaggio"}
 }

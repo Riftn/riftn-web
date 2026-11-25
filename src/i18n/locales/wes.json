@@ -664,7 +664,9 @@
       "planned": "scheduled, schedule, scheduled posts, queue, later, post am later",
       "liveStudio": "go live, stream, streaming, OBS, overlays, alerts, widgets, start live",
       "launchpad": "launch token, create coin, mek coin, meme coin, bonding curve, tokenise"
-    }
+    },
+    "moveGroupHint": "Drop am for anoda tab make e go deh",
+    "reorderHintGroups": "Hold am, drag any icon make you arrange am, or put am for another tab make you move am."
   },
   "feed": {
     "viewProfile": "Luk {{name}} profil",
@@ -1320,7 +1322,11 @@
     "menuLayoutSectionsDesc": "All page dem one time, under group header",
     "menuLayoutFoldersDesc": "Ya main page dem, den folder fo each group",
     "publicChatInBar": "Chat fo pablik fo di bar fo down",
-    "publicChatInBarDesc": "One tap go Chat fo pablik from di bar fo down fo di screen"
+    "publicChatInBarDesc": "One tap go Chat fo pablik from di bar fo down fo di screen",
+    "notificationShowCount": "Show the number for the bell",
+    "notificationShowCountDesc": "See how many notification you never read, no be only the glow",
+    "messagesShowCount": "Show the number for Messages",
+    "messagesShowCountDesc": "See how many message you never read, no be only the glow"
   },
   "common": {
     "confirm": "Confam",
@@ -1353,7 +1359,8 @@
     "next": "Di next one",
     "previous": "Bifo",
     "redo": "Redo",
-    "remove": "Comot am"
+    "remove": "Comot am",
+    "copy": "Kopi"
   },
   "tip": {
     "title": "Sen Tip",
@@ -1660,7 +1667,8 @@
     "roomSettings": "Settings fo room",
     "messagePinned": "Message don pin",
     "messageUnpinned": "Message don unpin",
-    "online": "{{count}} dey online"
+    "online": "{{count}} dey online",
+    "onlineHint": "{{count}} people dey for this chat now"
   },
   "aiChat": {
     "title": "Helpa",
@@ -2338,7 +2346,11 @@
     "feeNotEnough": "Token no reach (you need {{amount}})",
     "checkingTokenBalance": "We di check ya token balance...",
     "sending": "E di send",
-    "notSent": "E no send"
+    "notSent": "E no send",
+    "unreadMarkerOne": "1 message wey you never read",
+    "unreadMarkerMany": "{{value}} message wey you never read",
+    "jumpToUnread": "Jump go first message wey you never read",
+    "jumpToLatest": "Jump go last message"
   },
   "music": {
     "listeningCount_one": "{{count}} pesin di hia",
@@ -4054,7 +4066,8 @@
     },
     "bannedFromCommunity": "Yu no fit join dis community again.",
     "pendingRequestsShort": "{{count}} request(s) di wait fo approval",
-    "manageMembersHint": "Role, restriction, invite link and recent action dem"
+    "manageMembersHint": "Role, restriction, invite link and recent action dem",
+    "newChat": {"description":"Na weti e be about? (if you want)","whoCanJoin":"Who fit join","public":"Fo ol pipo","publicDetail":"Anybody fit find am and join","private":"I hide","privateDetail":"People dey join with your invite or your approval","free":"Fri","freeDetail":"Join na free","paid":"Don pay","paidDetail":"One payment for token, e go straight for you","price":"Price for token","channelNote":"Na only you and your admin dem fit post. Member dem dey read and react.","messageDetail":"Private chat with one person","groupDetail":"Chat with plenty people, public or private","channelDetail":"Broadcast go your follower dem, free or paid"}
   },
   "prompt": {
     "seoTitle": "Tell your feed | Riftn",
@@ -12829,7 +12842,8 @@
     "shareGroups": "Group dem",
     "shareKindChannel": "Channel",
     "shareKindCommunity": "Community",
-    "reportMessage": "Report message"
+    "reportMessage": "Report message",
+    "attachAnything": "Attach photo, video, audio or file"
   },
   "credits": {
     "earningsWorth": "E worth {{amount}}",
@@ -20881,5 +20895,16 @@
     "promptCatchUp": "Tɛl mi wetin {{handle}} don post nau nau",
     "promptMessage": "Hɛlp mi rait mesej gi {{handle}}",
     "promptAbout": "Bɔt {{handle}}: {{question}}"
-  }
+  },
+  "ownKeys": {"working":"Wokking","invalid":"Dem reject am, change am","noCredit":"Credit don finish","disabled":"Riftn don off am","failed":"Something no go well. Try again.","savedNoCredit":"{{name}} key don save, but the account credit don finish.","saved":"{{name}} key don save. Tool dem for {{name}} dey use your account now.","removed":"{{name}} key don comot.","title":"Your own AI key dem","description":"Add key from AI provider and Creator tool dem go run for your own account. Riftn no go charge anything for those job dem. Key dem dey encrypt and we no go ever show dem again.","check":"Chek","remove":"Comot am","save":"Sev","cancel":"Kansel","getKey":"Get {{name}} key","showLess":"Show only my key dem"},
+  "resetWallet": {"mismatch":"Password dem no match","tooShort":"Password must get at least {{count}} character","breached":"This password don show for data breach. Choose another one","weak":"Choose password wey strong pass (mix letter, number and symbol)","failed":"We no fit reset your wallet. Nothing move. Try again.","twoFactor":"Put the code from your authenticator app for move your account.","funds":"Token, NFT and other balance dem no go move. Dem go stay for the old address. If you still fit open the old wallet, send dem comot first.","doneTitle":"Your account don dey for yi new wallet","logOut":"Log Out","intro":"E go make new Riftn wallet and move your username, post, follower and message dem put am inside. Use this if your wallet don lost or another person get yi key. The old wallet no go work again for sign-in.","confirm":"Confirm di password","ack":"M no understand wetin happen to my old funds stay for old wallet.","rowDesc":"You don lose your wallet, or another person get yi key? Move your account go new wallet. Your username, post and follower dem go follow you."},
+  "twoFactor": {"wrongCode":"Dat code no match. Try di new one wey de for your app.","trustDevice":"No ask me again for this device for 30 days","useBackupShort":"Use backup code","lostEverything":"You don lose your phone and your backup code dem? Contact support","turnedOff":"Two-step sign-in dey off","introTitle":"Put anoda lock","codesTitle":"Save backup kodi yé.","newCodesTitle":"Get new backup code dem"},
+  "chatTextSize": {"title":"Teksi saiz"},
+  "chatBulk": {"toolbar":"Chat dem wey you select","selected":"{{count}} don select","cancel":"Kansel","read":"Mark am read","unread":"Mark am unread","reply":"Ansa","delete":"Dilit","replyHint":"Every person go get this one as normal message for their own chat.","replyPlaceholder":"Write message…","sendAll":"Send go {{count}}","partSent":"E don go {{ok}} for {{total}} chats","notSent":"We no fit send. Try again."},
+  "chatTabs": {"addToTab":"Add for tab","renameEdit":"Change name and edit","moveLeft":"Move go left","moveRight":"Move go right","emoji":"Pick emoji","sCreators":"Creator dem","chatsInTab":"Chat dem for this tab","deleteBody":"The tab go comot. Yi chat dem go stay for All and keep their message dem.","moveUp":"Move am up","moveDown":"Move am down","emptyTitle":"{{name}} dey empty","emptyBody":"Add chat dem here and dem go still dey for All too.","removedFrom":"E don comot for {{name}}","addedTo":"E don add for {{name}}","kindPublic":"Fo ol pipo","kindGroup":"Gruup","kindDirect":"Direk","tooMany":"You fit get reach 10 tabs","deleted":"{{name}} don delete"},
+  "msgSelect": {"partForwarded":"Forward {{ok}} for {{total}}","nothingToCopy":"Nothing for copy for the message dem wey you pick","toolbar":"Message dem wey you select","selected":"{{count}} don select","copy":"Kopi","forward":"Forward am"},
+  "dmSafety": {"notReal":"This one no be the real {{name}}.","neverLink":"Riftn team no go ever DM you link for fix your profile or wallet. No open link, no connect your wallet and no sign anything. Block and report this account."},
+  "post": {"destruct":{"offBody":"The post go stay.","onBody":"The post go delete yi self {{value1}} after e go up."}},
+  "dmPaidLock": {"lockOnUsd":"E don lock · {{price}}","lockCustom":"Oda one","lockCustomUsdLabel":"Your own price for dollar","lockHint":"Dem go see am blur until dem pay you. Locked file dem no get end-to-end encryption."},
+  "chatReactions": {"oneNamed":"{{name}} react {{emoji}} for your message","one":"Dem react {{emoji}} for your message"}
 }

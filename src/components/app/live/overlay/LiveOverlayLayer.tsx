@@ -30,6 +30,7 @@ import { HypeContext, useStreamHype } from './hype-train';
 interface Props {
   streamId: string;
   overlay: PublicOverlay;
+  showChatOverlay?: boolean;
   videoRef: RefObject<HTMLVideoElement | null>;
   /** The post's token id: the stream's chat room is keyed on it, not on streamId. */
   tokenId?: string | number | null;
@@ -39,7 +40,7 @@ interface Props {
   initialViewers: number;
 }
 
-export default function LiveOverlayLayer({ streamId, tokenId, overlay, videoRef, initialViewers, creator }: Props) {
+export default function LiveOverlayLayer({ streamId, tokenId, overlay, videoRef, initialViewers, creator, showChatOverlay = true }: Props) {
   const layerRef = useRef<HTMLDivElement>(null);
   const picture = useVideoPictureRect(layerRef, videoRef);
   const queryClient = useQueryClient();
@@ -50,11 +51,13 @@ export default function LiveOverlayLayer({ streamId, tokenId, overlay, videoRef,
       overlay.renderIn === 'app'
         ? drawOrder(
             overlay.widgets.filter(
-              (w) => w.enabled && w.kind !== 'poll' && isKnownKind(w.kind) && !(overlay.controls?.alertsPaused && isAlertKind(w.kind)),
+              (w) => w.enabled && w.kind !== 'poll' && isKnownKind(w.kind) &&
+                (showChatOverlay || w.kind !== 'chat_box') &&
+                !(overlay.controls?.alertsPaused && isAlertKind(w.kind)),
             ),
           )
         : [],
-    [overlay],
+    [overlay, showChatOverlay],
   );
 
   // A poll is the one thing viewers touch, so it is drawn whatever renderIn

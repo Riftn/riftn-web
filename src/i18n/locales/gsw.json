@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Bearbeite Video", "hiddenTag": "Versteckt", "tapToEdit": "Tippe zum Bearbeiten", "cover": "Cover", "trim": "Trim", "mirror": "Mirror", "rotate": "Rotate", "hide": "Hide", "timer": "Timer", "sheetTitleAny": "Bearbeite vor dem Senden", "close": "Close", "replace": "Ersetzen", "hiddenUntilTap": "Versteckt bis sie es antippen.", "pause": "Pause", "play": "Play video", "mute": "Stumm", "unmute": "Laut", "scrub": "Durch das Video wische", "addMore": "Bilder oder Videos hänge", "trimAria": "Zieht d'Ende zum trimme", "coverAria": "Tippe e Frame, um d'Cover z'stelle", "coverHint": "Tippe e Frame, um d'Cover z'stelle", "coverOwn": "Dein Bild", "coverAuto": "Auto", "mirrored": "Mirrored", "original": "Original", "rotate90": "Rotate 90°", "showNormally": "Show normally", "showNormallyBody": "Sie merke es gleich.", "hideUntilTap": "Hide until tapped", "hideUntilTapBody": "Verschwumme bis sie druf tippid", "hidePrice": "Hinder emene Priis verstecke", "hidePriceBody": "Verschwumme bis sie dich zahle", "priceUnavailable": "Nöd in däm Chat", "timerOff": "Off", "timerOffBody": "Es blibt im Chat.", "timerViewBody": "Es isch für beidi vo dir verglügt, sobald sie es gseh händ.", "confirm": "Bestätige", "lockedFor": "Entsperre für {{value1}} Tokens", "lockedForUsd": "Entsperre für {{value1}}", "editItem": "Bearbeite Gschäft {{value1}}", "kept": "{{time}} behalten", "timerTimeBody": "Verglügt für beidi vo dir {{value1}} nach em Versand."},
+  "dmVideo": {"edit": "Bearbeite Video", "hiddenTag": "Versteckt", "tapToEdit": "Tippe zum Bearbeiten", "cover": "Cover", "trim": "Trim", "mirror": "Mirror", "rotate": "Rotate", "hide": "Hide", "timer": "Timer", "sheetTitleAny": "Bearbeite vor dem Senden", "close": "Close", "replace": "Ersetzen", "hiddenUntilTap": "Versteckt bis sie es antippen.", "pause": "Pause", "play": "Play video", "mute": "Stumm", "unmute": "Laut", "scrub": "Durch das Video wische", "addMore": "Bilder oder Videos hänge", "trimAria": "Zieht d'Ende zum trimme", "coverAria": "Tippe e Frame, um d'Cover z'stelle", "coverHint": "Tippe e Frame, um d'Cover z'stelle", "coverOwn": "Dein Bild", "coverAuto": "Auto", "mirrored": "Mirrored", "original": "Original", "rotate90": "Rotate 90°", "showNormally": "Show normally", "showNormallyBody": "Sie merke es gleich.", "hideUntilTap": "Hide until tapped", "hideUntilTapBody": "Verschwumme bis sie druf tippid", "hidePrice": "Hinder emene Priis verstecke", "hidePriceBody": "Verschwumme bis sie dich zahle", "priceUnavailable": "Nöd in däm Chat", "timerOff": "Off", "timerOffBody": "Es blibt im Chat.", "timerViewBody": "Es isch für beidi vo dir verglügt, sobald sie es gseh händ.", "confirm": "Bestätige", "lockedFor": "Entsperre für {{value1}} Tokens", "lockedForUsd": "Entsperre für {{value1}}", "editItem": "Bearbeite Gschäft {{value1}}", "kept": "{{time}} behalten", "timerTimeBody": "Verglügt für beidi vo dir {{value1}} nach em Versand.", "destruct": {"60":"1 Minutä","3600":"1 Stund","43200":"12 Stunde","86400":"1 Tag","604800":"1 Wuche","31536000":"1 Jahr","view":"1 Aasicht"}, "destructShort": {"view":"1 Aasicht"}, "destructSecs": "{{n}} Sekundä"},
   "postBg": {
     "addMedia": "Bild, GIF oder Video derzuetue",
     "changeMedia": "Bild, GIF oder Video ändere",
@@ -664,7 +664,9 @@
       "main": "Haupt",
       "money": "Gäld",
       "riftn": "Riftn"
-    }
+    },
+    "moveGroupHint": "Zieh es uf en andere Tab, zum es dert ane z'verschiebe",
+    "reorderHintGroups": "Heb und zieh es Icon zum neu aordne, oder zieh es uf en andere Tab zum verschiebe"
   },
   "feed": {
     "viewProfile": "Lueg {{name}}'s Profil aa",
@@ -1320,7 +1322,12 @@
     "menuLayoutSectionsDesc": "Alli Siite ufs Mal, under Gruppe-Überschrifte",
     "menuLayoutFoldersDesc": "Dini Hauptsiite, denn en Ordner für jedi Gruppe",
     "publicChatInBar": "Public Chat i de undere Liiste",
-    "publicChatInBarDesc": "Mit eim Tipp i Public Chat vo de Liiste unde am Bildschirm"
+    "publicChatInBarDesc": "Mit eim Tipp i Public Chat vo de Liiste unde am Bildschirm",
+    "notificationShowCount": "D Zahl uf de Glogge zeige",
+    "notificationShowCountDesc": "Gseh, wie vill Benachrichtigunge ungläse sind, statt nur em Lüüchte",
+    "messagesShowCount": "D Zahl bi Nachrichte zeige",
+    "messagesShowCountDesc": "Gseh, wie vill Nachrichte ungläse sind, statt nur em Lüüchte",
+    "chatTextSize": "Chat-Textgrössi"
   },
   "common": {
     "confirm": "Bestätige.",
@@ -1353,7 +1360,8 @@
     "next": "Näscht",
     "previous": "Zurück",
     "redo": "Wiederholen",
-    "remove": "Entfernen"
+    "remove": "Entfernen",
+    "copy": "Kopiere"
   },
   "tip": {
     "title": "Trinkgäld schicke",
@@ -1660,7 +1668,8 @@
     "roomSettings": "Raum-Istelligä",
     "messagePinned": "Nachricht aaghefte",
     "messageUnpinned": "Nachricht glöst",
-    "online": "{{count}} online"
+    "online": "{{count}} online",
+    "onlineHint": "{{count}} Lüüt sind grad i dem Chat"
   },
   "aiChat": {
     "title": "Assischtänt",
@@ -2338,7 +2347,11 @@
     "sending": "Wird gesendet",
     "retrySend": "Nomol probiere",
     "discardSend": "Entferne",
-    "notSent": "Nöd gschickt"
+    "notSent": "Nöd gschickt",
+    "unreadMarkerOne": "1 ungläsni Nachricht",
+    "unreadMarkerMany": "{{value}} ungläsni Nachrichte",
+    "jumpToUnread": "Zur erschte ungläsene Nachricht",
+    "jumpToLatest": "Zur neuschte Nachricht"
   },
   "music": {
     "listeningCount_one": "{{count}} Zuhörende",
@@ -4084,7 +4097,8 @@
       "memberCount": "{{n}} Mitglieder"
     },
     "bannedFromCommunity": "Du bist vom Forum ausgeschlossen.",
-    "inviteToCommunity": "I d Community iilade"
+    "inviteToCommunity": "I d Community iilade",
+    "newChat": {"channelRow":"Kanal · {{formattedCount}} Mitglieder","groupRow":"Gruppe · {{formattedCount}} Mitglieder","newChannel":"Neue Kanal","newGroup":"Neui Gruppe","channelName":"Kanalname","groupName":"Gruppename","description":"Um was gaht s? (optional)","whoCanJoin":"Wer cha biiträte","public":"Öffentlech","publicDetail":"Jede cha si finde und biiträte","inviteOnly":"Nur mit Iiladig","private":"Privat","privateDetail":"Lüüt träted mit dinere Iiladig oder dinere Freigab bi","entry":"Iitritt","free":"Gratis","freeDetail":"Gratis biiträte","paid":"Bezahlt","paidDetail":"Ei Zahlig in Token, direkt a dich","price":"Pris in Token","channelNote":"Nur du und dini Admins chönd poste. Mitglieder läsed und reagiered.","createChannel":"Kanal erstelle","createGroup":"Gruppe erstelle","message":"Neui Nachricht","messageDetail":"En private Chat mit einere Person","groupDetail":"Mit vilne Lüüt chatte, öffentlich oder privat","channelDetail":"A Follower sände, gratis oder zahlt","title":"Öppis starte"}
   },
   "prompt": {
     "seoTitle": "Gib dis Feedback bekannt | Riftn",
@@ -12862,7 +12876,8 @@
     "shareKindCommunity": "Gmeinschaft",
     "shareGroups": "Gruppe",
     "shareKindChannel": "Kanal",
-    "reportMessage": "Nachricht mälde"
+    "reportMessage": "Nachricht mälde",
+    "attachAnything": "Es Foto, Video, Audio oder e Datei aahänke"
   },
   "credits": {
     "earningsWorth": "Wert {{amount}}",
@@ -21008,5 +21023,17 @@
     "addQuestion": "Frag dezue tue",
     "pointsLabel": "Pünkt pro richtigi Antwort",
     "attachFailed": "Dis Post isch online, aber s'Quiz hät nöd chöne dezue gfüegt werde"
-  }
+  },
+  "ownKeys": {"working":"Funktioniert","invalid":"Abglehnt, ersetz ne","noCredit":"Kei Guethabe meh","disabled":"Vo Riftn abgschaltet","failed":"Es isch öppis schief gange. Probier's no mal.","savedNoCredit":"{{name}}-Schlüssel gspeicheret, aber s Konto het kei Guethabe meh.","saved":"{{name}}-Schlüssel gspeicheret. Tools uf {{name}} bruuched jetzt dis Konto.","removed":"{{name}}-Schlüssel entfernt.","title":"Dini eigete KI-Schlüssel","description":"Füeg en Schlüssel vo me KI-Aabieter dezue und d Creator-Tools laufed stattdesse uf dim Konto. Riftn verlangt für die Jobs nüt. Schlüssel sind verschlüsslet und wärde nie meh aazeigt.","check":"Kontrolliere","remove":"Entferne","add":"Schlüssel dezuefüege","paste":"Füeg din {{name}}-Schlüssel ii","save":"Spychere","cancel":"Abbräche","getKey":"En {{name}}-Schlüssel hole","showLess":"Nur mini Schlüssel zeige","addAnother":"En andere Aabieter dezuefüege"},
+  "resetWallet": {"mismatch":"Passwörter stimmen nicht überein","tooShort":"S Passwort mues mindestens {{count}} Zeiche ha","breached":"Das Passwort isch inere Datepanne ufdaucht. Wähl es anders","weak":"Wähl es stärchers Passwort (misch Buechstabe, Zahle und Symbol)","failed":"Dis Wallet het nöd chönne zruggsetzt wärde. Es isch nüt verschobe worde. Probier s nomol.","twoFactor":"Gib de Code us dinere Authenticator-App ii, zum dis Konto z verschiebe.","funds":"Token, NFTs und anderi Guethabe wärde nöd verschobe. Si blibed uf de alte Adrässe. Wenn du s alte Wallet no chasch öffne, schick si zersch use.","doneTitle":"Dis Konto isch uf sim neue Wallet","logOut":"Abmelden","intro":"Macht es neus Riftn-Wallet und verschiebt din Username, dini Poste, Follower und Nachrichte druf. Bruuch das, wenn dis Wallet verlore isch oder öpper anders sin Schlüssel het. S alte Wallet funktioniert nüme für d Aamäldig.","password":"Neus Wallet-Passwort (min {{count}} Zeiche)","confirm":"Bestätige das Passwort","twoFactorPlaceholder":"Authenticator-Code","ack":"Ich verstehe, dass meini alte Fonds uf de alten Wallet bleibn.","submit":"Wallet zruggsetze","title":"Wallet zruggsetze","rowDesc":"Wallet verlore oder het öpper anders sin Schlüssel? Verschieb dis Konto uf es neus Wallet. Din Username, dini Poste und Follower chömed mit."},
+  "twoFactor": {"turnOn":"Aktiviere","wrongCode":"Das Code hät nöd zuegmache. Probier dä neuste i dinere App.","signingInAs":"Zuechmäldig als","signIn":"Zuechmäldig","trustDevice":"Nimm nöd wieder uf däm Gerät für 30 Tage","useBackupShort":"Benutze en Backup-Code","useApp":"Benutze mini Authenticator-App","useAnotherShort":"Anderi Account","lostEverything":"Hesch din Telefon und dini Backup-Codes verlore? Kontaktiere de Support","turnedOff":"Zwei-Schritt-Zuechmäldig isch ab.","introTitle":"Füge en zweite Schlüsli zue","linkTitle":"Verknüpfe dini Authenticator-App","codesTitle":"Speichere dini Backup-Codes","newCodesTitle":"Händ neu Backup-Codes","turnOff":"Ausschalten","backupCodes":"Backup-Codes"},
+  "chatTextSize": {"title":"Textgrösse"},
+  "notes": {"replyTo":"Antworte uf {{name}}…"},
+  "chatBulk": {"toolbar":"Usgwählti Chats","selected":"{{count}} ausgewählt","cancel":"Abbräche","read":"Als gläse markiere","unread":"Als ungläse markiere","reply":"Antwort","delete":"Lösche","replyHint":"Jedi Person überchunt das als normali Nachricht i ihrem eigete Chat.","replyPlaceholder":"Schrib e Nachricht…","sendAll":"A {{count}} schicke","partSent":"A {{ok}} vo {{total}} Chats gschickt","notSent":"Het nöd chönne gschickt wärde. Probier s nomol."},
+  "chatTabs": {"addToTab":"Zum Tab dezuefüege","newWith":"Neue Tab…","hide":"Tab verstecke","edit":"Tabs bearbeite","renameEdit":"Umbenänne und bearbeite","addChats":"Chats dezuefüege","moveLeft":"Nach links verschiebe","moveRight":"Nach rächts verschiebe","delete":"Tab lösche","new":"Neue Tab","editTab":"Tab bearbeite","create":"Tab erstelle","emoji":"Wähl es Emoji","namePlaceholder":"Tab-Name","noEmoji":"Kei Emoji","sFriends":"Fründe","sWork":"Arbet","sTrading":"Handel","sCreators":"Creator","chatsInTab":"Chats i dem Tab","picked":"{{n}} usgwählt","deleteTitle":"«{{name}}» lösche?","deleteBody":"De Tab verschwindet. Sini Chats blibed i Alli und bhalted ihri Nachrichte.","builtIn":"Iibaut","chatCount":"{{n}} Chats","moveUp":"Nimm nach obe","moveDown":"Gang abe","alwaysOn":"Immer an","show":"Tab zeige","emptyTitle":"{{name}} isch leer","emptyBody":"Füeg do Chats dezue und si blibed au i Alli.","removedFrom":"Us {{name}} entfernt","addedTo":"Zu {{name}} dezuegfüegt","kindPublic":"Öffentlech","kindChannel":"Kanal","kindGroup":"Gruppä","kindCommunity":"Gmeinschaft","kindDirect":"Direkt","tooMany":"Du chasch bis zu 10 Tabs ha","deleted":"{{name}} glöscht"},
+  "msgSelect": {"partForwarded":"{{ok}} vo {{total}} wiitergleitet","nothingToCopy":"I de usgwählte Nachrichte git s nüt zum Kopiere","toolbar":"Usgwählti Nachrichte","selected":"{{count}} ausgewählt","copy":"Kopiere","forward":"Wiiterleite","deleteSome":"{{count}} lösche"},
+  "dmSafety": {"notReal":"Das isch nöd de echt {{name}}.","neverLink":"S Riftn-Team schickt dir nie en Link per DM, zum dis Profil oder Wallet z flicke. Öffne kei Links, verbind dis Wallet nöd und signier nüt. Blockier und mäld das Konto."},
+  "post": {"destruct":{"offBody":"De Post blibt online.","onBody":"De Post löscht sich {{value1}} nachdem er online gaht sälber."}},
+  "dmPaidLock": {"lockOnUsd":"Gsperrt · {{price}}","lockVideo":"Video sperre","lockPhoto":"Foto sperre","lockCustom":"Anders","lockCustomUsdLabel":"Eigete Pris in Dollar","lockHint":"Si gsehnd s verschwomme, bis si dir zahled. Gsperrti Dateie sind nöd Ende-zu-Ende verschlüsslet."},
+  "chatReactions": {"oneNamed":"{{name}} het mit {{emoji}} uf dini Nachricht reagiert","one":"Het mit {{emoji}} uf dini Nachricht reagiert"}
 }

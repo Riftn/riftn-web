@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "영상 편집하세요", "hiddenTag": "숨겨진", "tapToEdit": "편집하려면 탭하세요", "cover": "커버", "trim": "자르기", "mirror": "좌우 반전", "rotate": "회전", "hide": "숨기기", "timer": "타이머", "sheetTitleAny": "보내기 전에 수정하세요", "close": "닫기", "replace": "대체", "hiddenUntilTap": "탭할 때까지 숨김", "pause": "일시 정지", "play": "동영상 재생", "mute": "입", "unmute": "음소거 해제", "scrub": "동영상 탐색", "addMore": "사진 또는 동영상 추가", "trimAria": "양 끝을 드래그하여 자르기", "coverAria": "프레임을 탭하여 커버로 설정", "coverHint": "프레임을 탭하여 커버로 설정", "coverOwn": "당신의 사진", "coverAuto": "자동", "uploadCover": "커버 사진 업로드", "mirrored": "좌우 반전됨", "original": "원본", "rotate90": "90° 회전", "showNormally": "일반적으로 표시", "showNormallyBody": "즉시 표시", "hideUntilTap": "탭할 때까지 숨김", "hideUntilTapBody": "탭할 때까지 흐리게 표시", "hidePrice": "가격 뒤에 숨기기", "hidePriceBody": "결제할 때까지 흐리게 표시", "priceUnavailable": "이 채팅에는 없음", "timerOff": "끄기", "timerOffBody": "채팅에 그대로 유지됩니다.", "timerViewBody": "상대방이 확인하면 양쪽 모두에게서 사라집니다.", "confirm": "확인", "lockedFor": "{{value1}} 토큰 잠금 해제", "lockedForUsd": "잠금 해제 {{value1}}", "editItem": "항목 편집 {{value1}}", "kept": "{{time}} 보관됨", "timerTimeBody": "전송 후 {{value1}} 지나면 양쪽 모두에게서 사라집니다."},
+  "dmVideo": {"edit": "영상 편집하세요", "hiddenTag": "숨겨진", "tapToEdit": "편집하려면 탭하세요", "cover": "커버", "trim": "자르기", "mirror": "좌우 반전", "rotate": "회전", "hide": "숨기기", "timer": "타이머", "sheetTitleAny": "보내기 전에 수정하세요", "close": "닫기", "replace": "대체", "hiddenUntilTap": "탭할 때까지 숨김", "pause": "일시 정지", "play": "동영상 재생", "mute": "입", "unmute": "음소거 해제", "scrub": "동영상 탐색", "addMore": "사진 또는 동영상 추가", "trimAria": "양 끝을 드래그하여 자르기", "coverAria": "프레임을 탭하여 커버로 설정", "coverHint": "프레임을 탭하여 커버로 설정", "coverOwn": "당신의 사진", "coverAuto": "자동", "uploadCover": "커버 사진 업로드", "mirrored": "좌우 반전됨", "original": "원본", "rotate90": "90° 회전", "showNormally": "일반적으로 표시", "showNormallyBody": "즉시 표시", "hideUntilTap": "탭할 때까지 숨김", "hideUntilTapBody": "탭할 때까지 흐리게 표시", "hidePrice": "가격 뒤에 숨기기", "hidePriceBody": "결제할 때까지 흐리게 표시", "priceUnavailable": "이 채팅에는 없음", "timerOff": "끄기", "timerOffBody": "채팅에 그대로 유지됩니다.", "timerViewBody": "상대방이 확인하면 양쪽 모두에게서 사라집니다.", "confirm": "확인", "lockedFor": "{{value1}} 토큰 잠금 해제", "lockedForUsd": "잠금 해제 {{value1}}", "editItem": "항목 편집 {{value1}}", "kept": "{{time}} 보관됨", "timerTimeBody": "전송 후 {{value1}} 지나면 양쪽 모두에게서 사라집니다.", "destruct": {"60":"1분","3600":"1시간","43200":"12시간","86400":"1일","604800":"1주","31536000":"1년","view":"조회수 1회"}, "destructShort": {"view":"조회수 1회"}, "destructSecs": "{{n}}초", "destructShortSecs": "{{n}}초"},
   "postBg": {
     "addMedia": "사진, GIF 또는 동영상 추가",
     "changeMedia": "사진, GIF 또는 동영상 변경",
@@ -664,7 +664,9 @@
       "discover": "둘러보기",
       "money": "머니",
       "riftn": "Riftn"
-    }
+    },
+    "moveGroupHint": "다른 탭으로 드래그하여 이동하세요",
+    "reorderHintGroups": "아이콘을 길게 눌러 드래그하면 위치를 변경할 수 있고, 다른 탭으로 드래그하면 해당 탭으로 이동할 수 있습니다."
   },
   "feed": {
     "viewProfile": "{{name}} 님의 프로필 보기",
@@ -1321,7 +1323,12 @@
     "chatDeleteEveryoneDesc": "가능한 경우에만. 그룹에서 다른 사람의 메시지는 나에게서만 삭제됩니다",
     "exportStep": "데이터를 수집하는 중 — {{total}}개 중 {{done}}개 섹션…",
     "ensSection": "ENS",
-    "tipsOffNote": "이 기능이 켜져 있는 동안에는 팁과 송금을 받을 수 없습니다. 다시 팁을 받으려면 끄세요."
+    "tipsOffNote": "이 기능이 켜져 있는 동안에는 팁과 송금을 받을 수 없습니다. 다시 팁을 받으려면 끄세요.",
+    "notificationShowCount": "벨에 숫자 표시",
+    "notificationShowCountDesc": "표시등 대신 읽지 않은 알림 수를 확인합니다",
+    "messagesShowCount": "메시지에 숫자 표시",
+    "messagesShowCountDesc": "표시등 대신 읽지 않은 메시지 수를 확인합니다",
+    "chatTextSize": "채팅 글자 크기"
   },
   "common": {
     "confirm": "확인",
@@ -1354,7 +1361,8 @@
     "next": "다음",
     "previous": "이전",
     "redo": "다시 실행",
-    "remove": "제거"
+    "remove": "제거",
+    "copy": "복사"
   },
   "tip": {
     "title": "팁 보내기",
@@ -1661,7 +1669,8 @@
     "roomSettings": "방 설정",
     "messagePinned": "메시지가 고정되었습니다",
     "messageUnpinned": "고정이 해제되었습니다",
-    "online": "{{count}}명 온라인"
+    "online": "{{count}}명 온라인",
+    "onlineHint": "지금 이 채팅에 {{count}}명이 있어요"
   },
   "aiChat": {
     "title": "어시스턴트",
@@ -2339,7 +2348,11 @@
     "sending": "전송 중",
     "retrySend": "다시 시도",
     "discardSend": "삭제",
-    "notSent": "전송되지 않음"
+    "notSent": "전송되지 않음",
+    "unreadMarkerOne": "읽지 않은 메시지 1개",
+    "unreadMarkerMany": "읽지 않은 메시지 {{value}}개",
+    "jumpToUnread": "첫 번째 읽지 않은 메시지로 이동",
+    "jumpToLatest": "최신 메시지로 이동"
   },
   "music": {
     "listeningCount_one": "{{count}}명 청취 중",
@@ -4069,7 +4082,8 @@
       "memberCount": "{{n}} 멤버",
       "approvalNote": "가입하려면 관리자가 요청을 승인해야 합니다."
     },
-    "bannedFromCommunity": "이 커뮤니티에서 차단되었습니다"
+    "bannedFromCommunity": "이 커뮤니티에서 차단되었습니다",
+    "newChat": {"channelRow":"채널 · 멤버 {{formattedCount}}명","groupRow":"그룹 · 멤버 {{formattedCount}}명","newChannel":"새 채널","newGroup":"새 그룹","channelName":"채널 이름","groupName":"그룹 이름","description":"어떤 내용인가요? (선택 사항)","whoCanJoin":"참여 가능 대상","public":"공개","publicDetail":"누구나 찾아서 참여할 수 있습니다","inviteOnly":"초대 전용","private":"비공개","privateDetail":"내 초대나 승인을 통해 참여합니다","entry":"참여 조건","free":"무료","freeDetail":"무료 참여","paid":"결제 완료","paidDetail":"토큰으로 한 번 결제, 나에게 바로 지급","price":"토큰 가격","channelNote":"나와 관리자만 게시할 수 있습니다. 멤버는 읽고 리액션할 수 있습니다.","createChannel":"채널 만들기","createGroup":"그룹 만들기","message":"새 메시지","messageDetail":"한 사람과의 비공개 채팅","groupDetail":"여러 사람과 공개 또는 비공개로 채팅","channelDetail":"팔로워에게 무료 또는 유료로 방송","title":"새로 시작하기"}
   },
   "prompt": {
     "seoTitle": "피드에 메시지 보내기 | Riftn",
@@ -12847,7 +12861,8 @@
     "shareKindGroup": "그룹",
     "shareKindChannel": "채널",
     "shareKindCommunity": "커뮤니티",
-    "reportMessage": "메시지 신고"
+    "reportMessage": "메시지 신고",
+    "attachAnything": "사진, 동영상, 오디오 또는 파일 첨부"
   },
   "credits": {
     "earningsWorth": "가치 {{amount}}",
@@ -20885,5 +20900,17 @@
     "promptCatchUp": "{{handle}}이(가) 최근에 올린 글을 알려줘",
     "promptMessage": "{{handle}}에게 보낼 메시지 쓰는 걸 도와줘",
     "promptAbout": "{{handle}}에 대해: {{question}}"
-  }
+  },
+  "ownKeys": {"working":"작업 중","invalid":"거부됨, 교체하세요","noCredit":"크레딧 부족","disabled":"Riftn에서 비활성화함","failed":"문제가 발생했습니다. 다시 시도하세요.","savedNoCredit":"{{name}} 키가 저장되었지만 계정의 크레딧이 부족합니다.","saved":"{{name}} 키가 저장되었습니다. 이제 {{name}} 도구가 내 계정을 사용합니다.","removed":"{{name}} 키가 삭제되었습니다.","title":"내 AI 키","description":"AI 제공업체의 키를 추가하면 크리에이터 도구가 내 계정으로 실행됩니다. 해당 작업에 대해 Riftn은 요금을 부과하지 않습니다. 키는 암호화되며 다시 표시되지 않습니다.","check":"체크","remove":"삭제","add":"키 추가","paste":"{{name}} 키 붙여넣기","save":"저장","cancel":"취소","getKey":"{{name}} 키 받기","showLess":"내 키만 보기","addAnother":"다른 제공업체 추가"},
+  "resetWallet": {"mismatch":"비밀번호가 일치하지 않습니다","tooShort":"비밀번호는 {{count}}자 이상이어야 합니다","breached":"이 비밀번호는 데이터 유출에 노출된 적이 있습니다. 다른 비밀번호를 선택하세요","weak":"더 강력한 비밀번호를 선택하세요(문자, 숫자, 기호 조합)","failed":"지갑을 재설정할 수 없습니다. 아무것도 이전되지 않았습니다. 다시 시도하세요.","twoFactor":"계정을 이전하려면 인증 앱의 코드를 입력하세요.","funds":"토큰, NFT 및 기타 잔액은 이전되지 않으며 이전 주소에 남아 있습니다. 아직 이전 지갑을 열 수 있다면 먼저 옮겨 두세요.","doneTitle":"계정이 새 지갑으로 이전되었습니다","logOut":"로그 아웃","intro":"새 Riftn 지갑을 만들고 사용자 이름, 게시물, 팔로워, 메시지를 새 지갑으로 이전합니다. 지갑을 잃어버렸거나 다른 사람이 키를 가지고 있다면 사용하세요. 이전 지갑은 더 이상 로그인에 사용할 수 없습니다.","password":"새 지갑 비밀번호(최소 {{count}}자)","confirm":"비밀번호 확인","twoFactorPlaceholder":"인증 코드","ack":"이전 자금은 이전 지갑에 남아 있습니다.","submit":"지갑 재설정","title":"지갑 재설정","rowDesc":"지갑을 잃어버렸거나 다른 사람이 키를 가지고 있나요? 계정을 새 지갑으로 이전하세요. 사용자 이름, 게시물, 팔로워도 함께 이전됩니다."},
+  "twoFactor": {"turnOn":"켜기","wrongCode":"그 코드는 맞지 않았어요. 앱에서 최신 코드를 사용해 보세요.","signingInAs":"로그인 중","signIn":"로그인","trustDevice":"30일 동안 이 기기에서 다시 묻지 않음","useBackupShort":"백업 코드 사용","useApp":"인증기 앱 사용","useAnotherShort":"다른 계정","lostEverything":"휴대폰과 백업 코드를 잃어버렸나요? 지원팀에 문의하세요","turnedOff":"2단계 로그인 비활성화","introTitle":"두 번째 잠금 추가","linkTitle":"인증기 앱 연결","codesTitle":"백업 코드 저장","newCodesTitle":"새 백업 코드 받기","turnOff":"비활성화","backupCodes":"백업 코드"},
+  "chatTextSize": {"title":"글자 크기"},
+  "notes": {"replyTo":"답글 달기 {{name}}…"},
+  "chatBulk": {"toolbar":"선택한 채팅","selected":"{{count}} 선택됨","cancel":"취소","read":"읽음으로 표시","unread":"읽지 않음으로 표시","reply":"답글","delete":"삭제","replyHint":"각 사람에게 각자의 채팅에서 일반 메시지로 전달됩니다.","replyPlaceholder":"메시지 작성…","sendAll":"{{count}}개에 보내기","partSent":"채팅 {{total}}개 중 {{ok}}개에 보냈습니다","notSent":"보낼 수 없습니다. 다시 시도하세요."},
+  "chatTabs": {"addToTab":"탭에 추가","newWith":"새 탭…","hide":"탭 숨기기","edit":"탭 편집","renameEdit":"이름 바꾸기 및 편집","addChats":"채팅 추가","moveLeft":"왼쪽으로 이동","moveRight":"오른쪽으로 이동","delete":"탭 삭제","new":"새 탭","editTab":"탭 편집","create":"탭 만들기","emoji":"이모지 선택","namePlaceholder":"탭 이름","noEmoji":"이모지 없음","sFriends":"친구","sWork":"업무","sTrading":"트레이딩","sCreators":"크리에이터","sGaming":"게임","chatsInTab":"이 탭의 채팅","picked":"{{n}}개 선택됨","deleteTitle":"“{{name}}”을(를) 삭제할까요?","deleteBody":"탭이 사라집니다. 채팅은 메시지와 함께 전체에 남습니다.","builtIn":"기본","chatCount":"채팅 {{n}}개","moveUp":"위로 이동","moveDown":"아래로 이동","alwaysOn":"항상 켜짐","show":"탭 표시","emptyTitle":"{{name}}이(가) 비어 있음","emptyBody":"여기에 채팅을 추가해도 전체에 남습니다.","removedFrom":"{{name}}에서 제거됨","addedTo":"{{name}}에 추가됨","kindPublic":"공개","kindChannel":"채널","kindGroup":"그룹","kindCommunity":"커뮤니티","kindDirect":"다이렉트","tooMany":"탭은 최대 10개까지 만들 수 있어요","deleted":"{{name}} 삭제됨"},
+  "msgSelect": {"partForwarded":"{{total}}개 중 {{ok}}개 전달됨","nothingToCopy":"선택한 메시지에 복사할 내용이 없습니다","toolbar":"선택한 메시지","selected":"{{count}} 선택됨","copy":"복사","forward":"전달","deleteSome":"{{count}}개 삭제"},
+  "dmSafety": {"notReal":"이 계정은 진짜 {{name}}이(가) 아닙니다.","neverLink":"Riftn 팀은 프로필이나 지갑을 고치라는 링크를 DM으로 보내지 않습니다. 링크를 열거나, 지갑을 연결하거나, 어떤 것에도 서명하지 마세요. 이 계정을 차단하고 신고하세요."},
+  "post": {"destruct":{"offBody":"게시물이 유지됩니다.","onBody":"게시물이 올라간 후 {{value1}} 뒤에 자동으로 삭제됩니다."}},
+  "dmPaidLock": {"lockOnUsd":"잠김 · {{price}}","lockVideo":"동영상 잠금","lockPhoto":"사진 잠금","lockCustom":"기타","lockCustomUsdLabel":"달러로 직접 가격 설정","lockHint":"상대방이 결제하기 전까지 흐리게 보입니다. 잠긴 파일은 종단 간 암호화되지 않습니다."},
+  "chatReactions": {"oneNamed":"{{name}}님이 내 메시지에 {{emoji}} 리액션을 남겼습니다","one":"내 메시지에 {{emoji}} 리액션을 남겼습니다"}
 }

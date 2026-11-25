@@ -44,7 +44,7 @@ export { EditorPresenceRoom } from './server/editor-presence.ts';
 // is derived from it — see the comment there.
 import { ROUTE_SEGMENTS, WORKER_ASSET_ROUTES } from './src/lib/reserved-usernames.js';
 import { edgeMaintenanceResponse } from './server/edge-maintenance.mjs';
-import { CONSOLIDATED_GUIDES, MILESTONE_REDIRECTS, RETIRED_GUIDES, cleanBlogSlug } from './src/lib/blog-redirects.js';
+import { CONSOLIDATED_GUIDES, MILESTONE_REDIRECTS, RETIRED_GUIDES, cleanBlogSlug, localizedGuideRedirect } from './src/lib/blog-redirects.js';
 import { STREAM_LINKS, STREAM_PAGE, streamFaqLd } from './src/lib/streamer-page.js';
 import { DEHUB_APP_LINKS, DEHUB_APP_PAGE, dehubAppFaqLd } from './src/lib/dehub-app-page.js';
 
@@ -1715,16 +1715,6 @@ ${DEHUB_APP_PAGE.faq.map(({ q, a }) => `<h3>${q}</h3>\n<p>${a}</p>`).join('\n')}
 <li><strong>Fixed-price contracts</strong>: hire creators for logos, video, translation and community work.</li>
 </ul>`,
   },
-  'nfts': {
-    title: 'NFT Market: Buy & Sell NFTs on BNB Chain and Base',
-    description: 'Buy, sell and make offers on NFTs on BNB Chain and Base. Pay in BNB, ETH or DHB. Every trade swaps the NFT and the payment in one step, so nobody waits on the other side.',
-    heading: 'Riftn NFT Market',
-    bodyHtml: `<p>The Riftn NFT market is where any NFT on BNB Chain or Base changes hands: Riftn posts minted as NFTs, and any other collection in your wallet. List one at a fixed price, buy a listing, or make an offer in DHB that the holder can accept.</p>
-<h2>How a trade works</h2>
-<p>Trades settle on Seaport, the open NFT swap contract. The NFT and the payment move in the same transaction, so a buyer never pays without receiving and a seller never sends without being paid. Riftn never holds your NFTs or your money.</p>
-<h2>Fees</h2>
-<p>Riftn takes 2% of a sale paid in BNB or ETH, and 1% when paid in DHB. Creators receive the royalty their collection sets, capped at 10%. The seller receives the rest the moment the trade settles.</p>`,
-  },
   'usernames': {
     title: 'Username Marketplace: Buy & Sell Riftn Handles for tokens',
     description: 'Browse Riftn usernames for sale and buy one with tokens. Short, numeric and original handles, transferred on-chain the moment payment clears, or list your own.',
@@ -2734,10 +2724,10 @@ function seoI18nTable(env, requestUrl) {
   return seoI18nPromise;
 }
 
-/** The hl the request asked for, or '' — two lowercase letters, nothing else. */
+/** The URL locale key, limited to supported language-code shapes. */
 function requestedLocale(url) {
   const raw = String(url.searchParams.get('hl') || '').toLowerCase();
-  return /^[a-z]{2}$/.test(raw) ? raw : '';
+  return /^(?:[a-z]{2}|zh_tw)$/.test(raw) ? raw : '';
 }
 
 function localizedUrl(route, lang) {
@@ -2755,7 +2745,7 @@ function servedLocales(route, table) {
   return Object.keys(langs)
     .filter((l) => {
       const t = langs[l];
-      return l !== 'en' && /^[a-z]{2}$/.test(l) && t && t.title && (t.body || t.asset) && (t.asset || !en || t.title !== en.title);
+      return l !== 'en' && /^(?:[a-z]{2}|zh_tw)$/.test(l) && t && t.title && (t.body || t.asset) && (t.asset || !en || t.title !== en.title);
     })
     .sort();
 }
@@ -2766,7 +2756,7 @@ function hreflangLinks(route, table) {
   if (!langs.length) return '';
   return [...langs, 'en']
     .sort()
-    .map((l) => `<link rel="alternate" hreflang="${l}" href="${localizedUrl(route, l)}">`)
+    .map((l) => `<link rel="alternate" hreflang="${l === 'zh_tw' ? 'zh-TW' : l}" href="${localizedUrl(route, l)}">`)
     .concat(`<link rel="alternate" hreflang="x-default" href="${localizedUrl(route, 'en')}">`)
     .join('\n');
 }
@@ -2785,11 +2775,11 @@ function unservedLocaleRedirect(url, route, table) {
 }
 
 /** og:locale values, in the territory form Facebook's own locale list uses. */
-const OG_LOCALES = { en: 'en_US', ar: 'ar_AR', es: 'es_ES', fr: 'fr_FR', nl: 'nl_NL', tr: 'tr_TR', ha: 'ha_NG', hi: 'hi_IN', ja: 'ja_JP', ko: 'ko_KR', pt: 'pt_BR', tl: 'tl_PH', vi: 'vi_VN', zh: 'zh_CN' };
+const OG_LOCALES = { en: 'en_US', ar: 'ar_AR', es: 'es_ES', fr: 'fr_FR', nl: 'nl_NL', tr: 'tr_TR', ha: 'ha_NG', hi: 'hi_IN', ja: 'ja_JP', ko: 'ko_KR', pt: 'pt_BR', tl: 'tl_PH', vi: 'vi_VN', zh: 'zh_CN', zh_tw: 'zh_TW' };
 function ogLocale(lang) {
-  return OG_LOCALES[lang] || `${lang}_${lang.toUpperCase()}`;
+  return OG_LOCALES[lang] || lang + '_' + new Intl.Locale(lang).maximize().region;
 }
-const RTL_LOCALES = new Set(['ar', 'fa', 'he', 'ur']);
+const RTL_LOCALES = new Set(['ar', 'fa', 'he', 'sd', 'ug', 'ur']);
 
 /**
  * og:locale for `lang` and og:locale:alternate for every other served
@@ -2853,7 +2843,7 @@ function localizePage(html, route, hl, table) {
     [unescaped((out.match(/<meta name="description" content="([^"]*)">/i) || [])[1]), t.description],
   ].filter(([from]) => from);
   out = out
-    .replace(/<html lang="[^"]*"(?: dir="[^"]*")?/i, `<html lang="${hl}"${RTL_LOCALES.has(hl) ? ' dir="rtl"' : ''}`)
+    .replace(/<html lang="[^"]*"(?: dir="[^"]*")?/i, `<html lang="${hl === 'zh_tw' ? 'zh-TW' : hl}"${RTL_LOCALES.has(hl) ? ' dir="rtl"' : ''}`)
     .replace(/(<title>)[^<]*(<\/title>)/i, (m, a, b) => `${a}${title}${b}`)
     .replace(/(<meta (?:property|name)="(?:og:title|twitter:title)" content=")[^"]*(">)/g, (m, a, b) => `${a}${title}${b}`)
     .replace(
@@ -7043,6 +7033,8 @@ async function handleRequest(request, env, ctx) {
   // Ahead of the SSR branches on purpose: these have to 301 for crawlers as
   // well as browsers, or the duplicate simply stays in the index.
   if (trimmedPath.startsWith('/guides/')) {
+    const localizedGuide = localizedGuideRedirect(trimmedPath.slice('/guides/'.length), url.search);
+    if (localizedGuide) return redirect301(APP_URL + localizedGuide);
     const supersededBy = MILESTONE_REDIRECTS[trimmedPath.slice('/guides/'.length)];
     if (supersededBy) return redirect301(`${APP_URL}/guides/${supersededBy}`);
     // Retired guides have no counterpart under /guides/, so their target is an
@@ -7068,6 +7060,8 @@ async function handleRequest(request, env, ctx) {
   const docsBlogPost = trimmedPath.match(/^\/docs\/blog\/([^/]+)$/);
   // One hop, straight to the address the post lives at now.
   if (docsBlogPost) {
+    const localizedGuide = localizedGuideRedirect(docsBlogPost[1], url.search);
+    if (localizedGuide) return redirect301(APP_URL + localizedGuide);
     const target = MILESTONE_REDIRECTS[docsBlogPost[1]] || cleanBlogSlug(docsBlogPost[1]) || docsBlogPost[1];
     return redirect301(`${APP_URL}/guides/${target}`);
   }

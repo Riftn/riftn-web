@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Video caman", "hiddenTag": "A bɔra", "tapToEdit": "Fɛɛrɛ ka caman", "cover": "Cover", "trim": "Trim", "mirror": "Mirror", "rotate": "Rotate", "hide": "Hide", "timer": "Timer", "sheetTitleAny": "Fɛɛrɛ ka caman ka kɔfɛ ka ci", "close": "Close", "replace": "Yɛlɛma", "hiddenUntilTap": "Kà kɛ̀ bɛ̀ nɛ̀ kɔ̀", "pause": "Pause", "play": "Play video", "mute": "Mɛn", "unmute": "Mɛn bɔ", "scrub": "Fɔlɔ video la", "addMore": "Kɛ foto kɛ video", "coverAria": "Kɔ̀nɲi kɛ̀nɛ kɔ̀nɔ̀ kɛ̀nɛ", "coverHint": "Kɔ̀nɲi kɛ̀nɛ kɔ̀nɔ̀ kɛ̀nɛ", "coverOwn": "I ka ja", "coverAuto": "Auto", "uploadCover": "Sɔrɔ kɛlɛ fɔlɔ", "mirrored": "Mirrored", "original": "Original", "rotate90": "Rotate 90°", "showNormally": "Show normally", "showNormallyBody": "A yi kaŋ", "hideUntilTap": "Hide until tapped", "hideUntilTapBody": "Bɔ̀lɔ kɔ̀n bɛ̀ kɔ̀n kɔ̀n", "priceUnavailable": "ma ni kɔ̀", "timerOff": "Off", "timerOffBody": "E nɔ kɔ̀ŋ kɔ̀ŋ", "confirm": "Confirm", "lockedFor": "Yɛlɛma {{value1}} o ye koo ɲuman ye. fɛ", "editItem": "Edit item {{value1}}", "kept": "{{time}} mara"},
+  "dmVideo": {"edit": "Video caman", "hiddenTag": "A bɔra", "tapToEdit": "Fɛɛrɛ ka caman", "cover": "Cover", "trim": "Trim", "mirror": "Mirror", "rotate": "Rotate", "hide": "Hide", "timer": "Timer", "sheetTitleAny": "Fɛɛrɛ ka caman ka kɔfɛ ka ci", "close": "Close", "replace": "Yɛlɛma", "hiddenUntilTap": "Kà kɛ̀ bɛ̀ nɛ̀ kɔ̀", "pause": "Pause", "play": "Play video", "mute": "Mɛn", "unmute": "Mɛn bɔ", "scrub": "Fɔlɔ video la", "addMore": "Kɛ foto kɛ video", "coverAria": "Kɔ̀nɲi kɛ̀nɛ kɔ̀nɔ̀ kɛ̀nɛ", "coverHint": "Kɔ̀nɲi kɛ̀nɛ kɔ̀nɔ̀ kɛ̀nɛ", "coverOwn": "I ka ja", "coverAuto": "Auto", "uploadCover": "Sɔrɔ kɛlɛ fɔlɔ", "mirrored": "Mirrored", "original": "Original", "rotate90": "Rotate 90°", "showNormally": "Show normally", "showNormallyBody": "A yi kaŋ", "hideUntilTap": "Hide until tapped", "hideUntilTapBody": "Bɔ̀lɔ kɔ̀n bɛ̀ kɔ̀n kɔ̀n", "priceUnavailable": "ma ni kɔ̀", "timerOff": "Off", "timerOffBody": "E nɔ kɔ̀ŋ kɔ̀ŋ", "confirm": "Confirm", "lockedFor": "Yɛlɛma {{value1}} o ye koo ɲuman ye. fɛ", "editItem": "Edit item {{value1}}", "kept": "{{time}} mara", "destruct": {"60":"miniti kelen","3600":"lɔrɔ kelen","43200":"lɔrɔ tan ni fila","86400":"tile kelen","604800":"karan kelen","31536000":"san kelen","view":"yɛlɛma kelen"}, "destructShort": {"view":"yɛlɛma kelen"}, "destructSecs": "sekondi {{n}}", "destructShortSecs": "s{{n}}"},
   "postBg": {
     "addMedia": "Ja, GIF walima widewo fara a kan",
     "changeMedia": "Ja, GIF walima widewo falen",
@@ -664,7 +664,9 @@
       "planned": "waati sigilen, waati sigi, sɛbɛn waati sigilenw, sira, kɔfɛ",
       "liveStudio": "ɲɛnama daminɛ, jɛnsɛn, jɛnsɛnni, OBS, overlays, lasɔminiw, widgets",
       "launchpad": "token daminɛ, coin dilan, coin kɛ, meme coin, bonding curve, ka kɛ token ye"
-    }
+    },
+    "moveGroupHint": "A ka don tab wɛrɛ kɔnɔ ka taa a la yen",
+    "reorderHintGroups": "Ikon o bɛɛ minɛ ka sɔgɔ walasa ka u labɛn, walima ka u bila tab wɛrɛ kan walasa ka u feere."
   },
   "feed": {
     "viewProfile": "{{name}} ka profil kɔrɔbɔ",
@@ -1320,7 +1322,12 @@
     "menuLayoutSectionsDesc": "Ɲɛ bɛɛ ɲɔgɔn fɛ, jɛkulu kuncɛw kɔrɔ",
     "menuLayoutFoldersDesc": "I ka ɲɛ kunbabaw, o kɔ dosiye jɛkulu kelen kelen bɛɛ ye",
     "publicChatInBar": "Jama ka baro duguma bara la",
-    "publicChatInBarDesc": "Digi kelen ka don Jama ka baro la ka bɔ ɛkran duguma bara la"
+    "publicChatInBarDesc": "Digi kelen ka don Jama ka baro la ka bɔ ɛkran duguma bara la",
+    "notificationShowCount": "Hakɛ yira kongolon kan",
+    "notificationShowCountDesc": "A ye notification joli ma kalan, yeelen dɔrɔn nɔ na",
+    "messagesShowCount": "Hakɛ yira Messages kan",
+    "messagesShowCountDesc": "A ye bataki joli ma kalan, yeelen dɔrɔn nɔ na",
+    "chatTextSize": "Baro sɛbɛn bonya"
   },
   "common": {
     "confirm": "Ka sɔn",
@@ -1353,7 +1360,8 @@
     "next": "O kɔ, o kɔ, o",
     "previous": "A tun be yen ka kɔrɔ",
     "redo": "O kɔ, a ye sira ta",
-    "remove": "Ka bɔ"
+    "remove": "Ka bɔ",
+    "copy": "Kopi"
   },
   "tip": {
     "title": "Kɔrɔbɔ",
@@ -1660,7 +1668,8 @@
     "roomSettings": "Sɔrɔw",
     "messagePinned": "Kɔrɔbɔ",
     "messageUnpinned": "Kɔrɔbɔ",
-    "online": "{{count}} Kɔrɔbɔ"
+    "online": "{{count}} Kɔrɔbɔ",
+    "onlineHint": "Mɔgɔ {{count}} bɛ nin baro in kɔnɔ sisan"
   },
   "aiChat": {
     "title": "Fɔlɔw",
@@ -2338,7 +2347,11 @@
     "sending": "Ka taga",
     "retrySend": "A lajɛ tuguni",
     "discardSend": "A bɔ",
-    "notSent": "A ma ci"
+    "notSent": "A ma ci",
+    "unreadMarkerOne": "bataki 1 ma kalan",
+    "unreadMarkerMany": "bataki {{value}} ma kalan",
+    "jumpToUnread": "Taa bataki fɔlɔ ma min ma kalan",
+    "jumpToLatest": "Taa bataki laban ma"
   },
   "music": {
     "listeningCount_one": "mɔgɔ {{count}} bɛ a lamɛn",
@@ -4064,7 +4077,8 @@
       "memberCount": "{{n}} members",
       "approvalNote": "I ka ɲi ka sɔn i ka fɔta ma sanni i ka se ka don."
     },
-    "bannedFromCommunity": "I banna ka bɔ o jɛnkulu kɔnɔ"
+    "bannedFromCommunity": "I banna ka bɔ o jɛnkulu kɔnɔ",
+    "newChat": {"channelRow":"Kanali · mɔgɔ {{formattedCount}}","groupRow":"Jɛkulu · mɔgɔ {{formattedCount}}","newChannel":"Kanali kura","newGroup":"Jɛkulu kura","channelName":"Kanali tɔgɔ","groupName":"Jɛkulu tɔgɔ","description":"A bɛ mun ko fɔ? (n'i y'a fɛ)","whoCanJoin":"Jɔn bɛ se ka don","public":"Kɔrɔbɔ","publicDetail":"Mɔgɔ bɛɛ bɛ se k'a sɔrɔ ka don","inviteOnly":"Weleli dɔrɔn","private":"Kɔrɔbɔ","privateDetail":"Mɔgɔw bɛ don ni i ka weleli walima i ka sɔnni ye","entry":"Donni","free":"Gansan","freeDetail":"Donni ye fu ye","paid":"A sara","paidDetail":"Sarali kelen token na, a bɛ se i yɛrɛ ma","price":"Sɔngɔ token na","channelNote":"I ni i ka adminw dɔrɔn de bɛ se ka post kɛ. Mɔgɔw bɛ kalan ani ka réaction kɛ.","createChannel":"Kanali dilan","createGroup":"Jɛkulu dilan","message":"Bataki kura","messageDetail":"Baro gundolen ni mɔgɔ kelen ye","groupDetail":"Baro kɛ ni mɔgɔ caman ye, kɛnɛ kan walima gundo la","channelDetail":"A lase i tugubagaw ma, fu walima ni sarali ye","title":"Fɛn dɔ daminɛ"}
   },
   "prompt": {
     "seoTitle": "Fiyɛri i ka duniŋkɛ | Riftn",
@@ -12839,7 +12853,8 @@
     "shareKindCommunity": "Jɛkulu",
     "shareGroups": "Jɛkuluw",
     "shareKindChannel": "Chaîne",
-    "reportMessage": "Cikan lakali"
+    "reportMessage": "Cikan lakali",
+    "attachAnything": "Ja, videyo, audio walima fichier fara a kan"
   },
   "credits": {
     "earningsWorth": "A sɔngɔ ye {{amount}} ye",
@@ -20979,5 +20994,17 @@
     "addQuestion": "Sɛbɛnni fara a kan",
     "pointsLabel": "Pwen min bɛ sɔrɔ jaabi teli kelen bɛɛ la",
     "attachFailed": "I ka post bɔra, nka quiz ma se ka fara a kan"
-  }
+  },
+  "ownKeys": {"working":"Mɔgɔ min be baara kɛ","invalid":"A ma sɔn, a yɛlɛma","noCredit":"Crédit banna","disabled":"Riftn y'a jɔ","failed":"O kɔ, i ka segi k'a ɲini.","savedNoCredit":"{{name}} clé marara, nka crédit banna konte kan.","saved":"{{name}} clé marara. {{name}} minɛnw bɛ i ka konte kɛ sisan.","removed":"{{name}} clé bɔra.","title":"I yɛrɛ ka AI cléw","description":"AI fournisseur dɔ ka clé fara a kan, Creator minɛnw bɛ baara kɛ i ka konte kan. Riftn tɛ foyi ta o baaraw la. Cléw bɛ chiffré ani u tɛ yira tugun abada.","check":"Lajɛ","remove":"A bɔ","add":"Clé fara a kan","paste":"I ka {{name}} clé coller","save":"Mara","cancel":"A dabila","getKey":"{{name}} clé sɔrɔ","showLess":"N ka cléw dɔrɔn yira","addAnother":"Fournisseur wɛrɛ fara a kan"},
+  "resetWallet": {"mismatch":"Mot de passew tɛ bɛn","tooShort":"Mot de passe ka kan ka sɛbɛnni {{count}} sɔrɔ a dɔgɔya la","breached":"Nin mot de passe bɔra kunnafoni sonyali dɔ la. Wɛrɛ sugandi","weak":"Mot de passe barikaman sugandi (sɛbɛnniw, nimɔrɔw ani taamasiyɛnw ɲagami)","failed":"I ka wallet ma se ka reset. Foyi ma lataa. A lajɛ tugun.","twoFactor":"I ka authenticator app code sɛbɛn walisa ka i ka konte lataa.","funds":"Tokenw, NFTw ani balance wɛrɛw tɛ lataa. U bɛ to adrɛsi kɔrɔ la. Ni i bɛ se ka wallet kɔrɔ dayɛlɛ hali bi, u ci kɛnɛma fɔlɔ.","doneTitle":"I ka konte bɛ a ka wallet kura kan sisan","logOut":"Bɔ kɔnɔ","intro":"A bɛ Riftn wallet kura dilan ka i ka tɔgɔ, postw, tugubagaw ani batakiw lataa a kan. Nin kɛ ni i ka wallet tunura walima ni mɔgɔ wɛrɛ bɛ a clé mara. Wallet kɔrɔ tɛna baara kɛ donni kama tugun.","password":"Wallet kura mot de passe (sɛbɛnni {{count}} a dɔgɔya la)","confirm":"Ka kumaɲɔgɔnya kɛ ni mɔgɔ dɔ ye","ack":"N'fa fɛ ko n'ka wari kɔrɔw bɛ to walɛti kɔrɔ kɔnɔ.","submit":"Wallet reset","title":"Wallet reset","rowDesc":"I ka wallet tunura, walima mɔgɔ wɛrɛ bɛ a clé mara? I ka konte lataa wallet kura kan. I ka tɔgɔ, postw ani tugubagaw bɛ na i fɛ."},
+  "twoFactor": {"wrongCode":"Kɔdi in tɛ kelen ye. Ɛnɛ kura min bɛ i ka app kɔnɔ, i ka o bɔ.","trustDevice":"Kana ɲininga tugun nin masin in kan kalo 30 kɔnɔ","useBackupShort":"Kà kòdè bàkò","lostEverything":"I ka telefon ani i ka kɔnɔko kɔrɔsili kɔdɛw lɔn? Sɔrɔ ka dɛmɛ sɔrɔ.","turnedOff":"Doni-fɛn fila kɔdi bɛ a la","introTitle":"Kɔfɛ-kɔfɛ-kɔdi dɔ fara a kan","linkTitle":"I ka authenticator app siri","codesTitle":"I ka backup kɔdi in kɔnɔna","newCodesTitle":"Backup code kuraw sɔrɔ","turnOff":"A tila"},
+  "chatTextSize": {"title":"Tamaño del texto"},
+  "notes": {"replyTo":"Jaabi si {{name}}…"},
+  "chatBulk": {"toolbar":"Baro sugandilenw","selected":"{{count}} Selection","cancel":"A dabila","read":"A kalanna","unread":"A ma kalan","reply":"Jalɛnɛn","delete":"Fɔlɔw","replyHint":"Mɔgɔ kelen-kelen bɛɛ bɛ nin sɔrɔ bataki gansan ye a yɛrɛ ka baro kɔnɔ.","replyPlaceholder":"Bataki sɛbɛn…","sendAll":"A ci {{count}} ma","partSent":"A cira baro {{ok}} ma {{total}} la","notSent":"A ma se ka ci. A lajɛ tugun."},
+  "chatTabs": {"addToTab":"A fara onglet kan","newWith":"Onglet kura…","hide":"Onglet dogo","edit":"Ongletw labɛn","renameEdit":"Tɔgɔ yɛlɛma ani a labɛn","addChats":"Barow fara a kan","moveLeft":"A lataa numanbolo fɛ","moveRight":"A lataa kininbolo fɛ","delete":"Onglet jɔsi","new":"Onglet kura","editTab":"Onglet labɛn","create":"Onglet dilan","emoji":"Emoji sugandi","namePlaceholder":"Onglet tɔgɔ","noEmoji":"Emoji tɛ","sFriends":"Teriw","sWork":"Baara","sTrading":"Fɛɛn minw be feere","sCreators":"Dilanbagaw","sGaming":"Kɔrɔbɔ","chatsInTab":"Barow nin onglet in kɔnɔ","picked":"{{n}} sugandira","deleteTitle":"“{{name}}” jɔsi?","deleteBody":"Onglet bɛ bɔ. A ka barow bɛ to All kɔnɔ ani u bɛ u ka batakiw mara.","builtIn":"A bɛ yen kaban","chatCount":"baro {{n}}","moveUp":"Ka teli san fɛ","moveDown":"Ka teli duguma","alwaysOn":"O tɛ se ka kɛ halibi.","show":"Onglet yira","emptyTitle":"{{name}} lankolon don","emptyBody":"Barow fara yan, u bɛ to All kɔnɔ fana.","removedFrom":"A bɔra {{name}} la","addedTo":"A farala {{name}} kan","kindPublic":"Kɔrɔbɔ","kindChannel":"Chaîne","kindGroup":"Jɛnkulu","kindCommunity":"Jɛkulu","kindDirect":"Ɲɛgɛnɛman","tooMany":"I bɛ se ka onglet 10 sɔrɔ ka se o ma","deleted":"{{name}} jɔsira"},
+  "msgSelect": {"partForwarded":"{{ok}} lasera {{total}} la","nothingToCopy":"Foyi tɛ bataki sugandilenw kɔnɔ ka copier","toolbar":"Bataki sugandilenw","selected":"{{count}} Selection","copy":"A kopi","forward":"A ci ka taa","deleteSome":"{{count}} jɔsi"},
+  "dmSafety": {"notReal":"Nin tɛ {{name}} yɛrɛ ye.","neverLink":"Riftn ekipu tɛna lien ci i ma DM la abada ka i ka profil walima wallet labɛn. Kana lienw dayɛlɛ, kana i ka wallet siri, kana foyi bolonɔbila. Nin konte bali ani k'a jira."},
+  "post": {"destruct":{"offBody":"Post bɛ to yen.","onBody":"Post bɛ a yɛrɛ jɔsi {{value1}} a bilalen kɔ."}},
+  "dmPaidLock": {"lockOnUsd":"A datugulen don · {{price}}","lockVideo":"Videyo datugu","lockPhoto":"Ja datugu","lockCustom":"Kɔrɔbɔ","lockCustomUsdLabel":"I yɛrɛ ka sɔngɔ dolari la","lockHint":"U b'a ye a dibilen don fo u ka i sara. Fichier datugulenw tɛ chiffré de bout en bout."},
+  "chatReactions": {"oneNamed":"{{name}} ye {{emoji}} réaction kɛ i ka bataki kan","one":"{{emoji}} réaction kɛra i ka bataki kan"}
 }

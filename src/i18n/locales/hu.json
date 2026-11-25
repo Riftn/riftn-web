@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Videó szerkesztése", "hiddenTag": "Rejtett", "tapToEdit": "Koppints a szerkesztéshez", "cover": "Borító", "trim": "Vágás", "mirror": "Tükrözés", "rotate": "Forgatás", "hide": "Elrejtés", "timer": "Időzítő", "sheetTitleAny": "Szerkesztés küldés előtt", "close": "Bezárás", "replace": "Csere", "hiddenUntilTap": "Elrejtve, amíg rá nem koppintanak", "pause": "Szünet", "play": "Videó lejátszása", "mute": "Némítás", "unmute": "Némítás feloldása", "scrub": "Léptetés a videóban", "addMore": "Fotók vagy videók hozzáadása", "trimAria": "Húzd a végeket a vágáshoz", "coverAria": "Koppints egy kockára a borító beállításához", "coverHint": "Koppints egy kockára a borító beállításához", "coverOwn": "A te képed", "coverAuto": "Automatikus", "uploadCover": "Borítókép feltöltése", "mirrored": "Tükrözött", "original": "Eredeti", "rotate90": "90°-os forgatás", "showNormally": "Normál megjelenítés", "showNormallyBody": "Azonnal látják", "hideUntilTap": "Elrejtés koppintásig", "hideUntilTapBody": "Elhomályosítva, amíg rá nem koppintanak", "hidePrice": "Elrejtés ár mögé", "hidePriceBody": "Elhomályosítva, amíg nem fizetnek neked", "priceUnavailable": "Nem ebben a csevegésben", "timerOff": "Ki", "timerOffBody": "A csevegésben marad.", "timerViewBody": "Mindkettőtök számára eltűnik, miután megnézték.", "confirm": "Megerősítés", "lockedFor": "Feloldás {{value1}} tokenek-ért", "lockedForUsd": "Feloldás ezért: {{value1}}", "editItem": "Elem szerkesztése {{value1}}", "kept": "{{time}} megtartva", "timerTimeBody": "Mindkettőtök számára eltűnik {{value1}} az elküldés után."},
+  "dmVideo": {"edit": "Videó szerkesztése", "hiddenTag": "Rejtett", "tapToEdit": "Koppints a szerkesztéshez", "cover": "Borító", "trim": "Vágás", "mirror": "Tükrözés", "rotate": "Forgatás", "hide": "Elrejtés", "timer": "Időzítő", "sheetTitleAny": "Szerkesztés küldés előtt", "close": "Bezárás", "replace": "Csere", "hiddenUntilTap": "Elrejtve, amíg rá nem koppintanak", "pause": "Szünet", "play": "Videó lejátszása", "mute": "Némítás", "unmute": "Némítás feloldása", "scrub": "Léptetés a videóban", "addMore": "Fotók vagy videók hozzáadása", "trimAria": "Húzd a végeket a vágáshoz", "coverAria": "Koppints egy kockára a borító beállításához", "coverHint": "Koppints egy kockára a borító beállításához", "coverOwn": "A te képed", "coverAuto": "Automatikus", "uploadCover": "Borítókép feltöltése", "mirrored": "Tükrözött", "original": "Eredeti", "rotate90": "90°-os forgatás", "showNormally": "Normál megjelenítés", "showNormallyBody": "Azonnal látják", "hideUntilTap": "Elrejtés koppintásig", "hideUntilTapBody": "Elhomályosítva, amíg rá nem koppintanak", "hidePrice": "Elrejtés ár mögé", "hidePriceBody": "Elhomályosítva, amíg nem fizetnek neked", "priceUnavailable": "Nem ebben a csevegésben", "timerOff": "Ki", "timerOffBody": "A csevegésben marad.", "timerViewBody": "Mindkettőtök számára eltűnik, miután megnézték.", "confirm": "Megerősítés", "lockedFor": "Feloldás {{value1}} tokenek-ért", "lockedForUsd": "Feloldás ezért: {{value1}}", "editItem": "Elem szerkesztése {{value1}}", "kept": "{{time}} megtartva", "timerTimeBody": "Mindkettőtök számára eltűnik {{value1}} az elküldés után.", "destruct": {"60":"1 perc","3600":"1 óra","43200":"12 óra","86400":"1 nap","604800":"1 hét","31536000":"1 év","view":"1 megtekintés"}, "destructShort": {"view":"1 megtekintés"}, "destructSecs": "{{n}} mp", "destructShortSecs": "{{n}}mp"},
   "postBg": {
     "addMedia": "Kép, GIF vagy videó hozzáadása",
     "changeMedia": "Kép, GIF vagy videó cseréje",
@@ -664,7 +664,9 @@
       "main": "Fő",
       "money": "Pénz",
       "riftn": "Riftn"
-    }
+    },
+    "moveGroupHint": "Húzd át egy másik lapra, hogy oda helyezd át",
+    "reorderHintGroups": "Tartsd lenyomva és húzd az ikont az átrendezéshez, vagy egy másik lapra az áthelyezéséhez"
   },
   "feed": {
     "viewProfile": "{{name}} profiljának megtekintése",
@@ -1320,7 +1322,12 @@
     "menuLayoutSectionsDesc": "Minden oldal egyszerre, csoportfejlécek alatt",
     "menuLayoutFoldersDesc": "A fő oldalaid, majd minden csoportnak egy mappa",
     "publicChatInBar": "Nyilvános csevegés az alsó sávban",
-    "publicChatInBarDesc": "Egy koppintással a Nyilvános csevegésbe a képernyő alján lévő sávból"
+    "publicChatInBarDesc": "Egy koppintással a Nyilvános csevegésbe a képernyő alján lévő sávból",
+    "notificationShowCount": "Szám megjelenítése a csengőn",
+    "notificationShowCountDesc": "Lásd, hány értesítés olvasatlan, ne csak a fényjelzést",
+    "messagesShowCount": "Szám megjelenítése az Üzeneteken",
+    "messagesShowCountDesc": "Lásd, hány üzenet olvasatlan, ne csak a fényjelzést",
+    "chatTextSize": "Csevegés szövegmérete"
   },
   "common": {
     "confirm": "Megerősítés",
@@ -1353,7 +1360,8 @@
     "next": "Következő",
     "previous": "Előző",
     "redo": "Visszavon",
-    "remove": "Töröl"
+    "remove": "Töröl",
+    "copy": "Másolás"
   },
   "tip": {
     "title": "Borravaló küldése",
@@ -1660,7 +1668,8 @@
     "roomSettings": "Szoba beállítások",
     "messagePinned": "Üzenet kitűzve",
     "messageUnpinned": "Kitűzés megszüntetve",
-    "online": "{{count}} online"
+    "online": "{{count}} online",
+    "onlineHint": "{{count}} ember van most ebben a csevegésben"
   },
   "aiChat": {
     "title": "Asszisztens",
@@ -2338,7 +2347,11 @@
     "sending": "Küldés",
     "retrySend": "Újra",
     "discardSend": "Eltávolítás",
-    "notSent": "Nem ment el"
+    "notSent": "Nem ment el",
+    "unreadMarkerOne": "1 olvasatlan üzenet",
+    "unreadMarkerMany": "{{value}} olvasatlan üzenet",
+    "jumpToUnread": "Ugrás az első olvasatlan üzenetre",
+    "jumpToLatest": "Ugrás a legújabb üzenetre"
   },
   "music": {
     "listeningCount_one": "{{count}} odafigyelés",
@@ -4068,7 +4081,8 @@
       "memberCount": "{{n}} tag",
       "approvalNote": "Egy admin fel kell engedélyeznie a kérésedet, mielőtt csatlakozhatsz."
     },
-    "bannedFromCommunity": "Tilaltak vagy ebben a közösségben"
+    "bannedFromCommunity": "Tilaltak vagy ebben a közösségben",
+    "newChat": {"channelRow":"Csatorna · {{formattedCount}} tag","groupRow":"Csoport · {{formattedCount}} tag","newChannel":"Új csatorna","newGroup":"Új csoport","channelName":"Csatorna neve","groupName":"Csoport neve","description":"Miről szól? (nem kötelező)","whoCanJoin":"Ki csatlakozhat","public":"Nyilvános","publicDetail":"Bárki megtalálhatja és csatlakozhat","inviteOnly":"Csak meghívással","private":"Privát","privateDetail":"Meghívásoddal vagy jóváhagyásoddal lehet csatlakozni","entry":"Belépés","free":"Ingyenes","freeDetail":"A csatlakozás ingyenes","paid":"Fizetve","paidDetail":"Egyszeri fizetés tokenben, közvetlenül neked","price":"Ár tokenben","channelNote":"Csak te és az adminjaid posztolhatnak. A tagok olvasnak és reagálnak.","createChannel":"Csatorna létrehozása","createGroup":"Csoport létrehozása","message":"Új üzenet","messageDetail":"Privát csevegés egy személlyel","groupDetail":"Csevegés sok emberrel, nyilvánosan vagy privátban","channelDetail":"Közvetítés a követőknek, ingyen vagy fizetősen","title":"Indíts valamit"}
   },
   "prompt": {
     "seoTitle": "Ösztönözd a hírfolyamodat | Riftn",
@@ -12846,7 +12860,8 @@
     "shareKindCommunity": "Közösség",
     "shareGroups": "Csoportok",
     "shareKindChannel": "Csatorna",
-    "reportMessage": "Üzenet jelentése"
+    "reportMessage": "Üzenet jelentése",
+    "attachAnything": "Fotó, videó, hang vagy fájl csatolása"
   },
   "credits": {
     "earningsWorth": "Megéri {{amount}}",
@@ -20983,5 +20998,17 @@
     "addQuestion": "Kérdés hozzáadása",
     "pointsLabel": "Pontok helyes válaszonként",
     "attachFailed": "A bejegyzésed kint van, de a kvízt nem sikerült hozzáadni"
-  }
+  },
+  "ownKeys": {"working":"Feldolgozás alatt","invalid":"Elutasítva, cseréld le","noCredit":"Elfogyott a kredit","disabled":"A Riftn kikapcsolta","failed":"Hiba történt. Próbálkozz újra.","savedNoCredit":"{{name}} kulcs mentve, de a fiókon elfogyott a kredit.","saved":"{{name}} kulcs mentve. A(z) {{name}} eszközök mostantól a te fiókodat használják.","removed":"{{name}} kulcs eltávolítva.","title":"Saját AI kulcsaid","description":"Adj hozzá kulcsot egy AI szolgáltatótól, és a Creator eszközök a te fiókodon futnak. A Riftn ezekért a feladatokért semmit sem számol fel. A kulcsokat titkosítjuk, és soha többé nem jelenítjük meg.","check":"Ellenőrzés","remove":"Eltávolítás","add":"Kulcs hozzáadása","paste":"Illeszd be a(z) {{name}} kulcsodat","save":"Mentés","cancel":"Mégse","getKey":"{{name}} kulcs beszerzése","showLess":"Csak a saját kulcsaim megjelenítése","addAnother":"Másik szolgáltató hozzáadása"},
+  "resetWallet": {"mismatch":"A jelszavak nem egyeznek meg","tooShort":"A jelszónak legalább {{count}} karakterből kell állnia","breached":"Ez a jelszó szerepelt egy adatszivárgásban. Válassz másikat","weak":"Válassz erősebb jelszót (keverj betűket, számokat és szimbólumokat)","failed":"Nem sikerült visszaállítani a pénztárcádat. Semmi sem lett áthelyezve. Próbáld újra.","twoFactor":"Add meg a hitelesítő alkalmazásod kódját a fiókod áthelyezéséhez.","funds":"A tokenek, NFT-k és egyéb egyenlegek nem kerülnek át. A régi címen maradnak. Ha még meg tudod nyitni a régi pénztárcát, előbb küldd el őket onnan.","doneTitle":"A fiókod az új pénztárcán van","logOut":"Kilépés","intro":"Új Riftn pénztárcát hoz létre, és áthelyezi rá a felhasználónevedet, bejegyzéseidet, követőidet és üzeneteidet. Használd, ha elveszett a pénztárcád, vagy más is hozzáfér a kulcsához. A régi pénztárca nem lesz használható bejelentkezésre.","password":"Új pénztárca jelszava (min. {{count}} karakter)","confirm":"Jelszó megerősítése","twoFactorPlaceholder":"Hitelesítő kód","ack":"Megértettem, hogy a régi pénzügyi eszközök a régi tárhelyen maradnak.","submit":"Pénztárca visszaállítása","title":"Pénztárca visszaállítása","rowDesc":"Elvesztetted a pénztárcádat, vagy másnál is ott a kulcsa? Helyezd át a fiókodat új pénztárcára. A felhasználóneved, bejegyzéseid és követőid veled jönnek."},
+  "twoFactor": {"turnOn":"Bekapcsolás","wrongCode":"Az adott kód nem egyezett. Próbáld ki a legújabb verziót az alkalmazásodban.","signingInAs":"Bejelentkezés mint","signIn":"Bejelentkezés","trustDevice":"Ne kérdezd meg újra ezen az eszközön 30 napig","useBackupShort":"Használj mentési kódot","useApp":"Használom az authenticator alkalmazásomat","useAnotherShort":"Másik fiók","lostEverything":"Elvesztetted a telefonodat és a mentési kódjaidat? Vedd fel a kapcsolatot a támogatással","turnedOff":"Kétlépcsős bejelentkezés ki van kapcsolva","introTitle":"Adj hozzá egy második zárat","linkTitle":"Kapcsold össze az authenticator alkalmazásodat","codesTitle":"Mentés a mentési kódokhoz","newCodesTitle":"Új mentési kódok beszerzése","turnOff":"Kikapcsolás","backupCodes":"Mentési kódok"},
+  "chatTextSize": {"title":"Szövegméret"},
+  "notes": {"replyTo":"Válaszolj neki: {{name}}…"},
+  "chatBulk": {"toolbar":"Kijelölt csevegések","selected":"{{count}} kiválasztva","cancel":"Mégse","read":"Olvasottnak jelölés","unread":"Olvasatlannak jelölés","reply":"Válasz","delete":"Törlés","replyHint":"Mindenki normál üzenetként kapja meg a saját csevegésében.","replyPlaceholder":"Írj egy üzenetet…","sendAll":"Küldés {{count}} címzettnek","partSent":"Elküldve {{ok}} / {{total}} csevegésbe","notSent":"Nem sikerült elküldeni. Próbáld újra."},
+  "chatTabs": {"addToTab":"Hozzáadás a laphoz","newWith":"Új lap…","hide":"Lap elrejtése","edit":"Lapok szerkesztése","renameEdit":"Átnevezés és szerkesztés","addChats":"Csevegések hozzáadása","moveLeft":"Mozgatás balra","moveRight":"Mozgatás jobbra","delete":"Lap törlése","new":"Új lap","editTab":"Lap szerkesztése","create":"Lap létrehozása","emoji":"Válassz emojit","namePlaceholder":"Lap neve","noEmoji":"Nincs emoji","sFriends":"Barátok","sWork":"Munka","sTrading":"Kereskedés","sCreators":"Alkotók","sGaming":"Játék","chatsInTab":"Csevegések ezen a lapon","picked":"{{n}} kiválasztva","deleteTitle":"Törlöd: „{{name}}”?","deleteBody":"A lap eltűnik. A csevegései az Összes között maradnak, az üzeneteikkel együtt.","builtIn":"Beépített","chatCount":"{{n}} csevegés","moveUp":"Fel","moveDown":"Le","alwaysOn":"Mindig bekapcsolt","show":"Lap megjelenítése","emptyTitle":"{{name}} üres","emptyBody":"Adj ide csevegéseket, és azok az Összes között is megmaradnak.","removedFrom":"Eltávolítva innen: {{name}}","addedTo":"Hozzáadva ide: {{name}}","kindPublic":"Nyilvános","kindChannel":"Csatorna","kindGroup":"Csoportosítás","kindCommunity":"Közösség","kindDirect":"Közvetlen","tooMany":"Legfeljebb 10 lapod lehet","deleted":"{{name}} törölve"},
+  "msgSelect": {"partForwarded":"{{ok}} / {{total}} továbbítva","nothingToCopy":"A kijelölt üzenetekben nincs mit másolni","toolbar":"Kijelölt üzenetek","selected":"{{count}} kiválasztva","copy":"Másolás","forward":"Továbbítás","deleteSome":"{{count}} törlése"},
+  "dmSafety": {"notReal":"Ez nem az igazi {{name}}.","neverLink":"A Riftn csapata soha nem küld neked üzenetben linket a profilod vagy pénztárcád javításához. Ne nyiss meg linkeket, ne csatlakoztasd a pénztárcádat, és ne írj alá semmit. Tiltsd le és jelentsd ezt a fiókot."},
+  "post": {"destruct":{"offBody":"A bejegyzés fent marad.","onBody":"A bejegyzés {{value1}} után törli magát a közzétételt követően."}},
+  "dmPaidLock": {"lockOnUsd":"Zárolva · {{price}}","lockVideo":"Videó zárolása","lockPhoto":"Fotó zárolása","lockCustom":"Egyéb","lockCustomUsdLabel":"Egyéni ár dollárban","lockHint":"Elmosva látják, amíg nem fizetnek neked. A zárolt fájlok nem végpontok közötti titkosításúak."},
+  "chatReactions": {"oneNamed":"{{name}} {{emoji}} reakciót adott az üzenetedre","one":"{{emoji}} reakció az üzenetedre"}
 }

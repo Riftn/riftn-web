@@ -5,19 +5,18 @@ import { createHash } from 'node:crypto';
 import ts from 'typescript';
 import { mdToHtml } from './markdown-html.mjs';
 import { pruneLocaleVersions } from './locale-retention.mjs';
+import { garbled } from './i18n-guards.mjs';
 import * as streamerPage from '../src/lib/streamer-page.js';
 import * as dehubAppPage from '../src/lib/dehub-app-page.js';
 
 export const PRIORITY_LOCALES = ['ar', 'es', 'fr', 'nl', 'tr'];
-/**
- * Languages a single page may also go out in. Unlike the priority five, which
- * every public page must carry, a page is served in one of these only when
- * its dictionary translates that page through and through; anything short of
- * that stays English rather than shipping a half-translated duplicate. Keeps
- * a high-value guide reachable in more markets without translating the whole
- * site. Two-letter codes only: the crawler reads ?hl= as [a-z]{2}.
- */
-export const EXTRA_LOCALES = ['de', 'ha', 'hi', 'id', 'it', 'ja', 'ko', 'pl', 'pt', 'ru', 'th', 'tl', 'vi', 'zh'];
+// The crawler accepts ISO 639-1 codes. Publish a locale only after a route
+// has a complete translation, even if the interface already supports it.
+export const EXTRA_LOCALES = fs.readdirSync(path.resolve('src/i18n/locales'))
+  .filter(file => /^(?:[a-z]{2}|zh_tw)\.json$/.test(file))
+  .map(file => file.slice(0, -5))
+  .filter(code => code !== 'en' && !PRIORITY_LOCALES.includes(code))
+  .sort();
 const MISSING_COPY = / missing (?:translation|HTML text|accessible text): /;
 const readJson = file => JSON.parse(fs.readFileSync(file, 'utf8'));
 const digest = value => createHash('sha256').update(JSON.stringify(value)).digest('hex').slice(0, 16);
@@ -197,19 +196,148 @@ function lookupBranded(dictionary, key) {
 }
 const brandedDictionary = entries => new Proxy(entries, { get: (target, key) => typeof key === 'string' && !(key in Object.prototype) ? lookupBranded(target, key) : target[key] });
 
+
+/** Return the same segment and accessibility keys the page builder reads. */
+export function missingPublicCopy(page, entries) {
+  const dictionary = brandedDictionary(Object.fromEntries(Object.entries(entries).map(
+    ([source, target]) => [normalizeCopy(source), target],
+  )));
+  const missing = new Set();
+  const add = text => {
+    const plain = normalizeCopy(text);
+    if (!plain || neutralCopy(plain) || !/[A-Za-z]{2}/.test(plain.replace(/<[^>]*>/g, ''))) return;
+    if (!entries[text] && !dictionary[plain]) missing.add(text);
+  };
+  for (const key of ['title', 'description', 'h1', 'lede']) if (page[key]) add(page[key]);
+  for (const part of pageSegments(page)) {
+    if (page.md || !/<[a-zA-Z/]/.test(part)) {
+      add(part);
+    } else if (!entries[part] && !dictionary[normalizeCopy(part)]) {
+      for (const section of part.split(/(<code\b[^>]*>[\s\S]*?<\/code>|<[^>]*>)/i)) {
+        if (!section.startsWith('<')) add(normalizeCopy(section));
+      }
+    }
+  }
+  const body = page.md ? mdToHtml(page.md) : page.body;
+  const accessible = [
+    ...[...body.matchAll(/<img\b[^>]*?\balt=(["'])(.*?)\1/gi)].map(match => match[2]),
+    ...[...body.matchAll(/<[^>]*?\b(?:aria-label|title|placeholder)=(["'])(.*?)\1/gi)].map(match => match[2]),
+    ...[...(page.md || '').matchAll(/!\[([^\]]*)\]\([^)]+\)/g)].map(match => match[1]),
+  ];
+  for (const text of accessible) {
+    const plain = normalizeCopy(text.replace(/\|avatar$/, ''));
+    if (plain && !neutralCopy(plain) && !fixedImageName(plain) && !dictionary[plain]) missing.add(plain);
+  }
+  return [...missing];
+}
+
+
+function readDocsCopy(root, language) {
+  const file = path.join(root, 'src/i18n', language + '.ts');
+  if (!fs.existsSync(file)) return null;
+  const translation = fs.readFileSync(file, 'utf8').replace(/^export const \w+\s*=\s*/, '').replace(/;\s*$/, '');
+  return vm.runInNewContext('(' + translation + ')', {}, { timeout: 1000 });
+}
+
+function checkedDocsCopy(english, copy, keys, language) {
+  if (!copy) return false;
+  const numberFormat = new Intl.NumberFormat(language.replace("_", "-"), { useGrouping: false });
+  const digits = Array.from({ length: 10 }, (_, digit) => numberFormat.format(digit));
+  return keys.every(key => {
+    const source = english[key];
+    const translated = copy[key];
+    if (typeof translated !== 'string' || !translated.trim() || normalizeCopy(translated) === normalizeCopy(source) ||
+        (source.length > 100 && translated.length < source.length * 0.18) || garbled(source, translated)) return false;
+    const normalized = digits.reduce((text, digit, index) => text.replaceAll(digit, String(index)), translated.normalize('NFKC'));
+    const expected = numbers(source);
+    let position = 0;
+    for (const actual of numbers(normalized)) if (actual === expected[position]) position++;
+    return position === expected.length;
+  });
+}
+
+/** Reuse the complete copy that the visible documentation already renders. */
+export function buildDocsPageCopy(root, sources) {
+  const english = readDocsCopy(root, 'en');
+  const overviewKeys = ['title', 'subtitle', 'disclaimerTitle', 'disclaimerText'];
+  for (let section = 1; section <= 7; section++) overviewKeys.push('heading' + section, 'paragraph' + section);
+  const features = ['featureFast', 'featureSecure', 'featureDevSupport', 'featureCommunity'];
+  const homeKeys = ['welcomeTo', 'ourDocs', 'heroDescription', ...features.flatMap(key => [key, key + 'Desc'])];
+  const seoKeys = ['indexTitle', 'indexDesc'];
+  const result = {};
+  for (const language of EXTRA_LOCALES) {
+    const docs = readDocsCopy(root, language);
+    if (!docs) continue;
+    const pages = {};
+    const heading = text => '<h2>' + escapeHtml(text) + '</h2>';
+    const paragraph = text => '<p>' + escapeHtml(text) + '</p>';
+    if (sources['/docs/overview'] && checkedDocsCopy(english.overview, docs.overview, overviewKeys, language)) {
+      const copy = docs.overview;
+      const body = [paragraph(copy.subtitle)];
+      for (let section = 1; section <= 7; section++) body.push(heading(copy['heading' + section]), paragraph(copy['paragraph' + section]));
+      body.push(heading(copy.disclaimerTitle), paragraph(copy.disclaimerText));
+      pages['/docs/overview'] = { title: copy.title, description: copy.subtitle, h1: copy.title, body: body.join('\n') };
+    }
+    if (sources['/docs'] && checkedDocsCopy(english.home, docs.home, homeKeys, language) &&
+        checkedDocsCopy(english.docsSeo, docs.docsSeo, seoKeys, language)) {
+      const { home, docsSeo } = docs;
+      const body = [paragraph(home.heroDescription)];
+      for (const feature of features) body.push(heading(home[feature]), paragraph(home[feature + 'Desc']));
+      if (pages['/docs/overview']) {
+        const linkText = escapeHtml(pages['/docs/overview'].h1);
+        body.push('<p><a href="https://riftn.com/docs/overview?hl=' + language + '">' + linkText + '</a></p>');
+      }
+      pages['/docs'] = {
+        title: docsSeo.indexTitle, description: docsSeo.indexDesc,
+        h1: home.welcomeTo + ' ' + home.ourDocs, body: body.join('\n'),
+      };
+    }
+    if (Object.keys(pages).length) result[language] = pages;
+  }
+  return result;
+}
+
 export function buildPublicLocales(root) {
   const sources = collectPublicSources(root);
-  const extras = EXTRA_LOCALES.filter(lang => fs.existsSync(path.join(root, `scripts/public-page-translations/${lang}.json`)));
+  const dictionaryFile = lang => path.join(root, 'scripts/public-page-translations', lang + '.json');
+  const editorialFile = lang => path.join(root, 'scripts/public-page-translations/editorial', lang + '.json');
+  const docsCopy = buildDocsPageCopy(root, sources);
+  const extras = EXTRA_LOCALES.filter(lang => docsCopy[lang] || fs.existsSync(dictionaryFile(lang)) || fs.existsSync(editorialFile(lang)));
   const languages = [...PRIORITY_LOCALES, ...extras];
-  const dictionaries = Object.fromEntries(languages.map(lang => [lang, readJson(path.join(root, `scripts/public-page-translations/${lang}.json`))]));
+  const dictionaries = Object.fromEntries(languages.map(lang => [lang, fs.existsSync(dictionaryFile(lang)) ? readJson(dictionaryFile(lang)) : {}]));
   const normalizedDictionaries = Object.fromEntries(languages.map(lang => [lang, Object.fromEntries(Object.entries(dictionaries[lang]).map(([source, target]) => [normalizeCopy(source), target]))]).map(([lang, entries]) => [lang, brandedDictionary(entries)]));
-  const version = digest({ sources, dictionaries });
+  const editorial = Object.fromEntries(languages.flatMap(lang => {
+    const file = editorialFile(lang);
+    return fs.existsSync(file) ? [[lang, readJson(file)]] : [];
+  }));
+  const version = digest({ sources, dictionaries, editorial, docsCopy });
   const table = {}, assets = {}, routes = {};
   for (const [route, source] of Object.entries(sources)) {
     table[route] = { en: { title: source.title, description: source.description, h1: source.h1 } };
     routes[route] = [...PRIORITY_LOCALES];
     for (const lang of languages) {
       const extra = !PRIORITY_LOCALES.includes(lang);
+      const docsPage = docsCopy[lang]?.[route];
+      if (docsPage) {
+        const asset = '/locale-pages/' + version + '/' + lang + route + '.json';
+        assets[asset] = docsPage;
+        const { title, description, h1 } = docsPage;
+        table[route][lang] = { title, description, h1, asset };
+        routes[route].push(lang);
+        continue;
+      }
+      const edited = editorial[lang]?.[route];
+      if (edited) {
+        const { title, description, h1, md } = edited;
+        if (!source.md || ![title, description, h1, md].every(value => typeof value === 'string' && value.trim())) {
+          throw new Error('Invalid editorial translation for ' + route + ':' + lang);
+        }
+        const asset = `/locale-pages/${version}/${lang}/${route.slice(1)}.json`;
+        assets[asset] = { title, description, h1, md, body: mdToHtml(md) };
+        table[route][lang] = { title, description, h1, asset };
+        if (extra) routes[route].push(lang);
+        continue;
+      }
       try {
         const dictionary = dictionaries[lang];
         const translate = text => {

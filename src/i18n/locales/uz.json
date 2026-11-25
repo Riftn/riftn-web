@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Videoni tahrirlash", "hiddenTag": "Yashirin", "tapToEdit": "Tahrirlash uchun bosing", "cover": "Muqova", "trim": "Qirqish", "mirror": "Oyna", "rotate": "Aylantirish", "hide": "Yashirish", "timer": "Taymer", "sheetTitleAny": "Yuborishdan oldin tahrirlash", "close": "Yopish", "replace": "Almashtirish", "hiddenUntilTap": "Ular bosmaguncha yashirin", "pause": "Pauza", "play": "Videoni ijro etish", "mute": "Ovozni o‘chirish", "unmute": "Ovozni yoqish", "scrub": "Video bo‘ylab harakatlanish", "addMore": "Foto yoki videolar qo‘shish", "trimAria": "Qirqish uchun chetlarini torting", "coverAria": "Muqovani belgilash uchun kadrni bosing", "coverHint": "Muqovani belgilash uchun kadrni bosing", "coverOwn": "Sizning rasmingiz", "coverAuto": "Avto", "uploadCover": "Muqova rasmini yuklash", "mirrored": "Oynalangan", "original": "Asl", "rotate90": "90° ga aylantirish", "showNormally": "Oddiy ko‘rinish", "showNormallyBody": "Ular uni darhol ko‘rishadi", "hideUntilTap": "Bosilguncha yashirish", "hideUntilTapBody": "Ular bosmaguncha xiralashtirilgan", "hidePrice": "Narx ortiga yashirish", "hidePriceBody": "Ular to‘lamaguncha xiralashtirilgan", "priceUnavailable": "Bu chatda emas", "timerOff": "O‘chirilgan", "timerOffBody": "U chatda qoladi.", "timerViewBody": "Ular ko‘rib bo‘lgach, ikkingiz uchun ham yo‘qoladi.", "confirm": "Tasdiqlash", "lockedFor": "{{value1}} tokenlar uchun qulfdan chiqarish", "lockedForUsd": "{{value1}} uchun qulfdan chiqarish", "editItem": "Elementni tahrirlash {{value1}}", "kept": "{{time}} saqlab qolindi", "timerTimeBody": "Siz yuborganingizdan so‘ng {{value1}} o‘tib, ikkingiz uchun ham yo‘qoladi."},
+  "dmVideo": {"edit": "Videoni tahrirlash", "hiddenTag": "Yashirin", "tapToEdit": "Tahrirlash uchun bosing", "cover": "Muqova", "trim": "Qirqish", "mirror": "Oyna", "rotate": "Aylantirish", "hide": "Yashirish", "timer": "Taymer", "sheetTitleAny": "Yuborishdan oldin tahrirlash", "close": "Yopish", "replace": "Almashtirish", "hiddenUntilTap": "Ular bosmaguncha yashirin", "pause": "Pauza", "play": "Videoni ijro etish", "mute": "Ovozni o‘chirish", "unmute": "Ovozni yoqish", "scrub": "Video bo‘ylab harakatlanish", "addMore": "Foto yoki videolar qo‘shish", "trimAria": "Qirqish uchun chetlarini torting", "coverAria": "Muqovani belgilash uchun kadrni bosing", "coverHint": "Muqovani belgilash uchun kadrni bosing", "coverOwn": "Sizning rasmingiz", "coverAuto": "Avto", "uploadCover": "Muqova rasmini yuklash", "mirrored": "Oynalangan", "original": "Asl", "rotate90": "90° ga aylantirish", "showNormally": "Oddiy ko‘rinish", "showNormallyBody": "Ular uni darhol ko‘rishadi", "hideUntilTap": "Bosilguncha yashirish", "hideUntilTapBody": "Ular bosmaguncha xiralashtirilgan", "hidePrice": "Narx ortiga yashirish", "hidePriceBody": "Ular to‘lamaguncha xiralashtirilgan", "priceUnavailable": "Bu chatda emas", "timerOff": "O‘chirilgan", "timerOffBody": "U chatda qoladi.", "timerViewBody": "Ular ko‘rib bo‘lgach, ikkingiz uchun ham yo‘qoladi.", "confirm": "Tasdiqlash", "lockedFor": "{{value1}} tokenlar uchun qulfdan chiqarish", "lockedForUsd": "{{value1}} uchun qulfdan chiqarish", "editItem": "Elementni tahrirlash {{value1}}", "kept": "{{time}} saqlab qolindi", "timerTimeBody": "Siz yuborganingizdan so‘ng {{value1}} o‘tib, ikkingiz uchun ham yo‘qoladi.", "destruct": {"60":"1 daqiqa","3600":"1 soat","43200":"12 soat","86400":"1 kun","604800":"1 hafta","31536000":"1 yil","view":"1 ko‘rish"}, "destructShort": {"view":"1 ko‘rish"}, "destructSecs": "{{n}} soniya"},
   "postBg": {
     "addMedia": "Rasm, GIF yoki video qo‘shish",
     "changeMedia": "Rasm, GIF yoki videoni almashtirish",
@@ -664,7 +664,9 @@
       "main": "Asosiy",
       "money": "Pul",
       "riftn": "Riftn"
-    }
+    },
+    "moveGroupHint": "Uni boshqa joyga ko‘chirish uchun boshqa tabga tashlang",
+    "reorderHintGroups": "Istalgan belgini qayta tartiblash uchun ushlab turing va suring yoki boshqa yorliqqa o‘tkazish uchun uning ustiga torting"
   },
   "feed": {
     "viewProfile": "{{name}} profilini ko'rish",
@@ -1320,7 +1322,12 @@
     "menuLayoutSectionsDesc": "Barcha sahifalar birdaniga, guruh sarlavhalari ostida",
     "menuLayoutFoldersDesc": "Asosiy sahifalaringiz, keyin har bir guruh uchun papka",
     "publicChatInBar": "Pastki panelda umumiy chat",
-    "publicChatInBarDesc": "Ekran pastidagi paneldan bir bosishda umumiy chatga o'tish"
+    "publicChatInBarDesc": "Ekran pastidagi paneldan bir bosishda umumiy chatga o'tish",
+    "notificationShowCount": "Qo'ng'iroqchada sonni ko'rsatish",
+    "notificationShowCountDesc": "Faqat yorug'lik o'rniga nechta bildirishnoma o'qilmaganini ko'ring",
+    "messagesShowCount": "Xabarlarda sonni ko'rsatish",
+    "messagesShowCountDesc": "Faqat yorug'lik o'rniga nechta xabar o'qilmaganini ko'ring",
+    "chatTextSize": "Chat matni o'lchami"
   },
   "common": {
     "confirm": "Tasdiqlash",
@@ -1353,7 +1360,8 @@
     "next": "Keyingisi",
     "previous": "Oldingi",
     "redo": "Qayta bajarish",
-    "remove": "Olib tashlash"
+    "remove": "Olib tashlash",
+    "copy": "Nusxalash"
   },
   "tip": {
     "title": "Tip yuborish",
@@ -1660,7 +1668,8 @@
     "roomSettings": "Xona sozlamalari",
     "messagePinned": "Xabar qadoqlandi",
     "messageUnpinned": "Xabar qadoqdan olindi",
-    "online": "{{count}} onlayn"
+    "online": "{{count}} onlayn",
+    "onlineHint": "Hozir bu chatda {{count}} kishi bor"
   },
   "aiChat": {
     "title": "Yordamchi",
@@ -2356,7 +2365,11 @@
     "sending": "Yuborishda",
     "retrySend": "Qayta urinish",
     "discardSend": "Olib tashlash",
-    "notSent": "Yuborilmadi"
+    "notSent": "Yuborilmadi",
+    "unreadMarkerOne": "1 ta o'qilmagan xabar",
+    "unreadMarkerMany": "{{value}} ta o'qilmagan xabar",
+    "jumpToUnread": "Birinchi o'qilmagan xabarga o'tish",
+    "jumpToLatest": "Oxirgi xabarga o'tish"
   },
   "music": {
     "listeningCount_one": "{{count}} tinglash",
@@ -4082,7 +4095,8 @@
       "memberCount": "{{n}} a&#39;zolar",
       "approvalNote": "Rahbariyat tomonidan sizning so'zlovchiningizni tasdiqlashdan keyin faol bo'lishingiz mumkin."
     },
-    "bannedFromCommunity": "Siz ushbu hamjamiyatdan bloklangansiz"
+    "bannedFromCommunity": "Siz ushbu hamjamiyatdan bloklangansiz",
+    "newChat": {"channelRow":"Kanal · {{formattedCount}} a'zo","groupRow":"Guruh · {{formattedCount}} a'zo","newChannel":"Yangi kanal","newGroup":"Yangi guruh","channelName":"Kanal nomi","groupName":"Guruh nomi","description":"U nima haqida? (ixtiyoriy)","whoCanJoin":"Kim qo'shila oladi","public":"Ommaviy","publicDetail":"Har kim topib, qo'shila oladi","inviteOnly":"Faqat taklif bilan","private":"Shaxsiy","privateDetail":"Odamlar taklifingiz yoki tasdig'ingiz bilan qo'shiladi","entry":"Kirish","free":"Bepul","freeDetail":"Qo'shilish bepul","paid":"Pullik","paidDetail":"Tokenlarda bir martalik to'lov, to'g'ridan-to'g'ri sizga","price":"Tokenlardagi narx","channelNote":"Faqat siz va adminlaringiz post joylay oladi. A'zolar o'qiydi va reaksiya bildiradi.","createChannel":"Kanal yaratish","createGroup":"Guruh yaratish","message":"Yangi xabar","messageDetail":"Bir kishi bilan shaxsiy chat","groupDetail":"Ko'p odam bilan chat, ommaviy yoki shaxsiy","channelDetail":"Obunachilarga tarqatish, bepul yoki pullik","title":"Nimadir boshlang"}
   },
   "prompt": {
     "seoTitle": "Lentangizni sozlang | Riftn",
@@ -12868,7 +12882,8 @@
     "shareKindCommunity": "Hamjamiyat",
     "shareGroups": "Guruhlar",
     "shareKindChannel": "Kanal",
-    "reportMessage": "Xabar ustidan shikoyat qilish"
+    "reportMessage": "Xabar ustidan shikoyat qilish",
+    "attachAnything": "Rasm, video, audio yoki fayl biriktiring"
   },
   "credits": {
     "earningsWorth": "{{amount}} ga arziydi",
@@ -20932,5 +20947,17 @@
     "promptCatchUp": "{{handle}} yaqinda nimalar joylaganini aytib ber",
     "promptMessage": "{{handle}}ga xabar yozishimga yordam ber",
     "promptAbout": "{{handle}} haqida: {{question}}"
-  }
+  },
+  "ownKeys": {"working":"Ishlamoqda","invalid":"Rad etildi, almashtiring","noCredit":"Kredit tugagan","disabled":"Riftn tomonidan o'chirilgan","failed":"Nimadir noto'g'ri ketdi. Qaytadan urinib ko'ring.","savedNoCredit":"{{name}} kaliti saqlandi, lekin hisobda kredit tugagan.","saved":"{{name}} kaliti saqlandi. {{name}} dagi vositalar endi sizning hisobingizdan foydalanadi.","removed":"{{name}} kaliti olib tashlandi.","title":"O'z AI kalitlaringiz","description":"AI provayderidan kalit qo'shing va Creator vositalari sizning hisobingizda ishlaydi. Riftn bu vazifalar uchun hech narsa olmaydi. Kalitlar shifrlanadi va boshqa ko'rsatilmaydi.","check":"Tekshirish","remove":"Olib tashlash","add":"Kalit qo'shish","paste":"{{name}} kalitingizni joylashtiring","save":"Saqlash","cancel":"Bekor qilish","getKey":"{{name}} kalitini olish","showLess":"Faqat mening kalitlarimni ko'rsatish","addAnother":"Boshqa provayder qo'shish"},
+  "resetWallet": {"mismatch":"Parollar mos kelmaydi","tooShort":"Parol kamida {{count}} belgidan iborat bo'lishi kerak","breached":"Bu parol ma'lumotlar sizib chiqishida paydo bo'lgan. Boshqasini tanlang","weak":"Kuchliroq parol tanlang (harflar, raqamlar va belgilarni aralashtiring)","failed":"Hamyoningizni tiklab bo'lmadi. Hech narsa ko'chirilmadi. Qayta urinib ko'ring.","twoFactor":"Hisobingizni ko'chirish uchun autentifikator ilovasidagi kodni kiriting.","funds":"Tokenlar, NFT'lar va boshqa balanslar ko'chmaydi. Ular eski manzilda qoladi. Agar eski hamyonni hali ocha olsangiz, avval ularni chiqarib oling.","doneTitle":"Hisobingiz yangi hamyonda","logOut":"Chiqish","intro":"Yangi Riftn hamyonini yaratadi va foydalanuvchi nomingiz, postlaringiz, obunachilaringiz va xabarlaringizni unga ko'chiradi. Hamyoningiz yo'qolgan bo'lsa yoki uning kaliti boshqa birovda bo'lsa, shundan foydalaning. Eski hamyon bilan endi kirib bo'lmaydi.","password":"Yangi hamyon paroli (kamida {{count}} belgi)","confirm":"Parolni tasdiqlash","twoFactorPlaceholder":"Autentifikator kodi","ack":"Men eski mablaglarim eski hamyonda qolishini tushundim.","submit":"Hamyonni tiklash","title":"Hamyonni tiklash","rowDesc":"Hamyoningizni yo'qotdingizmi yoki uning kaliti boshqa birovdami? Hisobingizni yangi hamyonga ko'chiring. Foydalanuvchi nomingiz, postlaringiz va obunachilaringiz siz bilan birga o'tadi."},
+  "twoFactor": {"turnOn":"Yoqish","wrongCode":"Bu kod mos kelmadi. Ilovangizdagi eng yangisini sinab ko‘ring.","signingInAs":"Kirish","signIn":"Kirish","trustDevice":"Ushbu qurilmada 30 kun davomida qayta so‘ramaslik","useBackupShort":"Zaxira kodidan foydalanish","useApp":"Autentifikator ilovamdan foydalanish","useAnotherShort":"Boshqa hisob","lostEverything":"Telefoningiz va zaxira kodlaringizni yo‘qotib qo‘ydingizmi? Qo‘llab-quvvatlash xizmatiga murojaat qiling","turnedOff":"Ikki bosqichli kirish o‘chirilgan","introTitle":"Ikkinchi qulfni qo‘shish","linkTitle":"Autentifikator ilovangizni ulash","codesTitle":"Zaxira kodlaringizni saqlang","newCodesTitle":"Yangi zaxira kodlarini olish","turnOff":"O‘chirish","backupCodes":"Zaxira kodlari"},
+  "chatTextSize": {"title":"Matn hajmi"},
+  "notes": {"replyTo":"Javob bering {{name}}…"},
+  "chatBulk": {"toolbar":"Tanlangan chatlar","selected":"{{count}} tanlangan","cancel":"Bekor qilish","read":"O'qilgan deb belgilash","unread":"O'qilmagan deb belgilash","reply":"Javob","delete":"Oʻchirish","replyHint":"Har bir kishi buni o'z chatida oddiy xabar sifatida oladi.","replyPlaceholder":"Xabar yozing…","sendAll":"{{count}} tasiga yuborish","partSent":"{{total}} ta chatdan {{ok}} tasiga yuborildi","notSent":"Yuborib bo'lmadi. Qayta urinib ko'ring."},
+  "chatTabs": {"addToTab":"Tabga qo'shish","newWith":"Yangi tab…","hide":"Tabni yashirish","edit":"Tablarni tahrirlash","renameEdit":"Nomini o'zgartirish va tahrirlash","addChats":"Chatlar qo'shish","moveLeft":"Chapga surish","moveRight":"O'ngga surish","delete":"Tabni o'chirish","new":"Yangi tab","editTab":"Tabni tahrirlash","create":"Tab yaratish","emoji":"Emoji tanlang","namePlaceholder":"Tab nomi","noEmoji":"Emoji yo'q","sFriends":"Do'stlar","sWork":"Ish","sTrading":"Savdo","sCreators":"Ijodkorlar","sGaming":"Oʻyinlar","chatsInTab":"Bu tabdagi chatlar","picked":"{{n}} ta tanlandi","deleteTitle":"“{{name}}” o'chirilsinmi?","deleteBody":"Tab yo'qoladi. Uning chatlari Barchasi bo'limida qoladi va xabarlari saqlanadi.","builtIn":"O'rnatilgan","chatCount":"{{n}} ta chat","moveUp":"Yuqoriga siljiting","moveDown":"Pastga siljiting","alwaysOn":"Hamma vaqt","show":"Tabni ko'rsatish","emptyTitle":"{{name}} bo'sh","emptyBody":"Chatlarni shu yerga qo'shing, ular Barchasi bo'limida ham qoladi.","removedFrom":"{{name}} dan olib tashlandi","addedTo":"{{name}} ga qo'shildi","kindPublic":"Ommaviy","kindChannel":"Kanal","kindGroup":"Guruhlash","kindCommunity":"Hamjamiyat","kindDirect":"To&#39;g&#39;ridan-to&#39;g&#39;ri","tooMany":"Ko'pi bilan 10 ta tab bo'lishi mumkin","deleted":"{{name}} o'chirildi"},
+  "msgSelect": {"partForwarded":"{{total}} tadan {{ok}} tasi uzatildi","nothingToCopy":"Tanlangan xabarlarda nusxalanadigan narsa yo'q","toolbar":"Tanlangan xabarlar","selected":"{{count}} tanlangan","copy":"Nusxalash","forward":"Uzatish","deleteSome":"{{count}} tasini o'chirish"},
+  "dmSafety": {"notReal":"Bu haqiqiy {{name}} emas.","neverLink":"Riftn jamoasi profilingiz yoki hamyoningizni tuzatish uchun sizga hech qachon shaxsiy xabarda havola yubormaydi. Havolalarni ochmang, hamyoningizni ulamang va hech narsani imzolamang. Bu hisobni bloklang va shikoyat qiling."},
+  "post": {"destruct":{"offBody":"Post saqlanib qoladi.","onBody":"Post joylangandan {{value1}} o'tib o'zini o'chiradi."}},
+  "dmPaidLock": {"lockOnUsd":"Qulflangan · {{price}}","lockVideo":"Videoni qulflash","lockPhoto":"Rasmni qulflash","lockCustom":"Boshqa","lockCustomUsdLabel":"Dollardagi maxsus narx","lockHint":"Ular sizga to'lamaguncha uni xira ko'radi. Qulflangan fayllar uchidan-uchiga shifrlanmaydi."},
+  "chatReactions": {"oneNamed":"{{name}} xabaringizga {{emoji}} bilan reaksiya bildirdi","one":"Xabaringizga {{emoji}} bilan reaksiya bildirdi"}
 }

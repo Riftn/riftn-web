@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Chỉnh sửa video", "hiddenTag": "Ẩn", "tapToEdit": "Nhấn để chỉnh sửa", "cover": "Ảnh bìa", "trim": "Cắt", "mirror": "Phản chiếu", "rotate": "Xoay", "hide": "Ẩn", "timer": "Hẹn giờ", "sheetTitleAny": "Chỉnh sửa trước khi gửi", "close": "Đóng", "replace": "Thay thế", "hiddenUntilTap": "Ẩn cho đến khi họ nhấn vào", "pause": "Tạm dừng", "play": "Phát video", "mute": "Tắt tiếng", "unmute": "Bật tiếng", "scrub": "Tua video", "addMore": "Thêm ảnh hoặc video", "trimAria": "Kéo các đầu để cắt", "coverAria": "Nhấn vào một khung hình để đặt làm ảnh bìa", "coverHint": "Nhấn vào một khung hình để đặt làm ảnh bìa", "coverOwn": "Ảnh của bạn", "coverAuto": "Tự động", "uploadCover": "Tải lên ảnh bìa", "mirrored": "Đã phản chiếu", "original": "Gốc", "rotate90": "Xoay 90°", "showNormally": "Hiển thị bình thường", "showNormallyBody": "Họ nhìn thấy ngay lập tức", "hideUntilTap": "Ẩn cho đến khi được nhấn", "hideUntilTapBody": "Làm mờ cho đến khi họ nhấn vào", "hidePrice": "Ẩn sau một mức giá", "hidePriceBody": "Làm mờ cho đến khi họ thanh toán cho bạn", "priceUnavailable": "Không có trong cuộc trò chuyện này", "timerOff": "Tắt", "timerOffBody": "Nó vẫn nằm trong cuộc trò chuyện.", "timerViewBody": "Biến mất đối với cả hai người sau khi họ đã xem nó.", "confirm": "Xác nhận", "lockedFor": "Mở khóa với {{value1}} token", "lockedForUsd": "Mở khóa với giá {{value1}}", "editItem": "Chỉnh sửa mục {{value1}}", "kept": "{{time}} đã giữ", "timerTimeBody": "Biến mất đối với cả hai người {{value1}} sau khi bạn gửi nó."},
+  "dmVideo": {"edit": "Chỉnh sửa video", "hiddenTag": "Ẩn", "tapToEdit": "Nhấn để chỉnh sửa", "cover": "Ảnh bìa", "trim": "Cắt", "mirror": "Phản chiếu", "rotate": "Xoay", "hide": "Ẩn", "timer": "Hẹn giờ", "sheetTitleAny": "Chỉnh sửa trước khi gửi", "close": "Đóng", "replace": "Thay thế", "hiddenUntilTap": "Ẩn cho đến khi họ nhấn vào", "pause": "Tạm dừng", "play": "Phát video", "mute": "Tắt tiếng", "unmute": "Bật tiếng", "scrub": "Tua video", "addMore": "Thêm ảnh hoặc video", "trimAria": "Kéo các đầu để cắt", "coverAria": "Nhấn vào một khung hình để đặt làm ảnh bìa", "coverHint": "Nhấn vào một khung hình để đặt làm ảnh bìa", "coverOwn": "Ảnh của bạn", "coverAuto": "Tự động", "uploadCover": "Tải lên ảnh bìa", "mirrored": "Đã phản chiếu", "original": "Gốc", "rotate90": "Xoay 90°", "showNormally": "Hiển thị bình thường", "showNormallyBody": "Họ nhìn thấy ngay lập tức", "hideUntilTap": "Ẩn cho đến khi được nhấn", "hideUntilTapBody": "Làm mờ cho đến khi họ nhấn vào", "hidePrice": "Ẩn sau một mức giá", "hidePriceBody": "Làm mờ cho đến khi họ thanh toán cho bạn", "priceUnavailable": "Không có trong cuộc trò chuyện này", "timerOff": "Tắt", "timerOffBody": "Nó vẫn nằm trong cuộc trò chuyện.", "timerViewBody": "Biến mất đối với cả hai người sau khi họ đã xem nó.", "confirm": "Xác nhận", "lockedFor": "Mở khóa với {{value1}} token", "lockedForUsd": "Mở khóa với giá {{value1}}", "editItem": "Chỉnh sửa mục {{value1}}", "kept": "{{time}} đã giữ", "timerTimeBody": "Biến mất đối với cả hai người {{value1}} sau khi bạn gửi nó.", "destruct": {"60":"1 phút","3600":"1 giờ","43200":"12 giờ","86400":"1 ngày","604800":"1 tuần","31536000":"1 năm","view":"1 lượt xem"}, "destructShort": {"view":"1 lượt xem"}, "destructSecs": "{{n}} giây", "destructShortSecs": "{{n}}g"},
   "postBg": {
     "addMedia": "Thêm ảnh, GIF hoặc video",
     "changeMedia": "Đổi ảnh, GIF hoặc video",
@@ -664,7 +664,9 @@
       "discover": "Khám phá",
       "money": "Tiền",
       "riftn": "Riftn"
-    }
+    },
+    "moveGroupHint": "Thả vào một tab khác để di chuyển nó đến đó",
+    "reorderHintGroups": "Nhấn giữ và kéo bất kỳ biểu tượng nào để sắp xếp lại, hoặc kéo vào một tab khác để di chuyển biểu tượng đó"
   },
   "feed": {
     "viewProfile": "Xem hồ sơ của {{name}}",
@@ -1321,7 +1323,12 @@
     "chatDeleteMeDesc": "Biến mất khỏi cuộc trò chuyện của bạn, người khác vẫn thấy",
     "chatDeleteEveryone": "Xóa với mọi người",
     "chatDeleteEveryoneDesc": "Khi có thể. Tin nhắn của người khác trong nhóm vẫn chỉ bị xóa phía bạn",
-    "tipsOffNote": "Tip và chuyển tiền cho bạn bị tắt khi tùy chọn này bật. Tắt nó đi để nhận tip trở lại."
+    "tipsOffNote": "Tip và chuyển tiền cho bạn bị tắt khi tùy chọn này bật. Tắt nó đi để nhận tip trở lại.",
+    "notificationShowCount": "Hiện số trên chuông",
+    "notificationShowCountDesc": "Xem có bao nhiêu thông báo chưa đọc thay vì chỉ có ánh sáng",
+    "messagesShowCount": "Hiện số trên Tin nhắn",
+    "messagesShowCountDesc": "Xem có bao nhiêu tin nhắn chưa đọc thay vì chỉ có ánh sáng",
+    "chatTextSize": "Cỡ chữ trò chuyện"
   },
   "common": {
     "confirm": "Xác nhận",
@@ -1364,7 +1371,8 @@
     "error": "Lỗi",
     "success": "Thành công",
     "warning": "Cảnh báo",
-    "info": "Thông tin"
+    "info": "Thông tin",
+    "copy": "Sao chép"
   },
   "tip": {
     "title": "Gửi tiền tip",
@@ -1671,7 +1679,8 @@
     "roomSettings": "Cài đặt phòng",
     "messagePinned": "Đã ghim tin nhắn",
     "messageUnpinned": "Đã bỏ ghim tin nhắn",
-    "online": "{{count}} đang trực tuyến"
+    "online": "{{count}} đang trực tuyến",
+    "onlineHint": "{{count}} người đang ở trong cuộc trò chuyện này"
   },
   "aiChat": {
     "title": "Trợ lý",
@@ -2349,7 +2358,11 @@
     "sending": "Đang gửi",
     "retrySend": "Thử lại",
     "discardSend": "Gỡ",
-    "notSent": "Chưa gửi"
+    "notSent": "Chưa gửi",
+    "unreadMarkerOne": "1 tin nhắn chưa đọc",
+    "unreadMarkerMany": "{{value}} tin nhắn chưa đọc",
+    "jumpToUnread": "Chuyển đến tin nhắn chưa đọc đầu tiên",
+    "jumpToLatest": "Chuyển đến tin nhắn mới nhất"
   },
   "music": {
     "listeningCount_one": "{{count}} đang nghe",
@@ -4075,7 +4088,8 @@
       "memberCount": "{{n}} thành viên",
       "approvalNote": "Một quản trị viên phải phê duyệt yêu cầu của bạn trước khi bạn có thể tham gia."
     },
-    "bannedFromCommunity": "Bạn bị cấm khỏi cộng đồng này"
+    "bannedFromCommunity": "Bạn bị cấm khỏi cộng đồng này",
+    "newChat": {"channelRow":"Kênh · {{formattedCount}} thành viên","groupRow":"Nhóm · {{formattedCount}} thành viên","newChannel":"Kênh mới","newGroup":"Nhóm mới","channelName":"Tên kênh","groupName":"Tên nhóm","description":"Nó nói về điều gì? (tùy chọn)","whoCanJoin":"Ai có thể tham gia","public":"Công khai","publicDetail":"Ai cũng có thể tìm và tham gia","inviteOnly":"Chỉ theo lời mời","private":"Riêng tư","privateDetail":"Mọi người tham gia qua lời mời hoặc khi bạn phê duyệt","entry":"Phí vào","free":"Miễn phí","freeDetail":"Tham gia miễn phí","paid":"Đã thanh toán","paidDetail":"Thanh toán một lần bằng token, chuyển thẳng cho bạn","price":"Giá bằng token","channelNote":"Chỉ bạn và quản trị viên được đăng. Thành viên đọc và bày tỏ cảm xúc.","createChannel":"Tạo kênh","createGroup":"Tạo nhóm","message":"Tin nhắn mới","messageDetail":"Trò chuyện riêng với một người","groupDetail":"Trò chuyện với nhiều người, công khai hoặc riêng tư","channelDetail":"Phát tới người theo dõi, miễn phí hoặc trả phí","title":"Bắt đầu điều gì đó"}
   },
   "prompt": {
     "seoTitle": "Nhắc nhở nguồn cấp dữ liệu của bạn | Riftn",
@@ -12925,7 +12939,8 @@
     "shareKindGroup": "Nhóm",
     "shareKindChannel": "Kênh",
     "shareKindCommunity": "Cộng đồng",
-    "reportMessage": "Báo cáo tin nhắn"
+    "reportMessage": "Báo cáo tin nhắn",
+    "attachAnything": "Đính kèm ảnh, video, âm thanh hoặc tệp"
   },
   "credits": {
     "earningsWorth": "Trị giá {{amount}}",
@@ -20963,5 +20978,17 @@
     "promptCatchUp": "Cập nhật cho tôi những gì {{handle}} đã đăng gần đây",
     "promptMessage": "Giúp tôi viết tin nhắn gửi {{handle}}",
     "promptAbout": "Về {{handle}}: {{question}}"
-  }
+  },
+  "ownKeys": {"working":"Đang xử lý","invalid":"Bị từ chối, hãy thay thế","noCredit":"Hết tín dụng","disabled":"Đã bị Riftn tắt","failed":"Đã xảy ra lỗi. Hãy thử lại.","savedNoCredit":"Đã lưu khóa {{name}}, nhưng tài khoản đã hết tín dụng.","saved":"Đã lưu khóa {{name}}. Các công cụ dùng {{name}} giờ sử dụng tài khoản của bạn.","removed":"Đã xóa khóa {{name}}.","title":"Khóa AI của riêng bạn","description":"Thêm khóa từ nhà cung cấp AI và các công cụ Creator sẽ chạy trên tài khoản của bạn. Riftn không tính phí cho các tác vụ đó. Khóa được mã hóa và không bao giờ hiển thị lại.","check":"Kiểm tra","remove":"Gỡ","add":"Thêm khóa","paste":"Dán khóa {{name}} của bạn","save":"Lưu","cancel":"Hủy","getKey":"Lấy khóa {{name}}","showLess":"Chỉ hiện khóa của tôi","addAnother":"Thêm nhà cung cấp khác"},
+  "resetWallet": {"mismatch":"Mật khẩu không khớp","tooShort":"Mật khẩu phải có ít nhất {{count}} ký tự","breached":"Mật khẩu này đã xuất hiện trong một vụ rò rỉ dữ liệu. Hãy chọn mật khẩu khác","weak":"Chọn mật khẩu mạnh hơn (kết hợp chữ, số và ký hiệu)","failed":"Không thể đặt lại ví của bạn. Chưa có gì được chuyển. Hãy thử lại.","twoFactor":"Nhập mã từ ứng dụng xác thực để chuyển tài khoản của bạn.","funds":"Token, NFT và các số dư khác không được chuyển. Chúng vẫn ở địa chỉ cũ. Nếu bạn vẫn mở được ví cũ, hãy chuyển chúng ra trước.","doneTitle":"Tài khoản của bạn đã chuyển sang ví mới","logOut":"Đăng xuất","intro":"Tạo ví Riftn mới và chuyển tên người dùng, bài đăng, người theo dõi và tin nhắn của bạn sang đó. Dùng tính năng này nếu bạn mất ví hoặc người khác có khóa của ví. Ví cũ sẽ không còn dùng để đăng nhập được nữa.","password":"Mật khẩu ví mới (tối thiểu {{count}} ký tự)","confirm":"Xác nhận mật khẩu","twoFactorPlaceholder":"Mã xác thực","ack":"Tôi hiểu rằng các quỹ cũ của tôi vẫn ở trong ví cũ.","submit":"Đặt lại ví","title":"Đặt lại ví","rowDesc":"Mất ví, hoặc người khác có khóa của ví? Hãy chuyển tài khoản sang ví mới. Tên người dùng, bài đăng và người theo dõi sẽ đi cùng bạn."},
+  "twoFactor": {"turnOn":"Bật","wrongCode":"Mã đó không khớp. Hãy thử mã mới nhất trong ứng dụng của bạn.","signingInAs":"Đang đăng nhập với tư cách","signIn":"Đăng nhập","trustDevice":"Không hỏi lại trên thiết bị này trong 30 ngày","useBackupShort":"Sử dụng mã dự phòng","useApp":"Sử dụng ứng dụng xác thực của tôi","useAnotherShort":"Tài khoản khác","lostEverything":"Bạn bị mất điện thoại và mã dự phòng? Liên hệ bộ phận hỗ trợ","turnedOff":"Đăng nhập hai bước đang tắt","introTitle":"Thêm lớp bảo mật thứ hai","linkTitle":"Liên kết ứng dụng xác thực của bạn","codesTitle":"Lưu mã dự phòng của bạn","newCodesTitle":"Nhận mã dự phòng mới","turnOff":"Tắt","backupCodes":"Mã dự phòng"},
+  "chatTextSize": {"title":"Cỡ chữ"},
+  "notes": {"replyTo":"Trả lời {{name}}…"},
+  "chatBulk": {"toolbar":"Cuộc trò chuyện đã chọn","selected":"{{count}} đã chọn","cancel":"Hủy","read":"Đánh dấu đã đọc","unread":"Đánh dấu chưa đọc","reply":"Phản hồi","delete":"Xóa","replyHint":"Mỗi người sẽ nhận được tin này như một tin nhắn bình thường trong cuộc trò chuyện riêng của họ.","replyPlaceholder":"Viết tin nhắn…","sendAll":"Gửi đến {{count}}","partSent":"Đã gửi đến {{ok}} trên {{total}} cuộc trò chuyện","notSent":"Không thể gửi. Hãy thử lại."},
+  "chatTabs": {"addToTab":"Thêm vào thẻ","newWith":"Thẻ mới…","hide":"Ẩn thẻ","edit":"Sửa thẻ","renameEdit":"Đổi tên và sửa","addChats":"Thêm cuộc trò chuyện","moveLeft":"Chuyển sang trái","moveRight":"Chuyển sang phải","delete":"Xóa thẻ","new":"Thẻ mới","editTab":"Sửa thẻ","create":"Tạo thẻ","emoji":"Chọn emoji","namePlaceholder":"Tên thẻ","noEmoji":"Không emoji","sFriends":"Bạn bè","sWork":"Công việc","sTrading":"Giao dịch","sCreators":"Nhà sáng tạo","sGaming":"Chơi game","chatsInTab":"Cuộc trò chuyện trong thẻ này","picked":"Đã chọn {{n}}","deleteTitle":"Xóa “{{name}}”?","deleteBody":"Thẻ sẽ biến mất. Các cuộc trò chuyện vẫn ở Tất cả cùng tin nhắn.","builtIn":"Mặc định","chatCount":"{{n}} cuộc trò chuyện","moveUp":"Chuyển lên","moveDown":"Chuyển xuống","alwaysOn":"Luôn bật","show":"Hiện thẻ","emptyTitle":"{{name}} đang trống","emptyBody":"Thêm cuộc trò chuyện vào đây, chúng vẫn ở Tất cả.","removedFrom":"Đã xóa khỏi {{name}}","addedTo":"Đã thêm vào {{name}}","kindPublic":"Công khai","kindChannel":"Kênh","kindGroup":"Nhóm","kindCommunity":"Cộng đồng","kindDirect":"Trực tiếp","tooMany":"Bạn có thể có tối đa 10 thẻ","deleted":"Đã xóa {{name}}"},
+  "msgSelect": {"partForwarded":"Đã chuyển tiếp {{ok}} trên {{total}}","nothingToCopy":"Không có gì để sao chép trong các tin nhắn đã chọn","toolbar":"Tin nhắn đã chọn","selected":"{{count}} đã chọn","copy":"Sao chép","forward":"Chuyển tiếp","deleteSome":"Xóa {{count}}"},
+  "dmSafety": {"notReal":"Đây không phải {{name}} thật.","neverLink":"Đội ngũ Riftn sẽ không bao giờ nhắn tin cho bạn một liên kết để sửa hồ sơ hoặc ví. Đừng mở liên kết, kết nối ví hay ký bất cứ thứ gì. Hãy chặn và báo cáo tài khoản này."},
+  "post": {"destruct":{"offBody":"Bài đăng vẫn được giữ.","onBody":"Bài đăng tự xóa {{value1}} sau khi được đăng."}},
+  "dmPaidLock": {"lockOnUsd":"Đã khóa · {{price}}","lockVideo":"Khóa video","lockPhoto":"Khóa ảnh","lockCustom":"Khác","lockCustomUsdLabel":"Giá tùy chỉnh bằng đô la","lockHint":"Họ sẽ thấy nội dung bị làm mờ cho đến khi thanh toán cho bạn. Tệp bị khóa không được mã hóa đầu cuối."},
+  "chatReactions": {"oneNamed":"{{name}} đã bày tỏ {{emoji}} với tin nhắn của bạn","one":"Đã bày tỏ {{emoji}} với tin nhắn của bạn"}
 }

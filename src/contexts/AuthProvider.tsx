@@ -286,6 +286,8 @@ function normalizeUser(userData: Partial<DeHubUser> | null | undefined, fallback
     sentTips: safe.sentTips ?? 0,
     receivedTips: safe.receivedTips ?? 0,
     customs: safe.customs || {},
+    defaultProfileView: safe.defaultProfileView,
+    profileViewOthers: safe.profileViewOthers,
     online: safe.online ?? true,
     createdAt: safe.createdAt,
     lastLoginTimestamp: safe.lastLoginTimestamp,

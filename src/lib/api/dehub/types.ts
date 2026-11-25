@@ -107,6 +107,8 @@ export interface DeHubUser {
   bannedAt?: string | null;
   /** This viewer asked to be served mature posts in the public feeds. */
   showMatureContent?: boolean;
+  defaultProfileView?: 'grid' | 'list';
+  profileViewOthers?: 'grid' | 'list' | 'owner';
   youBlocked?: boolean;
   blockedYou?: boolean;
   isBlocked?: boolean;

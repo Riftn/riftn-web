@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Redaguoti vaizdo įrašą", "hiddenTag": "Paslėpta", "tapToEdit": "Bakstelėkite, kad redaguotumėte", "cover": "Viršelis", "trim": "Apkirpti", "mirror": "Veidrodinis vaizdas", "rotate": "Pasukti", "hide": "Slėpti", "timer": "Laikmatis", "sheetTitleAny": "Redaguoti prieš siunčiant", "close": "Uždaryti", "replace": "Pakeisti", "hiddenUntilTap": "Paslėpta, kol palies", "pause": "Pristabdyti", "play": "Leisti vaizdo įrašą", "mute": "Nutildyti", "unmute": "Įjungti garsą", "scrub": "Slinkti per vaizdo įrašą", "addMore": "Pridėti nuotraukų ar vaizdo įrašų", "trimAria": "Tempkite galus, kad apkirptumėte", "coverAria": "Palieskite kadrą, kad nustatytumėte viršelį", "coverHint": "Palieskite kadrą, kad nustatytumėte viršelį", "coverOwn": "Jūsų nuotrauka", "coverAuto": "Automatinis", "uploadCover": "Įkelti viršelio nuotrauką", "mirrored": "Veidrodinis", "original": "Originalas", "rotate90": "Pasukti 90°", "showNormally": "Rodyti įprastai", "showNormallyBody": "Jie mato iškart", "hideUntilTap": "Slėpti, kol palies", "hideUntilTapBody": "Sulietas, kol palies", "hidePrice": "Slėpti už kainos", "hidePriceBody": "Sulietas, kol sumokės", "priceUnavailable": "Ne šiame pokalbyje", "timerOff": "Išjungta", "timerOffBody": "Tai lieka pokalbyje.", "timerViewBody": "Išnyksta abiem pusėms, kai jie tai pamato.", "confirm": "Patvirtinti", "lockedFor": "Atrakinti už {{value1}} ženklai", "lockedForUsd": "Atrakinti už {{value1}}", "editItem": "Redaguoti elementą {{value1}}", "kept": "{{time}} pasiliko", "timerTimeBody": "Išnyksta abiem pusėms {{value1}} po to, kai išsiunčiate."},
+  "dmVideo": {"edit": "Redaguoti vaizdo įrašą", "hiddenTag": "Paslėpta", "tapToEdit": "Bakstelėkite, kad redaguotumėte", "cover": "Viršelis", "trim": "Apkirpti", "mirror": "Veidrodinis vaizdas", "rotate": "Pasukti", "hide": "Slėpti", "timer": "Laikmatis", "sheetTitleAny": "Redaguoti prieš siunčiant", "close": "Uždaryti", "replace": "Pakeisti", "hiddenUntilTap": "Paslėpta, kol palies", "pause": "Pristabdyti", "play": "Leisti vaizdo įrašą", "mute": "Nutildyti", "unmute": "Įjungti garsą", "scrub": "Slinkti per vaizdo įrašą", "addMore": "Pridėti nuotraukų ar vaizdo įrašų", "trimAria": "Tempkite galus, kad apkirptumėte", "coverAria": "Palieskite kadrą, kad nustatytumėte viršelį", "coverHint": "Palieskite kadrą, kad nustatytumėte viršelį", "coverOwn": "Jūsų nuotrauka", "coverAuto": "Automatinis", "uploadCover": "Įkelti viršelio nuotrauką", "mirrored": "Veidrodinis", "original": "Originalas", "rotate90": "Pasukti 90°", "showNormally": "Rodyti įprastai", "showNormallyBody": "Jie mato iškart", "hideUntilTap": "Slėpti, kol palies", "hideUntilTapBody": "Sulietas, kol palies", "hidePrice": "Slėpti už kainos", "hidePriceBody": "Sulietas, kol sumokės", "priceUnavailable": "Ne šiame pokalbyje", "timerOff": "Išjungta", "timerOffBody": "Tai lieka pokalbyje.", "timerViewBody": "Išnyksta abiem pusėms, kai jie tai pamato.", "confirm": "Patvirtinti", "lockedFor": "Atrakinti už {{value1}} ženklai", "lockedForUsd": "Atrakinti už {{value1}}", "editItem": "Redaguoti elementą {{value1}}", "kept": "{{time}} pasiliko", "timerTimeBody": "Išnyksta abiem pusėms {{value1}} po to, kai išsiunčiate.", "destruct": {"3600":"1 valanda","43200":"12 valandų","86400":"1 diena","604800":"1 savaitė","31536000":"1 metai","view":"1 peržiūra"}, "destructShort": {"view":"1 peržiūra"}, "destructSecs": "{{n}} sek."},
   "postBg": {
     "addMedia": "Pridėti nuotrauką, GIF ar vaizdo įrašą",
     "changeMedia": "Keisti nuotrauką, GIF ar vaizdo įrašą",
@@ -664,7 +664,9 @@
       "main": "Pagrindinis",
       "money": "Pinigai",
       "riftn": "Riftn"
-    }
+    },
+    "moveGroupHint": "Išleiskite į kitą kortelę, kad perkelti ją ten",
+    "reorderHintGroups": "Palaikykite ir tempkite bet kurią piktogramą, kad pakeistumėte jos vietą, arba užtempkite ant kito skirtuko, kad perkeltumėte."
   },
   "feed": {
     "viewProfile": "Peržiūrėti profilį, kurį sukūrė {{name}}",
@@ -1320,7 +1322,12 @@
     "menuLayoutSectionsDesc": "Visi puslapiai iškart, po grupių antraštėmis",
     "menuLayoutFoldersDesc": "Jūsų pagrindiniai puslapiai, tada aplankas kiekvienai grupei",
     "publicChatInBar": "Viešas pokalbis apatinėje juostoje",
-    "publicChatInBarDesc": "Vienu bakstelėjimu į Viešą pokalbį iš juostos ekrano apačioje"
+    "publicChatInBarDesc": "Vienu bakstelėjimu į Viešą pokalbį iš juostos ekrano apačioje",
+    "notificationShowCount": "Rodyti skaičių ant varpelio",
+    "notificationShowCountDesc": "Matykite, kiek pranešimų neperskaityta, o ne tik švytėjimą",
+    "messagesShowCount": "Rodyti skaičių ant Žinučių",
+    "messagesShowCountDesc": "Matykite, kiek žinučių neperskaityta, o ne tik švytėjimą",
+    "chatTextSize": "Pokalbio teksto dydis"
   },
   "common": {
     "confirm": "Patvirtinti",
@@ -1353,7 +1360,8 @@
     "next": "Toliau",
     "previous": "Atgal",
     "redo": "Pakartoti",
-    "remove": "Ištrinti"
+    "remove": "Ištrinti",
+    "copy": "Kopijuoti"
   },
   "tip": {
     "title": "Siųsti arbatpinigius",
@@ -1660,7 +1668,8 @@
     "roomSettings": "Kambario nustatymai",
     "messagePinned": "Žinutė prisegta",
     "messageUnpinned": "Žinutė atsegta",
-    "online": "{{count}} prisijungę"
+    "online": "{{count}} prisijungę",
+    "onlineHint": "Šiame pokalbyje dabar yra žmonių: {{count}}"
   },
   "aiChat": {
     "title": "Asistentas",
@@ -2338,7 +2347,11 @@
     "sending": "Siunčiama",
     "retrySend": "Bandyti dar kartą",
     "discardSend": "Pašalinti",
-    "notSent": "Neišsiųsta"
+    "notSent": "Neišsiųsta",
+    "unreadMarkerOne": "1 neperskaityta žinutė",
+    "unreadMarkerMany": "Neperskaitytų žinučių: {{value}}",
+    "jumpToUnread": "Pereiti prie pirmos neperskaitytos žinutės",
+    "jumpToLatest": "Pereiti prie naujausios žinutės"
   },
   "music": {
     "listeningCount_one": "{{count}} klausymasis",
@@ -4064,7 +4077,8 @@
       "memberCount": "{{n}} nariai",
       "approvalNote": "Kad galėtumėte prisijungti, administratorius turi patvirtinti jūsų užklausą."
     },
-    "bannedFromCommunity": "Jums uždrausta dalyvauti šioje bendruomenėje"
+    "bannedFromCommunity": "Jums uždrausta dalyvauti šioje bendruomenėje",
+    "newChat": {"channelRow":"Kanalas · narių: {{formattedCount}}","groupRow":"Grupė · narių: {{formattedCount}}","newChannel":"Naujas kanalas","newGroup":"Nauja grupė","channelName":"Kanalo pavadinimas","groupName":"Grupės pavadinimas","description":"Apie ką tai? (neprivaloma)","whoCanJoin":"Kas gali prisijungti","public":"Viešas","publicDetail":"Bet kas gali rasti ir prisijungti","inviteOnly":"Tik su pakvietimu","private":"Privatus","privateDetail":"Žmonės prisijungia su jūsų pakvietimu arba patvirtinimu","entry":"Įėjimas","free":"Nemokamai","freeDetail":"Prisijungti nemokama","paid":"Sumokėta","paidDetail":"Vienkartinis mokėjimas žetonais tiesiai jums","price":"Kaina žetonais","channelNote":"Skelbti galite tik jūs ir jūsų administratoriai. Nariai skaito ir reaguoja.","createChannel":"Sukurti kanalą","createGroup":"Sukurti grupę","message":"Nauja žinutė","messageDetail":"Privatus pokalbis su vienu žmogumi","groupDetail":"Pokalbis su daug žmonių, viešas ar privatus","channelDetail":"Transliuokite sekėjams, nemokamai ar mokamai","title":"Pradėkite ką nors"}
   },
   "prompt": {
     "seoTitle": "Valdykite savo informacijos srautą („feed“): Riftn",
@@ -12842,7 +12856,8 @@
     "shareKindCommunity": "Bendruomenė",
     "shareGroups": "Grupės",
     "shareKindChannel": "Kanalas",
-    "reportMessage": "Pranešti apie žinutę"
+    "reportMessage": "Pranešti apie žinutę",
+    "attachAnything": "Pridėti nuotrauką, vaizdo ar garso įrašą arba failą"
   },
   "credits": {
     "earningsWorth": "Verta {{amount}}",
@@ -20880,5 +20895,17 @@
     "promptCatchUp": "Papasakok, ką {{handle}} neseniai paskelbė",
     "promptMessage": "Padėk man parašyti žinutę {{handle}}",
     "promptAbout": "Apie {{handle}}: {{question}}"
-  }
+  },
+  "ownKeys": {"working":"Dirbama","invalid":"Atmestas, pakeiskite jį","noCredit":"Baigėsi kreditas","disabled":"Išjungta „Riftn“","failed":"Įvyko klaida. Bandykite dar kartą.","savedNoCredit":"{{name}} raktas išsaugotas, bet paskyroje baigėsi kreditas.","saved":"{{name}} raktas išsaugotas. {{name}} įrankiai dabar naudoja jūsų paskyrą.","removed":"{{name}} raktas pašalintas.","title":"Jūsų DI raktai","description":"Pridėkite DI teikėjo raktą, ir Kūrėjo įrankiai veiks jūsų paskyra. „Riftn“ už tas užduotis nieko neima. Raktai užšifruojami ir daugiau niekada nerodomi.","check":"Patikrinti","remove":"Pašalinti","add":"Pridėti raktą","paste":"Įklijuokite savo {{name}} raktą","save":"Išsaugoti","cancel":"Atšaukti","getKey":"Gauti {{name}} raktą","showLess":"Rodyti tik mano raktus","addAnother":"Pridėti kitą teikėją"},
+  "resetWallet": {"mismatch":"Slaptažodžiai nesutampa","tooShort":"Slaptažodį turi sudaryti bent {{count}} simb.","breached":"Šis slaptažodis buvo nutekintas duomenų pažeidimo metu. Pasirinkite kitą","weak":"Pasirinkite stipresnį slaptažodį (derinkite raides, skaičius ir simbolius)","failed":"Nepavyko atkurti piniginės. Niekas neperkelta. Bandykite dar kartą.","twoFactor":"Įveskite kodą iš autentifikavimo programėlės, kad perkeltumėte paskyrą.","funds":"Žetonai, NFT ir kiti likučiai neperkeliami. Jie lieka senuoju adresu. Jei vis dar galite atidaryti senąją piniginę, pirmiausia juos išsiųskite.","doneTitle":"Jūsų paskyra perkelta į naują piniginę","logOut":"Išjungti prisijungimą","intro":"Sukuria naują „Riftn“ piniginę ir perkelia į ją jūsų naudotojo vardą, įrašus, sekėjus ir žinutes. Naudokite, jei piniginė prarasta arba kažkas kitas turi jos raktą. Senoji piniginė nebetinka prisijungimui.","password":"Naujos piniginės slaptažodis (min. {{count}} simb.)","confirm":"Patvirtinkite slaptažodį","twoFactorPlaceholder":"Autentifikavimo kodas","ack":"Mano senos pinigų liko senojoje žetonėlėje.","submit":"Atkurti piniginę","title":"Atkurti piniginę","rowDesc":"Praradote piniginę arba kažkas kitas turi jos raktą? Perkelkite paskyrą į naują piniginę. Jūsų naudotojo vardas, įrašai ir sekėjai keliauja kartu."},
+  "twoFactor": {"wrongCode":"Nepasitikrinta kodo. Pabandykite naujausią versiją savo programoje.","trustDevice":"Nesiklauskite dar kartą šiame įrenginyje 30 dienų.","useBackupShort":"Naudokite atsarginį kodą","lostEverything":"Prarado savo telefoną ir atsarginių kodų? Susisiekite su palaikymu","turnedOff":"Dviejų žingsnių prisijungimas išjungtas","introTitle":"Pridėti antrą užraktą","linkTitle":"Susiekite savo autentifikatoriaus programėlę","codesTitle":"Išsaugok savo atsarginius kodus","newCodesTitle":"Gauti naujus atsarginius kodus","turnOff":"Išjungti","backupCodes":"Atsarginių kodų kopijos"},
+  "chatTextSize": {"title":"Teksto dydis"},
+  "notes": {"replyTo":"Atsakykite į {{name}}…"},
+  "chatBulk": {"toolbar":"Pasirinkti pokalbiai","selected":"{{count}} pasirinkta","cancel":"Atšaukti","read":"Pažymėti kaip skaitytus","unread":"Pažymėti kaip neskaitytus","reply":"Atsakyti","delete":"Ištrinti","replyHint":"Kiekvienas žmogus tai gaus kaip įprastą žinutę savo pokalbyje.","replyPlaceholder":"Parašykite žinutę…","sendAll":"Siųsti ({{count}})","partSent":"Išsiųsta į {{ok}} iš {{total}} pokalbių","notSent":"Nepavyko išsiųsti. Bandykite dar kartą."},
+  "chatTabs": {"addToTab":"Pridėti į skirtuką","newWith":"Naujas skirtukas…","hide":"Slėpti skirtuką","edit":"Redaguoti skirtukus","renameEdit":"Pervadinti ir redaguoti","addChats":"Pridėti pokalbių","moveLeft":"Perkelti kairėn","moveRight":"Perkelti dešinėn","delete":"Ištrinti skirtuką","new":"Naujas skirtukas","editTab":"Redaguoti skirtuką","create":"Sukurti skirtuką","emoji":"Pasirinkite jaustuką","namePlaceholder":"Skirtuko pavadinimas","noEmoji":"Be jaustuko","sFriends":"Draugai","sWork":"Darbas","sTrading":"Prekyba","sCreators":"Kūrėjai","sGaming":"Žaidimai","chatsInTab":"Pokalbiai šiame skirtuke","picked":"Pasirinkta: {{n}}","deleteTitle":"Ištrinti „{{name}}“?","deleteBody":"Skirtukas išnyks. Jo pokalbiai liks skiltyje Visi ir išsaugos savo žinutes.","builtIn":"Integruotas","chatCount":"Pokalbių: {{n}}","moveUp":"Aukštyn","moveDown":"Perkelti žemyn","alwaysOn":"Visada įjungta","show":"Rodyti skirtuką","emptyTitle":"{{name}} tuščias","emptyBody":"Pridėkite pokalbių čia, ir jie liks ir skiltyje Visi.","removedFrom":"Pašalinta iš {{name}}","addedTo":"Pridėta į {{name}}","kindPublic":"Viešas","kindChannel":"Kanalas","kindGroup":"Grupuoti","kindCommunity":"Bendruomenė","kindDirect":"Direktyva","tooMany":"Galite turėti iki 10 skirtukų","deleted":"Ištrinta {{name}}"},
+  "msgSelect": {"partForwarded":"Persiųsta {{ok}} iš {{total}}","nothingToCopy":"Pasirinktose žinutėse nėra ką kopijuoti","toolbar":"Pasirinktos žinutės","selected":"{{count}} pasirinkta","copy":"Kopijuoti","forward":"Persiųsti","deleteSome":"Ištrinti ({{count}})"},
+  "dmSafety": {"notReal":"Tai ne tikrasis {{name}}.","neverLink":"„Riftn“ komanda niekada nesiųs jums nuorodos profiliui ar piniginei sutvarkyti. Neatidarykite nuorodų, nejunkite piniginės ir nieko nepasirašykite. Užblokuokite šią paskyrą ir praneškite apie ją."},
+  "post": {"destruct":{"offBody":"Įrašas lieka paskelbtas.","onBody":"Įrašas pats ištrins save praėjus {{value1}} po paskelbimo."}},
+  "dmPaidLock": {"lockOnUsd":"Užrakinta · {{price}}","lockVideo":"Užrakinti vaizdo įrašą","lockPhoto":"Užrakinti nuotrauką","lockCustom":"Kita","lockCustomUsdLabel":"Pasirinktinė kaina doleriais","lockHint":"Jie mato tai suliuotą, kol jums sumoka. Užrakinti failai nėra visapusiškai užšifruoti."},
+  "chatReactions": {"oneNamed":"{{name}} sureagavo {{emoji}} į jūsų žinutę","one":"Sureagavo {{emoji}} į jūsų žinutę"}
 }

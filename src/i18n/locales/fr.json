@@ -7999,6 +7999,7 @@
     "creatorEarnsDirect": "Les abonnés paient en jetons Riftn. Votre part atterrit dans votre portefeuille au moment où ils s'abonnent, moins les frais de plateforme pour votre niveau de badge."
   },
   "liveOverlay": {
+    "showCreatorChat": "Afficher le chat du créateur à l'écran",
     "eyebrow": {
       "follow": "Nouvel abonné",
       "subscribe": "Nouveau membre",

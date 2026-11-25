@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Upravit video", "hiddenTag": "Skrytý", "tapToEdit": "Klepněte pro editaci", "cover": "Kryt", "trim": "Oříznout", "mirror": "Zrcadlit", "rotate": "Otočit", "hide": "Skrýt", "timer": "Časovač", "sheetTitleAny": "Upravit před odesláním", "close": "Zavřít", "replace": "Vyměnit", "hiddenUntilTap": "Skryté, dokud na to neklepnou", "pause": "Pozastavit", "play": "Přehrát video", "mute": "Ztlumit", "unmute": "Ozvuk", "scrub": "Procházet video", "addMore": "Přidat fotky nebo videa", "trimAria": "Přetažením konců video zkrať", "coverAria": "Klepnutím na snímek nastavíš titulní obrázek", "coverHint": "Klepnutím na snímek nastavíš titulní obrázek", "coverOwn": "Vaše foto", "coverAuto": "Automaticky", "uploadCover": "Nahrát úvodní obrázek", "mirrored": "Zrcadlově obrácené", "original": "Původní", "rotate90": "Otočit o 90°", "showNormally": "Zobrazit normálně", "showNormallyBody": "Uvidí to hned", "hideUntilTap": "Skrýt, dokud se na něj neklepne", "hideUntilTapBody": "Rozmazané, dokud na něj neklepnou", "hidePrice": "Skrýt za cenou", "hidePriceBody": "Rozmazané, dokud ti nezaplatí", "priceUnavailable": "Ne v tomto chatu", "timerOff": "Vypnuto", "timerOffBody": "Zůstane v chatu.", "timerViewBody": "Jakmile si to prohlédnou, zmizí to pro vás oba.", "confirm": "Potvrdit", "lockedFor": "Odemknout pro {{value1}} tokeny", "lockedForUsd": "Odemknout pro {{value1}}", "editItem": "Upravit položku {{value1}}", "kept": "{{time}} zachoval", "timerTimeBody": "Po odeslání zmizí pro vás oba {{value1}}."},
+  "dmVideo": {"edit": "Upravit video", "hiddenTag": "Skrytý", "tapToEdit": "Klepněte pro editaci", "cover": "Kryt", "trim": "Oříznout", "mirror": "Zrcadlit", "rotate": "Otočit", "hide": "Skrýt", "timer": "Časovač", "sheetTitleAny": "Upravit před odesláním", "close": "Zavřít", "replace": "Vyměnit", "hiddenUntilTap": "Skryté, dokud na to neklepnou", "pause": "Pozastavit", "play": "Přehrát video", "mute": "Ztlumit", "unmute": "Ozvuk", "scrub": "Procházet video", "addMore": "Přidat fotky nebo videa", "trimAria": "Přetažením konců video zkrať", "coverAria": "Klepnutím na snímek nastavíš titulní obrázek", "coverHint": "Klepnutím na snímek nastavíš titulní obrázek", "coverOwn": "Vaše foto", "coverAuto": "Automaticky", "uploadCover": "Nahrát úvodní obrázek", "mirrored": "Zrcadlově obrácené", "original": "Původní", "rotate90": "Otočit o 90°", "showNormally": "Zobrazit normálně", "showNormallyBody": "Uvidí to hned", "hideUntilTap": "Skrýt, dokud se na něj neklepne", "hideUntilTapBody": "Rozmazané, dokud na něj neklepnou", "hidePrice": "Skrýt za cenou", "hidePriceBody": "Rozmazané, dokud ti nezaplatí", "priceUnavailable": "Ne v tomto chatu", "timerOff": "Vypnuto", "timerOffBody": "Zůstane v chatu.", "timerViewBody": "Jakmile si to prohlédnou, zmizí to pro vás oba.", "confirm": "Potvrdit", "lockedFor": "Odemknout pro {{value1}} tokeny", "lockedForUsd": "Odemknout pro {{value1}}", "editItem": "Upravit položku {{value1}}", "kept": "{{time}} zachoval", "timerTimeBody": "Po odeslání zmizí pro vás oba {{value1}}.", "destruct": {"3600":"1 hodina","43200":"12 hodin","86400":"1 den","604800":"1 týden","31536000":"1 rok","view":"1 zhlédnutí"}, "destructShort": {"view":"1 zhlédnutí"}, "destructSecs": "{{n}} s"},
   "postBg": {
     "addMedia": "Přidat obrázek, GIF nebo video",
     "changeMedia": "Změnit obrázek, GIF nebo video",
@@ -657,7 +657,9 @@
       "main": "Hlavní",
       "money": "Peníze",
       "riftn": "Riftn"
-    }
+    },
+    "moveGroupHint": "Zapni další kartu a přesuň ji tam",
+    "reorderHintGroups": "Zachyťte a přetáhněte libovolný ikon, abyste ho přehodnotili, nebo na jinou kartu, abyste ho přesunuli."
   },
   "feed": {
     "viewProfile": "Zobrazit profil uživatele {{name}}",
@@ -1314,7 +1316,12 @@
     "menuLayoutSectionsDesc": "Všechny stránky najednou, pod nadpisy skupin",
     "menuLayoutFoldersDesc": "Vaše hlavní stránky, pak složka pro každou skupinu",
     "publicChatInBar": "Veřejný chat ve spodní liště",
-    "publicChatInBarDesc": "Jedním klepnutím do veřejného chatu z lišty ve spodní části obrazovky"
+    "publicChatInBarDesc": "Jedním klepnutím do veřejného chatu z lišty ve spodní části obrazovky",
+    "notificationShowCount": "Zobrazit číslo na zvonku",
+    "notificationShowCountDesc": "Zobrazit počet nepřečtených oznámení místo pouhého svícení",
+    "messagesShowCount": "Zobrazit číslo u Zpráv",
+    "messagesShowCountDesc": "Zobrazit počet nepřečtených zpráv místo pouhého svícení",
+    "chatTextSize": "Velikost textu v chatu"
   },
   "common": {
     "confirm": "Potvrdit",
@@ -1347,7 +1354,8 @@
     "next": "Další",
     "previous": "Předchozí",
     "redo": "Znovu",
-    "remove": "Odstranit"
+    "remove": "Odstranit",
+    "copy": "Kopírovat"
   },
   "tip": {
     "title": "Poslat spropitné",
@@ -1654,7 +1662,8 @@
     "roomSettings": "Nastavení místnosti",
     "messagePinned": "Zpráva připnuta",
     "messageUnpinned": "Zpráva odepnuta",
-    "online": "{{count}} online"
+    "online": "{{count}} online",
+    "onlineHint": "V tomto chatu je právě {{count}} lidí"
   },
   "aiChat": {
     "title": "Asistent",
@@ -2332,7 +2341,11 @@
     "sending": "Odesílání",
     "retrySend": "Zkusit znovu",
     "discardSend": "Odebrat",
-    "notSent": "Neodesláno"
+    "notSent": "Neodesláno",
+    "unreadMarkerOne": "1 nepřečtená zpráva",
+    "unreadMarkerMany": "{{value}} nepřečtených zpráv",
+    "jumpToUnread": "Přejít na první nepřečtenou zprávu",
+    "jumpToLatest": "Přejít na nejnovější zprávu"
   },
   "music": {
     "listeningCount_one": "{{count}} naslouchání",
@@ -4062,7 +4075,8 @@
       "memberCount": "{{n}} členů",
       "approvalNote": "Administrátor musí schválit vaši žádost, než se můžete připojit."
     },
-    "bannedFromCommunity": "Jste zakázaný v této komunitě"
+    "bannedFromCommunity": "Jste zakázaný v této komunitě",
+    "newChat": {"channelRow":"Kanál · {{formattedCount}} členů","groupRow":"Skupina · {{formattedCount}} členů","newChannel":"Nový kanál","newGroup":"Nová skupina","channelName":"Název kanálu","groupName":"Název skupiny","description":"O čem to je? (volitelné)","whoCanJoin":"Kdo se může připojit","public":"Veřejné","publicDetail":"Kdokoli ji může najít a připojit se","inviteOnly":"Jen na pozvání","private":"Soukromé","privateDetail":"Lidé se připojí s vaší pozvánkou nebo vaším schválením","entry":"Vstup","free":"Zdarma","freeDetail":"Připojení je zdarma","paid":"Zaplaceno","paidDetail":"Jedna platba v tokenech, přímo vám","price":"Cena v tokenech","channelNote":"Přidávat příspěvky můžete jen vy a vaši správci. Členové čtou a reagují.","createChannel":"Vytvořit kanál","createGroup":"Vytvořit skupinu","message":"Nová zpráva","messageDetail":"Soukromý chat s jedním člověkem","groupDetail":"Chat s mnoha lidmi, veřejný nebo soukromý","channelDetail":"Vysílání sledujícím, zdarma nebo placené","title":"Začněte něco"}
   },
   "prompt": {
     "seoTitle": "Ovládat feed | Riftn",
@@ -12840,7 +12854,8 @@
     "shareKindCommunity": "Komunita",
     "shareGroups": "Skupiny",
     "shareKindChannel": "Kanál",
-    "reportMessage": "Nahlásit zprávu"
+    "reportMessage": "Nahlásit zprávu",
+    "attachAnything": "Přiložit fotku, video, audio nebo soubor"
   },
   "credits": {
     "earningsWorth": "V hodnotě {{amount}}",
@@ -20984,5 +20999,17 @@
     "addQuestion": "Přidat otázku",
     "pointsLabel": "Bodů za správnou odpověď",
     "attachFailed": "Tvůj příspěvek je zveřejněn, ale kvíz se nepodařilo přidat"
-  }
+  },
+  "ownKeys": {"working":"Probíhá","invalid":"Odmítnut, nahraďte ho","noCredit":"Došel kredit","disabled":"Vypnuto ze strany Riftn","failed":"Něco se pokazilo. Zkus to znovu.","savedNoCredit":"Klíč {{name}} uložen, ale účtu došel kredit.","saved":"Klíč {{name}} uložen. Nástroje na {{name}} nyní používají váš účet.","removed":"Klíč {{name}} odstraněn.","title":"Vaše vlastní AI klíče","description":"Přidejte klíč od poskytovatele AI a nástroje Creatoru poběží na vašem účtu. Riftn za tyto úlohy nic neúčtuje. Klíče jsou šifrované a už se nikdy nezobrazí.","check":"Ověřit","remove":"Odebrat","add":"Přidat klíč","paste":"Vložte svůj klíč {{name}}","save":"Uložit","cancel":"Zrušit","getKey":"Získat klíč {{name}}","showLess":"Zobrazit jen moje klíče","addAnother":"Přidat dalšího poskytovatele"},
+  "resetWallet": {"mismatch":"Hesla se neshodují","tooShort":"Heslo musí mít alespoň {{count}} znaků","breached":"Toto heslo se objevilo v úniku dat. Zvolte jiné","weak":"Zvolte silnější heslo (kombinujte písmena, číslice a symboly)","failed":"Peněženku se nepodařilo resetovat. Nic nebylo přesunuto. Zkuste to znovu.","twoFactor":"Zadejte kód z ověřovací aplikace pro přesun účtu.","funds":"Tokeny, NFT a další zůstatky se nepřesunou. Zůstanou na staré adrese. Pokud ještě můžete otevřít starou peněženku, nejdřív je odešlete.","doneTitle":"Váš účet je na nové peněžence","logOut":"Odhlásit se","intro":"Vytvoří novou peněženku Riftn a přesune na ni vaše uživatelské jméno, příspěvky, sledující a zprávy. Použijte to, pokud jste peněženku ztratili nebo její klíč má někdo jiný. Stará peněženka přestane fungovat pro přihlášení.","password":"Heslo nové peněženky (min. {{count}} znaků)","confirm":"Potvrdit heslo","twoFactorPlaceholder":"Kód z ověřovací aplikace","ack":"Rozumím, že mé staré prostředky zůstávají v staré peněžence.","submit":"Resetovat peněženku","title":"Resetovat peněženku","rowDesc":"Ztratili jste peněženku, nebo její klíč má někdo jiný? Přesuňte účet do nové peněženky. Vaše uživatelské jméno, příspěvky a sledující půjdou s vámi."},
+  "twoFactor": {"turnOn":"Zapnout","wrongCode":"Ten kód se nevyhovoval. Zkuste nejnovější ve vaší aplikaci.","signingInAs":"Přihlašování jako","signIn":"Přihlásit se","trustDevice":"Neptat se znovu na tomto zařízení po dobu 30 dnů","useBackupShort":"Použít záložní kód","useApp":"Použít moji autentizační aplikaci","useAnotherShort":"Různé konto","lostEverything":"Ztratili jste telefon a záložní kódy? Kontaktujte podporu","turnedOff":"Dvoufázové přihlášení je vypnuto","introTitle":"Přidat druhý zámek","linkTitle":"Připojte svou autentizační aplikaci","codesTitle":"Uložit vaše záložní kódy","newCodesTitle":"Získat nové záložní kódy","turnOff":"Vypnout","backupCodes":"Záložní kódy"},
+  "chatTextSize": {"title":"Velikost textu"},
+  "notes": {"replyTo":"Odpověz na {{name}}…"},
+  "chatBulk": {"toolbar":"Vybrané chaty","selected":"{{count}} vybráno","cancel":"Zrušit","read":"Označit jako přečtené","unread":"Označit jako nepřečtené","reply":"Odpovědět","delete":"Smazat","replyHint":"Každý to dostane jako běžnou zprávu ve svém vlastním chatu.","replyPlaceholder":"Napište zprávu…","sendAll":"Odeslat {{count}}","partSent":"Odesláno do {{ok}} z {{total}} chatů","notSent":"Nepodařilo se odeslat. Zkuste to znovu."},
+  "chatTabs": {"addToTab":"Přidat do karty","newWith":"Nová karta…","hide":"Skrýt kartu","edit":"Upravit karty","renameEdit":"Přejmenovat a upravit","addChats":"Přidat chaty","moveLeft":"Posunout doleva","moveRight":"Posunout doprava","delete":"Smazat kartu","new":"Nová karta","editTab":"Upravit kartu","create":"Vytvořit kartu","emoji":"Vyberte emoji","namePlaceholder":"Název karty","noEmoji":"Bez emoji","sFriends":"Přátelé","sWork":"Práce","sTrading":"Obchodování","sCreators":"Tvůrci","sGaming":"Počítačové hry","chatsInTab":"Chaty v této kartě","picked":"Vybráno {{n}}","deleteTitle":"Smazat „{{name}}“?","deleteBody":"Karta zmizí. Její chaty zůstanou ve Všech a zachovají si zprávy.","builtIn":"Vestavěné","chatCount":"{{n}} chatů","moveUp":"Posunout nahoru","moveDown":"Posunout dolů","alwaysOn":"Vždy zapnuto","show":"Zobrazit kartu","emptyTitle":"{{name}} je prázdné","emptyBody":"Přidejte sem chaty a zůstanou i ve Všech.","removedFrom":"Odebráno z {{name}}","addedTo":"Přidáno do {{name}}","kindPublic":"Veřejné","kindChannel":"Kanál","kindGroup":"Seskupit","kindCommunity":"Komunita","kindDirect":"Přímý","tooMany":"Můžete mít až 10 karet","deleted":"Smazáno: {{name}}"},
+  "msgSelect": {"partForwarded":"Přeposláno {{ok}} z {{total}}","nothingToCopy":"Ve vybraných zprávách není co kopírovat","toolbar":"Vybrané zprávy","selected":"{{count}} vybráno","copy":"Kopírovat","forward":"Přeposlat","deleteSome":"Smazat {{count}}"},
+  "dmSafety": {"notReal":"Toto není skutečný {{name}}.","neverLink":"Tým Riftn vám nikdy nepošle v DM odkaz na opravu profilu nebo peněženky. Neotevírejte odkazy, nepřipojujte peněženku a nic nepodepisujte. Zablokujte a nahlaste tento účet."},
+  "post": {"destruct":{"offBody":"Příspěvek zůstane zveřejněn.","onBody":"Příspěvek se sám smaže {{value1}} po zveřejnění."}},
+  "dmPaidLock": {"lockOnUsd":"Zamčeno · {{price}}","lockVideo":"Zamknout video","lockPhoto":"Zamknout fotku","lockCustom":"Ostatní","lockCustomUsdLabel":"Vlastní cena v dolarech","lockHint":"Uvidí to rozmazané, dokud vám nezaplatí. Zamčené soubory nejsou šifrovány end-to-end."},
+  "chatReactions": {"oneNamed":"{{name}} reagoval {{emoji}} na vaši zprávu","one":"Reagoval {{emoji}} na vaši zprávu"}
 }

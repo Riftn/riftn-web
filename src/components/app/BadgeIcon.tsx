@@ -1,3 +1,4 @@
+import { useBadgeTierLabel } from '@/i18n/badge-tier-label';
 import { useTranslation as _useCopy } from 'react-i18next';
 /**
  * BadgeIcon — Reusable staking badge image with tooltip. A click opens the
@@ -90,11 +91,13 @@ function badgeNameFromAssetUrl(url: string | null): string | undefined {
 
 export function BadgeIcon({ badgeBalance, username, lookupId, badgeLock, src, className = 'w-[1em] h-[1em]' }: BadgeIconProps) {
   const { t: _copy } = _useCopy();
+  const tierLabel = useBadgeTierLabel();
   const badgeRef = useInlineBadgeFont();
   const { url, name } = useBadgeVisual({ badgeBalance, username, lookupId, badgeLock, src });
   // Profiles already hold a resolved asset URL. Recover its tier so the same
   // size and measured artwork inset still apply there as everywhere else.
   const visualName = name ?? badgeNameFromAssetUrl(url);
+  const displayName = visualName ? tierLabel(visualName) : _copy("copy.002474e36821", { defaultValue: "Badge" });
   const gold = url === riftnGoldBadge;
   const art = gold ? undefined : badgeHoverArt(visualName);
   const originalStill = visualName === 'Killer Whale';
@@ -206,7 +209,7 @@ export function BadgeIcon({ badgeBalance, username, lookupId, badgeLock, src, cl
           className={`shrink-0 self-baseline align-baseline cursor-pointer ${className}`}
           role="button"
           tabIndex={0}
-          aria-label={visualName || _copy("copy.002474e36821", { defaultValue: "Badge" })}
+          aria-label={displayName}
           data-badge-playing={playing ? 'true' : 'false'}
           onPointerEnter={(e) => {
             warmShowcase(e.pointerType === 'mouse');
@@ -240,7 +243,7 @@ export function BadgeIcon({ badgeBalance, username, lookupId, badgeLock, src, cl
             data-badge-icon
             src={poster}
             srcSet={gold ? undefined : badgeSmallSrcSet(visualName)}
-            alt={visualName || _copy("copy.002474e36821", { defaultValue: "Badge" })}
+            alt={displayName}
             width={16}
             height={16}
             decoding="sync"
@@ -249,7 +252,7 @@ export function BadgeIcon({ badgeBalance, username, lookupId, badgeLock, src, cl
         </span>
       </TooltipTrigger>
       <TooltipContent side="top" className="text-xs capitalize">
-        {visualName || _copy("copy.002474e36821", { defaultValue: "Badge" })}
+        {displayName}
       </TooltipContent>
     </Tooltip>
   );

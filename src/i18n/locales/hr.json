@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Uredi video", "hiddenTag": "Skriveno", "tapToEdit": "Dodirnite za uređivanje", "cover": "Naslovna", "trim": "Skrati", "mirror": "Zrcali", "rotate": "Rotiraj", "hide": "Sakrij", "timer": "Mjerač vremena", "sheetTitleAny": "Uredi prije slanja", "close": "Zatvori", "replace": "Zamijeni", "hiddenUntilTap": "Skriveno dok ne dodirnu", "pause": "Pauziraj", "play": "Reproduciraj videozapis", "mute": "Utišaj", "unmute": "Uključi zvuk", "scrub": "Premotaj videozapis", "addMore": "Dodaj fotografije ili videozapise", "trimAria": "Povuci krajeve za skraćivanje", "coverAria": "Dodirni okvir za postavljanje naslovne", "coverHint": "Dodirni okvir za postavljanje naslovne", "coverOwn": "Vaša slika", "coverAuto": "Automatski", "uploadCover": "Učitaj naslovnu sliku", "mirrored": "Zrcaljeno", "original": "Izvorno", "rotate90": "Rotiraj za 90°", "showNormally": "Prikaži normalno", "showNormallyBody": "Vide odmah", "hideUntilTap": "Sakrij dok se ne dodirne", "hideUntilTapBody": "Zamućeno dok ne dodirnu", "hidePrice": "Sakrij iza cijene", "hidePriceBody": "Zamućeno dok ti ne plate", "priceUnavailable": "Nije u ovom chatu", "timerOff": "Isključeno", "timerOffBody": "Ostaje u chatu.", "timerViewBody": "Nestaje za oboje čim ga vide.", "confirm": "Potvrdi", "lockedFor": "Otključaj za {{value1}} tokena", "lockedForUsd": "Otključaj za {{value1}}", "editItem": "Uredi stavku {{value1}}", "kept": "{{time}} zadržano", "timerTimeBody": "Nestaje za oboje {{value1}} nakon što ga pošalješ."},
+  "dmVideo": {"edit": "Uredi video", "hiddenTag": "Skriveno", "tapToEdit": "Dodirnite za uređivanje", "cover": "Naslovna", "trim": "Skrati", "mirror": "Zrcali", "rotate": "Rotiraj", "hide": "Sakrij", "timer": "Mjerač vremena", "sheetTitleAny": "Uredi prije slanja", "close": "Zatvori", "replace": "Zamijeni", "hiddenUntilTap": "Skriveno dok ne dodirnu", "pause": "Pauziraj", "play": "Reproduciraj videozapis", "mute": "Utišaj", "unmute": "Uključi zvuk", "scrub": "Premotaj videozapis", "addMore": "Dodaj fotografije ili videozapise", "trimAria": "Povuci krajeve za skraćivanje", "coverAria": "Dodirni okvir za postavljanje naslovne", "coverHint": "Dodirni okvir za postavljanje naslovne", "coverOwn": "Vaša slika", "coverAuto": "Automatski", "uploadCover": "Učitaj naslovnu sliku", "mirrored": "Zrcaljeno", "original": "Izvorno", "rotate90": "Rotiraj za 90°", "showNormally": "Prikaži normalno", "showNormallyBody": "Vide odmah", "hideUntilTap": "Sakrij dok se ne dodirne", "hideUntilTapBody": "Zamućeno dok ne dodirnu", "hidePrice": "Sakrij iza cijene", "hidePriceBody": "Zamućeno dok ti ne plate", "priceUnavailable": "Nije u ovom chatu", "timerOff": "Isključeno", "timerOffBody": "Ostaje u chatu.", "timerViewBody": "Nestaje za oboje čim ga vide.", "confirm": "Potvrdi", "lockedFor": "Otključaj za {{value1}} tokena", "lockedForUsd": "Otključaj za {{value1}}", "editItem": "Uredi stavku {{value1}}", "kept": "{{time}} zadržano", "timerTimeBody": "Nestaje za oboje {{value1}} nakon što ga pošalješ.", "destruct": {"3600":"1 sat","43200":"12 sati","86400":"1 dan","604800":"1 tjedan","31536000":"1 godina","view":"1 pregled"}, "destructShort": {"view":"1 pregled"}, "destructSecs": "{{n}} sek"},
   "postBg": {
     "addMedia": "Dodaj sliku, GIF ili video",
     "changeMedia": "Promijeni sliku, GIF ili video",
@@ -664,7 +664,9 @@
       "main": "Glavno",
       "money": "Novac",
       "riftn": "Riftn"
-    }
+    },
+    "moveGroupHint": "Povucite na drugu karticu kako biste je premjestili tamo",
+    "reorderHintGroups": "Držite i povucite bilo koju ikonu kako biste je premjestili ili je povucite na drugu karticu kako biste je premjestili tamo"
   },
   "feed": {
     "viewProfile": "Pogledaj profil korisnika {{name}}",
@@ -1320,7 +1322,12 @@
     "menuLayoutSectionsDesc": "Sve stranice odjednom, pod naslovima grupa",
     "menuLayoutFoldersDesc": "Vaše glavne stranice, zatim mapa za svaku grupu",
     "publicChatInBar": "Javni chat u donjoj traci",
-    "publicChatInBarDesc": "Jednim dodirom u Javni chat iz trake na dnu zaslona"
+    "publicChatInBarDesc": "Jednim dodirom u Javni chat iz trake na dnu zaslona",
+    "notificationShowCount": "Prikaži broj na zvonu",
+    "notificationShowCountDesc": "Pogledajte koliko je obavijesti nepročitano umjesto samo sjaja",
+    "messagesShowCount": "Prikaži broj na Porukama",
+    "messagesShowCountDesc": "Pogledajte koliko je poruka nepročitano umjesto samo sjaja",
+    "chatTextSize": "Veličina teksta razgovora"
   },
   "common": {
     "confirm": "Potvrdi",
@@ -1353,7 +1360,8 @@
     "next": "Sljedeće",
     "previous": "Prethodno",
     "redo": "Ponovi",
-    "remove": "Ukloni"
+    "remove": "Ukloni",
+    "copy": "Kopiraj"
   },
   "tip": {
     "title": "Pošalji napojnicu",
@@ -1660,7 +1668,8 @@
     "roomSettings": "Postavke sobe",
     "messagePinned": "Poruka prikvačena",
     "messageUnpinned": "Poruka otkvačena",
-    "online": "{{count}} na mreži"
+    "online": "{{count}} na mreži",
+    "onlineHint": "{{count}} osoba je trenutačno u ovom razgovoru"
   },
   "aiChat": {
     "title": "Pomoćnik",
@@ -2338,7 +2347,11 @@
     "sending": "Slanje",
     "retrySend": "Pokušaj ponovno",
     "discardSend": "Ukloni",
-    "notSent": "Nije poslano"
+    "notSent": "Nije poslano",
+    "unreadMarkerOne": "1 nepročitana poruka",
+    "unreadMarkerMany": "Nepročitanih poruka: {{value}}",
+    "jumpToUnread": "Skoči na prvu nepročitanu poruku",
+    "jumpToLatest": "Skoči na najnoviju poruku"
   },
   "music": {
     "listeningCount_one": "{{count}} slušanje",
@@ -4064,7 +4077,8 @@
       "memberCount": "{{n}} članova",
       "approvalNote": "Administrator mora odobriti vašu molbu prije nego što možete pristupiti."
     },
-    "bannedFromCommunity": "Bacen/a ste iz ove zajednice"
+    "bannedFromCommunity": "Bacen/a ste iz ove zajednice",
+    "newChat": {"channelRow":"Kanal · {{formattedCount}} članova","groupRow":"Grupa · {{formattedCount}} članova","newChannel":"Novi kanal","newGroup":"Nova grupa","channelName":"Naziv kanala","groupName":"Naziv grupe","description":"O čemu se radi? (neobavezno)","whoCanJoin":"Tko se može pridružiti","public":"Javno","publicDetail":"Svatko je može pronaći i pridružiti se","inviteOnly":"Samo uz pozivnicu","private":"Privatno","privateDetail":"Ljudi se pridružuju uz vašu pozivnicu ili odobrenje","entry":"Ulaz","free":"Besplatno","freeDetail":"Pridruživanje je besplatno","paid":"Plaćeno","paidDetail":"Jedno plaćanje u žetonima, izravno vama","price":"Cijena u žetonima","channelNote":"Objavljivati možete samo vi i vaši administratori. Članovi čitaju i reagiraju.","createChannel":"Izradi kanal","createGroup":"Izradi grupu","message":"Nova poruka","messageDetail":"Privatni razgovor s jednom osobom","groupDetail":"Razgovor s mnogo ljudi, javni ili privatni","channelDetail":"Emitiranje pratiteljima, besplatno ili plaćeno","title":"Započnite nešto"}
   },
   "prompt": {
     "seoTitle": "Potaknite svoj feed | Riftn",
@@ -12842,7 +12856,8 @@
     "shareKindCommunity": "Zajednica",
     "shareGroups": "Grupe",
     "shareKindChannel": "Kanal",
-    "reportMessage": "Prijavi poruku"
+    "reportMessage": "Prijavi poruku",
+    "attachAnything": "Priložite fotografiju, video, zvuk ili datoteku"
   },
   "credits": {
     "earningsWorth": "Vrijedi {{amount}}",
@@ -20979,5 +20994,17 @@
     "addQuestion": "Dodaj pitanje",
     "pointsLabel": "Bodova po točnom odgovoru",
     "attachFailed": "Tvoja objava je postavljena, ali kviz nije bilo moguće dodati"
-  }
+  },
+  "ownKeys": {"working":"U tijeku","invalid":"Odbijen, zamijenite ga","noCredit":"Nema kredita","disabled":"Isključio Riftn","failed":"Došlo je do pogreške. Pokušajte ponovno.","savedNoCredit":"Ključ za {{name}} je spremljen, ali račun nema kredita.","saved":"Ključ za {{name}} je spremljen. Alati na {{name}} sada koriste vaš račun.","removed":"Ključ za {{name}} je uklonjen.","title":"Vaši vlastiti AI ključevi","description":"Dodajte ključ AI pružatelja i Creator alati radit će na vašem računu. Riftn ništa ne naplaćuje za te poslove. Ključevi su šifrirani i nikad se više ne prikazuju.","check":"Provjera","remove":"Ukloni","add":"Dodaj ključ","paste":"Zalijepite svoj {{name}} ključ","save":"Spremi","cancel":"Odustani","getKey":"Nabavite {{name}} ključ","showLess":"Prikaži samo moje ključeve","addAnother":"Dodaj drugog pružatelja"},
+  "resetWallet": {"mismatch":"Lozinke se ne podudaraju","tooShort":"Lozinka mora imati najmanje {{count}} znakova","breached":"Ova se lozinka pojavila u curenju podataka. Odaberite drugu","weak":"Odaberite jaču lozinku (kombinirajte slova, brojeve i simbole)","failed":"Nije moguće resetirati novčanik. Ništa nije premješteno. Pokušajte ponovno.","twoFactor":"Unesite kôd iz aplikacije za autentifikaciju da biste premjestili račun.","funds":"Žetoni, NFT-ovi i ostala stanja ne premještaju se. Ostaju na staroj adresi. Ako još možete otvoriti stari novčanik, najprije ih prebacite.","doneTitle":"Vaš je račun na novom novčaniku","logOut":"Odjava","intro":"Izrađuje novi Riftn novčanik i na njega premješta vaše korisničko ime, objave, pratitelje i poruke. Koristite ovo ako je vaš novčanik izgubljen ili netko drugi ima njegov ključ. Stari novčanik prestaje raditi za prijavu.","password":"Lozinka novog novčanika (najmanje {{count}} znakova)","confirm":"Potvrdi lozinku","twoFactorPlaceholder":"Kôd autentifikatora","ack":"Razumijem da moja stara sredstva ostaju u starom novčaniku.","submit":"Resetiraj novčanik","title":"Resetiraj novčanik","rowDesc":"Izgubili ste novčanik ili netko drugi ima njegov ključ? Premjestite račun na novi novčanik. Vaše korisničko ime, objave i pratitelji idu s vama."},
+  "twoFactor": {"turnOn":"Uključi","wrongCode":"Ta kod se nije podudara. Pokušajte najnoviji u svojoj aplikaciji.","signingInAs":"Prijavljivanje kao","signIn":"Prijavi se","trustDevice":"Ne pitaj ponovo na ovom uređaju 30 dana","useBackupShort":"Koristi kod za rezervu","useApp":"Koristi moju aplikaciju za autentifikaciju","useAnotherShort":"Drugi račun","lostEverything":"Izgubili ste telefon i kodove za rezervu? Kontaktirajte podršku","turnedOff":"Dvofaktorska prijava je isključena","introTitle":"Dodaj drugi zaključak","linkTitle":"Poveži svoju aplikaciju za autentifikaciju","codesTitle":"Spremi svoje kodove za rezervu","newCodesTitle":"Dobij nove backup kodove","turnOff":"Isključi","backupCodes":"Backup kodovi"},
+  "chatTextSize": {"title":"Velicina teksta"},
+  "notes": {"replyTo":"Odgovori na {{name}}…"},
+  "chatBulk": {"toolbar":"Odabrani razgovori","selected":"{{count}} odabrano","cancel":"Odustani","read":"Označi kao pročitano","unread":"Označi kao nepročitano","reply":"Odgovori","delete":"Obriši","replyHint":"Svaka osoba dobiva ovo kao običnu poruku u svom razgovoru.","replyPlaceholder":"Napišite poruku…","sendAll":"Pošalji za {{count}}","partSent":"Poslano u {{ok}} od {{total}} razgovora","notSent":"Slanje nije uspjelo. Pokušajte ponovno."},
+  "chatTabs": {"addToTab":"Dodaj u karticu","newWith":"Nova kartica…","hide":"Sakrij karticu","edit":"Uredi kartice","renameEdit":"Preimenuj i uredi","addChats":"Dodaj razgovore","moveLeft":"Pomakni lijevo","moveRight":"Pomakni desno","delete":"Izbriši karticu","new":"Nova kartica","editTab":"Uredi karticu","create":"Izradi karticu","emoji":"Odaberite emoji","namePlaceholder":"Naziv kartice","noEmoji":"Bez emojija","sFriends":"Prijatelji","sWork":"Posao","sTrading":"Trgovanje","sCreators":"Kreatori","sGaming":"Igre","chatsInTab":"Razgovori u ovoj kartici","picked":"Odabrano: {{n}}","deleteTitle":"Izbrisati „{{name}}”?","deleteBody":"Kartica nestaje. Njezini razgovori ostaju u Svima i zadržavaju poruke.","builtIn":"Ugrađeno","chatCount":"Razgovora: {{n}}","moveUp":"Pomakni gore","moveDown":"Pomakni dolje","alwaysOn":"Uvijek aktivno","show":"Prikaži karticu","emptyTitle":"{{name}} je prazna","emptyBody":"Dodajte razgovore ovdje i oni ostaju i u Svima.","removedFrom":"Uklonjeno iz {{name}}","addedTo":"Dodano u {{name}}","kindPublic":"Javno","kindChannel":"Kanal","kindGroup":"Grupiraj","kindCommunity":"Zajednica","kindDirect":"Direkt","tooMany":"Možete imati najviše 10 kartica","deleted":"Izbrisano: {{name}}"},
+  "msgSelect": {"partForwarded":"Proslijeđeno {{ok}} od {{total}}","nothingToCopy":"U odabranim porukama nema ničega za kopiranje","toolbar":"Odabrane poruke","selected":"{{count}} odabrano","copy":"Kopiraj","forward":"Proslijedi","deleteSome":"Izbriši {{count}}"},
+  "dmSafety": {"notReal":"Ovo nije pravi {{name}}.","neverLink":"Riftn tim vam nikad neće poslati izravnu poruku s poveznicom za popravak profila ili novčanika. Ne otvarajte poveznice, ne povezujte novčanik i ništa ne potpisujte. Blokirajte i prijavite ovaj račun."},
+  "post": {"destruct":{"offBody":"Objava ostaje.","onBody":"Objava se sama briše {{value1}} nakon objavljivanja."}},
+  "dmPaidLock": {"lockOnUsd":"Zaključano · {{price}}","lockVideo":"Zaključaj video","lockPhoto":"Zaključaj fotografiju","lockCustom":"Ostalo","lockCustomUsdLabel":"Prilagođena cijena u dolarima","lockHint":"Vide ga zamućenog dok vam ne plate. Zaključane datoteke nisu sveobuhvatno šifrirane."},
+  "chatReactions": {"oneNamed":"{{name}} je reagirao s {{emoji}} na vašu poruku","one":"Reagirao je s {{emoji}} na vašu poruku"}
 }
