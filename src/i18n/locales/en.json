@@ -8582,6 +8582,7 @@
       "banned": "Banned from your streams",
       "unban": "Unban",
       "noBans": "Nobody is banned.",
+      "delegatedBans": "Bans in streams you moderate",
       "log": "Recent actions",
       "noLog": "Nothing yet.",
       "actions": {
