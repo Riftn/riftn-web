@@ -2,7 +2,7 @@ import { useTranslation as _useCopy } from 'react-i18next';
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
 import { tokenLabel } from '@/lib/token-label';
 import { fitIconInk } from '@/lib/optical-icon';
-import { useState, useMemo, useRef, useCallback, useEffect, lazy, Suspense } from 'react';
+import { useState, useMemo, useRef, useCallback, useEffect, useLayoutEffect, lazy, Suspense } from 'react';
 import { SEOHead } from '@/components/SEOHead';
 import { getAiScrapingPreference } from '@/lib/ai-scraping';
 import { profileFeedUrl } from '@/lib/profile-feed-url';
@@ -82,13 +82,6 @@ const ProfileArrangeSheet = lazy(() => import('@/components/app/profile/ProfileA
 const CONTENT_BACKED_TABS: TabValue[] = ['home', 'posts', 'images', 'videos', 'articles'];
 
 /**
- * Wraps tab content and remembers the max height ever rendered.
- * When switching to a shorter tab, the container keeps its previous
- * height so the page never shrinks and the scroll position stays put.
- * The locked height is released after a brief delay so the container
- * can grow naturally if new content loads.
- */
-/**
  * The profile tabs' selected mark: a short glowing line under the active tab
  * ("Beam"), in place of the glass box other tab rows use. It takes the tab's
  * own text colour, so every theme's ink (white on dark, near-black on light)
@@ -117,35 +110,6 @@ function ProfileTabBeam({ rect, enableTransition }: {
           : 'none',
       }}
     />
-  );
-}
-
-function StableHeightContainer({ activeTab, children }: { activeTab: string; children: React.ReactNode }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const maxHeight = useRef(0);
-  const [minH, setMinH] = useState(0);
-
-  // On every tab switch, lock to the tallest height we've seen
-  useEffect(() => {
-    if (ref.current) {
-      const h = ref.current.scrollHeight;
-      if (h > maxHeight.current) maxHeight.current = h;
-      setMinH(maxHeight.current);
-    }
-    // After content settles, update to actual height (allows shrinking after data changes)
-    const timer = setTimeout(() => {
-      if (ref.current) {
-        maxHeight.current = ref.current.scrollHeight;
-        setMinH(ref.current.scrollHeight);
-      }
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [activeTab]);
-
-  return (
-    <div ref={ref} data-feed-root style={{ minHeight: minH > 0 ? `${minH}px` : undefined }}>
-      {children}
-    </div>
   );
 }
 
@@ -249,6 +213,7 @@ function PinnedPostSection({ profileAddress }: { profileAddress: string }) {
 
 /** Longest the profile skeleton waits for tab counts and pins after the profile itself. */
 const PROFILE_REVEAL_CAP_MS = 900;
+const PROFILE_TABS_STICKY_TOP = 4;
 
 export default function ProfilePage() {
   const { t: _copy } = _useCopy();
@@ -256,6 +221,9 @@ export default function ProfilePage() {
   const { theme } = useAppTheme();
   // UI-only state managed in orchestrator
   const [activeTab, setActiveTab] = useState<TabValue>('home');
+  const tabContentRef = useRef<HTMLDivElement>(null);
+  const [tabContentMinHeight, setTabContentMinHeight] = useState(0);
+  const nextTabScroll = useRef<number | null>(null);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
   const [arrangeOpen, setArrangeOpen] = useState(false);
   const [createPlanModalOpen, setCreatePlanModalOpen] = useState(false);
@@ -469,6 +437,7 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!profileKey || appliedDefaultTabFor.current === profileKey) return;
     appliedDefaultTabFor.current = profileKey;
+    setTabContentMinHeight(0);
     // ?tab= wins over the saved default: it is only ever set by something that
     // sent the user here to do one specific thing (the composer's Subscribers
     // row pointing at plan creation), and landing them on Home instead makes
@@ -508,10 +477,9 @@ export default function ProfilePage() {
     let observer: IntersectionObserver;
     const observe = () => {
       observer?.disconnect();
-      const top = 4;
       observer = new IntersectionObserver(
-        ([entry]) => setIsTabsStuck(entry.boundingClientRect.top <= (entry.rootBounds?.top ?? top)),
-        { rootMargin: `-${top}px 0px 0px 0px`, threshold: 0 },
+        ([entry]) => setIsTabsStuck(entry.boundingClientRect.top <= (entry.rootBounds?.top ?? PROFILE_TABS_STICKY_TOP)),
+        { rootMargin: `-${PROFILE_TABS_STICKY_TOP}px 0px 0px 0px`, threshold: 0 },
       );
       observer.observe(el);
     };
@@ -522,6 +490,42 @@ export default function ProfilePage() {
       observer?.disconnect();
     };
   }, [!!data.profile, holdForReveal]);
+
+  const selectTab = useCallback((tab: TabValue) => {
+    if (tab === activeTab) return;
+    const content = tabContentRef.current;
+    const sentinel = stuckSentinelRef.current;
+    const rail = profileTabsRef.current;
+    const current = window.scrollY;
+    let target = current;
+    // Once pinned, start the next panel just under the rail. Otherwise keep
+    // the expanded header at exactly the same position.
+    if (isTabsStuck && sentinel && rail) {
+      const sentinelTop = current + sentinel.getBoundingClientRect().bottom;
+      const railMargin = parseFloat(getComputedStyle(rail).marginTop) || 0;
+      const railTop = rail.getBoundingClientRect().top;
+      const pinnedAt = Math.ceil(sentinelTop + Math.max(1 - PROFILE_TABS_STICKY_TOP, railMargin - railTop));
+      target = Math.max(0, Math.min(current, pinnedAt));
+    }
+    // A loading or empty panel still needs enough height to reach the target.
+    // Set the floor with the tab change so the browser never clamps first.
+    let minHeight = 0;
+    if (content && target > 0) {
+      const contentTop = content.getBoundingClientRect().top + current;
+      minHeight = Math.max(0, Math.ceil(document.documentElement.clientHeight + target - contentTop));
+    }
+    setTabContentMinHeight(minHeight);
+    nextTabScroll.current = target;
+    setActiveTab(tab);
+  }, [activeTab, isTabsStuck]);
+
+  useLayoutEffect(() => {
+    const target = nextTabScroll.current;
+    nextTabScroll.current = null;
+    if (target !== null && target !== window.scrollY) {
+      window.scrollTo({ top: target, behavior: 'instant' });
+    }
+  }, [activeTab]);
 
   const { layerRef: tabsIndicatorLayerRef, setRef: setTabRef, rect: tabIndicator, onScroll: handleTabsScroll } = useTabIndicator(activeTab, isTabsStuck);
   const { ref: tabsFadeRef, style: tabsFadeStyle } = useScrollFadeMask<HTMLDivElement>();
@@ -603,10 +607,10 @@ return () => rail.removeEventListener('wheel', onWheel);
     const nearest = findNearestProfileTab(currentCenterX);
     if (nearest !== activeTab) {
       setTabTransition(true);
-      setActiveTab(nearest);
+      selectTab(nearest);
       setTimeout(() => setTabTransition(false), 450);
     }
-  }, [activeTab, findNearestProfileTab]);
+  }, [activeTab, findNearestProfileTab, selectTab]);
 
   const handleProfileDragEnd = useCallback(() => {
     if (!profileDragState.current) return;
@@ -839,7 +843,7 @@ return () => rail.removeEventListener('wheel', onWheel);
           isSubscribed={data.isSubscribed}
           hasPlans={data.hasPinnedPlans}
           setFullscreenImage={setFullscreenImage}
-          setActiveTab={setActiveTab}
+          setActiveTab={selectTab}
           shareSheetOpen={shareSheetOpen}
           setShareSheetOpen={setShareSheetOpen}
           setLoginModalOpen={setLoginModalOpen}
@@ -922,7 +926,7 @@ return () => rail.removeEventListener('wheel', onWheel);
                       setTabRef(tab.value)(el);
                       profileTabButtonPositions.current[tab.value] = el;
                     }}
-                    onClick={() => setActiveTab(tab.value)}
+                    onClick={() => selectTab(tab.value)}
                     aria-pressed={isActive}
                     title={t(`profile.tabs.${tab.value}`, tab.label)}
                     data-feed-tab-btn data-active={isActive}
@@ -949,7 +953,7 @@ return () => rail.removeEventListener('wheel', onWheel);
 
         {/* Tab Content - all panels rendered, inactive hidden via CSS */}
         <ProfileViewModeContext.Provider value={profileView}>
-        <div data-feed-swallow-bounds>
+        <div ref={tabContentRef} data-feed-swallow-bounds style={{ minHeight: tabContentMinHeight || undefined }}>
         <div ref={profileContentRef} data-profile-content>
         <FeedSwallowMotion>
         {/* Sort + search, on the four tabs actually backed by this creator's
@@ -1000,7 +1004,7 @@ return () => rail.removeEventListener('wheel', onWheel);
         {postBgPostHold.ringEl}
         <div ref={articleTileHold.hostRef} className="relative" {...articleTileHold.handlers}>
         {articleTileHold.ringEl}
-        <StableHeightContainer activeTab={activeTab}>
+        <div data-feed-root>
             <ProfileTabContent
               activeTab={activeTab}
               profileAddress={data.apiProfile?.walletAddress || ''}
@@ -1032,7 +1036,7 @@ return () => rail.removeEventListener('wheel', onWheel);
               setEditingPlan={setEditingPlan}
             />
 
-        </StableHeightContainer>
+        </div>
         </div>
         </div>
         </ProfileArticleTileContext.Provider>
