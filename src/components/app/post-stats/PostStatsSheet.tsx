@@ -11,6 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { openPostInfo } from '@/lib/preload-post-page';
 import { useTranslation } from 'react-i18next';
+import { formatPostDate } from '@/i18n/post-timestamp';
 import { Loader2 } from 'lucide-react';
 import Eye from '@/components/ui/cut-icons/visibility';
 import Clock from '@/components/ui/cut-icons/clock';
@@ -40,7 +41,7 @@ export function usePostStats(tokenId: string | number | null | undefined, enable
 }
 
 export function PostStatsSheet({ open, onOpenChange, tokenId }: PostStatsSheetProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { data, isLoading, isError } = usePostStats(tokenId, open);
 
@@ -114,7 +115,7 @@ export function PostStatsSheet({ open, onOpenChange, tokenId }: PostStatsSheetPr
                   <span>{t('postStats.first48', 'First 48 hours')}</span>
                   {peakAt && total[peakIdx] > 0 ? (
                     <b className="text-white font-semibold">
-                      {t('postStats.peak', { defaultValue: 'Peak {{time}} · {{n}}', time: peakAt.toLocaleString(undefined, { weekday: 'short', hour: 'numeric' }), n: fmt(total[peakIdx]) })}
+                      {t('postStats.peak', { defaultValue: 'Peak {{time}} · {{n}}', time: formatPostDate(peakAt, i18n.language, { weekday: 'short', hour: 'numeric' }), n: fmt(total[peakIdx]) })}
                     </b>
                   ) : null}
                 </div>

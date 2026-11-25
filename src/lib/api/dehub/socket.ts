@@ -23,6 +23,7 @@
  */
 
 import type { ChatRefusalPayload } from '@/lib/chat-refusal';
+import { waitForChatRoom } from '@/lib/chat-delivery';
 import { io, Socket } from 'socket.io-client';
 import { DEHUB_API_BASE, getAuthToken, ensureFreshToken } from './core';
 import { reviveOnReturn } from '@/lib/socket-revive';
@@ -31,6 +32,8 @@ export const GLOBAL_ROOM = 'global';
 
 /** roomId → its own connection. */
 const sockets = new Map<string, Socket>();
+const joinedStreamSockets = new WeakSet<Socket>();
+const roomJoinedEvents = ['roomJoined', 'livechat:roomJoined'];
 let currentToken: string | null = null;
 
 const keyOf = (roomId?: string) => roomId || GLOBAL_ROOM;
@@ -78,6 +81,7 @@ export function getSocket(roomId?: string): Socket {
   });
 
   socket.on('disconnect', (reason) => {
+    joinedStreamSockets.delete(socket);
     console.log('[LiveChat Socket] Disconnected:', key, reason);
     // The server closing us is the one drop Socket.IO does not retry by itself.
     if (reason === 'io server disconnect') {
@@ -88,6 +92,13 @@ export function getSocket(roomId?: string): Socket {
   socket.on('connect_error', (err) => {
     console.warn('[LiveChat Socket] Connection error:', key, err.message);
   });
+
+  if (key.startsWith('stream:')) {
+    const joined = (data: { room?: { roomId?: string } }) => {
+      if (data?.room?.roomId === key) joinedStreamSockets.add(socket);
+    };
+    for (const event of roomJoinedEvents) socket.on(event, joined);
+  }
 
   const pongHandler = (data: any) => {
     if (data?.connected && roomRefCounts.get(key)) emitJoin(socket, key);
@@ -180,6 +191,17 @@ function rekeySockets(prev: string | null, next: string | null) {
 function emitJoin(socket: Socket, key: string) {
   socket.emit('joinRoom', { roomId: key });
   socket.emit('livechat:joinRoom', { roomId: key });
+}
+
+/** Reuse the room's socket and wait for its join after a connection drop. */
+export function waitForLiveChatSend(socket: Socket, roomId: string): Promise<boolean> {
+  const stream = roomId.startsWith('stream:');
+  return waitForChatRoom(
+    socket,
+    () => sockets.get(roomId) === socket && (!stream || joinedStreamSockets.has(socket)),
+    stream ? roomJoinedEvents : ['connect'],
+    () => emitJoin(socket, roomId),
+  );
 }
 
 /**

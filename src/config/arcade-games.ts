@@ -1,4 +1,5 @@
 import { translateCopy as _translateCopy } from '@/i18n/copy';
+import type { ArcadeCreator } from './arcade-creators';
 /**
  * The Arcade registry.
  * ====================
@@ -80,6 +81,7 @@ export interface ArcadeGameCapability {
 }
 
 export interface ArcadeGame {
+  creator?: ArcadeCreator;
   /** URL segment under /arcade, and the key everything else joins on. */
   slug: string;
   title: string;
@@ -369,6 +371,7 @@ export const ARCADE_GAMES: ArcadeGame[] = [
   },
   {
     slug: 'trenchstar',
+    creator: 'riftn',
     get title() { return _translateCopy("copy.d9bac180ccc1", { defaultValue: "Chartopia" }); },
     brand: '/arcade/chartopia-brand-v1.webp',
     get tagline() { return _translateCopy("copy.52c873592957", { defaultValue: "Stand in a trading floor built out of live markets." }); },
@@ -415,6 +418,7 @@ export const ARCADE_GAMES: ArcadeGame[] = [
   },
   {
     slug: 'street-slayer',
+    creator: 'riftn',
     get title() { return _translateCopy("copy.71b386d38529", { defaultValue: "Street Slayer" }); },
     get tagline() { return _translateCopy("copy.883791f091e3", { defaultValue: "A neon-street brawler, made for Riftn alone." }); },
     get description() { return _translateCopy("copy.7a56c707abec", { defaultValue: "A side-scrolling beat ’em up down a neon-lit street: pick one of three fighters, then punch, kick and throw your way through everything the block sends at you." }); },

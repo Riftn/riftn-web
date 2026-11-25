@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { render, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 
 const getNotes = vi.fn();
 vi.mock('@/lib/api/dehub/notes', async (orig) => ({ ...(await orig<object>()), getNotes: () => getNotes() }));
@@ -24,5 +24,18 @@ describe('NotesStrip', () => {
     const { NotesStrip } = await import('@/components/app/chat/NotesRow');
     const { container } = render(<NotesStrip />);
     await waitFor(() => expect(container.querySelector('[data-notes-row]')).not.toBeNull());
+  });
+});
+
+describe('StatusRow', () => {
+  beforeEach(() => { vi.resetModules(); getNotes.mockReset(); });
+
+  it('shows a followed account returned by Notes without a matching conversation', async () => {
+    getNotes.mockResolvedValue({ mine: null, notes: [{ author, note }] });
+    const { StatusRow } = await import('@/components/app/chat/NotesRow');
+    render(<StatusRow me={{ ...author, address: '0xdef', username: 'viewer', displayName: 'Viewer' }} />);
+
+    const status = await screen.findByRole('button', { name: /araf/i });
+    expect(within(status).getByText('hello')).toBeTruthy();
   });
 });

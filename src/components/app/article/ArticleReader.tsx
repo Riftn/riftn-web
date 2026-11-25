@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
+import { formatArticlePostDate, parsePostTimestamp } from '@/i18n/post-timestamp';
 import { toast } from 'sonner';
 import { ArrowUp, ListOrdered, Type } from "lucide-react";
 import Coins from "@/components/ui/cut-icons/coins";
@@ -50,10 +51,8 @@ export function ArticleReader({ title, body, coverUrl, createdAt, children, shar
   const [activeId, setActiveId] = useState<string | null>(null);
   const headings = useMemo(() => articleHeadings(body).filter(h => h.level <= 2), [body]);
   const minutes = articleReadingMinutes(body);
-  const date = createdAt ? new Date(createdAt) : null;
-  const dateLabel = date && !Number.isNaN(date.getTime())
-    ? date.toLocaleDateString(i18n.language, { month: 'short', day: 'numeric', year: date.getFullYear() === new Date().getFullYear() ? undefined : 'numeric' })
-    : null;
+  const date = parsePostTimestamp(createdAt);
+  const dateLabel = date ? formatArticlePostDate(date, i18n.language) : null;
   const minutesLabel = t('articles.minRead', { count: minutes, defaultValue: '{{count}} min read' });
 
   // Progress line and the current section, from one passive scroll listener.

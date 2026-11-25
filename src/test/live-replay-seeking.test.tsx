@@ -16,7 +16,7 @@ afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 function mount(progress = 0.5) {
   const onSeek = vi.fn();
   render(<ImmersiveLiveChrome streamerName="Creator" title="Replay" isLive={false} isEnded viewers={0}
-    isMuted onToggleMute={() => {}} hidden={false} progress={progress} onSeek={onSeek} />);
+    isMuted onToggleMute={() => {}} hidden={false} progress={progress} replayDuration={80} onSeek={onSeek} />);
   return { onSeek, slider: screen.getByRole('slider', { name: 'Replay' }) };
 }
 
@@ -39,6 +39,8 @@ describe('replay seeking', () => {
     fireEvent.pointerMove(window, { clientX: 75 });
     expect(onSeek).not.toHaveBeenCalled();
     expect(slider).toHaveAttribute('aria-valuenow', '75');
+    expect(slider).toHaveAttribute('aria-valuetext', '1:00 / 1:20');
+    expect(screen.getByText('1:00 / 1:20')).toBeVisible();
     fireEvent.pointerUp(window, { clientX: 75 });
     expect(onSeek).toHaveBeenCalledExactlyOnceWith(0.75);
   });

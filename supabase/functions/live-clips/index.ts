@@ -347,12 +347,14 @@ async function render(db: any, wallet: string, body: any) {
   if (row.status !== 'draft' && !stale) return json({ error: `Clip is ${row.status}.` }, 409);
   if (!row.source_url) return json({ error: 'Clip has no source yet.' }, 409);
 
-  const start = Number(body?.start);
-  const end = Number(body?.end);
+  const requestedStart = Number(body?.start);
+  const requestedEnd = Number(body?.end);
   const windowStart = Number(row.window_start);
   const windowEnd = Number(row.window_end);
-  if (!Number.isFinite(start) || !Number.isFinite(end)) return json({ error: 'start and end required' }, 400);
-  if (start < windowStart - 0.05 || end > windowEnd + 0.05) return json({ error: 'Pick a stretch inside the clip.' }, 400);
+  if (!Number.isFinite(requestedStart) || !Number.isFinite(requestedEnd)) return json({ error: 'start and end required' }, 400);
+  if (requestedStart < windowStart - 0.05 || requestedEnd > windowEnd + 0.05) return json({ error: 'Pick a stretch inside the clip.' }, 400);
+  const start = Math.max(requestedStart, windowStart);
+  const end = Math.min(requestedEnd, windowEnd);
   if (end - start < MIN_CLIP_S - 1e-6 || end - start > MAX_CLIP_S + 1e-6) return json({ error: `Clips run ${MIN_CLIP_S}-${MAX_CLIP_S} seconds.` }, 400);
   const title = String(body?.title ?? '').replace(/\s+/g, ' ').trim().slice(0, 100) || row.title || 'Live clip';
 

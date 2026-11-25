@@ -12,7 +12,8 @@ import { tokenLabel } from '@/lib/token-label';
 
 import { lazy, Suspense, useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { getNFTInfo } from '@/lib/api/dehub/feed';
-import { extractReplayUrl } from '@/lib/live-replay';
+import { extractReplayUrl, formatReplayTime } from '@/lib/live-replay';
+import { SEEK_JUMP_SECONDS } from '@/lib/video-hold-gestures';
 import { useFeedPlaybackAllowed, useLivePlaybackAllowed, visualActivity } from '@/lib/visual-activity';
 import { canPictureInPicture, catchUpToLiveEdge, onReturnToTab, togglePictureInPicture, useAutoPictureInPicture } from '@/lib/live-background';
 import { usePictureInPicture } from '@/hooks/use-picture-in-picture';
@@ -45,6 +46,8 @@ import Info from "@/components/ui/cut-icons/information";
 import Bell from "@/components/ui/cut-icons/alerts";
 import Play from "@/components/ui/cut-icons/play";
 import Pause from "@/components/ui/cut-icons/pause";
+import Rewind from "@/components/ui/cut-icons/rewind";
+import FastForward from "@/components/ui/cut-icons/fast-forward";
 import Bookmark from "@/components/ui/cut-icons/save";
 import Gem from "@/components/ui/cut-icons/diamond";
 
@@ -541,8 +544,7 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
    * The replay timeline, for the scrub line the chrome draws.
    *
    * Only a recording has one. A broadcast on air has nothing behind the
-   * live edge to move to, so `replayProgress` stays undefined and the bar
-   * is not rendered at all rather than sitting there refusing taps.
+   * live edge to move to, so only a recording supplies a playback clock.
    */
   const replayRef = useRef<HTMLVideoElement>(null);
   useEffect(() => {
@@ -557,14 +559,14 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
   useEffect(() => {
     if (!playbackAllowed && (!isVideoInPictureInPicture(replayRef.current) || visualActivity.isCallBusy())) replayRef.current?.pause();
   }, [playbackAllowed]);
-  const [replayProgress, setReplayProgress] = useState<number | undefined>(undefined);
+  const [replayClock, setReplayClock] = useState<{ position: number; duration: number } | null>(null);
   const [replayPlaying, setReplayPlaying] = useState(false);
   const [replayBuffering, setReplayBuffering] = useState(false);
   useEffect(() => {
     setReplayBuffering(false);
     setReplayPlaying(false);
-    setReplayProgress(undefined);
-  }, [stream.replayUrl]);
+    setReplayClock(null);
+  }, [streamEnded, stream.replayUrl]);
   const toggleReplay = useCallback(() => {
     if (!visualActivity.isFeedPlaybackAllowed()) return;
     const el = replayRef.current;
@@ -572,12 +574,28 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
     if (el.paused) void el.play().catch(() => {});
     else el.pause();
   }, []);
+  const syncReplayClock = useCallback((video: HTMLVideoElement) => {
+    const { currentTime, duration } = video;
+    if (!Number.isFinite(duration) || duration <= 0) {
+      setReplayClock(null);
+      return;
+    }
+    const position = immersive ? currentTime : Math.floor(currentTime);
+    setReplayClock(previous => previous && previous.position === position && previous.duration === duration
+      ? previous
+      : { position, duration });
+  }, [immersive]);
   const seekReplay = useCallback((ratio: number) => {
-    const el = replayRef.current;
-    if (!el || !Number.isFinite(el.duration) || el.duration <= 0) return;
-    el.currentTime = ratio * el.duration;
-    setReplayProgress(ratio);
-  }, []);
+    const video = replayRef.current;
+    if (!video || !Number.isFinite(video.duration) || video.duration <= 0) return;
+    video.currentTime = Math.max(0, Math.min(video.duration, ratio * video.duration));
+    syncReplayClock(video);
+  }, [syncReplayClock]);
+  const jumpReplay = useCallback((direction: -1 | 1) => {
+    const video = replayRef.current;
+    if (!video || !Number.isFinite(video.duration) || video.duration <= 0) return;
+    seekReplay((video.currentTime + direction * SEEK_JUMP_SECONDS) / video.duration);
+  }, [seekReplay]);
   /**
    * Clip: on air, or on a replay that exists. Never on a stream sold per view
    * or locked — a free Short of it would give the paid part away. The server
@@ -1444,29 +1462,35 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
   const minimiseLive = useCallback(async (mode: LiveMiniMode = 'video') => {
     const streamId = stream.streamId;
     if (!streamId) return;
+    const path = `${window.location.pathname}${window.location.search}`;
     let seat: { leave: () => void } | null = null;
     if (!isOwnStream) {
       const { joinStreamPresence } = await import('@/lib/api/dehub/stream-presence');
+      if (path !== `${window.location.pathname}${window.location.search}`) return;
       seat = joinStreamPresence(streamId);
     }
     const video = videoRef.current;
     const session = transport === 'whep' ? whepSessionRef.current : null;
+    const playingUrl = hlsRef.current?.url ?? video?.currentSrc;
+    const urls = playingUrl && urlsToTry.includes(playingUrl)
+      ? [playingUrl, ...urlsToTry.filter((url) => url !== playingUrl)]
+      : urlsToTry;
     if (session) handedToMiniRef.current = session;
     openLiveMini({
       streamId,
       playbackId: whepPlaybackId,
-      urls: urlsToTry,
+      urls,
       title: stream.title,
       host: stream.creatorUsername ? `@${stream.creatorUsername}` : stream.streamer,
       avatar: stream.avatar,
-      path: `${window.location.pathname}${window.location.search}`,
+      path,
       session,
       poster: video ? snapshotLiveFrame(video) : undefined,
       seat,
       mode,
     });
     if (isFullscreen) toggleFullscreen();
-    if (window.history.length > 1) navigate(-1);
+    if (window.history.state?.idx > 0) navigate(-1);
     else navigate('/app');
   }, [stream.streamId, stream.title, stream.creatorUsername, stream.streamer, stream.avatar, isOwnStream, transport, whepPlaybackId, urlsToTry, isFullscreen, toggleFullscreen, navigate]);
 
@@ -1979,12 +2003,9 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
             for a broadcast nobody watched. */}
         <div ref={viewRef} aria-hidden className="absolute inset-0 pointer-events-none" />
         {streamEnded && stream.replayUrl ? (
-          /* The broadcast is over but the recording was captured: play that
-             instead of the tombstone. A plain mp4 off our own CDN, so no
-             hls.js and no retry ladder — native controls are the whole
-             player. */
-          <>
+          <div className="group/replay absolute inset-0">
             <video
+              key={stream.replayUrl}
               ref={replayRef}
               className="w-full h-full object-contain"
               style={chatBeside ? CHAT_BESIDE_STYLE : undefined}
@@ -1998,11 +2019,9 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
                  screen, so the native bar would be a second timeline a
                  centimetre above it. */
               controls={!immersive}
-              onTimeUpdate={immersive ? (e) => {
-                const el = e.currentTarget;
-                if (!Number.isFinite(el.duration) || el.duration <= 0) return;
-                setReplayProgress(el.currentTime / el.duration);
-              } : undefined}
+              onLoadedMetadata={(e) => syncReplayClock(e.currentTarget)}
+              onDurationChange={(e) => syncReplayClock(e.currentTarget)}
+              onTimeUpdate={(e) => syncReplayClock(e.currentTarget)}
               onPlay={(e) => {
                 if (!visualActivity.isFeedPlaybackAllowed() && !isVideoInPictureInPicture(e.currentTarget)) { e.currentTarget.pause(); return; }
                 setReplayPlaying(true);
@@ -2023,28 +2042,52 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
                 <ButtonLoader size={40} className="!filter-none" />
               </div>
             )}
-            {/* Full-bleed took the native control bar away so the scrub
-                line could have the floor to itself — and with it went the
-                only way to start a replay, which left an ended stream as a
-                black rectangle you could not press. The picture is the
-                play/pause target now, with a visible button while it is
-                stopped, exactly as the shorts viewer does it. */}
-            {immersive && (
-              <button
-                type="button"
-                onClick={toggleReplay}
-                aria-label={replayPlaying ? t('audioPost.pause', 'Pause') : t('audioPost.play', 'Play')}
-                className="absolute inset-0 z-[5] flex items-center justify-center"
+            {(!immersive || !chromeHidden) && (
+              <div
+                data-no-navigate
+                data-replay-transport
+                onClick={(e) => e.stopPropagation()}
+                className={cn(
+                  'absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 transition-opacity',
+                  !immersive && replayPlaying && 'pointer-events-none opacity-0 group-hover/replay:pointer-events-auto group-hover/replay:opacity-100 focus-within:pointer-events-auto focus-within:opacity-100',
+                )}
               >
-                {/* rounded-xl, not a circle: every other control on this frame
-                    is a 12px-radius square, and a lone disc read as a different
-                    app's play button. */}
-                {!replayPlaying && (
-                  <span className="flex h-16 w-16 items-center justify-center rounded-xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] border border-white/10">
-                    <Play className="ml-1 h-8 w-8 fill-white text-white" />
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    disabled={!replayClock}
+                    onClick={() => jumpReplay(-1)}
+                    aria-label={_copy('copy.ba85bf0351d5', { defaultValue: 'Rewind {{value1}} seconds', value1: SEEK_JUMP_SECONDS })}
+                    className="flex size-10 flex-col items-center justify-center rounded-xl border border-white/10 bg-black/40 text-white backdrop-blur-sm disabled:opacity-50"
+                  >
+                    <Rewind className="size-4" aria-hidden="true" />
+                    <span aria-hidden="true" className="text-[10px] font-semibold">{SEEK_JUMP_SECONDS}s</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={toggleReplay}
+                    aria-label={replayPlaying ? t('audioPost.pause', 'Pause') : t('audioPost.play', 'Play')}
+                    className="flex size-16 items-center justify-center rounded-xl border border-white/10 bg-black/40 text-white backdrop-blur-sm"
+                  >
+                    {replayPlaying ? <Pause className="size-8 fill-white" aria-hidden="true" /> : <Play className="ml-1 size-8 fill-white" aria-hidden="true" />}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!replayClock}
+                    onClick={() => jumpReplay(1)}
+                    aria-label={_copy('copy.e4ee35029d20', { defaultValue: 'Skip forward {{value1}} seconds', value1: SEEK_JUMP_SECONDS })}
+                    className="flex size-10 flex-col items-center justify-center rounded-xl border border-white/10 bg-black/40 text-white backdrop-blur-sm disabled:opacity-50"
+                  >
+                    <FastForward className="size-4" aria-hidden="true" />
+                    <span aria-hidden="true" className="text-[10px] font-semibold">{SEEK_JUMP_SECONDS}s</span>
+                  </button>
+                </div>
+                {!immersive && replayClock && (
+                  <span className="pointer-events-none absolute left-1/2 top-full mt-2 -translate-x-1/2 whitespace-nowrap rounded bg-black/70 px-2 py-0.5 text-xs font-semibold tabular-nums text-white">
+                    {formatReplayTime(replayClock.position)} / {formatReplayTime(replayClock.duration)}
                   </span>
                 )}
-              </button>
+              </div>
             )}
 
             {/* PARTIAL when the capture was cut to the creator's daily
@@ -2066,7 +2109,7 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
             >
               {stream.replayTruncated ? _copy("copy.7874ebc95c83", { defaultValue: "PARTIAL REPLAY" }) : _copy("copy.92d23f5381ea", { defaultValue: "REPLAY" })}
             </span>
-          </>
+          </div>
         ) : streamEnded ? (
           /* Past live with nothing recorded: show the stream's cover image if
              there is one, otherwise a staticy TV screen — never an empty
@@ -2391,8 +2434,9 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
             onToggleMute={toggleMute}
             optionsSlot={optionsMenu}
             likeCount={stream.likeCount}
-            progress={streamEnded && stream.replayUrl ? (replayProgress ?? 0) : undefined}
-            onSeek={streamEnded && stream.replayUrl ? seekReplay : undefined}
+            progress={streamEnded && replayClock ? replayClock.position / replayClock.duration : undefined}
+            replayDuration={streamEnded ? replayClock?.duration : undefined}
+            onSeek={streamEnded && replayClock ? seekReplay : undefined}
             hidden={chromeHidden}
             streamId={stream.streamId}
             onClose={swipeFeed?.onClose}
@@ -2420,7 +2464,9 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
           onClick={(e) => e.stopPropagation()}
           className={cn(
             'absolute inset-x-3 bottom-0 z-20 flex max-h-[45%] flex-col justify-end transition-opacity duration-300',
-            keyboardOpen ? 'pb-2' : 'pb-[max(0.75rem,env(safe-area-inset-bottom))]',
+            keyboardOpen ? 'pb-2' : streamEnded && replayClock
+              ? 'pb-[calc(max(0.75rem,env(safe-area-inset-bottom))+1.25rem)]'
+              : 'pb-[max(0.75rem,env(safe-area-inset-bottom))]',
             chromeHidden && !(clearedChat && rotation !== 'css') && 'invisible pointer-events-none opacity-0',
             chromeHidden && clearedChat && rotation !== 'css' && 'z-[45] right-16'
           )}

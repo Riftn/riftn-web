@@ -1,7 +1,7 @@
 import { useTranslation as _useCopy } from 'react-i18next';
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
 import { BrandIcon, ThemedIcon } from '@/components/app/war/WarHudIcon';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, type TouchEvent } from 'react';
 import { Clock, FileText, Loader2, Ticket, FolderOpen } from "lucide-react";
 import LayoutGrid from "@/components/ui/cut-icons/apps";
 import Image from "@/components/ui/cut-icons/images";
@@ -28,6 +28,7 @@ import bookmark3dIcon from '@/assets/icons/bookmark-3d-icon.webp';
 import { useTranslation } from 'react-i18next';
 import { SEOHead } from '@/components/SEOHead';
 import { IslandAction, PageBody, PageIsland, PageTabs } from '@/components/app/page-kit/PageKit';
+import { SWIPE_BACK_EDGE } from '@/lib/swipe-back';
 
 const tabKeys = [
   { labelKey: 'bookmarks.all', value: 'all' as BookmarkType, icon: LayoutGrid },
@@ -40,6 +41,22 @@ const tabKeys = [
   { labelKey: 'bookmarks.videos', value: 'videos' as BookmarkType, icon: Video },
   { labelKey: 'bookmarks.textPosts', value: 'text' as BookmarkType, icon: FileText },
 ];
+
+const SWIPE_DISTANCE = 50;
+const SWIPE_RATIO = 1.5;
+const SWIPE_EXCLUDED = '[data-no-swipe], [data-swipe-back-ignore], input, textarea, select, [contenteditable], [role="slider"], video, canvas, iframe, [draggable="true"]';
+
+function canStartTabSwipe(target: EventTarget, surface: HTMLElement) {
+  if (!(target instanceof Element) || !surface.contains(target) || target.closest(SWIPE_EXCLUDED)) return false;
+  const selection = window.getSelection();
+  if (selection && !selection.isCollapsed) return false;
+  for (let node: Element | null = target; node && node !== surface; node = node.parentElement) {
+    const { overflowX, touchAction } = getComputedStyle(node);
+    if (touchAction === 'none') return false;
+    if ((overflowX === 'auto' || overflowX === 'scroll') && node.scrollWidth > node.clientWidth + 1) return false;
+  }
+  return true;
+}
 
 function FeedItemRenderer({ item }: { item: FeedItem }) {
   switch (item.type) {
@@ -81,6 +98,7 @@ export default function BookmarksPage() {
   const { t: _copy } = _useCopy();
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<BookmarkType>('all');
+  const swipeStart = useRef<{ id: number; x: number; y: number; rtl: boolean; horizontal: boolean } | null>(null);
   const clearHistory = useClearWatchHistory();
   const [searchQuery, setSearchQuery] = useSurfaceDraft("pages/app/BookmarksPage.tsx:searchQuery", '');
   const { isAuthenticated } = useAuth();
@@ -125,6 +143,44 @@ export default function BookmarksPage() {
     return () => observer.disconnect();
   }, [handleLoadMore]);
 
+  const handleSwipeStart = (event: TouchEvent<HTMLDivElement>) => {
+    swipeStart.current = null;
+    if (event.touches.length !== 1 || !canStartTabSwipe(event.target, event.currentTarget)) return;
+    const touch = event.touches[0];
+    const rtl = getComputedStyle(event.currentTarget).direction === 'rtl';
+    const fromLeadingEdge = rtl ? window.innerWidth - touch.clientX : touch.clientX;
+    if (fromLeadingEdge <= SWIPE_BACK_EDGE) return;
+    swipeStart.current = { id: touch.identifier, x: touch.clientX, y: touch.clientY, rtl, horizontal: false };
+  };
+
+  const handleSwipeMove = (event: TouchEvent<HTMLDivElement>) => {
+    const origin = swipeStart.current;
+    if (!origin) return;
+    const touch = event.touches[0];
+    if (event.touches.length !== 1 || touch.identifier !== origin.id) {
+      swipeStart.current = null;
+      return;
+    }
+    if (origin.horizontal) return;
+    const dx = Math.abs(touch.clientX - origin.x);
+    const dy = Math.abs(touch.clientY - origin.y);
+    if (Math.max(dx, dy) < 14) return;
+    if (dx >= dy * SWIPE_RATIO) origin.horizontal = true;
+    else swipeStart.current = null;
+  };
+
+  const handleSwipeEnd = (event: TouchEvent<HTMLDivElement>) => {
+    const origin = swipeStart.current;
+    swipeStart.current = null;
+    if (!origin?.horizontal || event.touches.length !== 0) return;
+    const touch = event.changedTouches[0];
+    if (!touch || touch.identifier !== origin.id) return;
+    const dx = touch.clientX - origin.x;
+    if (Math.abs(dx) < SWIPE_DISTANCE || Math.abs(dx) < Math.abs(touch.clientY - origin.y) * SWIPE_RATIO) return;
+    const step = (origin.rtl ? dx > 0 : dx < 0) ? 1 : -1;
+    setActiveTab((current) => tabKeys[tabKeys.findIndex((tab) => tab.value === current) + step]?.value ?? current);
+  };
+
   // Block access for unauthenticated users
   if (!isAuthenticated) {
     return (
@@ -162,6 +218,7 @@ export default function BookmarksPage() {
           <PageTabs
             value={activeTab}
             onChange={setActiveTab}
+            followSelection
             // Desktop: wrap onto a second line instead of scrolling, so no tab
             // ends up past the island's right edge with no way to reach it.
             className="lg:flex-wrap lg:overflow-visible"
@@ -186,7 +243,13 @@ export default function BookmarksPage() {
       </PageIsland>
 
       {/* Content Area */}
-      <PageBody>
+      <PageBody
+        data-tab-swipe
+        onTouchStart={handleSwipeStart}
+        onTouchMove={handleSwipeMove}
+        onTouchEnd={handleSwipeEnd}
+        onTouchCancel={() => { swipeStart.current = null; }}
+      >
       {activeTab === 'folders' ? (
         <div data-page-bento data-kit-section className="bg-zinc-900 p-3 sm:p-4">
           <BookmarkFoldersPanel />

@@ -11,11 +11,14 @@ import Volume2 from "@/components/ui/cut-icons/volume";
 import VolumeX from "@/components/ui/cut-icons/mute";
 
 import X from "@/components/ui/cut-icons/close";
+import PictureInPicture2 from "@/components/ui/cut-icons/picture-in-picture";
 
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import Hls from 'hls.js';
 import type { PiPChannel } from '@/contexts/PiPContext';
+import { usePictureInPicture } from '@/hooks/use-picture-in-picture';
+import { canPictureInPicture, togglePictureInPicture } from '@/lib/live-background';
 import {
   claimMediaSession,
   releaseMediaSession,
@@ -41,6 +44,8 @@ export function FloatingPiPPlayer({ channel, index, onClose }: FloatingPiPPlayer
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [isMuted, setIsMuted] = useState(true); // Start muted for autoplay compatibility
+  const [pipAvailable, setPipAvailable] = useState(false);
+  const inPictureInPicture = usePictureInPicture(videoRef);
   const workerRetried = useRef(false);
   const [isDragging, setIsDragging] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -252,6 +257,7 @@ export function FloatingPiPPlayer({ channel, index, onClose }: FloatingPiPPlayer
         playsInline
         {...{"webkit-playsinline": ""}}
         autoPlay
+        onLoadedMetadata={() => setPipAvailable(canPictureInPicture(videoRef.current))}
         className="w-full object-cover"
         style={{ height: videoHeight }}
       />
@@ -290,6 +296,17 @@ export function FloatingPiPPlayer({ channel, index, onClose }: FloatingPiPPlayer
           >
             {expanded ? <Minimize2 className="w-3.5 h-3.5 text-white" /> : <Maximize2 className="w-3.5 h-3.5 text-white" />}
           </button>
+          {pipAvailable && (
+            <button
+              type="button"
+              aria-label={t('liveMini.float', 'Float over other apps')}
+              aria-pressed={inPictureInPicture}
+              onClick={() => { void togglePictureInPicture(videoRef.current); }}
+              className="w-11 h-11 rounded-lg hover:bg-white/20 flex items-center justify-center transition-colors"
+            >
+              <PictureInPicture2 className="w-3.5 h-3.5 text-white" />
+            </button>
+          )}
           <button
             type="button"
             aria-label={t('common.close')}

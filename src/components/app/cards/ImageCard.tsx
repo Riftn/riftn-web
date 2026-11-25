@@ -1757,7 +1757,7 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
         {/* Metadata: timestamp and views */}
         <PostMetadata 
           className="!mt-3"
-          timestamp={post.timeAgo}
+          timestamp={post.createdAt || post.timeAgo}
           viewCount={post.views}
           tokenId={post.id}
           isOwnPost={isOwnPost}

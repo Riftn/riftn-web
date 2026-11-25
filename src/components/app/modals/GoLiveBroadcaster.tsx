@@ -41,7 +41,7 @@ import {
   type VideoEncoding,
 } from '@/lib/livepeer/whip';
 import { openCaptureCard, encodingForTrack } from '@/lib/livepeer/capture-card';
-import { requestDisplayCapture, tuneDisplayTrack } from '@/lib/livepeer/display-capture';
+import { displaySurfaceOf, requestDisplayCapture, tuneDisplayTrack } from '@/lib/livepeer/display-capture';
 import {
   composeCameraBubble,
   BUBBLE_CORNERS,
@@ -639,12 +639,19 @@ export function GoLiveBroadcaster({
     setStarved(true);
     if (!reportedStarvedRef.current) {
       reportedStarvedRef.current = true;
+      const screenTrack = screenStreamRef.current?.getVideoTracks()[0];
       logger.warn('broadcast starved', {
         fps: sample.fps,
         videoKbps: sample.videoKbps,
         audioKbps: sample.audioKbps,
         limitation: sample.limitation,
         rttMs: sample.rttMs,
+        visibility: document.visibilityState,
+        ...(screenTrack && {
+          displaySurface: displaySurfaceOf(screenTrack),
+          displayMuted: screenTrack.muted,
+          displayState: screenTrack.readyState,
+        }),
       });
     }
   }, []);
