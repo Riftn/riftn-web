@@ -285,6 +285,7 @@ export const ChatMessage = memo(function ChatMessage({
     error: translateError,
     isTooShort,
     handleTranslate,
+    handleTranslateSilently,
     handleShowOriginal,
   } = useTextTranslation(message.content, 'chat');
   const canTranslate = (message.type === 'text' || message.type === 'image') && !!message.content?.trim() && !isTooShort;
@@ -295,6 +296,7 @@ export const ChatMessage = memo(function ChatMessage({
     message.timestamp,
     !isTranslated && !isTranslateLoading && !isTooShort && !!message.content?.trim(),
     handleTranslate,
+    handleTranslateSilently,
   );
 
   // Community chat used to card up community links and nothing else — a store
