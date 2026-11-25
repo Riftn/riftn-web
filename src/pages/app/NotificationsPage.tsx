@@ -6,7 +6,6 @@ import { memo, useContext, useState, useEffect, useLayoutEffect, useRef, useCall
 import { CachedPageActiveContext } from '@/contexts/CachedPageActiveContext';
 import { toast } from 'sonner';
 import { isDhb } from '@/components/app/DhbAmount';
-import { motion, useReducedMotion } from 'framer-motion';
 import { IslandAction, PageBody, PageIsland, PageTabs, usePhonePill } from '@/components/app/page-kit/PageKit';
 import { NotificationSearchLine, notificationMatches, type MeltFrom } from '@/components/app/notifications/NotificationSearchLine';
 import SearchIcon from '@/components/ui/cut-icons/search';
@@ -43,7 +42,6 @@ import XIcon from "@/components/ui/cut-icons/close";
 import Send from "@/components/ui/cut-icons/send";
 import Gift from "@/components/ui/cut-icons/gifts";
 
-import { AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { AuthGate } from '@/components/app/AuthGate';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -1184,35 +1182,22 @@ function announcementTarget(notification: DeHubNotification): AnnouncementTarget
   return { kind: 'external', url: url.href };
 }
 
-// Off-screen rows (index >= 6) get `content-visibility: auto` so the browser
-// skips their layout + paint until they scroll near the viewport — same
-// technique as offscreenCardStyle in ProfileTabContent / the home feed. The
-// `auto` keyword means once a row has rendered, the browser reuses its real
-// size as the placeholder. Constant object keeps the prop referentially
-// stable so it never defeats React.memo.
-const OFFSCREEN_ROW_STYLE: React.CSSProperties = { contentVisibility: 'auto', containIntrinsicSize: 'auto 80px' };
-function offscreenRowStyle(index: number): React.CSSProperties | undefined {
-  return index < 6 ? undefined : OFFSCREEN_ROW_STYLE;
-}
-
 // Memoized: the page stays mounted forever (PersistentPageCache), so any parent
 // re-render used to re-run every row's per-render work (canonical-actor
 // building, date formatting). All props are kept referentially stable in the
-// parent (memoized bundles/list, useCallback onMarkAsRead, constant style).
+// parent (memoized bundles/list, useCallback onMarkAsRead).
 export const NotificationItem = memo(function NotificationItem({
   notification,
   bundle,
   onMarkAsRead,
   isMarkingAsRead,
   enrichedAvatars,
-  style,
 }: {
   notification: DeHubNotification;
   bundle: BundledNotification;
   onMarkAsRead: (id: string) => void;
   isMarkingAsRead: boolean;
   enrichedAvatars: Map<string, EnrichedAvatar>;
-  style?: React.CSSProperties;
 }) {
   const { t: _copy } = _useCopy();
   const navigate = useNavigate();
@@ -1508,7 +1493,6 @@ export const NotificationItem = memo(function NotificationItem({
       data-notification-row
       data-feed-row
       data-unread={isUnreadRow ? '' : undefined}
-      style={style}
       className="relative flex items-start gap-3 rounded-2xl py-3 pl-[18px] pr-4 transition-colors duration-300 cursor-pointer"
     >
       {/* Unread is a solid dot, not a filled block. It doubles as the
@@ -1977,7 +1961,6 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
   const phonePill = usePhonePill();
   const [search, setSearch] = useState<{ query: string; from: MeltFrom } | null>(null);
   const searchQuery = search?.query.trim().toLowerCase() ?? '';
-  const reduceMotion = useReducedMotion();
   const isDesktopViewport = useIsDesktopViewport();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const settingsSheetRef = useRef<HTMLDivElement>(null);
@@ -2451,7 +2434,7 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
       aria-label={t('notifications.settings')}
       title={t('notifications.settings')}
     >
-      <Settings className="h-[18px] w-[18px] text-white" />
+      <Settings className="size-5 text-white" />
     </button>
   );
   const settingsBody = (
@@ -2716,7 +2699,7 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
                         setSearch({ query: '', from: btn ? { left: btn.left, right: btn.right } : null });
                       }}
                     >
-                      <span data-notif-search-open className="flex"><SearchIcon className="h-[18px] w-[18px] text-white" /></span>
+                      <span data-notif-search-open className="flex"><SearchIcon className="size-5 text-white" /></span>
                     </IslandAction>
                   )}
                   <IslandAction
@@ -2725,9 +2708,9 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
                     disabled={totalUnread === 0 || markAllAsRead.isPending}
                   >
                     {markAllAsRead.isPending ? (
-                      <Loader2 className="h-[18px] w-[18px] animate-spin text-white" />
+                      <Loader2 className="size-5 animate-spin text-white" />
                     ) : (
-                      <Check className="h-[18px] w-[18px] text-white" />
+                      <Check className="size-5 text-white" />
                     )}
                   </IslandAction>
                 </div>
@@ -2740,7 +2723,8 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
                 return {
                   id: tab.value,
                   label: <span className="sr-only">{translateFilterLabel(tab.value)}</span>,
-                  icon: <tab.icon className={tab.value === 'reposts' ? 'h-[20px] w-[20px]' : 'h-[18px] w-[18px]'} aria-hidden="true" />,
+                  icon: <tab.icon className={tab.value === 'reposts' ? 'size-[22px]' : 'size-5'} aria-hidden="true" />,
+                  pillIconSize: tab.value === 'reposts' ? 22 : 20,
                   count: count > 0 ? count : undefined,
                   hint: String(translateFilterLabel(tab.value)),
                 };
@@ -2792,17 +2776,14 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
             // Keyed by tab: switching tabs swaps the list at once, instead of
             // every row springing from its old place to its new one.
             <div key={activeTab} data-notification-feed className="pb-2">
-              <AnimatePresence initial={false}>
-                {bundledNotifications.map((bundle, index) => {
-                  const group = feedGroupOf(bundle);
-                  // Unread rows lead with no heading: anything at the top is new.
-                  const showLabel = group !== 'new' && (index === 0 || feedGroupOf(bundledNotifications[index - 1]) !== group);
-                  return (
-                  <motion.div
-                    key={bundle.primary.id}
-                    layout={reduceMotion ? false : 'position'}
-                    transition={{ type: 'spring', stiffness: 420, damping: 38 }}
-                  >
+              {/* Keep rows in normal flow so scroll anchoring can follow the
+                  visible row when a refresh inserts or reorders notifications. */}
+              {bundledNotifications.map((bundle, index) => {
+                const group = feedGroupOf(bundle);
+                // Unread rows lead with no heading: anything at the top is new.
+                const showLabel = group !== 'new' && (index === 0 || feedGroupOf(bundledNotifications[index - 1]) !== group);
+                return (
+                  <div key={bundle.primary.id}>
                     {showLabel && (
                       <div data-feed-group-label className={`px-[18px] pb-1 ${index === 0 ? 'pt-1.5' : 'pt-4'} text-xs font-semibold uppercase tracking-[0.06em] text-zinc-500`}>
                         {feedGroupLabel(group)}
@@ -2814,14 +2795,10 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
                       onMarkAsRead={handleMarkAsRead}
                       isMarkingAsRead={bundle.allIds.includes(markingNotificationId || '')}
                       enrichedAvatars={enrichedAvatars}
-                      // iOS WebKit can leave content-visibility rows unpainted inside the
-                      // bell drawer's transformed scroller, showing a black sheet.
-                      style={inDrawer ? undefined : offscreenRowStyle(index)}
                     />
-                  </motion.div>
-                  );
-                })}
-              </AnimatePresence>
+                  </div>
+                );
+              })}
               
               {/* More loads on its own a screen and a half before the end; the
                   button stays as a fallback. */}

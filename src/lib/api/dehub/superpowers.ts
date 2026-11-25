@@ -99,7 +99,7 @@ export interface SuperPowerStatus {
   cycleEndsAt: string;
   cycleDays: number;
   tier: string | null;
-  /** Earned balance the tier came from — a lent badge does not count here. */
+  /** The personal entitlement or Team Up balance that earned this allowance. */
   badgeBalance: number;
   boostsPerCycle: number;
   boostsUsed: number;

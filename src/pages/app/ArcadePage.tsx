@@ -23,17 +23,24 @@ import Upload from "@/components/ui/cut-icons/upload";
 import Play from "@/components/ui/cut-icons/play";
 
 import { useReducedMotion } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { IslandAction, PageBody, PageIsland } from '@/components/app/page-kit/PageKit';
 import { SEOHead } from '@/components/SEOHead';
 import { ArcadeLeaderboard } from '@/components/app/arcade/ArcadeLeaderboard';
 import { ArcadeSubmissionForm } from '@/components/app/arcade/ArcadeSubmissionForm';
 import { useAuth } from '@/contexts/AuthContext';
 import { ARCADE_GAMES, type ArcadeGame } from '@/config/arcade-games';
+import { COCHRANIZ3R, groupArcadeGames } from '@/config/arcade-creators';
+import { getAccountSummariesByUsernames } from '@/lib/api/dehub/users';
+import { buildAvatarUrl } from '@/lib/media-url';
+import { profilePath } from '@/lib/profile-path';
 
-/** Turn-based games played with friends (riftn-backend src/games). */
-const FRIEND_GAMES = [
+/** Arcade entries with their own routes outside the embedded-game registry. */
+const LINK_GAMES = [
   {
     href: '/arcade/okey',
+    creator: { username: 'galatasaray' },
     art: '/og/arcade-okey.jpg',
     titleKey: 'games.okey.title',
     title: 'Okey 101',
@@ -42,6 +49,7 @@ const FRIEND_GAMES = [
   },
   {
     href: '/arcade/sillycoin',
+    creator: COCHRANIZ3R,
     art: '/og/arcade-sillycoin.jpg',
     titleKey: 'games.sillycoin.title',
     title: 'SillyCoin',
@@ -50,6 +58,7 @@ const FRIEND_GAMES = [
   },
   {
     href: '/arcade/chestard',
+    creator: COCHRANIZ3R,
     art: '/og/arcade-chestard.jpg',
     titleKey: 'games.chestard.title',
     title: 'Chestard',
@@ -58,6 +67,7 @@ const FRIEND_GAMES = [
   },
   {
     href: '/music/binary-metal',
+    creator: COCHRANIZ3R,
     art: '/og/music-binary-metal.jpg',
     titleKey: 'binaryMetal.title',
     title: 'Binary Metal',
@@ -66,6 +76,7 @@ const FRIEND_GAMES = [
   },
   {
     href: '/arcade/gratitude',
+    creator: COCHRANIZ3R,
     art: '/og/arcade-gratitude.jpg',
     titleKey: 'games.gratitude.title',
     title: 'Gratitude pen pals',
@@ -73,6 +84,9 @@ const FRIEND_GAMES = [
     blurb: 'Take turns saying what you are grateful for. No repeats. Miss your turn and they win.',
   },
 ] as const;
+
+const CREATOR_GROUPS = groupArcadeGames([...LINK_GAMES, ...ARCADE_GAMES]);
+const CREATOR_USERNAMES = CREATOR_GROUPS.flatMap((group) => group.username ? [group.username] : []);
 
 /** The games that are a competition, in registry order. */
 const RANKED_GAMES = ARCADE_GAMES.filter((game) => game.leaderboard);
@@ -86,7 +100,7 @@ function GameCard({ game }: { game: ArcadeGame }) {
     <div
       data-feed-item
       data-arcade-card
-      className="group flex flex-col overflow-hidden rounded-2xl bg-zinc-900 ring-1 ring-white/[0.06] transition-colors hover:ring-white/[0.14]"
+      className="group flex flex-1 flex-col overflow-hidden rounded-2xl bg-zinc-900 ring-1 ring-white/[0.06] transition-colors hover:ring-white/[0.14]"
     >
       <Link to={`/arcade/${game.slug}`} className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40">
         <div data-arcade-art data-media-scrim={!game.brand || undefined} className="relative aspect-video overflow-hidden bg-black">
@@ -110,8 +124,6 @@ function GameCard({ game }: { game: ArcadeGame }) {
               alt={game.brand ? game.title : game.artAlt}
               width={1280}
               height={720}
-              // Every card is above the fold on a desktop grid of three, so
-              // lazy-loading them only delays the one thing the page is for.
               loading="eager"
               decoding="async"
               className={`h-full w-full ${game.brand ? 'object-contain' : 'object-cover'} transition-transform duration-500 group-hover:scale-[1.03]`}
@@ -120,16 +132,11 @@ function GameCard({ game }: { game: ArcadeGame }) {
           {/* Keeps the title legible over whatever the capture happens to be. */}
           {!game.brand && <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />}
           <div className={game.brand ? 'sr-only' : 'pointer-events-none absolute inset-x-0 bottom-0 p-4'}>
-            <h2 className="text-lg font-semibold leading-tight text-white">{game.title}</h2>
+            <h3 className="text-lg font-semibold leading-tight text-white">{game.title}</h3>
           </div>
         </div>
       </Link>
 
-      {/* flex-1 + mt-auto below: every card in a grid row stretches to the same
-          height, and the button rides the bottom edge, so the Play buttons line
-          up across the row. The registry keeps the descriptions to a matching
-          length, so that alignment holds without the stretch having to absorb a
-          ragged block of copy. */}
       <div className="flex flex-1 flex-col gap-3 p-4">
         <p className="text-xs leading-relaxed text-zinc-400">{game.description}</p>
 
@@ -158,6 +165,91 @@ function GameCard({ game }: { game: ArcadeGame }) {
           ) : null}
         </div>
       </div>
+    </div>
+  );
+}
+
+function LinkGameCard({ game }: { game: typeof LINK_GAMES[number] }) {
+  const { t } = useTranslation();
+  return (
+    <Link
+      to={game.href}
+      data-feed-item
+      data-arcade-card
+      className="group flex flex-1 flex-col overflow-hidden rounded-2xl bg-zinc-900 ring-1 ring-white/[0.06] transition-colors hover:ring-white/[0.14]"
+    >
+      <div className="relative aspect-[1200/630] overflow-hidden bg-black">
+        <img src={game.art} alt="" width={1200} height={630} loading="lazy" decoding="async" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+      </div>
+      <div className="flex flex-col gap-1 p-4">
+        <h3 className="text-sm font-semibold text-white">{t(game.titleKey, { defaultValue: game.title })}</h3>
+        <p className="text-xs leading-relaxed text-zinc-400">{t(game.blurbKey, { defaultValue: game.blurb })}</p>
+      </div>
+    </Link>
+  );
+}
+
+function CreatorShelves() {
+  const { t } = useTranslation();
+  const { data: profiles = [] } = useQuery({
+    queryKey: ['arcade-creator-profiles', CREATOR_USERNAMES],
+    queryFn: () => getAccountSummariesByUsernames(CREATOR_USERNAMES),
+    enabled: CREATOR_USERNAMES.length > 0,
+    staleTime: 5 * 60_000,
+  });
+
+  return (
+    <div className="space-y-3">
+      {CREATOR_GROUPS.map((group) => {
+        const profile = group.username ? profiles.find((entry) => entry.username?.toLowerCase() === group.username) : undefined;
+        const name = profile?.displayName?.trim() || group.name || (
+          group.id === 'riftn' ? t('arcade.riftnOriginals') : t('arcade.otherGames')
+        );
+        const avatarUrl = profile?.avatarImageUrl
+          ? buildAvatarUrl(profile.address, profile.avatarImageUrl)
+          : group.avatarUrl;
+        const headingId = `arcade-creator-${group.id}`;
+        const identity = (
+          <>
+            <Avatar className="size-8">
+              <AvatarImage src={avatarUrl ?? undefined} className="object-cover" referrerPolicy="no-referrer" />
+              <AvatarFallback aria-hidden="true" className="text-xs text-muted-foreground">
+                {name.replace(/^@/, '').slice(0, 1).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <span className="truncate">{name}</span>
+          </>
+        );
+
+        return (
+          <section key={group.id} aria-labelledby={headingId} className="min-w-0">
+            <header className="mb-2 flex min-w-0 items-center justify-between gap-3">
+              <h2 id={headingId} className="min-w-0 text-sm font-semibold text-white">
+                {group.username ? (
+                  <Link to={profilePath(group.username)} className="flex items-center gap-2 hover:underline">{identity}</Link>
+                ) : group.profileUrl ? (
+                  <a href={group.profileUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:underline">{identity}</a>
+                ) : (
+                  <span className="flex items-center gap-2">{identity}</span>
+                )}
+              </h2>
+              <span className="shrink-0 text-xs tabular-nums text-zinc-400">
+                {t('arcade.gameCount', { count: group.games.length })}
+              </span>
+            </header>
+            <ul className="-mx-1 flex min-w-0 snap-x snap-proximity gap-3 overflow-x-auto overscroll-x-contain p-1">
+              {group.games.map((game) => (
+                <li
+                  key={'slug' in game ? game.slug : game.href}
+                  className="flex min-w-0 shrink-0 basis-[84%] snap-start sm:basis-[calc(50%_-_0.375rem)] lg:basis-[calc(33.333%_-_0.5rem)]"
+                >
+                  {'slug' in game ? <GameCard game={game} /> : <LinkGameCard game={game} />}
+                </li>
+              ))}
+            </ul>
+          </section>
+        );
+      })}
     </div>
   );
 }
@@ -217,51 +309,8 @@ export default function ArcadePage() {
       </PageIsland>
 
       <PageBody className="mx-auto max-w-4xl">
-        {/* Three to a row on desktop, and the equal-height cards put every Play
-            button on the same baseline within a row. Deliberately not widened
-            to four when the fourth game arrived: at this max-width that leaves
-            each capture about 200px across, which is too small to read as a
-            game rather than a thumbnail. A short second row is the cheaper
-            trade. */}
-        {/* Games with friends: turn based, played against people (or bots),
-            with a push when it is your turn. Not iframe builds, so they sit
-            outside ARCADE_GAMES. */}
-        <section className="mb-3">
-          <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">{t('games.withFriends', { defaultValue: 'Play with friends' })}</h2>
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            {FRIEND_GAMES.map((game) => (
-              <Link
-                key={game.href}
-                to={game.href}
-                data-feed-item
-                data-arcade-card
-                className="group flex flex-col overflow-hidden rounded-2xl bg-zinc-900 ring-1 ring-white/[0.06] transition-colors hover:ring-white/[0.14]"
-              >
-                <div className="relative aspect-[1200/630] overflow-hidden bg-black">
-                  <img src={game.art} alt="" width={1200} height={630} loading="eager" decoding="async" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
-                </div>
-                <div className="flex flex-col gap-1 p-4">
-                  <p className="text-sm font-semibold text-white">{t(game.titleKey, { defaultValue: game.title })}</p>
-                  <p className="text-xs leading-relaxed text-zinc-400">{t(game.blurbKey, { defaultValue: game.blurb })}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
+        <CreatorShelves />
 
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-          {ARCADE_GAMES.map((game) => (
-            <GameCard key={game.slug} game={game} />
-          ))}
-        </div>
-
-        {/* The boards, under the games rather than above them: somebody who has
-            not played yet wants the grid, and somebody who has knows to scroll.
-
-            One switcher rather than two stacked boards. They are different
-            games measured in different units — a chess rating and a distance
-            down a street have no shared axis — so showing them side by side
-            would invite a comparison that means nothing. */}
         {RANKED_GAMES.length > 0 ? (
           <section data-feed-item data-kit-section className="bg-zinc-900/60 p-4 ring-1 ring-white/[0.06]">
             <div className="mb-3 flex flex-wrap gap-1.5">

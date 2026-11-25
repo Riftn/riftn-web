@@ -1,3 +1,5 @@
+import type { Socket } from 'socket.io-client';
+
 /** A connected socket is not proof that the server accepted a message. */
 export function confirmChatDelivery(options: {
   listen: (event: string, handler: (value: any) => void) => () => void;
@@ -41,4 +43,30 @@ export function roomMessageMatches(message: any, expected: {
   if (expected.attachment && value.audioUrl !== expected.attachment && value.gif?.url !== expected.attachment &&
       !value.media?.some((item: { url?: string }) => item.url === expected.attachment)) return false;
   return true;
+}
+
+/** Wait for the room to be usable before allowing an outgoing message. */
+export function waitForChatRoom(
+  socket: Socket,
+  isReady: () => boolean,
+  joinEvents: string[],
+  rejoin: () => void,
+): Promise<boolean> {
+  if (socket.connected && isReady()) return Promise.resolve(true);
+  return new Promise(resolve => {
+    const ready = () => { if (socket.connected && isReady()) finish(true); };
+    const rejected = () => { if (!socket.active) finish(false); };
+    const finish = (joined: boolean) => {
+      clearTimeout(timeout);
+      socket.off('connect_error', rejected);
+      for (const event of joinEvents) socket.off(event, ready);
+      resolve(joined);
+    };
+    const timeout = setTimeout(() => finish(false), 12_000);
+    socket.on('connect_error', rejected);
+    for (const event of joinEvents) socket.on(event, ready);
+    if (socket.connected) rejoin();
+    // Namespace refusals stop the automatic reconnect loop.
+    else if (!socket.active) socket.connect();
+  });
 }

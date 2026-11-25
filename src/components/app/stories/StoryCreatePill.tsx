@@ -45,7 +45,7 @@ const CLOSE_MS = 200;
  */
 function useCreateMenu() {
   const { t } = useTranslation();
-  const { walletAddress, user } = useAuth();
+  const { walletAddress, user, isAuthenticated, openLoginModal } = useAuth();
   const { openPostModal } = useGlobalDropZone();
   const openCreator = useStoriesStore(s => s.openCreator);
   const [menu, setMenu] = useState<'closed' | 'open' | 'closing'>('closed');
@@ -81,7 +81,10 @@ function useCreateMenu() {
 
   const pick = (kind: Kind) => {
     closeMenu();
-    if (kind === 'moment') openCreator();
+    if (kind === 'moment') {
+      if (isAuthenticated) openCreator();
+      else openLoginModal();
+    }
     else if (kind === 'post') openPostModal();
     else if (kind === 'live') { setLiveMounted(true); setLiveOpen(true); }
     else if (kind === 'stage') openStageModal('create');
@@ -201,7 +204,7 @@ export function StoryCreateTile() {
         aria-label={createLabel}
         onClick={() => toggle(ref.current, 'left')}
       >
-        <span data-create-key><Add className="h-[18px] w-[18px]" /></span>
+        <span data-create-key aria-hidden="true"><Add /></span>
         <span data-create-label>{createLabel}</span>
       </button>
       {elements}

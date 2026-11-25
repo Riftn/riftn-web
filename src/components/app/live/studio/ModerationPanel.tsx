@@ -5,6 +5,7 @@
  */
 import { useEffect, useId, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '@/contexts/AuthContext';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -16,9 +17,11 @@ import { PageSection } from '@/components/app/page-kit/PageKit';
 import { SETTINGS_FIELD_CLASS, SETTINGS_LABEL_CLASS } from '@/components/app/settings/SettingsRow';
 import {
   addStreamModerator,
+  getDelegatedStreamBans,
   getMyStreamModeration,
   removeStreamModerator,
   saveMyStreamModeration,
+  unbanFromModeratedStreams,
   unbanFromStreams,
   type MyStreamModeration,
   type StreamModerationPerson,
@@ -64,6 +67,19 @@ const nameOf = (p: StreamModerationPerson) => p.displayName || p.username || `${
 export function ModerationPanel() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { walletAddress } = useAuth();
+  const delegatedBansKey = ['delegated-stream-bans', walletAddress?.toLowerCase()] as const;
+  const delegated = useQuery({
+    queryKey: delegatedBansKey,
+    queryFn: getDelegatedStreamBans,
+    enabled: !!walletAddress,
+  });
+  const delegatedUnban = useMutation({
+    mutationFn: ({ creator, address }: { creator: string; address: string }) =>
+      unbanFromModeratedStreams(creator, address),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: delegatedBansKey }),
+    onError: () => toast.error(t('liveStudio.moderation.saveFailed')),
+  });
   const { data, isLoading, isError } = useQuery<MyStreamModeration>({
     queryKey: myModerationKey,
     queryFn: getMyStreamModeration,
@@ -241,8 +257,24 @@ export function ModerationPanel() {
 
           <div>
             <p className={SETTINGS_LABEL_CLASS}>{t('liveStudio.moderation.banned')}</p>
-            <PeopleList people={data.banned} empty={t('liveStudio.moderation.noBans')} actionLabel={t('liveStudio.moderation.unban')} onAction={(a) => unban.mutate(a)} />
+            <PeopleList people={data.banned} empty={t('liveStudio.moderation.noBans')} actionLabel={t('liveStudio.moderation.unban')} showActionLabel disabled={unban.isPending} onAction={(a) => unban.mutate(a)} />
           </div>
+
+          {(delegated.isError || !!delegated.data?.bans.length) && (
+            <div className="space-y-2">
+              <p className={SETTINGS_LABEL_CLASS}>{t('liveStudio.moderation.delegatedBans')}</p>
+              {delegated.isError ? (
+                <p className="text-sm text-zinc-400">{t('liveStudio.moderation.loadFailed')}</p>
+              ) : delegated.data?.bans.map(({ creator, banned }) => (
+                <div key={creator.address}>
+                  <p className="text-sm text-zinc-400">{nameOf(creator)}</p>
+                  <PeopleList people={banned} empty={t('liveStudio.moderation.noBans')} actionLabel={t('liveStudio.moderation.unban')} showActionLabel
+                    disabled={delegatedUnban.isPending}
+                    onAction={(address) => delegatedUnban.mutate({ creator: creator.address, address })} />
+                </div>
+              ))}
+            </div>
+          )}
 
           <div>
             <p className={SETTINGS_LABEL_CLASS}>{t('liveStudio.moderation.log')}</p>
@@ -276,11 +308,15 @@ function PeopleList({
   people,
   empty,
   actionLabel,
+  showActionLabel,
+  disabled,
   onAction,
 }: {
   people: StreamModerationPerson[];
   empty: string;
   actionLabel: string;
+  showActionLabel?: boolean;
+  disabled?: boolean;
   onAction: (address: string) => void;
 }) {
   if (!people.length) return <p className="text-sm text-zinc-500">{empty}</p>;
@@ -289,8 +325,8 @@ function PeopleList({
       {people.map((p) => (
         <li key={p.address} className="flex items-center justify-between gap-2 rounded-lg px-2 py-1 hover:bg-zinc-800/60">
           <span className="truncate text-sm text-white">{nameOf(p)}</span>
-          <button onClick={() => onAction(p.address)} aria-label={actionLabel} title={actionLabel} className="rounded-md p-1 text-zinc-500 hover:bg-zinc-700 hover:text-white">
-            <Trash2 className="h-4 w-4" />
+          <button type="button" disabled={disabled} onClick={() => onAction(p.address)} aria-label={actionLabel} title={actionLabel} className="rounded-md p-1 text-zinc-500 hover:bg-zinc-700 hover:text-white disabled:opacity-50">
+            {showActionLabel ? <span className="text-xs font-medium">{actionLabel}</span> : <Trash2 className="h-4 w-4" />}
           </button>
         </li>
       ))}

@@ -244,6 +244,7 @@ const HUE_GRADIENT =
   'linear-gradient(to right, hsl(0, 80%, 60%), hsl(60, 80%, 60%), hsl(120, 80%, 60%), hsl(180, 80%, 60%), hsl(240, 80%, 60%), hsl(300, 80%, 60%), hsl(360, 80%, 60%))';
 
 const STATIC_BAR_COUNT = 100;
+const MAX_WAVEFORM_DECODE_SECONDS = 120;
 /** CSS px of the studio animation that runs on under the deck (audio-studio.css). */
 const STUDIO_BLEED = 44;
 /** Matches `fftSize: 256` below — an idle frame has to be the analyser's size. */
@@ -446,17 +447,18 @@ export function AudioVisualizer({
   const mutedRef = useRef(muted);
   mutedRef.current = muted;
 
-  // Decode the audio file to get full-track waveform peaks — deferred until
-  // the card is near the viewport (or playing) so a feed of audio posts
-  // doesn't download + PCM-decode every track on mount.
+  // Short tracks can afford a separate full-file decode for waveform peaks.
+  // Long tracks use the existing seeded shape and live analyser so playback
+  // doesn't also download and scan minutes of uncompressed audio.
   useEffect(() => {
+    if (!isActiveClaim || !Number.isFinite(duration) || duration <= 0 || duration > MAX_WAVEFORM_DECODE_SECONDS) return;
     if (!isPlaying && (waveformOnPlay || !decodeEnabled)) return;
     let stale = false;
     decodeAudioWaveform(audioUrl, STATIC_BAR_COUNT, (peaks) => {
       if (!stale) setWaveformPeaks(peaks);
     });
     return () => { stale = true; };
-  }, [audioUrl, decodeEnabled, waveformOnPlay, isPlaying]);
+  }, [audioUrl, decodeEnabled, duration, isActiveClaim, waveformOnPlay, isPlaying]);
 
   /**
    * Point this card's refs at `graph` — the shared player, arriving from the

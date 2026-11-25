@@ -3,9 +3,10 @@ import { fireEvent, render, screen, waitFor, cleanup } from '@testing-library/re
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import QuickActionsDrawer from '@/components/app/QuickActionsDrawer';
 
-const mocks = vi.hoisted(() => ({ submit: vi.fn(), capture: vi.fn(), login: vi.fn(), authenticated: true }));
+const mocks = vi.hoisted(() => ({ submit: vi.fn(), capture: vi.fn(), login: vi.fn(), disconnect: vi.fn(), profiles: vi.fn((): { id: string }[] => []), authenticated: true }));
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
-vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ isAuthenticated: mocks.authenticated, walletAddress: '0xabc', openLoginModal: mocks.login, disconnect: vi.fn() }) }));
+vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ isAuthenticated: mocks.authenticated, walletAddress: '0xabc', openLoginModal: mocks.login, disconnect: mocks.disconnect }) }));
+vi.mock('@/lib/profiles', () => ({ currentProfileId: () => 'active', listProfiles: mocks.profiles }));
 vi.mock('@/hooks/use-feature-requests', () => ({ useSubmitFeatureRequest: () => ({ mutateAsync: mocks.submit, isPending: false }) }));
 vi.mock('@/components/app/settings/ProfilesSection', () => ({ ProfilesSection: () => null }));
 vi.mock('@/hooks/use-surface-draft', () => ({ useSurfaceDraft: () => {
@@ -18,7 +19,7 @@ vi.mock('@/components/ui/drawer', () => {
 });
 vi.mock('@/lib/page-bug-report', async importOriginal => ({ ...await importOriginal<object>(), captureBugScreenshot: mocks.capture, enrichPageBugContext: async (context: unknown) => context }));
 const context = { page: 'https://riftn.com/app/home', capturedAt: '2026-10-11T12:00:00Z', device: 'Android 16', viewport: '400 × 800', model: 'Pixel', userAgent: 'Browser' };
-beforeEach(() => { mocks.submit.mockReset(); mocks.capture.mockReset().mockResolvedValue(null); mocks.login.mockReset(); mocks.authenticated = true; });
+beforeEach(() => { mocks.submit.mockReset(); mocks.capture.mockReset().mockResolvedValue(null); mocks.login.mockReset(); mocks.disconnect.mockReset().mockResolvedValue(undefined); mocks.profiles.mockReturnValue([]); mocks.authenticated = true; });
 afterEach(cleanup);
 
 it('sends a short report and automatic context even when capture is unavailable', async () => {
@@ -50,4 +51,21 @@ it('asks guests to sign in before writing a public bug', async () => {
   await waitFor(() => expect(screen.getByText('quickActions.signIn')).toBeEnabled());
   fireEvent.click(screen.getByText('quickActions.signIn'));
   expect(mocks.login).toHaveBeenCalledTimes(1); expect(mocks.submit).not.toHaveBeenCalled();
+});
+
+it.each([
+  ['settings.logOutThisAccount', { forgetProfile: true }],
+  ['settings.logOutAllAccounts', { allAccounts: true }],
+])('uses the selected account scope from quick actions', async (label, options) => {
+  mocks.profiles.mockReturnValue([{ id: 'active' }, { id: 'saved' }]);
+  const close = vi.fn();
+  render(<QuickActionsDrawer context={context} initialReport={false} onClose={close} />);
+
+  fireEvent.click(screen.getByText('quickActions.logout'));
+  const choice = await screen.findByRole('button', { name: label });
+  expect(mocks.disconnect).not.toHaveBeenCalled();
+
+  fireEvent.click(choice);
+  await waitFor(() => expect(mocks.disconnect).toHaveBeenCalledWith(options));
+  expect(close).toHaveBeenCalledTimes(1);
 });

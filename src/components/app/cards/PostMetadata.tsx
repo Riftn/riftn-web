@@ -14,7 +14,7 @@ import Clock from "@/components/ui/cut-icons/clock";
 import Languages from "@/components/ui/cut-icons/language";
 
 import { useTranslation } from 'react-i18next';
-import { formatTimeAgo } from '@/lib/feed-utils';
+import { formatPostAge, formatPostDate, parsePostTimestamp } from '@/i18n/post-timestamp';
 import { LANGUAGE_NAMES } from '@/hooks/use-user-language';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
@@ -58,12 +58,9 @@ export function PostMetadata({ className, timestamp, viewCount, tokenId, isAd, i
   const boosted = useBoostedPost();
   const navigate = useNavigate();
 
-  // Format timestamp - if it's an ISO string, convert to relative time
-  const formattedTimestamp = timestamp ? (
-    timestamp.includes('T') || timestamp.includes('-') 
-      ? formatTimeAgo(timestamp) 
-      : timestamp
-  ) : undefined;
+  const date = parsePostTimestamp(timestamp);
+  const formattedTimestamp = date ? formatPostAge(date, i18n.language, t) : timestamp;
+  const exactTimestamp = date ? formatPostDate(date, i18n.language, { dateStyle: 'medium', timeStyle: 'short' }) : undefined;
 
   const displayedCount = typeof viewCount === 'string' ? viewCount.replace(/\s+views?$/i, '') : viewCount;
   const hasViews = viewCount !== undefined && viewCount !== null;
@@ -133,7 +130,7 @@ export function PostMetadata({ className, timestamp, viewCount, tokenId, isAd, i
       {formattedTimestamp && (
         <span className="flex items-center gap-1">
           <Clock className="w-3 h-3" />
-          <span>{formattedTimestamp}</span>
+          {date ? <time dateTime={date.toISOString()} title={exactTimestamp}>{formattedTimestamp}</time> : <span>{formattedTimestamp}</span>}
         </span>
       )}
       {boosted && (

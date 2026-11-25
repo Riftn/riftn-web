@@ -276,13 +276,14 @@ export function useDeHubProfile({ userId, username, address, enabled = true }: U
   }, [query.data, query.isPlaceholderData, cacheKey]);
 
   // Helper to update follow status optimistically
-  const setFollowStatus = (isFollowing: boolean) => {
+  const setFollowStatus = (isFollowing: boolean, isPending = false) => {
     queryClient.setQueryData(['dehub-profile', userId || username, address], (old: ProfileData | undefined) => {
-      if (!old) return old;
+      if (!old || (old.isFollowing === isFollowing && old.isPending === isPending)) return old;
       return {
         ...old,
         isFollowing,
-        followers: isFollowing ? old.followers + 1 : Math.max(0, old.followers - 1),
+        isPending,
+        followers: Math.max(0, old.followers + Number(isFollowing) - Number(old.isFollowing === true)),
       };
     });
   };

@@ -153,24 +153,15 @@ export function currentProfileId(): string | null {
   return currentIdentity()?.id ?? null;
 }
 
-/**
- * One row per Riftn account. Usernames are unique, so two rows sharing one are
- * the same person under an old and a new address — a wallet reset moves the
- * profile to a new smart account and leaves the old row behind. The most
- * recently added row is the address the account lives on now.
- */
+/** Legacy wallet-only and linked sign-ins can leave two rows for one address. */
 function withoutStaleDuplicates(profiles: StoredProfile[]): StoredProfile[] {
   const newest = new Map<string, StoredProfile>();
   for (const p of profiles) {
-    const key = p.username?.toLowerCase();
-    if (!key) continue;
+    const key = p.address.toLowerCase();
     const seen = newest.get(key);
     if (!seen || p.addedAt > seen.addedAt) newest.set(key, p);
   }
-  return profiles.filter((p) => {
-    const key = p.username?.toLowerCase();
-    return !key || newest.get(key) === p;
-  });
+  return profiles.filter((p) => newest.get(p.address.toLowerCase()) === p);
 }
 
 export function listProfiles(): StoredProfile[] {
@@ -230,6 +221,11 @@ export function canAddProfile(profiles: StoredProfile[] = readStore(), liveBadge
 
 export function getProfile(id: string): StoredProfile | null {
   return readStore().find((p) => p.id === id) ?? null;
+}
+
+export function clearProfiles(): void {
+  localStorage.removeItem(PROFILES_STORAGE_KEY);
+  window.dispatchEvent(new Event(PROFILES_CHANGED_EVENT));
 }
 
 export function removeProfile(id: string): void {

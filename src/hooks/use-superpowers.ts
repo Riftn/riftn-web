@@ -61,7 +61,7 @@ function useIsAuthed(): boolean {
 }
 
 /** This account's tier, allowance and bookings. Null while signed out. */
-export function useSuperpowers(enabled = true) {
+export function useSuperpowers(enabled = true, staleTime = 30_000) {
   const isAuthenticated = useIsAuthed();
 
   return useQuery<SuperPowerStatus | null>({
@@ -71,7 +71,7 @@ export function useSuperpowers(enabled = true) {
     // card) pass their own open/closed state; without it each mount is an
     // observer that refetches the moment the stale window has passed.
     enabled: isAuthenticated && enabled,
-    staleTime: 30 * 1000,
+    staleTime,
     // An account with no badge gets a legitimate, well-formed answer here
     // (tier null, nothing granted), so a failure is a real failure — but it
     // must never block a composer. Callers treat undefined as "no boost

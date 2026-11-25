@@ -513,7 +513,6 @@ function FeatureCard({
               variant="destructive"
               onClick={confirmDelete}
               disabled={deleteMutation.isPending}
-              className="rounded-lg text-xs"
             >
               {deleteMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : _copy("copy.e2d0a54968ea", { defaultValue: "Delete" })}
             </Button>
@@ -521,7 +520,6 @@ function FeatureCard({
               size="sm"
               variant="ghost"
               onClick={() => setShowDeleteConfirm(false)}
-              className="rounded-lg text-xs text-zinc-400"
             >{_copy("copy.19766ed6ccb2", { defaultValue: "Cancel" })}</Button>
           </div>
         </div>
@@ -542,10 +540,10 @@ function FeatureCard({
             className="bg-zinc-800/50 border-white/10 text-white rounded-lg text-sm"
           />
           <div className="flex gap-2">
-            <Button size="sm" variant="glass" onClick={saveNotFeasible} disabled={statusMutation.isPending} className="rounded-lg text-xs">
+            <Button size="sm" variant="glass" onClick={saveNotFeasible} disabled={statusMutation.isPending}>
               {statusMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : _copy("copy.465fe84f18fc", { defaultValue: "Mark Not feasible" })}
             </Button>
-            <Button size="sm" variant="ghost" onClick={() => setReasonDraft(null)} className="rounded-lg text-xs text-zinc-400">{_copy("copy.19766ed6ccb2", { defaultValue: "Cancel" })}</Button>
+            <Button size="sm" variant="ghost" onClick={() => setReasonDraft(null)}>{_copy("copy.19766ed6ccb2", { defaultValue: "Cancel" })}</Button>
           </div>
         </div>
       )}
@@ -611,7 +609,6 @@ function FeatureCard({
                 type="button"
                 size="sm"
                 variant="ghost"
-                className="rounded-lg px-2 text-xs"
                 disabled={editMutation.isPending || editKeep.length + editNew.length >= MAX_FEATURE_ATTACHMENTS}
                 onClick={() => editFileRef.current?.click()}
               >
@@ -625,7 +622,6 @@ function FeatureCard({
                 variant="glass"
                 onClick={handleSaveEdit}
                 disabled={editMutation.isPending || !editTitle.trim() || !editDescription.trim() || editDescription.length > editDescriptionLimit}
-                className="rounded-lg text-xs"
               >
                 {editMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : _copy("copy.1509f561f241", { defaultValue: "Save" })}
               </Button>
@@ -633,7 +629,6 @@ function FeatureCard({
                 size="sm"
                 variant="ghost"
                 onClick={() => { setIsEditing(false); clearEditNew(); }}
-                className="rounded-lg text-xs text-zinc-400"
               >{_copy("copy.19766ed6ccb2", { defaultValue: "Cancel" })}</Button>
             </div>
           </div>
@@ -736,7 +731,7 @@ function RequestLoadError({ retry }: { retry: () => void }) {
       <Button
         onClick={retry}
         variant="glass"
-        className="rounded-xl font-semibold mt-3"
+        className="mt-3"
       >
         {t('common.retry', 'Retry')}
       </Button>
@@ -873,14 +868,14 @@ function PromptComposer({ initialCategory, focusRequest, onPosted }: { initialCa
         />
         <div className="flex flex-wrap items-center gap-2 border-t border-white/10 pt-3 mt-2">
           <input ref={fileInputRef} type="file" accept="image/*,video/*" multiple className="hidden" onChange={e => { addFiles(Array.from(e.target.files ?? [])); e.target.value = ''; }} />
-          <Button type="button" variant="ghost" size="sm" className="rounded-lg px-2" disabled={submitMutation.isPending || attachments.length >= MAX_FEATURE_ATTACHMENTS} onClick={() => fileInputRef.current?.click()}>
+          <Button type="button" variant="ghost" size="sm" className="px-2" disabled={submitMutation.isPending || attachments.length >= MAX_FEATURE_ATTACHMENTS} onClick={() => fileInputRef.current?.click()}>
             <ImagePlus className="w-4 h-4" />{t('features.promptAttach', 'Attach images')}
           </Button>
           <HoldToTalkButton disabled={submitMutation.isPending || description.length >= FEATURE_PROMPT_MAX_LENGTH}
             beforeStart={() => { if (isAuthenticated) return false; openLoginModal(); return true; }}
             onText={addSpoken} />
           <span className="hidden sm:inline text-[11px] text-zinc-500">{t('features.promptDrop', 'Paste or drop images here')}</span>
-          <Button type="button" variant="glass" className="rounded-xl ml-auto" disabled={!description.trim() || submitMutation.isPending} onClick={handleSubmit}>
+          <Button type="button" variant="glass" className="ml-auto" disabled={!description.trim() || submitMutation.isPending} onClick={handleSubmit}>
             {submitMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
             {t('features.promptPost', 'Post prompt')}
           </Button>
@@ -1376,6 +1371,7 @@ export default function FeaturesPage() {
                       ref={setFeaturesCatRef(cat.id)}
                       type="button"
                       onClick={() => setCategory(cat.id)}
+                      aria-pressed={category === cat.id}
                       className={`relative z-40 px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors duration-200 ${
                         category === cat.id
                           ? 'text-white'
@@ -1515,7 +1511,6 @@ export default function FeaturesPage() {
               <Button
                 onClick={handleSubmitClick}
                 variant="glass"
-                className="rounded-xl font-semibold"
               >
                 <Plus className="w-4 h-4" />
                 {t('features.submitFeatureRequest')}

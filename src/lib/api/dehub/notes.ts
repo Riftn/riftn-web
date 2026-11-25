@@ -3,7 +3,8 @@
  * =========
  * A note is a short line (60 characters) with an optional song, GIF or place,
  * shown in the row at the top of Messages for 24 hours. One per person; a new
- * one replaces the old. You see your own and the notes of people you follow.
+ * one replaces the old. The API returns your own note and eligible active
+ * notes from people you follow, regardless of how long ago you followed them.
  *
  * @module lib/api/dehub/notes
  */

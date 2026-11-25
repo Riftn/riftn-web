@@ -174,7 +174,7 @@ def card_cmd(source: str, at: float, out: str) -> list[str]:
 
 def render(job: dict, tmp: str) -> dict:
     start, end = float(job["start"]), float(job["end"])
-    clip_s = end - start
+    clip_s = round(end - start, 3)
     if start < 0 or not (MIN_CLIP_S <= clip_s <= MAX_CLIP_S):
         raise RuntimeError("clip window out of range")
     source = job["sourceUrl"]
@@ -183,7 +183,9 @@ def render(job: dict, tmp: str) -> dict:
     with open(os.path.join(tmp, "clip.ass"), "w", encoding="utf-8") as f:
         f.write(job["ass"])
     out = os.path.join(tmp, "clip.mp4")
-    clips.sh(*clips.render_cmd(source, start, clip_s, True, None, out), cwd=tmp)
+    audio = clips.sh("ffprobe", "-v", "error", "-select_streams", "a:0", "-show_entries",
+                     "stream=codec_type", "-of", "csv=p=0", source).strip() == "audio"
+    clips.sh(*clips.render_cmd(source, start, clip_s, True, None, out, audio=audio), cwd=tmp)
     poster = os.path.join(tmp, "poster.jpg")
     clips.sh("ffmpeg", "-y", "-v", "error", "-ss", f"{min(1.0, clip_s / 2):.3f}", "-i", out, "-frames:v", "1", "-q:v", "3", poster)
     card = os.path.join(tmp, "card.jpg")
