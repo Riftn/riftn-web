@@ -204,7 +204,7 @@ export function StoryCreateTile() {
         aria-label={createLabel}
         onClick={() => toggle(ref.current, 'left')}
       >
-        <span data-create-key><Add className="h-[18px] w-[18px]" /></span>
+        <span data-create-key aria-hidden="true"><Add /></span>
         <span data-create-label>{createLabel}</span>
       </button>
       {elements}
