@@ -2639,7 +2639,6 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
         data-media-frame-key={!isImmersive && !isFullscreen ? `video:${video.id}` : undefined}
         data-media-frame-measured={resolvedVideoAspect == null ? undefined : measuredAspect}
         data-audio-frame={video.isAudio || undefined}
-        data-no-navigate={video.isAudio || undefined}
         data-video-pointer-hidden={(isFullscreen && overlayControls && !controlsVisible) || undefined}
         data-no-navigate
         data-feed-video-frame={cropFeedVideo || undefined}
