@@ -5,7 +5,6 @@ import { AuthContext } from '@/contexts/AuthContext';
 import { useMomentPeek, refreshMomentPeeks } from '@/hooks/use-moment-peek';
 import { useStoriesEnabled } from '@/hooks/use-stories-enabled';
 import { getUserStories, type MomentPeek } from '@/lib/api/dehub/stories';
-import { useMomentPreviewsBlurred } from '@/lib/moment-preview-blur';
 import { formatCount } from '@/lib/format-count';
 import { cn } from '@/lib/utils';
 import { useStoriesStore } from '@/store/storiesStore';
@@ -77,7 +76,6 @@ interface MomentFaceProps {
 export function MomentFace({ address, size, children, className, big, name, outline }: MomentFaceProps) {
   const { t } = useTranslation();
   const peek = useFaceMoment(address);
-  const blurred = useMomentPreviewsBlurred();
   const open = useOpenMoments(address);
   const thumbRef = useRef<HTMLSpanElement>(null);
   const faceRef = useRef<HTMLSpanElement>(null);
@@ -113,7 +111,6 @@ export function MomentFace({ address, size, children, className, big, name, outl
           aria-hidden
           data-moment-peek={peek.state}
           data-close-friends={peek.closeFriends ? '' : undefined}
-          data-blur={blurred && peek.state === 'unseen' ? 'true' : undefined}
           style={{ width: w, height: h, borderRadius: Math.max(4, Math.round(w * 0.26)), right: big ? -6 : -4, bottom: big ? -6 : -4 }}
         >
           {peek.cover ? <img src={peek.cover} alt="" loading="lazy" decoding="async" draggable={false} /> : <span data-moment-peek-blank />}

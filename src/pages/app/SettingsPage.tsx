@@ -106,7 +106,6 @@ import { isReservedUsername } from '@/lib/reserved-usernames';
 import { buildAvatarUrl, buildCoverUrl, bumpProfileImageVersion, deviceWidth } from '@/lib/media-url';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useStoriesEnabled } from '@/hooks/use-stories-enabled';
-import { setMomentPreviewsBlurred, useMomentPreviewsBlurred } from '@/lib/moment-preview-blur';
 import { useAuth as useAuthContext } from '@/contexts/AuthContext';
 import { useMatureContent } from '@/hooks/use-mature-content';
 import { useKidsMode } from '@/hooks/use-kids-mode';
@@ -3021,7 +3020,6 @@ function ContentSettings() {
             onCheckedChange={setStoriesEnabled}
             disabled={!canChange}
           />
-          <BlurMomentsToggle />
           <HideWatchedToggle />
           <SkipSegmentsToggle />
           <VideoGlitchToggle />
@@ -3276,21 +3274,6 @@ function KidsModeToggle() {
  * readers. Not the Riftn account row — a named setting there has to be
  * whitelisted server-side or the write is silently dropped.
  */
-function BlurMomentsToggle() {
-  const { t } = useTranslation();
-  const blurred = useMomentPreviewsBlurred();
-  return (
-    <SettingToggle
-      icon={EyeOff}
-      anchor="blur-moments"
-      title={t('settings.blurMoments', 'Blur Moment previews')}
-      description={t('settings.blurMomentsDesc', "Other people's Moments stay blurred on Home until you open them.")}
-      defaultChecked={blurred}
-      onCheckedChange={setMomentPreviewsBlurred}
-    />
-  );
-}
-
 function HideWatchedToggle() {
   const { t } = useTranslation();
   const { isAuthenticated } = useAuthContext();

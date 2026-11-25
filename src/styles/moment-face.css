@@ -53,9 +53,6 @@ html:is([data-theme='cosmic'], [data-theme='hazy'], [data-theme='swarms'], [data
 /* Close Friends: the rim is green until it's watched. */
 [data-moment-peek='unseen'][data-close-friends] { box-shadow: 0 0 0 2px #22c55e, 0 0 0 4px var(--moment-cut); }
 [data-moment-face][data-big] > [data-moment-peek='unseen'][data-close-friends] { box-shadow: 0 0 0 2.5px #22c55e, 0 0 0 5px var(--moment-cut); }
-/* Settings > Blur Moment previews */
-[data-moment-peek][data-blur='true'] > img { filter: blur(5px) saturate(0.8); transform: scale(1.3); }
-
 [data-moment-count] {
   position: absolute;
   z-index: 4;
