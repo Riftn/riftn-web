@@ -62,7 +62,8 @@ export function BoostModal({ open, onOpenChange, tokenId, postTitle }: BoostModa
   const { t: _copy } = _useCopy();
   const { t } = useTranslation();
   const { walletAddress } = useAuth();
-  const { data: status, isLoading, isError } = useSuperpowers(open);
+  // A teammate can change the allowance while this dialog is closed.
+  const { data: status, isLoading, isError } = useSuperpowers(open, 0);
   const { data: ladder } = useSuperpowerLadder();
   const bookBoost = useBookBoost();
 
