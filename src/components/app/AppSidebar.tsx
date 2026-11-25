@@ -54,6 +54,7 @@ const PostModal = React.lazy(() =>
   import('@/features/post/PostModal').then(m => ({ default: m.PostModal }))
 );
 import { useAuth } from '@/contexts/AuthContext';
+import { useAccountSignOut } from './AccountSignOut';
 import { canManageAgents } from '@/lib/agent-access';
 
 // Loaded on first empty search: it pulls in the Requests board's submit code.
@@ -73,7 +74,7 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
   const closeMenu = useCallback(() => onOpenChange(false), [onOpenChange]);
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAuthenticated, disconnect, user, walletAddress } = useAuth();
+  const { isAuthenticated, user, walletAddress } = useAuth();
   // Read-only: SelfBadgeSync and the header already own these fetches.
   const dhbBalance = useSelfBadge().balance ?? 0;
   const balanceHidden = useBalanceHidden();
@@ -177,6 +178,8 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
   };
   const lastFollowListType = useRef<'followers' | 'following'>('followers');
   if (followList) lastFollowListType.current = followList;
+
+  const { pending: signOutPending, requestSignOut, signOutDialog } = useAccountSignOut({ onStart: closeMenu });
 
   const mobileNavContent = (
     <>
@@ -356,14 +359,10 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
       {isAuthenticated && (
         <div data-vaul-no-drag data-menu-footer className="shrink-0 -mx-4 space-y-1 border-t border-white/10 px-4 pt-2">
           <div className="-mx-1.5 flex items-center justify-between">
-            {/* forgetProfile: logging out revokes this session's tokens
-                server-side, so its stored snapshot is dead the moment this
-                runs. Left on the list it looked like a working profile and
-                dumped you into the sign-in sheet on tap. Other saved accounts
-                are untouched — that is what makes this a log out of ONE
-                account rather than of the device. */}
             <button
-              onClick={() => { closeMenu(); disconnect({ forgetProfile: true }); }}
+              type="button"
+              onClick={requestSignOut}
+              disabled={signOutPending}
               className="flex h-12 items-center gap-3 rounded-xl px-3.5 text-[15px] font-medium text-zinc-400 hover:text-white transition-colors"
             >
               <LogOut className="w-5 h-5" />
@@ -386,6 +385,7 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
 
   return (
     <>
+      {signOutDialog}
       {/* Mobile Header with Drawer */}
       <MobileHeader isOpen={isOpen} onOpenChange={onOpenChange}>
         {mobileNavContent}
@@ -398,7 +398,7 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
           skips that work; the hook is live, so a rotation or resize past lg
           mounts it at that moment, exactly where the CSS would have revealed
           it. Same gate the right rail uses. */}
-      {isDesktop && <DesktopSidebar onPostClick={openPostModal} />}
+      {isDesktop && <DesktopSidebar onPostClick={openPostModal} onSignOut={requestSignOut} />}
 
       {followListMounted && (user?.address || walletAddress) && (
         <Suspense fallback={null}>

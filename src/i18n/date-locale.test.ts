@@ -1,3 +1,5 @@
+import type { TFunction } from 'i18next';
+import { formatPostAge, formatPostDate, parsePostTimestamp } from './post-timestamp';
 import { afterEach, describe, expect, it } from 'vitest';
 import { format } from 'date-fns';
 import { applyDateLocale, formatMessageTime, formatRelativeTime } from './date-locale';
@@ -37,5 +39,27 @@ describe('message clock', () => {
   it('uses a 12-hour clock where the region does', () => {
     expect(formatMessageTime(new Date(2026, 0, 1, 16, 57), 'en-US', false)).toBe('4:57 PM');
     expect(formatMessageTime(new Date(2026, 0, 1, 0, 5), 'en-US', false)).toBe('12:05 AM');
+  });
+});
+
+describe('post timestamps', () => {
+  const t = ((key: string) => key) as unknown as TFunction;
+
+  it('formats compact ages in the chosen language', () => {
+    const posted = parsePostTimestamp('2026-01-02T04:30:00+03:00');
+    const now = Date.parse('2026-01-02T02:30:00Z');
+    expect(formatPostAge(posted, 'en', t, now)).toBe('1h');
+    expect(formatPostAge(posted, 'tr', t, now)).toMatch(/^1\s*sa/);
+    expect(formatPostAge(posted, 'ja', t, now)).toMatch(/^1\s*時間$/);
+    expect(formatPostAge(posted, 'tr', t, now - 3600000)).toBe('şimdi');
+    expect(formatPostAge(parsePostTimestamp('invalid'), 'tr', t, now)).toBe('');
+  });
+
+  it('uses the same instant across publisher offsets and rolls the local date across midnight', () => {
+    const post = parsePostTimestamp('2026-01-01T20:30:00-05:00')!;
+    expect(post).toEqual(parsePostTimestamp('2026-01-02T04:30:00+03:00'));
+    const options = { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' } as const;
+    expect(formatPostDate(post, 'tr', { ...options, timeZone: 'America/Los_Angeles' })).toMatch(/1 Ocak.*17:30/);
+    expect(formatPostDate(post, 'tr', { ...options, timeZone: 'Europe/Istanbul' })).toMatch(/2 Ocak.*04:30/);
   });
 });

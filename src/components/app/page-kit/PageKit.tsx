@@ -18,7 +18,7 @@ import { useTranslation as _useCopy } from 'react-i18next';
  * attributes below, so a page never paints itself per theme.
  */
 
-import { Fragment, createContext, useContext, useEffect, useId, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
+import { Fragment, createContext, useContext, useEffect, useId, useRef, useState, useSyncExternalStore, type HTMLAttributes, type ReactNode } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Search, X } from 'lucide-react';
 import ArrowLeft from "@/components/ui/cut-icons/back";
@@ -351,6 +351,8 @@ export interface PageTab<T extends string = string> {
   id: T;
   label: ReactNode;
   icon?: IconKey | ReactNode;
+  /** Glyph size in a header pill, in CSS pixels. */
+  pillIconSize?: number;
   count?: number;
   /** Hover text for an icon-only tab, so a mouse can learn what it is. */
   hint?: string;
@@ -363,6 +365,7 @@ export function PageTabs<T extends string>({
   className,
   size = 'md',
   beforeTabs,
+  followSelection = false,
 }: {
   tabs: PageTab<NoInfer<T>>[];
   value: T;
@@ -371,11 +374,14 @@ export function PageTabs<T extends string>({
   size?: 'sm' | 'md';
   /** Leading controls on the same row, before the category tabs. */
   beforeTabs?: ReactNode;
+  /** Keep the active pill visible and animate it when selection can change outside the tab row. */
+  followSelection?: boolean;
 }) {
   const inPill = useContext(PillContext);
   const layoutId = useId();
   const { layerRef, setRef, rect, onScroll } = useTabIndicator(value, inPill, undefined, 5);
   const [glide, setGlide] = useState(false);
+  const reduceMotion = useReducedMotion();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [overflow, setOverflow] = useState(false);
   useEffect(() => {
@@ -397,6 +403,16 @@ export function PageTabs<T extends string>({
     el.addEventListener('scroll', check, { passive: true });
     return () => { ro.disconnect(); el.removeEventListener('scroll', check); };
   }, [inPill, tabs.length, onScroll]);
+  useEffect(() => {
+    const row = scrollRef.current;
+    if (!followSelection || !inPill || !row || row.scrollWidth <= row.clientWidth + 1) return;
+    const tab = row.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]');
+    if (!tab) return;
+    const rowBox = row.getBoundingClientRect();
+    const tabBox = tab.getBoundingClientRect();
+    const left = (tabBox.left + tabBox.right - rowBox.left - rowBox.right) / 2;
+    row.scrollBy({ left, behavior: reduceMotion ? 'instant' : 'smooth' });
+  }, [followSelection, inPill, reduceMotion, value]);
   // A row first laid out while the page is still hidden (boot, fonts) measures
   // as nothing and no resize follows, so keep trying briefly until it lands.
   useEffect(() => {
@@ -411,7 +427,7 @@ export function PageTabs<T extends string>({
         {beforeTabs ? <div data-kit-pill-before className="flex shrink-0 items-center [&_[data-kit-square]]:contents">{beforeTabs}</div> : null}
         <div ref={layerRef} className="relative min-w-0 flex-1 overflow-visible">
           <div className="pointer-events-none absolute inset-0">
-            <GlassIndicator rect={rect} borderRadius="0.75rem" layoutKey={`kit-pill-${layoutId}-${value}`} enableTransition={glide} fixedHeightPx={35} variant="nav" />
+              <GlassIndicator rect={rect} borderRadius="0.75rem" layoutKey={`kit-pill-${layoutId}-${value}`} enableTransition={glide || (followSelection && !reduceMotion)} fixedHeightPx={35} variant="nav" />
           </div>
           <div
             ref={scrollRef}
@@ -434,6 +450,7 @@ export function PageTabs<T extends string>({
                   data-feed-tab-btn
                   title={tab.hint}
                   data-active={active ? 'true' : undefined}
+                  style={tab.pillIconSize === undefined ? undefined : { '--kit-pill-tab-icon-size': `${tab.pillIconSize}px` } as React.CSSProperties}
                   onClick={() => {
                     if (!active) {
                       setGlide(true);
@@ -450,7 +467,7 @@ export function PageTabs<T extends string>({
                   )}
                 >
                   {tab.icon ? (
-                    <span className="relative z-10 flex h-4 w-4 items-center justify-center [&_img]:h-4 [&_img]:w-4 [&_svg]:h-4 [&_svg]:w-4">
+                    <span className="relative z-10 flex size-[var(--kit-pill-tab-icon-size,16px)] shrink-0 items-center justify-center [&_img]:size-full [&_svg]:size-full">
                       {typeof tab.icon === 'string' ? <ThemedIcon icon={tab.icon as IconKey} alt="" className="h-4 w-4 object-contain" /> : tab.icon}
                     </span>
                   ) : null}
@@ -458,7 +475,7 @@ export function PageTabs<T extends string>({
                   {typeof tab.count === 'number' ? (
                     // Beside the icon as plain text, as the app draws it; a white
                     // dot over the icon hid the glyph and read as a red badge.
-                    <span data-kit-pill-count className={cn('z-10 font-semibold leading-none tabular-nums opacity-60', iconOnly ? 'pointer-events-none absolute left-[calc(50%+8px)] top-[5px] whitespace-nowrap text-[9.5px]' : 'relative ml-1 text-[12px]')}>{tab.count > 99 ? '99+' : tab.count}</span>
+                    <span data-kit-pill-count className={cn('z-10 font-semibold leading-none tabular-nums opacity-60', iconOnly ? 'pointer-events-none absolute left-[calc(50%_+_var(--kit-pill-tab-icon-size,16px)/2)] top-[5px] whitespace-nowrap text-[9.5px]' : 'relative ml-1 text-[12px]')}>{tab.count > 99 ? '99+' : tab.count}</span>
                   ) : null}
                 </button>
               );
@@ -527,6 +544,7 @@ export function PageBody({
   className,
   measure,
   frameClip,
+  ...bodyProps
 }: {
   children: ReactNode;
   className?: string;
@@ -536,12 +554,12 @@ export function PageBody({
    *  transforms. For bodies inside their own scroller (the bell drawer),
    *  where iOS WebKit leaves the transformed layers unpainted. */
   frameClip?: boolean;
-}) {
+} & HTMLAttributes<HTMLDivElement>) {
   const ref = useRef<HTMLDivElement>(null);
   useFeedSwallowClip(ref, KIT_TOP_CUT, [], { allThemes: true, frameOnly: frameClip });
   return (
     <div data-feed-swallow-bounds className="w-full">
-    <div ref={ref} data-kit-body className={cn('w-full pb-28 pt-3', measure && 'max-w-2xl', className)}>
+      <div {...bodyProps} ref={ref} data-kit-body className={cn('w-full pb-28 pt-3', measure && 'max-w-2xl', className)}>
       <FeedSwallowMotion>
       {children}
       </FeedSwallowMotion>

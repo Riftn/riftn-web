@@ -1,4 +1,3 @@
-import { pruneStaleLocalePacks } from '@/lib/storage-quota-guard';
 import { applyDateLocale } from './date-locale';
 import manifest from './locale-manifest.json';
 /**
@@ -173,19 +172,24 @@ export const preferredLanguage = defaultLang;
 
 const packOrigin = '';
 const readPackCache = async (key: string) => { try { return localStorage.getItem(`locale-pack:${key}`); } catch { return null; } };
-const writePackCache = async (key: string, value: string) => { try { localStorage.setItem(`locale-pack:${key}`, value); } catch {} };
-// Packs are cached per build version; drop older builds' copies so they don't
-// pile up (~100KB each) until localStorage is full.
-pruneStaleLocalePacks(manifest.version);
+function previousPackKeys(lang: string, group: string): string[] {
+  try {
+    const current = `locale-pack:${manifest.version}:${lang}:${group}`;
+    return Object.keys(localStorage).filter(key =>
+      key.startsWith('locale-pack:') && key.endsWith(`:${lang}:${group}`) && key !== current,
+    );
+  } catch { return []; }
+}
 
 const loadedPacks = new Set<string>([`${manifest.version}:en:core`]);
+const offlinePacks = new Set<string>();
 const retryAfter = new Map<string, number>();
 const pendingPacks = new Map<string, Promise<boolean>>();
 async function loadPack(lang: string, group: string, trigger = 'language-selection'): Promise<boolean> {
   if (!manifest.languages.includes(lang)) return false;
   const key = `${manifest.version}:${lang}:${group}`;
   if (loadedPacks.has(key)) return true;
-  if ((retryAfter.get(key) || 0) > Date.now()) return false;
+  if ((retryAfter.get(key) || 0) > Date.now()) return offlinePacks.has(key);
   if (pendingPacks.has(key)) return pendingPacks.get(key)!;
   // Record only the first attempt for a pack, so startup audits can identify
   // the translation caller without recording user text or repeated renders.
@@ -202,12 +206,35 @@ async function loadPack(lang: string, group: string, trigger = 'language-selecti
           const response = await fetch(`${packOrigin}/locale-packs/web/${manifest.version}/${lang}/${group}.json`, { signal: controller.signal });
           if (!response.ok) throw new Error('Locale pack unavailable');
           data = await response.json();
+          if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('Invalid locale pack');
+        } catch {
+          retryAfter.set(key, Date.now() + 30_000);
+          if (offlinePacks.has(key)) return true;
+          for (const previousKey of previousPackKeys(lang, group).reverse()) {
+            const previous = localStorage.getItem(previousKey);
+            if (!previous) continue;
+            try {
+              const bundle = JSON.parse(previous);
+              if (!bundle || typeof bundle !== 'object' || Array.isArray(bundle)) continue;
+              offlinePacks.add(key);
+              i18n.addResourceBundle(lang, 'translation', bundle, true, true);
+              fillMissingPluralForms(i18n, lang);
+              return true;
+            } catch { /* Try another cached copy. */ }
+          }
+          return false;
         } finally { clearTimeout(timeout); }
-        if (!data || typeof data !== 'object' || Array.isArray(data)) return false;
-        await writePackCache(key, JSON.stringify(data));
+        try {
+          const value = JSON.stringify(data);
+          localStorage.setItem(`locale-pack:${key}`, value);
+          if (localStorage.getItem(`locale-pack:${key}`) === value) {
+            for (const previousKey of previousPackKeys(lang, group)) localStorage.removeItem(previousKey);
+          }
+        } catch { /* The in-memory resources still work. */ }
       }
       // Mark first: resource events rerender consumers synchronously.
       loadedPacks.add(key);
+      offlinePacks.delete(key);
       i18n.addResourceBundle(lang, 'translation', data, true, true);
       fillMissingPluralForms(i18n, lang);
       return true;

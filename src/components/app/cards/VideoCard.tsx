@@ -3608,7 +3608,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
         <div data-video-metadata className="mb-3">
           <PostMetadata 
             className="!mt-3"
-            timestamp={video.uploadedAgo}
+            timestamp={video.createdAt || video.uploadedAgo}
             viewCount={video.views?.replace(' views', '') || '0'}
             tokenId={video.id}
             isAd={video.isAd}

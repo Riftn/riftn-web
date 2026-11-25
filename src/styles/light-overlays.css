@@ -91,11 +91,3 @@ html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_
 html:is([data-theme='light'], [data-system-tone='light']) .arrival-look-preview .signin-rift__stage {
   visibility: visible;
 }
-
-/* Money menu price strip (MarketTicker): ink prices and a soft ink card on
-   both light themes, darker up/down colours so they read on the pale menu. */
-html:is([data-theme="light"], [data-system-tone="light"]) [data-market-ticker]:not(#_):not(#_):not(#_):not(#_) > div { background: rgba(11,11,13,.04) !important; --tw-ring-color: rgba(11,11,13,.08) !important; }
-html:is([data-theme="light"], [data-system-tone="light"]) [data-market-ticker]:not(#_):not(#_):not(#_):not(#_) .text-white { color: var(--sl-ink, #0b0b0d) !important; }
-html:is([data-theme="light"], [data-system-tone="light"]) [data-market-ticker]:not(#_):not(#_):not(#_):not(#_) .text-zinc-400 { color: rgba(11,11,13,.62) !important; }
-html:is([data-theme="light"], [data-system-tone="light"]) [data-market-ticker]:not(#_):not(#_):not(#_):not(#_) .text-emerald-400 { color: #047857 !important; }
-html:is([data-theme="light"], [data-system-tone="light"]) [data-market-ticker]:not(#_):not(#_):not(#_):not(#_) .text-red-400 { color: #b91c1c !important; }

@@ -579,7 +579,7 @@ export function FinanceSection({ range }: { range: Range }) {
       {/* A source that could not be read is named up front, beside the
           numbers it is missing from — not only inside the collapsed list. */}
       {unavailable.length > 0 && (
-        <p className="text-[11px] text-zinc-500 leading-relaxed px-1">
+        <p className="px-4 text-[11px] leading-relaxed text-zinc-500">
           {t('stats.money.unavailable', '{{sources}} could not be reached, so they are left out of every total above rather than guessed.', {
             sources: unavailable.map((s) => s.label).join(', '),
           })}

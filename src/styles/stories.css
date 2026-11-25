@@ -45,14 +45,19 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-story-shelf] {
 }
 [data-story-shelf]::-webkit-scrollbar { display: none; }
 
-/* Slim pills: Create is a solid + key, then one pill per live or person
+/* Slim pills: Create is an outlined + key, then one pill per live or person
    (face, name, one line). Pills share the row's width, so 1 to 3 up never
    leave empty space; with just 1 up the pill also shows who is watching or
-   the Moments themselves. The + and the pills are the same 52 px tall. */
+   the Moments themselves. */
 [data-story-shelf] { align-items: center; scroll-snap-type: none; }
 /* One up: the pill takes the whole row and its name gives way to the extras. */
 [data-story-shelf][data-up='1'] > [data-story-tile]:not([data-kind='create']) { flex: 1 1 0; min-width: 0; }
 [data-story-tile] {
+  --st-avatar-size: 36px;
+  --st-avatar-radius: 12px;
+  --st-ring-gap-width: 2px;
+  --st-ring-width: 1.5px;
+  --st-ring-spread: calc(var(--st-ring-gap-width) + var(--st-ring-width));
   --st-ring: #fff;
   --st-ring-gap: #0b0b0c;
   --st-pill-ink: #fff;
@@ -60,7 +65,6 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-story-shelf] {
   --st-pill-line: rgb(255 255 255 / 0.14);
   --st-pill-fill: rgb(255 255 255 / 0.05);
   --st-key: #fff;
-  --st-key-ink: #0b0b0c;
   position: relative;
   flex: 1 0 auto;
   display: flex;
@@ -86,7 +90,6 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-story-tile] {
   --st-pill-line: rgb(11 11 13 / 0.1);
   --st-pill-fill: transparent;
   --st-key: #111114;
-  --st-key-ink: #fff;
 }
 :is([data-theme='hazy'], [data-theme='osaka'], [data-theme='jungle'], [data-theme='cosmic'], [data-theme='glass'], [data-theme='lavalamp'], [data-theme='swarms'], [data-theme='winter'], [data-theme='island'], [data-theme='horror'], [data-theme='hacker']) [data-story-tile] {
   --st-ring: var(--st-acc);
@@ -94,7 +97,6 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-story-tile] {
   --st-pill-line: rgb(255 255 255 / 0.18);
   --st-pill-fill: rgb(255 255 255 / 0.08);
   --st-key: var(--st-acc);
-  --st-key-ink: var(--st-btn-ink);
   -webkit-backdrop-filter: blur(18px) saturate(1.4);
   backdrop-filter: blur(18px) saturate(1.4);
 }
@@ -102,17 +104,17 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-story-tile] {
 [data-story-tile] [data-st-avatar] {
   display: block;
   flex: none;
-  width: 36px;
-  height: 36px;
-  border-radius: 12px;
+  width: var(--st-avatar-size);
+  height: var(--st-avatar-size);
+  border-radius: var(--st-avatar-radius);
   object-fit: cover;
   background: rgb(127 127 135 / 0.25);
-  box-shadow: 0 0 0 2px var(--st-ring-gap), 0 0 0 3.5px var(--st-ring);
+  box-shadow: 0 0 0 var(--st-ring-gap-width) var(--st-ring-gap), 0 0 0 var(--st-ring-spread) var(--st-ring);
 }
-[data-story-tile][data-kind='live'] [data-st-avatar] { box-shadow: 0 0 0 2px var(--st-ring-gap); }
+[data-story-tile][data-kind='live'] [data-st-avatar] { box-shadow: 0 0 0 var(--st-ring-gap-width) var(--st-ring-gap); }
 [data-story-tile][data-kind='person'][data-seen='true'] [data-st-avatar] { box-shadow: none; opacity: 0.8; }
 /* Close Friends: a green ring until it's watched. */
-[data-story-tile][data-close-friends][data-seen='false'] [data-st-avatar] { box-shadow: 0 0 0 2px var(--st-ring-gap), 0 0 0 3.5px #22c55e; }
+[data-story-tile][data-close-friends][data-seen='false'] [data-st-avatar] { box-shadow: 0 0 0 var(--st-ring-gap-width) var(--st-ring-gap), 0 0 0 var(--st-ring-spread) #22c55e; }
 [data-st-text] { display: flex; flex-direction: column; min-width: 0; flex: 1 1 auto; }
 [data-story-tile] [data-st-label] {
   display: flex;
@@ -146,18 +148,27 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-story-tile] {
 [data-st-stack][data-covers] img { width: 22px; height: 30px; border-radius: 7px; }
 [data-st-stack] b { margin-left: 6px; color: var(--st-pill-sub); font-size: 11px; font-weight: 700; }
 
-/* Create: a solid square key with a centred +, the pills' height. */
+/* The visible key matches the profile ring inside a full-height tap target. */
 [data-story-tile][data-kind='create'] {
-  flex: 0 0 52px;
-  width: 52px;
+  --st-ring-size: calc(var(--st-avatar-size) + 2 * var(--st-ring-spread));
+  flex: 0 0 auto;
+  width: max(44px, var(--st-ring-size));
   justify-content: center;
   padding: 0;
   border: 0;
-  background: var(--st-key);
-  color: var(--st-key-ink);
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
-[data-story-tile][data-kind='create'] [data-create-key] { display: grid; place-items: center; }
-[data-story-tile][data-kind='create'] [data-create-key] svg { width: 22px; height: 22px; transition: transform 200ms cubic-bezier(0.25, 0.8, 0.25, 1); }
+[data-story-tile][data-kind='create'] [data-create-key] {
+  display: grid;
+  place-items: center;
+  width: var(--st-ring-size);
+  height: var(--st-ring-size);
+  border-radius: calc(var(--st-avatar-radius) + var(--st-ring-spread));
+  box-shadow: inset 0 0 0 var(--st-ring-width) var(--st-ring);
+}
+[data-story-tile][data-kind='create'] [data-create-key] svg { width: 16px; height: 16px; transition: transform 200ms cubic-bezier(0.25, 0.8, 0.25, 1); }
 [data-story-tile][data-kind='create'][aria-expanded='true'] [data-create-key] svg { transform: rotate(45deg); }
 [data-story-tile][data-kind='create'] [data-create-label] { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 

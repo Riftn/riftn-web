@@ -1,7 +1,7 @@
 import { useTranslation as _useCopy } from 'react-i18next';
 import { pollHasEnded, pollVotePercent, pollOptionWins } from '@/lib/poll-results';
 import { useEffect, useRef, useState } from 'react';
-import { formatDistanceToNow } from 'date-fns';
+import { formatPostDate, parsePostTimestamp } from '@/i18n/post-timestamp';
 import Check from "@/components/ui/cut-icons/check";
 
 import X from "@/components/ui/cut-icons/close";
@@ -24,7 +24,7 @@ export function PollCard(props: PollCardProps) {
 }
 
 function ViewerPollCard({ tokenId, autoTranslate = true, viewer }: PollCardProps & { viewer: string }) {
-  const { t: _copy } = _useCopy();
+  const { t: _copy, i18n } = _useCopy();
   // Defer the poll probe until the card nears the viewport — the feed API has
   // no "has poll" flag, so without this every card fires a request on mount.
   const observerRef = useRef<HTMLDivElement>(null);
@@ -61,6 +61,8 @@ function ViewerPollCard({ tokenId, autoTranslate = true, viewer }: PollCardProps
   // of flow so parent space-y-* utilities don't count it as a child and add a
   // phantom gap to every poll-less post — while staying intersectable.
   if (isLoading || !poll) return <div ref={observerRef} className="absolute" aria-hidden="true" />;
+  const expiresAt = parsePostTimestamp(poll.expiresAt);
+  const expiresLabel = expiresAt ? formatPostDate(expiresAt, i18n.language, { dateStyle: 'medium', timeStyle: 'short' }) : null;
 
   // A poll whose end time has passed is over even while the stored isActive
   // flag still says true — only "Close Poll" flips that flag. Treating it as
@@ -199,11 +201,11 @@ function ViewerPollCard({ tokenId, autoTranslate = true, viewer }: PollCardProps
       <div className="flex items-center justify-between text-xs text-zinc-500">
         <span>{_copy("copy.8ce57030b104", { defaultValue: "{{count}} votes", count: totalVotes })}</span>
         <div className="flex items-center gap-3">
-          {poll.expiresAt && (
+          {expiresLabel && (
             <span>
               {isOpen
-                ? _copy("copy.ce89f7f6696e", { defaultValue: "Ends {{value1}}", value1: formatDistanceToNow(new Date(poll.expiresAt), { addSuffix: true }) })
-                : _copy("copy.caeb37121e94", { defaultValue: "Ended {{value1}}", value1: formatDistanceToNow(new Date(poll.expiresAt), { addSuffix: true }) })}
+                ? _copy("copy.ce89f7f6696e", { defaultValue: "Ends {{value1}}", value1: expiresLabel })
+                : _copy("copy.caeb37121e94", { defaultValue: "Ended {{value1}}", value1: expiresLabel })}
             </span>
           )}
           {hasVoted && isOpen && (

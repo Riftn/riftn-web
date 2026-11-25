@@ -14,7 +14,7 @@ import {
   type LiveChatUserProfile,
 } from '@/lib/api/dehub';
 import {
-  getSocket, joinRoom, leaveRoom, emitSendMessage,
+  getSocket, joinRoom, leaveRoom, emitSendMessage, waitForLiveChatSend,
   onLiveChatMessage, onRoomJoined, onMessageDeleted,
   onUserBanned, onUserUnbanned, onReactionUpdated, onMessageEdited, onStreamModeration,
   emitAddReaction, emitRemoveReaction, emitEditMessage, emitDeleteMessage,
@@ -951,15 +951,6 @@ export function useLiveChatMessages(roomId: string | null, options: LiveChatPagi
       });
 
       try {
-        const socket = getSocket(roomId);
-        if (!socket.connected) {
-          await new Promise<void>((resolve, reject) => {
-            const timeout = setTimeout(() => reject(new Error(_translateCopy("copy.7fbd7933cfe0", { defaultValue: "Socket connection timeout" }))), 5000);
-            socket.once('connect', () => { clearTimeout(timeout); resolve(); });
-            if (socket.connected) { clearTimeout(timeout); resolve(); }
-          });
-        }
-
         const apiType = type === 'image' ? 'media' : type;
         // A refusal is already toasted by the room's error listener with the
         // server's reason (slow down, blocked link, ...); remember it so the
@@ -970,27 +961,35 @@ export function useLiveChatMessages(roomId: string | null, options: LiveChatPagi
         // sleep as a guest is signed in again by the send itself. Make sure
         // it is a live one first.
         await ensureFreshToken().catch(() => undefined);
-        const deliver = () => confirmChatDelivery({
-          listen: (event, handler) => {
-            if (event === 'message') return onLiveChatMessage(roomId, handler);
-            if (event === 'error') return onLiveChatError(roomId, (data) => {
-              if (isAuthRefusal(data)) signedOut = true; else refused = true;
-              handler(data);
-            });
-            socket.on(event, handler); return () => { socket.off(event, handler); };
-          },
-          emit: () => { emitSendMessage({
-          roomId,
-          content,
-          messageType: apiType,
-          imageUrl,
-          audioUrl,
-          audioDuration,
-          replyTo: replyToId
-        }); },
-          messageEvent: 'message', errorEvent: 'error',
-          matches: message => roomMessageMatches(message, { account: walletAddress, content, room: roomId, attachment: imageUrl || audioUrl }),
-        });
+        const socket = getSocket(roomId);
+        const deliver = async () => {
+          if (!(await waitForLiveChatSend(socket, roomId)) || !socket.connected) {
+            throw new Error(_translateCopy("copy.7fbd7933cfe0", { defaultValue: "Socket connection timeout" }));
+          }
+          return confirmChatDelivery({
+            listen: (event, handler) => {
+              if (event === 'message') return onLiveChatMessage(roomId, handler);
+              if (event === 'error') return onLiveChatError(roomId, (data) => {
+                if (isAuthRefusal(data)) signedOut = true; else refused = true;
+                handler(data);
+              });
+              socket.on(event, handler); return () => { socket.off(event, handler); };
+            },
+            emit: () => {
+              emitSendMessage({
+                roomId,
+                content,
+                messageType: apiType,
+                imageUrl,
+                audioUrl,
+                audioDuration,
+                replyTo: replyToId,
+              });
+            },
+            messageEvent: 'message', errorEvent: 'error',
+            matches: message => roomMessageMatches(message, { account: walletAddress, content, room: roomId, attachment: imageUrl || audioUrl }),
+          });
+        };
         let confirmed = await deliver();
         // Refused as signed out while signed in here: get a new token and
         // send once more, quietly. Only a session that is really over says so.

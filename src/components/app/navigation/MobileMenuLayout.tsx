@@ -9,7 +9,6 @@ import type { MenuLayout } from '@/lib/menu-layout';
 import type { NavItem } from '@/types/app.types';
 import { MenuReorderHint, MobileMenuGrid, menuIconKey } from './MobileMenuGrid';
 import type { MenuGroup } from './menu-groups';
-import { MarketTicker } from './MarketTicker';
 
 /**
  * The phone menu's body, in the layout picked in Settings (lib/menu-layout):
@@ -67,7 +66,6 @@ export function MobileMenuLayout({
               <span className="text-[12.5px] font-extrabold uppercase tracking-[0.06em] text-zinc-200">{t(group.labelKey, group.fallback)}</span>
               <span className="text-[12px] text-zinc-500 tabular-nums">{group.items.length}</span>
             </h3>
-            {group.id === 'money' ? <MarketTicker /> : null}
             <MobileMenuGrid {...gridProps} items={group.items} columns={4} showHint={false} moveHint />
           </section>
         ))}
@@ -125,7 +123,6 @@ export function MobileMenuLayout({
             className="mt-3 rounded-[18px] border border-white/[0.08] bg-white/[0.04] p-3"
           >
             <p className="mx-0.5 mb-2.5 text-[15px] font-extrabold text-zinc-100">{t(open.labelKey, open.fallback)}</p>
-            {open.id === 'money' ? <MarketTicker /> : null}
             <MobileMenuGrid {...gridProps} items={open.items} columns={3} showHint={false} moveHint />
           </motion.div>
         )}
@@ -143,10 +140,7 @@ export function MobileMenuLayout({
       onTabChange={onTabChange}
       reduceMotion={!!reduceMotion}
       renderPage={(group) => (
-        <>
-          {group.id === 'money' ? <MarketTicker /> : null}
-          <MobileMenuGrid {...gridProps} items={group.items} columns={3} showHint={false} moveHint />
-        </>
+        <MobileMenuGrid {...gridProps} items={group.items} columns={3} showHint={false} moveHint />
       )}
     />
   );
