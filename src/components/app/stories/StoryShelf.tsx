@@ -122,7 +122,7 @@ function VisibleStoryShelf({ dismissed }: { dismissed: string[] }) {
     if (lastSeat === 'ask') return null;
     return (
       <>
-        <div data-stories data-story-shelf data-no-swipe role="list" aria-busy="true" {...menuEvents(openMenu)}>
+        <div data-stories data-story-shelf data-no-swipe data-no-pull role="list" aria-busy="true" {...menuEvents(openMenu)}>
           {isAuthenticated && <StoryCreateTile />}
           {[0, 1, 2].map(index => <LoadingPill key={index} />)}
         </div>
@@ -155,7 +155,7 @@ function VisibleStoryShelf({ dismissed }: { dismissed: string[] }) {
 
   return (
     <>
-      <div data-stories data-story-shelf data-no-swipe role="list" data-up={upCount || undefined} {...menuEvents(openMenu)}>
+      <div data-stories data-story-shelf data-no-swipe data-no-pull role="list" data-up={upCount || undefined} {...menuEvents(openMenu)}>
         {storiesEnabled && isAuthenticated && <StoryCreateTile />}
         {showMe && (
           <MeTile
@@ -207,7 +207,7 @@ function MomentCovers({ entry }: { entry: ShelfEntry | null }) {
   if (!covers.length) return null;
   return (
     <span data-st-stack data-covers aria-hidden="true">
-      {covers.map(url => <img key={url} src={url} alt="" loading="lazy" />)}
+      {covers.map(url => <img key={url} src={url} alt="" loading="lazy" draggable={false} />)}
     </span>
   );
 }
@@ -226,6 +226,7 @@ function LiveWatchers({ streamId }: { streamId: string }) {
           src={a.avatarImageUrl ? buildAvatarUrl(a.address, a.avatarImageUrl, deviceWidth(24)) : buildAvatarCdnFallbackUrl(a.address, undefined)}
           alt=""
           loading="lazy"
+          draggable={false}
         />
       ))}
       {more > 0 && <b>+{formatCount(more)}</b>}
@@ -236,7 +237,7 @@ function LiveWatchers({ streamId }: { streamId: string }) {
 function ShelfAvatar({ src }: { src?: string | null }) {
   const [brokenSrc, setBrokenSrc] = useState<string | null>(null);
   return src && brokenSrc !== src ? (
-    <img data-st-avatar src={src} alt="" onError={() => setBrokenSrc(src)} />
+    <img data-st-avatar src={src} alt="" draggable={false} onError={() => setBrokenSrc(src)} />
   ) : (
     <span data-st-avatar aria-hidden="true" />
   );
@@ -311,7 +312,7 @@ function TileIdentity({ address, username, displayName, live }: {
     <span data-st-label>
       <span data-st-name>{label}</span>
       {badge.url && !live?.hideBadgeAndBalance && !account.hideBadgeAndBalance && (
-        <img data-st-badge src={badge.url} alt={badge.name ?? ''} />
+        <img data-st-badge src={badge.url} alt={badge.name ?? ''} draggable={false} />
       )}
     </span>
   );
