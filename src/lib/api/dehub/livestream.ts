@@ -5,6 +5,8 @@ import type { DeHubUser } from './types';
 export interface LiveStream {
   streamId: string;
   tokenId?: number | string;
+  /** Views of the associated post. */
+  postViews?: number;
   playbackId?: string;
   provider?: string;
   address: string;

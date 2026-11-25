@@ -306,17 +306,17 @@ export function ProfileHeader({
         {featuredCommunity && <PinnedCommunityWash community={featuredCommunity} />}
         {/* Avatar */}
         <div className="relative -mt-12 sm:-mt-14 mb-1.5 flex items-end justify-between">
-          <div className="relative" data-profile-avatar>
+          <div className="relative [--profile-avatar-size:6rem] sm:[--profile-avatar-size:7rem] [--profile-avatar-radius:calc(var(--profile-avatar-size)/3)]" data-profile-avatar>
               <svg data-profile-pull-ring aria-hidden viewBox="0 0 100 100" preserveAspectRatio="none">
-                <rect x="2" y="2" width="96" height="96" rx="15" pathLength="100" />
+                <rect x="2" y="2" width="96" height="96" rx="33.3333%" pathLength="100" />
               </svg>
-              <LiveRipple ids={[apiProfile?.walletAddress ?? profile.walletAddress, profile.handle]} size="lg" orbit className="rounded-xl">
-                <MomentFace address={apiProfile?.walletAddress ?? profile.walletAddress} size={96} noPeek name={profile.name} className="rounded-xl">
+              <LiveRipple ids={[apiProfile?.walletAddress ?? profile.walletAddress, profile.handle]} size="lg" orbit className="rounded-[var(--profile-avatar-radius)]">
+                <MomentFace address={apiProfile?.walletAddress ?? profile.walletAddress} size={96} noPeek name={profile.name} className="rounded-[var(--profile-avatar-radius)]">
                 <button 
                   data-keep-dark
                   data-pull-through
                   data-own-avatar={isViewingOwnProfile ? '' : undefined}
-                  className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl bg-[linear-gradient(to_bottom,#18181b_50%,transparent_50%)] p-0.5 cursor-pointer disabled:cursor-default"
+                  className="relative size-[var(--profile-avatar-size)] rounded-[var(--profile-avatar-radius)] bg-[linear-gradient(to_bottom,#18181b_50%,transparent_50%)] p-0.5 cursor-pointer disabled:cursor-default"
                   onClick={() => profile.avatarUrl && setFullscreenImage(profile.avatarUrl)}
                   // Kept clickable for the owner with no picture yet, so the
                   // right-click / hold menu (Change, Paste) still reaches it.
@@ -327,7 +327,7 @@ export function ProfileHeader({
                     <img
                       src={avatarFailed ? cdnFallbackUrl : profile.avatarUrl}
                       alt={profile.name}
-                      className="block w-full h-full rounded-[10px] object-cover"
+                      className="block w-full h-full rounded-[calc(var(--profile-avatar-radius)-2px)] object-cover"
                       onError={() => avatarFailed ? setAvatarCdnFailed(true) : setAvatarFailed(true)}
                     />
                   ) : (
@@ -335,10 +335,10 @@ export function ProfileHeader({
                       name={profile.name}
                       handle={profile.handle}
                       size="lg"
-                      className="w-full h-full rounded-[10px]"
+                      className="w-full h-full rounded-[calc(var(--profile-avatar-radius)-2px)]"
                     />
                   )}
-                  {savingImage === 'avatar' && <span className="contents [&>span]:rounded-[10px]">{savingSpinner}</span>}
+                  {savingImage === 'avatar' && <span className="contents [&>span]:rounded-[calc(var(--profile-avatar-radius)-2px)]">{savingSpinner}</span>}
                 </button>
                 </MomentFace>
               </LiveRipple>
