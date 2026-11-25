@@ -23,18 +23,24 @@ export function OpenedBubble({
   mine,
   openedAt,
   onCameraFile,
+  deliveryStatus,
 }: {
   kind?: 'image' | 'video';
   mine: boolean;
   openedAt?: string | Date | null;
   /** The person who got it: what they took or picked, to send as a reply. */
   onCameraFile?: (file: File) => void;
+  deliveryStatus?: 'sending' | 'failed' | 'sent';
 }) {
   const { t } = useTranslation();
   const [cardOpen, setCardOpen] = useState(false);
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
   const when = openedAt ? formatMessageTime(new Date(openedAt)) : '';
+  const label = deliveryStatus === 'sending' ? t('copy.b8ed5279e897', 'Sending…')
+    : deliveryStatus === 'failed' ? t('toasts.failed_to_send', 'Failed to send')
+    : deliveryStatus === 'sent' ? t('dm.openTimer.sent', 'Sent')
+    : t('dm.openTimer.opened', 'Opened');
   const KindIcon = kind === 'video' ? Video : ImageIcon;
   const pick = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -50,17 +56,17 @@ export function OpenedBubble({
       data-dm-bubble={mine ? 'me' : 'them'}
       data-dm-bubble-first=""
       data-dm-bubble-last=""
-      data-dm-opened=""
+      data-dm-opened={deliveryStatus ? undefined : ''}
       className={`inline-flex min-w-[168px] items-center gap-3 rounded-xl py-2 pl-3.5 text-left ${onCameraFile ? 'pr-2' : 'pr-4'} ${
         mine ? 'bg-white/[0.11] text-white rounded-br-sm' : 'border border-white/[0.16] text-zinc-100 rounded-bl-sm'
       }`}
-      aria-label={kind === 'video'
+      aria-label={deliveryStatus ? `${t('dm.photo', 'Photo')}, ${label}` : kind === 'video'
         ? t('dm.opened.videoA11y', 'Video, opened {{time}}', { time: when })
         : t('dm.opened.photoA11y', 'Photo, opened {{time}}', { time: when })}
     >
       <KindIcon className="h-[22px] w-[22px] shrink-0" />
       <span className="min-w-0 flex-1">
-        <span className="block text-[15px] font-semibold opacity-80">{t('dm.openTimer.opened', 'Opened')}</span>
+        <span className="block text-[15px] font-semibold opacity-80">{label}</span>
         {when && (
           <span className="flex items-center gap-1 text-[11px] opacity-60">
             {mine && <CheckCheck className="h-3 w-3" />}

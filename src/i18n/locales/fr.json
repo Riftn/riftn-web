@@ -13675,6 +13675,7 @@
     "shareGroups": "Groupes",
     "opened": {"photoA11y": "Photo, ouverte {{time}}", "videoA11y": "Vidéo, ouverte {{time}}", "seenAt": "Vu {{time}}", "replyCamera": "Répondre avec la caméra", "quotePhoto": "Photo · Ouverte", "quoteVideo": "Vidéo · Ouverte", "cameraTitle": "Répondre à cette photo", "cameraOff": "L'accès à la caméra est désactivé. Envoie plutôt une photo ou une vidéo.", "takePhoto": "Prendre une photo", "uploadInstead": "Importer un fichier"},
     "openTimer": {
+      "sent": "Envoyée",
       "secs": "{{n}} s",
       "oneMin": "1 min",
       "chip": "{{time}} après ouverture",

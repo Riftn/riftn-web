@@ -11,6 +11,7 @@ vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({
 vi.mock('react-router-dom', () => ({ useLocation: () => ({ pathname: '/app/messages' }) }));
 vi.mock('@/lib/api/dehub', () => ({ getMessages: mocks.getMessages }));
 vi.mock('@/lib/api/dehub/dm-socket', () => ({
+  onDmDestructOpened: () => () => undefined,
   emitSendMessage: mocks.send,
   waitForDmSocket: async () => {},
   onDmSendMessage: () => () => {},
