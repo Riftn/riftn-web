@@ -8184,6 +8184,7 @@
     "creatorEarnsDirect": "Abonnees betalen in Riftn-tokens. Je aandeel komt in je portemonnee terecht op het moment dat ze zich abonneren, minus de platformkosten voor je badge-niveau."
   },
   "liveOverlay": {
+    "showCreatorChat": "De chat van de maker in beeld tonen",
     "eyebrow": {
       "follow": "Nieuwe volger",
       "subscribe": "Nieuwe abonnee",

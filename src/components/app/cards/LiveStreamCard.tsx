@@ -79,6 +79,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
@@ -647,6 +648,10 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
   // A creator's own tip alert replaces the built-in celebration, never both.
   // A replay draws the overlay too, from the stream's own log (ReplayOverlayLayer).
   const { data: streamOverlay } = useStreamOverlay(stream.streamId, (!!stream.isLive && !streamEnded) || (streamEnded && !!stream.replayUrl));
+  const [showChatOverlay, setShowChatOverlay] = useState(true);
+  const canToggleChatOverlay = !!stream.isLive && !streamEnded && !!stream.streamId && !!streamOverlay &&
+    streamOverlay.version > 0 && streamOverlay.renderIn === 'app' &&
+    streamOverlay.widgets.some((widget) => widget.enabled && widget.kind === 'chat_box');
   const overlayOwnsCelebration = overlayReplacesCelebration(streamOverlay);
   /**
    * The tier the amount currently in the box will play — whether it was
@@ -1748,16 +1753,44 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
     }
   };
 
-  const optionsMenu = (
+  const chatOverlayOption = canToggleChatOverlay ? (
+    <DropdownMenuCheckboxItem
+      checked={showChatOverlay}
+      onCheckedChange={setShowChatOverlay}
+      className="cursor-pointer text-white focus:bg-zinc-700 focus:text-white"
+    >
+      {t('liveOverlay.showCreatorChat', 'Show creator’s chat overlay')}
+    </DropdownMenuCheckboxItem>
+  ) : null;
+
+  const optionsTrigger = (
+    <DropdownMenuTrigger asChild>
+      <button type="button" onClick={(e) => { if (!walletAddress && !canToggleChatOverlay) { e.preventDefault(); e.stopPropagation(); openLoginModal(); } }} aria-label={_copy("copy.2545613b2ba8", { defaultValue: "Post options" })} className={immersive ? "flex h-10 w-10 items-center justify-center text-white [filter:drop-shadow(0_1px_2px_rgb(0_0_0/0.7))]" : "w-8 h-[37.5px] rounded-xl flex items-start justify-center pt-[6.25px] text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"}>
+        <MoreVertical className="w-[23.5px] h-[23.5px]" />
+      </button>
+    </DropdownMenuTrigger>
+  );
+
+  // Above the full-bleed viewer (z-[55]) on phones.
+  const optionsClassName = cn("bg-zinc-800 border-zinc-700", immersive && "z-[60]");
+  const optionsMenu = !walletAddress && canToggleChatOverlay ? (
+    <DropdownMenu>
+      {optionsTrigger}
+      <DropdownMenuContent align="end" className={optionsClassName}>
+        {chatOverlayOption}
+        <DropdownMenuItem
+          onSelect={() => openLoginModal()}
+          className="cursor-pointer text-white focus:bg-zinc-700 focus:text-white"
+        >
+          {t('auth.signIn', 'Sign in')}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  ) : (
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button onClick={(e) => { if (!walletAddress) { e.preventDefault(); e.stopPropagation(); openLoginModal(); } }} aria-label={_copy("copy.2545613b2ba8", { defaultValue: "Post options" })} className={immersive ? "flex h-10 w-10 items-center justify-center text-white [filter:drop-shadow(0_1px_2px_rgb(0_0_0/0.7))]" : "w-8 h-[37.5px] rounded-xl flex items-start justify-center pt-[6.25px] text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"}>
-                <MoreVertical className="w-[23.5px] h-[23.5px]" />
-              </button>
-            </DropdownMenuTrigger>
-            {/* Above the full-bleed viewer (z-[55]); the menu's own z-50 drew it
-                behind the picture on phones. */}
-            <DropdownMenuContent align="end" className={cn("bg-zinc-800 border-zinc-700", immersive && "z-[60]")}>
+            {optionsTrigger}
+            <DropdownMenuContent align="end" className={optionsClassName}>
+              {chatOverlayOption}
               {/* Bookmark / Post info. Also on the action bar as icons on desktop —
                   the menu carries them at every width so there is one
                   reliable place to look. */}
@@ -2289,6 +2322,7 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
               streamId={stream.streamId}
               tokenId={stream.id}
               overlay={streamOverlay}
+              showChatOverlay={showChatOverlay}
               videoRef={videoRef}
               initialViewers={Number(livePresence) || 0}
               creator={stream.creatorId}
