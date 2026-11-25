@@ -121,7 +121,8 @@ export async function dismissReadMessageNotifications(conversationId: string): P
     const notifications = await registration.getNotifications();
     const origin = window.location.origin;
     for (const notification of notifications) {
-      if (notification.timestamp > readThrough || typeof notification.data?.url !== 'string') continue;
+      if ('timestamp' in notification && typeof notification.timestamp === 'number' && notification.timestamp > readThrough) continue;
+      if (typeof notification.data?.url !== 'string') continue;
       let url: URL;
       try { url = new URL(notification.data.url, origin); } catch { continue; }
       if (url.origin !== origin) continue;
