@@ -92,7 +92,8 @@ export function PostUtilityMenuItems({
   const isPinned = useIsPostPinned(tokenId);
   const linkUrl = previewedLinkUrl(linkText);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const walletAddress = useContext(AuthContext)?.walletAddress;
+  const auth = useContext(AuthContext);
+  const walletAddress = auth?.walletAddress;
   const coAuthors = useCoAuthors(tokenId);
   const me = walletAddress?.toLowerCase();
   const isCoAuthor = !!me && coAuthors.users.some(u => u.address === me);
@@ -149,7 +150,9 @@ export function PostUtilityMenuItems({
           onClick={() => {
             onClose?.();
             onBeforeNavigate?.();
-            useStoriesStore.getState().openPostMoment(tokenId);
+            const open = () => useStoriesStore.getState().openPostMoment(tokenId);
+            if (auth && !auth.isAuthenticated) auth.openLoginModal({ then: open });
+            else open();
           }}
           className={cn(ROW, 'text-white')}
           data-share-to-moment
