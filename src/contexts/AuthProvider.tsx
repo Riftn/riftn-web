@@ -1095,6 +1095,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setUser(normalizedUser);
             setWalletAddress(savedWallet);
             localStorage.setItem('dehub_user', JSON.stringify(normalizedUser));
+            snapshotCurrentSession();
 
             if (!normalizedUser.username) {
               setRequiresUsername(true);
