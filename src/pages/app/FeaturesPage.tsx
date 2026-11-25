@@ -810,6 +810,7 @@ function PromptComposer({ initialCategory, focusRequest, onPosted }: { initialCa
       if (!box) return;
       box.focus({ preventScroll: true });
       box.setSelectionRange(box.value.length, box.value.length);
+      box.scrollTop = box.scrollHeight;
     });
   };
   const handleSubmit = () => {
@@ -845,13 +846,19 @@ function PromptComposer({ initialCategory, focusRequest, onPosted }: { initialCa
       <h2 className="text-base sm:text-lg font-semibold text-white mb-1">{t('features.promptHeading', 'What should we build next?')}</h2>
       <p className="text-xs text-zinc-400 mb-3">{t('features.promptHint', 'Describe it. Drop in a screenshot. Make it happen.')}</p>
       <div className={cn('rounded-xl border border-white/15 bg-black/10 p-3 transition-colors focus-within:border-white/40', dragging && 'ring-2 ring-current')}>
-        <textarea ref={promptRef} value={description} onChange={e => setDescription(e.target.value)}
+        <textarea ref={promptRef} value={description} onChange={e => {
+          const box = e.currentTarget;
+          setDescription(box.value);
+          if (box.selectionStart === box.value.length && box.selectionEnd === box.value.length) {
+            box.scrollTop = box.scrollHeight;
+          }
+        }}
           aria-label={t('features.promptLabel', 'Your prompt')}
           placeholder={t('features.promptPlaceholder', 'Describe an idea, improvement, or bug…')}
           maxLength={FEATURE_PROMPT_MAX_LENGTH} rows={4} disabled={submitMutation.isPending}
           onKeyDown={e => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && !e.nativeEvent.isComposing) { e.preventDefault(); handleSubmit(); } }}
           onPaste={e => { const files = Array.from(e.clipboardData.files); if (files.length) { e.preventDefault(); addFiles(files); } }}
-          className="w-full bg-transparent text-white placeholder:text-zinc-500 text-sm leading-relaxed resize-y min-h-24 max-h-80 outline-none disabled:opacity-60" />
+          className="w-full bg-transparent text-white placeholder:text-zinc-500 text-sm leading-relaxed resize-y min-h-24 max-h-80 overflow-y-auto overscroll-y-contain outline-none disabled:opacity-60" />
         {attachments.length > 0 && <div className="flex gap-2 overflow-x-auto py-2">
           {attachments.map((attachment, index) => <div key={attachment.preview} className="relative shrink-0 w-28">
             <div className="h-20 rounded-lg overflow-hidden border border-white/15 bg-black/20">
