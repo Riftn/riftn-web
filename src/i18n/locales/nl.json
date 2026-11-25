@@ -4794,6 +4794,10 @@
     "suggestion5": "Voetbal hoogtepunten"
   },
   "arcade": {
+    "riftnOriginals": "Originele Riftn-games",
+    "otherGames": "Andere games",
+    "gameCount_one": "{{count}} game",
+    "gameCount_other": "{{count}} games",
     "title": "Arcade",
     "intro": "Een verzameling games, werelden en ervaringen die Riftn heeft gebouwd en opensource heeft gemaakt.",
     "seoTitle": "Arcade | Riftn",

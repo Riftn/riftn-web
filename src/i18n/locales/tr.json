@@ -4605,6 +4605,10 @@
     "suggestion5": "Futbol özetleri"
   },
   "arcade": {
+    "riftnOriginals": "Riftn orijinalleri",
+    "otherGames": "Diğer oyunlar",
+    "gameCount_one": "{{count}} oyun",
+    "gameCount_other": "{{count}} oyun",
     "title": "Oyun Salonu",
     "intro": "Riftn'ın geliştirip açık kaynak yaptığı oyunlar, dünyalar ve deneyimlerden oluşan bir koleksiyon.",
     "seoTitle": "Arcade | Riftn",

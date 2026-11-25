@@ -4629,6 +4629,13 @@
     "suggestion5": "أبرز لقطات كرة القدم"
   },
   "arcade": {
+    "riftnOriginals": "ألعاب Riftn الأصلية",
+    "otherGames": "ألعاب أخرى",
+    "gameCount_one": "{{count}} لعبة",
+    "gameCount_two": "{{count}} لعبة",
+    "gameCount_few": "{{count}} ألعاب",
+    "gameCount_many": "{{count}} لعبة",
+    "gameCount_other": "{{count}} لعبة",
     "title": "الأركيد",
     "intro": "مجموعة من الألعاب والعوالم والتجارب التي بنتها Riftn وأتاحتها مفتوحة المصدر.",
     "seoTitle": "الأركيد | Riftn",

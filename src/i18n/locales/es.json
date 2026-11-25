@@ -4605,6 +4605,10 @@
     "suggestion5": "Momentos destacados de fútbol"
   },
   "arcade": {
+    "riftnOriginals": "Originales de Riftn",
+    "otherGames": "Otros juegos",
+    "gameCount_one": "{{count}} juego",
+    "gameCount_other": "{{count}} juegos",
     "title": "Arcade",
     "intro": "Una colección de juegos, mundos y experiencias creados y liberados como código abierto por Riftn.",
     "seoTitle": "Arcade | Riftn",
