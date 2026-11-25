@@ -5,7 +5,11 @@ import { expect, it, vi } from 'vitest';
 import { MomentArchive } from './MomentArchive';
 
 const read = vi.hoisted(() => vi.fn());
-vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ isAuthenticated: true, walletAddress: 'owner' }) }));
+vi.mock('@/contexts/AuthContext', async () => {
+  const { createContext } = await import('react');
+  const auth = { isAuthenticated: true, walletAddress: 'owner' };
+  return { AuthContext: createContext(auth), useAuth: () => auth };
+});
 vi.mock('@/hooks/use-mature-content', () => ({ useMatureContent: () => ({ showMatureContent: false }) }));
 vi.mock('@/hooks/use-kids-mode', () => ({ useKidsModeLock: () => false }));
 vi.mock('@/lib/api/dehub/stories', () => ({ getStoryArchive: read }));

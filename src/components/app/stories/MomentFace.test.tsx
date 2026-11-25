@@ -1,5 +1,5 @@
 import { fireEvent, render, waitFor } from '@testing-library/react';
-import { beforeEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { MomentFace } from './MomentFace';
 import { useStoriesStore } from '@/store/storiesStore';
 import { getStoryRings, getUserStories } from '@/lib/api/dehub/stories';
@@ -26,6 +26,8 @@ beforeEach(() => {
   useStoriesStore.setState({ viewer: null });
   vi.mocked(getUserStories).mockClear();
 });
+
+afterEach(() => localStorage.removeItem('riftn.blurMomentPreviews'));
 
 it('puts the Moment on the corner of the face and a tap opens it instead of the row', async () => {
   const onRow = vi.fn();
@@ -65,6 +67,20 @@ it('draws no corner thumbnail on profiles but a tap still opens their Moments', 
   await waitFor(() => expect(container.querySelector('[data-moment-face="unseen"]')).not.toBeNull());
   expect(container.querySelector('[data-moment-peek]')).toBeNull();
   expect(container.querySelector('[data-moment-count]')).toBeNull();
+  fireEvent.click(container.querySelector('[data-moment-face]')!);
+  await waitFor(() => expect(useStoriesStore.getState().viewer?.entries[0].items).toHaveLength(2));
+});
+
+it.each(['unseen', 'seen'] as const)('covers a %s preview until it is opened', async state => {
+  const address = state === 'seen' ? '0x6666666666666666666666666666666666666666' : '0x6666666666666666666666666666666666666667';
+  localStorage.setItem('riftn.blurMomentPreviews', '1');
+  vi.mocked(getStoryRings).mockResolvedValueOnce({
+    rings: {},
+    peeks: { [address]: { state, count: 2, cover: '/cover.jpg' } },
+  });
+  const { container } = render(<MomentFace address={address} size={48}><span>face</span></MomentFace>);
+  await waitFor(() => expect(container.querySelector(`[data-moment-peek="${state}"] [data-moment-peek-blank]`)).toBeTruthy());
+  expect(container.querySelector('[data-moment-peek] img')).toBeNull();
   fireEvent.click(container.querySelector('[data-moment-face]')!);
   await waitFor(() => expect(useStoriesStore.getState().viewer?.entries[0].items).toHaveLength(2));
 });

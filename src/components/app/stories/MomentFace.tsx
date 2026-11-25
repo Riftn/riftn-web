@@ -117,10 +117,9 @@ export function MomentFace({ address, size, children, className, big, name, noPe
           aria-hidden
           data-moment-peek={peek.state}
           data-close-friends={peek.closeFriends ? '' : undefined}
-          data-blur={blurred && peek.state === 'unseen' ? 'true' : undefined}
           style={{ width: w, height: h, borderRadius: Math.max(4, Math.round(w * 0.26)), right: big ? -6 : -4, bottom: big ? -6 : -4 }}
         >
-          {peek.cover ? <img src={peek.cover} alt="" loading="lazy" decoding="async" draggable={false} /> : <span data-moment-peek-blank />}
+          {peek.cover && !blurred ? <img src={peek.cover} alt="" loading="lazy" decoding="async" draggable={false} /> : <span data-moment-peek-blank />}
         </span>
       )}
       {peek && !noPeek && big && peek.count > 1 && (

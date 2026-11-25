@@ -143,7 +143,10 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-story-tile] {
 @media (min-width: 1024px) { [data-story-shelf][data-up='2'] [data-st-stack] { display: flex; } }
 [data-st-stack] img { width: 24px; height: 24px; border-radius: 8px; object-fit: cover; background: rgb(127 127 135 / 0.3); box-shadow: 0 0 0 2px var(--st-ring-gap); }
 [data-st-stack] img + img { margin-left: -7px; }
-[data-st-stack][data-covers] img { width: 22px; height: 30px; border-radius: 7px; }
+[data-st-stack][data-covers] img,
+[data-st-cover-placeholder] { width: 22px; height: 30px; border-radius: 7px; }
+[data-st-cover-placeholder] { background: rgb(127 127 135 / 0.3); box-shadow: 0 0 0 2px var(--st-ring-gap); }
+[data-st-cover-placeholder] + [data-st-cover-placeholder] { margin-left: -7px; }
 [data-st-stack] b { margin-left: 6px; color: var(--st-pill-sub); font-size: 11px; font-weight: 700; }
 
 /* Create: a solid square key with a centred +, the pills' height. */

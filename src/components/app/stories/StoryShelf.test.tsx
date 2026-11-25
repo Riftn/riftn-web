@@ -11,7 +11,11 @@ vi.mock('@/hooks/use-badge-balance', () => ({
   useBadgeVisual: () => ({ url: '/tier.png', name: 'Dolphin' }),
 }));
 vi.mock('@/hooks/use-stories-enabled', () => ({ useStoriesEnabled: () => prefs }));
-vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ isAuthenticated: true, walletAddress: 'owner' }) }));
+vi.mock('@/contexts/AuthContext', async () => {
+  const { createContext } = await import('react');
+  const auth = { isAuthenticated: true, walletAddress: 'owner' };
+  return { AuthContext: createContext(auth), useAuth: () => auth };
+});
 vi.mock('@/hooks/use-mature-content', () => ({ useMatureContent: () => ({ showMatureContent: false }) }));
 vi.mock('@/hooks/use-kids-mode', () => ({ useKidsModeLock: () => false }));
 vi.mock('@/hooks/use-global-drop-zone', () => ({ useGlobalDropZone: () => ({ openPostModal: vi.fn() }) }));

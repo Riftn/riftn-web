@@ -1,30 +1,56 @@
-import { useSyncExternalStore } from 'react';
+import { useContext, useSyncExternalStore } from 'react';
+import { AuthContext } from '@/contexts/AuthContext';
 
-/**
- * "Blur Moment previews": other people's Moment tiles on Home stay blurred
- * until you open them, so nothing is seen before you choose to watch it
- * (Requests e7dde08b / ce574e81). Off by default. Saved on this device.
- */
 const KEY = 'riftn.blurMomentPreviews';
 const listeners = new Set<() => void>();
+const sessionValues = new Map<string, boolean>();
 
-function read(): boolean {
-  try { return localStorage.getItem(KEY) === '1'; } catch { return false; }
+function read(key: string): boolean | undefined {
+  const sessionValue = sessionValues.get(key);
+  if (sessionValue !== undefined) return sessionValue;
+  try {
+    const value = localStorage.getItem(key);
+    if (value === '1' || value === '0') return value === '1';
+  } catch { /* Storage may be unavailable in private browsing. */ }
 }
 
-let blurred = read();
-
-export function setMomentPreviewsBlurred(next: boolean) {
-  blurred = next;
-  try { localStorage.setItem(KEY, next ? '1' : '0'); } catch { /* private mode */ }
-  listeners.forEach((l) => l());
+function onStorage(event: StorageEvent) {
+  if (event.key === null) sessionValues.clear();
+  else if (event.key === KEY || event.key.startsWith(KEY + ':')) sessionValues.delete(event.key);
+  else return;
+  listeners.forEach(listener => listener());
 }
 
-function subscribe(l: () => void) {
-  listeners.add(l);
-  return () => { listeners.delete(l); };
+function subscribe(listener: () => void) {
+  if (listeners.size === 0) window.addEventListener('storage', onStorage);
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+    if (listeners.size === 0) window.removeEventListener('storage', onStorage);
+  };
+}
+
+export function useMomentPreviewSetting() {
+  const auth = useContext(AuthContext);
+  const wallet = auth?.isAuthenticated ? auth.walletAddress?.toLowerCase() : undefined;
+  const key = wallet ? `${KEY}:${wallet}` : KEY;
+  // Preserve the old device-wide setting until this account has its own choice.
+  const readValue = () => read(key) ?? read(KEY) ?? false;
+  const blurred = useSyncExternalStore(subscribe, readValue, () => false);
+  const loading = auth?.isLoading ?? false;
+  const setBlurred = (next: boolean) => {
+    try {
+      localStorage.setItem(key, next ? '1' : '0');
+      sessionValues.delete(key);
+    } catch {
+      sessionValues.set(key, next);
+    }
+    listeners.forEach(listener => listener());
+  };
+  return { blurred, loading, setBlurred };
 }
 
 export function useMomentPreviewsBlurred(): boolean {
-  return useSyncExternalStore(subscribe, () => blurred, () => false);
+  const { blurred, loading } = useMomentPreviewSetting();
+  return blurred || loading;
 }

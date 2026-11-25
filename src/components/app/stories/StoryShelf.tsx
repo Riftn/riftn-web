@@ -152,7 +152,7 @@ function LoadingPill() {
 /** Small covers of someone's Moments, for a pill that has the room. */
 function MomentCovers({ entry }: { entry: ShelfEntry | null }) {
   const blurred = useMomentPreviewsBlurred();
-  if (!entry || blurred) return null;
+  if (!entry) return null;
   const covers = entry.items
     .map(item => item.posterUrl || (item.type === 'photo' ? item.mediaUrl : null))
     .filter((url): url is string => !!url)
@@ -160,7 +160,9 @@ function MomentCovers({ entry }: { entry: ShelfEntry | null }) {
   if (!covers.length) return null;
   return (
     <span data-st-stack data-covers aria-hidden="true">
-      {covers.map(url => <img key={url} src={url} alt="" loading="lazy" />)}
+      {covers.map((url, index) => blurred
+        ? <span key={index} data-st-cover-placeholder />
+        : <img key={url} src={url} alt="" loading="lazy" />)}
     </span>
   );
 }
