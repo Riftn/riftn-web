@@ -40,6 +40,7 @@ import {
   type LiveMini,
 } from '@/lib/live-mini';
 import { LIVE_HLS_CONFIG, playsNativeHls } from '@/lib/live/hls-standby';
+import { watchLiveProgress } from '@/lib/live/stall-watchdog';
 import { BIG_EVENT_HLS_CONFIG, isBigEventPlayback } from '@/lib/live-ingest';
 import { canPictureInPicture, catchUpToLiveEdge, onReturnToTab, togglePictureInPicture, useAutoPictureInPicture } from '@/lib/live-background';
 import { videoPlaybackManager } from '@/lib/video-playback-manager';
@@ -116,8 +117,20 @@ function LiveMiniSession({ mini }: { mini: LiveMini }) {
     video.muted = false;
     videoPlaybackManager.play(OWNER);
     videoPlaybackManager.claimAudio(OWNER);
-    void video.play().catch(() => {
-      // No gesture left to play with sound: wait for a tap on Play.
+    void video.play().catch(async (error: unknown) => {
+      if (!wantPlayRef.current || !video.isConnected) return;
+      if (error instanceof DOMException && error.name === 'AbortError') return;
+      // The route handoff can outlast the tap's transient user activation.
+      if (error instanceof DOMException && error.name === 'NotAllowedError') {
+        video.muted = true;
+        try {
+          await video.play();
+          return;
+        } catch (fallbackError) {
+          if (fallbackError instanceof DOMException && fallbackError.name === 'AbortError') return;
+        }
+      }
+      if (!wantPlayRef.current || !video.isConnected) return;
       wantPlayRef.current = false;
       setPlaying(false);
       setBuffering(false);
@@ -167,18 +180,21 @@ function LiveMiniSession({ mini }: { mini: LiveMini }) {
       setBuffering(true);
       if (playsNativeHls(video, url)) {
         video.src = url;
-        play();
+        if (wantPlayRef.current) play();
         return;
       }
       const { default: HlsCtor } = await import('hls.js');
       if (disposed) return;
       if (!HlsCtor.isSupported()) {
         video.src = url;
-        play();
+        if (wantPlayRef.current) play();
         return;
       }
       const hls = new HlsCtor({ ...LIVE_HLS_CONFIG, ...(isBigEventPlayback(url) ? BIG_EVENT_HLS_CONFIG : {}) });
       hlsRef.current = hls;
+      hls.on(HlsCtor.Events.MEDIA_ATTACHED, () => {
+        if (!disposed && wantPlayRef.current) play();
+      });
       hls.loadSource(url);
       hls.attachMedia(video);
       hls.on(HlsCtor.Events.ERROR, (_e, data) => {
@@ -189,21 +205,28 @@ function LiveMiniSession({ mini }: { mini: LiveMini }) {
           retry = setTimeout(() => { if (!disposed) hls.startLoad(); }, 3000);
         });
       });
-      play();
     };
 
     const session = mini.session;
+    let stopWatch: (() => void) | undefined;
     if (session) {
-      session.setStateListener((state) => {
+      const fallBack = () => {
         if (disposed || getLiveMini()?.session !== session) return;
-        if (state === 'failed') {
-          video.srcObject = null;
-          dropLiveMiniSession();
-          void startHls();
-        }
+        stopWatch?.();
+        video.srcObject = null;
+        dropLiveMiniSession();
+        void startHls();
+      };
+      session.setStateListener((state) => {
+        if (state === 'failed') fallBack();
       });
       video.srcObject = session.stream;
-      play();
+      if (wantPlayRef.current) play();
+      stopWatch = watchLiveProgress(video, {
+        stallMs: 6000,
+        shouldWatch: () => wantPlayRef.current && visualActivity.isLivePlaybackAllowed(),
+        onStall: fallBack,
+      });
     } else {
       void startHls();
     }
@@ -211,6 +234,7 @@ function LiveMiniSession({ mini }: { mini: LiveMini }) {
     return () => {
       disposed = true;
       clearTimeout(retry);
+      stopWatch?.();
       session?.setStateListener(undefined);
       hlsRef.current?.destroy();
       hlsRef.current = null;

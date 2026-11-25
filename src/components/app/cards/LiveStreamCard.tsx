@@ -1439,29 +1439,35 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
   const minimiseLive = useCallback(async (mode: LiveMiniMode = 'video') => {
     const streamId = stream.streamId;
     if (!streamId) return;
+    const path = `${window.location.pathname}${window.location.search}`;
     let seat: { leave: () => void } | null = null;
     if (!isOwnStream) {
       const { joinStreamPresence } = await import('@/lib/api/dehub/stream-presence');
+      if (path !== `${window.location.pathname}${window.location.search}`) return;
       seat = joinStreamPresence(streamId);
     }
     const video = videoRef.current;
     const session = transport === 'whep' ? whepSessionRef.current : null;
+    const playingUrl = hlsRef.current?.url ?? video?.currentSrc;
+    const urls = playingUrl && urlsToTry.includes(playingUrl)
+      ? [playingUrl, ...urlsToTry.filter((url) => url !== playingUrl)]
+      : urlsToTry;
     if (session) handedToMiniRef.current = session;
     openLiveMini({
       streamId,
       playbackId: whepPlaybackId,
-      urls: urlsToTry,
+      urls,
       title: stream.title,
       host: stream.creatorUsername ? `@${stream.creatorUsername}` : stream.streamer,
       avatar: stream.avatar,
-      path: `${window.location.pathname}${window.location.search}`,
+      path,
       session,
       poster: video ? snapshotLiveFrame(video) : undefined,
       seat,
       mode,
     });
     if (isFullscreen) toggleFullscreen();
-    if (window.history.length > 1) navigate(-1);
+    if (window.history.state?.idx > 0) navigate(-1);
     else navigate('/app');
   }, [stream.streamId, stream.title, stream.creatorUsername, stream.streamer, stream.avatar, isOwnStream, transport, whepPlaybackId, urlsToTry, isFullscreen, toggleFullscreen, navigate]);
 
