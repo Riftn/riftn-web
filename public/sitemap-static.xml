@@ -21510,4 +21510,7 @@
     <xhtml:link rel="alternate" hreflang="tr" href="https://riftn.com/docs/troubleshooting?hl=tr"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://riftn.com/docs/troubleshooting"/>
   </url>
+  <url>
+    <loc>https://riftn.com/stores</loc>
+  </url>
 </urlset>

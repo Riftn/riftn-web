@@ -279,7 +279,7 @@ export function parseDehubLink(input: string): DehubLinkMatch | null {
   }
 
   // ── /app/stores/:storeId  (+ ?listing=<id>) ──
-  if (isAppScoped && scoped[0] === 'stores' && scoped[1]) {
+  if (scoped[0] === 'stores' && scoped.length === 2) {
     const storeId = scoped[1];
     if (!/^[a-fA-F0-9-]{8,}$/.test(storeId)) return null;
     const listingId = new URLSearchParams(search).get('listing');
