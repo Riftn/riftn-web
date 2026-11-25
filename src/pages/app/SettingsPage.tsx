@@ -111,7 +111,7 @@ import { useAuth as useAuthContext } from '@/contexts/AuthContext';
 import { useMatureContent } from '@/hooks/use-mature-content';
 import { useKidsMode } from '@/hooks/use-kids-mode';
 import { KidsModeDrawer } from '@/components/app/settings/KidsModeDrawer';
-import { Baby, RectangleHorizontal, ThumbsDown, UserCheck, Hash, Check } from 'lucide-react';
+import { Baby, RectangleHorizontal, ThumbsDown, UserCheck, Hash } from 'lucide-react';
 import type { FreeAccessUser } from '@/lib/api/dehub/dm';
 import { JungleMoodToggle } from '@/components/app/jungle/JungleMoodToggle';
 import { useJungleMood } from '@/lib/jungle-mood';
