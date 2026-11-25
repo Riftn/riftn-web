@@ -463,10 +463,12 @@ export function ProfileHeader({
                     {nameTail}
                     {/* The ceremony flies the badge out of this slot and back
                         into it, so it needs an element to measure. */}
-                    <span ref={badgeSlotRef} className="inline-flex align-baseline ml-1">
-                      <BadgeIcon src={badgeUrl} className="w-[1em] h-[1em]" />
+                    <span data-inline-name-badges className="inline-flex items-end align-baseline">
+                      <span ref={badgeSlotRef} className="inline-flex ml-1">
+                        <BadgeIcon src={badgeUrl} className="w-[1em] h-[1em]" />
+                      </span>
+                      <StreamerBadge address={profile.walletAddress} canSelect={!!isViewingOwnProfile} className="ml-1 !self-end" />
                     </span>
-                    <StreamerBadge address={profile.walletAddress} canSelect={!!isViewingOwnProfile} className="ml-1" />
                   </span>
                 </h2>
                 {/* A lent badge draws like any other badge everywhere else
