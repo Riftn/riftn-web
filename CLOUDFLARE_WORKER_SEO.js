@@ -1250,9 +1250,9 @@ const MARKETING_PAGES = {
 <p><a href="${APP_URL}/ads">Open Ads Manager</a> or <a href="${APP_URL}/docs/advertising">read how POVR works</a>.</p>`,
   },
   'buy': {
-    title: 'Buy: Purchase Crypto on Riftn',
+    title: '$RIFT on-chain launch',
     description: '$RIFT is Riftn’s in-app currency. You can already use it inside Riftn. The on-chain token has yet to launch and has no official contract address or exchange listing.',
-    heading: 'Buy Crypto on Riftn',
+    heading: '$RIFT on-chain launch',
     bodyHtml: `<p>$RIFT is Riftn’s in-app currency. You can already use it inside Riftn. The on-chain token has yet to launch and has no official contract address or exchange listing.</p>
 <p><a href="${APP_URL}/docs/token/where-to-buy">Check the official $RIFT launch status</a>.</p>`,
   },
@@ -5268,10 +5268,10 @@ function articleSlugOf(pathname) {
  *  undefined when the lookup failed (rate limit, timeout, 5xx). A failed
  *  lookup is not a missing post: answering 404 for it told crawlers that
  *  real articles were gone whenever the API was busy. */
-async function resolveArticleSlugTokenId(slug) {
+async function resolveArticleSlugTokenId(slug, timeoutMs = 6000) {
   try {
     const res = await fetch(`https://api.dehub.io/api/article/${encodeURIComponent(slug)}`, {
-      signal: AbortSignal.timeout(6000),
+      signal: AbortSignal.timeout(timeoutMs),
     });
     if (res.status === 429 || res.status >= 500) return undefined;
     if (!res.ok) return null;
@@ -6804,7 +6804,7 @@ async function withInitialPublicContent(shell, page, pageStatus) {
     : '');
   const body = page.match(/<body[^>]*>([\s\S]*?)<\/body>/i)?.[1] || '';
   const language = page.match(/<html\b[^>]*\blang="([^"]+)"/i)?.[1];
-  const style = '<style>#root .edge-public-content{box-sizing:border-box;max-width:74ch;margin:0 auto;padding:2rem 1rem;color:CanvasText;background:Canvas;line-height:1.55;overflow-wrap:anywhere}#root .edge-public-content img{max-width:100%;height:auto}#root .edge-public-content .dh-cta{display:none}</style>';
+  const style = '<style>#root .edge-public-content{box-sizing:border-box;max-width:74ch;margin:0 auto;padding:2rem 1rem;color:var(--boot-fg,CanvasText);background:var(--boot-bg,Canvas);line-height:1.55;overflow-wrap:anywhere}#root .edge-public-content img{max-width:100%;height:auto}#root .edge-public-content .dh-cta{display:none}</style>';
   const snapshot = '<div class="edge-public-content">' + body + '</div>';
   const result = html.replace(PAGE_META_TAGS, '')
     .replace('<head>', () => '<head>' + meta + style)
@@ -7916,6 +7916,8 @@ async function handleRequest(request, env, ctx) {
   // /app/post/x, /username, etc.). The React SPA handles all routing itself.
   if (!isBot && !browserPublicDocument) {
     if (!forceApp && request.method === 'GET' && request.headers.get('Accept')?.includes('text/html')) {
+      const slug = articleSlugOf(pathname);
+      if (slug && await resolveArticleSlugTokenId(slug, 1200) === null) return entityNotFound();
       const segment = pathname.split('/').filter(Boolean);
       if (segment.length === 1 && couldBeProfileSegment(segment[0], SYSTEM_ROUTES)) {
         const handle = segment[0].replace(/^(?:@|%40)/i, '');

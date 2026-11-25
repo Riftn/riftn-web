@@ -90,7 +90,7 @@ const TokenOverview = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground leading-relaxed text-sm">{t('tokenOverview.disclaimerNoApy')}</p>
-          <p className="text-muted-foreground leading-relaxed text-sm">{t('tokenOverview.disclaimerText')}</p>
+          <p className="text-muted-foreground leading-relaxed text-sm">{t('faq.a20')}</p>
         </CardContent>
       </Card>
     </div>
