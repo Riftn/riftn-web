@@ -31,14 +31,14 @@ html[data-theme='war'] [data-stories] {
 [data-story-shelf] {
   --st-shelf-outline: rgb(255 255 255 / 0.18);
   display: flex;
+  align-items: center;
   gap: 8px;
   overflow-x: auto;
-  overscroll-behavior-x: contain;
+  overscroll-behavior-x: none;
   scrollbar-width: none;
   padding: 2px 0;
   margin: 0 0 10px;
   -webkit-overflow-scrolling: touch;
-  scroll-snap-type: x proximity;
 }
 html:is([data-theme='light'], [data-system-tone='light']) [data-story-shelf] {
   --st-shelf-outline: rgb(113 113 122 / 0.24);
@@ -65,7 +65,6 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-story-shelf] {
    (face, name, one line). Pills share the row's width, so 1 to 3 up never
    leave empty space; with just 1 up the pill also shows who is watching or
    the Moments themselves. */
-[data-story-shelf] { align-items: center; scroll-snap-type: none; }
 /* One up: the pill takes the whole row and its name gives way to the extras. */
 [data-story-shelf][data-up='1'] > [data-story-tile]:not([data-kind='create']) { flex: 1 1 0; min-width: 0; }
 [data-story-tile] {
@@ -94,7 +93,6 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-story-shelf] {
   background: var(--st-pill-fill);
   color: var(--st-pill-ink);
   text-align: left;
-  scroll-snap-align: start;
   -webkit-tap-highlight-color: transparent;
   transition: transform 0.18s cubic-bezier(.2,.8,.2,1);
 }
@@ -116,7 +114,16 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-story-tile] {
   -webkit-backdrop-filter: blur(18px) saturate(1.4);
   backdrop-filter: blur(18px) saturate(1.4);
 }
-[data-story-tile]:active { transform: scale(0.97); }
+@media (hover: hover) and (pointer: fine) {
+  [data-story-tile]:active { transform: scale(0.97); }
+}
+/* Keep the scroll positions stable when names and audience counts change. */
+@media (max-width: 767px) {
+  [data-story-tile]:is([data-kind='me'], [data-kind='live'], [data-kind='person']) {
+    flex-basis: 150px;
+    min-width: 0;
+  }
+}
 [data-story-tile] [data-st-avatar] {
   display: block;
   flex: none;
