@@ -8787,6 +8787,7 @@
       "banned": "Gebannen van je streams",
       "unban": "Ontbannen",
       "noBans": "Niemand is gebannen.",
+      "delegatedBans": "Geblokkeerde gebruikers in streams die je modereert",
       "log": "Recente acties",
       "noLog": "Nog niets.",
       "actions": {

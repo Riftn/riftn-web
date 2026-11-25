@@ -8602,6 +8602,7 @@
       "banned": "Banni de vos streams",
       "unban": "Débannir",
       "noBans": "Personne n'est banni.",
+      "delegatedBans": "Utilisateurs bannis des diffusions que vous modérez",
       "log": "Actions récentes",
       "noLog": "Rien pour l'instant.",
       "actions": {
