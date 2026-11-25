@@ -275,7 +275,7 @@ function LiveTile({ item, roomy, onOpen }: { item: LiveNowItem; roomy: boolean; 
     ? [item.count && t('stories.spot.listening', { n: item.count, defaultValue: '{{n}} listening' })]
     : [
         item.count && t('stories.spot.watching', { n: item.count, defaultValue: '{{n}} watching' }),
-        item.views ? t('stories.spot.views', { n: formatCount(item.views), defaultValue: '{{n}} views' }) : '',
+        item.views != null ? t('stories.spot.views', { n: formatCount(item.views), defaultValue: '{{n}} views' }) : '',
       ];
   return (
     <button type="button" role="listitem" data-story-tile data-kind="live" onClick={onOpen} aria-label={item.title}>

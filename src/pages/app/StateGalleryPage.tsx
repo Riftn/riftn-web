@@ -1137,7 +1137,7 @@ function LiveAvatarsGallery() {
         <LiveRipple live orbit className="rounded-md">{face('w-9 h-9 rounded-md', 'M')}</LiveRipple>
         <LiveRipple live className="rounded-lg">{face('w-10 h-10', 'D')}</LiveRipple>
         <LiveRipple live className="rounded-lg">{face('w-12 h-12', 'L')}</LiveRipple>
-        <LiveRipple live size="lg" orbit className="rounded-xl">{face('w-28 h-28 rounded-xl text-3xl', 'S')}</LiveRipple>
+        <LiveRipple live size="lg" orbit className="[--profile-avatar-radius:calc(7rem/3)] rounded-[var(--profile-avatar-radius)]">{face('w-28 h-28 rounded-[var(--profile-avatar-radius)] text-3xl', 'S')}</LiveRipple>
         <div className="flex flex-col items-center gap-2">
           {face('w-12 h-12', 'T')}
           <span className="text-[11px] text-zinc-500">{_copy("copy.cf7d0ae846cb", { defaultValue: "Not live" })}</span>

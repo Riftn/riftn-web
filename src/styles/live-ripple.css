@@ -71,6 +71,7 @@
   --live-orbit-radius: 12px;
 }
 [data-live-orbit='md'] { --live-orbit-radius: calc(var(--radius) - 2px); }
+[data-live-orbit='lg'] { --live-orbit-radius: var(--profile-avatar-radius, 12px); }
 [data-live-orbit] > [data-live-orbit-ring] {
   position: absolute;
   inset: -3.5px;
