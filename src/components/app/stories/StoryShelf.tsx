@@ -6,7 +6,8 @@
  * last. Pills share the row's width; with one or two up they also show who
  * is watching or the Moments themselves. A pill opens the full-screen viewer.
  */
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent } from 'react';
+import { Eye } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import Refresh from '@/components/ui/cut-icons/refresh';
@@ -26,11 +27,42 @@ import { StoryCreatePill, StoryCreateTile } from './StoryCreatePill';
 import { useMomentPreviewsBlurred } from '@/lib/moment-preview-blur';
 import { formatCount } from '@/lib/format-count';
 import { useLiveAudience } from '@/hooks/use-live-audience';
+import { setActivityBarHidden, useActivityShelfPreferences } from '@/lib/activity-shelf-preferences';
+import { ActivityShelfMenu, type ActivityMenuRequest, type ActivityTarget } from './ActivityShelfMenu';
 import '@/styles/stories.css';
 import '@/styles/live-ripple.css';
 
 
 export function StoryShelf() {
+  const { t } = useTranslation();
+  const { hidden, dismissed } = useActivityShelfPreferences();
+  if (hidden) {
+    return (
+      <div data-stories data-activity-restore>
+        <button type="button" onClick={() => setActivityBarHidden(false)}>
+          <Eye size={16} aria-hidden />
+          {t('stories.activity.showBar', 'Show activity bar')}
+        </button>
+      </div>
+    );
+  }
+  return <VisibleStoryShelf dismissed={dismissed} />;
+}
+
+type OpenActivityMenu = (event: MouseEvent<HTMLElement> | KeyboardEvent<HTMLElement>, target?: ActivityTarget) => void;
+
+function menuEvents(openMenu: OpenActivityMenu) {
+  return {
+    onContextMenu: (event: MouseEvent<HTMLElement>) => openMenu(event),
+    onKeyDown: (event: KeyboardEvent<HTMLElement>) => {
+      if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) openMenu(event);
+    },
+  };
+}
+
+const liveKey = (item: LiveNowItem) => `${item.kind}:${item.id}`;
+
+function VisibleStoryShelf({ dismissed }: { dismissed: string[] }) {
   const { isAuthenticated, walletAddress, user, openLoginModal } = useAuth();
   const { items: live, open: openLive, loading: liveLoading } = useLiveNowItems();
   const { showMatureContent } = useMatureContent();
@@ -39,17 +71,32 @@ export function StoryShelf() {
   const liveHosts = [...new Set(live.map(item => (item.wallet || '').toLowerCase()).filter(Boolean))].sort().slice(0, 100).join(',');
   const { storiesEnabled, storiesSettingLoading } = useStoriesEnabled();
   const { data, isLoading, isError } = useStoryShelf(liveHosts, canSeeMature, storiesEnabled || !!liveHosts);
-  const eligibleLive = live.filter(item => data?.liveHosts?.includes((item.wallet || '').toLowerCase()));
+  const eligibleLive = live.filter(item => !dismissed.includes(liveKey(item)) && data?.liveHosts?.includes((item.wallet || '').toLowerCase()));
   const openViewer = useStoriesStore(s => s.openViewer);
   const openCreator = useStoriesStore(s => s.openCreator);
   const pending = useStoriesStore(s => s.pending);
+  const [menu, setMenu] = useState<ActivityMenuRequest | null>();
+  const closeMenu = useCallback(() => setMenu(null), []);
+  const openMenu: OpenActivityMenu = (event, target) => {
+    if (event.defaultPrevented) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const anchor = event.target instanceof Element ? event.target.closest('button') ?? event.currentTarget : event.currentTarget;
+    const rect = anchor.getBoundingClientRect();
+    const point = 'clientX' in event && (event.clientX || event.clientY)
+      ? { x: event.clientX, y: event.clientY }
+      : { x: rect.left, y: rect.bottom };
+    setMenu({ point, target });
+  };
+  const menuElement = menu !== undefined && <ActivityShelfMenu request={menu} onClose={closeMenu} />;
+  const createPill = () => <><div {...menuEvents(openMenu)}><StoryCreatePill /></div>{menuElement}</>;
 
   const shelf = useMemo(() => data?.shelf ?? [], [data]);
   const own = shelf.find(e => e.own) ?? null;
   // What the viewer can page through: your own day when it has something, then everyone else.
   const watchable = useMemo(
-    () => shelf.map(e => ({ ...e, items: playable(e.items).filter(item => canSeeMature || !item.isMature) })).filter(e => e.items.length > 0),
-    [shelf, canSeeMature],
+    () => shelf.map(e => ({ ...e, items: playable(e.items).filter(item => !dismissed.includes(`story:${item.id}`) && (canSeeMature || !item.isMature)) })).filter(e => e.items.length > 0),
+    [shelf, canSeeMature, dismissed],
   );
   const others = watchable.filter(e => !e.own);
   const ownWatchable = watchable.find(e => e.own) ?? null;
@@ -69,13 +116,14 @@ export function StoryShelf() {
   const hidden = (!storiesEnabled || (!isAuthenticated && others.length === 0 && !isLoading)) && eligibleLive.length === 0;
   // Signed in and nobody has a Moment up (yours included): a thin pill that
   // invites you to create takes the row's place instead of a lone tile.
-  const bare = storiesEnabled && isAuthenticated && !isLoading && !pending && !own?.items.length
+  const hasOwnMoment = !!own?.items.some(item => !dismissed.includes(`story:${item.id}`));
+  const bare = storiesEnabled && isAuthenticated && !isLoading && !pending && !hasOwnMoment
     && others.length === 0 && eligibleLive.length === 0;
   const seat: ShelfSeat = hidden ? 'none' : bare ? 'ask' : 'row';
   // Lives arrive a beat after the shelf, and the shelf then checks their
   // hosts again. Until both are in, "nothing up" is not an answer yet.
   const vetting = !!data && !isError && (data.askedHosts ?? '') !== liveHosts;
-  const nothingYet = eligibleLive.length === 0 && others.length === 0 && !own?.items.length;
+  const nothingYet = eligibleLive.length === 0 && others.length === 0 && !hasOwnMoment;
   const holding = eligibleLive.length === 0 && (waiting || ((liveLoading || vetting) && nothingYet));
   // The seat on screen stays put while holding: what the last visit (or the
   // last settled answer this visit) had, so the feed under it never moves.
@@ -88,22 +136,31 @@ export function StoryShelf() {
   if (holding) {
     const lastSeat = heldSeat.current;
     if (lastSeat === 'none') return null;
-    if (lastSeat === 'ask' && isAuthenticated) return <StoryCreatePill />;
+    if (lastSeat === 'ask' && isAuthenticated) return createPill();
     if (lastSeat === 'ask') return null;
     return (
-      <div data-stories data-story-shelf data-no-swipe role="list" aria-busy="true">
-        {isAuthenticated && <StoryCreateTile />}
-        {[0, 1, 2].map(index => <LoadingPill key={index} />)}
-      </div>
+      <>
+        <div data-stories data-story-shelf data-no-swipe role="list" aria-busy="true" {...menuEvents(openMenu)}>
+          {isAuthenticated && <StoryCreateTile />}
+          {[0, 1, 2].map(index => <LoadingPill key={index} />)}
+        </div>
+        {menuElement}
+      </>
     );
   }
   if (hidden) return null;
-  if (bare) return <StoryCreatePill />;
+  if (bare) return createPill();
 
   const openEntry = (entry: ShelfEntry, el: HTMLElement) => {
     const index = watchable.findIndex(e => e.author.address === entry.author.address);
     if (index >= 0) openViewer(watchable, index, { from: el.getBoundingClientRect() });
   };
+  const storyTarget = (entry: ShelfEntry, element: HTMLElement): ActivityTarget => ({
+    kind: 'story',
+    ids: entry.items.map(item => `story:${item.id}`),
+    open: () => openEntry(entry, element),
+    creator: entry.own ? undefined : { address: entry.author.address, name: nameOf(entry.author) },
+  });
 
   const addMoment = () => (isAuthenticated ? openCreator() : openLoginModal());
 
@@ -115,28 +172,37 @@ export function StoryShelf() {
   const roomy = upCount >= 1 && upCount <= 2;
 
   return (
-    <div data-stories data-story-shelf data-no-swipe role="list" data-up={upCount || undefined}>
-      {storiesEnabled && isAuthenticated && <StoryCreateTile />}
-      {showMe && (
-        <MeTile
-          address={walletAddress ?? ''}
-          avatar={user?.avatarImageUrl ?? own?.author.avatarImageUrl ?? null}
-          entry={ownWatchable}
-          processing={!!own?.items.some(i => i.status === 'processing')}
-          pending={pending}
-          roomy={roomy}
-          onAdd={addMoment}
-          onOpen={el => ownWatchable && openEntry(ownWatchable, el)}
-        />
-      )}
-      {eligibleLive.map(item => (
-        <LiveTile key={`${item.kind}-${item.id}`} item={item} roomy={roomy} onOpen={() => openLive(item)} />
-      ))}
-      {storiesEnabled && isLoading && [0, 1, 2].map(index => <LoadingPill key={index} />)}
-      {shownOthers.map(entry => (
-        <PersonTile key={entry.author.address} entry={entry} roomy={roomy} onOpen={el => openEntry(entry, el)} />
-      ))}
-    </div>
+    <>
+      <div data-stories data-story-shelf data-no-swipe role="list" data-up={upCount || undefined} {...menuEvents(openMenu)}>
+        {storiesEnabled && isAuthenticated && <StoryCreateTile />}
+        {showMe && (
+          <MeTile
+            address={walletAddress ?? ''}
+            avatar={user?.avatarImageUrl ?? own?.author.avatarImageUrl ?? null}
+            entry={ownWatchable}
+            processing={!!own?.items.some(i => i.status === 'processing')}
+            pending={pending}
+            roomy={roomy}
+            onAdd={addMoment}
+            onOpen={el => ownWatchable && openEntry(ownWatchable, el)}
+            onMenu={ownWatchable && !pending ? event => openMenu(event, storyTarget(ownWatchable, event.currentTarget)) : undefined}
+          />
+        )}
+        {eligibleLive.map(item => (
+          <LiveTile key={liveKey(item)} item={item} roomy={roomy} onOpen={() => openLive(item)}
+            onMenu={event => openMenu(event, {
+              kind: item.kind, ids: [liveKey(item)], open: () => openLive(item),
+              creator: { address: item.wallet, name: item.displayName || item.username },
+            })} />
+        ))}
+        {storiesEnabled && isLoading && [0, 1, 2].map(index => <LoadingPill key={index} />)}
+        {shownOthers.map(entry => (
+          <PersonTile key={entry.author.address} entry={entry} roomy={roomy} onOpen={el => openEntry(entry, el)}
+            onMenu={event => openMenu(event, storyTarget(entry, event.currentTarget))} />
+        ))}
+      </div>
+      {menuElement}
+    </>
   );
 }
 
@@ -201,7 +267,7 @@ function momentsLine(t: TFunction, count: number) {
     : t('stories.spot.moments', { n: formatCount(count), defaultValue: '{{n}} Moments' });
 }
 
-function MeTile({ address, avatar, entry, processing, pending, roomy, onAdd, onOpen }: {
+function MeTile({ address, avatar, entry, processing, pending, roomy, onAdd, onOpen, onMenu }: {
   address: string;
   avatar: string | null;
   entry: ShelfEntry | null;
@@ -210,6 +276,7 @@ function MeTile({ address, avatar, entry, processing, pending, roomy, onAdd, onO
   roomy: boolean;
   onAdd: () => void;
   onOpen: (el: HTMLElement) => void;
+  onMenu?: OpenActivityMenu;
 }) {
   const { t } = useTranslation();
   const face = avatar ? buildAvatarUrl(address, avatar, deviceWidth(36)) : buildAvatarCdnFallbackUrl(address, undefined);
@@ -225,6 +292,7 @@ function MeTile({ address, avatar, entry, processing, pending, roomy, onAdd, onO
       data-story-tile
       data-kind="me"
       aria-label={you}
+      {...(onMenu && menuEvents(onMenu))}
       onClick={e => (entry && !pending ? onOpen(e.currentTarget) : !busy ? (pending?.retry ? pending.retry() : onAdd()) : undefined)}
     >
       {failed ? <span data-st-avatar className="grid place-items-center"><Refresh className="w-5 h-5" /></span> : <ShelfAvatar src={face} />}
@@ -268,7 +336,7 @@ function TileIdentity({ address, username, displayName, live }: {
   );
 }
 
-function LiveTile({ item, roomy, onOpen }: { item: LiveNowItem; roomy: boolean; onOpen: () => void }) {
+function LiveTile({ item, roomy, onOpen, onMenu }: { item: LiveNowItem; roomy: boolean; onOpen: () => void; onMenu: OpenActivityMenu }) {
   const { t } = useTranslation();
   const face = faceUrlOf(item);
   const line = item.kind === 'stage'
@@ -278,7 +346,7 @@ function LiveTile({ item, roomy, onOpen }: { item: LiveNowItem; roomy: boolean; 
         item.views != null ? t('stories.spot.views', { n: formatCount(item.views), defaultValue: '{{n}} views' }) : '',
       ];
   return (
-    <button type="button" role="listitem" data-story-tile data-kind="live" onClick={onOpen} aria-label={item.title}>
+    <button type="button" role="listitem" data-story-tile data-kind="live" onClick={onOpen} aria-label={item.title} {...menuEvents(onMenu)}>
       <span data-live-orbit="shelf" role="img" aria-label={t('stages.liveBadge', { defaultValue: 'LIVE' })}>
         <span data-live-orbit-ring aria-hidden />
         <ShelfAvatar src={face} />
@@ -292,7 +360,7 @@ function LiveTile({ item, roomy, onOpen }: { item: LiveNowItem; roomy: boolean; 
   );
 }
 
-function PersonTile({ entry, roomy, onOpen }: { entry: ShelfEntry; roomy: boolean; onOpen: (el: HTMLElement) => void }) {
+function PersonTile({ entry, roomy, onOpen, onMenu }: { entry: ShelfEntry; roomy: boolean; onOpen: (el: HTMLElement) => void; onMenu: OpenActivityMenu }) {
   const { t, i18n } = useTranslation();
   const a = entry.author;
   const face = a.avatarImageUrl ? buildAvatarUrl(a.address, a.avatarImageUrl, deviceWidth(36)) : buildAvatarCdnFallbackUrl(a.address, undefined);
@@ -305,6 +373,7 @@ function PersonTile({ entry, roomy, onOpen }: { entry: ShelfEntry; roomy: boolea
       data-seen={entry.seen ? 'true' : 'false'}
       data-close-friends={entry.closeFriends && !entry.own ? '' : undefined}
       onClick={e => onOpen(e.currentTarget)}
+      {...menuEvents(onMenu)}
       aria-label={nameOf(a)}
     >
       <ShelfAvatar src={face} />

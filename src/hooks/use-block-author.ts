@@ -52,6 +52,7 @@ export function useBlockAuthor() {
       }
 
       queryClient.invalidateQueries({ queryKey: ['block-list'] });
+      queryClient.invalidateQueries({ queryKey: ['story-shelf'] });
       toast.success(displayName
         ? _copy("copy.b2f9daafb41e", { defaultValue: "Blocked {{value1}} — they can no longer see you either", value1: displayName })
         : _copy("copy.789fe7653aa0", { defaultValue: "Blocked account — they can no longer see you either" }));

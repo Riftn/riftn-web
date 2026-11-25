@@ -45,6 +45,22 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-story-shelf] {
 }
 [data-story-shelf]::-webkit-scrollbar { display: none; }
 
+[data-activity-restore] { margin-block: 6px; }
+[data-activity-restore] button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding-inline: 12px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 999px;
+  color: hsl(var(--foreground));
+  font-size: 13px;
+  font-weight: 600;
+}
+[data-activity-restore] button:hover { background: hsl(var(--accent)); }
+[data-activity-restore] button:focus-visible { outline: 2px solid hsl(var(--ring)); }
+
 /* Slim pills: Create is an outlined + key, then one pill per live or person
    (face, name, one line). Pills share the row's width, so 1 to 3 up never
    leave empty space; with just 1 up the pill also shows who is watching or
