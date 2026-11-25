@@ -47,6 +47,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLiveAudience } from '@/hooks/use-live-audience';
 import { LiveAudienceSheet, audienceAvatar, audienceName } from './LiveAudienceSheet';
 import { profilePath } from '@/lib/profile-path';
+import { formatReplayTime } from '@/lib/live-replay';
 import { LivePlayPause, LiveTag, LiveTimelineLine, useTimeshiftSnap, type LiveTimeshift } from './LiveTimeline';
 
 const compact = (n: number) => {
@@ -109,6 +110,7 @@ export interface ImmersiveLiveChromeProps {
   optionsSlot?: React.ReactNode;
   /** 0..1 of the replay. Undefined for a stream that is genuinely on air. */
   progress?: number;
+  replayDuration?: number;
   onSeek?: (ratio: number) => void;
   /** Chrome cleared by a swipe down; the caller dims its own overlays to match. */
   hidden: boolean;
@@ -138,6 +140,7 @@ export function ImmersiveLiveChrome({
   onToggleMute,
   optionsSlot,
   progress,
+  replayDuration,
   onSeek,
   hidden,
   streamId,
@@ -224,14 +227,14 @@ export function ImmersiveLiveChrome({
     ? t('liveAudience.startedAgo', { time: formatDistanceToNow(startedMs, { addSuffix: true }), defaultValue: 'Started {{time}}' })
     : null;
 
-  /* ── the scrub line ───────────────────────────────────────────────────
-     Same bar the shorts viewer draws: 1px at rest, 2px under a finger, a
-     white/20 track and a white/80 fill. Live has nothing to scrub — the
-     caller passes no progress and the bar is not rendered at all. */
+  // Preview the replay position while dragging, then seek on release.
   const trackRef = useRef<HTMLDivElement>(null);
   const [seeking, setSeeking] = useState(false);
   const [seekPreview, setSeekPreview] = useState<number | null>(null);
   const seekable = progress !== undefined && !!onSeek;
+  const shownProgress = Math.max(0, Math.min(1, seekPreview ?? progress ?? 0));
+  const replayTime = replayDuration === undefined ? undefined
+    : formatReplayTime(shownProgress * replayDuration) + ' / ' + formatReplayTime(replayDuration);
 
   const ratioFromEvent = useCallback((clientX: number) => {
     const el = trackRef.current;
@@ -422,8 +425,11 @@ export function ImmersiveLiveChrome({
         ) : null}
       </div>
 
-      {/* The timeline. Only a replay has one — a broadcast on air has nothing
-          behind the live edge to move to. */}
+      {seekable && replayTime && !hidden ? (
+        <span className="pointer-events-none absolute bottom-5 left-4 z-30 text-xs font-semibold tabular-nums text-white [text-shadow:0_1px_2px_rgb(0_0_0/0.8)]">
+          {replayTime}
+        </span>
+      ) : null}
       {seekable ? (
         <div
           ref={trackRef}
@@ -432,7 +438,8 @@ export function ImmersiveLiveChrome({
           aria-label={title || t('feed.videos')}
           aria-valuemin={0}
           aria-valuemax={100}
-          aria-valuenow={Math.round((seekPreview ?? progress ?? 0) * 100)}
+          aria-valuenow={Math.round(shownProgress * 100)}
+          aria-valuetext={replayTime}
           onKeyDown={(e) => {
             const current = progress ?? 0;
             const next = e.key === 'Home' ? 0 : e.key === 'End' ? 1
@@ -449,18 +456,18 @@ export function ImmersiveLiveChrome({
             setSeeking(true);
             setSeekPreview(ratioFromEvent(e.clientX));
           }}
-          className="absolute inset-x-0 bottom-0 z-30 flex h-6 cursor-pointer touch-none select-none items-end"
+          data-no-navigate
+          className="absolute inset-x-0 bottom-0 z-30 flex h-6 cursor-pointer touch-none select-none items-end pb-1 focus-visible:outline focus-visible:outline-1 focus-visible:outline-white/60"
         >
           <div
             className={cn(
-              'relative w-full transition-[height] duration-150',
-              seeking ? 'h-0.5' : 'h-px'
+              'relative w-full rounded-full bg-white/25 transition-[height] duration-150',
+              seeking || !hidden ? 'h-1' : 'h-0.5'
             )}
           >
-            <div className="absolute inset-0 bg-white/20" />
             <div
-              className="absolute bottom-0 left-0 top-0 bg-white/80"
-              style={{ width: `${Math.min(1, Math.max(0, seekPreview ?? progress ?? 0)) * 100}%` }}
+              className="absolute inset-y-0 left-0 rounded-full bg-white/85"
+              style={{ width: `${shownProgress * 100}%` }}
             />
           </div>
         </div>
