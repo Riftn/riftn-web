@@ -92,6 +92,7 @@ import { chatsFromMemberships } from '@/lib/community-kinds';
 import { insertCommunityChatMessage } from '@/lib/community-chat-send';
 import { reportCommunityChatMessage } from '@/lib/community-chat-notify';
 import { previewLinks } from '@/lib/dehub-links';
+import { localizeDmCallPreview } from '@/lib/dm-call-notice';
 
 import { formatCount } from '@/lib/format-count';
 import { stripBold } from '@/lib/bold-markup';
@@ -169,9 +170,12 @@ export function ConversationItem({
   const username = otherUser?.username || '';
   const fallbackName = displayName || username ||
     (otherUser?.address ? `${otherUser.address.slice(0, 6)}...${otherUser.address.slice(-4)}` : 'User');
-  const lastMessagePreview = conversation.lastMessage?.undecryptable
+  const lastMessage = conversation.lastMessage;
+  const lastMessagePreview = lastMessage?.undecryptable
     ? `🔒 ${t('messages.cannotDecrypt')}`
-    : (conversation.lastMessage?.content && stripBold(previewLinks(conversation.lastMessage.content))) || _copy("copy.f42e0f66017d", { defaultValue: "No messages yet" });
+    : localizeDmCallPreview(lastMessage, t)
+      || (lastMessage?.content && stripBold(previewLinks(lastMessage.content)))
+      || _copy("copy.f42e0f66017d", { defaultValue: "No messages yet" });
   const lastMessageTime = conversation.lastMessage?.createdAt
     ? (compactTime
       ? formatTimeAgo(conversation.lastMessage.createdAt)
