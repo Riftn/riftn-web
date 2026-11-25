@@ -351,6 +351,8 @@ export interface PageTab<T extends string = string> {
   id: T;
   label: ReactNode;
   icon?: IconKey | ReactNode;
+  /** Glyph size in a header pill, in CSS pixels. */
+  pillIconSize?: number;
   count?: number;
   /** Hover text for an icon-only tab, so a mouse can learn what it is. */
   hint?: string;
@@ -448,6 +450,7 @@ export function PageTabs<T extends string>({
                   data-feed-tab-btn
                   title={tab.hint}
                   data-active={active ? 'true' : undefined}
+                  style={tab.pillIconSize === undefined ? undefined : { '--kit-pill-tab-icon-size': `${tab.pillIconSize}px` } as React.CSSProperties}
                   onClick={() => {
                     if (!active) {
                       setGlide(true);
@@ -464,7 +467,7 @@ export function PageTabs<T extends string>({
                   )}
                 >
                   {tab.icon ? (
-                    <span className="relative z-10 flex h-4 w-4 items-center justify-center [&_img]:h-4 [&_img]:w-4 [&_svg]:h-4 [&_svg]:w-4">
+                    <span className="relative z-10 flex size-[var(--kit-pill-tab-icon-size,16px)] shrink-0 items-center justify-center [&_img]:size-full [&_svg]:size-full">
                       {typeof tab.icon === 'string' ? <ThemedIcon icon={tab.icon as IconKey} alt="" className="h-4 w-4 object-contain" /> : tab.icon}
                     </span>
                   ) : null}
@@ -472,7 +475,7 @@ export function PageTabs<T extends string>({
                   {typeof tab.count === 'number' ? (
                     // Beside the icon as plain text, as the app draws it; a white
                     // dot over the icon hid the glyph and read as a red badge.
-                    <span data-kit-pill-count className={cn('z-10 font-semibold leading-none tabular-nums opacity-60', iconOnly ? 'pointer-events-none absolute left-[calc(50%+8px)] top-[5px] whitespace-nowrap text-[9.5px]' : 'relative ml-1 text-[12px]')}>{tab.count > 99 ? '99+' : tab.count}</span>
+                    <span data-kit-pill-count className={cn('z-10 font-semibold leading-none tabular-nums opacity-60', iconOnly ? 'pointer-events-none absolute left-[calc(50%_+_var(--kit-pill-tab-icon-size,16px)/2)] top-[5px] whitespace-nowrap text-[9.5px]' : 'relative ml-1 text-[12px]')}>{tab.count > 99 ? '99+' : tab.count}</span>
                   ) : null}
                 </button>
               );

@@ -45,13 +45,19 @@ export function PostSpacingSection() {
   const queryClient = useQueryClient();
   const walletAddress = useContext(AuthContext)?.walletAddress;
   const spacing = usePostSpacing(true);
+  const queryKey = [POST_SPACING_KEY, walletAddress] as const;
   const save = useMutation({
     mutationFn: savePostSpacing,
-    onSuccess: (next) => queryClient.setQueryData([POST_SPACING_KEY, walletAddress], next),
+    scope: { id: `${POST_SPACING_KEY}:${walletAddress}` },
+    onSuccess: async (next) => {
+      await queryClient.cancelQueries({ queryKey, exact: true });
+      queryClient.setQueryData(queryKey, next);
+    },
     onError: () => toast.error(t('postSpacing.saveFailed', { defaultValue: 'Could not save that. Try again.' })),
   });
 
   if (!walletAddress) return null;
+  const controlsDisabled = spacing.isLoading || save.isPending;
   const data = save.isPending && save.variables !== undefined
     ? { ...(spacing.data ?? { nextAt: null, waiting: 0 }), gapMinutes: save.variables }
     : spacing.data;
@@ -71,7 +77,7 @@ export function PostSpacingSection() {
         </span>
         <Switch
           checked={on}
-          disabled={spacing.isLoading}
+          disabled={controlsDisabled}
           onCheckedChange={(v) => save.mutate(v ? (gap || 60) : 0)}
           aria-label={t('postSpacing.title', { defaultValue: 'Space my posts' })}
         />
@@ -85,6 +91,7 @@ export function PostSpacingSection() {
                 type="button"
                 role="radio"
                 aria-checked={g === gap}
+                disabled={controlsDisabled}
                 data-kit-chip
                 data-active={g === gap ? 'true' : undefined}
                 onClick={() => g !== gap && save.mutate(g)}

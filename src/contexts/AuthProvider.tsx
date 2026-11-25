@@ -115,11 +115,12 @@ import {
   profileAllowance,
   beginProfileSwitch,
   abortProfileSwitch,
+  clearProfiles,
   removeProfile,
 } from '@/lib/profiles';
 import { unregisterPushToken } from '@/lib/api/dehub/push';
 import { getDeviceId } from '@/lib/device-id';
-import { AuthContext, LoginSheetContext, type SocialProvider, type WalletProvider, type WalletPhase } from './AuthContext';
+import { AuthContext, LoginSheetContext, type AuthContextType, type SocialProvider, type WalletProvider, type WalletPhase } from './AuthContext';
 import { finishWalletUnlock, setWalletUnlockPrompt } from '@/lib/wallet-unlock-flow';
 import { isChunkLoadError, recoverFromChunkError } from '@/lib/lazy-with-retry';
 
@@ -3286,7 +3287,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch { /* already gone */ }
   };
 
-  const disconnect = async (options?: { forgetProfile?: boolean }) => {
+  const disconnect: AuthContextType['disconnect'] = async (options) => {
+    const allAccounts = options?.allAccounts === true;
+    const forgetProfile = allAccounts || options?.forgetProfile;
+    if (allAccounts) clearProfiles();
     // An account page left open behind a sign-out goes home quietly rather
     // than asking them to sign straight back in.
     noteSignedOut();
@@ -3300,8 +3304,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Read the identity off storage before any of it is cleared below, so an
     // explicit sign-out can drop that account from this device's profile list.
-    const forgetId = options?.forgetProfile ? currentProfileId() : null;
-    if (options?.forgetProfile) {
+    const forgetId = !allAccounts && forgetProfile ? currentProfileId() : null;
+    if (forgetProfile) {
       // This browser stops getting that account's notifications. Sent while
       // the account's token is still in storage (apiCall reads it before its
       // first await); the next account registers the browser again itself.
@@ -3324,7 +3328,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (forgetId) removeProfile(forgetId);
     // Logging out of one of several saved accounts lands on the next one
     // (most recently used first) instead of the signed-out screen.
-    const nextProfile = options?.forgetProfile
+    const nextProfile = forgetProfile && !allAccounts
       ? listProfiles().find((p) => p.id !== forgetId && p.session) ?? null
       : null;
 
@@ -3362,7 +3366,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         clearWalletCache();
         clearPasskeyCache();
         try { sessionStorage.removeItem('dhb_approved_chains'); } catch { /* */ }
-        supabaseSignedOut = supabase.auth.signOut().catch(() => {});
+        supabaseSignedOut = supabase.auth.signOut({ scope: 'local' }).catch(() => {});
         clearWagmiStorage();
       } else {
         wagmiDisconnect();

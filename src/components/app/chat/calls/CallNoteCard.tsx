@@ -33,7 +33,7 @@ export function CallNoteCard({ content, time, isOwn, peerAddress }: {
   }
 
   const title = note.kind === 'ended'
-    ? kind
+    ? t('calls.ended', 'Call ended')
     : note.kind === 'declined'
       ? t('calls.declined', 'Call declined')
       : isOwn ? t('calls.noAnswer', 'No answer') : t('calls.missed', 'Missed call');

@@ -6,6 +6,7 @@ import { tokenLabel } from '@/lib/token-label';
 
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { formatPostDate } from '@/i18n/post-timestamp';
 import { Loader2 } from 'lucide-react';
 import { getBestTimes, type PostWatchSummary } from '@/lib/api/dehub/post-stats';
 import { buildAvatarUrl } from '@/lib/media-url';
@@ -47,7 +48,7 @@ export function PostStatsPanel({ tokenId, views }: {
   /** The post's view count, the same number its card shows. */
   views?: number;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { data, isLoading, isError } = usePostStats(tokenId);
   const best = useQuery({ queryKey: ['post-stats-best-times'], queryFn: getBestTimes, staleTime: 10 * 60_000, retry: false });
 
@@ -102,7 +103,7 @@ export function PostStatsPanel({ tokenId, views }: {
 
       <StatsSection
         title={t('postStats.first48', 'First 48 hours')}
-        aside={total[peakIdx] > 0 ? t('postStats.peak', { defaultValue: 'Peak {{time}} · {{n}}', time: peakAt.toLocaleString(undefined, { weekday: 'short', hour: 'numeric' }), n: fmt(total[peakIdx]) }) : undefined}
+        aside={total[peakIdx] > 0 ? t('postStats.peak', { defaultValue: 'Peak {{time}} · {{n}}', time: formatPostDate(peakAt, i18n.language, { weekday: 'short', hour: 'numeric' }), n: fmt(total[peakIdx]) }) : undefined}
       >
         <AreaChart series={[hourly.signedIn, hourly.signedOut]} height={96} label={t('postStats.first48', 'First 48 hours')} />
         <div className="mt-2">

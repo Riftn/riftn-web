@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { SEOHead } from '@/components/SEOHead';
 import { PageBody, PageIsland, PageSection, PageEmpty, KitButton } from '@/components/app/page-kit/PageKit';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { CATEGORIES, FEATURES, PLATFORMS, COMPETITOR_REVIEWED_ON, UPDATES_REVIEWED_ON, SOURCES, STATUS_LABELS, entryFor, featureTotals, filterFeatures, markFor, type ComparisonFeature, type Mark, type PlatformId } from '@/data/platform-comparison';
+import { CATEGORIES, FEATURES, PLATFORMS, COMPETITOR_REVIEWED_ON, UPDATES_REVIEWED_ON, SOURCES, COMPARISON_FALLBACK_NOTES, STATUS_LABELS, entryFor, featureTotals, filterFeatures, markFor, type ComparisonFeature, type Mark, type PlatformId } from '@/data/platform-comparison';
 import { BRAND_MARKS } from '@/data/platform-comparison-marks';
 import { cn } from '@/lib/utils';
 
@@ -18,7 +18,6 @@ const inView = (feature: ComparisonFeature, view: View) =>
   view === 'all' || (view === 'social' ? !EDITOR_CATEGORIES.has(feature.category) : markFor(entryFor(feature, 'dehub')) !== 'yes');
 /** Stable i18n key for a section title: "Posts and discovery" -> "postsAndDiscovery". */
 const categoryKey = (category: string) => category.toLowerCase().replace(/[^a-z0-9]+(.)?/g, (_, c: string | undefined) => (c ? c.toUpperCase() : ''));
-const percent = (part: number, whole: number) => `${whole ? Math.round((part / whole) * 100) : 0}%`;
 /** Riftn first, then everyone else from most features to fewest. */
 const COLUMNS: Column[] = [
   { id: 'dehub', name: 'Riftn', short: 'Riftn' },
@@ -51,7 +50,10 @@ const MARK_TONE: Record<Mark, string> = {
 };
 
 export default function ComparePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = (i18n.resolvedLanguage ?? i18n.language)?.replace('_', '-');
+  const percentFormat = useMemo(() => new Intl.NumberFormat(locale, { style: 'percent' }), [locale]);
+  const percent = (part: number, whole: number) => percentFormat.format(whole ? part / whole : 0);
   const copy = (key: string, fallback: string, vars: Record<string, string | number> = {}) => t(`comparison.${key}`, { defaultValue: fallback, ...vars });
   // Feature names and section titles are English in the data file; each has a key so the table reads in the viewer's language.
   const featureName = (feature: ComparisonFeature) => t(`comparison.f.${feature.id}`, { defaultValue: feature.name });
@@ -64,10 +66,15 @@ export default function ComparePage() {
   const filtered = useMemo(() => {
     // Match the English data and the translated name, so a search typed in the viewer's language still finds rows.
     const english = new Set(filterFeatures(query, 'all').map(feature => feature.id));
-    const needle = query.trim().toLocaleLowerCase();
-    return FEATURES.filter(feature => (english.has(feature.id) || (!!needle && featureName(feature).toLocaleLowerCase().includes(needle))) && inView(feature, view));
+    const words = query.trim().toLocaleLowerCase(locale).split(/\s+/).filter(Boolean);
+    return FEATURES.filter(feature => {
+      if (!inView(feature, view)) return false;
+      if (english.has(feature.id)) return true;
+      const label = `${featureName(feature)} ${categoryName(feature.category)}`.toLocaleLowerCase(locale);
+      return words.every(word => label.includes(word));
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, view, t]);
+  }, [query, view, t, locale]);
   const totals = useMemo(() => (query || view !== 'all' ? featureTotals(filtered) : ALL_TOTALS), [filtered, query, view]);
   const groups = useMemo(() => CATEGORIES.map(category => {
     const rows = filtered.filter(f => f.category === category);
@@ -102,6 +109,12 @@ export default function ComparePage() {
     if (value === 'all') next.delete('view'); else next.set('view', value);
     setParams(next, { replace: true });
   };
+  const resetFilters = () => {
+    const next = new URLSearchParams(params);
+    next.delete('q');
+    next.delete('view');
+    setParams(next, { replace: true });
+  };
   const views: { id: View; label: string }[] = [
     { id: 'all', label: copy('viewAll', 'All features') },
     { id: 'social', label: copy('viewSocial', 'Social only') },
@@ -112,7 +125,7 @@ export default function ComparePage() {
     <>
       <SEOHead
         title={copy('seoTitle', 'Riftn vs YouTube, X, TikTok, Twitch and more: every feature compared')}
-        description={copy('seoDescription', `One chart of ${FEATURES.length} features across Riftn, YouTube, X, Kick, Twitch, Facebook, Instagram, TikTok, Rumble, Mastodon, Bluesky and Farcaster. See who has the most.`)}
+        description={copy('seoDescription', 'One chart of {{total}} features across Riftn, YouTube, X, Kick, Twitch, Facebook, Instagram, TikTok, Rumble, Mastodon, Bluesky and Farcaster. See who has the most.', { total: FEATURES.length })}
         url="https://riftn.com/compare"
         image="https://riftn.com/og/compare.jpg"
       />
@@ -152,7 +165,7 @@ export default function ComparePage() {
         </PageSection>
 
         {filtered.length === 0 ? (
-          <PageEmpty icon="search" title={copy('empty', 'No matching features')} body={copy('emptyBody', 'Try another word.')} action={<KitButton onClick={() => setParams(new URLSearchParams(), { replace: true })}>{copy('reset', 'Clear search')}</KitButton>} />
+          <PageEmpty icon="search" title={copy('empty', 'No matching features')} body={copy('emptyBody', 'Try another word.')} action={<KitButton onClick={resetFilters}>{copy('reset', 'Clear search')}</KitButton>} />
         ) : (
           <div data-compare-matrix data-kit-flat-skip className="relative max-h-[calc(100dvh-9.5rem)] overflow-auto overscroll-x-contain rounded-xl border border-white/10 bg-zinc-950 lg:max-h-[calc(100dvh-7rem)]">
             <table className="w-max min-w-full border-separate border-spacing-0 text-sm">
@@ -258,7 +271,7 @@ export default function ComparePage() {
                       <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-white/[0.08] text-white"><BrandMark id={col.id} className="h-3.5 w-3.5" /></span>
                       <div className="min-w-0 flex-1">
                         <p className="flex items-center gap-1.5 text-sm font-medium text-white">{col.name}<span className={cn('grid h-4 w-4 place-items-center', MARK_TONE[mark])}><MarkGlyph mark={mark} /></span><span className="text-xs font-normal text-zinc-400">{copy(`status.${entry.status}`, STATUS_LABELS[entry.status])}</span></p>
-                        {mark !== 'unknown' && <p className="mt-0.5 text-xs leading-relaxed text-zinc-400">{entry.note}</p>}
+                        {mark !== 'unknown' && <p className="mt-0.5 text-xs leading-relaxed text-zinc-400">{entry.note === COMPARISON_FALLBACK_NOTES.unavailable ? copy('unavailableOnRiftn', COMPARISON_FALLBACK_NOTES.unavailable) : entry.note}</p>}
                         {col.id === 'dehub' && open.iosRestricted && <p className="mt-0.5 text-xs text-zinc-400">{copy('ios', 'Purchase and reward actions are unavailable in the iOS app.')}</p>}
                         {source && mark !== 'unknown' && <a className="mt-0.5 inline-block text-xs text-zinc-300 underline underline-offset-4 hover:text-white" href={source.url} target="_blank" rel="noopener noreferrer">{source.title}</a>}
                       </div>

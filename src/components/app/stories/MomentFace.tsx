@@ -5,7 +5,6 @@ import { AuthContext } from '@/contexts/AuthContext';
 import { useMomentPeek, refreshMomentPeeks } from '@/hooks/use-moment-peek';
 import { useStoriesEnabled } from '@/hooks/use-stories-enabled';
 import { getUserStories, type MomentPeek } from '@/lib/api/dehub/stories';
-import { useMomentPreviewsBlurred } from '@/lib/moment-preview-blur';
 import { formatCount } from '@/lib/format-count';
 import { cn } from '@/lib/utils';
 import { useStoriesStore } from '@/store/storiesStore';
@@ -66,23 +65,17 @@ interface MomentFaceProps {
   big?: boolean;
   /** Name for the button label. */
   name?: string;
-  /** Keep the tap that opens their Moments but draw no thumbnail (profiles). */
-  noPeek?: boolean;
+  /** Outline the avatar itself on profile and chat surfaces. */
+  outline?: boolean;
 }
 
 /**
- * Corner Peek: while someone has a Moment up, a small portrait of it sits on
- * the bottom corner of their face, rimmed in the theme colour (grey once
- * you've watched them all), and a tap on the face opens their Moments.
- *
- * The face itself is left alone, so the note ring and the live ripple keep
- * working beside it. Put this INSIDE LiveRipple: while they're live, the
- * live stream gets the tap first, like before.
+ * A tap on the avatar opens the person's active Moments. Profiles and chats
+ * outline the avatar, while feed avatars can show a cover preview.
  */
-export function MomentFace({ address, size, children, className, big, name, noPeek }: MomentFaceProps) {
+export function MomentFace({ address, size, children, className, big, name, outline }: MomentFaceProps) {
   const { t } = useTranslation();
   const peek = useFaceMoment(address);
-  const blurred = useMomentPreviewsBlurred();
   const open = useOpenMoments(address);
   const thumbRef = useRef<HTMLSpanElement>(null);
   const faceRef = useRef<HTMLSpanElement>(null);
@@ -111,19 +104,19 @@ export function MomentFace({ address, size, children, className, big, name, noPe
       className={cn('relative inline-flex shrink-0 align-top', peek && 'cursor-pointer', className)}
     >
       {children}
-      {peek && !noPeek && (
+      {peek && outline && <span aria-hidden data-moment-outline data-close-friends={peek.closeFriends ? '' : undefined} />}
+      {peek && !outline && (
         <span
           ref={thumbRef}
           aria-hidden
           data-moment-peek={peek.state}
           data-close-friends={peek.closeFriends ? '' : undefined}
-          data-blur={blurred && peek.state === 'unseen' ? 'true' : undefined}
           style={{ width: w, height: h, borderRadius: Math.max(4, Math.round(w * 0.26)), right: big ? -6 : -4, bottom: big ? -6 : -4 }}
         >
           {peek.cover ? <img src={peek.cover} alt="" loading="lazy" decoding="async" draggable={false} /> : <span data-moment-peek-blank />}
         </span>
       )}
-      {peek && !noPeek && big && peek.count > 1 && (
+      {peek && !outline && big && peek.count > 1 && (
         <span aria-hidden data-moment-count style={{ right: (big ? -6 : -4) - 9, bottom: (big ? -6 : -4) + h - 12 }}>
           {formatCount(peek.count)}
         </span>

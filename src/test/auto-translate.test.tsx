@@ -71,6 +71,43 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe('auto-translate', () => {
+  it('recognizes an unlabelled echo of a chat line already in the reader language', async () => {
+    localStorage.setItem('user-preferred-language', 'en');
+    const text = 'Yes, I should have a bitter coffee.';
+    invoke.mockResolvedValue({ data: { translatedText: text, detectedLanguage: { language: 'auto' } }, error: null });
+    const { setAutoTranslateEnabled } = await import('@/lib/auto-translate-setting');
+    setAutoTranslateEnabled(false);
+    const { useTranslation } = await import('@/components/app/TranslatableText');
+    const { result } = renderHook(() => useTranslation(text, 'chat'));
+
+    await act(async () => { await result.current.handleTranslate(); });
+    expect(result.current.isTranslated).toBe(false);
+    expect(result.current.error).toBe('Already in your language');
+    await act(async () => { await result.current.handleTranslate(); });
+    expect(invoke).toHaveBeenCalledTimes(1);
+  });
+
+  it('retries a stored chat echo and allows a fresh tap after another unconfirmed echo', async () => {
+    const text = 'I guess four hours of sleep is enough.';
+    localStorage.setItem('dehub-translation-cache-v4', JSON.stringify([
+      [`${text}-es`, { translated: text, sourceLang: 'unknown' }],
+    ]));
+    invoke.mockResolvedValueOnce({ data: { translatedText: text }, error: null })
+      .mockResolvedValueOnce({ data: { translatedText: 'Supongo que cuatro horas de sueño son suficientes.' }, error: null });
+    const { setAutoTranslateEnabled } = await import('@/lib/auto-translate-setting');
+    setAutoTranslateEnabled(false);
+    const { useTranslation } = await import('@/components/app/TranslatableText');
+    const { result } = renderHook(() => useTranslation(text, 'chat'));
+
+    await act(async () => { await result.current.handleTranslate(); });
+    expect(result.current.isTranslated).toBe(false);
+    expect(result.current.error).toBe('Translation unavailable');
+    await act(async () => { await result.current.handleTranslate(); });
+    expect(result.current.isTranslated).toBe(true);
+    expect(result.current.translatedText).toBe('Supongo que cuatro horas de sueño son suficientes.');
+    expect(invoke).toHaveBeenCalledTimes(2);
+  });
+
   it('reacts when enabled without remounting the post', async () => {
     const { setAutoTranslateEnabled } = await import('@/lib/auto-translate-setting');
     setAutoTranslateEnabled(false);
