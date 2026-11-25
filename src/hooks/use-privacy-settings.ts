@@ -11,7 +11,7 @@ import { getAiScrapingPreference, mergeAiScrapingPreference, type AiScrapingPref
 import { getShowOnline, mergeShowOnline } from '@/lib/online-presence';
 import { getShowLastSeen, mergeShowLastSeen } from '@/lib/last-seen';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
-import { PROFILE_VIEW_DEFAULT_KEY, PROFILE_VIEW_READER_KEY, clearProfileViewFlip, parseProfileViewDefault, parseProfileViewReaderPref, type ProfileViewMode, type ProfileViewReaderPref } from '@/lib/profile-view-mode';
+import { PROFILE_VIEW_DEFAULT_KEY, PROFILE_VIEW_READER_KEY, parseProfileViewDefault, parseProfileViewReaderPref, type ProfileViewMode, type ProfileViewReaderPref } from '@/lib/profile-view-mode';
 
 /**
  * Follow visibility modes stored in Riftn API customs.followVisibility:
@@ -71,7 +71,7 @@ export function parseFollowLists(customs: Record<string, unknown> | null | undef
 /**
  * Hook to manage the current user's privacy settings via the Riftn API customs field.
  */
-export function usePrivacySettings() {
+export function usePrivacySettings({ refreshOnMount = true } = {}) {
   const { t: _copy } = _useCopy();
   const { user, walletAddress, isAuthenticated, refreshUser } = useAuth();
   const queryClient = useQueryClient();
@@ -81,7 +81,8 @@ export function usePrivacySettings() {
     userId: walletAddress || undefined,
     enabled: !!walletAddress && isAuthenticated,
   });
-  const { data: profile, isPlaceholderData, isFetchedAfterMount, refetch } = profileQuery;
+  const { data, isPlaceholderData, isFetchedAfterMount, refetch } = profileQuery;
+  const profile = data?.walletAddress?.toLowerCase() === walletAddress?.toLowerCase() ? data : undefined;
 
   // Settings must show what the server has right now. The profile query
   // paints from a week-old localStorage copy and keeps answers for five
@@ -90,11 +91,13 @@ export function usePrivacySettings() {
   // again when the screen opens, and keep the switches locked until that
   // answer is in.
   useEffect(() => {
-    if (walletAddress && isAuthenticated) void refetch();
-  }, [walletAddress, isAuthenticated, refetch]);
+    if (refreshOnMount && walletAddress && isAuthenticated) void refetch();
+  }, [refreshOnMount, walletAddress, isAuthenticated, refetch]);
   const isLoading = !profile || isPlaceholderData || !isFetchedAfterMount;
 
   const customs = profile?.customs;
+  const layoutAccount = profile ?? user;
+  const savedDefaultView = layoutAccount?.defaultProfileView ?? layoutAccount?.customs?.[PROFILE_VIEW_DEFAULT_KEY];
   const { showFollowersFollowing, hideFollowerCounts } = parseVisibility(customs?.followVisibility);
   const { showFollowersList, showFollowingList } = parseFollowLists(customs as Record<string, unknown> | undefined);
   const isPrivate = profile?.isPrivate === true;
@@ -104,6 +107,7 @@ export function usePrivacySettings() {
   const showLastSeen = getShowLastSeen(customs);
 
   const updateMutation = useMutation({
+    scope: { id: `profile-settings:${walletAddress?.toLowerCase()}` },
     mutationFn: async (updates: {
       show_followers_following?: boolean;
       hide_follower_counts?: boolean;
@@ -184,11 +188,11 @@ export function usePrivacySettings() {
         customsUpdates.defaultProfileTab = updates.default_profile_tab;
       }
       if (updates.default_profile_view !== undefined) {
-        customsUpdates[PROFILE_VIEW_DEFAULT_KEY] = updates.default_profile_view;
-        // The owner's own toggle flip on their profile would hide the new default.
-        clearProfileViewFlip(walletAddress);
+        profileUpdate.defaultProfileView = updates.default_profile_view;
+        profileUpdate.profileViewOthers = updates.default_profile_view;
       }
-      if (updates.reader_profile_view !== undefined) customsUpdates[PROFILE_VIEW_READER_KEY] = updates.reader_profile_view;
+      if (updates.reader_profile_view !== undefined) profileUpdate.profileViewOthers = updates.reader_profile_view;
+      if (profileUpdate.profileViewOthers !== undefined) profileUpdate.layoutViewer = walletAddress;
       if (updates.show_dislikes !== undefined) {
         customsUpdates[DISLIKES_VISIBILITY_KEY] = updates.show_dislikes ? 'public' : 'private';
       }
@@ -266,8 +270,11 @@ export function usePrivacySettings() {
     showLikes: likesArePublic(customs as Record<string, unknown> | undefined),
     defaultPostVisibility: (customs?.defaultPostVisibility as 'public' | 'private') ?? 'public',
     defaultProfileTab: parseDefaultProfileTab(customs?.defaultProfileTab),
-    defaultProfileView: parseProfileViewDefault(customs?.[PROFILE_VIEW_DEFAULT_KEY]),
-    readerProfileView: parseProfileViewReaderPref(customs?.[PROFILE_VIEW_READER_KEY]),
+    defaultProfileView: parseProfileViewDefault(savedDefaultView),
+    readerProfileView: parseProfileViewReaderPref(
+      layoutAccount?.profileViewOthers ?? layoutAccount?.customs?.[PROFILE_VIEW_READER_KEY],
+      savedDefaultView,
+    ),
     updateSettings,
     isUpdating: updateMutation.isPending,
   };

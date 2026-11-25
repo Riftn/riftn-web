@@ -7996,6 +7996,7 @@
     "creatorEarnsDirect": "Subscribers pay in Riftn tokens. Your share lands in your wallet the moment they subscribe, less the platform fee for your badge tier."
   },
   "liveOverlay": {
+    "showCreatorChat": "Show creator’s chat overlay",
     "eyebrow": {
       "follow": "New follower",
       "subscribe": "New subscriber",

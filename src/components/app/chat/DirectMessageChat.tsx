@@ -93,6 +93,7 @@ import { formatAttachmentSize, getAttachmentLabel, isAllowedAttachment } from '@
 import { GroupSettingsDrawer } from './GroupSettingsDrawer';
 import { FullscreenImageViewerLazy } from '@/components/app/cards/FullscreenImageViewerLazy';
 import { AppState } from '@/components/app/AppState';
+import { dismissReadMessageNotifications } from '@/lib/web-push';
 import { DmTipDialog } from './DmTipDialog';
 import { DmPollDialog } from './DmPollDialog';
 import { ScheduledMessagesDrawer, ScheduledStrip, scheduledDmKey, useScheduledDms, useWhenLabel } from './ScheduledMessages';
@@ -2403,6 +2404,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') {
         emitReadReceipt(resolvedConversationId);
+        if (!isInitialMount.current) void dismissReadMessageNotifications(resolvedConversationId);
       }
     };
     

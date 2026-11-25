@@ -30,20 +30,21 @@ export function writeLanguageAlternates(pathname: string, lang: string, indexabl
   document.head.querySelectorAll('link[rel="alternate"][hreflang]').forEach(node => node.remove());
   document.head.querySelectorAll('meta[property="og:locale:alternate"]').forEach(node => node.remove());
   const languages = indexable ? publicPageLanguages(pathname) : [];
-  const territory: Record<string, string> = { en: 'en_US', ar: 'ar_AR', es: 'es_ES', fr: 'fr_FR', nl: 'nl_NL', tr: 'tr_TR', de: 'de_DE', ha: 'ha_NG', hi: 'hi_IN', id: 'id_ID', it: 'it_IT', ja: 'ja_JP', ko: 'ko_KR', pl: 'pl_PL', pt: 'pt_BR', ru: 'ru_RU', th: 'th_TH', tl: 'tl_PH', vi: 'vi_VN', zh: 'zh_CN' };
+  const territory: Record<string, string> = { en: 'en_US', ar: 'ar_AR', es: 'es_ES', fr: 'fr_FR', nl: 'nl_NL', tr: 'tr_TR', de: 'de_DE', ha: 'ha_NG', hi: 'hi_IN', id: 'id_ID', it: 'it_IT', ja: 'ja_JP', ko: 'ko_KR', pl: 'pl_PL', pt: 'pt_BR', ru: 'ru_RU', th: 'th_TH', tl: 'tl_PH', vi: 'vi_VN', zh: 'zh_CN', zh_tw: 'zh_TW' };
   let locale = document.head.querySelector<HTMLMetaElement>('meta[property="og:locale"]');
   if (!locale) { locale = document.createElement('meta'); locale.setAttribute('property', 'og:locale'); document.head.appendChild(locale); }
-  locale.content = territory[lang] || lang;
+  const ogLocale = (code: string) => territory[code] || code + '_' + new Intl.Locale(code).maximize().region;
+  locale.content = /^(?:[a-z]{2}|zh_tw)$/.test(lang) ? ogLocale(lang) : lang;
   if (!languages.length) return;
   for (const code of ['en', ...languages, 'x-default']) {
     const link = document.createElement('link');
-    link.rel = 'alternate'; link.hreflang = code;
+    link.rel = 'alternate'; link.hreflang = code === "zh_tw" ? "zh-TW" : code;
     link.href = localizedPageUrl(pathname, code === 'x-default' ? 'en' : code);
     document.head.appendChild(link);
     if (code !== lang && code !== 'x-default') {
       const meta = document.createElement('meta');
       meta.setAttribute('property', 'og:locale:alternate');
-      meta.content = territory[code] || code;
+      meta.content = ogLocale(code);
       document.head.appendChild(meta);
     }
   }

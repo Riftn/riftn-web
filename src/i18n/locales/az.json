@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Videonu redaktə et", "hiddenTag": "Gizli", "tapToEdit": "Redaktə etmək üçün toxun", "cover": "Qapaq", "trim": "Kəsin", "mirror": "Güzgü", "rotate": "Fırlat", "hide": "Gizlət", "timer": "Taimer", "sheetTitleAny": "Göndərməzdən əvvəl redaktə et", "close": "Bağla", "replace": "Əvəz et", "hiddenUntilTap": "Üzərinə toxunana qədər gizli qalır", "pause": "Fasilə ver", "play": "Videonu göstər", "mute": "Səsi bağla", "unmute": "Səsi aç", "scrub": "Videonu sürüşdürün", "addMore": "Fotolar və ya videolar əlavə edin", "trimAria": "Kəsmək üçün ucları sürüşdürün", "coverAria": "Kapağı təyin etmək üçün kadra basın", "coverHint": "Kapağı təyin etmək üçün kadra basın", "coverOwn": "Şəkiliniz", "coverAuto": "Avtomatik", "uploadCover": "Əsas foto yükləyin", "mirrored": "Güzgülü", "original": "Orijinal", "rotate90": "90° fırladın", "showNormally": "Normal şəkildə göstər", "showNormallyBody": "Onlar bunu dərhal görürlər", "hideUntilTap": "Üzərinə toxunulana qədər gizlət", "hideUntilTapBody": "Üzərinə toxunana qədər bulanıq olacaq", "hidePrice": "Qiymətin arxasında gizlədin", "hidePriceBody": "Sizə ödəniş edənə qədər bulanıq olacaq", "priceUnavailable": "Bu söhbətdə deyil", "timerOff": "Qeyri-aktiv", "timerOffBody": "Söhbətdə qalır.", "timerViewBody": "O, bunu gördükdən sonra hər ikiniz üçün silinəcək.", "confirm": "Təsdiqlə", "lockedFor": "{{value1}} token üçün kilidi aç", "lockedForUsd": "{{value1}} üçün kilidi aç", "editItem": "{{value1}} elementini redaktə et", "kept": "{{time}} saxlanıldı", "timerTimeBody": "Siz onu göndərdikdən sonra hər ikiniz üçün {{value1}} yox olacaq."},
+  "dmVideo": {"edit": "Videonu redaktə et", "hiddenTag": "Gizli", "tapToEdit": "Redaktə etmək üçün toxun", "cover": "Qapaq", "trim": "Kəsin", "mirror": "Güzgü", "rotate": "Fırlat", "hide": "Gizlət", "timer": "Taimer", "sheetTitleAny": "Göndərməzdən əvvəl redaktə et", "close": "Bağla", "replace": "Əvəz et", "hiddenUntilTap": "Üzərinə toxunana qədər gizli qalır", "pause": "Fasilə ver", "play": "Videonu göstər", "mute": "Səsi bağla", "unmute": "Səsi aç", "scrub": "Videonu sürüşdürün", "addMore": "Fotolar və ya videolar əlavə edin", "trimAria": "Kəsmək üçün ucları sürüşdürün", "coverAria": "Kapağı təyin etmək üçün kadra basın", "coverHint": "Kapağı təyin etmək üçün kadra basın", "coverOwn": "Şəkiliniz", "coverAuto": "Avtomatik", "uploadCover": "Əsas foto yükləyin", "mirrored": "Güzgülü", "original": "Orijinal", "rotate90": "90° fırladın", "showNormally": "Normal şəkildə göstər", "showNormallyBody": "Onlar bunu dərhal görürlər", "hideUntilTap": "Üzərinə toxunulana qədər gizlət", "hideUntilTapBody": "Üzərinə toxunana qədər bulanıq olacaq", "hidePrice": "Qiymətin arxasında gizlədin", "hidePriceBody": "Sizə ödəniş edənə qədər bulanıq olacaq", "priceUnavailable": "Bu söhbətdə deyil", "timerOff": "Qeyri-aktiv", "timerOffBody": "Söhbətdə qalır.", "timerViewBody": "O, bunu gördükdən sonra hər ikiniz üçün silinəcək.", "confirm": "Təsdiqlə", "lockedFor": "{{value1}} token üçün kilidi aç", "lockedForUsd": "{{value1}} üçün kilidi aç", "editItem": "{{value1}} elementini redaktə et", "kept": "{{time}} saxlanıldı", "timerTimeBody": "Siz onu göndərdikdən sonra hər ikiniz üçün {{value1}} yox olacaq.", "destruct": {"60":"1 dəqiqə","3600":"1 saat","43200":"12 saat","86400":"1 gün","604800":"1 həftə","31536000":"1 il","view":"1 baxış"}, "destructShort": {"view":"1 baxış"}, "destructSecs": "{{n}} san"},
   "postBg": {
     "addMedia": "Şəkil, GIF və ya video əlavə et",
     "changeMedia": "Şəkli, GIF-i və ya videonu dəyiş",
@@ -664,7 +664,9 @@
       "main": "Əsas",
       "money": "Pul",
       "riftn": "Riftn"
-    }
+    },
+    "moveGroupHint": "Başqa bir sekməyə keçirmək üçün ora buraxın",
+    "reorderHintGroups": "İstənilən ikonu yenidən düzmək üçün basıb saxlayın və sürükləyin, yaxud başqa bir taba keçirmək üçün həmin tabın üzərinə aparın"
   },
   "feed": {
     "viewProfile": "{{name}} adlı şəxsin profilinə baxın",
@@ -1320,7 +1322,12 @@
     "menuLayoutSectionsDesc": "Bütün səhifələr birdən, qrup başlıqları altında",
     "menuLayoutFoldersDesc": "Əsas səhifələriniz, sonra hər qrup üçün qovluq",
     "publicChatInBar": "Aşağı paneldə İctimai söhbət",
-    "publicChatInBarDesc": "Ekranın aşağısındakı paneldən bir toxunuşla İctimai söhbətə keçin"
+    "publicChatInBarDesc": "Ekranın aşağısındakı paneldən bir toxunuşla İctimai söhbətə keçin",
+    "notificationShowCount": "Zəng işarəsində sayı göstər",
+    "notificationShowCountDesc": "Sadəcə işıqlanma əvəzinə neçə oxunmamış bildiriş olduğunu görün",
+    "messagesShowCount": "Mesajlarda sayı göstər",
+    "messagesShowCountDesc": "Sadəcə işıqlanma əvəzinə neçə oxunmamış mesaj olduğunu görün",
+    "chatTextSize": "Söhbət mətn ölçüsü"
   },
   "common": {
     "confirm": "Təsdiq et",
@@ -1353,7 +1360,8 @@
     "next": "Növbəti",
     "previous": "Əvvəlki",
     "redo": "Yenidən et",
-    "remove": "Sil"
+    "remove": "Sil",
+    "copy": "Kopyala"
   },
   "tip": {
     "title": "Bəxşiş Göndər",
@@ -1660,7 +1668,8 @@
     "roomSettings": "Otaq parametrləri",
     "messagePinned": "Mesaj sabitləndi",
     "messageUnpinned": "Mesaj sabitləməsi silindi",
-    "online": "{{count}} onlayn"
+    "online": "{{count}} onlayn",
+    "onlineHint": "Hazırda bu söhbətdə {{count}} nəfər var"
   },
   "aiChat": {
     "title": "Köməkçi",
@@ -2338,7 +2347,11 @@
     "sending": "Göndərilir",
     "retrySend": "Yenidən cəhd et",
     "discardSend": "Sil",
-    "notSent": "Göndərilmədi"
+    "notSent": "Göndərilmədi",
+    "unreadMarkerOne": "1 oxunmamış mesaj",
+    "unreadMarkerMany": "{{value}} oxunmamış mesaj",
+    "jumpToUnread": "İlk oxunmamış mesaja keç",
+    "jumpToLatest": "Son mesaja keç"
   },
   "music": {
     "listeningCount_one": "{{count}} dinləmək",
@@ -4064,7 +4077,8 @@
       "memberCount": "{{n}} üzvlər",
       "approvalNote": "Admin qoşulmazdan əvvəl sorğunuzu təsdiqləməlidir."
     },
-    "bannedFromCommunity": "Bu icmaya qadağa qoymusunuz"
+    "bannedFromCommunity": "Bu icmaya qadağa qoymusunuz",
+    "newChat": {"channelRow":"Kanal · {{formattedCount}} üzv","groupRow":"Qrup · {{formattedCount}} üzv","newChannel":"Yeni kanal","newGroup":"Yeni qrup","channelName":"Kanal adı","groupName":"Qrup adı","description":"Nə haqqındadır? (istəyə bağlı)","whoCanJoin":"Kim qoşula bilər","public":"Açıq","publicDetail":"Hər kəs tapa və qoşula bilər","inviteOnly":"Yalnız dəvətlə","private":"Gizli","privateDetail":"İnsanlar dəvətinizlə və ya təsdiqinizlə qoşulur","entry":"Giriş","free":"Pulsuz","freeDetail":"Qoşulmaq pulsuzdur","paid":"Ödənilib","paidDetail":"Tokenlə birdəfəlik ödəniş, birbaşa sizə","price":"Token ilə qiymət","channelNote":"Yalnız siz və adminləriniz paylaşa bilər. Üzvlər oxuyur və reaksiya verir.","createChannel":"Kanal yarat","createGroup":"Qrup yarat","message":"Yeni mesaj","messageDetail":"Bir nəfərlə şəxsi söhbət","groupDetail":"Çoxlu insanla açıq və ya gizli söhbət","channelDetail":"İzləyicilərə pulsuz və ya ödənişli yayım","title":"Nəsə başlat"}
   },
   "prompt": {
     "seoTitle": "Riftn-da lentinizi tənzimləyin | Riftn",
@@ -12842,7 +12856,8 @@
     "shareKindCommunity": "İcma",
     "shareGroups": "Qruplar",
     "shareKindChannel": "Kanal",
-    "reportMessage": "Mesajı şikayət et"
+    "reportMessage": "Mesajı şikayət et",
+    "attachAnything": "Şəkil, video, audio və ya fayl əlavə et"
   },
   "credits": {
     "earningsWorth": "Dəyər {{amount}}",
@@ -20978,5 +20993,17 @@
     "addQuestion": "Sual əlavə et",
     "pointsLabel": "Düzgün cavab üçün xallar",
     "attachFailed": "Paylaşımınız yerləşdirilib, lakin viktorinanı əlavə etmək mümkün olmadı"
-  }
+  },
+  "ownKeys": {"working":"İşləyir","invalid":"Rədd edildi, onu dəyişin","noCredit":"Kredit bitib","disabled":"Riftn tərəfindən söndürülüb","failed":"Xəta baş verdi. Yenidən cəhd edin.","savedNoCredit":"{{name}} açarı saxlanıldı, lakin hesabda kredit bitib.","saved":"{{name}} açarı saxlanıldı. {{name}} üzərindəki alətlər indi sizin hesabınızdan istifadə edir.","removed":"{{name}} açarı silindi.","title":"Öz Sİ açarlarınız","description":"Sİ provayderindən açar əlavə edin və Creator alətləri sizin hesabınızda işləsin. Riftn bu tapşırıqlar üçün heç nə tutmur. Açarlar şifrələnir və bir daha göstərilmir.","check":"Yoxla","remove":"Sil","add":"Açar əlavə et","paste":"{{name}} açarınızı yapışdırın","save":"Yadda saxla","cancel":"Ləğv et","getKey":"{{name}} açarı əldə et","showLess":"Yalnız mənim açarlarımı göstər","addAnother":"Başqa provayder əlavə et"},
+  "resetWallet": {"mismatch":"Parollar eyni deyil","tooShort":"Parol ən azı {{count}} simvoldan ibarət olmalıdır","breached":"Bu parol məlumat sızmasında görünüb. Başqasını seçin","weak":"Daha güclü parol seçin (hərfləri, rəqəmləri və simvolları qarışdırın)","failed":"Cüzdanınız sıfırlana bilmədi. Heç nə köçürülmədi. Yenidən cəhd edin.","twoFactor":"Hesabınızı köçürmək üçün autentifikator tətbiqinizdəki kodu daxil edin.","funds":"Tokenlər, NFT-lər və digər balanslar köçmür. Onlar köhnə ünvanda qalır. Köhnə cüzdanı hələ aça bilirsinizsə, əvvəlcə onları çıxarın.","doneTitle":"Hesabınız yeni cüzdanındadır","logOut":"Çıxış et","intro":"Yeni Riftn cüzdanı yaradır və istifadəçi adınızı, postlarınızı, izləyicilərinizi və mesajlarınızı ona köçürür. Cüzdanınız itibsə və ya açarı başqasındadırsa, bundan istifadə edin. Köhnə cüzdan giriş üçün işləməyi dayandırır.","password":"Yeni cüzdan parolu (min. {{count}} simvol)","confirm":"Parolu təsdiqləyin","twoFactorPlaceholder":"Autentifikator kodu","ack":"Köhnə pul kisəsində köhnə vəsaitimin qaldığını başa düşürəm.","submit":"Cüzdanı sıfırla","title":"Cüzdanı sıfırla","rowDesc":"Cüzdanınızı itirmisiniz və ya açarı başqasındadır? Hesabınızı yeni cüzdana köçürün. İstifadəçi adınız, postlarınız və izləyiciləriniz sizinlə gəlir."},
+  "twoFactor": {"turnOn":"Aktivləşdir","wrongCode":"O kod uyğun gəlmədi. Ən yeni kodu tətbiqinizdə sınayın.","signingInAs":"Giriş edirik","signIn":"Giriş edin","trustDevice":"Bu cihazda 30 gün ərzində yenidən soruşma","useBackupShort":"Yedek koddan istifadə edin","useApp":"Authenticator tətbiqimi istifadə et","useAnotherShort":"Fərqli hesab","lostEverything":"Telefonunuzu və yedek kodlarınızı itirdinizmi? Dəstək ilə əlaqə saxlayın","turnedOff":"İki addımlı giriş söndürülüb","introTitle":"İkinci bir kilid əlavə edin","linkTitle":"Authenticator tətbiqinizi bağlayın","codesTitle":"Yedek kodlarınızı saxlayın","newCodesTitle":"Yeni ehtiyat kodları əldə edin","turnOff":"söndürmək","backupCodes":"Ehtiyat kodlar"},
+  "chatTextSize": {"title":"Mətn ölçüsü"},
+  "notes": {"replyTo":"{{name}}-a cavab ver…"},
+  "chatBulk": {"toolbar":"Seçilmiş söhbətlər","selected":"{{count}} seçilib","cancel":"Ləğv et","read":"Oxunmuş et","unread":"Oxunmamış et","reply":"Cavab","delete":"Sil","replyHint":"Hər kəs bunu öz söhbətində adi mesaj kimi alır.","replyPlaceholder":"Mesaj yazın…","sendAll":"{{count}} nəfərə göndər","partSent":"{{total}} söhbətdən {{ok}} söhbətə göndərildi","notSent":"Göndərmək alınmadı. Yenidən cəhd edin."},
+  "chatTabs": {"addToTab":"Taba əlavə et","newWith":"Yeni tab…","hide":"Tabı gizlət","edit":"Tabları redaktə et","renameEdit":"Adını dəyiş və redaktə et","addChats":"Söhbət əlavə et","moveLeft":"Sola köçür","moveRight":"Sağa köçür","delete":"Tabı sil","new":"Yeni tab","editTab":"Tabı redaktə et","create":"Tab yarat","emoji":"Emoji seçin","namePlaceholder":"Tab adı","noEmoji":"Emoji yoxdur","sFriends":"Dostlar","sWork":"İş","sTrading":"Ticarət","sCreators":"Yaradıcılar","sGaming":"Oyun","chatsInTab":"Bu tabdakı söhbətlər","picked":"{{n}} seçilib","deleteTitle":"“{{name}}” silinsin?","deleteBody":"Tab silinir. Onun söhbətləri Hamısı bölməsində qalır və mesajlarını saxlayır.","builtIn":"Daxili","chatCount":"{{n}} söhbət","moveUp":"Yuxarıya daşı","moveDown":"Aşağıya daşı","alwaysOn":"Həmişə aktiv","show":"Tabı göstər","emptyTitle":"{{name}} boşdur","emptyBody":"Söhbətləri bura əlavə edin, onlar Hamısı bölməsində də qalır.","removedFrom":"{{name}} tabından silindi","addedTo":"{{name}} tabına əlavə edildi","kindPublic":"Açıq","kindChannel":"Kanal","kindGroup":"Qruplaşdır","kindCommunity":"İcma","kindDirect":"Birbaşa","tooMany":"Ən çox 10 tabınız ola bilər","deleted":"{{name}} silindi"},
+  "msgSelect": {"partForwarded":"{{total}} mesajdan {{ok}} yönləndirildi","nothingToCopy":"Seçilmiş mesajlarda kopyalanacaq heç nə yoxdur","toolbar":"Seçilmiş mesajlar","selected":"{{count}} seçilib","copy":"Kopyala","forward":"Yönləndir","deleteSome":"{{count}} sil"},
+  "dmSafety": {"notReal":"Bu, əsl {{name}} deyil.","neverLink":"Riftn komandası profilinizi və ya cüzdanınızı düzəltmək üçün sizə heç vaxt şəxsi mesajla keçid göndərməyəcək. Keçidləri açmayın, cüzdanınızı qoşmayın və heç nə imzalamayın. Bu hesabı bloklayın və şikayət edin."},
+  "post": {"destruct":{"offBody":"Post yerində qalır.","onBody":"Post paylaşıldıqdan {{value1}} sonra özünü silir."}},
+  "dmPaidLock": {"lockOnUsd":"Kilidli · {{price}}","lockVideo":"Videonu kilidlə","lockPhoto":"Şəkli kilidlə","lockCustom":"Digər","lockCustomUsdLabel":"Dollarla xüsusi qiymət","lockHint":"Sizə ödəyənədək onu bulanıq görürlər. Kilidli fayllar uçdan-uca şifrələnmir."},
+  "chatReactions": {"oneNamed":"{{name}} mesajınıza {{emoji}} reaksiyası verdi","one":"Mesajınıza {{emoji}} reaksiyası verdi"}
 }

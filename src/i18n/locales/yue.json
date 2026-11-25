@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "編輯影片", "hiddenTag": "隱藏", "tapToEdit": "點擊以編輯", "cover": "封面", "trim": "裁剪", "mirror": "鏡像", "rotate": "旋轉", "hide": "隱藏", "timer": "計時器", "sheetTitleAny": "傳送前編輯", "close": "關閉", "replace": "取代", "hiddenUntilTap": "點擊前隱藏", "pause": "暫停", "play": "播放影片", "mute": "靜音", "unmute": "取消靜音", "scrub": "拖動影片進度條", "addMore": "加入相片或影片", "trimAria": "拖動兩端以裁剪", "coverAria": "點擊影格以設定封面", "coverHint": "點擊影格以設定封面", "coverOwn": "你的相片", "coverAuto": "自動", "uploadCover": "上傳封面圖片", "mirrored": "已鏡像", "original": "原始", "rotate90": "旋轉 90°", "showNormally": "正常顯示", "showNormallyBody": "立即顯示", "hideUntilTap": "點擊前隱藏", "hideUntilTapBody": "點擊前模糊顯示", "hidePrice": "隱藏於價格後", "hidePriceBody": "付款前模糊顯示", "priceUnavailable": "不在本對話中", "timerOff": "關閉", "timerOffBody": "佢會留喺對話入面。", "timerViewBody": "佢哋睇完之後，對你哋雙方嚟講都會消失。", "confirm": "確認", "lockedFor": "解鎖 {{value1}} 代幣", "lockedForUsd": "解鎖 {{value1}}", "editItem": "編輯項目 {{value1}}", "kept": "{{time}} 已保留", "timerTimeBody": "你發送之後 {{value1}}，對你哋雙方嚟講都會消失。"},
+  "dmVideo": {"edit": "編輯影片", "hiddenTag": "隱藏", "tapToEdit": "點擊以編輯", "cover": "封面", "trim": "裁剪", "mirror": "鏡像", "rotate": "旋轉", "hide": "隱藏", "timer": "計時器", "sheetTitleAny": "傳送前編輯", "close": "關閉", "replace": "取代", "hiddenUntilTap": "點擊前隱藏", "pause": "暫停", "play": "播放影片", "mute": "靜音", "unmute": "取消靜音", "scrub": "拖動影片進度條", "addMore": "加入相片或影片", "trimAria": "拖動兩端以裁剪", "coverAria": "點擊影格以設定封面", "coverHint": "點擊影格以設定封面", "coverOwn": "你的相片", "coverAuto": "自動", "uploadCover": "上傳封面圖片", "mirrored": "已鏡像", "original": "原始", "rotate90": "旋轉 90°", "showNormally": "正常顯示", "showNormallyBody": "立即顯示", "hideUntilTap": "點擊前隱藏", "hideUntilTapBody": "點擊前模糊顯示", "hidePrice": "隱藏於價格後", "hidePriceBody": "付款前模糊顯示", "priceUnavailable": "不在本對話中", "timerOff": "關閉", "timerOffBody": "佢會留喺對話入面。", "timerViewBody": "佢哋睇完之後，對你哋雙方嚟講都會消失。", "confirm": "確認", "lockedFor": "解鎖 {{value1}} 代幣", "lockedForUsd": "解鎖 {{value1}}", "editItem": "編輯項目 {{value1}}", "kept": "{{time}} 已保留", "timerTimeBody": "你發送之後 {{value1}}，對你哋雙方嚟講都會消失。", "destruct": {"60":"1 分鐘","3600":"1 小時","43200":"12 小時","86400":"1 日","604800":"1 星期","31536000":"1 年","view":"1 次觀看"}, "destructShort": {"view":"1 次觀看"}, "destructSecs": "{{n}} 秒"},
   "postBg": {
     "addMedia": "加圖片、GIF 或者影片",
     "changeMedia": "換圖片、GIF 或者影片",
@@ -664,7 +664,9 @@
       "riftn": "去中心",
       "main": "主要",
       "money": "錢"
-    }
+    },
+    "moveGroupHint": "拖去另一個分頁就可以將佢移過去",
+    "reorderHintGroups": "撳住任何圖示並拖曳嚟重新排列，或者拖去另一個分頁嚟移動佢"
   },
   "feed": {
     "viewProfile": "睇下 {{name}} 嘅個人檔案",
@@ -1321,7 +1323,12 @@
     "menuLayoutSectionsDesc": "所有頁面一次過顯示，喺分組標題下面",
     "menuLayoutFoldersDesc": "你嘅主要頁面，然後每組一個資料夾",
     "publicChatInBar": "底部欄嘅公共傾偈",
-    "publicChatInBarDesc": "喺螢幕底部欄一㩒就入公共傾偈"
+    "publicChatInBarDesc": "喺螢幕底部欄一㩒就入公共傾偈",
+    "notificationShowCount": "喺鈴鐺顯示數字",
+    "notificationShowCountDesc": "睇到有幾多條未讀通知，而唔係淨係見到發光",
+    "messagesShowCount": "喺訊息顯示數字",
+    "messagesShowCountDesc": "睇到有幾多條未讀訊息，而唔係淨係見到發光",
+    "chatTextSize": "傾偈文字大小"
   },
   "common": {
     "confirm": "確定",
@@ -1354,7 +1361,8 @@
     "next": "下一個",
     "previous": "之前",
     "redo": "重做",
-    "remove": "去除"
+    "remove": "去除",
+    "copy": "複製"
   },
   "tip": {
     "title": "送禮物",
@@ -1661,7 +1669,8 @@
     "roomSettings": "聊天室設定",
     "messagePinned": "訊息已置頂",
     "messageUnpinned": "訊息已取消置頂",
-    "online": "{{count}} 位在線"
+    "online": "{{count}} 位在線",
+    "onlineHint": "而家有 {{count}} 個人喺呢個傾偈入面"
   },
   "aiChat": {
     "title": "助手",
@@ -2339,7 +2348,11 @@
     "sending": "正在傳送",
     "retrySend": "再試",
     "discardSend": "移除",
-    "notSent": "未送出"
+    "notSent": "未送出",
+    "unreadMarkerOne": "1 條未讀訊息",
+    "unreadMarkerMany": "{{value}} 條未讀訊息",
+    "jumpToUnread": "跳到第一條未讀訊息",
+    "jumpToLatest": "跳到最新訊息"
   },
   "music": {
     "listeningCount_one": "{{count}} 聽緊",
@@ -4065,7 +4078,8 @@
       "memberCount": "{{n}} 名成員",
       "approvalNote": "管理員必須批准您的加入申請後您才能加入。"
     },
-    "bannedFromCommunity": "您已被禁止加入本社區"
+    "bannedFromCommunity": "您已被禁止加入本社區",
+    "newChat": {"channelRow":"頻道 · {{formattedCount}} 位成員","groupRow":"群組 · {{formattedCount}} 位成員","newChannel":"新頻道","newGroup":"新群組","channelName":"頻道名稱","groupName":"群組名稱","description":"係關於乜嘢？（可選）","whoCanJoin":"邊個可以加入","public":"公開","publicDetail":"任何人都可以搵到同加入","inviteOnly":"只限邀請","private":"私人","privateDetail":"用你嘅邀請或者經你批准先可以加入","entry":"入場","free":"免費","freeDetail":"免費加入","paid":"畀咗錢","paidDetail":"用代幣一次過付款，直接俾你","price":"代幣價錢","channelNote":"只有你同你嘅管理員可以發帖。成員可以睇同回應。","createChannel":"建立頻道","createGroup":"建立群組","message":"新訊息","messageDetail":"同一個人私人傾偈","groupDetail":"同好多人傾偈，公開或者私人","channelDetail":"向追蹤者廣播，免費或者付費","title":"開始啲嘢"}
   },
   "prompt": {
     "seoTitle": "提示你的訂閱 | Riftn",
@@ -12843,7 +12857,8 @@
     "shareKindCommunity": "社區",
     "shareGroups": "群組",
     "shareKindChannel": "頻道",
-    "reportMessage": "舉報訊息"
+    "reportMessage": "舉報訊息",
+    "attachAnything": "附加相片、影片、音訊或者檔案"
   },
   "credits": {
     "earningsWorth": "值 {{amount}}",
@@ -20881,5 +20896,17 @@
     "promptCatchUp": "同我講吓{{handle}}最近post咗啲乜",
     "promptMessage": "幫我寫個訊息俾{{handle}}",
     "promptAbout": "關於{{handle}}：{{question}}"
-  }
+  },
+  "ownKeys": {"working":"做緊嘢","invalid":"被拒絕，請更換","noCredit":"點數用晒","disabled":"已被 Riftn 關閉","failed":"有啲嘢出錯咗。再試多次。","savedNoCredit":"已儲存 {{name}} 金鑰，但帳戶點數已用晒。","saved":"已儲存 {{name}} 金鑰。{{name}} 上嘅工具而家會用你嘅帳戶。","removed":"已移除 {{name}} 金鑰。","title":"你自己嘅 AI 金鑰","description":"加入 AI 供應商嘅金鑰，Creator 工具就會改用你嘅帳戶運行。Riftn 唔會為呢啲工作收費。金鑰會加密，而且唔會再顯示。","check":"檢查","remove":"移除","add":"加金鑰","paste":"貼上你嘅 {{name}} 金鑰","save":"儲存","cancel":"取消","getKey":"攞一個 {{name}} 金鑰","showLess":"只顯示我嘅金鑰","addAnother":"加另一個供應商"},
+  "resetWallet": {"mismatch":"密碼唔吻合","tooShort":"密碼最少要有 {{count}} 個字元","breached":"呢個密碼曾經喺資料外洩中出現。請揀另一個","weak":"揀一個更強嘅密碼（混合字母、數字同符號）","failed":"重設唔到你嘅錢包。冇轉移任何嘢。再試一次。","twoFactor":"輸入驗證器 App 嘅驗證碼嚟轉移你嘅帳戶。","funds":"代幣、NFT 同其他結餘唔會轉移，會留喺舊地址。如果你仲可以打開舊錢包，請先將佢哋轉走。","doneTitle":"你嘅帳戶已經喺新錢包","logOut":"登出","intro":"建立一個新嘅 Riftn 錢包，並將你嘅用戶名、帖文、追蹤者同訊息轉移過去。如果你嘅錢包遺失咗或者其他人有佢嘅金鑰，就用呢個。舊錢包會唔可以再用嚟登入。","password":"新錢包密碼（最少 {{count}} 個字元）","confirm":"確認密碼","twoFactorPlaceholder":"驗證器驗證碼","ack":"我明白舊嘅資金喺舊嘅錢包中。","submit":"重設錢包","title":"重設錢包","rowDesc":"遺失咗錢包，或者其他人有佢嘅金鑰？將你嘅帳戶轉移到新錢包。你嘅用戶名、帖文同追蹤者都會跟住你。"},
+  "twoFactor": {"turnOn":"開啟","wrongCode":"嗰個驗證碼唔啱。試吓你個 App 入面最新嗰個。","signingInAs":"登入緊","signIn":"登入","trustDevice":"呢部裝置 30 日內唔好再問我","useBackupShort":"使用備用驗證碼","useApp":"使用我嘅驗證器 App","useAnotherShort":"其他帳戶","lostEverything":"唔見咗電話同備用驗證碼？聯絡支援團隊","turnedOff":"雙重驗證登入已關閉","introTitle":"加多重鎖","linkTitle":"連結你嘅驗證器 App","codesTitle":"儲存你嘅備用驗證碼","newCodesTitle":"獲取新備用代碼","turnOff":"關閉","backupCodes":"備用代碼"},
+  "chatTextSize": {"title":"文字大小"},
+  "notes": {"replyTo":"回覆 {{name}}…"},
+  "chatBulk": {"toolbar":"已選傾偈","selected":"{{count}} 選擇","cancel":"取消","read":"標記為已讀","unread":"標記為未讀","reply":"覆","delete":"刪除","replyHint":"每個人都會喺佢哋自己嘅傾偈收到一條普通訊息。","replyPlaceholder":"寫訊息…","sendAll":"發送俾 {{count}} 個","partSent":"已發送到 {{total}} 個傾偈之中嘅 {{ok}} 個","notSent":"發送唔到。再試一次。"},
+  "chatTabs": {"addToTab":"加到分頁","newWith":"新分頁…","hide":"隱藏分頁","edit":"編輯分頁","renameEdit":"重新命名同編輯","addChats":"加傾偈","moveLeft":"向左移","moveRight":"向右移","delete":"刪除分頁","new":"新分頁","editTab":"編輯分頁","create":"建立分頁","emoji":"揀一個表情符號","namePlaceholder":"分頁名稱","noEmoji":"冇表情符號","sFriends":"朋友","sWork":"工作","sTrading":"交易","sCreators":"創作者","sGaming":"遊戲","chatsInTab":"呢個分頁嘅傾偈","picked":"已揀 {{n}} 個","deleteTitle":"刪除「{{name}}」？","deleteBody":"分頁會消失。入面嘅傾偈會留喺「全部」，訊息亦會保留。","builtIn":"內置","chatCount":"{{n}} 個傾偈","moveUp":"向上移動","moveDown":"移除","alwaysOn":"一直開啟","show":"顯示分頁","emptyTitle":"{{name}} 係空嘅","emptyBody":"將傾偈加到呢度，佢哋亦會留喺「全部」。","removedFrom":"已從 {{name}} 移除","addedTo":"已加到 {{name}}","kindPublic":"公開","kindChannel":"頻道","kindGroup":"分組","kindCommunity":"社區","kindDirect":"直接","tooMany":"你最多可以有 10 個分頁","deleted":"已刪除 {{name}}"},
+  "msgSelect": {"partForwarded":"已轉寄 {{total}} 條之中嘅 {{ok}} 條","nothingToCopy":"已選嘅訊息入面冇嘢可以複製","toolbar":"已選訊息","selected":"{{count}} 選擇","copy":"複製","forward":"轉寄","deleteSome":"刪除 {{count}} 條"},
+  "dmSafety": {"notReal":"呢個唔係真正嘅 {{name}}。","neverLink":"Riftn 團隊永遠唔會私訊你連結嚟修復你嘅個人檔案或者錢包。唔好打開連結、連接你嘅錢包或者簽署任何嘢。封鎖同檢舉呢個帳戶。"},
+  "post": {"destruct":{"offBody":"帖文會保留。","onBody":"帖文發佈後 {{value1}} 會自動刪除。"}},
+  "dmPaidLock": {"lockOnUsd":"已鎖定 · {{price}}","lockVideo":"鎖定影片","lockPhoto":"鎖定相片","lockCustom":"其他","lockCustomUsdLabel":"自訂美元價錢","lockHint":"佢哋俾錢之前只會見到模糊畫面。已鎖定嘅檔案唔係端對端加密。"},
+  "chatReactions": {"oneNamed":"{{name}} 對你嘅訊息回應咗 {{emoji}}","one":"對你嘅訊息回應咗 {{emoji}}"}
 }

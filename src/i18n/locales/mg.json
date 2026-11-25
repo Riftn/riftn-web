@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Manova video", "hiddenTag": "Nafototra", "tapToEdit": "Tsindrio hanovana", "cover": "Sarony", "trim": "Hetezo", "mirror": "Fitaratra", "rotate": "Ahodino", "hide": "Afeno", "timer": "Fanamariham-potoana", "sheetTitleAny": "Manova alohan'ny fandefasana", "close": "Akaro", "replace": "Soloina", "hiddenUntilTap": "Afenina mandra-kitikiny azy", "pause": "Atsaharo", "play": "Alefaso ny horonan-tsary", "mute": "Mitsahatra", "unmute": "Miverina amin'ny feo", "scrub": "Hetezo ny horonan-tsary", "addMore": "Manampy sary na horonan-tsary", "trimAria": "Tariho ny sisiny mba hanetezana azy", "coverAria": "Kitiho ny sary iray mba hanaovana azy ho sarony", "coverHint": "Kitiho ny sary iray mba hanaovana azy ho sarony", "coverOwn": "Sary anao", "coverAuto": "Ahoana", "uploadCover": "Ampidiro ny sary ho sarony", "mirrored": "Fitaratra", "original": "Tany am-boalohany", "rotate90": "Ahodino 90°", "showNormally": "Asehoy ara-dalàna", "showNormallyBody": "Hitany avy hatrany izany", "hideUntilTap": "Afeno mandra-kitika", "hideUntilTapBody": "Manjavozavo mandra-kitikiny azy", "hidePrice": "Afeno ao ambadiky ny vidiny", "hidePriceBody": "Manjavozavo mandra-pandoany vola anao", "priceUnavailable": "Tsy ato amin'ity chat ity", "timerOff": "Vonoina", "timerOffBody": "Mijanona ao anatin'ny chat izany.", "timerViewBody": "Lasa ho anareo roa rehefa avy hitan'izy ireo izany.", "confirm": "Hamafisina", "lockedFor": "Avela ho an'ny {{value1}} marika", "lockedForUsd": "Hamohana amin'ny {{value1}}", "editItem": "Hanova ny zavatra {{value1}}", "kept": "{{time}} voatahiry", "timerTimeBody": "Lasa ho anareo roa {{value1}} aorian'ny fandefasanao azy."},
+  "dmVideo": {"edit": "Manova video", "hiddenTag": "Nafototra", "tapToEdit": "Tsindrio hanovana", "cover": "Sarony", "trim": "Hetezo", "mirror": "Fitaratra", "rotate": "Ahodino", "hide": "Afeno", "timer": "Fanamariham-potoana", "sheetTitleAny": "Manova alohan'ny fandefasana", "close": "Akaro", "replace": "Soloina", "hiddenUntilTap": "Afenina mandra-kitikiny azy", "pause": "Atsaharo", "play": "Alefaso ny horonan-tsary", "mute": "Mitsahatra", "unmute": "Miverina amin'ny feo", "scrub": "Hetezo ny horonan-tsary", "addMore": "Manampy sary na horonan-tsary", "trimAria": "Tariho ny sisiny mba hanetezana azy", "coverAria": "Kitiho ny sary iray mba hanaovana azy ho sarony", "coverHint": "Kitiho ny sary iray mba hanaovana azy ho sarony", "coverOwn": "Sary anao", "coverAuto": "Ahoana", "uploadCover": "Ampidiro ny sary ho sarony", "mirrored": "Fitaratra", "original": "Tany am-boalohany", "rotate90": "Ahodino 90°", "showNormally": "Asehoy ara-dalàna", "showNormallyBody": "Hitany avy hatrany izany", "hideUntilTap": "Afeno mandra-kitika", "hideUntilTapBody": "Manjavozavo mandra-kitikiny azy", "hidePrice": "Afeno ao ambadiky ny vidiny", "hidePriceBody": "Manjavozavo mandra-pandoany vola anao", "priceUnavailable": "Tsy ato amin'ity chat ity", "timerOff": "Vonoina", "timerOffBody": "Mijanona ao anatin'ny chat izany.", "timerViewBody": "Lasa ho anareo roa rehefa avy hitan'izy ireo izany.", "confirm": "Hamafisina", "lockedFor": "Avela ho an'ny {{value1}} marika", "lockedForUsd": "Hamohana amin'ny {{value1}}", "editItem": "Hanova ny zavatra {{value1}}", "kept": "{{time}} voatahiry", "timerTimeBody": "Lasa ho anareo roa {{value1}} aorian'ny fandefasanao azy.", "destruct": {"60":"1 minitra","3600":"1 ora","43200":"12 ora","86400":"1 andro","604800":"1 herinandro","31536000":"1 taona","view":"1 fijerena"}, "destructShort": {"view":"1 fijerena"}, "destructSecs": "{{n}} segondra"},
   "postBg": {
     "addMedia": "Ampio sary, GIF na horonan-tsary",
     "changeMedia": "Ovay ny sary, GIF na horonan-tsary",
@@ -664,7 +664,9 @@
       "main": "Fototra",
       "money": "Vola",
       "riftn": "Riftn"
-    }
+    },
+    "moveGroupHint": "Apetraho amin'ny kiheba hafa mba hamindrana azy any",
+    "reorderHintGroups": "Tazomy ary tariho ny kisary rehetra mba handamina azy indray, na apetraho eo amin'ny kiheba hafa mba hamindrana azy"
   },
   "feed": {
     "viewProfile": "Hijery ny mombamomba an'i {{name}}",
@@ -1320,7 +1322,12 @@
     "menuLayoutSectionsDesc": "Ny pejy rehetra indray mandeha, eo ambanin'ny lohatenin'ny vondrona",
     "menuLayoutFoldersDesc": "Ny pejy fototrao, avy eo lahatahiry iray isaky ny vondrona",
     "publicChatInBar": "Chat Iraisana ao amin'ny bara ambany",
-    "publicChatInBarDesc": "Tsindry iray monja dia tafiditra ao amin'ny Chat Iraisana avy amin'ny bara eo ambanin'ny efijery"
+    "publicChatInBarDesc": "Tsindry iray monja dia tafiditra ao amin'ny Chat Iraisana avy amin'ny bara eo ambanin'ny efijery",
+    "notificationShowCount": "Asehoy ny isa eo amin'ny lakolosy",
+    "notificationShowCountDesc": "Jereo hoe firy ny fampandrenesana tsy voavaky fa tsy ny famirapiratana fotsiny",
+    "messagesShowCount": "Asehoy ny isa eo amin'ny Hafatra",
+    "messagesShowCountDesc": "Jereo hoe firy ny hafatra tsy voavaky fa tsy ny famirapiratana fotsiny",
+    "chatTextSize": "Haben'ny soratra amin'ny chat"
   },
   "common": {
     "confirm": "Hanamafy",
@@ -1353,7 +1360,8 @@
     "next": "Manaraka",
     "previous": "Aloha",
     "redo": "Avereno ny fanovana",
-    "remove": "Esory"
+    "remove": "Esory",
+    "copy": "Adikao"
   },
   "tip": {
     "title": "Handefa fanomezana",
@@ -1683,7 +1691,8 @@
     "connectionStatus": "Sata-pifandraisana",
     "connected": "Mifandray",
     "disconnected": "Tsy mifandray",
-    "reconnecting": "Mifandray indray..."
+    "reconnecting": "Mifandray indray...",
+    "onlineHint": "Olona {{count}} no ao amin'ity chat ity izao"
   },
   "aiChat": {
     "title": "Mpanampy",
@@ -2361,7 +2370,11 @@
     "sending": "Mandefa...",
     "retrySend": "Andramo indray",
     "discardSend": "Esory",
-    "notSent": "Tsy lasa"
+    "notSent": "Tsy lasa",
+    "unreadMarkerOne": "Hafatra 1 tsy voavaky",
+    "unreadMarkerMany": "Hafatra {{value}} tsy voavaky",
+    "jumpToUnread": "Mankany amin'ny hafatra voalohany tsy voavaky",
+    "jumpToLatest": "Mankany amin'ny hafatra farany"
   },
   "music": {
     "listeningCount_one": "{{count}} mihaino",
@@ -4087,7 +4100,8 @@
       "memberCount": "{{n}} mponina",
       "approvalNote": "Ny mpitantana iray dia tsy maintsy manaiky ny iyay fanadinana alohan'ny hidiranareo."
     },
-    "bannedFromCommunity": "Voasasaka amin'ity fiaraha-monina ity ianao"
+    "bannedFromCommunity": "Voasasaka amin'ity fiaraha-monina ity ianao",
+    "newChat": {"channelRow":"Fantsona · mpikambana {{formattedCount}}","groupRow":"Vondrona · mpikambana {{formattedCount}}","newChannel":"Fantsona vaovao","newGroup":"Vondrona vaovao","channelName":"Anaran'ny fantsona","groupName":"Anaran'ny vondrona","description":"Momba ny inona? (tsy voatery)","whoCanJoin":"Iza no afaka miditra","public":"Ho an'ny rehetra","publicDetail":"Afaka mahita sy miditra ny rehetra","inviteOnly":"Fanasana ihany","private":"Manokana","privateDetail":"Miditra amin'ny fanasanao na fankatoavanao ny olona","entry":"Fidirana","free":"Malalaka","freeDetail":"Maimaim-poana ny fidirana","paid":"Vidiana","paidDetail":"Fandoavana iray amin'ny token, mivantana aminao","price":"Vidiny amin'ny token","channelNote":"Ianao sy ny mpitantana anao ihany no afaka mamoaka. Mamaky sy mihetsika ny mpikambana.","createChannel":"Mamorona fantsona","createGroup":"Mamorona vondrona","message":"Hafatra vaovao","messageDetail":"Chat manokana amin'olona iray","groupDetail":"Miresaka amin'olona maro, ho an'ny daholobe na manokana","channelDetail":"Mandefa ho an'ny mpanaraka, maimaim-poana na mandoa","title":"Manomboka zavatra"}
   },
   "prompt": {
     "seoTitle": "Ampodio ny sakafonao | Riftn",
@@ -12865,7 +12879,8 @@
     "shareKindCommunity": "Fiaraha-monina",
     "shareGroups": "Vondrona",
     "shareKindChannel": "Fantsona",
-    "reportMessage": "Tatero ny hafatra"
+    "reportMessage": "Tatero ny hafatra",
+    "attachAnything": "Ampiarao sary, horonan-tsary, feo na rakitra"
   },
   "credits": {
     "earningsWorth": "Mitentina {{amount}}",
@@ -20979,5 +20994,17 @@
     "promptCatchUp": "Lazao ahy izay navoakan'i {{handle}} vao haingana",
     "promptMessage": "Ampio aho hanoratra hafatra ho an'i {{handle}}",
     "promptAbout": "Momba an'i {{handle}}: {{question}}"
-  }
+  },
+  "ownKeys": {"working":"Miasa","invalid":"Nolavina, soloy","noCredit":"Lany ny credit","disabled":"Novonoin'ny Riftn","failed":"Nisy zavatra tsy nety. Andramo indray.","savedNoCredit":"Voatahiry ny lakile {{name}}, saingy lany credit ny kaonty.","saved":"Voatahiry ny lakile {{name}}. Mampiasa ny kaontinao izao ny fitaovana ao amin'ny {{name}}.","removed":"Voaesotra ny lakile {{name}}.","title":"Ny lakile AI anao manokana","description":"Ampio lakile avy amin'ny mpamatsy AI ary handeha amin'ny kaontinao kosa ny fitaovana Creator. Tsy mandoa na inona na inona ho an'ireo asa ireo ny Riftn. Voaaro ny lakile ary tsy haseho intsony mihitsy.","check":"Jerena","remove":"Esory","add":"Ampio lakile","paste":"Apetaho ny lakile {{name}}-nao","save":"Tehirizo","cancel":"Foano","getKey":"Makà lakile {{name}}","showLess":"Asehoy ny lakileko ihany","addAnother":"Ampio mpamatsy hafa"},
+  "resetWallet": {"mismatch":"Mpananarana tsy misy tsy mitovy","tooShort":"Tsy maintsy litera {{count}} farafahakeliny ny tenimiafina","breached":"Efa niseho tamin'ny fivoahan'ny data ity tenimiafina ity. Misafidiana hafa","weak":"Misafidiana tenimiafina matanjaka kokoa (afangaroy litera, isa ary marika)","failed":"Tsy voaverina ny kitapom-bolanao. Tsy nisy nafindra. Andramo indray.","twoFactor":"Ampidiro ny kaody avy amin'ny app authenticator-nao mba hamindrana ny kaontinao.","funds":"Tsy mifindra ny token, NFT ary fitambaram-bola hafa. Mijanona ao amin'ny adiresy taloha izy ireo. Raha mbola afaka manokatra ny kitapom-bola taloha ianao, avoahy aloha izy ireo.","doneTitle":"Efa ao amin'ny kitapom-bolany vaovao ny kaontinao","logOut":"Miala amin ny kaonty","intro":"Mamorona kitapom-bola Riftn vaovao ary mamindra ny anaranao, ny lahatsoratrao, ny mpanaraka anao ary ny hafatrao ao aminy. Ampiasao ity raha very ny kitapom-bolanao na misy olon-kafa manana ny lakileny. Tsy mandeha intsony ho an'ny fidirana ny kitapom-bola taloha.","password":"Tenimiafin'ny kitapom-bola vaovao (litera {{count}} farafahakeliny)","confirm":"Hanamarina ny tenimiafina","twoFactorPlaceholder":"Kaody authenticator","ack":"Nauunawaan ko na ang aking lumang pondo ay manatili sa lumang wallet.","submit":"Avereno ny kitapom-bola","title":"Avereno ny kitapom-bola","rowDesc":"Very ny kitapom-bolanao, na misy olon-kafa manana ny lakileny? Afindrao amin'ny kitapom-bola vaovao ny kaontinao. Miaraka aminao ny anaranao, ny lahatsoratrao ary ny mpanaraka anao."},
+  "twoFactor": {"turnOn":"Alefaso","wrongCode":"Tsy mifanaraka io kaody io. Andramo ny farany indrindra ao amin'ny app-nao.","signingInAs":"Miditra amin'ny maha","signIn":"Miditra","trustDevice":"Aza mangataka indray amin'ity fitaovana ity mandritra ny 30 andro","useBackupShort":"Mampiasa kaody fitehirizana","useApp":"Mampiasa ny app authenticator-ko","useAnotherShort":"Kaonty hafa","lostEverything":"Very ny findainao sy ny kaody fitehirizana? Mifandraisa amin'ny fanohanana","turnedOff":"Fidirana amin'ny dingana roa dia voatery","introTitle":"Ampio satro-boninahitra faharoa","linkTitle":"Mifandraisa amin'ny app authenticator-nao","codesTitle":"Tehirizo ny kaody fitehirizana-nao","newCodesTitle":"Mahazo kaody backup vaovao","turnOff":"Atsaharo","backupCodes":"Kaody backup"},
+  "chatTextSize": {"title":"Haben'ny Tab"},
+  "notes": {"replyTo":"Valio amin'i {{name}}…"},
+  "chatBulk": {"toolbar":"Chat voafidy","selected":"{{count}} voafantina","cancel":"Foano","read":"Mariho ho voavaky","unread":"Mariho ho tsy voavaky","reply":"Valiny","delete":"Fafao","replyHint":"Samy mahazo izany ho hafatra tsotra ao amin'ny chat-ny manokana ny olona tsirairay.","replyPlaceholder":"Manorata hafatra…","sendAll":"Alefaso any amin'ny {{count}}","partSent":"Lasa tany amin'ny chat {{ok}} amin'ny {{total}}","notSent":"Tsy lasa. Andramo indray."},
+  "chatTabs": {"addToTab":"Ampio amin'ny tab","newWith":"Tab vaovao…","hide":"Afeno ny tab","edit":"Ovay ny tab","renameEdit":"Ovay anarana ary amboary","addChats":"Ampio chat","moveLeft":"Afindrao havia","moveRight":"Afindrao havanana","delete":"Fafao ny tab","new":"Tab vaovao","editTab":"Ovay ny tab","create":"Mamorona tab","emoji":"Misafidiana emoji","namePlaceholder":"Anaran'ny tab","noEmoji":"Tsy misy emoji","sFriends":"Namana","sWork":"Asa","sTrading":"- Varotra…","sCreators":"Mpamorona","sGaming":"Lalao","chatsInTab":"Chat ao amin'ity tab ity","picked":"{{n}} voafidy","deleteTitle":"Hamafa ny “{{name}}”?","deleteBody":"Miala ny tab. Mijanona ao amin'ny Rehetra ny chat-ny ary mitazona ny hafatra ao aminy.","builtIn":"Efa misy","chatCount":"Chat {{n}}","moveUp":"Atsangana","moveDown":"Midina","alwaysOn":"Mirehitra foana","show":"Asehoy ny tab","emptyTitle":"Foana ny {{name}}","emptyBody":"Ampio chat eto ary mijanona ao amin'ny Rehetra koa izy ireo.","removedFrom":"Nesorina tao amin'ny {{name}}","addedTo":"Nampidirina tao amin'ny {{name}}","kindPublic":"Ho an'ny rehetra","kindChannel":"Fantsona","kindGroup":"Vondrona","kindCommunity":"Fiaraha-monina","kindDirect":"Mivantana","tooMany":"Afaka manana tab hatramin'ny 10 ianao","deleted":"Voafafa {{name}}"},
+  "msgSelect": {"partForwarded":"Nalefa {{ok}} amin'ny {{total}}","nothingToCopy":"Tsy misy azo adika ao amin'ny hafatra voafidy","toolbar":"Hafatra voafidy","selected":"{{count}} voafantina","copy":"Adikao","forward":"Alefaso","deleteSome":"Fafao {{count}}"},
+  "dmSafety": {"notReal":"Tsy {{name}} tena izy ity.","neverLink":"Tsy handefa DM misy rohy hanamboarana ny mombamombanao na ny kitapom-bolanao mihitsy ny ekipa Riftn. Aza manokatra rohy, mampifandray ny kitapom-bolanao na manao sonia na inona na inona. Sakano ary tatero ity kaonty ity."},
+  "post": {"destruct":{"offBody":"Mijanona ny lahatsoratra.","onBody":"Mamafa ny tenany {{value1}} aorian'ny famoahana azy ny lahatsoratra."}},
+  "dmPaidLock": {"lockOnUsd":"Mihidy · {{price}}","lockVideo":"Hidio ny horonan-tsary","lockPhoto":"Hidio ny sary","lockCustom":"Hafa","lockCustomUsdLabel":"Vidiny manokana amin'ny dolara","lockHint":"Manjavozavo no ahitan'izy ireo azy mandra-pandoany anao. Tsy voaaro end-to-end ny rakitra mihidy."},
+  "chatReactions": {"oneNamed":"Naneho {{emoji}} tamin'ny hafatrao i {{name}}","one":"Naneho {{emoji}} tamin'ny hafatrao"}
 }

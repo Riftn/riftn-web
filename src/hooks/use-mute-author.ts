@@ -24,7 +24,7 @@ export function useMuteAuthor() {
   const [isMuting, setIsMuting] = useState(false);
 
   const muteAuthor = useCallback(
-    async (address?: string | null, displayName?: string) => {
+    async (address?: string | null, displayName?: string, onChange?: () => void) => {
       const target = lowerAddress(address);
       if (!target || isMuting) return;
       setIsMuting(true);
@@ -60,6 +60,7 @@ export function useMuteAuthor() {
         }
 
         queryClient.invalidateQueries({ queryKey: ['mute-list'] });
+        queryClient.invalidateQueries({ queryKey: ['story-shelf'] });
         // Says what a mute does and does not do — the point of it being its own
         // control rather than a softer word for Block.
         //
@@ -82,6 +83,8 @@ export function useMuteAuthor() {
                   queryClient.setQueryData<MutedUser[]>(['mute-list'], (old) =>
                     (old ?? []).filter((user) => lowerAddress(user.address) !== target));
                   queryClient.invalidateQueries({ queryKey: ['mute-list'] });
+                  queryClient.invalidateQueries({ queryKey: ['story-shelf'] });
+                  onChange?.();
                   // The pruned pages are gone from the cache, so refetch to
                   // bring the author's posts back rather than leaving a mute
                   // that reads as undone and still looks applied.
@@ -98,6 +101,7 @@ export function useMuteAuthor() {
             },
           },
         });
+        onChange?.();
       } catch (error) {
         console.error('[muteAuthor]', error);
         toast.error(_copy("copy.a82fcbd4b343", { defaultValue: "Failed to mute account" }));

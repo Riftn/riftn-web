@@ -245,6 +245,40 @@ describe('web push state', () => {
     expect(mod.getWebPushState()).toBe('subscribed');
   });
 
+  it('closes only delivered alerts for the conversation read in a visible tab', async () => {
+    installBrowser({ subscribe: () => fakeSubscription() });
+    const readThrough = Date.now();
+    const alert = (url: string, timestamp = readThrough) => ({
+      data: { url }, timestamp, close: vi.fn(),
+    });
+    const sameChat = alert('/app/messages?conversation=chat-1');
+    const legacyChatLink = alert('/dm/chat-1');
+    const otherAlerts = [
+      alert('/app/messages?conversation=chat-2'),
+      alert('/app/notifications?conversation=chat-1'),
+      alert('https://other.example/app/messages?conversation=chat-1'),
+      alert('/app/messages?conversation=chat-1', readThrough + 1_000),
+    ];
+    vi.spyOn(Date, 'now').mockReturnValue(readThrough);
+    const visibility = vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden');
+    const getNotifications = vi.fn(async () => [sameChat, legacyChatLink, ...otherAlerts]);
+    vi.stubGlobal('navigator', { serviceWorker: { getRegistration: async () => ({ getNotifications }) } });
+
+    try {
+      const mod = await freshModule();
+      await mod.dismissReadMessageNotifications('chat-1');
+      expect(getNotifications).not.toHaveBeenCalled();
+
+      visibility.mockReturnValue('visible');
+      await mod.dismissReadMessageNotifications('chat-1');
+      expect(sameChat.close).toHaveBeenCalledOnce();
+      expect(legacyChatLink.close).toHaveBeenCalledOnce();
+      for (const notification of otherAlerts) expect(notification.close).not.toHaveBeenCalled();
+    } finally {
+      vi.restoreAllMocks();
+    }
+  });
+
   it('reports off, not unavailable, when the permission is not granted', async () => {
     installBrowser({ subscribe: () => fakeSubscription() });
     vi.stubGlobal('Notification', { permission: 'default' });

@@ -7997,6 +7997,7 @@
     "creatorEarnsDirect": "Los suscriptores pagan en tokens Riftn. Tu acción llega a tu billetera en el momento en que se suscriben, menos la tarifa de la plataforma para tu nivel de insignia."
   },
   "liveOverlay": {
+    "showCreatorChat": "Mostrar el chat del creador en pantalla",
     "eyebrow": {
       "follow": "Nuevo seguidor",
       "subscribe": "Nuevo suscriptor",

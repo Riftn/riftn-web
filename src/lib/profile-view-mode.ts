@@ -21,8 +21,9 @@ export function parseProfileViewDefault(raw: unknown): ProfileViewMode {
 export type ProfileViewReaderPref = 'owner' | ProfileViewMode;
 export const PROFILE_VIEW_READER_KEY = 'profileViewOthers';
 
-export function parseProfileViewReaderPref(raw: unknown): ProfileViewReaderPref {
-  return raw === 'grid' || raw === 'list' ? raw : 'owner';
+export function parseProfileViewReaderPref(raw: unknown, accountDefault?: unknown): ProfileViewReaderPref {
+  if (raw === 'grid' || raw === 'list' || raw === 'owner') return raw;
+  return accountDefault === 'grid' || accountDefault === 'list' ? accountDefault : 'owner';
 }
 
 /** The view a profile opens in for this reader. Your own profile always uses your own default. */

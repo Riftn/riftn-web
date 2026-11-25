@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "वीडियो एडिट करीं", "hiddenTag": "लुकल", "tapToEdit": "एडिट करे खातिर टैप करीं", "cover": "कवर", "trim": "काट-छाँट", "mirror": "आईना (मिरर)", "rotate": "घुमाव", "hide": "लुकाव", "timer": "टाइमर", "sheetTitleAny": "भेजे से पहिले एडिट करीं", "close": "बंद", "replace": "बदलीं", "hiddenUntilTap": "जब तक वे टैप न करें तब तक छिपा हुआ", "pause": "रोकें", "play": "वीडियो चलाएं", "mute": "म्यूट करीं", "unmute": "अनम्यूट करीं", "scrub": "वीडियो को आगे-पीछे करें", "addMore": "फोटो या वीडियो जोड़ें", "trimAria": "काटने के लिए सिरों को खींचें", "coverAria": "कवर सेट करने के लिए एक फ्रेम पर टैप करें", "coverHint": "कवर सेट करने के लिए एक फ्रेम पर टैप करें", "coverOwn": "तोर फोटो", "coverAuto": "ऑटो", "uploadCover": "कवर पिक्चर अपलोड करें", "mirrored": "आईना जैसा (मिरर किया हुआ)", "original": "मूल (ओरिजिनल)", "rotate90": "90° घुमाएं", "showNormally": "सामान्य रूप से दिखाएं", "showNormallyBody": "वे इसे तुरंत देखते हैं", "hideUntilTap": "टैप करने तक छिपाएं", "hideUntilTapBody": "टैप करने तक धुंधला रखें", "hidePrice": "कीमत के पीछे छिपाएं", "hidePriceBody": "भुगतान करने तक धुंधला रखें", "priceUnavailable": "इस चैट में नहीं", "timerOff": "बंद", "timerOffBody": "ई चैट में रहै छै।", "timerViewBody": "ओकरा देखला के बाद दुनु के लेल गायब हो जाय छै।", "confirm": "पुष्टि करूँ", "lockedFor": "{{value1}} टोकन खातिर अनलॉक करीं", "lockedForUsd": "{{value1}} के लेल अनलॉक करूँ", "editItem": "आइटम संपादित करूँ {{value1}}", "kept": "{{time}} रखल गेल", "timerTimeBody": "भेजला के {{value1}} बाद दुनु के लेल गायब हो जाय छै।"},
+  "dmVideo": {"edit": "वीडियो एडिट करीं", "hiddenTag": "लुकल", "tapToEdit": "एडिट करे खातिर टैप करीं", "cover": "कवर", "trim": "काट-छाँट", "mirror": "आईना (मिरर)", "rotate": "घुमाव", "hide": "लुकाव", "timer": "टाइमर", "sheetTitleAny": "भेजे से पहिले एडिट करीं", "close": "बंद", "replace": "बदलीं", "hiddenUntilTap": "जब तक वे टैप न करें तब तक छिपा हुआ", "pause": "रोकें", "play": "वीडियो चलाएं", "mute": "म्यूट करीं", "unmute": "अनम्यूट करीं", "scrub": "वीडियो को आगे-पीछे करें", "addMore": "फोटो या वीडियो जोड़ें", "trimAria": "काटने के लिए सिरों को खींचें", "coverAria": "कवर सेट करने के लिए एक फ्रेम पर टैप करें", "coverHint": "कवर सेट करने के लिए एक फ्रेम पर टैप करें", "coverOwn": "तोर फोटो", "coverAuto": "ऑटो", "uploadCover": "कवर पिक्चर अपलोड करें", "mirrored": "आईना जैसा (मिरर किया हुआ)", "original": "मूल (ओरिजिनल)", "rotate90": "90° घुमाएं", "showNormally": "सामान्य रूप से दिखाएं", "showNormallyBody": "वे इसे तुरंत देखते हैं", "hideUntilTap": "टैप करने तक छिपाएं", "hideUntilTapBody": "टैप करने तक धुंधला रखें", "hidePrice": "कीमत के पीछे छिपाएं", "hidePriceBody": "भुगतान करने तक धुंधला रखें", "priceUnavailable": "इस चैट में नहीं", "timerOff": "बंद", "timerOffBody": "ई चैट में रहै छै।", "timerViewBody": "ओकरा देखला के बाद दुनु के लेल गायब हो जाय छै।", "confirm": "पुष्टि करूँ", "lockedFor": "{{value1}} टोकन खातिर अनलॉक करीं", "lockedForUsd": "{{value1}} के लेल अनलॉक करूँ", "editItem": "आइटम संपादित करूँ {{value1}}", "kept": "{{time}} रखल गेल", "timerTimeBody": "भेजला के {{value1}} बाद दुनु के लेल गायब हो जाय छै।", "destruct": {"60":"1 मिनट","3600":"1 घंटा","43200":"12 घंटा","86400":"1 दिन","604800":"1 हफ्ता","31536000":"1 साल","view":"1 व्यू"}, "destructShort": {"view":"1 व्यू"}, "destructSecs": "{{n}} सेकंड", "destructShortSecs": "{{n}}से"},
   "postBg": {
     "addMedia": "फोटो, GIF या वीडियो जोड़ऽ",
     "changeMedia": "फोटो, GIF या वीडियो बदलऽ",
@@ -664,7 +664,9 @@
       "riftn": "डीहब",
       "main": "मुख्य",
       "money": "पइसा"
-    }
+    },
+    "moveGroupHint": "दूसरे टैब पर ड्रॉप करके उसे वहाँ ले जाएँ",
+    "reorderHintGroups": "किसी भी आइकन को पकड़ें और ड्रैग करके पुनर्व्यवस्थित करें, या किसी अन्य टैब पर खींचकर उसे स्थानांतरित करें"
   },
   "feed": {
     "viewProfile": "{{name}} के प्रोफ़ाइल देखना",
@@ -1320,7 +1322,12 @@
     "menuLayoutSectionsDesc": "सब पेज एक्के साथे, ग्रुप हेडर के नीचे",
     "menuLayoutFoldersDesc": "तोहर मुख्य पेज, फेन हर ग्रुप ला एगो फोल्डर",
     "publicChatInBar": "नीचे के बार में पब्लिक चैट",
-    "publicChatInBarDesc": "स्क्रीन के नीचे वाला बार से एक टैप में पब्लिक चैट खोलऽ"
+    "publicChatInBarDesc": "स्क्रीन के नीचे वाला बार से एक टैप में पब्लिक चैट खोलऽ",
+    "notificationShowCount": "घंटी पर गिनती देखावऽ",
+    "notificationShowCountDesc": "खाली चमक न, देखऽ कि केतना नोटिफिकेसन बिना पढ़ल हइ",
+    "messagesShowCount": "मैसेज पर गिनती देखावऽ",
+    "messagesShowCountDesc": "खाली चमक न, देखऽ कि केतना मैसेज बिना पढ़ल हइ",
+    "chatTextSize": "चैट के अक्षर के साइज"
   },
   "common": {
     "confirm": "कंफर्म",
@@ -1353,7 +1360,8 @@
     "next": "नेक्स्ट",
     "previous": "प्रिवियस",
     "redo": "रिडो",
-    "remove": "रिमूव"
+    "remove": "रिमूव",
+    "copy": "कॉपी करू"
   },
   "tip": {
     "title": "टिप भेजो",
@@ -1660,7 +1668,8 @@
     "roomSettings": "रूम सेटिंग",
     "messagePinned": "संदेश पिन हो गेल",
     "messageUnpinned": "संदेश अनपिन हो गेल",
-    "online": "{{count}} ऑनलाइन"
+    "online": "{{count}} ऑनलाइन",
+    "onlineHint": "अभी ई चैट में {{count}} लोग हथिन"
   },
   "aiChat": {
     "title": "सहायक",
@@ -2338,7 +2347,11 @@
     "sending": "भेज रहा हूँ...",
     "retrySend": "फेर कोशिश करूँ",
     "discardSend": "हटावऽ",
-    "notSent": "न भेजल गेलइ"
+    "notSent": "न भेजल गेलइ",
+    "unreadMarkerOne": "1 बिना पढ़ल मैसेज",
+    "unreadMarkerMany": "{{value}} बिना पढ़ल मैसेज",
+    "jumpToUnread": "पहिला बिना पढ़ल मैसेज पर जा",
+    "jumpToLatest": "सबसे नया मैसेज पर जा"
   },
   "music": {
     "listeningCount_one": "{{count}} सुन रहे",
@@ -4064,7 +4077,8 @@
       "memberCount": "{{n}} सदस्य",
       "approvalNote": "एक एडमिन को आपकी मांग को स्वीकार करना होगा ताकि आप जुड़ सकें।"
     },
-    "bannedFromCommunity": "आपको इस समुदाय से बैन कर दिया गया है।"
+    "bannedFromCommunity": "आपको इस समुदाय से बैन कर दिया गया है।",
+    "newChat": {"channelRow":"चैनल · {{formattedCount}} मेंबर","groupRow":"ग्रुप · {{formattedCount}} मेंबर","newChannel":"नया चैनल","newGroup":"नया ग्रुप","channelName":"चैनल के नाम","groupName":"ग्रुप के नाम","description":"ई केकरा बारे में हइ? (मरजी से)","whoCanJoin":"के जुड़ सकऽ हइ","public":"पब्लिक","publicDetail":"कोई भी खोज के जुड़ सकऽ हइ","inviteOnly":"खाली न्योता से","private":"प्राइवेट","privateDetail":"लोग तोहर न्योता या मंजूरी से जुड़थिन","entry":"प्रवेश","free":"मुफ्त","freeDetail":"जुड़े के कोनो फीस न","paid":"भुगतान कैलक्यूलेटर","paidDetail":"टोकन में एक बेर के भुगतान, सीधे तोहरा","price":"टोकन में दाम","channelNote":"खाली तू आउ तोहर एडमिन पोस्ट कर सकऽ हथिन। मेंबर पढ़थिन आउ रिएक्ट करथिन।","createChannel":"चैनल बनावऽ","createGroup":"ग्रुप बनावऽ","message":"नया मैसेज","messageDetail":"एक आदमी से निजी चैट","groupDetail":"बहुत लोग से चैट, सार्वजनिक या निजी","channelDetail":"फॉलोअर तक प्रसारण, मुफ्त या पइसा वाला","title":"कुछ सुरू करऽ"}
   },
   "prompt": {
     "seoTitle": "अहाँ के Feed मांगा | Riftn",
@@ -12842,7 +12856,8 @@
     "shareKindCommunity": "समुदाय",
     "shareGroups": "ग्रुप",
     "shareKindChannel": "चैनल",
-    "reportMessage": "मैसेज के रिपोर्ट करऽ"
+    "reportMessage": "मैसेज के रिपोर्ट करऽ",
+    "attachAnything": "फोटो, वीडियो, ऑडियो या फाइल जोड़ऽ"
   },
   "credits": {
     "earningsWorth": "कीमत {{amount}}",
@@ -20880,5 +20895,17 @@
     "promptCatchUp": "हमरा बतावऽ कि {{handle}} हाल में का पोस्ट कइलका हे",
     "promptMessage": "{{handle}} के मैसेज लिखे में हमर मदद करऽ",
     "promptAbout": "{{handle}} के बारे में: {{question}}"
-  }
+  },
+  "ownKeys": {"working":"कार्यलय सहयोगि","invalid":"नामंजूर, बदलऽ","noCredit":"क्रेडिट खतम","disabled":"Riftn बंद कर देलक","failed":"कुछ त्रुटि होई हई, कृपया फेर से प्रयास करीं","savedNoCredit":"{{name}} की सेव हो गेलइ, बाकि खाता में क्रेडिट खतम हइ।","saved":"{{name}} की सेव हो गेलइ। {{name}} वाला टूल अब तोहर खाता चलावऽ हइ।","removed":"{{name}} की हटा देल गेलइ।","title":"तोहर अपन AI की","description":"कोनो AI प्रोवाइडर के की जोड़ऽ, तब Creator टूल तोहर खाता पर चलतइ। ऊ काम ला Riftn कुछो न लेतइ। की एन्क्रिप्ट रहऽ हइ आउ फिर कभी न देखावल जा हइ।","check":"चेक","remove":"हटावऽ","add":"की जोड़ऽ","paste":"अपन {{name}} की पेस्ट करऽ","save":"सेव करऽ","cancel":"रद्द करऽ","getKey":"{{name}} की लऽ","showLess":"खाली हमर की देखावऽ","addAnother":"दोसर प्रोवाइडर जोड़ऽ"},
+  "resetWallet": {"mismatch":"पासवर्ड मैच नहीं करते","tooShort":"पासवर्ड कम से कम {{count}} अक्षर के होवे के चाही","breached":"ई पासवर्ड कोनो डेटा लीक में आ चुकल हइ। दोसर चुनऽ","weak":"मजबूत पासवर्ड चुनऽ (अक्षर, अंक आउ चिन्ह मिलावऽ)","failed":"तोहर वॉलेट रीसेट न हो सकलइ। कुछो न खिसकल। फिर से कोसिस करऽ।","twoFactor":"अपन खाता खिसकावे ला authenticator ऐप के कोड डालऽ।","funds":"टोकन, NFT आउ दोसर बैलेंस न खिसकऽ हइ। ऊ पुराने पता पर रहतइ। अगर पुरान वॉलेट अभियो खोल सकऽ हऽ, तऽ पहिले ओकरा बाहर भेज दऽ।","doneTitle":"तोहर खाता अब नया वॉलेट पर हइ","logOut":"लॉग आउट करे","intro":"नया Riftn वॉलेट बनावऽ हइ आउ तोहर यूजरनेम, पोस्ट, फॉलोअर आउ मैसेज ओकरा पर खिसका दे हइ। अगर तोहर वॉलेट खो गेलो या केकरो दोसर के पास ओकर की हइ, तऽ एकरा चलावऽ। पुरान वॉलेट से साइन-इन बंद हो जइतइ।","password":"नया वॉलेट पासवर्ड (कम से कम {{count}} अक्षर)","confirm":"पासवर्ड कन्फर्म करें","twoFactorPlaceholder":"Authenticator कोड","ack":"मुझे समझ आया कि मेरे पुराने फंड पुराने वॉलेट में ही रहेंगे।","submit":"वॉलेट रीसेट करऽ","title":"वॉलेट रीसेट करऽ","rowDesc":"वॉलेट खो गेलो, या केकरो दोसर के पास ओकर की हइ? अपन खाता नया वॉलेट पर खिसकावऽ। तोहर यूजरनेम, पोस्ट आउ फॉलोअर संगे अइतो।"},
+  "twoFactor": {"turnOn":"चालू करीं","wrongCode":"उ कोड मेल ना खइले। अपने ऐप में नवीनतम कोड के कोशिश करीं।","signingInAs":"साइन इन कर रहल बानी","signIn":"साइन इन","trustDevice":"ई डिवाइस पर 30 दिन तक फिर से ना पूछे","useBackupShort":"बैकअप कोड इस्तेमाल करीं","useApp":"हमर ऑथेंटिकेटर ऐप इस्तेमाल करीं","useAnotherShort":"अलग खाता","lostEverything":"अपना फोन और बैकअप कोड खो देनी? सपोर्ट से संपर्क करीं","turnedOff":"दो‑चरणीय साइन‑इन बंद बा","introTitle":"दूसरा लॉक जोड़ें","linkTitle":"अपना ऑथेंटिकेटर ऐप से लिंक करीं","codesTitle":"अपना बैकअप कोड सुरक्षित करीं","newCodesTitle":"नए बैकअप कोड्स प्राप्त करें","turnOff":"बंद करें","backupCodes":"बैकअप कोड्स"},
+  "chatTextSize": {"title":"टेक्स्ट साइज़"},
+  "notes": {"replyTo":"{{name}} के जवाब दीं…"},
+  "chatBulk": {"toolbar":"चुनल चैट","selected":"{{count}} चुना गया","cancel":"रद्द करऽ","read":"पढ़ल मार्क करऽ","unread":"बिना पढ़ल मार्क करऽ","reply":"जवाब","delete":"मिटाओ","replyHint":"हर आदमी के ई अपन चैट में आम मैसेज जइसन मिलतइ।","replyPlaceholder":"मैसेज लिखऽ…","sendAll":"{{count}} के भेजऽ","partSent":"{{total}} में से {{ok}} चैट में भेज देल गेलइ","notSent":"न भेजा सकलइ। फिर से कोसिस करऽ।"},
+  "chatTabs": {"addToTab":"टैब में जोड़ऽ","newWith":"नया टैब…","hide":"टैब छिपावऽ","edit":"टैब एडिट करऽ","renameEdit":"नाम बदलऽ आउ एडिट करऽ","addChats":"चैट जोड़ऽ","moveLeft":"बायां खिसकावऽ","moveRight":"दायां खिसकावऽ","delete":"टैब मिटावऽ","new":"नया टैब","editTab":"टैब एडिट करऽ","create":"टैब बनावऽ","emoji":"एगो इमोजी चुनऽ","namePlaceholder":"टैब के नाम","noEmoji":"कोनो इमोजी न","sFriends":"दोस्त","sWork":"काम","sTrading":"व्यापार","sCreators":"क्रिएटर","sGaming":"गेमिंग","chatsInTab":"ई टैब के चैट","picked":"{{n}} चुनल","deleteTitle":"“{{name}}” मिटावे के हइ?","deleteBody":"टैब हट जइतइ। ओकर चैट 'सब' में रहतइ आउ ओकर मैसेज बचल रहतइ।","builtIn":"पहिले से बनल","chatCount":"{{n}} चैट","moveUp":"अग्रिम बढ़ाएँ","moveDown":"पीछे बढ़ाएँ","alwaysOn":"सदा ऑन","show":"टैब देखावऽ","emptyTitle":"{{name}} खाली हइ","emptyBody":"एहां चैट जोड़ऽ, ऊ 'सब' में भी रहतइ।","removedFrom":"{{name}} से हटा देल गेलइ","addedTo":"{{name}} में जोड़ देल गेलइ","kindPublic":"पब्लिक","kindChannel":"चैनल","kindGroup":"समूह","kindCommunity":"समुदाय","kindDirect":"सीधा तौर पर चाहे जितना","tooMany":"तू जादे से जादे 10 टैब रख सकऽ हऽ","deleted":"{{name}} मिटा देल गेलइ"},
+  "msgSelect": {"partForwarded":"{{total}} में से {{ok}} फॉरवर्ड हो गेलइ","nothingToCopy":"चुनल मैसेज में कॉपी करे ला कुछो न हइ","toolbar":"चुनल मैसेज","selected":"{{count}} चुना गया","copy":"कॉपी करऽ","forward":"आगे भेजूँ","deleteSome":"{{count}} मिटावऽ"},
+  "dmSafety": {"notReal":"ई असली {{name}} न हथिन।","neverLink":"Riftn टीम तोहर प्रोफाइल या वॉलेट ठीक करे ला कभी DM में लिंक न भेजतो। लिंक मत खोलऽ, वॉलेट मत जोड़ऽ, आउ कुछो साइन मत करऽ। ई खाता के ब्लॉक करऽ आउ रिपोर्ट करऽ।"},
+  "post": {"destruct":{"offBody":"पोस्ट बनल रहतइ।","onBody":"पोस्ट डाले के {{value1}} बाद ई अपने-आप मिट जइतइ।"}},
+  "dmPaidLock": {"lockOnUsd":"लॉक · {{price}}","lockVideo":"वीडियो लॉक करऽ","lockPhoto":"फोटो लॉक करऽ","lockCustom":"अउरी","lockCustomUsdLabel":"डॉलर में अपन दाम","lockHint":"जब तक ऊ तोहरा पइसा न देथिन, उनका ई धुंधला देखइतइ। लॉक कैल फाइल एंड-टू-एंड एन्क्रिप्टेड न होवऽ हइ।"},
+  "chatReactions": {"oneNamed":"{{name}} तोहर मैसेज पर {{emoji}} रिएक्ट कैलथिन","one":"तोहर मैसेज पर {{emoji}} रिएक्ट कैल गेलइ"}
 }

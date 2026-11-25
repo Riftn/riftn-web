@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Viidiyoo gulaali", "hiddenTag": "Dhokataa", "tapToEdit": "Gulaaluuf tuqi", "cover": "Qola", "trim": "Murii", "mirror": "Ilaalii", "rotate": "Naannessi", "hide": "Dhoksi", "timer": "Yeroo", "sheetTitleAny": "Erguun dura gulaali", "close": "Cufi", "replace": "Bakka buusi", "hiddenUntilTap": "Hanga isaan tuqanitti dhokataa dha", "pause": "Dhaabi", "play": "Viidiyoo taphachiisi", "mute": "Sagalee haqi", "unmute": "Sagalee deebisi", "scrub": "Viidiyoo keessa darbi", "addMore": "Suuraa ykn viidiyoo itti dabali", "trimAria": "Muruf qarqara isaa harkisi", "coverAria": "Qola ta'uuf firaamee tokko tuqi", "coverHint": "Qola ta'uuf firaamee tokko tuqi", "coverOwn": "Suuraa kee", "coverAuto": "Ofiin (Auto)", "uploadCover": "Suuraa qolaa fe'i", "mirrored": "Ilaalii (Mirror)", "original": "Asli", "rotate90": "Digrii 90 naannessi", "showNormally": "Akkuma idileetti argisiisi", "showNormallyBody": "Isaan battalumatti argu", "hideUntilTap": "Hanga tuqamutti dhoksi", "hideUntilTapBody": "Hanga isaan tuqanitti hafuuraa (blurred) ta'a", "hidePrice": "Gatii duuba dhoksi", "hidePriceBody": "Hanga isaan siif kaffalanitti hafuuraa (blurred) ta'a", "priceUnavailable": "Chat kana keessa miti", "timerOff": "Hojiin ala", "timerOffBody": "Chat keessatti hafa.", "timerViewBody": "Erga isaan ilaalanii booda isin lamaanuuf ni bada.", "confirm": "Mirkaneessi", "lockedFor": "{{value1}} tokkenoota tiin banadhu", "lockedForUsd": "{{value1}}f bani", "editItem": "Wanticha gulaali {{value1}}", "kept": "{{time}} qabameera", "timerTimeBody": "Erga ergitee booda {{value1}} isin lamaanuuf ni bada."},
+  "dmVideo": {"edit": "Viidiyoo gulaali", "hiddenTag": "Dhokataa", "tapToEdit": "Gulaaluuf tuqi", "cover": "Qola", "trim": "Murii", "mirror": "Ilaalii", "rotate": "Naannessi", "hide": "Dhoksi", "timer": "Yeroo", "sheetTitleAny": "Erguun dura gulaali", "close": "Cufi", "replace": "Bakka buusi", "hiddenUntilTap": "Hanga isaan tuqanitti dhokataa dha", "pause": "Dhaabi", "play": "Viidiyoo taphachiisi", "mute": "Sagalee haqi", "unmute": "Sagalee deebisi", "scrub": "Viidiyoo keessa darbi", "addMore": "Suuraa ykn viidiyoo itti dabali", "trimAria": "Muruf qarqara isaa harkisi", "coverAria": "Qola ta'uuf firaamee tokko tuqi", "coverHint": "Qola ta'uuf firaamee tokko tuqi", "coverOwn": "Suuraa kee", "coverAuto": "Ofiin (Auto)", "uploadCover": "Suuraa qolaa fe'i", "mirrored": "Ilaalii (Mirror)", "original": "Asli", "rotate90": "Digrii 90 naannessi", "showNormally": "Akkuma idileetti argisiisi", "showNormallyBody": "Isaan battalumatti argu", "hideUntilTap": "Hanga tuqamutti dhoksi", "hideUntilTapBody": "Hanga isaan tuqanitti hafuuraa (blurred) ta'a", "hidePrice": "Gatii duuba dhoksi", "hidePriceBody": "Hanga isaan siif kaffalanitti hafuuraa (blurred) ta'a", "priceUnavailable": "Chat kana keessa miti", "timerOff": "Hojiin ala", "timerOffBody": "Chat keessatti hafa.", "timerViewBody": "Erga isaan ilaalanii booda isin lamaanuuf ni bada.", "confirm": "Mirkaneessi", "lockedFor": "{{value1}} tokkenoota tiin banadhu", "lockedForUsd": "{{value1}}f bani", "editItem": "Wanticha gulaali {{value1}}", "kept": "{{time}} qabameera", "timerTimeBody": "Erga ergitee booda {{value1}} isin lamaanuuf ni bada.", "destruct": {"60":"daqiiqaa 1","3600":"sa'aatii 1","43200":"sa'aatii 12","86400":"guyyaa 1","604800":"torban 1","31536000":"waggaa 1","view":"ilaallii 1"}, "destructShort": {"view":"ilaallii 1"}, "destructSecs": "{{n}} sek"},
   "postBg": {
     "addMedia": "Suuraa, GIF ykn viidiyoo dabali",
     "changeMedia": "Suuraa, GIF ykn viidiyoo jijjiiri",
@@ -664,7 +664,9 @@
       "liveStudio": "kallattiin seeni, tamsaasi, tamsaasuu, OBS, overlays, akeekkachiisa, widgets",
       "launchpad": "token jalqabsiisi, saantima uumi, saantima hojjedhu, meme coin, bonding curve, tokenise godhi",
       "getTheApp": "appii buusi, Android, iPhone, appii moobaayilaa, fe'i, APK, appii kompiitaraa, kompiitara irratti fe'i, Windows, Mac"
-    }
+    },
+    "moveGroupHint": "Tabii biraa irratti gadi dhiisi gara achiitti akka inni socho'uuf",
+    "reorderHintGroups": "Mallattoo kamiyyuu qabdee harkisuun bakka jijjiiruu dandeessa, ykn tab biraa irratti gadi dhiisuun gara achiitti geessuu dandeessa"
   },
   "feed": {
     "viewProfile": "{{name}}'s profile ilaali",
@@ -1320,7 +1322,12 @@
     "menuLayoutSectionsDesc": "Fuula hunda yeroo tokkotti, mataduree garee jalatti",
     "menuLayoutFoldersDesc": "Fuulota kee ijoo, itti aansee foldarii garee tokkoon tokkoof",
     "publicChatInBar": "Haasawa Uummataa sararaa gadii keessatti",
-    "publicChatInBarDesc": "Sararaa gadii iskiriinii irraa tuqaa tokkoon Haasawa Uummataatti seeni"
+    "publicChatInBarDesc": "Sararaa gadii iskiriinii irraa tuqaa tokkoon Haasawa Uummataatti seeni",
+    "notificationShowCount": "Lakkoofsa bilbila irratti agarsiisi",
+    "notificationShowCountDesc": "Ifa qofa osoo hin taane beeksisa hammam akka hin dubbifamne ilaali",
+    "messagesShowCount": "Lakkoofsa Ergaawwan irratti agarsiisi",
+    "messagesShowCountDesc": "Ifa qofa osoo hin taane ergaawwan hammam akka hin dubbifamne ilaali",
+    "chatTextSize": "Hammamtaa barreeffama haasawaa"
   },
   "common": {
     "confirm": "Mirkaneessuu",
@@ -1353,7 +1360,8 @@
     "next": "Kan itti aanu",
     "previous": "Kan duraa",
     "redo": "Irra deebi'ii hojjedhu",
-    "remove": "Irraa kaasuu"
+    "remove": "Irraa kaasuu",
+    "copy": "Garagalchi"
   },
   "tip": {
     "title": "Tiippii Ergi",
@@ -1660,7 +1668,8 @@
     "roomSettings": "Qindaa'ina Kutaa",
     "messagePinned": "Ergaan maxanfamera",
     "messageUnpinned": "Ergaan maxansuu irraa haqamera",
-    "online": "{{count}} toora irra"
+    "online": "{{count}} toora irra",
+    "onlineHint": "Namoonni {{count}} amma haasawa kana keessa jiru"
   },
   "aiChat": {
     "title": "Gargaaraa",
@@ -2351,7 +2360,11 @@
     "sending": "Ergaa",
     "retrySend": "Irra deebi'ii yaali",
     "discardSend": "Balleessi",
-    "notSent": "Hin ergamne"
+    "notSent": "Hin ergamne",
+    "unreadMarkerOne": "Ergaa 1 hin dubbifamne",
+    "unreadMarkerMany": "Ergaawwan {{value}} hin dubbifamne",
+    "jumpToUnread": "Ergaa jalqabaa hin dubbifamnetti dabri",
+    "jumpToLatest": "Ergaa haaraatti dabri"
   },
   "music": {
     "listeningCount_one": "{{count}} dhaggeeffachaa",
@@ -4077,7 +4090,8 @@
       "memberCount": "{{n}} miseensa",
       "approvalNote": "Admin tokko osoo join gochuu hin dandeenye gaaffii kee raggaasisuu qaba."
     },
-    "bannedFromCommunity": "Hawaasa kana irraa dhorkamta"
+    "bannedFromCommunity": "Hawaasa kana irraa dhorkamta",
+    "newChat": {"channelRow":"Chaanaala · miseensota {{formattedCount}}","groupRow":"Garee · miseensota {{formattedCount}}","newChannel":"Chaanaala haaraa","newGroup":"Garee haaraa","channelName":"Maqaa chaanaalaa","groupName":"Maqaa garee","description":"Waa'ee maalii? (dirqama miti)","whoCanJoin":"Eenyutu makamuu danda'a","public":"Ummataa","publicDetail":"Namni kamiyyuu argatee makamuu danda'a","inviteOnly":"Afeerraan qofa","private":"Dhuunfaa","privateDetail":"Namoonni afeerraa yookaan hayyama keetiin makamu","entry":"Seensa","free":"Bilisa","freeDetail":"Makamuuf kaffaltii hin jiru","paid":"Kaffalame","paidDetail":"Kaffaltii tokko tokenaan, kallattiin siif","price":"Gatii tokenaan","channelNote":"Si fi bulchitoota kee qofatu maxxansuu danda'a. Miseensonni dubbisanii deebii kennu.","createChannel":"Chaanaala uumi","createGroup":"Garee uumi","message":"Ergaa haaraa","messageDetail":"Haasawa dhuunfaa nama tokko waliin","groupDetail":"Namoota baay'ee waliin haasa'i, ifatti yookaan dhuunfaan","channelDetail":"Hordoftootaaf tamsaasi, bilisaan yookaan kaffaltiin","title":"Waa tokko jalqabi"}
   },
   "prompt": {
     "seoTitle": "Nyaata keessan kakaasi | Riftn",
@@ -12863,7 +12877,8 @@
     "shareKindCommunity": "Hawaasa",
     "shareGroups": "Gareewwan",
     "shareKindChannel": "Chaanaalii",
-    "reportMessage": "Ergaa gabaasi"
+    "reportMessage": "Ergaa gabaasi",
+    "attachAnything": "Suuraa, viidiyoo, sagalee yookaan faayilii walqabsiisi"
   },
   "credits": {
     "earningsWorth": "Gatii {{amount}} .",
@@ -20927,5 +20942,17 @@
     "promptCatchUp": "Wanta {{handle}} dhiyeenya maxxanse natti himi",
     "promptMessage": "Ergaa {{handle}}f barreessuuf na gargaari",
     "promptAbout": "Waa'ee {{handle}}: {{question}}"
-  }
+  },
+  "ownKeys": {"working":"Hojjechuu","invalid":"Didame, bakka buusi","noCredit":"Kreeditiin dhumeera","disabled":"Riftn'n cufame","failed":"Waan tokkotu dogoggora ta'e. Ammas yaalaa.","savedNoCredit":"Furtuun {{name}} olkaa'ameera, garuu herregni kreeditii hin qabu.","saved":"Furtuun {{name}} olkaa'ameera. Meeshaaleen {{name}} irra jiran amma herrega kee fayyadamu.","removed":"Furtuun {{name}} haqameera.","title":"Furtuuwwan AI kee mataa kee","description":"Dhiyeessaa AI irraa furtuu dabali, meeshaaleen Uumaa herrega kee irratti hojjetu. Riftn hojii sanaaf homaa hin kaffalchiisu. Furtuuwwan encrypt ta'anii gonkumaa irra deebi'anii hin mul'atan.","check":"Qori","remove":"Balleessi","add":"Furtuu dabali","paste":"Furtuu {{name}} kee maxxansi","save":"Olkaa'i","cancel":"Haqi","getKey":"Furtuu {{name}} argadhu","showLess":"Furtuuwwan koo qofa agarsiisi","addAnother":"Dhiyeessaa biraa dabali"},
+  "resetWallet": {"mismatch":"Passwordsin akkaa fiiraa matcha","tooShort":"Jechi icciitii yoo xiqqaate qubee {{count}} qabaachuu qaba","breached":"Jechi icciitii kun saamicha daataa keessatti mul'ateera. Kan biraa filadhu","weak":"Jecha icciitii cimaa filadhu (qubee, lakkoofsa fi mallattoo walitti makii)","failed":"Baallama kee haaromsuu hin dandeenye. Wanti socho'e hin jiru. Irra deebi'ii yaali.","twoFactor":"Herrega kee socho'suuf koodii appii mirkaneessaa kee irraa galchi.","funds":"Tokenoonni, NFT fi hafteen biroo hin socho'an. Teessoo moofaa irratti hafu. Yoo ammallee baallama moofaa banuu dandeessu, dura isaan ergi.","doneTitle":"Herregni kee baallama haaraa isaa irra jira","logOut":"Ba’i","intro":"Baallama Riftn haaraa uumee maqaa fayyadamaa, barreeffamoota, hordoftootaa fi ergaawwan kee itti socho'sa. Yoo baallamni kee bade yookaan namni biraa furtuu isaa qabaate kana fayyadami. Baallamni moofaan seensaaf hojjechuu dhaaba.","password":"Jecha icciitii baallama haaraa (xiqqaate qubee {{count}})","confirm":"Jecha icciitii mirkaneessi","twoFactorPlaceholder":"Koodii mirkaneessaa","ack":"Qabeenya koo duubaa jidha duubaa keessatti hafu akka hubadhu.","submit":"Baallama haaromsi","title":"Baallama haaromsi","rowDesc":"Baallama kee dhabdee, yookaan namni biraa furtuu isaa qabaa? Herrega kee gara baallama haaraatti socho'si. Maqaan fayyadamaa, barreeffamoonnii fi hordoftoonni kee si waliin dhufu."},
+  "twoFactor": {"wrongCode":"Koodiin kun hin walfakkaanne. Koodii haaraa app keessan keessatti yaali.","signingInAs":"Galmee seenuu","signIn":"Seenuu","trustDevice":"Dhiisi deebii kanaa yeroo 30 guyyaa kanaaf","useBackupShort":"Koodii backup fayyadami","useApp":"App authenticator koo fayyadami","useAnotherShort":"Account adda","lostEverything":"Foonii fi koodii backup keessan dhabuun? Tajaajila deeggarsa qunnamaa","turnedOff":"Seenuu lamaan off","introTitle":"Lakkiin lammaffaa dabaluu","linkTitle":"App authenticator keessan walqabsiisu","codesTitle":"Koodii deebii kee kuusi","newCodesTitle":"Koodii eeggannoo haaraa argadhu"},
+  "chatTextSize": {"title":"Guddina barruu"},
+  "notes": {"replyTo":"{{name}}’f deebisi…"},
+  "chatBulk": {"toolbar":"Haasawwan filataman","selected":"{{count}} filatame","cancel":"Haqi","read":"Dubbifame jedhii mallatteessi","unread":"Hin dubbifamne jedhii mallatteessi","reply":"Deebii","delete":"Haqi","replyHint":"Namni hundi kana akka ergaa idilee haasawa mataa isaa keessatti argata.","replyPlaceholder":"Ergaa barreessi…","sendAll":"{{count}}f ergi","partSent":"Haasawwan {{total}} keessaa {{ok}}f ergameera","notSent":"Erguu hin dandeenye. Irra deebi'ii yaali."},
+  "chatTabs": {"addToTab":"Taabiitti dabali","newWith":"Taabii haaraa…","hide":"Taabii dhoksi","edit":"Taabiiwwan gulaali","renameEdit":"Maqaa jijjiiri fi gulaali","addChats":"Haasawwan dabali","moveLeft":"Gara bitaatti socho'si","moveRight":"Gara mirgaatti socho'si","delete":"Taabii haqi","new":"Taabii haaraa","editTab":"Taabii gulaali","create":"Taabii uumi","emoji":"Emojii filadhu","namePlaceholder":"Maqaa taabii","noEmoji":"Emojii hin jiru","sFriends":"Hiriyoota","sWork":"Hojii","sTrading":"Daldala","sCreators":"Uumtota","sGaming":"Tapha taphachuu","chatsInTab":"Haasawwan taabii kana keessa jiran","picked":"{{n}} filatame","deleteTitle":"“{{name}}” haqtaa?","deleteBody":"Taabiin ni bada. Haasawwan isaa Hunda keessatti hafanii ergaawwan isaanii eeggatu.","builtIn":"Kan dhaabbataa","chatCount":"Haasawwan {{n}}","moveUp":"Ol geessuu","moveDown":"Gadi geessuu","alwaysOn":"Yeroo hunda banamee jira","show":"Taabii agarsiisi","emptyTitle":"{{name}} duwwaa dha","emptyBody":"Haasawwan asitti dabali, Hunda keessattis ni hafu.","removedFrom":"{{name}} irraa haqameera","addedTo":"{{name}}tti dabalameera","kindPublic":"Ummataa","kindChannel":"Chaanaalii","kindGroup":"Walitti qabi","kindCommunity":"Hawaasa","kindDirect":"Kallattii","tooMany":"Taabiiwwan hanga 10 qabaachuu dandeessa","deleted":"{{name}} haqameera"},
+  "msgSelect": {"partForwarded":"{{total}} keessaa {{ok}} dabarfameera","nothingToCopy":"Ergaawwan filataman keessa wanti garagalchamu hin jiru","toolbar":"Ergaawwan filataman","selected":"{{count}} filatame","copy":"Garagalchi","forward":"Dabarsi","deleteSome":"{{count}} haqi"},
+  "dmSafety": {"notReal":"Kun {{name}} dhugaa miti.","neverLink":"Gareen Riftn piroofaayilii yookaan baallama kee sirreessuuf gonkumaa liinkii DM'n siif hin ergu. Liinkii hin banin, baallama kee hin walqabsiisin, yookaan waan tokkollee hin mallattessin. Herrega kana dhorkii gabaasi."},
+  "post": {"destruct":{"offBody":"Barreeffamni ni tura.","onBody":"Barreeffamni erga maxxanfamee {{value1}} booda ofii isaa haqa."}},
+  "dmPaidLock": {"lockOnUsd":"Cufameera · {{price}}","lockVideo":"Viidiyoo cufi","lockPhoto":"Suuraa cufi","lockCustom":"Kan biraa","lockCustomUsdLabel":"Gatii filannoo doolaraan","lockHint":"Hanga siif kaffalanitti dhokataa ta'ee argu. Faayiloonni cufaman encryption jalqabaa hanga dhumaatti hin qaban."},
+  "chatReactions": {"oneNamed":"{{name}} ergaa keetiif {{emoji}} deebii miiraa kenne","one":"Ergaa keetiif {{emoji}} deebii miiraa kenne"}
 }

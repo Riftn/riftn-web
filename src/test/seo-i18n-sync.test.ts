@@ -16,6 +16,8 @@ import { describe, expect, it } from 'vitest';
 import {
   buildSeoI18n,
   SEO_I18N_LOCALES,
+  SITEMAP_ALTERNATE_LIMIT,
+  hrefLanguage,
   SEO_I18N_ROUTES,
   withSitemapAlternates,
 } from '../../scripts/build-seo-i18n.mjs';
@@ -52,6 +54,38 @@ describe('seo-i18n.json', () => {
       expect(JSON.parse(readFileSync(resolve(ROOT, 'public' + asset), 'utf8')), asset).toEqual(content);
     }
   }, 30000);
+
+  it('uses complete existing documentation copy for additional languages', () => {
+    const index = expanded(committed['/docs'].pt);
+    const overview = expanded(committed['/docs/overview'].pt);
+    expect(index.description).toContain('Documenta\u00e7\u00e3o oficial');
+    expect(index.body).toContain('/docs/overview?hl=pt');
+    expect(overview.body?.match(/<h2>/g)).toHaveLength(8);
+    expect(committed['/docs'].ja?.asset).toBeTruthy();
+    expect(committed['/docs/overview'].de?.asset).toBeTruthy();
+  });
+
+  it('keeps the meaningful part of translated guide titles and headings out of English', () => {
+    const plain = (text: string) => text.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+    const title = (text: string) => plain(text.split(/\s+[|\u2013\u2014]\s+/)[0]);
+    for (const [route, translations] of Object.entries(committed)) {
+      if (!route.startsWith('/guides/')) continue;
+      const original = translations.en;
+      for (const [language, localized] of Object.entries(translations)) {
+        if (language === 'en') continue;
+        const label = route + '?hl=' + language;
+        expect(title(localized.title), label + ' title').not.toBe(title(original.title));
+        expect(plain(localized.h1!), label + ' heading').not.toBe(plain(original.h1!));
+      }
+    }
+  });
+
+  it('exposes Traditional Chinese with the standard search language code', () => {
+    expect(committed['/docs'].zh_tw?.asset).toBeTruthy();
+    expect(committed['/docs/overview'].zh_tw?.asset).toBeTruthy();
+    expect(hrefLanguage('zh_tw')).toBe('zh-TW');
+    expect(sitemap).toContain('<loc>https://riftn.com/docs?hl=zh_tw</loc>');
+  });
 
   it('lists English plus the chosen languages only', () => {
     for (const [route, langs] of Object.entries(committed)) {
@@ -107,9 +141,22 @@ describe('sitemap-static.xml alternates', () => {
         const block = sitemap.match(new RegExp(`<url>\\s*<loc>${loc.replace(/[.?]/g, '\\$&')}</loc>[\\s\\S]*?</url>`));
         expect(block, loc).not.toBeNull();
         const hreflangs = [...block![0].matchAll(/hreflang="([^"]+)"/g)].map((m) => m[1]).sort();
-        expect(hreflangs, loc).toEqual([...served, 'en', 'x-default'].sort());
+        expect(hreflangs, loc).toEqual(served.length > SITEMAP_ALTERNATE_LIMIT ? [] : [...served.map(hrefLanguage), 'en', 'x-default'].sort());
       }
     }
+  });
+
+  it('lists all URLs when the crawler HTML carries a large cluster', () => {
+    const route = '/guides/example';
+    const url = 'https://riftn.com' + route;
+    const table = { [route]: Object.fromEntries(['en', ...SEO_I18N_LOCALES, ...EXTRA_LOCALES].map(code => [code, {}])) };
+    const xml = '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url>\n    <loc>' + url + '</loc>\n  </url>\n</urlset>';
+    const result = withSitemapAlternates(xml, table);
+    for (const code of Object.keys(table[route])) {
+      expect(result).toContain('<loc>' + url + (code === 'en' ? '' : '?hl=' + code) + '</loc>');
+    }
+    expect(result).not.toContain('hreflang=');
+    expect(withSitemapAlternates(result, table)).toBe(result);
   });
 
   it('adds nothing when run twice', () => {

@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Muuda videot", "hiddenTag": "Peidetud", "tapToEdit": "Puuduta muutmiseks", "cover": "Kaane", "trim": "Lõikamine", "mirror": "Peegel", "rotate": "Pööra", "hide": "Peida", "timer": "Taimer", "sheetTitleAny": "Muuda enne saatmist", "close": "Sulge", "replace": "Asenda", "hiddenUntilTap": "Peidetud kuni nad selle puudutavad", "pause": "Paus", "play": "Mängi video", "mute": "Vaigista", "unmute": "Tühista vaigistus", "scrub": "Käi läbi video", "addMore": "Lisa fotosid või videoid", "trimAria": "Lõhenda lõpusid lõikamiseks", "coverAria": "Puuduta kaadrit kaane määramiseks", "coverHint": "Puuduta kaadrit kaane määramiseks", "coverOwn": "Sinu pilt", "coverAuto": "Automaatne", "uploadCover": "Laadi üles kaanepilt", "mirrored": "Peegeldatud", "original": "Algne", "rotate90": "Pööra 90°", "showNormally": "Näita tavaliselt", "showNormallyBody": "Nad näevad seda kohe", "hideUntilTap": "Peida kuni puudutatakse", "hideUntilTapBody": "Sume kuni nad seda puudutavad", "hidePrice": "Peida hinna taga", "hidePriceBody": "Sume kuni nad maksavad", "priceUnavailable": "Ei ole selles vestluses", "timerOff": "Lülita välja", "timerOffBody": "See jääb vestlusesse.", "timerViewBody": "See on kaotanud mõlemale, kui nad seda näevad.", "confirm": "Kinnita", "lockedFor": "Ava {{value1}} märki eest", "lockedForUsd": "Lukustamata {{value1}}", "editItem": "Muuda üksus {{value1}}", "kept": "{{time}} säilitatud", "timerTimeBody": "Kaotanud mõlemale {{value1}} pärast saatmist."},
+  "dmVideo": {"edit": "Muuda videot", "hiddenTag": "Peidetud", "tapToEdit": "Puuduta muutmiseks", "cover": "Kaane", "trim": "Lõikamine", "mirror": "Peegel", "rotate": "Pööra", "hide": "Peida", "timer": "Taimer", "sheetTitleAny": "Muuda enne saatmist", "close": "Sulge", "replace": "Asenda", "hiddenUntilTap": "Peidetud kuni nad selle puudutavad", "pause": "Paus", "play": "Mängi video", "mute": "Vaigista", "unmute": "Tühista vaigistus", "scrub": "Käi läbi video", "addMore": "Lisa fotosid või videoid", "trimAria": "Lõhenda lõpusid lõikamiseks", "coverAria": "Puuduta kaadrit kaane määramiseks", "coverHint": "Puuduta kaadrit kaane määramiseks", "coverOwn": "Sinu pilt", "coverAuto": "Automaatne", "uploadCover": "Laadi üles kaanepilt", "mirrored": "Peegeldatud", "original": "Algne", "rotate90": "Pööra 90°", "showNormally": "Näita tavaliselt", "showNormallyBody": "Nad näevad seda kohe", "hideUntilTap": "Peida kuni puudutatakse", "hideUntilTapBody": "Sume kuni nad seda puudutavad", "hidePrice": "Peida hinna taga", "hidePriceBody": "Sume kuni nad maksavad", "priceUnavailable": "Ei ole selles vestluses", "timerOff": "Lülita välja", "timerOffBody": "See jääb vestlusesse.", "timerViewBody": "See on kaotanud mõlemale, kui nad seda näevad.", "confirm": "Kinnita", "lockedFor": "Ava {{value1}} märki eest", "lockedForUsd": "Lukustamata {{value1}}", "editItem": "Muuda üksus {{value1}}", "kept": "{{time}} säilitatud", "timerTimeBody": "Kaotanud mõlemale {{value1}} pärast saatmist.", "destruct": {"3600":"1 tund","43200":"12 tundi","86400":"1 päev","604800":"1 nädal","31536000":"1 aasta","view":"1 vaatamine"}, "destructShort": {"view":"1 vaatamine"}, "destructSecs": "{{n}} sek"},
   "postBg": {
     "addMedia": "Lisa pilt, GIF või video",
     "changeMedia": "Muuda pilti, GIF-i või videot",
@@ -664,7 +664,9 @@
       "main": "Peamine",
       "money": "Raha",
       "riftn": "Riftn"
-    }
+    },
+    "moveGroupHint": "Lohista teisele vahekaardile, et see sinna teisaldada",
+    "reorderHintGroups": "Hoia ja lohista ikooni selle ümberpaigutamiseks või lohista see teisele vahekaardile selle teisaldamiseks"
   },
   "feed": {
     "viewProfile": "Vaata kasutaja {{name}} profiili",
@@ -1320,7 +1322,12 @@
     "menuLayoutSectionsDesc": "Kõik lehed korraga, rühmade pealkirjade all",
     "menuLayoutFoldersDesc": "Sinu peamised lehed, seejärel kaust iga rühma jaoks",
     "publicChatInBar": "Avalik vestlus alumisel ribal",
-    "publicChatInBarDesc": "Ühe puudutusega avalikku vestlusse ekraani alumiselt ribalt"
+    "publicChatInBarDesc": "Ühe puudutusega avalikku vestlusse ekraani alumiselt ribalt",
+    "notificationShowCount": "Näita numbrit kellal",
+    "notificationShowCountDesc": "Vaata, mitu teavitust on lugemata, mitte ainult helendust",
+    "messagesShowCount": "Näita numbrit Sõnumitel",
+    "messagesShowCountDesc": "Vaata, mitu sõnumit on lugemata, mitte ainult helendust",
+    "chatTextSize": "Vestluse teksti suurus"
   },
   "common": {
     "confirm": "Kinnita",
@@ -1353,7 +1360,8 @@
     "next": "Järgmine",
     "previous": "Eelmine",
     "redo": "Taasta",
-    "remove": "Eemalda"
+    "remove": "Eemalda",
+    "copy": "Kopeeri"
   },
   "tip": {
     "title": "Saada jootraha",
@@ -1660,7 +1668,8 @@
     "roomSettings": "Ruumi seaded",
     "messagePinned": "Sõnum kinnitatud",
     "messageUnpinned": "Sõnumi kinnitamine eemaldatud",
-    "online": "{{count}} võrgus"
+    "online": "{{count}} võrgus",
+    "onlineHint": "Selles vestluses on praegu {{count}} inimest"
   },
   "aiChat": {
     "title": "Assistent",
@@ -2338,7 +2347,11 @@
     "sending": "Saatmine",
     "retrySend": "Proovi uuesti",
     "discardSend": "Eemalda",
-    "notSent": "Saatmata"
+    "notSent": "Saatmata",
+    "unreadMarkerOne": "1 lugemata sõnum",
+    "unreadMarkerMany": "{{value}} lugemata sõnumit",
+    "jumpToUnread": "Mine esimese lugemata sõnumi juurde",
+    "jumpToLatest": "Mine viimase sõnumi juurde"
   },
   "music": {
     "listeningCount_one": "{{count}} kuulamine",
@@ -4064,7 +4077,8 @@
       "memberCount": "{{n}} liiget",
       "approvalNote": "Enne liitumist peab administraator sinu taotluse kinnitama."
     },
-    "bannedFromCommunity": "Sul on keelatud sellest kogukonnast lahkuda"
+    "bannedFromCommunity": "Sul on keelatud sellest kogukonnast lahkuda",
+    "newChat": {"channelRow":"Kanal · {{formattedCount}} liiget","groupRow":"Grupp · {{formattedCount}} liiget","newChannel":"Uus kanal","newGroup":"Uus grupp","channelName":"Kanali nimi","groupName":"Grupi nimi","description":"Millest see räägib? (valikuline)","whoCanJoin":"Kes saab liituda","public":"Avalik","publicDetail":"Igaüks saab selle leida ja liituda","inviteOnly":"Ainult kutsega","private":"Privaatne","privateDetail":"Inimesed liituvad sinu kutse või heakskiiduga","entry":"Sissepääs","free":"Tasuta","freeDetail":"Liitumine on tasuta","paid":"Makstud","paidDetail":"Üks makse žetoonides, otse sulle","price":"Hind žetoonides","channelNote":"Postitada saavad ainult sina ja sinu adminid. Liikmed loevad ja reageerivad.","createChannel":"Loo kanal","createGroup":"Loo grupp","message":"Uus sõnum","messageDetail":"Privaatne vestlus ühe inimesega","groupDetail":"Vestle paljude inimestega, avalikult või privaatselt","channelDetail":"Edasta jälgijatele, tasuta või tasu eest","title":"Alusta midagi"}
   },
   "prompt": {
     "seoTitle": "Kohandage oma voogu | Riftn",
@@ -12842,7 +12856,8 @@
     "shareKindCommunity": "Kogukond",
     "shareGroups": "Grupid",
     "shareKindChannel": "Kanal",
-    "reportMessage": "Teata sõnumist"
+    "reportMessage": "Teata sõnumist",
+    "attachAnything": "Lisa foto, video, heli või fail"
   },
   "credits": {
     "earningsWorth": "Väärtus {{amount}}",
@@ -20979,5 +20994,17 @@
     "addQuestion": "Lisa küsimus",
     "pointsLabel": "Punktid õige vastuse eest",
     "attachFailed": "Sinu postitus on üleval, kuid viktoriini ei õnnestunud lisada"
-  }
+  },
+  "ownKeys": {"working":"Töötab","invalid":"Tagasi lükatud, asenda see","noCredit":"Krediit otsas","disabled":"Riftni poolt välja lülitatud","failed":"Midagi läks valesti. Proovi uuesti.","savedNoCredit":"{{name}} võti salvestatud, kuid kontol on krediit otsas.","saved":"{{name}} võti salvestatud. {{name}} tööriistad kasutavad nüüd sinu kontot.","removed":"{{name}} võti eemaldatud.","title":"Sinu enda AI-võtmed","description":"Lisa AI-teenusepakkuja võti ja Creatori tööriistad töötavad selle asemel sinu kontol. Riftn nende tööde eest tasu ei võta. Võtmed krüpteeritakse ja neid ei näidata enam kunagi.","check":"Kontrolli","remove":"Eemalda","add":"Lisa võti","paste":"Kleebi oma {{name}} võti","save":"Salvesta","cancel":"Tühista","getKey":"Hangi {{name}} võti","showLess":"Näita ainult minu võtmeid","addAnother":"Lisa teine teenusepakkuja"},
+  "resetWallet": {"mismatch":"Salad ei sobi kokku","tooShort":"Parool peab olema vähemalt {{count}} tähemärki","breached":"See parool on esinenud andmelekkes. Vali teine","weak":"Vali tugevam parool (sega tähti, numbreid ja sümboleid)","failed":"Rahakotti ei õnnestunud lähtestada. Midagi ei liigutatud. Proovi uuesti.","twoFactor":"Konto liigutamiseks sisesta autentimisrakenduse kood.","funds":"Žetoonid, NFT-d ja muud saldod ei liigu. Need jäävad vanale aadressile. Kui saad vana rahakotti veel avada, saada need kõigepealt välja.","doneTitle":"Sinu konto on uues rahakotis","logOut":"Logi välja","intro":"Loob uue Riftni rahakoti ja liigutab sinna sinu kasutajanime, postitused, jälgijad ja sõnumid. Kasuta seda, kui su rahakott on kadunud või kellelgi teisel on selle võti. Vana rahakott lakkab sisselogimiseks töötamast.","password":"Uue rahakoti parool (min {{count}} märki)","confirm":"Kinnita salasõna","twoFactorPlaceholder":"Autentimiskood","ack":"Ma mõistan, et muudetud fondid jäävad vanasse varukojasse.","submit":"Lähtesta rahakott","title":"Lähtesta rahakott","rowDesc":"Kaotasid rahakoti või on kellelgi teisel selle võti? Liiguta oma konto uude rahakotti. Sinu kasutajanimi, postitused ja jälgijad tulevad kaasa."},
+  "twoFactor": {"turnOn":"Lülita sisse","wrongCode":"See kood ei sobi. Proovi uusimat oma rakenduses.","signingInAs":"Sisselogimine kui","signIn":"Logi sisse","trustDevice":"Ära küsi seda uuesti sellel seadmel 30 päeva jooksul","useBackupShort":"Kasuta varukoodi","useApp":"Kasuta minu autentikaatorirakendust","useAnotherShort":"Erinev konto","lostEverything":"Kaotasite telefoni ja varukoodid? Võtke ühendust tugiteenusega","turnedOff":"Kaksastmeline sisselogimine on välja lülitatud","introTitle":"Lisa teine lukus","linkTitle":"Ühenda oma autentikaatorirakendus","codesTitle":"Salvesta oma varukoodid","newCodesTitle":"Hangi uued varukoopia koodid","turnOff":"Lülita välja","backupCodes":"Varukoopia koodid"},
+  "chatTextSize": {"title":"Teksti suurus"},
+  "notes": {"replyTo":"Vasta {{name}}…"},
+  "chatBulk": {"toolbar":"Valitud vestlused","selected":"{{count}} valitud","cancel":"Tühista","read":"Märgi loetuks","unread":"Märgi lugemata","reply":"Vasta","delete":"Kustuta","replyHint":"Iga inimene saab selle tavalise sõnumina oma vestlusesse.","replyPlaceholder":"Kirjuta sõnum…","sendAll":"Saada {{count}}-le","partSent":"Saadetud {{ok}} vestlusesse {{total}}-st","notSent":"Saatmine ebaõnnestus. Proovi uuesti."},
+  "chatTabs": {"addToTab":"Lisa vahekaardile","newWith":"Uus vahekaart…","hide":"Peida vahekaart","edit":"Muuda vahekaarte","renameEdit":"Nimeta ümber ja muuda","addChats":"Lisa vestlusi","moveLeft":"Liiguta vasakule","moveRight":"Liiguta paremale","delete":"Kustuta vahekaart","new":"Uus vahekaart","editTab":"Muuda vahekaarti","create":"Loo vahekaart","emoji":"Vali emoji","namePlaceholder":"Vahekaardi nimi","noEmoji":"Emojita","sFriends":"Sõbrad","sWork":"Töö","sTrading":"Kauplemine","sCreators":"Loojad","sGaming":"Mängimine","chatsInTab":"Selle vahekaardi vestlused","picked":"{{n}} valitud","deleteTitle":"Kustutada „{{name}}”?","deleteBody":"Vahekaart kaob. Selle vestlused jäävad jaotisesse Kõik ja säilitavad oma sõnumid.","builtIn":"Sisseehitatud","chatCount":"{{n}} vestlust","moveUp":"Liiguta üles","moveDown":"Liiguta alla","alwaysOn":"Alati sisse","show":"Näita vahekaarti","emptyTitle":"{{name}} on tühi","emptyBody":"Lisa siia vestlusi ja need jäävad ka jaotisesse Kõik.","removedFrom":"Eemaldatud: {{name}}","addedTo":"Lisatud: {{name}}","kindPublic":"Avalik","kindChannel":"Kanal","kindGroup":"Grupeeri","kindCommunity":"Kogukond","kindDirect":"Direkt","tooMany":"Sul võib olla kuni 10 vahekaarti","deleted":"Kustutatud: {{name}}"},
+  "msgSelect": {"partForwarded":"Edastatud {{ok}} / {{total}}","nothingToCopy":"Valitud sõnumites pole midagi kopeerida","toolbar":"Valitud sõnumid","selected":"{{count}} valitud","copy":"Kopeeri","forward":"Edasta","deleteSome":"Kustuta {{count}}"},
+  "dmSafety": {"notReal":"See pole päris {{name}}.","neverLink":"Riftni meeskond ei saada sulle kunagi otsesõnumis linki profiili või rahakoti parandamiseks. Ära ava linke, ära ühenda rahakotti ega allkirjasta midagi. Blokeeri see konto ja teata sellest."},
+  "post": {"destruct":{"offBody":"Postitus jääb üles.","onBody":"Postitus kustutab end {{value1}} pärast avaldamist."}},
+  "dmPaidLock": {"lockOnUsd":"Lukustatud · {{price}}","lockVideo":"Lukusta video","lockPhoto":"Lukusta foto","lockCustom":"Muu","lockCustomUsdLabel":"Kohandatud hind dollarites","lockHint":"Nad näevad seda hägusana, kuni sulle maksavad. Lukustatud failid ei ole otspunktkrüpteeritud."},
+  "chatReactions": {"oneNamed":"{{name}} reageeris sinu sõnumile {{emoji}}","one":"Reageeris sinu sõnumile {{emoji}}"}
 }

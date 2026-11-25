@@ -85,6 +85,8 @@ export interface ProfileData {
   followingsList?: string[];
   /** Raw customs data from API */
   customs?: Record<string, unknown>;
+  defaultProfileView?: DeHubUser['defaultProfileView'];
+  profileViewOthers?: DeHubUser['profileViewOthers'];
   /** On-chain badge balance from API */
   badgeBalance?: number;
   /** The earned tier and balance requirement retained across ladder changes. */
@@ -173,6 +175,8 @@ export function mapUserToProfile(user: DeHubUser): ProfileData {
     followersList,
     followingsList,
     customs: Object.keys(mergedCustoms).length > 0 ? mergedCustoms : undefined,
+    defaultProfileView: user.defaultProfileView,
+    profileViewOthers: user.profileViewOthers,
     badgeBalance: user.badgeBalance || (user.balanceData?.reduce((sum, b) => sum + (b.walletBalance || 0) + (b.staked || 0), 0)) || 0,
     badgeLock: parseBadgeLock(user.badgeLock),
     dmSettings: user.dmSettings,

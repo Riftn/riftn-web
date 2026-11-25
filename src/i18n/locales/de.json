@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Video bearbeiten", "hiddenTag": "Ausgeblendet", "tapToEdit": "Zum Bearbeiten tippen", "cover": "Titelbild", "trim": "Zuschneiden", "mirror": "Spiegeln", "rotate": "Drehen", "hide": "Ausblenden", "timer": "Timer", "sheetTitleAny": "Vor dem Senden bearbeiten", "close": "Schließen", "replace": "Ersetzen", "hiddenUntilTap": "Versteckt, bis sie tippen", "pause": "Pause", "play": "Video abspielen", "mute": "Stummschalten", "unmute": "Stummschaltung aufheben", "scrub": "Durch das Video scrubbing", "addMore": "Fotos oder Videos hinzufügen", "trimAria": "Ziehe die Enden, um zuzuschneiden", "coverAria": "Tippe einen Frame, um das Titelbild festzulegen", "coverHint": "Tippe einen Frame, um das Titelbild festzulegen", "coverOwn": "Dein Bild", "coverAuto": "Auto", "uploadCover": "Titelbild hochladen", "mirrored": "Gespiegelt", "original": "Original", "rotate90": "90° drehen", "showNormally": "Normal anzeigen", "showNormallyBody": "Sie sehen es sofort", "hideUntilTap": "Ausblenden bis angetippt", "hideUntilTapBody": "Verschwommen, bis sie tippen", "hidePrice": "Hinter einem Preis ausblenden", "hidePriceBody": "Verschwommen, bis sie bezahlen", "priceUnavailable": "Nicht in diesem Chat", "timerOff": "Aus", "timerOffBody": "Es bleibt im Chat.", "timerViewBody": "Weg für euch beide, sobald sie es gesehen haben.", "confirm": "Bestätigen", "lockedFor": "Für {{value1}} Tokens freischalten", "lockedForUsd": "Entsperren für {{value1}}", "editItem": "Element bearbeiten {{value1}}", "kept": "{{time}} behalten", "timerTimeBody": "Weg für euch beide {{value1}}, nachdem du es gesendet hast."},
+  "dmVideo": {"edit": "Video bearbeiten", "hiddenTag": "Ausgeblendet", "tapToEdit": "Zum Bearbeiten tippen", "cover": "Titelbild", "trim": "Zuschneiden", "mirror": "Spiegeln", "rotate": "Drehen", "hide": "Ausblenden", "timer": "Timer", "sheetTitleAny": "Vor dem Senden bearbeiten", "close": "Schließen", "replace": "Ersetzen", "hiddenUntilTap": "Versteckt, bis sie tippen", "pause": "Pause", "play": "Video abspielen", "mute": "Stummschalten", "unmute": "Stummschaltung aufheben", "scrub": "Durch das Video scrubbing", "addMore": "Fotos oder Videos hinzufügen", "trimAria": "Ziehe die Enden, um zuzuschneiden", "coverAria": "Tippe einen Frame, um das Titelbild festzulegen", "coverHint": "Tippe einen Frame, um das Titelbild festzulegen", "coverOwn": "Dein Bild", "coverAuto": "Auto", "uploadCover": "Titelbild hochladen", "mirrored": "Gespiegelt", "original": "Original", "rotate90": "90° drehen", "showNormally": "Normal anzeigen", "showNormallyBody": "Sie sehen es sofort", "hideUntilTap": "Ausblenden bis angetippt", "hideUntilTapBody": "Verschwommen, bis sie tippen", "hidePrice": "Hinter einem Preis ausblenden", "hidePriceBody": "Verschwommen, bis sie bezahlen", "priceUnavailable": "Nicht in diesem Chat", "timerOff": "Aus", "timerOffBody": "Es bleibt im Chat.", "timerViewBody": "Weg für euch beide, sobald sie es gesehen haben.", "confirm": "Bestätigen", "lockedFor": "Für {{value1}} Tokens freischalten", "lockedForUsd": "Entsperren für {{value1}}", "editItem": "Element bearbeiten {{value1}}", "kept": "{{time}} behalten", "timerTimeBody": "Weg für euch beide {{value1}}, nachdem du es gesendet hast.", "destruct": {"60":"1 Min.","3600":"1 Stunde","43200":"12 Stunden","86400":"1 Tag","604800":"1 Woche","31536000":"1 Jahr","view":"1 Aufruf"}, "destructShort": {"view":"1 Aufruf"}, "destructSecs": "{{n}} Sek."},
   "postBg": {
     "addMedia": "Bild, GIF oder Video hinzufügen",
     "changeMedia": "Bild, GIF oder Video ändern",
@@ -658,7 +658,9 @@
       "discover": "Entdecken",
       "money": "Geld",
       "riftn": "Riftn"
-    }
+    },
+    "moveGroupHint": "Ziehe es auf einen anderen Tab, um es dorthin zu verschieben",
+    "reorderHintGroups": "Halte ein Symbol gedrückt und ziehe es, um die Anordnung zu ändern, oder ziehe es auf einen anderen Tab, um es zu verschieben"
   },
   "feed": {
     "viewProfile": "Profil von {{name}} anzeigen",
@@ -1315,7 +1317,12 @@
     "chatDeleteMeDesc": "Aus Ihrem Chat entfernt, andere sehen sie weiterhin",
     "chatDeleteEveryone": "Für alle löschen",
     "chatDeleteEveryoneDesc": "Wenn möglich. Nachrichten anderer in einer Gruppe werden nur für Sie entfernt",
-    "tipsOffNote": "Trinkgelder und Zahlungen an Sie sind deaktiviert, solange dies aktiv ist. Schalten Sie es aus, um wieder Trinkgeld zu erhalten."
+    "tipsOffNote": "Trinkgelder und Zahlungen an Sie sind deaktiviert, solange dies aktiv ist. Schalten Sie es aus, um wieder Trinkgeld zu erhalten.",
+    "notificationShowCount": "Anzahl an der Glocke anzeigen",
+    "notificationShowCountDesc": "Sieh, wie viele Benachrichtigungen ungelesen sind, statt nur das Leuchten",
+    "messagesShowCount": "Anzahl bei Nachrichten anzeigen",
+    "messagesShowCountDesc": "Sieh, wie viele Nachrichten ungelesen sind, statt nur das Leuchten",
+    "chatTextSize": "Chat-Textgröße"
   },
   "common": {
     "confirm": "Bestätigen",
@@ -1348,7 +1355,8 @@
     "next": "Nächste",
     "previous": "Vorherige",
     "redo": "Wiederholen",
-    "remove": "Entfernen"
+    "remove": "Entfernen",
+    "copy": "Kopieren"
   },
   "tip": {
     "title": "Trinkgeld senden",
@@ -1657,7 +1665,8 @@
     "roomSettings": "Raumeinstellungen",
     "messagePinned": "Nachricht angepinnt",
     "messageUnpinned": "Nachricht gelöst",
-    "online": "{{count}} online"
+    "online": "{{count}} online",
+    "onlineHint": "{{count}} Personen sind gerade in diesem Chat"
   },
   "aiChat": {
     "title": "KI-Assistent",
@@ -2336,7 +2345,11 @@
     "sending": "Wird gesendet",
     "notSent": "Nicht gesendet",
     "retrySend": "Erneut versuchen",
-    "discardSend": "Entfernen"
+    "discardSend": "Entfernen",
+    "unreadMarkerOne": "1 ungelesene Nachricht",
+    "unreadMarkerMany": "{{value}} ungelesene Nachrichten",
+    "jumpToUnread": "Zur ersten ungelesenen Nachricht",
+    "jumpToLatest": "Zur neuesten Nachricht"
   },
   "music": {
     "listeningCount_one": "{{count}} zuhören",
@@ -4054,7 +4067,8 @@
       "memberCount": "{{n}} -Mitglieder",
       "approvalNote": "Ein Administrator muss Ihre Anfrage genehmigen, bevor Sie beitreten können."
     },
-    "bannedFromCommunity": "Du bist aus dieser Community ausgeschlossen"
+    "bannedFromCommunity": "Du bist aus dieser Community ausgeschlossen",
+    "newChat": {"channelRow":"Kanal · {{formattedCount}} Mitglieder","groupRow":"Gruppe · {{formattedCount}} Mitglieder","newChannel":"Neuer Kanal","newGroup":"Neue Gruppe","channelName":"Kanalname","groupName":"Gruppenname","description":"Worum geht es? (optional)","whoCanJoin":"Wer beitreten kann","public":"Öffentlich","publicDetail":"Jeder kann sie finden und beitreten","inviteOnly":"Nur auf Einladung","private":"Privat","privateDetail":"Leute treten mit deiner Einladung oder Zustimmung bei","entry":"Eintritt","free":"Kostenlos","freeDetail":"Beitritt kostenlos","paid":"Bezahlt","paidDetail":"Eine Zahlung in Token, direkt an dich","price":"Preis in Token","channelNote":"Nur du und deine Admins können posten. Mitglieder lesen und reagieren.","createChannel":"Kanal erstellen","createGroup":"Gruppe erstellen","message":"Neue Nachricht","messageDetail":"Ein privater Chat mit einer Person","groupDetail":"Mit vielen Leuten chatten, öffentlich oder privat","channelDetail":"An Follower senden, kostenlos oder bezahlt","title":"Etwas starten"}
   },
   "prompt": {
     "seoTitle": "Deinen Feed anstoßen | Riftn",
@@ -12833,7 +12847,8 @@
     "shareKindGroup": "Gruppe",
     "shareKindChannel": "Kanal",
     "shareKindCommunity": "Community",
-    "reportMessage": "Nachricht melden"
+    "reportMessage": "Nachricht melden",
+    "attachAnything": "Foto, Video, Audio oder Datei anhängen"
   },
   "credits": {
     "earningsWorth": "Wert {{amount}}",
@@ -20987,5 +21002,17 @@
     "addQuestion": "Frage hinzufügen",
     "pointsLabel": "Punkte pro richtige Antwort",
     "attachFailed": "Dein Beitrag ist online, aber das Quiz konnte nicht hinzugefügt werden"
-  }
+  },
+  "ownKeys": {"working":"Wird verarbeitet","invalid":"Abgelehnt, ersetze ihn","noCredit":"Kein Guthaben mehr","disabled":"Von Riftn deaktiviert","failed":"Etwas ist schiefgelaufen. Versuchen Sie es erneut.","savedNoCredit":"{{name}}-Schlüssel gespeichert, aber das Konto hat kein Guthaben mehr.","saved":"{{name}}-Schlüssel gespeichert. Tools auf {{name}} nutzen jetzt dein Konto.","removed":"{{name}}-Schlüssel entfernt.","title":"Deine eigenen KI-Schlüssel","description":"Füge einen Schlüssel eines KI-Anbieters hinzu, und Creator-Tools laufen stattdessen über dein Konto. Riftn berechnet für diese Jobs nichts. Schlüssel werden verschlüsselt und nie wieder angezeigt.","check":"Überprüfen","remove":"Entfernen","add":"Schlüssel hinzufügen","paste":"Füge deinen {{name}}-Schlüssel ein","save":"Speichern","cancel":"Abbrechen","getKey":"{{name}}-Schlüssel holen","showLess":"Nur meine Schlüssel anzeigen","addAnother":"Weiteren Anbieter hinzufügen"},
+  "resetWallet": {"mismatch":"Passwörter stimmen nicht überein","tooShort":"Das Passwort muss mindestens {{count}} Zeichen lang sein","breached":"Dieses Passwort ist in einem Datenleck aufgetaucht. Wähle ein anderes","weak":"Wähle ein stärkeres Passwort (kombiniere Buchstaben, Zahlen und Symbole)","failed":"Deine Geldbörse konnte nicht zurückgesetzt werden. Es wurde nichts verschoben. Versuch es erneut.","twoFactor":"Gib den Code aus deiner Authenticator-App ein, um dein Konto zu verschieben.","funds":"Token, NFTs und andere Guthaben werden nicht verschoben. Sie bleiben an der alten Adresse. Falls du die alte Geldbörse noch öffnen kannst, sende sie zuerst heraus.","doneTitle":"Dein Konto ist auf seiner neuen Geldbörse","logOut":"Abmelden","intro":"Erstellt eine neue Riftn-Geldbörse und verschiebt deinen Nutzernamen, deine Beiträge, Follower und Nachrichten dorthin. Nutze das, wenn deine Geldbörse verloren ist oder jemand anderes ihren Schlüssel hat. Die alte Geldbörse funktioniert dann nicht mehr für die Anmeldung.","password":"Neues Geldbörsen-Passwort (mind. {{count}} Zeichen)","confirm":"Passwort bestätigen","twoFactorPlaceholder":"Authenticator-Code","ack":"Ich verstehe, dass meine alten Guthaben im alten Wallet bleiben.","submit":"Geldbörse zurücksetzen","title":"Geldbörse zurücksetzen","rowDesc":"Geldbörse verloren oder hat jemand anderes ihren Schlüssel? Verschiebe dein Konto auf eine neue Geldbörse. Dein Nutzername, deine Beiträge und Follower kommen mit."},
+  "twoFactor": {"turnOn":"Aktivieren","wrongCode":"Dieser Code passte nicht. Versuche den neuesten in deiner App.","signingInAs":"Anmelden als","signIn":"Anmelden","trustDevice":"Nicht erneut auf diesem Gerät für 30 Tage fragen","useBackupShort":"Backup-Code verwenden","useApp":"Meine Authenticator-App verwenden","useAnotherShort":"Anderes Konto","lostEverything":"Hast du dein Telefon und deine Backup-Codes verloren? Kontaktiere den Support","turnedOff":"Zwei-Schritt-Anmeldung ist deaktiviert","introTitle":"Eine zweite Sperre hinzufügen","linkTitle":"Verbinde deine Authenticator-App","codesTitle":"Speichere deine Backup-Codes","newCodesTitle":"Neue Backup‑Codes anfordern","turnOff":"Deaktivieren","backupCodes":"Backup‑Codes"},
+  "chatTextSize": {"title":"Textgröße"},
+  "notes": {"replyTo":"Antworte auf {{name}}…"},
+  "chatBulk": {"toolbar":"Ausgewählte Chats","selected":"{{count}} ausgewählt","cancel":"Abbrechen","read":"Als gelesen markieren","unread":"Als ungelesen markieren","reply":"Antworten","delete":"Löschen","replyHint":"Jede Person erhält dies als normale Nachricht in ihrem eigenen Chat.","replyPlaceholder":"Nachricht schreiben…","sendAll":"An {{count}} senden","partSent":"An {{ok}} von {{total}} Chats gesendet","notSent":"Senden fehlgeschlagen. Versuch es erneut."},
+  "chatTabs": {"addToTab":"Zu Tab hinzufügen","newWith":"Neuer Tab…","hide":"Tab ausblenden","edit":"Tabs bearbeiten","renameEdit":"Umbenennen und bearbeiten","addChats":"Chats hinzufügen","moveLeft":"Nach links","moveRight":"Nach rechts","delete":"Tab löschen","new":"Neuer Tab","editTab":"Tab bearbeiten","create":"Tab erstellen","emoji":"Emoji wählen","namePlaceholder":"Tab-Name","noEmoji":"Kein Emoji","sFriends":"Freunde","sWork":"Arbeit","sCreators":"Creator","chatsInTab":"Chats in diesem Tab","picked":"{{n}} gewählt","deleteTitle":"„{{name}}“ löschen?","deleteBody":"Der Tab verschwindet. Seine Chats bleiben in Alle und behalten ihre Nachrichten.","builtIn":"Eingebaut","chatCount":"{{n}} Chats","moveUp":"Nach oben","moveDown":"Nach unten","alwaysOn":"Immer an","show":"Tab anzeigen","emptyTitle":"{{name}} ist leer","emptyBody":"Füge hier Chats hinzu, sie bleiben auch in Alle.","removedFrom":"Aus {{name}} entfernt","addedTo":"Zu {{name}} hinzugefügt","kindPublic":"Öffentlich","kindChannel":"Kanal","kindGroup":"Gruppe","kindDirect":"Direkt","tooMany":"Du kannst bis zu 10 Tabs haben","deleted":"{{name}} gelöscht"},
+  "msgSelect": {"partForwarded":"{{ok}} von {{total}} weitergeleitet","nothingToCopy":"In den ausgewählten Nachrichten gibt es nichts zu kopieren","toolbar":"Ausgewählte Nachrichten","selected":"{{count}} ausgewählt","copy":"Kopieren","forward":"Weiterleiten","deleteSome":"{{count}} löschen"},
+  "dmSafety": {"notReal":"Das ist nicht der echte {{name}}.","neverLink":"Das Riftn-Team schickt dir nie per DM einen Link, um dein Profil oder deine Geldbörse zu reparieren. Öffne keine Links, verbinde nicht deine Geldbörse und signiere nichts. Blockiere und melde dieses Konto."},
+  "post": {"destruct":{"offBody":"Der Beitrag bleibt online.","onBody":"Der Beitrag löscht sich {{value1}} nach der Veröffentlichung selbst."}},
+  "dmPaidLock": {"lockOnUsd":"Gesperrt · {{price}}","lockVideo":"Video sperren","lockPhoto":"Foto sperren","lockCustom":"Sonstiges","lockCustomUsdLabel":"Eigener Preis in Dollar","lockHint":"Sie sehen es verschwommen, bis sie dich bezahlen. Gesperrte Dateien sind nicht Ende-zu-Ende-verschlüsselt."},
+  "chatReactions": {"oneNamed":"{{name}} hat mit {{emoji}} auf deine Nachricht reagiert","one":"Hat mit {{emoji}} auf deine Nachricht reagiert"}
 }

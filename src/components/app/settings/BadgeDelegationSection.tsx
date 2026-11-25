@@ -1,3 +1,4 @@
+import { useBadgeTierLabel } from '@/i18n/badge-tier-label';
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
 /**
  * Badge delegation — lending your tier to other accounts
@@ -46,11 +47,12 @@ function shortAddress(address: string): string {
 }
 
 function TierBadge({ tier }: { tier: string }) {
+  const tierLabel = useBadgeTierLabel();
   const src = badgeImage(tier);
   return (
     <span className="flex items-center gap-1.5">
       {src ? <img src={src} alt="" className="size-4 shrink-0" /> : null}
-      <span className="text-sm text-white">{tier}</span>
+      <span className="text-sm text-white">{tierLabel(tier)}</span>
     </span>
   );
 }
@@ -91,6 +93,7 @@ function DelegationRow({
 
 export function BadgeDelegationSection() {
   const { t } = useTranslation();
+  const tierLabel = useBadgeTierLabel();
   const { data, isLoading } = useBadgeDelegations();
   const grant = useGrantDelegation();
   const revoke = useRevokeDelegation();
@@ -163,10 +166,10 @@ export function BadgeDelegationSection() {
           <>
             {t('settings.badgeDelegationSlots', {
               count: data.slots,
-              tier: data.ownTier,
+              tier: tierLabel(data.ownTier ?? ''),
               free: slotsFree,
             })}{' '}
-            {t('settings.badgeDelegationLendsAny', { tier: data.grantableTier ?? data.ownTier })}{' '}
+            {t('settings.badgeDelegationLendsAny', { tier: tierLabel(data.grantableTier ?? data.ownTier ?? '') })}{' '}
             {t('settings.badgeDelegationRaisesOnlyTier')}{' '}
             {t('settings.badgeDelegationTakeBack')}
           </>
@@ -203,7 +206,7 @@ export function BadgeDelegationSection() {
                   }`}
                 >
                   {src ? <img src={src} alt="" className="size-4 shrink-0" /> : null}
-                  {name}
+                  {tierLabel(name)}
                 </button>
               );
             })}

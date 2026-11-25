@@ -6,7 +6,7 @@ import { ProfileContentToolbar } from './ProfileContentToolbar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { EMPTY_PROFILE_FILTERS } from '@/hooks/use-dehub-profile';
 import { ProfileTabContent } from './ProfileTabContent';
-import { clearProfileViewFlip, ProfileViewModeContext, useProfileViewState } from '@/lib/profile-view-mode';
+import { clearProfileViewFlip, parseProfileViewReaderPref, ProfileViewModeContext, startingProfileView, useProfileViewState } from '@/lib/profile-view-mode';
 import type { ComponentProps } from 'react';
 
 vi.mock('@/hooks/use-mobile', () => ({ useIsMobile: vi.fn() }));
@@ -17,6 +17,14 @@ vi.mock('./ProfileImageGrid', () => ({ ProfileImageGrid: () => <div data-testid=
 beforeEach(() => {
   localStorage.clear();
   sessionStorage.clear();
+});
+
+it('applies a saved default to other profiles unless the reader chose a different layout', () => {
+  const reader = parseProfileViewReaderPref(undefined, 'list');
+  expect(startingProfileView('grid', reader, false)).toBe('list');
+  expect(startingProfileView('list', reader, false)).toBe('list');
+  expect(startingProfileView('grid', parseProfileViewReaderPref('owner', 'list'), false)).toBe('grid');
+  expect(startingProfileView('grid', parseProfileViewReaderPref(undefined), false)).toBe('grid');
 });
 
 it('migrates a previous tab choice once without overwriting a newer choice', () => {
