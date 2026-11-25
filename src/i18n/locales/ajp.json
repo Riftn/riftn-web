@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "عدّل الفيديو", "hiddenTag": "مخفي", "tapToEdit": "اضغط للتعديل", "cover": "غلاف", "trim": "قص", "mirror": "مرآة", "rotate": "دور", "hide": "إخفاء", "timer": "مؤقت", "sheetTitleAny": "عدّل قبل الإرسال", "close": "إغلاق", "replace": "استبدال", "hiddenUntilTap": "مخفي لحد ما يضغطوا عليه", "pause": "إيقاف مؤقت", "play": "تشغيل الفيديو", "mute": "كتم الصوت", "unmute": "إلغاء كتم الصوت", "scrub": "تسحب الفيديو", "addMore": "ضيف صور أو فيديوهات", "trimAria": "اسحب الأطراف للقص", "coverAria": "إضغط على إطار لتعيينه كغلاف", "coverHint": "إضغط على إطار لتعيينه كغلاف", "coverOwn": "صورتك", "coverAuto": "تلقائي", "uploadCover": "حمّل صورة غلاف", "mirrored": "معكوس", "original": "أصلي", "rotate90": "دور 90°", "showNormally": "عرض طبيعي", "showNormallyBody": "بيشوفوه فوراً", "hideUntilTap": "إخفاء لحد ما يضغطوا", "hideUntilTapBody": "مضبّب لحد ما يضغطوا", "hidePrice": "إخفاء خلف سعر", "hidePriceBody": "مضبّب لحد ما يدفعوا", "priceUnavailable": "مش بهالدردشة", "timerOff": "إيقاف", "timerOffBody": "بتضل بالمحادثة.", "timerViewBody": "بتروح لكما بعد ما يشوفوها.", "confirm": "أكد", "lockedFor": "افتح القفل مقابل {{value1}} درهم", "lockedForUsd": "افتح لـ {{value1}}", "editItem": "عدّل العنصر {{value1}}", "kept": "تم الاحتفاظ بـ {{time}}", "timerTimeBody": "بتروح لكما {{value1}} بعد ما تبعتها."},
+  "dmVideo": {"edit": "عدّل الفيديو", "hiddenTag": "مخفي", "tapToEdit": "اضغط للتعديل", "cover": "غلاف", "trim": "قص", "mirror": "مرآة", "rotate": "دور", "hide": "إخفاء", "timer": "مؤقت", "sheetTitleAny": "عدّل قبل الإرسال", "close": "إغلاق", "replace": "استبدال", "hiddenUntilTap": "مخفي لحد ما يضغطوا عليه", "pause": "إيقاف مؤقت", "play": "تشغيل الفيديو", "mute": "كتم الصوت", "unmute": "إلغاء كتم الصوت", "scrub": "تسحب الفيديو", "addMore": "ضيف صور أو فيديوهات", "trimAria": "اسحب الأطراف للقص", "coverAria": "إضغط على إطار لتعيينه كغلاف", "coverHint": "إضغط على إطار لتعيينه كغلاف", "coverOwn": "صورتك", "coverAuto": "تلقائي", "uploadCover": "حمّل صورة غلاف", "mirrored": "معكوس", "original": "أصلي", "rotate90": "دور 90°", "showNormally": "عرض طبيعي", "showNormallyBody": "بيشوفوه فوراً", "hideUntilTap": "إخفاء لحد ما يضغطوا", "hideUntilTapBody": "مضبّب لحد ما يضغطوا", "hidePrice": "إخفاء خلف سعر", "hidePriceBody": "مضبّب لحد ما يدفعوا", "priceUnavailable": "مش بهالدردشة", "timerOff": "إيقاف", "timerOffBody": "بتضل بالمحادثة.", "timerViewBody": "بتروح لكما بعد ما يشوفوها.", "confirm": "أكد", "lockedFor": "افتح القفل مقابل {{value1}} درهم", "lockedForUsd": "افتح لـ {{value1}}", "editItem": "عدّل العنصر {{value1}}", "kept": "تم الاحتفاظ بـ {{time}}", "timerTimeBody": "بتروح لكما {{value1}} بعد ما تبعتها.", "destruct": {"60":"1 دقيقه","3600":"ساعه واحده","43200":"12 ساعه","86400":"يوم واحد","604800":"اسبوع واحد","31536000":"سنه واحده","view":"مشاهده واحده"}, "destructShort": {"view":"1 مشاهدة"}, "destructSecs": "{{n}} ثواني", "destructShortSecs": "{{n}} ث"},
   "postBg": {
     "addMedia": "أضف صورة أو GIF أو فيديو",
     "changeMedia": "غيّر الصورة أو GIF أو الفيديو",
@@ -664,7 +664,9 @@
       "riftn": "دي هاب",
       "main": "الرئيسي",
       "money": "المصاري"
-    }
+    },
+    "moveGroupHint": "اسحبها على تاب تانية عشان تنقلها لهناك",
+    "reorderHintGroups": "علّق واسحب أي أيقونة عشان تغيّر ترتيبها، أو حطها فوق تاب تانية عشان تنقلها"
   },
   "feed": {
     "viewProfile": "شوف بروفايل {{name}}",
@@ -1320,7 +1322,12 @@
     "menuLayoutSectionsDesc": "كل الصفحات مرة وحدة، تحت عناوين المجموعات",
     "menuLayoutFoldersDesc": "صفحاتك الرئيسية، وبعدين مجلد لكل مجموعة",
     "publicChatInBar": "الدردشة العامة بالشريط التحتاني",
-    "publicChatInBarDesc": "كبسة وحدة للدردشة العامة من الشريط اللي تحت الشاشة"
+    "publicChatInBarDesc": "كبسة وحدة للدردشة العامة من الشريط اللي تحت الشاشة",
+    "notificationShowCount": "اعرض الرقم على الجرس",
+    "notificationShowCountDesc": "شوف قديش في إشعارات مش مقروءة بدل الضو بس",
+    "messagesShowCount": "اعرض الرقم على الرسائل",
+    "messagesShowCountDesc": "شوف قديش في رسائل مش مقروءة بدل الضو بس",
+    "chatTextSize": "حجم نص الدردشة"
   },
   "common": {
     "confirm": "تأكيد",
@@ -1353,7 +1360,8 @@
     "next": "التالي",
     "previous": "السابق",
     "redo": "يعيد",
-    "remove": "يحذف"
+    "remove": "يحذف",
+    "copy": "انسخ"
   },
   "tip": {
     "title": "أرسل إكرامية",
@@ -1660,7 +1668,8 @@
     "roomSettings": "إعدادات الغرفة",
     "messagePinned": "الرسالة مثبتة",
     "messageUnpinned": "إلغاء تثبيت الرسالة",
-    "online": "{{count}} متصل"
+    "online": "{{count}} متصل",
+    "onlineHint": "{{count}} أشخاص بهالدردشة هلأ"
   },
   "aiChat": {
     "title": "المساعد",
@@ -2338,7 +2347,11 @@
     "sending": "جاري الإرسال",
     "retrySend": "جرّب كمان مرة",
     "discardSend": "احذف",
-    "notSent": "ما انبعتت"
+    "notSent": "ما انبعتت",
+    "unreadMarkerOne": "رسالة وحدة مش مقروءة",
+    "unreadMarkerMany": "{{value}} رسائل مش مقروءة",
+    "jumpToUnread": "روح لأول رسالة مش مقروءة",
+    "jumpToLatest": "روح لآخر رسالة"
   },
   "music": {
     "listeningCount_one": "{{count}} مستمعين",
@@ -4064,7 +4077,8 @@
       "memberCount": "{{n}} الأعضاء",
       "approvalNote": "يجب على أحد المسؤولين الموافقة على طلبك قبل أن تتمكن من الانضمام."
     },
-    "bannedFromCommunity": "تم حظرك من هذه المجموعة"
+    "bannedFromCommunity": "تم حظرك من هذه المجموعة",
+    "newChat": {"channelRow":"قناة · {{formattedCount}} عضو","groupRow":"مجموعة · {{formattedCount}} عضو","newChannel":"قناة جديدة","newGroup":"مجموعة جديدة","channelName":"اسم القناة","groupName":"اسم المجموعة","description":"عن شو هي؟ (اختياري)","whoCanJoin":"مين بيقدر ينضم","public":"عام","publicDetail":"أي حدا بيقدر يلاقيها وينضم","inviteOnly":"بالدعوة بس","private":"خاص","privateDetail":"الناس بينضموا بدعوتك أو بموافقتك","entry":"الدخول","free":"مجاناً","freeDetail":"الانضمام ببلاش","paid":"دفع","paidDetail":"دفعة وحدة بالتوكنز، مباشرة إلك","price":"السعر بالتوكنز","channelNote":"بس إنت والأدمنز تبعك بتقدروا تنشروا. الأعضاء بيقروا وبيتفاعلوا.","createChannel":"اعمل قناة","createGroup":"اعمل مجموعة","message":"رسالة جديدة","messageDetail":"دردشة خاصة مع شخص واحد","groupDetail":"دردشة مع ناس كتير، عامة أو خاصة","channelDetail":"بث للمتابعين، ببلاش أو مدفوع","title":"بلّش إشي"}
   },
   "prompt": {
     "seoTitle": "إيش حاب تشوف: Riftn",
@@ -12844,7 +12858,8 @@
     "shareKindCommunity": "المجتمع",
     "shareGroups": "مجموعات",
     "shareKindChannel": "قناة",
-    "reportMessage": "بلّغ عن الرسالة"
+    "reportMessage": "بلّغ عن الرسالة",
+    "attachAnything": "ارفق صورة أو فيديو أو صوت أو ملف"
   },
   "credits": {
     "earningsWorth": "القيمة {{amount}}",
@@ -20980,5 +20995,17 @@
     "addQuestion": "ضيف سؤال",
     "pointsLabel": "نقاط لكل جواب صح",
     "attachFailed": "منشورك نزل، بس الكويز ما قدرت أضيفه"
-  }
+  },
+  "ownKeys": {"working":"بعمل","invalid":"مرفوض، بدّله","noCredit":"خلص الرصيد","disabled":"مطفي من Riftn","failed":"حدث خطأ ما. حاول مرة أخرى.","savedNoCredit":"انحفظ مفتاح {{name}}، بس الحساب خلص رصيده.","saved":"انحفظ مفتاح {{name}}. أدوات {{name}} صارت تستخدم حسابك.","removed":"انشال مفتاح {{name}}.","title":"مفاتيح الذكاء الاصطناعي الخاصة فيك","description":"ضيف مفتاح من مزوّد ذكاء اصطناعي وأدوات المبدعين بتشتغل على حسابك بدالها. Riftn ما بياخد إشي على هالمهام. المفاتيح مشفّرة وما بتنعرض مرة تانية.","check":"تحقق","remove":"احذف","add":"ضيف مفتاح","paste":"الصق مفتاح {{name}} تبعك","save":"احفظ","cancel":"إلغاء","getKey":"جيب مفتاح {{name}}","showLess":"اعرض مفاتيحي بس","addAnother":"ضيف مزوّد تاني"},
+  "resetWallet": {"mismatch":"لا يتوافق كلمة المرور","tooShort":"كلمة السر لازم تكون {{count}} حروف على الأقل","breached":"كلمة السر هاي طلعت بتسريب بيانات. اختار غيرها","weak":"اختار كلمة سر أقوى (اخلط حروف وأرقام ورموز)","failed":"ما قدرنا نعيد ضبط محفظتك. ما انتقل إشي. جرّب كمان مرة.","twoFactor":"دخّل الرمز من تطبيق المصادقة لتنقل حسابك.","funds":"التوكنز والـ NFTs والأرصدة التانية ما بتنتقل. بتضل على العنوان القديم. إذا لسا بتقدر تفتح المحفظة القديمة، طلّعهم منها أول.","doneTitle":"حسابك صار على محفظته الجديدة","logOut":"تسجيل خروج","intro":"بيعمل محفظة Riftn جديدة وبينقل اسم المستخدم والمنشورات والمتابعين والرسائل لإلها. استخدم هاد إذا محفظتك ضاعت أو حدا تاني معه مفتاحها. المحفظة القديمة بتوقف تشتغل لتسجيل الدخول.","password":"كلمة سر المحفظة الجديدة (على الأقل {{count}} حروف)","confirm":"تأكيد كلمة المرور","twoFactorPlaceholder":"رمز المصادقة","ack":"أنا أفهم أن أموالي القديمة تبقى في الحقيبة القديمة.","submit":"إعادة ضبط المحفظة","title":"إعادة ضبط المحفظة","rowDesc":"ضيّعت محفظتك، أو حدا تاني معه مفتاحها؟ انقل حسابك لمحفظة جديدة. اسم المستخدم والمنشورات والمتابعين بيجوا معك."},
+  "twoFactor": {"turnOn":"فعّل","wrongCode":"الكود ما طابق. جرّب أحدث كود بتطبيقك.","signingInAs":"عم سجل الدخول كـ","signIn":"سجّل الدخول","trustDevice":"ما تسألني مرة تانية على هالجهاز لمدة ٣٠ يوم","useBackupShort":"استخدم كود احتياطي","useApp":"استخدم تطبيق المصادقة","useAnotherShort":"حساب مختلف","lostEverything":"ضايع موبايلك وكودات الاحتياطي؟ تواصل مع الدعم","turnedOff":"تسجيل الدخول بخطوتين مطفّئ","introTitle":"ضيف قفل تاني","linkTitle":"اربط تطبيق المصادقة تبعك","codesTitle":"احفظ كوداتك الاحتياطية","newCodesTitle":"احصل على أكواد احتياطية جديدة","turnOff":"اطفي","backupCodes":"كودات النسخ الاحتياطي"},
+  "chatTextSize": {"title":"حجم النص"},
+  "notes": {"replyTo":"رد على {{name}}…"},
+  "chatBulk": {"toolbar":"الدردشات المختارة","selected":"{{count}} محدد","cancel":"إلغاء","read":"علّم كمقروءة","unread":"علّم كمش مقروءة","reply":"رد","delete":"حذف","replyHint":"كل شخص بيوصله هاد كرسالة عادية بدردشته.","replyPlaceholder":"اكتب رسالة…","sendAll":"ابعت لـ {{count}}","partSent":"انبعت لـ {{ok}} من {{total}} دردشات","notSent":"ما قدرنا نبعت. جرّب كمان مرة."},
+  "chatTabs": {"addToTab":"ضيف للتبويب","newWith":"تبويب جديد…","hide":"خبّي التبويب","edit":"عدّل التبويبات","renameEdit":"غيّر الاسم وعدّل","addChats":"ضيف دردشات","moveLeft":"حرّك لليسار","moveRight":"حرّك لليمين","delete":"احذف التبويب","new":"تبويب جديد","editTab":"عدّل التبويب","create":"اعمل تبويب","emoji":"اختار إيموجي","namePlaceholder":"اسم التبويب","noEmoji":"بلا إيموجي","sFriends":"الأصحاب","sWork":"الشغل","sTrading":"التجارة","sCreators":"المبدعين","sGaming":"ألعاب","chatsInTab":"الدردشات بهالتبويب","picked":"{{n}} مختارين","deleteTitle":"بدك تحذف “{{name}}”؟","deleteBody":"التبويب بيروح. دردشاته بتضل بالكل وبتحتفظ برسائلها.","builtIn":"مدمج","chatCount":"{{n}} دردشات","moveUp":"تحرك لأعلى","moveDown":"تحرك لأسفل","alwaysOn":"دائما","show":"اعرض التبويب","emptyTitle":"{{name}} فاضي","emptyBody":"ضيف دردشات هون وبتضل بالكل كمان.","removedFrom":"انشال من {{name}}","addedTo":"انضاف لـ {{name}}","kindPublic":"عام","kindChannel":"قناة","kindGroup":"تجميع","kindCommunity":"المجتمع","kindDirect":"مباشر","tooMany":"فيك يكون عندك لحد 10 تبويبات","deleted":"انحذف {{name}}"},
+  "msgSelect": {"partForwarded":"انحوّل {{ok}} من {{total}}","nothingToCopy":"ما في إشي ينّسخ بالرسائل المختارة","toolbar":"الرسائل المختارة","selected":"{{count}} محدد","copy":"نسخ","forward":"إعادة توجيه","deleteSome":"احذف {{count}}"},
+  "dmSafety": {"notReal":"هاد مش {{name}} الحقيقي.","neverLink":"فريق Riftn أبداً ما رح يبعتلك رابط برسالة خاصة لتصلّح بروفايلك أو محفظتك. لا تفتح روابط، لا تربط محفظتك ولا توقّع على إشي. احظر هالحساب وبلّغ عنه."},
+  "post": {"destruct":{"offBody":"المنشور بيضل موجود.","onBody":"المنشور بيحذف حاله بعد {{value1}} من ما ينّشر."}},
+  "dmPaidLock": {"lockOnUsd":"مقفول · {{price}}","lockVideo":"اقفل الفيديو","lockPhoto":"اقفل الصورة","lockCustom":"تاني","lockCustomUsdLabel":"سعر مخصص بالدولار","lockHint":"بيشوفوه مغبّش لحد ما يدفعولك. الملفات المقفولة مش مشفّرة من طرف لطرف."},
+  "chatReactions": {"oneNamed":"{{name}} تفاعل بـ {{emoji}} على رسالتك","one":"تفاعل بـ {{emoji}} على رسالتك"}
 }

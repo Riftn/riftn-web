@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "動画を編集", "hiddenTag": "非表示", "tapToEdit": "タップして編集", "cover": "カバー", "trim": "トリミング", "mirror": "ミラー", "rotate": "回転", "hide": "非表示", "timer": "タイマー", "sheetTitleAny": "送信前に編集", "close": "閉じる", "replace": "置き換え", "hiddenUntilTap": "タップされるまで非表示", "pause": "一時停止", "play": "動画を再生", "mute": "ミュート", "unmute": "ミュート解除", "scrub": "動画をスクラブ", "addMore": "写真または動画を追加", "trimAria": "端をドラッグしてトリミング", "coverAria": "フレームをタップしてカバーに設定", "coverHint": "フレームをタップしてカバーに設定", "coverOwn": "あなたの写真", "coverAuto": "自動", "uploadCover": "カバー写真をアップロード", "mirrored": "ミラー", "original": "オリジナル", "rotate90": "90°回転", "showNormally": "通常表示", "showNormallyBody": "すぐに表示", "hideUntilTap": "タップされるまで非表示", "hideUntilTapBody": "タップされるまでぼかし", "hidePrice": "価格の裏に隠す", "hidePriceBody": "支払われるまでぼかし", "priceUnavailable": "このチャットにはありません", "timerOff": "オフ", "timerOffBody": "チャットに残ります。", "timerViewBody": "行方不明になった二人とも、それを見た後には。", "confirm": "確認", "lockedFor": "{{value1}} DHBでロック解除", "lockedForUsd": "{{value1}}のためにロックを解除", "editItem": "アイテム {{value1}} を編集", "kept": "{{time}} を保持", "timerTimeBody": "あなたたちが送った後、二人とも {{value1}} になるよ。"},
+  "dmVideo": {"edit": "動画を編集", "hiddenTag": "非表示", "tapToEdit": "タップして編集", "cover": "カバー", "trim": "トリミング", "mirror": "ミラー", "rotate": "回転", "hide": "非表示", "timer": "タイマー", "sheetTitleAny": "送信前に編集", "close": "閉じる", "replace": "置き換え", "hiddenUntilTap": "タップされるまで非表示", "pause": "一時停止", "play": "動画を再生", "mute": "ミュート", "unmute": "ミュート解除", "scrub": "動画をスクラブ", "addMore": "写真または動画を追加", "trimAria": "端をドラッグしてトリミング", "coverAria": "フレームをタップしてカバーに設定", "coverHint": "フレームをタップしてカバーに設定", "coverOwn": "あなたの写真", "coverAuto": "自動", "uploadCover": "カバー写真をアップロード", "mirrored": "ミラー", "original": "オリジナル", "rotate90": "90°回転", "showNormally": "通常表示", "showNormallyBody": "すぐに表示", "hideUntilTap": "タップされるまで非表示", "hideUntilTapBody": "タップされるまでぼかし", "hidePrice": "価格の裏に隠す", "hidePriceBody": "支払われるまでぼかし", "priceUnavailable": "このチャットにはありません", "timerOff": "オフ", "timerOffBody": "チャットに残ります。", "timerViewBody": "行方不明になった二人とも、それを見た後には。", "confirm": "確認", "lockedFor": "{{value1}} DHBでロック解除", "lockedForUsd": "{{value1}}のためにロックを解除", "editItem": "アイテム {{value1}} を編集", "kept": "{{time}} を保持", "timerTimeBody": "あなたたちが送った後、二人とも {{value1}} になるよ。", "destruct": {"60":"1分","3600":"1時間","43200":"12時間","86400":"1日","604800":"1週間","31536000":"1年","view":"1回視聴"}, "destructShort": {"view":"1回視聴"}, "destructSecs": "{{n}}秒", "destructShortSecs": "{{n}}秒"},
   "postBg": {
     "addMedia": "画像・GIF・動画を追加",
     "changeMedia": "画像・GIF・動画を変更",
@@ -664,7 +664,9 @@
       "discover": "見つける",
       "money": "お金",
       "riftn": "Riftn"
-    }
+    },
+    "moveGroupHint": "別のタブにドロップして移動します",
+    "reorderHintGroups": "アイコンを長押ししてドラッグすると並べ替えができます。別のタブにドラッグすると移動できます。"
   },
   "feed": {
     "viewProfile": "{{name}}のプロフィールを表示",
@@ -1321,7 +1323,12 @@
     "chatDeleteMeDesc": "自分のチャットからは消えますが、他の人には表示されたままです",
     "chatDeleteEveryone": "全員から削除",
     "chatDeleteEveryoneDesc": "可能な場合のみ。グループ内の他の人のメッセージは自分のチャットからのみ削除されます",
-    "ensSection": "ENS"
+    "ensSection": "ENS",
+    "notificationShowCount": "ベルに数字を表示",
+    "notificationShowCountDesc": "通知の光だけでなく、未読数を確認できるようにします",
+    "messagesShowCount": "メッセージに数字を表示",
+    "messagesShowCountDesc": "通知の光だけでなく、未読メッセージ数を確認できるようにします",
+    "chatTextSize": "チャットの文字サイズ"
   },
   "common": {
     "confirm": "確認",
@@ -1354,7 +1361,8 @@
     "next": "次へ",
     "previous": "前へ",
     "redo": "やり直し",
-    "remove": "削除"
+    "remove": "削除",
+    "copy": "コピー"
   },
   "tip": {
     "title": "チップを送る",
@@ -1661,7 +1669,8 @@
     "roomSettings": "ルーム設定",
     "messagePinned": "メッセージをピン留めしました",
     "messageUnpinned": "ピン留めを解除しました",
-    "online": "{{count}}人オンライン"
+    "online": "{{count}}人オンライン",
+    "onlineHint": "今このチャットに{{count}}人います"
   },
   "aiChat": {
     "title": "アシスタント",
@@ -2339,7 +2348,11 @@
     "sending": "送信中",
     "retrySend": "再試行",
     "discardSend": "削除",
-    "notSent": "未送信"
+    "notSent": "未送信",
+    "unreadMarkerOne": "未読メッセージ 1件",
+    "unreadMarkerMany": "未読メッセージ {{value}}件",
+    "jumpToUnread": "最初の未読メッセージへ移動",
+    "jumpToLatest": "最新のメッセージへ移動"
   },
   "music": {
     "listeningCount_one": "{{count}}リスニング",
@@ -4067,7 +4080,8 @@
       "memberCount": "{{n}}人のメンバー",
       "approvalNote": "参加するには、管理者がリクエストを承認する必要があります。"
     },
-    "bannedFromCommunity": "このコミュニティからのアクセスが禁止されています"
+    "bannedFromCommunity": "このコミュニティからのアクセスが禁止されています",
+    "newChat": {"channelRow":"チャンネル · {{formattedCount}} メンバー","groupRow":"グループ · {{formattedCount}} メンバー","newChannel":"新しいチャンネル","newGroup":"新しいグループ","channelName":"チャンネル名","groupName":"グループ名","description":"何についてか (任意)","whoCanJoin":"誰が参加できるか","public":"公開","publicDetail":"誰でも見つけて参加できる","inviteOnly":"招待のみ","private":"非公開","privateDetail":"招待または承認で参加できる","entry":"エントリー","free":"無料","freeDetail":"参加に料金はかからない","paid":"支払い済み","paidDetail":"1回のトークン支払い、直接あなたに","price":"トークンでの価格","channelNote":"あなたとあなたの管理者だけが投稿できる。メンバーは読み、リアクションする。","createChannel":"チャンネルを作成","createGroup":"グループを作成","message":"新規メッセージ","messageDetail":"1対1のプライベートチャット","groupDetail":"複数人でのチャット（公開または非公開）","channelDetail":"フォロワーへの配信（無料または有料）","title":"何かを始める"}
   },
   "prompt": {
     "seoTitle": "フィードをプロンプト | Riftn",
@@ -12845,7 +12859,8 @@
     "shareKindGroup": "グループ",
     "shareKindChannel": "チャンネル",
     "shareKindCommunity": "コミュニティ",
-    "reportMessage": "メッセージを報告"
+    "reportMessage": "メッセージを報告",
+    "attachAnything": "写真、動画、音声、またはファイルを添付"
   },
   "credits": {
     "earningsWorth": "価値{{amount}}",
@@ -20977,5 +20992,17 @@
     "addQuestion": "質問を追加",
     "pointsLabel": "正解ごとのポイント",
     "attachFailed": "投稿は完了しましたが、クイズを追加できませんでした"
-  }
+  },
+  "ownKeys": {"working":"処理中","invalid":"キーが拒否されました、置き換えます","noCredit":"クレジットが不足しています","disabled":"Riftnによって無効化されました","failed":"エラーが発生しました。もう一度お試しください。","savedNoCredit":"{{name}}キーが保存されましたが、アカウントのクレジットが不足しています。","saved":"{{name}}キーが保存されました。ツールは{{name}}であなたのアカウントを使用します。","removed":"{{name}}キーが削除されました。","title":"自分のAIキー","description":"AIプロバイダーからキーを追加し、ツールはあなたのアカウントで実行されます。Riftnはこれらの仕事には料金を請求しません。キーは暗号化され、再び表示されません。","check":"チェック","remove":"削除","add":"キーを追加","paste":"{{name}}キーを貼り付け","save":"保存","cancel":"キャンセル","getKey":"{{name}}キーを取得","showLess":"自分のキーのみを表示","addAnother":"別のプロバイダーを追加"},
+  "resetWallet": {"mismatch":"パスワードが一致しません","tooShort":"パスワードは{{count}}文字以上でなければなりません","breached":"このパスワードはデータ侵害で流出した可能性があります。別のパスワードを選択してください。","weak":"強いパスワードを選びましょう（大文字・小文字・数字・記号を混ぜて）","failed":"ウォレットをリセットできませんでした。何も移動されていません。もう一度やり直してください。","twoFactor":"認証アプリのコードを入力して、アカウントを移行してください。","funds":"トークン、NFT、その他の残高は移動しません。それらは古いアドレスに残ったままになります。もし古いウォレットをまだ開けるのであれば、先にそれらを送金してください。","doneTitle":"あなたのアカウントは新しいウォレットに移行されました","logOut":"ログアウト","intro":"新しいRiftnウォレットを作成し、ユーザー名、投稿、フォロワー、メッセージをそこに移行します。ウォレットを紛失した場合や、他人にキーを知られた場合に使用してください。古いウォレットではサインインできなくなります。","password":"新しいウォレットのパスワード（最低{{count}}文字）","confirm":"パスワードを確認してください。","twoFactorPlaceholder":"認証コード","ack":"私は古い資金が古い財布に残っていることを理解しています。","submit":"ウォレットをリセット","title":"ウォレットをリセット","rowDesc":"財布を失ったり、誰かが鍵を持っている場合は、新しい財布にアカウントを移してください。ユーザー名、投稿、フォロワーはすべて一緒に移動します。"},
+  "twoFactor": {"turnOn":"オンにする","wrongCode":"そのコードは一致しませんでした。アプリで最新のものを試してください。","signingInAs":"サインイン中","signIn":"サインイン","trustDevice":"このデバイスで30日間再度確認しない","useBackupShort":"バックアップコードを使用","useApp":"認証アプリを使用","useAnotherShort":"別のアカウント","lostEverything":"電話とバックアップコードを紛失しましたか？サポートに連絡","turnedOff":"二段階サインインはオフ","introTitle":"第二のロックを追加","linkTitle":"認証アプリをリンク","codesTitle":"バックアップコードを保存","newCodesTitle":"新しいバックアップコードを取得","turnOff":"無効にする","backupCodes":"バックアップコード"},
+  "chatTextSize": {"title":"文字サイズ"},
+  "notes": {"replyTo":"{{name}}…への返信です。"},
+  "chatBulk": {"toolbar":"選択されたチャット","selected":"{{count}}が選択されました","cancel":"キャンセル","read":"既読にする","unread":"未読にする","reply":"返信","delete":"削除","replyHint":"各相手には、それぞれのチャットで通常のメッセージとして届きます。","replyPlaceholder":"メッセージを入力…","sendAll":"{{count}}に送信","partSent":"{{total}}件中{{ok}}件のチャットに送信しました","notSent":"送信できませんでした。もう一度試してください。"},
+  "chatTabs": {"addToTab":"タブに追加","newWith":"新しいタブ…","hide":"タブを非表示","edit":"タブを編集","renameEdit":"名前の変更と編集","addChats":"チャットを追加","moveLeft":"左へ移動","moveRight":"右へ移動","delete":"タブを削除","new":"新しいタブ","editTab":"タブを編集","create":"タブを作成","emoji":"絵文字を選択","namePlaceholder":"タブ名","noEmoji":"絵文字なし","sFriends":"友だち","sWork":"仕事","sTrading":"トレード","sCreators":"クリエイター","sGaming":"ゲーム","chatsInTab":"このタブのチャット","picked":"{{n}} 件選択","deleteTitle":"「{{name}}」を削除しますか？","deleteBody":"タブは削除されます。チャットはメッセージごと「すべて」に残ります。","builtIn":"標準","chatCount":"{{n}} 件のチャット","moveUp":"上へ移動","moveDown":"下へ移動","alwaysOn":"常に表示","show":"タブを表示","emptyTitle":"{{name}} は空です","emptyBody":"ここにチャットを追加しても「すべて」に残ります。","removedFrom":"{{name}} から削除しました","addedTo":"{{name}} に追加しました","kindPublic":"公開","kindChannel":"チャンネル","kindGroup":"グループ","kindCommunity":"コミュニティ","kindDirect":"ダイレクト","tooMany":"タブは最大 10 個までです","deleted":"{{name}} を削除しました"},
+  "msgSelect": {"partForwarded":"{{total}}件中{{ok}}件を転送しました","nothingToCopy":"選択したメッセージ内にコピーできるものはありません","toolbar":"選択されたメッセージ","selected":"{{count}}が選択されました","copy":"コピー","forward":"転送","deleteSome":"{{count}}を削除"},
+  "dmSafety": {"notReal":"これは本物の{{name}}ではありません。","neverLink":"Riftnチームが、プロフィールやウォレットを修正するためのリンクをDMで送ることは絶対にありません。リンクを開いたり、ウォレットを接続したり、何かに署名したりしないでください。このアカウントをブロックして報告してください。"},
+  "post": {"destruct":{"offBody":"投稿はそのまま残します。","onBody":"この投稿は公開後 {{value1}} で自動的に削除されます。"}},
+  "dmPaidLock": {"lockOnUsd":"ロック済み · {{price}}","lockVideo":"動画をロック","lockPhoto":"写真をロック","lockCustom":"その他","lockCustomUsdLabel":"カスタム価格（ドル）","lockHint":"彼らはあなたが支払いをするまで、それがぼやけて見える。ロックされたファイルはエンドツーエンドで暗号化されていない。"},
+  "chatReactions": {"oneNamed":"{{name}}があなたのメッセージに{{emoji}}でリアクションしました","one":"あなたのメッセージに{{emoji}}でリアクションしました"}
 }

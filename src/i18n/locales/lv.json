@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Rediģēt video", "hiddenTag": "Paslēpts", "tapToEdit": "Pieskarieties, lai rediģētu", "cover": "Vāks", "trim": "Apgriezt", "mirror": "Spogulis", "rotate": "Pagriezt", "hide": "Paslēpt", "timer": "Taimeris", "sheetTitleAny": "Rediģēt pirms nosūtīšanas", "close": "Aizvērt", "replace": "Aizstāt", "hiddenUntilTap": "Paslēpts, līdz uz tā uzspiež", "pause": "Pauze", "play": "Atskaņot video", "mute": "Izslēgt skaņu", "unmute": "Ieslēgt skaņu", "scrub": "Pārvietoties pa video", "addMore": "Pievienot fotoattēlus vai video", "trimAria": "Velc galus, lai apgrieztu", "coverAria": "Uzspied uz kadra, lai iestatītu vāku", "coverHint": "Uzspied uz kadra, lai iestatītu vāku", "coverOwn": "Jūsu attēls", "coverAuto": "Automātiski", "uploadCover": "Augšupielādēt vāka attēlu", "mirrored": "Spoguļattēls", "original": "Oriģināls", "rotate90": "Pagriezt par 90°", "showNormally": "Rādīt parasti", "showNormallyBody": "Viņi to redz uzreiz", "hideUntilTap": "Paslēpt, līdz uzspiež", "hideUntilTapBody": "Aizmiglots, līdz uz tā uzspiež", "hidePrice": "Paslēpt aiz cenas", "hidePriceBody": "Aizmiglots, līdz samaksā", "priceUnavailable": "Nav šajā čatā", "timerOff": "Izslēgts", "timerOffBody": "Tas paliek čatā.", "timerViewBody": "Pazūd abiem, tiklīdz viņi to ir redzējuši.", "confirm": "Apstiprināt", "lockedFor": "Atbloķēt par {{value1}} žetoni", "lockedForUsd": "Atbloķēt par {{value1}}", "editItem": "Rediģēt vienumu {{value1}}", "kept": "{{time}} paturēts", "timerTimeBody": "Pazūd abiem {{value1}} pēc tam, kad to nosūtīji."},
+  "dmVideo": {"edit": "Rediģēt video", "hiddenTag": "Paslēpts", "tapToEdit": "Pieskarieties, lai rediģētu", "cover": "Vāks", "trim": "Apgriezt", "mirror": "Spogulis", "rotate": "Pagriezt", "hide": "Paslēpt", "timer": "Taimeris", "sheetTitleAny": "Rediģēt pirms nosūtīšanas", "close": "Aizvērt", "replace": "Aizstāt", "hiddenUntilTap": "Paslēpts, līdz uz tā uzspiež", "pause": "Pauze", "play": "Atskaņot video", "mute": "Izslēgt skaņu", "unmute": "Ieslēgt skaņu", "scrub": "Pārvietoties pa video", "addMore": "Pievienot fotoattēlus vai video", "trimAria": "Velc galus, lai apgrieztu", "coverAria": "Uzspied uz kadra, lai iestatītu vāku", "coverHint": "Uzspied uz kadra, lai iestatītu vāku", "coverOwn": "Jūsu attēls", "coverAuto": "Automātiski", "uploadCover": "Augšupielādēt vāka attēlu", "mirrored": "Spoguļattēls", "original": "Oriģināls", "rotate90": "Pagriezt par 90°", "showNormally": "Rādīt parasti", "showNormallyBody": "Viņi to redz uzreiz", "hideUntilTap": "Paslēpt, līdz uzspiež", "hideUntilTapBody": "Aizmiglots, līdz uz tā uzspiež", "hidePrice": "Paslēpt aiz cenas", "hidePriceBody": "Aizmiglots, līdz samaksā", "priceUnavailable": "Nav šajā čatā", "timerOff": "Izslēgts", "timerOffBody": "Tas paliek čatā.", "timerViewBody": "Pazūd abiem, tiklīdz viņi to ir redzējuši.", "confirm": "Apstiprināt", "lockedFor": "Atbloķēt par {{value1}} žetoni", "lockedForUsd": "Atbloķēt par {{value1}}", "editItem": "Rediģēt vienumu {{value1}}", "kept": "{{time}} paturēts", "timerTimeBody": "Pazūd abiem {{value1}} pēc tam, kad to nosūtīji.", "destruct": {"3600":"1 stunda","43200":"12 stundas","86400":"1 diena","604800":"1 nedēļa","31536000":"1 gads","view":"1 skatījums"}, "destructShort": {"view":"1 skatījums"}, "destructSecs": "{{n}} sek"},
   "postBg": {
     "addMedia": "Pievienot attēlu, GIF vai video",
     "changeMedia": "Mainīt attēlu, GIF vai video",
@@ -664,7 +664,9 @@
       "main": "Galvenais",
       "money": "Nauda",
       "riftn": "Riftn"
-    }
+    },
+    "moveGroupHint": "Pārvilkt uz citu cilni, lai to pārvietotu turp",
+    "reorderHintGroups": "Turiet un velciet jebkuru ikonu, lai mainītu tās novietojumu, vai uzvelciet to uz citas cilnes, lai pārvietotu"
   },
   "feed": {
     "viewProfile": "Skatīt lietotāja {{name}} profilu",
@@ -1320,7 +1322,12 @@
     "menuLayoutSectionsDesc": "Visas lapas uzreiz, zem grupu virsrakstiem",
     "menuLayoutFoldersDesc": "Jūsu galvenās lapas, pēc tam mape katrai grupai",
     "publicChatInBar": "Publiskā tērzēšana apakšējā joslā",
-    "publicChatInBarDesc": "Viens pieskāriens līdz Publiskajai tērzēšanai no joslas ekrāna apakšā"
+    "publicChatInBarDesc": "Viens pieskāriens līdz Publiskajai tērzēšanai no joslas ekrāna apakšā",
+    "notificationShowCount": "Rādīt skaitu uz zvaniņa",
+    "notificationShowCountDesc": "Redzēt, cik paziņojumu ir nelasīti, nevis tikai spīdumu",
+    "messagesShowCount": "Rādīt skaitu pie Ziņām",
+    "messagesShowCountDesc": "Redzēt, cik ziņu ir nelasītas, nevis tikai spīdumu",
+    "chatTextSize": "Tērzēšanas teksta lielums"
   },
   "common": {
     "confirm": "Apstiprināt",
@@ -1353,7 +1360,8 @@
     "next": "Tālāk",
     "previous": "Atpakaļ",
     "redo": "Atcelt atsaukšanu",
-    "remove": "Noņemt"
+    "remove": "Noņemt",
+    "copy": "Kopēt"
   },
   "tip": {
     "title": "Sūtīt dzeramnaudu",
@@ -1660,7 +1668,8 @@
     "roomSettings": "Istabas iestatījumi",
     "messagePinned": "Ziņojums piesprausts",
     "messageUnpinned": "Ziņojuma piespraušana noņemta",
-    "online": "{{count}} tiešsaistē"
+    "online": "{{count}} tiešsaistē",
+    "onlineHint": "{{count}} cilvēki šobrīd ir šajā tērzēšanā"
   },
   "aiChat": {
     "title": "Asistents",
@@ -2338,7 +2347,11 @@
     "sending": "Sūta",
     "retrySend": "Mēģināt vēlreiz",
     "discardSend": "Noņemt",
-    "notSent": "Nav nosūtīts"
+    "notSent": "Nav nosūtīts",
+    "unreadMarkerOne": "1 nelasīta ziņa",
+    "unreadMarkerMany": "{{value}} nelasītas ziņas",
+    "jumpToUnread": "Pāriet uz pirmo nelasīto ziņu",
+    "jumpToLatest": "Pāriet uz jaunāko ziņu"
   },
   "music": {
     "listeningCount_one": "{{count}} klausīšanās",
@@ -4064,7 +4077,8 @@
       "memberCount": "{{n}} dalībnieki",
       "approvalNote": "Administratoram ir jāapstiprina jūsu pieprasījums, lai jūs varētu pievienoties."
     },
-    "bannedFromCommunity": "Jums ir liegta dalība šajā kopienā"
+    "bannedFromCommunity": "Jums ir liegta dalība šajā kopienā",
+    "newChat": {"channelRow":"Kanāls · {{formattedCount}} dalībnieki","groupRow":"Grupa · {{formattedCount}} dalībnieki","newChannel":"Jauns kanāls","newGroup":"Jauna grupa","channelName":"Kanāla nosaukums","groupName":"Grupas nosaukums","description":"Par ko tā ir? (neobligāti)","whoCanJoin":"Kas var pievienoties","public":"Publisks","publicDetail":"Ikviens var to atrast un pievienoties","inviteOnly":"Tikai ar uzaicinājumu","private":"Privāts","privateDetail":"Cilvēki pievienojas ar jūsu uzaicinājumu vai apstiprinājumu","entry":"Ieeja","free":"Bezmaksas","freeDetail":"Pievienoties bez maksas","paid":"Apmaksāts","paidDetail":"Viens maksājums žetonos, tieši jums","price":"Cena žetonos","channelNote":"Publicēt var tikai jūs un jūsu administratori. Dalībnieki lasa un reaģē.","createChannel":"Izveidot kanālu","createGroup":"Izveidot grupu","message":"Jauna ziņa","messageDetail":"Privāta tērzēšana ar vienu cilvēku","groupDetail":"Tērzējiet ar daudziem cilvēkiem, publiski vai privāti","channelDetail":"Pārraidiet sekotājiem, bez maksas vai par maksu","title":"Sāciet kaut ko"}
   },
   "prompt": {
     "seoTitle": "Virziet savu plūsmu | Riftn",
@@ -12842,7 +12856,8 @@
     "shareKindCommunity": "Kopiena",
     "shareGroups": "Grupas",
     "shareKindChannel": "Kanāls",
-    "reportMessage": "Ziņot par ziņu"
+    "reportMessage": "Ziņot par ziņu",
+    "attachAnything": "Pievienot foto, video, audio vai failu"
   },
   "credits": {
     "earningsWorth": "Vērts {{amount}}",
@@ -20880,5 +20895,17 @@
     "promptCatchUp": "Pastāsti, ko {{handle}} nesen publicējis",
     "promptMessage": "Palīdzi man uzrakstīt ziņu {{handle}}",
     "promptAbout": "Par {{handle}}: {{question}}"
-  }
+  },
+  "ownKeys": {"working":"Darbojas","invalid":"Noraidīta, nomainiet to","noCredit":"Beidzies kredīts","disabled":"Izslēgta no Riftn puses","failed":"Radās kļūda. Mēģiniet vēlreiz.","savedNoCredit":"{{name}} atslēga saglabāta, bet kontā beidzies kredīts.","saved":"{{name}} atslēga saglabāta. {{name}} rīki tagad izmanto jūsu kontu.","removed":"{{name}} atslēga noņemta.","title":"Jūsu pašu AI atslēgas","description":"Pievienojiet atslēgu no AI pakalpojumu sniedzēja, un Creator rīki darbosies jūsu kontā. Riftn par šiem darbiem neiekasē maksu. Atslēgas ir šifrētas un vairs netiek rādītas.","check":"Pārbaudīt","remove":"Noņemt","add":"Pievienot atslēgu","paste":"Ielīmējiet savu {{name}} atslēgu","save":"Saglabāt","cancel":"Atcelt","getKey":"Iegūt {{name}} atslēgu","showLess":"Rādīt tikai manas atslēgas","addAnother":"Pievienot citu pakalpojumu sniedzēju"},
+  "resetWallet": {"mismatch":"Atšķirīgi parolēs","tooShort":"Parolei jābūt vismaz {{count}} rakstzīmēm","breached":"Šī parole ir parādījusies datu noplūdē. Izvēlieties citu","weak":"Izvēlieties stiprāku paroli (apvienojiet burtus, ciparus un simbolus)","failed":"Neizdevās atiestatīt maku. Nekas netika pārvietots. Mēģiniet vēlreiz.","twoFactor":"Ievadiet kodu no autentifikatora lietotnes, lai pārvietotu kontu.","funds":"Žetoni, NFT un citi atlikumi netiek pārvietoti. Tie paliek vecajā adresē. Ja vēl varat atvērt veco maku, vispirms tos pārsūtiet.","doneTitle":"Jūsu konts ir jaunajā makā","logOut":"Izrakstīties","intro":"Izveido jaunu Riftn maku un pārvieto uz to jūsu lietotājvārdu, ierakstus, sekotājus un ziņas. Izmantojiet to, ja jūsu maks ir pazudis vai kādam citam ir tā atslēga. Vecais maks vairs nedarbojas pieteikšanās vajadzībām.","password":"Jaunā maka parole (vismaz {{count}} rakstzīmes)","confirm":"Apstiprināt paroli","twoFactorPlaceholder":"Autentifikatora kods","ack":"Aizvainojos, ka manas vecās naudas paliek vecajā portfelī.","submit":"Atiestatīt maku","title":"Atiestatīt maku","rowDesc":"Pazaudējāt maku vai kādam citam ir tā atslēga? Pārvietojiet kontu uz jaunu maku. Jūsu lietotājvārds, ieraksti un sekotāji pāriet līdzi."},
+  "twoFactor": {"wrongCode":"Tas kods neatbilst. Mēģini jaunāko versiju savā lietotnē.","trustDevice":"Neuzdodiet vēlreiz uz šī ierīces 30 dienas","useBackupShort":"Izmantojiet rezerves kodu","lostEverything":"Zaudējis mobilā telefonu un rezervkopiju kodus? Saistīties ar atbalstu.","turnedOff":"Divpazīšanas divstāvu režīms ir izslēgts","introTitle":"Pievienot otru slēgu","linkTitle":"Pievienojiet savu autentifikācijas lietotni","codesTitle":"Saglabājiet savus rezerves kodus","newCodesTitle":"Iegūt jaunos rezerves kodus","turnOff":"Izslēgt","backupCodes":"Rezerves kodi"},
+  "chatTextSize": {"title":"Teksta lielums"},
+  "notes": {"replyTo":"Atbildēt uz {{name}}…"},
+  "chatBulk": {"toolbar":"Atlasītās tērzēšanas","selected":"{{count}} atlasīts","cancel":"Atcelt","read":"Atzīmēt kā lasītas","unread":"Atzīmēt kā nelasītas","reply":"Atbildēt","delete":"Dzēst","replyHint":"Katrs cilvēks to saņems kā parastu ziņu savā tērzēšanā.","replyPlaceholder":"Rakstiet ziņu…","sendAll":"Sūtīt {{count}}","partSent":"Nosūtīts uz {{ok}} no {{total}} tērzēšanām","notSent":"Neizdevās nosūtīt. Mēģiniet vēlreiz."},
+  "chatTabs": {"addToTab":"Pievienot cilnei","newWith":"Jauna cilne…","hide":"Paslēpt cilni","edit":"Rediģēt cilnes","renameEdit":"Pārdēvēt un rediģēt","addChats":"Pievienot tērzēšanas","moveLeft":"Pārvietot pa kreisi","moveRight":"Pārvietot pa labi","delete":"Dzēst cilni","new":"Jauna cilne","editTab":"Rediģēt cilni","create":"Izveidot cilni","emoji":"Izvēlieties emocijzīmi","namePlaceholder":"Cilnes nosaukums","noEmoji":"Bez emocijzīmes","sFriends":"Draugi","sWork":"Darbs","sTrading":"Tirdzniecība","sCreators":"Veidotāji","sGaming":"Spēles","chatsInTab":"Tērzēšanas šajā cilnē","picked":"Atlasītas {{n}}","deleteTitle":"Dzēst „{{name}}”?","deleteBody":"Cilne pazūd. Tās tērzēšanas paliek sadaļā Visas un saglabā savas ziņas.","builtIn":"Iebūvēta","chatCount":"{{n}} tērzēšanas","moveUp":"Pārvietot uz augšu","moveDown":"Pārvietot uz leju","alwaysOn":"Vienmēr ieslēgts","show":"Rādīt cilni","emptyTitle":"{{name}} ir tukša","emptyBody":"Pievienojiet tērzēšanas šeit, un tās paliks arī sadaļā Visas.","removedFrom":"Noņemts no {{name}}","addedTo":"Pievienots cilnei {{name}}","kindPublic":"Publisks","kindChannel":"Kanāls","kindGroup":"Grupēt","kindCommunity":"Kopiena","kindDirect":"Tieši","tooMany":"Jums var būt līdz 10 cilnēm","deleted":"Dzēsta {{name}}"},
+  "msgSelect": {"partForwarded":"Pārsūtītas {{ok}} no {{total}}","nothingToCopy":"Atlasītajās ziņās nav ko kopēt","toolbar":"Atlasītās ziņas","selected":"{{count}} atlasīts","copy":"Kopēt","forward":"Pārsūtīt","deleteSome":"Dzēst {{count}}"},
+  "dmSafety": {"notReal":"Tas nav īstais {{name}}.","neverLink":"Riftn komanda nekad nesūtīs jums DM ar saiti, lai labotu jūsu profilu vai maku. Neatveriet saites, nepievienojiet maku un neko neparakstiet. Bloķējiet un ziņojiet par šo kontu."},
+  "post": {"destruct":{"offBody":"Ieraksts paliek publicēts.","onBody":"Ieraksts izdzēsīsies pats {{value1}} pēc publicēšanas."}},
+  "dmPaidLock": {"lockOnUsd":"Bloķēts · {{price}}","lockVideo":"Bloķēt video","lockPhoto":"Bloķēt foto","lockCustom":"Cits","lockCustomUsdLabel":"Pielāgota cena dolāros","lockHint":"Viņi to redz izpludinātu, līdz jums samaksā. Bloķētie faili nav pilnībā šifrēti."},
+  "chatReactions": {"oneNamed":"{{name}} reaģēja ar {{emoji}} uz jūsu ziņu","one":"Reaģēja ar {{emoji}} uz jūsu ziņu"}
 }

@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Edit video", "hiddenTag": "Hidden", "tapToEdit": "Tap to edit", "cover": "Jalada", "trim": "Punguza", "mirror": "Kioo", "rotate": "Zungusha", "hide": "Ficha", "timer": "Kipima muda", "sheetTitleAny": "Edit before sending", "close": "Funga", "replace": "Replace", "hiddenUntilTap": "Imefichwa hadi watakapogonga", "pause": "Sitisha", "play": "Cheza video", "mute": "Mute", "unmute": "Unmute", "scrub": "Sogeza video", "addMore": "Ongeza picha au video", "trimAria": "Buruta ncha ili kupunguza", "coverAria": "Gonga fremu ili kuweka jalada", "coverHint": "Gonga fremu ili kuweka jalada", "coverOwn": "Your picture", "coverAuto": "Auto", "uploadCover": "Pakia picha ya jalada", "mirrored": "Imeakisiwa", "original": "Asilia", "rotate90": "Zungusha 90°", "showNormally": "Onyesha kawaida", "showNormallyBody": "Wanaiona mara moja", "hideUntilTap": "Ficha hadi igongwe", "hideUntilTapBody": "Imefifishwa hadi watakapogonga", "hidePrice": "Ficha nyuma ya bei", "hidePriceBody": "Imefifishwa hadi wakulipe", "priceUnavailable": "Si katika gumzo hili", "timerOff": "Zima", "timerOffBody": "Inabaki kwenye gumzo.", "timerViewBody": "Imekwisha kwa nyinyi wawili pindi tu watakapokiona.", "confirm": "Thibitisha", "lockedForUsd": "Fungua kwa ajili ya {{value1}}", "editItem": "Hariri kipengee {{value1}}", "kept": "{{time}} imehifadhiwa", "timerTimeBody": "Imeondoka kwa ajili yenu nyote wawili {{value1}} baada ya kuituma."},
+  "dmVideo": {"edit": "Edit video", "hiddenTag": "Hidden", "tapToEdit": "Tap to edit", "cover": "Jalada", "trim": "Punguza", "mirror": "Kioo", "rotate": "Zungusha", "hide": "Ficha", "timer": "Kipima muda", "sheetTitleAny": "Edit before sending", "close": "Funga", "replace": "Replace", "hiddenUntilTap": "Imefichwa hadi watakapogonga", "pause": "Sitisha", "play": "Cheza video", "mute": "Mute", "unmute": "Unmute", "scrub": "Sogeza video", "addMore": "Ongeza picha au video", "trimAria": "Buruta ncha ili kupunguza", "coverAria": "Gonga fremu ili kuweka jalada", "coverHint": "Gonga fremu ili kuweka jalada", "coverOwn": "Your picture", "coverAuto": "Auto", "uploadCover": "Pakia picha ya jalada", "mirrored": "Imeakisiwa", "original": "Asilia", "rotate90": "Zungusha 90°", "showNormally": "Onyesha kawaida", "showNormallyBody": "Wanaiona mara moja", "hideUntilTap": "Ficha hadi igongwe", "hideUntilTapBody": "Imefifishwa hadi watakapogonga", "hidePrice": "Ficha nyuma ya bei", "hidePriceBody": "Imefifishwa hadi wakulipe", "priceUnavailable": "Si katika gumzo hili", "timerOff": "Zima", "timerOffBody": "Inabaki kwenye gumzo.", "timerViewBody": "Imekwisha kwa nyinyi wawili pindi tu watakapokiona.", "confirm": "Thibitisha", "lockedForUsd": "Fungua kwa ajili ya {{value1}}", "editItem": "Hariri kipengee {{value1}}", "kept": "{{time}} imehifadhiwa", "timerTimeBody": "Imeondoka kwa ajili yenu nyote wawili {{value1}} baada ya kuituma.", "destruct": {"60":"dakika 1","3600":"saa 1","43200":"saa 12","86400":"siku 1","604800":"wiki 1","31536000":"mwaka 1","view":"mtazamo 1"}, "destructShort": {"view":"mtazamo 1"}, "destructSecs": "{{n}} sekunde"},
   "postBg": {
     "addMedia": "Ongeza picha, GIF au video",
     "changeMedia": "Badilisha picha, GIF au video",
@@ -664,7 +664,9 @@
       "main": "Kuu",
       "money": "Pesa",
       "riftn": "Riftn"
-    }
+    },
+    "moveGroupHint": "Iburute kwenye kichupo kingine ili kuihamishia huko",
+    "reorderHintGroups": "Shikilia na uburute ikoni yoyote ili kupanga upya, au uipeleke kwenye kichupo kingine ili kuihamisha"
   },
   "feed": {
     "viewProfile": "Angalia wasifu wa {{name}}",
@@ -1321,7 +1323,12 @@
     "menuLayoutSectionsDesc": "Kila ukurasa kwa wakati mmoja, chini ya vichwa vya vikundi",
     "menuLayoutFoldersDesc": "Kurasa zako kuu, kisha folda kwa kila kikundi",
     "publicChatInBar": "Gumzo la Umma kwenye upau wa chini",
-    "publicChatInBarDesc": "Mguso mmoja kuingia Gumzo la Umma kutoka kwenye upau wa chini wa skrini"
+    "publicChatInBarDesc": "Mguso mmoja kuingia Gumzo la Umma kutoka kwenye upau wa chini wa skrini",
+    "notificationShowCount": "Onyesha idadi kwenye kengele",
+    "notificationShowCountDesc": "Ona arifa ngapi hazijasomwa badala ya mwangaza tu",
+    "messagesShowCount": "Onyesha idadi kwenye Ujumbe",
+    "messagesShowCountDesc": "Ona jumbe ngapi hazijasomwa badala ya mwangaza tu",
+    "chatTextSize": "Ukubwa wa maandishi ya gumzo"
   },
   "common": {
     "confirm": "Thibitisha",
@@ -1354,7 +1361,8 @@
     "next": "Inayofuata",
     "previous": "Iliyotangulia",
     "redo": "Fanya tena",
-    "remove": "Ondoa"
+    "remove": "Ondoa",
+    "copy": "Nakili"
   },
   "tip": {
     "title": "Tuma Kidokezo",
@@ -1661,7 +1669,8 @@
     "roomSettings": "Mipangilio ya chumba",
     "messagePinned": "Ujumbe umebandikwa",
     "messageUnpinned": "Ujumbe umebandulwa",
-    "online": "{{count}} mtandaoni"
+    "online": "{{count}} mtandaoni",
+    "onlineHint": "Watu {{count}} wako kwenye gumzo hili sasa hivi"
   },
   "aiChat": {
     "title": "Msaidizi",
@@ -2340,7 +2349,11 @@
     "sending": "Inatuma",
     "retrySend": "Jaribu tena",
     "discardSend": "Ondoa",
-    "notSent": "Haukutumwa"
+    "notSent": "Haukutumwa",
+    "unreadMarkerOne": "Ujumbe 1 haujasomwa",
+    "unreadMarkerMany": "Jumbe {{value}} hazijasomwa",
+    "jumpToUnread": "Ruka hadi ujumbe wa kwanza ambao haujasomwa",
+    "jumpToLatest": "Ruka hadi ujumbe wa hivi karibuni"
   },
   "music": {
     "listeningCount_one": "{{count}} akisikiliza",
@@ -4066,7 +4079,8 @@
       "memberCount": "{{n}} wanachama",
       "approvalNote": "Msimamizi anapaswa kuidhinisha ombi lako kabla ya kujiunga."
     },
-    "bannedFromCommunity": "Umepigwa marufuku kutoka kwenye jumuiya hii"
+    "bannedFromCommunity": "Umepigwa marufuku kutoka kwenye jumuiya hii",
+    "newChat": {"channelRow":"Chaneli · wanachama {{formattedCount}}","groupRow":"Kikundi · wanachama {{formattedCount}}","newChannel":"Chaneli mpya","newGroup":"Kikundi kipya","channelName":"Jina la chaneli","groupName":"Jina la kikundi","description":"Inahusu nini? (si lazima)","whoCanJoin":"Nani anaweza kujiunga","public":"Umma","publicDetail":"Mtu yeyote anaweza kuipata na kujiunga","inviteOnly":"Kwa mwaliko pekee","private":"Binafsi","privateDetail":"Watu hujiunga kwa mwaliko wako au idhini yako","entry":"Kiingilio","free":"Bila malipo","freeDetail":"Hakuna malipo ya kujiunga","paid":"Imelipwa","paidDetail":"Malipo moja kwa tokeni, moja kwa moja kwako","price":"Bei kwa tokeni","channelNote":"Wewe na wasimamizi wako pekee mnaweza kuchapisha. Wanachama husoma na kutoa hisia.","createChannel":"Unda chaneli","createGroup":"Unda kikundi","message":"Ujumbe mpya","messageDetail":"Gumzo la faragha na mtu mmoja","groupDetail":"Ongea na watu wengi, hadharani au faraghani","channelDetail":"Tangaza kwa wafuasi, bure au kwa malipo","title":"Anzisha kitu"}
   },
   "prompt": {
     "seoTitle": "Weka ishara kwenye malisho yako | Riftn",
@@ -12844,7 +12858,8 @@
     "shareKindCommunity": "Jumuiya",
     "shareGroups": "Vikundi",
     "shareKindChannel": "Chaneli",
-    "reportMessage": "Ripoti ujumbe"
+    "reportMessage": "Ripoti ujumbe",
+    "attachAnything": "Ambatisha picha, video, sauti au faili"
   },
   "credits": {
     "earningsWorth": "Thamani {{amount}}",
@@ -20882,5 +20897,17 @@
     "promptCatchUp": "Nipe habari za alichochapisha {{handle}} hivi karibuni",
     "promptMessage": "Nisaidie kumwandikia {{handle}} ujumbe",
     "promptAbout": "Kuhusu {{handle}}: {{question}}"
-  }
+  },
+  "ownKeys": {"working":"Inafanya kazi","invalid":"Umekataliwa, ubadilishe","noCredit":"Salio limeisha","disabled":"Umezimwa na Riftn","failed":"Hitilafu imetokea. Jaribu tena.","savedNoCredit":"Ufunguo wa {{name}} umehifadhiwa, lakini akaunti haina salio.","saved":"Ufunguo wa {{name}} umehifadhiwa. Zana za {{name}} sasa zinatumia akaunti yako.","removed":"Ufunguo wa {{name}} umeondolewa.","title":"Funguo zako za AI","description":"Ongeza ufunguo kutoka kwa mtoa huduma wa AI na zana za Creator zitaendeshwa kwenye akaunti yako badala yake. Riftn haitozi chochote kwa kazi hizo. Funguo zimesimbwa na hazionyeshwi tena.","check":"Angalia","remove":"Ondoa","add":"Ongeza ufunguo","paste":"Bandika ufunguo wako wa {{name}}","save":"Hifadhi","cancel":"Ghairi","getKey":"Pata ufunguo wa {{name}}","showLess":"Onyesha funguo zangu pekee","addAnother":"Ongeza mtoa huduma mwingine"},
+  "resetWallet": {"mismatch":"Nywila hazilingani","tooShort":"Nenosiri lazima liwe na angalau herufi {{count}}","breached":"Nenosiri hili limeonekana kwenye uvujaji wa data. Chagua jingine","weak":"Chagua nenosiri imara zaidi (changanya herufi, nambari na alama)","failed":"Imeshindwa kuweka upya pochi yako. Hakuna kilichohamishwa. Jaribu tena.","twoFactor":"Weka msimbo kutoka kwa programu yako ya uthibitishaji ili kuhamisha akaunti yako.","funds":"Tokeni, NFT na salio nyingine hazihamishwi. Zinabaki kwenye anwani ya zamani. Ikiwa bado unaweza kufungua pochi ya zamani, zitume kwanza.","doneTitle":"Akaunti yako iko kwenye pochi yake mpya","logOut":"Toka","intro":"Huunda pochi mpya ya Riftn na kuhamisha jina lako la mtumiaji, machapisho, wafuasi na jumbe kwenda kwake. Tumia hii ikiwa pochi yako imepotea au mtu mwingine ana ufunguo wake. Pochi ya zamani itaacha kufanya kazi kwa kuingia.","password":"Nenosiri jipya la pochi (angalau herufi {{count}})","confirm":"Uamuzi wa kifungu cha kifedha","twoFactorPlaceholder":"Msimbo wa uthibitishaji","ack":"Ninajua pesa zangu za zamani ziko katika kisanduku chake cha zamani.","submit":"Weka upya pochi","title":"Weka upya pochi","rowDesc":"Umepoteza pochi yako, au mtu mwingine ana ufunguo wake? Hamisha akaunti yako kwenda pochi mpya. Jina lako la mtumiaji, machapisho na wafuasi vinakuja nawe."},
+  "twoFactor": {"turnOn":"Washa","wrongCode":"Msimbo huo haukulingana. Jaribu ule mpya zaidi kwenye programu yako.","signingInAs":"Unaingia kama","signIn":"Ingia","trustDevice":"Usiulize tena kwenye kifaa hiki kwa siku 30","useBackupShort":"Tumia msimbo wa chelezo","useApp":"Tumia programu yangu ya uthibitishaji","useAnotherShort":"Akaunti tofauti","lostEverything":"Ulipoteza simu yako na misimbo yako ya chelezo? Wasiliana na usaidizi","turnedOff":"Kuingia kwa hatua mbili kumezimwa","introTitle":"Ongeza kufuli ya pili","linkTitle":"Unganisha programu yako ya uthibitishaji","codesTitle":"Hifadhi misimbo yako ya chelezo","newCodesTitle":"Pata misimbo mipya ya chelezo","turnOff":"Zima","backupCodes":"Misimbo ya chelezo"},
+  "chatTextSize": {"title":"Ukubwa wa maandishi"},
+  "notes": {"replyTo":"Jibu kwa {{name}}…"},
+  "chatBulk": {"toolbar":"Gumzo zilizochaguliwa","selected":"{{count}} imechaguliwa","cancel":"Ghairi","read":"Weka kama imesomwa","unread":"Weka kama haijasomwa","reply":"Jibu","delete":"Futa","replyHint":"Kila mtu anapokea hili kama ujumbe wa kawaida kwenye gumzo lake.","replyPlaceholder":"Andika ujumbe…","sendAll":"Tuma kwa {{count}}","partSent":"Imetumwa kwa gumzo {{ok}} kati ya {{total}}","notSent":"Imeshindwa kutuma. Jaribu tena."},
+  "chatTabs": {"addToTab":"Ongeza kwenye kichupo","newWith":"Kichupo kipya…","hide":"Ficha kichupo","edit":"Hariri vichupo","renameEdit":"Badilisha jina na hariri","addChats":"Ongeza gumzo","moveLeft":"Sogeza kushoto","moveRight":"Sogeza kulia","delete":"Futa kichupo","new":"Kichupo kipya","editTab":"Hariri kichupo","create":"Unda kichupo","emoji":"Chagua emoji","namePlaceholder":"Jina la kichupo","noEmoji":"Hakuna emoji","sFriends":"Marafiki","sWork":"Kazi","sTrading":"Biashara","sCreators":"Waundaji","sGaming":"Michezo","chatsInTab":"Gumzo kwenye kichupo hiki","picked":"{{n}} zimechaguliwa","deleteTitle":"Futa “{{name}}”?","deleteBody":"Kichupo kinaondoka. Gumzo zake zinabaki kwenye Zote na zinahifadhi jumbe zake.","builtIn":"Vilivyojengwa ndani","chatCount":"Gumzo {{n}}","moveUp":"Waeleze mifumo ya kawaida","moveDown":"Nenda chini","alwaysOn":"Imekuwa imewekwa kwa kudumu","show":"Onyesha kichupo","emptyTitle":"{{name}} ni tupu","emptyBody":"Ongeza gumzo hapa na zitabaki kwenye Zote pia.","removedFrom":"Imeondolewa kwenye {{name}}","addedTo":"Imeongezwa kwenye {{name}}","kindPublic":"Umma","kindChannel":"Chaneli","kindGroup":"Gawa","kindCommunity":"Jumuiya","kindDirect":"Moja kwa moja","tooMany":"Unaweza kuwa na hadi vichupo 10","deleted":"{{name}} imefutwa"},
+  "msgSelect": {"partForwarded":"Imesambazwa {{ok}} kati ya {{total}}","nothingToCopy":"Hakuna cha kunakili kwenye jumbe zilizochaguliwa","toolbar":"Ujumbe uliochaguliwa","selected":"{{count}} imechaguliwa","copy":"Nakili","forward":"Sambaza","deleteSome":"Futa {{count}}"},
+  "dmSafety": {"notReal":"Huyu si {{name}} halisi.","neverLink":"Timu ya Riftn haitakutumia kamwe kiungo kwa DM ili kurekebisha wasifu au pochi yako. Usifungue viungo, usiunganishe pochi yako wala kusaini chochote. Zuia na uripoti akaunti hii."},
+  "post": {"destruct":{"offBody":"Chapisho linabaki.","onBody":"Chapisho linajifuta lenyewe {{value1}} baada ya kuchapishwa."}},
+  "dmPaidLock": {"lockOnUsd":"Imefungwa · {{price}}","lockVideo":"Funga video","lockPhoto":"Funga picha","lockCustom":"Nyingine","lockCustomUsdLabel":"Bei maalum kwa dola","lockHint":"Wanaiona ikiwa na ukungu hadi wakulipe. Faili zilizofungwa hazijasimbwa kutoka mwanzo hadi mwisho."},
+  "chatReactions": {"oneNamed":"{{name}} ameitikia {{emoji}} kwenye ujumbe wako","one":"Ameitikia {{emoji}} kwenye ujumbe wako"}
 }

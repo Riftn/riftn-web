@@ -47,7 +47,6 @@ export const SEO_I18N_ROUTES = {
   launchpad: '/launchpad',
   // The namespace is `migrate`; the page has always lived at /migrate-youtube.
   migrate: '/migrate-youtube',
-  nftMarket: '/nfts',
   premium: '/premium',
   prompt: '/prompt',
   stages: '/stages',
@@ -101,6 +100,9 @@ export function buildSeoI18n(localesDir, copyDir = join(HERE, 'seo-i18n-copy')) 
 const xmlEsc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const locUrl = (route, lang) => `${APP_URL}${route}${lang && lang !== 'en' ? `?hl=${lang}` : ''}`;
 
+export const SITEMAP_ALTERNATE_LIMIT = 20;
+export const hrefLanguage = lang => lang === "zh_tw" ? "zh-TW" : lang;
+
 /**
  * sitemap-static.xml with the ?hl= variants of every translated route: an
  * xhtml:link alternate for each language on the English row, and a row of its
@@ -109,8 +111,8 @@ const locUrl = (route, lang) => `${APP_URL}${route}${lang && lang !== 'en' ? `?h
  * dropped first, so the file always matches the table.
  */
 export function withSitemapAlternates(xml, table) {
-  let out = xml
-    .replace(/\s*<url>\s*<loc>[^<]*\?hl=[a-z]{2}<\/loc>[\s\S]*?<\/url>/g, '')
+  let out = xml.replace(/\r+\n/g, '\n')
+    .replace(/\s*<url>\s*<loc>[^<]*\?hl=(?:[a-z]{2}|zh_tw)<\/loc>[\s\S]*?<\/url>/g, '')
     .replace(/\n[ \t]*<xhtml:link [^>]*\/>/g, '');
   if (!out.includes('xmlns:xhtml=')) {
     out = out.replace(/<urlset xmlns="[^"]*"/, (m) => `${m} xmlns:xhtml="http://www.w3.org/1999/xhtml"`);
@@ -122,18 +124,26 @@ export function withSitemapAlternates(xml, table) {
     const block = out.match(new RegExp(`\\n([ \\t]*)<url>\\s*<loc>${loc.replace(/[.?*+^$[\]\\(){}|-]/g, '\\$&')}</loc>[\\s\\S]*?</url>`));
     if (!block) continue;
     const indent = block[1];
-    const links = [...served, 'en']
-      .sort()
-      .map((l) => `${indent}  <xhtml:link rel="alternate" hreflang="${l}" href="${xmlEsc(locUrl(route, l))}"/>`)
-      .concat(`${indent}  <xhtml:link rel="alternate" hreflang="x-default" href="${loc}"/>`)
-      .join('\n');
-    const english = block[0].replace(/\n[ \t]*<\/url>$/, `\n${links}\n${indent}</url>`);
+    // The worker emits the full reciprocal cluster in HTML. For larger
+    // clusters, list every URL here without repeating the links on each row.
+    const english = served.length > SITEMAP_ALTERNATE_LIMIT ? block[0] : block[0].replace(
+      /\n[ \t]*<\/url>$/,
+      () => '\n' + makeAlternateLinks(route, served, indent, loc) + '\n' + indent + '</url>',
+    );
     const variants = served.map((l) =>
       english.replace(`<loc>${loc}</loc>`, `<loc>${xmlEsc(locUrl(route, l))}</loc>`),
     );
     out = out.replace(block[0], () => [english, ...variants].join(''));
   }
   return out;
+}
+
+function makeAlternateLinks(route, served, indent, loc) {
+  return [...served, 'en']
+    .sort()
+    .map((l) => `${indent}  <xhtml:link rel="alternate" hreflang="${hrefLanguage(l)}" href="${xmlEsc(locUrl(route, l))}"/>`)
+    .concat(`${indent}  <xhtml:link rel="alternate" hreflang="x-default" href="${loc}"/>`)
+    .join('\n');
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

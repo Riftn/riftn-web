@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Editează video", "hiddenTag": "Ascuns", "tapToEdit": "Apasă pentru a edita", "cover": "Acoperire", "trim": "Tăiere", "mirror": "Oglindit", "rotate": "Rotație", "hide": "Ascunde", "timer": "Timer", "sheetTitleAny": "Editează înainte de a trimite", "close": "Închide", "replace": "Înlocuiește", "hiddenUntilTap": "Ascuns până când îl ating", "pause": "Pauză", "play": "Redau video", "mute": "Mută", "unmute": "Dezmută", "scrub": "Scrolă prin video", "addMore": "Adaugă fotografii sau videoclipuri", "trimAria": "Trage capetele pentru a tăia", "coverAria": "Atinge un cadru pentru a-l seta ca acoperire", "coverHint": "Atinge un cadru pentru a-l seta ca acoperire", "coverOwn": "Imaginea ta", "coverAuto": "Automat", "uploadCover": "Încarca o imagine de acoperire", "mirrored": "Oglindit", "original": "Original", "rotate90": "Rotație 90°", "showNormally": "Arată normal", "showNormallyBody": "O văd imediat", "hideUntilTap": "Ascunde până la atingere", "hideUntilTapBody": "Abuzit până când îl atingi", "hidePrice": "Ascuns în spatele unui preț", "hidePriceBody": "Abuzit până când plătești", "priceUnavailable": "Nu în această conversație", "timerOff": "Oprit", "timerOffBody": "Rămâne în știre.", "timerViewBody": "Dispar pentru ambii după ce l-au văzut.", "confirm": "Confirmă", "lockedFor": "Deblochează pentru {{value1}} tokenuri", "lockedForUsd": "Dezblochează pentru {{value1}}", "editItem": "Editează obiectul {{value1}}", "kept": "{{time}} păstrat", "timerTimeBody": "Dispar pentru ambii {{value1}} după ce îl trimiți."},
+  "dmVideo": {"edit": "Editează video", "hiddenTag": "Ascuns", "tapToEdit": "Apasă pentru a edita", "cover": "Acoperire", "trim": "Tăiere", "mirror": "Oglindit", "rotate": "Rotație", "hide": "Ascunde", "timer": "Timer", "sheetTitleAny": "Editează înainte de a trimite", "close": "Închide", "replace": "Înlocuiește", "hiddenUntilTap": "Ascuns până când îl ating", "pause": "Pauză", "play": "Redau video", "mute": "Mută", "unmute": "Dezmută", "scrub": "Scrolă prin video", "addMore": "Adaugă fotografii sau videoclipuri", "trimAria": "Trage capetele pentru a tăia", "coverAria": "Atinge un cadru pentru a-l seta ca acoperire", "coverHint": "Atinge un cadru pentru a-l seta ca acoperire", "coverOwn": "Imaginea ta", "coverAuto": "Automat", "uploadCover": "Încarca o imagine de acoperire", "mirrored": "Oglindit", "original": "Original", "rotate90": "Rotație 90°", "showNormally": "Arată normal", "showNormallyBody": "O văd imediat", "hideUntilTap": "Ascunde până la atingere", "hideUntilTapBody": "Abuzit până când îl atingi", "hidePrice": "Ascuns în spatele unui preț", "hidePriceBody": "Abuzit până când plătești", "priceUnavailable": "Nu în această conversație", "timerOff": "Oprit", "timerOffBody": "Rămâne în știre.", "timerViewBody": "Dispar pentru ambii după ce l-au văzut.", "confirm": "Confirmă", "lockedFor": "Deblochează pentru {{value1}} tokenuri", "lockedForUsd": "Dezblochează pentru {{value1}}", "editItem": "Editează obiectul {{value1}}", "kept": "{{time}} păstrat", "timerTimeBody": "Dispar pentru ambii {{value1}} după ce îl trimiți.", "destruct": {"3600":"1 oră","43200":"12 ore","86400":"1 zi","604800":"1 săptămână","31536000":"1 an","view":"1 vizionare"}, "destructShort": {"view":"1 vizionare"}},
   "postBg": {
     "addMedia": "Adaugă o imagine, un GIF sau un videoclip",
     "changeMedia": "Schimbă imaginea, GIF-ul sau videoclipul",
@@ -657,7 +657,9 @@
       "main": "Principal",
       "money": "Bani",
       "riftn": "Riftn"
-    }
+    },
+    "moveGroupHint": "Plasează într-o altă filă pentru a o muta acolo",
+    "reorderHintGroups": "Ține apăsat și trage orice pictogramă pentru a o rearanja sau peste o altă filă pentru a o muta"
   },
   "feed": {
     "viewProfile": "Afișează profilul lui {{name}}",
@@ -1314,7 +1316,12 @@
     "menuLayoutSectionsDesc": "Toate paginile deodată, sub titlurile grupurilor",
     "menuLayoutFoldersDesc": "Paginile tale principale, apoi câte un dosar pentru fiecare grup",
     "publicChatInBar": "Chat public în bara de jos",
-    "publicChatInBarDesc": "O singură atingere până la Chatul public din bara din partea de jos a ecranului"
+    "publicChatInBarDesc": "O singură atingere până la Chatul public din bara din partea de jos a ecranului",
+    "notificationShowCount": "Arată numărul pe clopoțel",
+    "notificationShowCountDesc": "Vezi câte notificări sunt necitite, nu doar strălucirea",
+    "messagesShowCount": "Arată numărul pe Mesaje",
+    "messagesShowCountDesc": "Vezi câte mesaje sunt necitite, nu doar strălucirea",
+    "chatTextSize": "Mărimea textului în chat"
   },
   "common": {
     "confirm": "Confirmă",
@@ -1347,7 +1354,8 @@
     "next": "Înainte",
     "previous": "Înapoi",
     "redo": "Refă",
-    "remove": "Ștergere"
+    "remove": "Ștergere",
+    "copy": "Copiază"
   },
   "tip": {
     "title": "Trimite bacșiș",
@@ -1654,7 +1662,8 @@
     "roomSettings": "Setările camerei",
     "messagePinned": "Mesaj fixat",
     "messageUnpinned": "Fixarea mesajului a fost anulată",
-    "online": "{{count}} conectați"
+    "online": "{{count}} conectați",
+    "onlineHint": "{{count}} persoane sunt acum în acest chat"
   },
   "aiChat": {
     "title": "Asistent",
@@ -2332,7 +2341,11 @@
     "sending": "Se trimite",
     "retrySend": "Încearcă din nou",
     "discardSend": "Elimină",
-    "notSent": "Netrimis"
+    "notSent": "Netrimis",
+    "unreadMarkerOne": "1 mesaj necitit",
+    "unreadMarkerMany": "{{value}} mesaje necitite",
+    "jumpToUnread": "Salt la primul mesaj necitit",
+    "jumpToLatest": "Salt la cel mai recent mesaj"
   },
   "music": {
     "listeningCount_one": "{{count}} ascultare",
@@ -4048,7 +4061,8 @@
       "memberCount": "Membrii {{n}}",
       "approvalNote": "Un administrator trebuie să vă aprobe cererea înainte de a vă putea alătura."
     },
-    "bannedFromCommunity": "Ți se interzice accesul în această comunitate"
+    "bannedFromCommunity": "Ți se interzice accesul în această comunitate",
+    "newChat": {"channelRow":"Canal · {{formattedCount}} membri","groupRow":"Grup · {{formattedCount}} membri","newChannel":"Canal nou","newGroup":"Grup nou","channelName":"Numele canalului","groupName":"Numele grupului","description":"Despre ce este? (opțional)","whoCanJoin":"Cine se poate alătura","publicDetail":"Oricine îl poate găsi și i se poate alătura","inviteOnly":"Doar cu invitație","private":"Privat","privateDetail":"Oamenii se alătură prin invitația sau aprobarea ta","entry":"Acces","free":"Gratuit","freeDetail":"Alăturarea este gratuită","paid":"Plătit","paidDetail":"O singură plată în tokenuri, direct către tine","price":"Preț în tokenuri","channelNote":"Doar tu și administratorii tăi puteți posta. Membrii citesc și reacționează.","createChannel":"Creează canalul","createGroup":"Creează grupul","message":"Mesaj nou","messageDetail":"Un chat privat cu o persoană","groupDetail":"Chat cu mai mulți oameni, public sau privat","channelDetail":"Transmite către urmăritori, gratuit sau cu plată","title":"Începe ceva"}
   },
   "prompt": {
     "seoTitle": "Configurează-ți feed-ul | Riftn",
@@ -12831,7 +12845,8 @@
     "shareKindCommunity": "Comunitate",
     "shareGroups": "Grupuri",
     "shareKindChannel": "Canal",
-    "reportMessage": "Raportează mesajul"
+    "reportMessage": "Raportează mesajul",
+    "attachAnything": "Atașează o fotografie, un video, audio sau un fișier"
   },
   "credits": {
     "earningsWorth": "Valoare {{amount}}",
@@ -20892,5 +20907,17 @@
     "promptCatchUp": "Pune-mă la curent cu ce a postat {{handle}} în ultima vreme",
     "promptMessage": "Ajută-mă să scriu un mesaj pentru {{handle}}",
     "promptAbout": "Despre {{handle}}: {{question}}"
-  }
+  },
+  "ownKeys": {"working":"În curs","invalid":"Respinsă, înlocuiește-o","noCredit":"Fără credit","disabled":"Dezactivată de Riftn","failed":"Ceva nu a mers bine. Încearcă din nou.","savedNoCredit":"Cheia {{name}} a fost salvată, dar contul nu mai are credit.","saved":"Cheia {{name}} a fost salvată. Instrumentele {{name}} folosesc acum contul tău.","removed":"Cheia {{name}} a fost eliminată.","title":"Propriile tale chei AI","description":"Adaugă o cheie de la un furnizor AI, iar instrumentele Creator vor rula pe contul tău. Riftn nu taxează nimic pentru acele sarcini. Cheile sunt criptate și nu mai sunt afișate niciodată.","check":"Verificare","remove":"Elimină","add":"Adaugă cheie","paste":"Lipește cheia {{name}}","save":"Salvează","cancel":"Anulează","getKey":"Obține o cheie {{name}}","showLess":"Arată doar cheile mele","addAnother":"Adaugă alt furnizor"},
+  "resetWallet": {"mismatch":"Parolele nu se potrivesc","tooShort":"Parola trebuie să aibă cel puțin {{count}} caractere","breached":"Această parolă a apărut într-o scurgere de date. Alege alta","weak":"Alege o parolă mai puternică (combină litere, cifre și simboluri)","failed":"Portofelul nu a putut fi resetat. Nu s-a mutat nimic. Încearcă din nou.","twoFactor":"Introdu codul din aplicația de autentificare pentru a-ți muta contul.","funds":"Tokenurile, NFT-urile și alte solduri nu se mută. Rămân la adresa veche. Dacă încă poți deschide vechiul portofel, trimite-le mai întâi în altă parte.","doneTitle":"Contul tău este pe noul portofel","logOut":"Deconectați-vă","intro":"Creează un portofel Riftn nou și îți mută pe el numele de utilizator, postările, urmăritorii și mesajele. Folosește asta dacă ți-ai pierdut portofelul sau altcineva are cheia lui. Vechiul portofel nu mai funcționează pentru autentificare.","password":"Parola noului portofel (min. {{count}} caractere)","confirm":"Confirmă parola","twoFactorPlaceholder":"Cod de autentificare","ack":"Înțeleg că fondurile mele vechi rămân în vechiul portofel.","submit":"Resetează portofelul","title":"Resetează portofelul","rowDesc":"Ți-ai pierdut portofelul sau altcineva are cheia lui? Mută-ți contul pe un portofel nou. Numele de utilizator, postările și urmăritorii vin cu tine."},
+  "twoFactor": {"turnOn":"Activează","wrongCode":"Codul nu a corespuns. Încearcă-l pe cel mai nou din aplicația ta.","signingInAs":"Te autentifici ca","signIn":"Autentificare","trustDevice":"Nu mai întreba pe acest dispozitiv timp de 30 de zile","useBackupShort":"Folosește un cod de rezervă","useApp":"Folosește aplicația mea de autentificare","useAnotherShort":"Alt cont","lostEverything":"Ți-ai pierdut telefonul și codurile de rezervă? Contactează asistența","turnedOff":"Autentificarea în doi pași este dezactivată","introTitle":"Adaugă un al doilea nivel de securitate","linkTitle":"Conectează-ți aplicația de autentificare","codesTitle":"Salvează codurile de rezervă","newCodesTitle":"Obține coduri de rezervă noi","turnOff":"Dezactivează","backupCodes":"Coduri de rezervă"},
+  "chatTextSize": {"title":"Mărime text"},
+  "notes": {"replyTo":"Răspunde la {{name}}…"},
+  "chatBulk": {"toolbar":"Chaturi selectate","selected":"{{count}} selectat","cancel":"Anulează","read":"Marchează ca citite","unread":"Marchează ca necitite","reply":"Răspunde","delete":"Șterge","replyHint":"Fiecare persoană primește asta ca mesaj normal în propriul chat.","replyPlaceholder":"Scrie un mesaj…","sendAll":"Trimite către {{count}}","partSent":"Trimis în {{ok}} din {{total}} chaturi","notSent":"Nu s-a putut trimite. Încearcă din nou."},
+  "chatTabs": {"addToTab":"Adaugă în filă","newWith":"Filă nouă…","hide":"Ascunde fila","edit":"Editează filele","renameEdit":"Redenumește și editează","addChats":"Adaugă chaturi","moveLeft":"Mută la stânga","moveRight":"Mută la dreapta","delete":"Șterge fila","new":"Filă nouă","editTab":"Editează fila","create":"Creează filă","emoji":"Alege un emoji","namePlaceholder":"Numele filei","noEmoji":"Fără emoji","sFriends":"Prieteni","sWork":"Muncă","sTrading":"Tranzacționare","sCreators":"Creatori","sGaming":"Jocuri","chatsInTab":"Chaturi în această filă","picked":"{{n}} alese","deleteTitle":"Ștergi „{{name}}”?","deleteBody":"Fila dispare. Chaturile ei rămân în Toate și își păstrează mesajele.","builtIn":"Integrată","chatCount":"{{n}} chaturi","moveUp":"Mutare în sus","moveDown":"Deplasare în jos","alwaysOn":"Tot timpul","show":"Arată fila","emptyTitle":"{{name}} este goală","emptyBody":"Adaugă chaturi aici și vor rămâne și în Toate.","removedFrom":"Eliminat din {{name}}","addedTo":"Adăugat în {{name}}","kindChannel":"Canal","kindGroup":"Grupează","kindCommunity":"Comunitate","kindDirect":"Directe","tooMany":"Poți avea până la 10 file","deleted":"{{name}} a fost ștearsă"},
+  "msgSelect": {"partForwarded":"Redirecționate {{ok}} din {{total}}","nothingToCopy":"Nimic de copiat în mesajele alese","toolbar":"Mesaje selectate","selected":"{{count}} selectat","copy":"Copiază","forward":"Redirecționează","deleteSome":"Șterge {{count}}"},
+  "dmSafety": {"notReal":"Acesta nu este adevăratul {{name}}.","neverLink":"Echipa Riftn nu îți va trimite niciodată în mesaje privat un link pentru a-ți repara profilul sau portofelul. Nu deschide linkuri, nu conecta portofelul și nu semna nimic. Blochează și raportează acest cont."},
+  "post": {"destruct":{"offBody":"Postarea rămâne publicată.","onBody":"Postarea se șterge singură la {{value1}} după publicare."}},
+  "dmPaidLock": {"lockOnUsd":"Blocat · {{price}}","lockVideo":"Blochează videoclipul","lockPhoto":"Blochează fotografia","lockCustom":"Altele","lockCustomUsdLabel":"Preț personalizat în dolari","lockHint":"Îl văd estompat până te plătesc. Fișierele blocate nu sunt criptate end-to-end."},
+  "chatReactions": {"oneNamed":"{{name}} a reacționat cu {{emoji}} la mesajul tău","one":"A reacționat cu {{emoji}} la mesajul tău"}
 }

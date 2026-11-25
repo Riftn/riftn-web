@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Redigera video", "hiddenTag": "Dold", "tapToEdit": "Tappa för att redigera", "cover": "Omslag", "trim": "Trimma", "mirror": "Spegla", "rotate": "Rotera", "hide": "Dölj", "timer": "Timer", "sheetTitleAny": "Redigera innan du skickar", "close": "Stäng", "replace": "Ersätt", "hiddenUntilTap": "Dold tills de trycker på den", "pause": "Pausa", "play": "Spela upp video", "mute": "Tyst", "unmute": "Avtysta", "scrub": "Skrubba genom videon", "addMore": "Lägg till foton eller videor", "trimAria": "Dra i ändarna för att trimma", "coverAria": "Tryck på en bildruta för att välja omslag", "coverHint": "Tryck på en bildruta för att välja omslag", "coverOwn": "Ditt foto", "coverAuto": "Auto", "uploadCover": "Ladda upp en omslagsbild", "mirrored": "Spegvänd", "original": "Original", "rotate90": "Rotera 90°", "showNormally": "Visa normalt", "showNormallyBody": "De ser den direkt", "hideUntilTap": "Dölj tills den trycks på", "hideUntilTapBody": "Oskarp tills de trycker på den", "hidePrice": "Dölj bakom ett pris", "hidePriceBody": "Oskarp tills de betalar dig", "priceUnavailable": "Inte i den här chatten", "timerOff": "Av", "timerOffBody": "Den stannar i chatten.", "timerViewBody": "Borta för er båda när de har sett den.", "confirm": "Bekräfta", "lockedFor": "Lås upp för {{value1}} tokens", "lockedForUsd": "Lås upp för {{value1}}", "editItem": "Redigera objekt {{value1}}", "kept": "{{time}} behölls", "timerTimeBody": "Borta för er båda {{value1}} efter att du har skickat den."},
+  "dmVideo": {"edit": "Redigera video", "hiddenTag": "Dold", "tapToEdit": "Tappa för att redigera", "cover": "Omslag", "trim": "Trimma", "mirror": "Spegla", "rotate": "Rotera", "hide": "Dölj", "timer": "Timer", "sheetTitleAny": "Redigera innan du skickar", "close": "Stäng", "replace": "Ersätt", "hiddenUntilTap": "Dold tills de trycker på den", "pause": "Pausa", "play": "Spela upp video", "mute": "Tyst", "unmute": "Avtysta", "scrub": "Skrubba genom videon", "addMore": "Lägg till foton eller videor", "trimAria": "Dra i ändarna för att trimma", "coverAria": "Tryck på en bildruta för att välja omslag", "coverHint": "Tryck på en bildruta för att välja omslag", "coverOwn": "Ditt foto", "coverAuto": "Auto", "uploadCover": "Ladda upp en omslagsbild", "mirrored": "Spegvänd", "original": "Original", "rotate90": "Rotera 90°", "showNormally": "Visa normalt", "showNormallyBody": "De ser den direkt", "hideUntilTap": "Dölj tills den trycks på", "hideUntilTapBody": "Oskarp tills de trycker på den", "hidePrice": "Dölj bakom ett pris", "hidePriceBody": "Oskarp tills de betalar dig", "priceUnavailable": "Inte i den här chatten", "timerOff": "Av", "timerOffBody": "Den stannar i chatten.", "timerViewBody": "Borta för er båda när de har sett den.", "confirm": "Bekräfta", "lockedFor": "Lås upp för {{value1}} tokens", "lockedForUsd": "Lås upp för {{value1}}", "editItem": "Redigera objekt {{value1}}", "kept": "{{time}} behölls", "timerTimeBody": "Borta för er båda {{value1}} efter att du har skickat den.", "destruct": {"3600":"1 timme","43200":"12 timmar","86400":"1 dag","604800":"1 vecka","31536000":"1 år","view":"1 visning"}, "destructShort": {"view":"1 visning"}, "destructSecs": "{{n}} sek"},
   "postBg": {
     "addMedia": "Lägg till en bild, GIF eller video",
     "changeMedia": "Byt bild, GIF eller video",
@@ -657,7 +657,9 @@
       "main": "Huvud",
       "money": "Pengar",
       "riftn": "Riftn"
-    }
+    },
+    "moveGroupHint": "Släpp på en annan flik för att flytta den dit",
+    "reorderHintGroups": "Håll och dra ikonen för att omarrangera eller dra den till en annan flik för att flytta den"
   },
   "feed": {
     "viewProfile": "Visa profilen för {{name}}",
@@ -1314,7 +1316,12 @@
     "menuLayoutSectionsDesc": "Alla sidor på en gång, under grupprubriker",
     "menuLayoutFoldersDesc": "Dina huvudsidor, sedan en mapp för varje grupp",
     "publicChatInBar": "Offentlig chatt i nedre fältet",
-    "publicChatInBarDesc": "Ett tryck till Offentlig chatt från fältet längst ner på skärmen"
+    "publicChatInBarDesc": "Ett tryck till Offentlig chatt från fältet längst ner på skärmen",
+    "notificationShowCount": "Visa antalet på klockan",
+    "notificationShowCountDesc": "Se hur många aviseringar som är olästa i stället för bara ljuspunkten",
+    "messagesShowCount": "Visa antalet på Meddelanden",
+    "messagesShowCountDesc": "Se hur många meddelanden som är olästa i stället för bara ljuspunkten",
+    "chatTextSize": "Textstorlek i chatten"
   },
   "common": {
     "confirm": "Bekräfta",
@@ -1347,7 +1354,8 @@
     "next": "Nästa",
     "previous": "Föregående",
     "redo": "Återgör",
-    "remove": "Ta bort"
+    "remove": "Ta bort",
+    "copy": "Kopiera"
   },
   "tip": {
     "title": "Skicka dricks",
@@ -1654,7 +1662,8 @@
     "roomSettings": "Rumsinställningar",
     "messagePinned": "Meddelande fäst",
     "messageUnpinned": "Meddelande lossat",
-    "online": "{{count}} online"
+    "online": "{{count}} online",
+    "onlineHint": "{{count}} personer är i den här chatten just nu"
   },
   "aiChat": {
     "title": "Assistent",
@@ -2332,7 +2341,11 @@
     "sending": "Skickar",
     "retrySend": "Försök igen",
     "discardSend": "Ta bort",
-    "notSent": "Inte skickat"
+    "notSent": "Inte skickat",
+    "unreadMarkerOne": "1 oläst meddelande",
+    "unreadMarkerMany": "{{value}} olästa meddelanden",
+    "jumpToUnread": "Hoppa till första olästa meddelandet",
+    "jumpToLatest": "Hoppa till senaste meddelandet"
   },
   "music": {
     "listeningCount_one": "{{count}} lyssnar",
@@ -4052,7 +4065,8 @@
       "memberCount": "{{n}} medlemmar",
       "approvalNote": "En administratör måste godkänna din förfrågan innan du kan gå med."
     },
-    "bannedFromCommunity": "Du är avstängd från denna community"
+    "bannedFromCommunity": "Du är avstängd från denna community",
+    "newChat": {"channelRow":"Kanal · {{formattedCount}} medlemmar","groupRow":"Grupp · {{formattedCount}} medlemmar","newChannel":"Ny kanal","newGroup":"Ny grupp","channelName":"Kanalnamn","groupName":"Gruppnamn","description":"Vad handlar den om? (valfritt)","whoCanJoin":"Vem kan gå med","public":"Offentlig","publicDetail":"Vem som helst kan hitta och gå med","inviteOnly":"Endast inbjudna","private":"Privat","privateDetail":"Folk går med via din inbjudan eller ditt godkännande","entry":"Inträde","free":"Gratis","freeDetail":"Kostar inget att gå med","paid":"Betald","paidDetail":"En betalning i tokens, direkt till dig","price":"Pris i tokens","channelNote":"Bara du och dina administratörer kan publicera. Medlemmar läser och reagerar.","createChannel":"Skapa kanal","createGroup":"Skapa grupp","message":"Nytt meddelande","messageDetail":"En privat chatt med en person","groupDetail":"Chatta med många, offentligt eller privat","channelDetail":"Sänd till följare, gratis eller betalt","title":"Starta något"}
   },
   "prompt": {
     "seoTitle": "Styr ditt flöde | Riftn",
@@ -12829,7 +12843,8 @@
     "shareKindCommunity": "Gemenskap",
     "shareGroups": "Grupper",
     "shareKindChannel": "Kanal",
-    "reportMessage": "Rapportera meddelande"
+    "reportMessage": "Rapportera meddelande",
+    "attachAnything": "Bifoga ett foto, en video, ljud eller en fil"
   },
   "credits": {
     "earningsWorth": "Värt {{amount}}",
@@ -20884,5 +20899,17 @@
     "promptCatchUp": "Uppdatera mig om vad {{handle}} har postat på sistone",
     "promptMessage": "Hjälp mig skriva ett meddelande till {{handle}}",
     "promptAbout": "Om {{handle}}: {{question}}"
-  }
+  },
+  "ownKeys": {"working":"Arbetar","invalid":"Avvisad, ersätt den","noCredit":"Slut på kredit","disabled":"Avstängd av Riftn","failed":"Något gick fel. Försök igen.","savedNoCredit":"{{name}}-nyckel sparad, men kontot har slut på kredit.","saved":"{{name}}-nyckel sparad. Verktyg på {{name}} använder nu ditt konto.","removed":"{{name}}-nyckel borttagen.","title":"Dina egna AI-nycklar","description":"Lägg till en nyckel från en AI-leverantör så körs Creator-verktygen på ditt konto i stället. Riftn tar inget betalt för de jobben. Nycklar krypteras och visas aldrig igen.","check":"Kontrollera","remove":"Ta bort","add":"Lägg till nyckel","paste":"Klistra in din {{name}}-nyckel","save":"Spara","cancel":"Avbryt","getKey":"Skaffa en {{name}}-nyckel","showLess":"Visa bara mina nycklar","addAnother":"Lägg till en annan leverantör"},
+  "resetWallet": {"mismatch":"Lösenorden matchar inte","tooShort":"Lösenordet måste vara minst {{count}} tecken","breached":"Det här lösenordet har förekommit i ett dataintrång. Välj ett annat","weak":"Välj ett starkare lösenord (blanda bokstäver, siffror och symboler)","failed":"Kunde inte återställa din plånbok. Inget flyttades. Försök igen.","twoFactor":"Ange koden från din autentiseringsapp för att flytta ditt konto.","funds":"Tokens, NFT:er och andra saldon flyttas inte. De stannar på den gamla adressen. Om du fortfarande kan öppna den gamla plånboken, skicka ut dem först.","doneTitle":"Ditt konto finns nu på sin nya plånbok","logOut":"Logga ut","intro":"Skapar en ny Riftn-plånbok och flyttar ditt användarnamn, dina inlägg, följare och meddelanden dit. Använd detta om din plånbok har försvunnit eller om någon annan har dess nyckel. Den gamla plånboken slutar fungera för inloggning.","password":"Nytt plånbokslösenord (minst {{count}} tecken)","confirm":"Bekräfta lösenord","twoFactorPlaceholder":"Autentiseringskod","ack":"Jag förstår att mina gamla medel förblir i det gamla värdes.","submit":"Återställ plånbok","title":"Återställ plånbok","rowDesc":"Har du förlorat din plånbok, eller har någon annan dess nyckel? Flytta ditt konto till en ny plånbok. Ditt användarnamn, dina inlägg och följare följer med."},
+  "twoFactor": {"turnOn":"Aktivera","wrongCode":"Den koden stämde inte. Prova den senaste i din app.","signingInAs":"Loggar in som","signIn":"Logga in","trustDevice":"Fråga inte igen på den här enheten på 30 dagar","useBackupShort":"Använd en reservkod","useApp":"Använd min autentiseringsapp","useAnotherShort":"Annat konto","lostEverything":"Har du tappat bort din telefon och dina reservkoder? Kontakta supporten","turnedOff":"Tvåstegsinloggning är avstängd","introTitle":"Lägg till ett extra lås","linkTitle":"Koppla din autentiseringsapp","codesTitle":"Spara dina reservkoder","newCodesTitle":"Hämta nya reservkoder","turnOff":"Stäng av","backupCodes":"Reservkoder"},
+  "chatTextSize": {"title":"Textstorlek"},
+  "notes": {"replyTo":"Svara till {{name}}…"},
+  "chatBulk": {"toolbar":"Valda chattar","selected":"{{count}} valda","cancel":"Avbryt","read":"Markera som läst","unread":"Markera som oläst","reply":"Svar","delete":"Radera","replyHint":"Varje person får detta som ett vanligt meddelande i sin egen chatt.","replyPlaceholder":"Skriv ett meddelande…","sendAll":"Skicka till {{count}}","partSent":"Skickat till {{ok}} av {{total}} chattar","notSent":"Kunde inte skicka. Försök igen."},
+  "chatTabs": {"addToTab":"Lägg till i flik","newWith":"Ny flik…","hide":"Dölj flik","edit":"Redigera flikar","renameEdit":"Byt namn och redigera","addChats":"Lägg till chattar","moveLeft":"Flytta vänster","moveRight":"Flytta höger","delete":"Radera flik","new":"Ny flik","editTab":"Redigera flik","create":"Skapa flik","emoji":"Välj en emoji","namePlaceholder":"Fliknamn","noEmoji":"Ingen emoji","sFriends":"Vänner","sWork":"Jobb","sTrading":"Handel","sCreators":"Kreatörer","sGaming":"Spel","chatsInTab":"Chattar i den här fliken","picked":"{{n}} valda","deleteTitle":"Radera ”{{name}}”?","deleteBody":"Fliken försvinner. Dess chattar finns kvar i Alla och behåller sina meddelanden.","builtIn":"Inbyggd","chatCount":"{{n}} chattar","moveUp":"Flytta upp","moveDown":"Flytta ner","alwaysOn":"Alltid på","show":"Visa flik","emptyTitle":"{{name}} är tom","emptyBody":"Lägg till chattar här så finns de kvar i Alla också.","removedFrom":"Borttagen från {{name}}","addedTo":"Tillagd i {{name}}","kindPublic":"Offentlig","kindChannel":"Kanal","kindGroup":"Gruppera","kindCommunity":"Gemenskap","kindDirect":"Direkt","tooMany":"Du kan ha upp till 10 flikar","deleted":"Raderade {{name}}"},
+  "msgSelect": {"partForwarded":"Vidarebefordrade {{ok}} av {{total}}","nothingToCopy":"Inget att kopiera i de valda meddelandena","toolbar":"Valda meddelanden","selected":"{{count}} valda","copy":"Kopiera","forward":"Vidarebefordra","deleteSome":"Radera {{count}}"},
+  "dmSafety": {"notReal":"Det här är inte den riktiga {{name}}.","neverLink":"Riftn-teamet kommer aldrig att skicka dig en länk i DM för att fixa din profil eller plånbok. Öppna inga länkar, anslut inte din plånbok och signera ingenting. Blockera och anmäl det här kontot."},
+  "post": {"destruct":{"offBody":"Inlägget ligger kvar.","onBody":"Inlägget raderas automatiskt {{value1}} efter att det publicerats."}},
+  "dmPaidLock": {"lockOnUsd":"Låst · {{price}}","lockVideo":"Lås video","lockPhoto":"Lås foto","lockCustom":"Övrigt","lockCustomUsdLabel":"Eget pris i dollar","lockHint":"De ser det suddigt tills de betalar dig. Låsta filer är inte end-to-end-krypterade."},
+  "chatReactions": {"oneNamed":"{{name}} reagerade med {{emoji}} på ditt meddelande","one":"Reagerade med {{emoji}} på ditt meddelande"}
 }

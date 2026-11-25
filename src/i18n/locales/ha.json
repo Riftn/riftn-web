@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Gyara bidiyo", "hiddenTag": "A ɓoye", "tapToEdit": "Danna don gyarawa", "cover": "Cover", "trim": "Trim", "mirror": "Mirror", "rotate": "Rotate", "hide": "Hide", "timer": "Timer", "sheetTitleAny": "Gyara kafin a tura", "close": "Close", "replace": "Sauya", "hiddenUntilTap": "An ɓoye har sai sun danna shi", "pause": "Pause", "play": "Play video", "mute": "Kashe sauti", "unmute": "Kunna sauti", "scrub": "Duba bidiyon gaba-gaba", "addMore": "Ƙara hoto ko bidiyo", "trimAria": "Ja ƙarshe don yanke", "coverAria": "Danna fuskoki don saita rufin", "coverHint": "Danna fuskoki don saita rufin", "coverOwn": "Hotonka", "coverAuto": "Ta atomatik", "mirrored": "Mirrored", "original": "Original", "rotate90": "Rotate 90°", "showNormally": "Show normally", "showNormallyBody": "Suna ganin shi nan da nan", "hideUntilTap": "Hide until tapped", "hideUntilTapBody": "An ɓoye har sai sun danna shi", "hidePrice": "Boye a bayan farashi", "hidePriceBody": "An ɓata hoton har sai sun biya ka", "priceUnavailable": "Ba a cikin wannan hira ba", "timerOff": "Off", "timerOffBody": "Yana nan a cikin hira.", "timerViewBody": "Zai ɓace ga ku duka biyun da zarar sun gani.", "confirm": "Tabbatar", "lockedFor": "Buɗe don {{value1}} isassun", "lockedForUsd": "Buɗe don {{value1}}", "editItem": "Gyara abu {{value1}}", "kept": "{{time}} an ajiye", "timerTimeBody": "Zai ɓace ga ku duka biyun {{value1}} bayan ka tura shi."},
+  "dmVideo": {"edit": "Gyara bidiyo", "hiddenTag": "A ɓoye", "tapToEdit": "Danna don gyarawa", "cover": "Cover", "trim": "Trim", "mirror": "Mirror", "rotate": "Rotate", "hide": "Hide", "timer": "Timer", "sheetTitleAny": "Gyara kafin a tura", "close": "Close", "replace": "Sauya", "hiddenUntilTap": "An ɓoye har sai sun danna shi", "pause": "Pause", "play": "Play video", "mute": "Kashe sauti", "unmute": "Kunna sauti", "scrub": "Duba bidiyon gaba-gaba", "addMore": "Ƙara hoto ko bidiyo", "trimAria": "Ja ƙarshe don yanke", "coverAria": "Danna fuskoki don saita rufin", "coverHint": "Danna fuskoki don saita rufin", "coverOwn": "Hotonka", "coverAuto": "Ta atomatik", "mirrored": "Mirrored", "original": "Original", "rotate90": "Rotate 90°", "showNormally": "Show normally", "showNormallyBody": "Suna ganin shi nan da nan", "hideUntilTap": "Hide until tapped", "hideUntilTapBody": "An ɓoye har sai sun danna shi", "hidePrice": "Boye a bayan farashi", "hidePriceBody": "An ɓata hoton har sai sun biya ka", "priceUnavailable": "Ba a cikin wannan hira ba", "timerOff": "Off", "timerOffBody": "Yana nan a cikin hira.", "timerViewBody": "Zai ɓace ga ku duka biyun da zarar sun gani.", "confirm": "Tabbatar", "lockedFor": "Buɗe don {{value1}} isassun", "lockedForUsd": "Buɗe don {{value1}}", "editItem": "Gyara abu {{value1}}", "kept": "{{time}} an ajiye", "timerTimeBody": "Zai ɓace ga ku duka biyun {{value1}} bayan ka tura shi.", "destruct": {"3600":"1 awa","43200":"Sa'o'i 12","31536000":"1 shekara","view":"kallo 1"}, "destructShort": {"view":"kallo 1"}, "destructSecs": "{{n}} daƙiƙa"},
   "postBg": {
     "addMedia": "Ƙara hoto, GIF ko bidiyo",
     "changeMedia": "Canza hoto, GIF ko bidiyo",
@@ -664,7 +664,9 @@
       "main": "Babba",
       "money": "Kuɗi",
       "riftn": "Riftn"
-    }
+    },
+    "moveGroupHint": "Jefa a wani tab don motsa shi a can",
+    "reorderHintGroups": "Riƙe kuma ja kowanne alamar don sake tsara, ko a kan wani shafin don motsa shi"
   },
   "feed": {
     "viewProfile": "Duba bayanan {{name}}",
@@ -1320,7 +1322,12 @@
     "menuLayoutSectionsDesc": "Kowane shafi lokaci guda, ƙarƙashin taken rukuni",
     "menuLayoutFoldersDesc": "Manyan shafukanka, sannan babban fayil ga kowane rukuni",
     "publicChatInBar": "Hirar Jama'a a sandar ƙasa",
-    "publicChatInBarDesc": "Taɓa ɗaya zuwa Hirar Jama'a daga sandar da ke ƙasan allo"
+    "publicChatInBarDesc": "Taɓa ɗaya zuwa Hirar Jama'a daga sandar da ke ƙasan allo",
+    "notificationShowCount": "Nuna adadin a kan ƙararrawa",
+    "notificationShowCountDesc": "Duba adadin sanarwar da ba a karanta ba maimakon haske kawai",
+    "messagesShowCount": "Nuna adadin a kan Saƙonni",
+    "messagesShowCountDesc": "Duba adadin saƙonnin da ba a karanta ba maimakon haske kawai",
+    "chatTextSize": "Girman rubutun hira"
   },
   "common": {
     "confirm": "Tabbatar",
@@ -1353,7 +1360,8 @@
     "next": "Na gaba",
     "previous": "Na baya",
     "redo": "Sake yi",
-    "remove": "Cire"
+    "remove": "Cire",
+    "copy": "Kwafi"
   },
   "tip": {
     "title": "Aika Kyauta",
@@ -1660,7 +1668,8 @@
     "roomSettings": "Saituna na ɗaki",
     "messagePinned": "An manne saƙo",
     "messageUnpinned": "An cire saƙo",
-    "online": "{{count}} a layi"
+    "online": "{{count}} a layi",
+    "onlineHint": "Mutane {{count}} suna cikin wannan hirar yanzu"
   },
   "aiChat": {
     "title": "Mai Taimako",
@@ -2338,7 +2347,11 @@
     "sending": "Aikawa",
     "retrySend": "Sake gwadawa",
     "discardSend": "Cire",
-    "notSent": "Ba a aika ba"
+    "notSent": "Ba a aika ba",
+    "unreadMarkerOne": "Saƙo 1 da ba a karanta ba",
+    "unreadMarkerMany": "Saƙonni {{value}} da ba a karanta ba",
+    "jumpToUnread": "Tsallaka zuwa saƙo na farko da ba a karanta ba",
+    "jumpToLatest": "Tsallaka zuwa sabon saƙo"
   },
   "music": {
     "listeningCount_one": "{{count}} sauraron",
@@ -4064,7 +4077,8 @@
       "approvalNote": "Admin dole ne ya amince da buƙatarku kafin ku shiga.",
       "browse": "Duba al'ummomi"
     },
-    "bannedFromCommunity": "An hana ku daga wannan al'umma"
+    "bannedFromCommunity": "An hana ku daga wannan al'umma",
+    "newChat": {"channelRow":"Tasha · membobi {{formattedCount}}","groupRow":"Ƙungiya · membobi {{formattedCount}}","newChannel":"Sabuwar tasha","newGroup":"Sabuwar ƙungiya","channelName":"Sunan tasha","groupName":"Sunan ƙungiya","description":"Game da me? (na zaɓi)","whoCanJoin":"Wanda zai iya shiga","public":"Jama'a","publicDetail":"Kowa zai iya samun ta kuma ya shiga","inviteOnly":"Ta gayyata kawai","private":"Sirri","privateDetail":"Mutane suna shiga da gayyatarka ko amincewarka","entry":"Shiga","free":"Kyauta","freeDetail":"Babu caji don shiga","paid":"Biyan kuɗi","paidDetail":"Biya ɗaya da alamu, kai tsaye zuwa gare ka","price":"Farashi a alamu","channelNote":"Kai da masu gudanarwarka ne kawai za ku iya bugawa. Membobi suna karantawa da mayar da martani.","createChannel":"Ƙirƙiri tasha","createGroup":"Ƙirƙiri ƙungiya","message":"Sabon saƙo","messageDetail":"Hira ta sirri da mutum ɗaya","groupDetail":"Hira da mutane da yawa, a bayyane ko na sirri","channelDetail":"Watsa ga mabiya, kyauta ko da biya","title":"Fara wani abu"}
   },
   "prompt": {
     "seoTitle": "Fadakar da abincinka - Riftn",
@@ -12842,7 +12856,8 @@
     "shareKindCommunity": "Al'umma",
     "shareGroups": "Ƙungiyoyi",
     "shareKindChannel": "Tasha",
-    "reportMessage": "Bayar da rahoton saƙo"
+    "reportMessage": "Bayar da rahoton saƙo",
+    "attachAnything": "Haɗa hoto, bidiyo, sauti ko fayil"
   },
   "credits": {
     "earningsWorth": "Darajarsa {{amount}}",
@@ -20979,5 +20994,17 @@
     "addQuestion": "Kara tambaya",
     "pointsLabel": "Maki ga kowace amsa daidai",
     "attachFailed": "An tura sakonka, amma ba a iya kara tambayar ba"
-  }
+  },
+  "ownKeys": {"working":"Aiki","invalid":"An ƙi, maye gurbinsa","noCredit":"Kiredit ya ƙare","disabled":"Riftn ta kashe shi","failed":"Wani abu ya tafi ba daidai ba. sake gwadawa.","savedNoCredit":"An ajiye maɓallin {{name}}, amma kiredit na asusun ya ƙare.","saved":"An ajiye maɓallin {{name}}. Kayan aiki a kan {{name}} yanzu suna amfani da asusunka.","removed":"An cire maɓallin {{name}}.","title":"Maɓallanka na AI","description":"Ƙara maɓalli daga mai samar da AI kuma kayan aikin Creator za su gudana a kan asusunka maimakon haka. Riftn ba ta cajin komai don waɗannan ayyukan. Ana ɓoye maɓallai kuma ba za a sake nuna su ba.","check":"Duba","remove":"Cire","add":"Ƙara maɓalli","paste":"Liƙa maɓallinka na {{name}}","save":"Ajiye","cancel":"Soke","getKey":"Samu maɓallin {{name}}","showLess":"Nuna maɓallaina kawai","addAnother":"Ƙara wani mai samarwa"},
+  "resetWallet": {"mismatch":"Kalmomin wucewa ba su daidaita ba","tooShort":"Kalmar sirri dole ta zama aƙalla haruffa {{count}}","breached":"Wannan kalmar sirri ta bayyana a cikin satar bayanai. Zaɓi wata daban","weak":"Zaɓi kalmar sirri mai ƙarfi (haɗa haruffa, lambobi da alamomi)","failed":"Ba a iya sake saita walat ɗinka ba. Ba a matsar da komai ba. Sake gwadawa.","twoFactor":"Shigar da lambar daga manhajar tabbatarwarka don matsar da asusunka.","funds":"Alamu, NFTs da sauran ma'auni ba sa matsawa. Suna zama a tsohon adireshi. Idan har yanzu za ka iya buɗe tsohon walat, aika su waje tukuna.","doneTitle":"Asusunka yana kan sabon walat ɗinsa","logOut":"Shiga waje","intro":"Yana ƙirƙirar sabon walat na Riftn kuma yana matsar da sunan mai amfaninka, rubuce-rubuce, mabiya da saƙonni zuwa gare shi. Yi amfani da wannan idan walat ɗinka ya ɓace ko wani yana da maɓallinsa. Tsohon walat zai daina aiki don shiga.","password":"Kalmar sirrin sabon walat (aƙalla haruffa {{count}})","confirm":"Tabbatar da kalmar sirri","twoFactorPlaceholder":"Lambar tabbatarwa","ack":"Na fahimci cewa tsoffin kuɗina suna nan a tsohon walat.","submit":"Sake saita walat","title":"Sake saita walat","rowDesc":"Walat ɗinka ya ɓace, ko wani yana da maɓallinsa? Matsar da asusunka zuwa sabon walat. Sunan mai amfaninka, rubuce-rubuce da mabiya suna zuwa tare da kai."},
+  "twoFactor": {"turnOn":"Kunna","wrongCode":"Wannan lambar ba ta yi daidai ba. Gwada sabuwa a cikin manhajarka.","signingInAs":"Ana shiga a matsayin","signIn":"Shiga","trustDevice":"Kada ka sake tambaya a wannan na'urar na tsawon kwanaki 30","useBackupShort":"Yi amfani da lambar madadin","useApp":"Yi amfani da manhajar tantancewa ta","useAnotherShort":"Wani asusun daban","lostEverything":"Ka rasa wayarka da lambobin madadin naka? Tuntubi sashen taimako","turnedOff":"Shiga mataki-biyu a kashe yake","introTitle":"Ƙara ƙarin kariya","linkTitle":"Haɗa manhajar tantancewarka","codesTitle":"Ajiye lambobinka na madadin","newCodesTitle":"Samun sabbin lambobin ajiyar","turnOff":"Kashe","backupCodes":"Lambobin ajiyar"},
+  "chatTextSize": {"title":"Girman rubutu"},
+  "notes": {"replyTo":"Ka ba da amsa ga {{name}}…"},
+  "chatBulk": {"toolbar":"Hirarrakin da aka zaɓa","selected":"{{count}} zaba","cancel":"Soke","read":"Yi alama an karanta","unread":"Yi alama ba a karanta ba","reply":"Amsa","delete":"Share","replyHint":"Kowane mutum yana samun wannan a matsayin saƙo na yau da kullum a cikin hirarsa.","replyPlaceholder":"Rubuta saƙo…","sendAll":"Aika zuwa {{count}}","partSent":"An aika zuwa {{ok}} na hirarraki {{total}}","notSent":"Ba a iya aikawa ba. Sake gwadawa."},
+  "chatTabs": {"addToTab":"Ƙara zuwa shafi","newWith":"Sabon shafi…","hide":"Ɓoye shafi","edit":"Gyara shafuka","renameEdit":"Sake suna da gyara","addChats":"Ƙara hirarraki","moveLeft":"Matsar hagu","moveRight":"Matsar dama","delete":"Share shafi","new":"Sabon shafi","editTab":"Gyara shafi","create":"Ƙirƙiri shafi","emoji":"Zaɓi emoji","namePlaceholder":"Sunan shafi","noEmoji":"Babu emoji","sFriends":"Abokai","sWork":"Aiki","sTrading":"Ciniki","sCreators":"Masu ƙirƙira","sGaming":"Wasanni","chatsInTab":"Hirarraki a wannan shafin","picked":"{{n}} an zaɓa","deleteTitle":"Share “{{name}}”?","deleteBody":"Shafin zai tafi. Hirarrakinsa suna nan a Duka kuma suna riƙe saƙonninsu.","builtIn":"Na asali","chatCount":"Hirarraki {{n}}","moveUp":"Motsa sama","moveDown":"Yi ƙaura ƙasa","alwaysOn":"A kunne koyaushe","show":"Nuna shafi","emptyTitle":"{{name}} babu komai","emptyBody":"Ƙara hirarraki a nan kuma za su kasance a Duka su ma.","removedFrom":"An cire daga {{name}}","addedTo":"An ƙara zuwa {{name}}","kindPublic":"Jama'a","kindChannel":"Tasha","kindGroup":"Rukunin","kindCommunity":"Al'umma","kindDirect":"Kai tsaye","tooMany":"Za ka iya samun har zuwa shafuka 10","deleted":"An share {{name}}"},
+  "msgSelect": {"partForwarded":"An tura {{ok}} na {{total}}","nothingToCopy":"Babu abin da za a kwafa a cikin saƙonnin da aka zaɓa","toolbar":"Saƙonnin da aka zaɓa","selected":"{{count}} zaba","copy":"Kwafa","forward":"Tura gaba","deleteSome":"Share {{count}}"},
+  "dmSafety": {"notReal":"Wannan ba {{name}} na gaske ba ne.","neverLink":"Ƙungiyar Riftn ba za ta taɓa aiko maka da hanyar haɗi ta saƙon kai tsaye don gyara bayanin martabarka ko walat ɗinka ba. Kada ka buɗe hanyoyin haɗi, haɗa walat ɗinka ko sa hannu a komai. Toshe kuma ka bayar da rahoton wannan asusu."},
+  "post": {"destruct":{"offBody":"Rubutun yana nan.","onBody":"Rubutun yana share kansa {{value1}} bayan an buga shi."}},
+  "dmPaidLock": {"lockOnUsd":"An kulle · {{price}}","lockVideo":"Kulle bidiyo","lockPhoto":"Kulle hoto","lockCustom":"Wani","lockCustomUsdLabel":"Farashi na musamman a dala","lockHint":"Suna ganin sa a dushe har sai sun biya ka. Fayilolin da aka kulle ba a ɓoye su daga ƙarshe zuwa ƙarshe ba."},
+  "chatReactions": {"oneNamed":"{{name}} ya mayar da martani {{emoji}} ga saƙonka","one":"An mayar da martani {{emoji}} ga saƙonka"}
 }

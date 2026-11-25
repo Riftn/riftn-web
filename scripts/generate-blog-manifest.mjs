@@ -27,7 +27,7 @@ import { build } from 'esbuild';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import path from 'node:path';
 import fs from 'node:fs';
-import { CONSOLIDATED_GUIDES, MILESTONE_REDIRECTS, RETIRED_GUIDES, cleanBlogSlug } from '../src/lib/blog-redirects.js';
+import { CONSOLIDATED_GUIDES, MILESTONE_REDIRECTS, RETIRED_GUIDES, LOCALIZED_GUIDE_REDIRECTS, cleanBlogSlug } from '../src/lib/blog-redirects.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PUBLIC = path.join(ROOT, 'public');
@@ -139,6 +139,12 @@ for (const from of Object.keys(RETIRED_GUIDES)) {
 for (const [from, to] of Object.entries(CONSOLIDATED_GUIDES)) {
   if (!kept.some((p) => p.slug === to)) {
     throw new Error(`[blog-manifest] consolidation target missing: ${from} -> ${to}`);
+  }
+}
+
+for (const [from, { slug }] of Object.entries(LOCALIZED_GUIDE_REDIRECTS)) {
+  if (blogData.posts.some(post => post.slug === from) || !kept.some(post => post.slug === slug)) {
+    throw new Error(`[blog-manifest] invalid localized guide redirect: ${from} -> ${slug}`);
   }
 }
 

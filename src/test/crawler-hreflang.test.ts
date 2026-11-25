@@ -1,3 +1,4 @@
+import { localizedGuideRedirect } from '@/lib/blog-redirects.js';
 import { localizePublicChrome, localizeStructuredData } from '../../server/public-page-locales.js';
 /**
  * dehub.io had 110 UI locales and one indexable language: every page said
@@ -340,5 +341,28 @@ describe('wiring', () => {
     expect(I18N_INDEX).toContain('if (urlLang) defaultLang = urlLang;');
     expect(I18N_INDEX).not.toContain('localStorage.setItem(STORAGE_KEY, urlLang)');
     expect(I18N_INDEX).toMatch(/let defaultLang = savedLang \|\| browserLang;/);
+  });
+});
+
+describe('Brazilian Portuguese guide consolidation', () => {
+  const oldSlug = 'redes-sociais-descentralizadas-2026';
+  const route = '/guides/best-decentralised-social-media-platforms-2026';
+  const target = 'https://riftn.com' + route + '?hl=pt';
+
+  it('preserves an explicit language and gives old bare links a Portuguese destination', () => {
+    expect(localizedGuideRedirect(oldSlug, '?ref=community')).toBe(route + '?ref=community&hl=pt');
+    expect(localizedGuideRedirect(oldSlug, '?hl=es')).toBe(route + '?hl=es');
+    expect(localizedGuideRedirect('__proto__', '')).toBeNull();
+  });
+
+  it('serves Portuguese copy and metadata at the self-canonical target', () => {
+    const table = JSON.parse(readFileSync(resolve(ROOT, 'public/seo-i18n.json'), 'utf8'));
+    const asset = JSON.parse(readFileSync(resolve(ROOT, 'public' + table[route].pt.asset), 'utf8'));
+    const html = api.localizePage(page, route, 'pt', { [route]: { ...table[route], pt: asset } });
+    expect(html).toContain('<html lang="pt">');
+    expect(html).toContain('<link rel="canonical" href="' + target + '">');
+    expect(html).toContain('hreflang="pt" href="' + target + '"');
+    expect(html).toContain('Uma rede social descentralizada');
+    expect(table['/guides/' + oldSlug]).toBeUndefined();
   });
 });
