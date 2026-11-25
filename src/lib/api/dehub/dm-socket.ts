@@ -533,6 +533,12 @@ export function onDmDeleteMessage(cb: (data: DeletedMessage) => void): () => voi
   return addPersistentListener('deleteMessage', cb as AnyFn);
 }
 
+export function onDmDestructOpened(
+  cb: (data: { dmId: string; messageId: string; openedAt: string }) => void,
+): () => void {
+  return addPersistentListener('destructOpened', cb as AnyFn);
+}
+
 /** Server broadcasts `readReceipt` after `markAsRead` is processed. */
 export function onReadReceipt(cb: (data: ReadReceiptData) => void): () => void {
   return addPersistentListener('readReceipt', cb as AnyFn);

@@ -52,7 +52,7 @@ import { MomentFace } from '@/components/app/stories/MomentFace';
 import { ChatInput, type ChatInputSendArgs } from './ChatInput';
 import { DmVideoBubble } from './DmVideo';
 import type { DmVideoOptions } from '@/lib/dm-video-options';
-import { isSeenOnce, type DmDestruct, type DmDestructChoice } from '@/lib/dm-destruct';
+import { isPrivatePhoto, isSeenOnce, type DmDestruct, type DmDestructChoice } from '@/lib/dm-destruct';
 import { markDmMessageViewed } from '@/lib/api/dehub/dm';
 import { DmTimeLeft } from './DmTimeLeft';
 import { DmOpenTimerMedia } from './DmOpenTimerMedia';
@@ -503,7 +503,12 @@ function EncryptedMediaBody({
           src={url}
           alt={_copy("copy.f9c984552075", { defaultValue: "Shared image" })}
           className="max-w-full max-h-64 rounded-lg object-cover cursor-zoom-in"
-          onClick={() => onOpenImage?.(url)}
+          onClick={() => {
+            if (!isOwn && destruct?.mode === 'time' && !destruct.openedAt) {
+              void markDmMessageViewed(messageId).catch(() => undefined);
+            }
+            onOpenImage?.(url);
+          }}
         />
       </DmTimeLeft>
     );
@@ -689,12 +694,20 @@ const MessageBubble = memo(function MessageBubble({
   // "can't be opened" line below stands in for it.
   const encMedia = message.encMedia;
   const isLockedMedia = !encMedia && !!primaryMedia?.encrypted;
+  const privatePhoto = isPrivatePhoto(message);
+  const ownPrivatePhoto = isOwnMessage && privatePhoto;
+  const openPlainPhoto = (url: string) => {
+    if (!isOwnMessage && message.destruct?.mode === 'time' && !message.destruct.openedAt) {
+      void markDmMessageViewed(message._id).catch(() => undefined);
+    }
+    onOpenImage?.(url);
+  };
 
   // A plain photo, video or document can be saved from the hover actions.
   // Paid and end-to-end encrypted attachments are left out: one is a blurred
   // preview, the other downloads from its own tap.
   const downloadTarget = useMemo(() => {
-    if (message.msgType !== 'media' || message.lock || encMedia || isLockedMedia || !primaryMediaUrl) return null;
+    if (message.msgType !== 'media' || ownPrivatePhoto || message.lock || encMedia || isLockedMedia || !primaryMediaUrl) return null;
     const url = getMediaUrl(primaryMediaUrl) || primaryMediaUrl;
     if (!/^(https?:|blob:)/.test(url)) return null;
     const name = isFileMedia
@@ -703,7 +716,7 @@ const MessageBubble = memo(function MessageBubble({
         ? `dehub-chat-${message._id}.mp4`
         : messageImageDownloadName(url);
     return { url, name };
-  }, [message.msgType, message.lock, message._id, encMedia, isLockedMedia, primaryMediaUrl, isFileMedia, primaryMedia?.name, primaryMedia?.type, primaryMedia?.mimeType]);
+  }, [message.msgType, message.lock, message._id, ownPrivatePhoto, encMedia, isLockedMedia, primaryMediaUrl, isFileMedia, primaryMedia?.name, primaryMedia?.type, primaryMedia?.mimeType]);
   const handleDownloadMedia = useCallback(async () => {
     if (!downloadTarget) return;
     const toastId = `dm-download-${message._id}`;
@@ -893,7 +906,7 @@ const MessageBubble = memo(function MessageBubble({
   // A photo, GIF or video can be copied as itself, not just its caption.
   // Paid and encrypted attachments stay out, like Download.
   const copyMediaTarget = (() => {
-    if ((message.msgType !== 'media' && message.msgType !== 'gif') || message.undecryptable || message.lock || encMedia || isLockedMedia || isFileMedia) return null;
+    if ((message.msgType !== 'media' && message.msgType !== 'gif') || ownPrivatePhoto || message.undecryptable || message.lock || encMedia || isLockedMedia || isFileMedia) return null;
     const url = copyableMediaUrl(getMediaUrl(primaryMediaUrl) || primaryMediaUrl);
     if (!url) return null;
     const kind = message.msgType === 'gif' || primaryMedia?.mimeType === 'image/gif' ? 'gif' as const
@@ -975,7 +988,7 @@ const MessageBubble = memo(function MessageBubble({
       menuActions.push({ key: 'translate', icon: menuIcons.translate, label: L.translate, onSelect: go, hint: 'T' });
       holdActions.push({ key: 'translate', icon: menuIcons.translate, label: L.translate, onSelect: go });
     }
-    if (onForward) {
+    if (onForward && !privatePhoto) {
       menuActions.push({ key: 'forward', icon: menuIcons.forward, label: L.forward, onSelect: () => onForward(message), hint: 'F' });
       holdActions.push({ key: 'forward', icon: menuIcons.forward, label: L.forward, onSelect: () => onForward(message) });
     }
@@ -1133,7 +1146,7 @@ const MessageBubble = memo(function MessageBubble({
             >
               <Reply className="w-3 h-3 flex-shrink-0" />
               <span className="text-zinc-300 font-medium flex-shrink-0">{message.replyTo.sender?.displayName || message.replyTo.sender?.username || _copy("copy.b512d97e7cbf", { defaultValue: "User" })}</span>
-              {isSeenOnce(message.replyTo.destruct) ? (
+              {isSeenOnce(message.replyTo.destruct) || isPrivatePhoto(message.replyTo) ? (
                 // A view-once / on-open photo is quoted by what it was, never the picture.
                 <span className="min-w-0 truncate inline-flex items-center gap-1">
                   {message.replyTo.destruct?.kind === 'video' ? <Video className="w-3 h-3 flex-shrink-0" /> : <ImageIcon className="w-3 h-3 flex-shrink-0" />}
@@ -1297,8 +1310,23 @@ const MessageBubble = memo(function MessageBubble({
               )
             )}
 
+            {ownPrivatePhoto && (
+              <div>
+                <OpenedBubble
+                  mine
+                  openedAt={message.destruct?.openedAt}
+                  deliveryStatus={message.destruct?.openedAt ? undefined : message.sendState ??
+                    (message.uploadStatus === 'pending' ? 'sending' : message.uploadStatus === 'failed' ? 'failed' : 'sent')}
+                />
+                {message.content && (
+                  <p dir="auto" className="text-sm mt-1 break-words whitespace-pre-wrap text-left">
+                    {renderChatTextWithLinks(isTranslated ? translatedText : message.content)}
+                  </p>
+                )}
+              </div>
+            )}
             {/* Media (image or document) — loading state while mediaUrls is empty */}
-            {message.msgType === 'media' && encMedia && (
+            {message.msgType === 'media' && !ownPrivatePhoto && encMedia && (
               <div>
                 {message.destruct?.mode === 'open' && isOwnMessage ? (
                   <DmOpenTimerMedia messageId={message._id} mine destruct={message.destruct} kind={encMedia.kind === 'video' ? 'video' : 'image'}>
@@ -1331,10 +1359,10 @@ const MessageBubble = memo(function MessageBubble({
               </div>
             )}
             {/* Pay-to-unlock photo or video: its own card, never the plain media path. */}
-            {message.msgType === 'media' && message.lock && (
-              <LockedMediaBubble message={message} onOpenImage={onOpenImage} />
+            {message.msgType === 'media' && !ownPrivatePhoto && message.lock && (
+              <LockedMediaBubble message={message} onOpenImage={openPlainPhoto} />
             )}
-            {message.msgType === 'media' && !message.lock && !encMedia && !isLockedMedia && (
+            {message.msgType === 'media' && !ownPrivatePhoto && !message.lock && !encMedia && !isLockedMedia && (
               <div>
                 {primaryMediaUrl && isFileMedia ? (
                   <>
@@ -1425,7 +1453,7 @@ const MessageBubble = memo(function MessageBubble({
                         src={getMediaUrl(primaryMediaUrl)!}
                         alt={_copy("copy.f9c984552075", { defaultValue: "Shared image" })}
                         className="max-w-full max-h-64 rounded-lg object-cover cursor-zoom-in"
-                        onClick={() => onOpenImage?.(getMediaUrl(primaryMediaUrl)!)}
+                        onClick={() => openPlainPhoto(getMediaUrl(primaryMediaUrl)!)}
                       />
                     </DmTimeLeft>
                     )}
@@ -1498,7 +1526,7 @@ const MessageBubble = memo(function MessageBubble({
         )}
 
         {/* Encrypted on another device's key — never show the envelope */}
-        {!message.isDeleted && message.undecryptable && (
+        {!message.isDeleted && !ownPrivatePhoto && message.undecryptable && (
           <div className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 border border-white/[0.10] text-zinc-500 text-sm italic ${isOwnMessage ? 'rounded-br-sm' : 'rounded-bl-sm'}`}>
             <Lock className="w-3.5 h-3.5 flex-shrink-0" />
             {tr('messages.cannotDecrypt')}
@@ -2689,6 +2717,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
 
   /** Sends one message on to another chat; throws when it did not go. */
   const forwardOne = useCallback(async (msg: DmMessage, targetConversationId: string) => {
+    if (isPrivatePhoto(msg)) throw new Error('Private photos cannot be forwarded.');
     if (msg.encMedia) {
       await forwardEncryptedMedia(msg, msg.encMedia, targetConversationId);
     } else if (msg.encrypted) {
@@ -2946,7 +2975,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     const replyingTo = replyTarget;
 
     // A view-once / on-open photo is quoted as "Photo · Opened", never the picture.
-    const seenOnce = isSeenOnce(replyingTo?.destruct);
+    const seenOnce = !!replyingTo && (isSeenOnce(replyingTo.destruct) || isPrivatePhoto(replyingTo));
     const replyPreview: DmMessage['replyTo'] = replyingTo
       ? seenOnce
         ? {

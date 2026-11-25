@@ -48,6 +48,7 @@ import {
   onDmReconnect,
   onEditMessage,
   onDmDeleteMessage,
+  onDmDestructOpened,
   onReValidateMessage,
   onFeeConfirmed,
   onReadReceipt,
@@ -706,6 +707,24 @@ export function useMessages(conversationId: string | null) {
       );
     });
 
+    const unsubDestructOpened = onDmDestructOpened(({ dmId, messageId, openedAt }) => {
+      if (dmId !== conversationId) return;
+      queryClient.setQueryData(messagesKeys.messages(conversationId), (old: any) => {
+        if (!old?.pages) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page: any) => ({
+            ...page,
+            items: page.items.map((m: DmMessage) =>
+              m._id === messageId && !m.isDeleted && m.destruct && !m.destruct.openedAt &&
+              (m.author === 'me' || m.destruct.mode === 'time')
+                ? { ...m, destruct: { ...m.destruct, openedAt } }
+                : m),
+          })),
+        };
+      });
+    });
+
     const unsubReaction = onDmReactionUpdated(({ dmId, messageId, reactions }) => {
       if (dmId !== conversationId) return;
       queryClient.setQueryData(messagesKeys.messages(conversationId), (old: any) => {
@@ -797,6 +816,7 @@ export function useMessages(conversationId: string | null) {
       unsubSend();
       unsubEdit();
       unsubDelete();
+      unsubDestructOpened();
       unsubReaction();
       unsubFeeConfirmed();
       unsubRevalidate();

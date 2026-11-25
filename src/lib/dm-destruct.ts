@@ -58,6 +58,22 @@ export function isSeenOnce(d: DmDestruct | null | undefined): boolean {
   return d?.mode === 'view' || d?.mode === 'open';
 }
 
+/** A photo sent with a view or expiry limit, including older media entries. */
+export function isPrivatePhoto(message: {
+  msgType?: string;
+  destruct?: DmDestruct | null;
+  encMedia?: { kind: string } | null;
+  mediaUrls?: readonly (string | { type?: string; mimeType?: string })[];
+}): boolean {
+  if (message.msgType !== 'media' || !message.destruct) return false;
+  const kind = message.destruct.kind ?? message.encMedia?.kind;
+  if (kind) return kind === 'image';
+  const media = message.mediaUrls?.[0];
+  if (!media || typeof media === 'string') return true;
+  return media.type !== 'file' && media.type !== 'video' && media.type !== 'audio' &&
+    !media.mimeType?.startsWith('video/') && !media.mimeType?.startsWith('audio/');
+}
+
 /** Replays still left on an on-open message, as the server last said. */
 export function replaysLeft(d: DmDestruct | null | undefined): number {
   return Math.max(0, (Number(d?.replaysAllowed) || 0) - (Number(d?.replaysUsed) || 0));
