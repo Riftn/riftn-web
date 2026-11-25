@@ -15,14 +15,15 @@
  * @module components/app/profile/ProfileMixedGrid
  */
 
-import { memo, useCallback, useEffect, useMemo, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type ComponentPropsWithRef, type MouseEvent as ReactMouseEvent, type ReactNode } from 'react';
 import { useDragReorder } from '@/hooks/use-drag-reorder';
 import { warmPostPage } from '@/lib/preload-post-page';
 import { warmPostData } from '@/lib/post-warm';
 import { cdnImage, deviceWidth } from '@/lib/media-url';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Lock, Pin } from 'lucide-react';
+import { Loader2, Lock, Pin, RotateCcw } from 'lucide-react';
+import Languages from '@/components/ui/cut-icons/language';
 import Music from '@/components/ui/cut-icons/music';
 import MessageSquare from '@/components/ui/cut-icons/messages';
 import ThumbsUp from '@/components/ui/cut-icons/like';
@@ -33,12 +34,14 @@ import type { TextPost, ImagePost, VideoItem } from '@/types/feed.types';
 import { noteProfileFeedOpen, useProfileFeedContext } from '@/lib/profile-feed-origin';
 import { openBrainrotFeed } from '@/lib/brainrot-feed';
 import { PostBgLayer, postBgHostProps, usePostBgResolver } from './PostBackground';
-import { postBgToken, postBgVariant } from '@/lib/post-backgrounds';
+import { postBgToken, postBgVariant, type PostBg } from '@/lib/post-backgrounds';
 import { ArticleTileFace, useProfileArticleTile } from './ArticleTile';
 import { articleReadMinutes } from '@/lib/article-tile';
-import { GridCardFace, GridPollProbe } from './GridCardTile';
+import { GridCardFace } from './GridCardTile';
+import { usePoll } from '@/hooks/use-polls';
+import { useTranslation as usePostTranslation } from '@/components/app/TranslatableText';
 import { FormatMark } from './FormatMark';
-import { mediaCardOf, textCardOf, wordsWithoutLinks, type GridCardKind } from '@/lib/grid-card';
+import { mediaCardOf, textCardOf, wordsWithoutLinks } from '@/lib/grid-card';
 import { postTileMenuProps, type PostMenuTarget } from '@/lib/post-menu';
 import { imagePostMenuTarget, textPostMenuTarget, videoMenuTarget } from '@/lib/post-menu-targets';
 import './profile-mixed-grid.css';
@@ -124,6 +127,71 @@ function plainText(text: string | undefined): string {
     .trim();
 }
 
+
+function TextGridTile({ post, entry, bg, chip, grip, tileProps, onOpen }: {
+  post: TextPost;
+  entry: MixedGridEntry;
+  bg: PostBg | null;
+  chip: ReactNode;
+  grip: ReactNode;
+  tileProps: ComponentPropsWithRef<'div'>;
+  onOpen: () => void;
+}) {
+  const { t } = useTranslation();
+  const previewRef = useRef<HTMLButtonElement>(null);
+  const locked = !!post.isLocked && !post.isUnlocked && !post.isOwner;
+  const card = locked ? null : textCardOf(post);
+  const tokenId = Number(String(post.id).replace(/^[a-z]+-/, '')) || 0;
+  const probePoll = !card && !locked && !entry.isOptimistic && tokenId > 0;
+  const { data: poll, isPending: pollPending } = usePoll(probePoll ? tokenId : 0, probePoll);
+  const displayCard = card ?? (poll ? { kind: 'poll' as const } : null);
+  const original = post.content || post.title || '';
+  const originalWords = plainText(card ? wordsWithoutLinks(original) : original);
+  const hasPreview = (!card && !poll?.question) || card?.kind === 'quote' || card?.kind === 'sharedPost';
+  const translatable = hasPreview && !!originalWords && !post.isLocked && !entry.isOptimistic &&
+    (!post.visibility || post.visibility === 'public');
+  const { isTranslated, translatedText, error, isLoading, isTooShort, handleTranslate, handleShowOriginal } =
+    usePostTranslation(translatable ? original : '', !probePoll || !pollPending, previewRef, true);
+  const words = translatable && isTranslated
+    ? plainText(card ? wordsWithoutLinks(translatedText) : translatedText) || originalWords
+    : originalWords;
+  const translationLabel = error || (isLoading ? t('common.translating') : isTranslated ? t('common.showOriginal') : t('copy.8fe147696fbf', { defaultValue: 'Translate' }));
+  const TranslationIcon = isLoading ? Loader2 : isTranslated ? RotateCcw : Languages;
+  const poster = (
+    <>
+      <FormatMark kind={displayCard?.kind ?? 'text'} />
+      {chip ?? <span className="pmg-quote" aria-hidden>“</span>}
+      <span className="pmg-words">{locked ? <><Lock className="pmg-inline-lock" />{t('profile.lockedPost', 'Locked post')}</> : words}</span>
+      <span className="pmg-meta pmg-stats">
+        <span><MessageSquare />{compact(post.stats?.comments)}</span>
+        <span><ThumbsUp />{compact(post.stats?.likes)}</span>
+      </span>
+    </>
+  );
+
+  return (
+    <div {...tileProps} className="pmg-text-cell">
+      <button ref={previewRef} type="button" data-tile="text" data-card={card?.kind}
+        className="pmg-tile pmg-poster pmg-text" disabled={entry.isOptimistic} onClick={onOpen}
+        aria-label={locked ? t('profile.lockedPost', 'Locked post') : words.slice(0, 80) || t('profile.tabs.posts', 'Post')}
+        data-soft={card ? undefined : postBgVariant(post.id, 3)}
+        {...(card || entry.isRepost ? {} : postBgHostProps(bg, post.id))}>
+        {!card && !entry.isRepost && <PostBgLayer bg={bg} seed={post.id} />}
+        {displayCard
+          ? <GridCardFace card={displayCard} tokenId={tokenId} quotedPost={post.quotedPost} words={words} chip={chip} fallback={poster} />
+          : poster}
+        {grip}
+      </button>
+      {translatable && !isTooShort && (
+        <button type="button" className="pmg-translate" title={translationLabel} aria-label={translationLabel}
+          disabled={isLoading} onPointerDown={(event) => event.stopPropagation()}
+          onClick={isTranslated ? handleShowOriginal : handleTranslate}>
+          <TranslationIcon aria-hidden />
+        </button>
+      )}
+    </div>
+  );
+}
 
 export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries, onMove }: ProfileMixedGridProps) {
   const { t } = useTranslation();
@@ -347,39 +415,9 @@ export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries, onMove
             );
           }
 
-          const locked = !!post.isLocked && !post.isUnlocked && !post.isOwner;
-          // A post whose feed card is a stage, poll, event, link... is drawn as
-          // a small copy of that card (GridCardTile). Locked words stay hidden.
-          const card = locked ? null : textCardOf(post);
-          const words = plainText(card ? wordsWithoutLinks(post.content || post.title || '') : post.content || post.title);
-          const tokenId = Number(String(post.id).replace(/^[a-z]+-/, '')) || 0;
-          const poster = (kind?: GridCardKind) => (
-            <>
-              <FormatMark kind={kind ?? 'text'} />
-              {pinChip ?? <span className="pmg-quote" aria-hidden>“</span>}
-              <span className="pmg-words">{locked ? <><Lock className="pmg-inline-lock" />{t('profile.lockedPost', 'Locked post')}</> : words}</span>
-              <span className="pmg-meta pmg-stats">
-                <span><MessageSquare />{compact(post.stats?.comments)}</span>
-                <span><ThumbsUp />{compact(post.stats?.likes)}</span>
-              </span>
-            </>
-          );
-          if (card) {
-            return (
-              <button key={entry.key} {...tileProps(entry)} type="button" data-tile="text" data-card={card.kind} className="pmg-tile pmg-poster pmg-text" disabled={entry.isOptimistic} onClick={openThis} aria-label={words.slice(0, 80) || post.title || t('profile.tabs.posts', 'Post')}>
-                <GridCardFace card={card} tokenId={tokenId} quotedPost={post.quotedPost} words={words} chip={pinChip ?? undefined} fallback={poster(card.kind)} />
-                {grip(entry)}
-              </button>
-            );
-          }
           return (
-            <button key={entry.key} {...tileProps(entry)} type="button" data-tile="text" className="pmg-tile pmg-poster pmg-text" disabled={entry.isOptimistic} onClick={openThis} aria-label={words.slice(0, 80)} data-soft={postBgVariant(post.id, 3)} {...(entry.isRepost ? {} : postBgHostProps(bgFor(post.id), post.id))}>
-              {!entry.isRepost && <PostBgLayer bg={bgFor(post.id)} seed={post.id} />}
-              {locked || entry.isOptimistic || tokenId <= 0
-                ? poster()
-                : <GridPollProbe tokenId={tokenId} words={words} chip={pinChip ?? undefined} poster={poster()} fallback={poster('poll')} />}
-              {grip(entry)}
-            </button>
+            <TextGridTile key={entry.key} entry={entry} post={post} bg={bgFor(post.id)} chip={pinChip}
+              grip={grip(entry)} tileProps={tileProps(entry)} onOpen={openThis} />
           );
         })}
       </div>
