@@ -113,4 +113,3 @@ function protect(source) {
     return restored;
   } };
 }
-
