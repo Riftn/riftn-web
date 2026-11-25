@@ -767,10 +767,10 @@ export function NotesStrip() {
 
 // ── Status row ───────────────────────────────────────────────────────────
 // Statuses (notes) from people you follow sit in one row at the top of Chat,
-// under the tabs and above the chat cards: a white thought cloud over each
+// under the tabs and above the chat cards: a thought cloud over each
 // face, yours first so you can post one.
 
-const CLOUD_STYLE = { background: '#fff', color: '#0b0b0c', boxShadow: '0 0 0 1px var(--kit-hairline), var(--status-cloud-shadow, 0 4px 14px rgb(0 0 0 / 0.28))' } as const;
+const CLOUD_STYLE = { background: 'var(--kit-primary-bg)', color: 'var(--kit-primary-ink)', boxShadow: '0 0 0 1px var(--kit-hairline), var(--status-cloud-shadow, 0 4px 14px rgb(0 0 0 / 0.28))' } as const;
 
 function cloudText(note: Note | null): string {
   if (!note) return '';
@@ -792,7 +792,7 @@ function StatusTile({ author, note, own, label, onClick }: { author: StoryAuthor
         {words && (
           <>
             <span style={{ ...CLOUD_STYLE, borderRadius: 16 }} className="max-w-[86px] shrink-0 px-2.5 py-[7px]">
-              <span className="line-clamp-2 break-words text-[11.5px] font-semibold leading-[1.25]" style={{ color: own && !note ? '#71717a' : '#0b0b0c' }}>{words}</span>
+              <span className="line-clamp-2 break-words text-[11.5px] font-semibold leading-[1.25]">{words}</span>
             </span>
             <span aria-hidden className="flex w-full shrink-0 flex-col items-start pl-[26px]">
               <span style={{ ...CLOUD_STYLE, borderRadius: 9999 }} className="mt-0.5 h-2 w-2" />
