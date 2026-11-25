@@ -9,7 +9,7 @@ export function badgeTierLabel(tier: string, language?: string): string {
   const index = labels.en.indexOf(canonicalTierName(tier));
   if (index < 0) return tier;
 
-  const locale = language?.toLowerCase().replaceAll('-', '_') ?? 'en';
+  const locale = language?.toLowerCase().replace(/-/g, '_') ?? 'en';
   const base = locale.split('_')[0];
   return translations[locale]?.[index] ?? translations[base]?.[index] ?? labels.en[index];
 }
