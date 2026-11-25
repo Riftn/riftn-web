@@ -8,10 +8,10 @@
  * person's photo or a colour they picked, tap or swipe through everyone's,
  * reply or heart at the bottom.
  */
-import { useCallback, useContext, useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { lazy, Suspense, useCallback, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { ChevronDown, Heart, Loader2, MapPin, Music2, Play, Plus, SendHorizontal, X } from 'lucide-react';
+import { ChevronDown, Eye, Heart, Loader2, MapPin, Music2, Play, Plus, SendHorizontal, X } from 'lucide-react';
 import Languages from '@/components/ui/cut-icons/language';
 import { supabase } from '@/integrations/supabase/client';
 import { CachedPageActiveContext } from '@/contexts/CachedPageActiveContext';
@@ -32,22 +32,35 @@ import {
   type Note, type NoteEntry, type NoteInput,
 } from '@/lib/api/dehub/notes';
 import { BoldText, stripBold } from '@/lib/bold-markup';
+import { activityMenuEvents, useActivityMenu } from '@/hooks/use-activity-menu';
+import { getActivityShelfPreferences, setActivityBarHidden, useActivityShelfPreferences } from '@/lib/activity-shelf-preferences';
+
+const StatusMenu = lazy(() => import('../stories/ActivityShelfMenu').then(module => ({ default: module.ActivityShelfMenu })));
+const statusKey = (entry: NoteEntry) => `status:${entry.note.id}`;
+const visibleNotes = (notes: NoteEntry[], dismissed: string[]) => notes.filter(entry => !dismissed.includes(statusKey(entry)));
 
 // A tiny shared store instead of react-query, so the row also renders where
 // there is no QueryClientProvider (tests, the state gallery).
 type NotesData = { mine: NoteEntry | null; notes: NoteEntry[] };
 let notesData: NotesData | null = null;
 let notesFetchedAt = 0;
+let notesRequest = 0;
 let activeNotesReaders = 0;
 let notesRefreshTimer: ReturnType<typeof setInterval> | undefined;
 const listeners = new Set<() => void>();
 const emit = () => listeners.forEach(l => l());
 export function refreshNotes(): void {
   notesFetchedAt = Date.now();
-  getNotes().then(d => { notesData = d; emit(); }).catch(() => {});
+  const request = ++notesRequest;
+  getNotes().then(d => {
+    if (request !== notesRequest) return;
+    notesData = d;
+    emit();
+  }).catch(() => {});
 }
 export function useNotes({ enabled = true, refreshOnStart = false } = {}): NotesData | null {
   const pageActive = useContext(CachedPageActiveContext);
+  const { dismissed } = useActivityShelfPreferences();
   const data = useSyncExternalStore(
     useCallback((l: () => void) => { listeners.add(l); return () => { listeners.delete(l); }; }, []),
     () => notesData,
@@ -66,7 +79,7 @@ export function useNotes({ enabled = true, refreshOnStart = false } = {}): Notes
       }
     };
   }, [enabled, pageActive, refreshOnStart]);
-  return data;
+  return useMemo(() => data ? { ...data, notes: visibleNotes(data.notes, dismissed) } : null, [data, dismissed]);
 }
 
 const nameOf = (a: StoryAuthor) => a.displayName || a.username || `${a.address.slice(0, 6)}…`;
@@ -780,14 +793,17 @@ function cloudText(note: Note | null): string {
   return note.gifUrl ? 'GIF' : '';
 }
 
-function StatusTile({ author, note, own, label, onClick }: { author: StoryAuthor; note: Note | null; own?: boolean; label: string; onClick: () => void }) {
+function StatusTile({ author, note, own, label, onClick, onMenu }: {
+  author: StoryAuthor; note: Note | null; own?: boolean; label: string; onClick: () => void;
+  onMenu: Parameters<typeof activityMenuEvents>[0];
+}) {
   const { t } = useTranslation();
   const avatar = buildAvatarUrl(author.address, author.avatarImageUrl, 120);
   const said = useNoteWords(note?.text, own).shown;
   const words = (note?.text ? said : cloudText(note)) || (own ? t('notes.whatsUp', { defaultValue: 'What\u2019s up?' }) : '');
   const gif = note?.gifUrl || null;
   return (
-    <button type="button" onClick={onClick} data-status-tile={own ? 'own' : ''} className="flex w-[88px] shrink-0 flex-col items-center text-center">
+    <button type="button" onClick={onClick} {...activityMenuEvents(onMenu)} data-status-tile={own ? 'own' : ''} className="flex w-[88px] shrink-0 flex-col items-center text-center">
       <span className="flex min-h-[62px] w-full flex-col items-center justify-end pt-1">
         {words && (
           <>
@@ -828,6 +844,8 @@ export function StatusRow({ me }: { me: StoryAuthor | null }) {
   const mine = data?.mine ?? null;
   const notes = data?.notes ?? [];
   const self = mine?.author ?? me;
+  const { statusesHidden } = useActivityShelfPreferences();
+  const { request, open, close } = useActivityMenu();
   const statusScrollCleanup = useRef<(() => void) | null>(null);
   const bindStatusScroll = useCallback((row: HTMLDivElement | null) => {
     statusScrollCleanup.current?.();
@@ -844,13 +862,22 @@ export function StatusRow({ me }: { me: StoryAuthor | null }) {
     statusScrollCleanup.current = () => row.removeEventListener('wheel', scrollSideways);
   }, []);
   if (!self) return null;
+  if (statusesHidden) {
+    return <button type="button" data-kit-chip data-size="sm" onClick={() => { close(); setActivityBarHidden(false, 'status'); }}>
+      <Eye size={16} aria-hidden />{t('notes.showStatusBar', 'Show status bar')}
+    </button>;
+  }
   return (
-    <div ref={bindStatusScroll} data-status-row className="-mx-0.5 flex gap-1 overflow-x-auto px-0.5 pb-1 pt-0.5 [scrollbar-width:none] [mask-image:linear-gradient(90deg,#000_calc(100%-28px),transparent)]">
-      <StatusTile own author={self} note={mine?.note ?? null} label={t('notes.yourStatus', { defaultValue: 'Your status' })} onClick={() => openNotesSheet()} />
-      {notes.map(entry => (
-        <StatusTile key={entry.note.id} author={entry.author} note={entry.note} label={nameOf(entry.author)} onClick={() => openNotesSheet(entry)} />
-      ))}
-    </div>
+    <>
+      <div ref={bindStatusScroll} data-status-row {...activityMenuEvents(open)} className="-mx-0.5 flex gap-1 overflow-x-auto px-0.5 pb-1 pt-0.5 [scrollbar-width:none] [mask-image:linear-gradient(90deg,#000_calc(100%-28px),transparent)]">
+        <StatusTile own author={self} note={mine?.note ?? null} label={t('notes.yourStatus', { defaultValue: 'Your status' })} onClick={() => openNotesSheet()} onMenu={open} />
+        {notes.map(entry => (
+          <StatusTile key={entry.note.id} author={entry.author} note={entry.note} label={nameOf(entry.author)} onClick={() => openNotesSheet(entry)}
+            onMenu={event => open(event, { kind: 'status', ids: [statusKey(entry)], open: () => openNotesSheet(entry), creator: { address: entry.author.address, name: nameOf(entry.author) } })} />
+        ))}
+      </div>
+      {request !== undefined && <Suspense fallback={null}><StatusMenu request={request} onClose={close} bar="status" onModerated={refreshNotes} /></Suspense>}
+    </>
   );
 }
 
@@ -1014,7 +1041,7 @@ export function NotesSheetHost({ me, onMessage }: { me?: StoryAuthor | null; onM
     setWriting(false);
     if (!tapped) { setViewing(null); return; }
     // The list is taken once, so a refresh mid-view never moves the page.
-    const list = notesData?.notes ?? [];
+    const list = visibleNotes(notesData?.notes ?? [], getActivityShelfPreferences().dismissed);
     const at = list.findIndex(e => e.note.id === tapped.note.id);
     setViewing(at >= 0 ? { entries: list, start: at } : { entries: [tapped], start: 0 });
   }, [open]);
