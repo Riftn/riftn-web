@@ -196,10 +196,9 @@ describe('article share tags for browser-shaped previewers', () => {
   }
 
   it("the app shell for an article carries the article's title and banner", async () => {
-    const post = manifest.find((p) => p.slug === NEW_SLUG)!;
     const html = await shell(`/guides/${NEW_SLUG}?ref=ABC`);
     expect(html).toContain('<div id="root"');
-    expect(meta(html, 'og:image')).toContain(post.bannerImage!);
+    expect(meta(html, 'og:image')).toBe('https://riftn.com/_og/blog-card/' + NEW_SLUG + '.jpg');
     expect(meta(html, 'twitter:image')).toBe(meta(html, 'og:image'));
     expect(meta(html, 'og:title')).not.toBe('Riftn');
     expect(html).toContain('<meta property="og:type" content="article"');
