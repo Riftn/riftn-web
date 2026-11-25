@@ -41,6 +41,7 @@ import { StageCoverArt } from '@/components/app/stages/StageCoverArt';
 import { usePoll } from '@/hooks/use-polls';
 import { useCommunity } from '@/hooks/use-communities';
 import { useInvitePreview } from '@/hooks/use-community-admin';
+import { useStoreById, useStoreListing } from '@/hooks/use-stores';
 import { getAccountByUsername } from '@/lib/api/dehub/users';
 import { getNFTInfo } from '@/lib/api/dehub';
 import type { DeHubNFT } from '@/lib/api/dehub/types';
@@ -372,6 +373,37 @@ function InviteFace({ code, chip, fallback }: FaceProps & { code: string }) {
   );
 }
 
+function ListingFace({ listingId, chip, fallback }: FaceProps & { listingId: string }) {
+  const { data: listing } = useStoreListing(listingId);
+  if (!listing) return <>{fallback}</>;
+  const image = ((listing.images as string[]) || [])[0];
+  const price = Number(listing.price);
+  return (
+    <CoverFace
+      kind="shop"
+      chip={chip}
+      title={listing.title}
+      sub={price > 0 ? `$${price.toLocaleString(undefined, { maximumFractionDigits: 2 })}` : (listing as { stores?: { name?: string } }).stores?.name}
+      cover={image ? <img src={thumb(image)} alt="" loading="lazy" decoding="async" /> : null}
+    />
+  );
+}
+
+function StoreFace({ storeId, chip, fallback }: FaceProps & { storeId: string }) {
+  const { t } = useTranslation();
+  const { data: store } = useStoreById(storeId);
+  if (!store) return <>{fallback}</>;
+  const art = store.banner_url || store.avatar_url;
+  return (
+    <CoverFace
+      kind="shop"
+      chip={chip}
+      title={store.name || t('stores.store', 'Store')}
+      cover={art ? <img src={storageImage(art, deviceWidth(260))} alt="" loading="lazy" decoding="async" /> : null}
+    />
+  );
+}
+
 function ProfileFace({ username, chip, fallback }: FaceProps & { username: string }) {
   // Same key as ProfileLinkEmbed.
   const { data: user } = useQuery({
@@ -419,7 +451,8 @@ export function GridCardFace({ card, tokenId, quotedPost, ...face }: GridCardTil
       if (link?.code) return <InviteFace {...face} code={link.code} />;
       return link?.slug ? <CommunityFace {...face} slug={link.slug} /> : <>{face.fallback}</>;
     case 'shop':
-      return <>{face.fallback}</>;
+      if (link?.listingId) return <ListingFace {...face} listingId={link.listingId} />;
+      return link?.storeId ? <StoreFace {...face} storeId={link.storeId} /> : <>{face.fallback}</>;
     case 'sharedPost':
       return link?.tokenId ? <SharedPostFace {...face} tokenId={link.tokenId} /> : <>{face.fallback}</>;
     case 'profile':
