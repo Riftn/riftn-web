@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Rediger video", "hiddenTag": "Skjult", "tapToEdit": "Tryk for at redigere", "cover": "Dæksel", "trim": "Beskær", "mirror": "Spejlvend", "rotate": "Roter", "hide": "Skjul", "timer": "Timer", "sheetTitleAny": "Rediger før afsendelse", "close": "Luk", "replace": "Erstat", "hiddenUntilTap": "Skjult, indtil de trykker på det", "pause": "Pause", "play": "Afspil video", "mute": "Slå lyd fra", "unmute": "Slå lyd til", "scrub": "Gå frem og tilbage i videoen", "addMore": "Tilføj billeder eller videoer", "trimAria": "Træk i enderne for at trimme", "coverAria": "Tryk på et billede for at vælge det som forsidebillede", "coverHint": "Tryk på et billede for at vælge det som forsidebillede", "coverOwn": "Dit billede", "coverAuto": "Auto", "uploadCover": "Upload et forsidebillede", "mirrored": "Spejlet", "original": "Original", "rotate90": "Roter 90°", "showNormally": "Vis normalt", "showNormallyBody": "De ser det med det samme", "hideUntilTap": "Skjul, indtil der trykkes på det", "hideUntilTapBody": "Sløret, indtil de trykker på det", "hidePrice": "Skjul bag en pris", "hidePriceBody": "Sløret, indtil de betaler dig", "priceUnavailable": "Ikke i denne chat", "timerOff": "Slået fra", "timerOffBody": "Det forbliver i chatten.", "timerViewBody": "Forsvinder for jer begge, når de har set det.", "confirm": "Bekræft", "lockedFor": "Lås op for {{value1}} tokens", "lockedForUsd": "Lås op for {{value1}}", "editItem": "Rediger element {{value1}}", "kept": "{{time}} beholdt", "timerTimeBody": "Forsvinder for jer begge {{value1}}, når du har sendt det."},
+  "dmVideo": {"edit": "Rediger video", "hiddenTag": "Skjult", "tapToEdit": "Tryk for at redigere", "cover": "Dæksel", "trim": "Beskær", "mirror": "Spejlvend", "rotate": "Roter", "hide": "Skjul", "timer": "Timer", "sheetTitleAny": "Rediger før afsendelse", "close": "Luk", "replace": "Erstat", "hiddenUntilTap": "Skjult, indtil de trykker på det", "pause": "Pause", "play": "Afspil video", "mute": "Slå lyd fra", "unmute": "Slå lyd til", "scrub": "Gå frem og tilbage i videoen", "addMore": "Tilføj billeder eller videoer", "trimAria": "Træk i enderne for at trimme", "coverAria": "Tryk på et billede for at vælge det som forsidebillede", "coverHint": "Tryk på et billede for at vælge det som forsidebillede", "coverOwn": "Dit billede", "coverAuto": "Auto", "uploadCover": "Upload et forsidebillede", "mirrored": "Spejlet", "original": "Original", "rotate90": "Roter 90°", "showNormally": "Vis normalt", "showNormallyBody": "De ser det med det samme", "hideUntilTap": "Skjul, indtil der trykkes på det", "hideUntilTapBody": "Sløret, indtil de trykker på det", "hidePrice": "Skjul bag en pris", "hidePriceBody": "Sløret, indtil de betaler dig", "priceUnavailable": "Ikke i denne chat", "timerOff": "Slået fra", "timerOffBody": "Det forbliver i chatten.", "timerViewBody": "Forsvinder for jer begge, når de har set det.", "confirm": "Bekræft", "lockedFor": "Lås op for {{value1}} tokens", "lockedForUsd": "Lås op for {{value1}}", "editItem": "Rediger element {{value1}}", "kept": "{{time}} beholdt", "timerTimeBody": "Forsvinder for jer begge {{value1}}, når du har sendt det.", "destruct": {"3600":"1 time","43200":"12 timer","86400":"1 dag","604800":"1 uge","31536000":"1 år","view":"1 visning"}, "destructShort": {"view":"1 visning"}, "destructSecs": "{{n}} sek"},
   "postBg": {
     "addMedia": "Tilføj et billede, en GIF eller en video",
     "changeMedia": "Skift billede, GIF eller video",
@@ -664,7 +664,9 @@
       "main": "Primært",
       "money": "Penge",
       "riftn": "Riftn"
-    }
+    },
+    "moveGroupHint": "Slip på en anden fane for at flytte den dertil",
+    "reorderHintGroups": "Hold og træk et ikon for at omarrangere det, eller slip det på en anden fane for at flytte det"
   },
   "feed": {
     "viewProfile": "Se profilen for {{name}}",
@@ -1320,7 +1322,12 @@
     "menuLayoutSectionsDesc": "Alle sider på én gang under gruppeoverskrifter",
     "menuLayoutFoldersDesc": "Dine primære sider og derefter en mappe for hver gruppe",
     "publicChatInBar": "Offentlig chat i bundlinjen",
-    "publicChatInBarDesc": "Ét tryk til Offentlig chat fra linjen nederst på skærmen"
+    "publicChatInBarDesc": "Ét tryk til Offentlig chat fra linjen nederst på skærmen",
+    "notificationShowCount": "Vis tallet på klokken",
+    "notificationShowCountDesc": "Se hvor mange notifikationer der er ulæste i stedet for bare lyset",
+    "messagesShowCount": "Vis tallet på Beskeder",
+    "messagesShowCountDesc": "Se hvor mange beskeder der er ulæste i stedet for bare lyset",
+    "chatTextSize": "Tekststørrelse i chat"
   },
   "common": {
     "confirm": "Bekræft",
@@ -1353,7 +1360,8 @@
     "next": "Næste",
     "previous": "Tidligere",
     "redo": "Annuller fortryd",
-    "remove": "Fjern"
+    "remove": "Fjern",
+    "copy": "Kopiér"
   },
   "tip": {
     "title": "Send drikkepenge",
@@ -1660,7 +1668,8 @@
     "roomSettings": "Rumindstillinger",
     "messagePinned": "Besked fastgjort",
     "messageUnpinned": "Besked frigjort",
-    "online": "{{count}}online"
+    "online": "{{count}}online",
+    "onlineHint": "{{count}} personer er i denne chat lige nu"
   },
   "aiChat": {
     "title": "Assistent",
@@ -2338,7 +2347,11 @@
     "sending": "Sender",
     "retrySend": "Prøv igen",
     "discardSend": "Fjern",
-    "notSent": "Ikke sendt"
+    "notSent": "Ikke sendt",
+    "unreadMarkerOne": "1 ulæst besked",
+    "unreadMarkerMany": "{{value}} ulæste beskeder",
+    "jumpToUnread": "Gå til første ulæste besked",
+    "jumpToLatest": "Gå til seneste besked"
   },
   "music": {
     "listeningCount_one": "{{count}} lytter",
@@ -4058,7 +4071,8 @@
       "memberCount": "{{n}} medlemmer",
       "approvalNote": "En administrator skal godkende din anmodning, før du kan deltage."
     },
-    "bannedFromCommunity": "Du er udelukket fra dette fællesskab"
+    "bannedFromCommunity": "Du er udelukket fra dette fællesskab",
+    "newChat": {"channelRow":"Kanal · {{formattedCount}} medlemmer","groupRow":"Gruppe · {{formattedCount}} medlemmer","newChannel":"Ny kanal","newGroup":"Ny gruppe","channelName":"Kanalnavn","groupName":"Gruppenavn","description":"Hvad handler det om? (valgfrit)","whoCanJoin":"Hvem kan deltage","public":"Offentlig","publicDetail":"Alle kan finde den og deltage","inviteOnly":"Kun med invitation","private":"Privat","privateDetail":"Folk deltager med din invitation eller godkendelse","entry":"Adgang","free":"Gratis","freeDetail":"Gratis at deltage","paid":"Betalt","paidDetail":"Én betaling i tokens, direkte til dig","price":"Pris i tokens","channelNote":"Kun du og dine administratorer kan skrive. Medlemmer læser og reagerer.","createChannel":"Opret kanal","createGroup":"Opret gruppe","message":"Ny besked","messageDetail":"En privat chat med én person","groupDetail":"Chat med mange, offentligt eller privat","channelDetail":"Send ud til følgere, gratis eller betalt","title":"Start noget"}
   },
   "prompt": {
     "seoTitle": "Styr dit feed | Riftn",
@@ -12836,7 +12850,8 @@
     "shareKindCommunity": "Fællesskab",
     "shareGroups": "Grupper",
     "shareKindChannel": "Kanal",
-    "reportMessage": "Anmeld besked"
+    "reportMessage": "Anmeld besked",
+    "attachAnything": "Vedhæft et billede, en video, lyd eller en fil"
   },
   "credits": {
     "earningsWorth": "{{amount}} værd",
@@ -20983,5 +20998,17 @@
     "addQuestion": "Tilføj spørgsmål",
     "pointsLabel": "Point pr. rigtigt svar",
     "attachFailed": "Dit opslag er oppe, men quizzen kunne ikke tilføjes"
-  }
+  },
+  "ownKeys": {"working":"Arbejder","invalid":"Afvist, erstat den","noCredit":"Ingen kredit tilbage","disabled":"Slået fra af Riftn","failed":"Noget gik galt. Prøv igen.","savedNoCredit":"{{name}}-nøgle gemt, men kontoen har ingen kredit tilbage.","saved":"{{name}}-nøgle gemt. Værktøjer på {{name}} bruger nu din konto.","removed":"{{name}}-nøgle fjernet.","title":"Dine egne AI-nøgler","description":"Tilføj en nøgle fra en AI-udbyder, så kører Creator-værktøjer på din konto i stedet. Riftn opkræver intet for de job. Nøgler er krypterede og vises aldrig igen.","check":"Tjek","remove":"Fjern","add":"Tilføj nøgle","paste":"Indsæt din {{name}}-nøgle","save":"Gem","cancel":"Annuller","getKey":"Få en {{name}}-nøgle","showLess":"Vis kun mine nøgler","addAnother":"Tilføj en anden udbyder"},
+  "resetWallet": {"mismatch":"Kunne ikke matche adgangskoderne","tooShort":"Adgangskoden skal være mindst {{count}} tegn","breached":"Denne adgangskode er dukket op i et datalæk. Vælg en anden","weak":"Vælg en stærkere adgangskode (bland bogstaver, tal og symboler)","failed":"Kunne ikke nulstille din tegnebog. Intet blev flyttet. Prøv igen.","twoFactor":"Indtast koden fra din godkendelsesapp for at flytte din konto.","funds":"Tokens, NFT'er og andre saldi flyttes ikke. De bliver på den gamle adresse. Hvis du stadig kan åbne den gamle tegnebog, så send dem ud først.","doneTitle":"Din konto er på sin nye tegnebog","logOut":"Log ud","intro":"Laver en ny Riftn-tegnebog og flytter dit brugernavn, dine opslag, følgere og beskeder over på den. Brug dette, hvis din tegnebog er mistet, eller en anden har dens nøgle. Den gamle tegnebog holder op med at virke til login.","password":"Ny tegnebogsadgangskode (min. {{count}} tegn)","confirm":"Bekræft password","twoFactorPlaceholder":"Godkendelseskode","ack":"Jeg forstår, at mine gamle penge forbliver i den gamle tegnebog.","submit":"Nulstil tegnebog","title":"Nulstil tegnebog","rowDesc":"Mistet din tegnebog, eller har en anden dens nøgle? Flyt din konto til en ny tegnebog. Dit brugernavn, dine opslag og følgere følger med."},
+  "twoFactor": {"turnOn":"Tænd","wrongCode":"Det kode passer ikke. Prøv den nyeste i din app.","signingInAs":"Log ind som","signIn":"Log ind","trustDevice":"Spørg ikke igen på denne enhed i 30 dage","useBackupShort":"Brug en backup kode","useApp":"Brug min authenticator app","useAnotherShort":"Anden konto","lostEverything":"Mistet din telefon og dine backup koder? Kontakt support","turnedOff":"To-trins login er slået fra","introTitle":"Tilføj en anden lås","linkTitle":"Link din authenticator app","codesTitle":"Gem dine backup koder","newCodesTitle":"Få nye backup-koder","turnOff":"Slå fra","backupCodes":"Backup-koder"},
+  "chatTextSize": {"title":"Tekststørrelse"},
+  "notes": {"replyTo":"Svar til {{name}}…"},
+  "chatBulk": {"toolbar":"Valgte chats","selected":"{{count}} valgt","cancel":"Annuller","read":"Markér som læst","unread":"Markér som ulæst","reply":"Svar","delete":"Slet","replyHint":"Hver person får dette som en almindelig besked i sin egen chat.","replyPlaceholder":"Skriv en besked…","sendAll":"Send til {{count}}","partSent":"Sendt til {{ok}} af {{total}} chats","notSent":"Kunne ikke sende. Prøv igen."},
+  "chatTabs": {"addToTab":"Føj til fane","newWith":"Ny fane…","hide":"Skjul fane","edit":"Rediger faner","renameEdit":"Omdøb og rediger","addChats":"Tilføj chats","moveLeft":"Flyt til venstre","moveRight":"Flyt til højre","delete":"Slet fane","new":"Ny fane","editTab":"Rediger fane","create":"Opret fane","emoji":"Vælg en emoji","namePlaceholder":"Fanenavn","noEmoji":"Ingen emoji","sFriends":"Venner","sWork":"Arbejde","sTrading":"Handel","sCreators":"Skabere","sGaming":"Spil","chatsInTab":"Chats i denne fane","picked":"{{n}} valgt","deleteTitle":"Slet “{{name}}”?","deleteBody":"Fanen forsvinder. Dens chats bliver i Alle og beholder deres beskeder.","builtIn":"Indbygget","moveUp":"Flyt op","moveDown":"Flyt ned","alwaysOn":"Altid på","show":"Vis fane","emptyTitle":"{{name}} er tom","emptyBody":"Tilføj chats her, så bliver de også i Alle.","removedFrom":"Fjernet fra {{name}}","addedTo":"Føjet til {{name}}","kindPublic":"Offentlig","kindChannel":"Kanal","kindGroup":"Gruppér","kindCommunity":"Fællesskab","kindDirect":"Direkte","tooMany":"Du kan have op til 10 faner","deleted":"Slettede {{name}}"},
+  "msgSelect": {"partForwarded":"Videresendte {{ok}} af {{total}}","nothingToCopy":"Intet at kopiere i de valgte beskeder","toolbar":"Valgte beskeder","selected":"{{count}} valgt","copy":"Kopiér","forward":"Videresend","deleteSome":"Slet {{count}}"},
+  "dmSafety": {"notReal":"Dette er ikke den rigtige {{name}}.","neverLink":"Riftn-teamet vil aldrig sende dig en DM med et link til at ordne din profil eller tegnebog. Åbn ikke links, forbind ikke din tegnebog, og underskriv ikke noget. Bloker og anmeld denne konto."},
+  "post": {"destruct":{"offBody":"Opslaget bliver liggende.","onBody":"Opslaget sletter sig selv {{value1}} efter, det er lagt op."}},
+  "dmPaidLock": {"lockOnUsd":"Låst · {{price}}","lockVideo":"Lås video","lockPhoto":"Lås billede","lockCustom":"Andet","lockCustomUsdLabel":"Brugerdefineret pris i dollars","lockHint":"De ser det sløret, indtil de betaler dig. Låste filer er ikke end-to-end-krypterede."},
+  "chatReactions": {"oneNamed":"{{name}} reagerede med {{emoji}} på din besked","one":"Reagerede med {{emoji}} på din besked"}
 }

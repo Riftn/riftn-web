@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Edit video", "hiddenTag": "Tersembunyi", "tapToEdit": "Ketik untuk edit", "cover": "Kulit", "trim": "Potong", "mirror": "Cermin", "rotate": "Putar", "hide": "Sembunyi", "timer": "Pemasa", "sheetTitleAny": "Edit sebelum menghantar", "close": "Tutup", "replace": "Ganti", "hiddenUntilTap": "Disembunyikan sehingga mereka mengetuknya", "pause": "Jeda", "play": "Mainkan video", "mute": "Nyahaktifkan bunyi", "unmute": "Aktifkan bunyi", "scrub": "Tatal video", "addMore": "Tambah foto atau video", "trimAria": "Seret hujung untuk memotong", "coverAria": "Ketuk bingkai untuk menetapkan kulit", "coverHint": "Ketuk bingkai untuk menetapkan kulit", "coverOwn": "Gambar anda", "coverAuto": "Auto", "uploadCover": "Muat naik gambar kulit", "mirrored": "Dicerminkan", "original": "Asal", "rotate90": "Putar 90°", "showNormally": "Tunjuk seperti biasa", "showNormallyBody": "Mereka melihatnya serta-merta", "hideUntilTap": "Sembunyi sehingga diketuk", "hideUntilTapBody": "Dikaburkan sehingga mereka mengetuknya", "hidePrice": "Sembunyi di sebalik harga", "hidePriceBody": "Dikaburkan sehingga mereka membayar anda", "priceUnavailable": "Tiada dalam sembang ini", "timerOff": "Mati", "timerOffBody": "Ia kekal dalam sembang.", "timerViewBody": "Hilang untuk anda berdua sebaik sahaja mereka melihatnya.", "confirm": "Sahkan", "lockedFor": "Buka kunci untuk {{value1}} token", "lockedForUsd": "Buka kunci untuk {{value1}}", "editItem": "Edit item {{value1}}", "kept": "{{time}} disimpan", "timerTimeBody": "Hilang untuk anda berdua {{value1}} selepas anda menghantarnya."},
+  "dmVideo": {"edit": "Edit video", "hiddenTag": "Tersembunyi", "tapToEdit": "Ketik untuk edit", "cover": "Kulit", "trim": "Potong", "mirror": "Cermin", "rotate": "Putar", "hide": "Sembunyi", "timer": "Pemasa", "sheetTitleAny": "Edit sebelum menghantar", "close": "Tutup", "replace": "Ganti", "hiddenUntilTap": "Disembunyikan sehingga mereka mengetuknya", "pause": "Jeda", "play": "Mainkan video", "mute": "Nyahaktifkan bunyi", "unmute": "Aktifkan bunyi", "scrub": "Tatal video", "addMore": "Tambah foto atau video", "trimAria": "Seret hujung untuk memotong", "coverAria": "Ketuk bingkai untuk menetapkan kulit", "coverHint": "Ketuk bingkai untuk menetapkan kulit", "coverOwn": "Gambar anda", "coverAuto": "Auto", "uploadCover": "Muat naik gambar kulit", "mirrored": "Dicerminkan", "original": "Asal", "rotate90": "Putar 90°", "showNormally": "Tunjuk seperti biasa", "showNormallyBody": "Mereka melihatnya serta-merta", "hideUntilTap": "Sembunyi sehingga diketuk", "hideUntilTapBody": "Dikaburkan sehingga mereka mengetuknya", "hidePrice": "Sembunyi di sebalik harga", "hidePriceBody": "Dikaburkan sehingga mereka membayar anda", "priceUnavailable": "Tiada dalam sembang ini", "timerOff": "Mati", "timerOffBody": "Ia kekal dalam sembang.", "timerViewBody": "Hilang untuk anda berdua sebaik sahaja mereka melihatnya.", "confirm": "Sahkan", "lockedFor": "Buka kunci untuk {{value1}} token", "lockedForUsd": "Buka kunci untuk {{value1}}", "editItem": "Edit item {{value1}}", "kept": "{{time}} disimpan", "timerTimeBody": "Hilang untuk anda berdua {{value1}} selepas anda menghantarnya.", "destruct": {"3600":"1 jam","43200":"12 jam","86400":"1 hari","604800":"1 minggu","31536000":"1 tahun","view":"1 tontonan"}, "destructShort": {"view":"1 tontonan"}, "destructSecs": "{{n}} saat"},
   "postBg": {
     "addMedia": "Tambah gambar, GIF atau video",
     "changeMedia": "Tukar gambar, GIF atau video",
@@ -664,7 +664,9 @@
       "main": "Utama",
       "money": "Wang",
       "riftn": "Riftn"
-    }
+    },
+    "moveGroupHint": "Lepaskan pada tab lain untuk memindahkannya ke sana",
+    "reorderHintGroups": "Tahan dan seret mana-mana ikon untuk menyusun semula, atau ke tab lain untuk mengalihkannya"
   },
   "feed": {
     "viewProfile": "Lihat profil {{name}}",
@@ -1321,7 +1323,12 @@
     "menuLayoutSectionsDesc": "Semua halaman sekali gus, di bawah pengepala kumpulan",
     "menuLayoutFoldersDesc": "Halaman utama anda, kemudian folder untuk setiap kumpulan",
     "publicChatInBar": "Sembang Awam di bar bawah",
-    "publicChatInBarDesc": "Satu ketikan ke Sembang Awam dari bar di bahagian bawah skrin"
+    "publicChatInBarDesc": "Satu ketikan ke Sembang Awam dari bar di bahagian bawah skrin",
+    "notificationShowCount": "Tunjukkan nombor pada loceng",
+    "notificationShowCountDesc": "Lihat berapa banyak pemberitahuan belum dibaca dan bukan sekadar cahaya",
+    "messagesShowCount": "Tunjukkan nombor pada Mesej",
+    "messagesShowCountDesc": "Lihat berapa banyak mesej belum dibaca dan bukan sekadar cahaya",
+    "chatTextSize": "Saiz teks sembang"
   },
   "common": {
     "confirm": "Sahkan",
@@ -1917,7 +1924,8 @@
     "roomSettings": "Tetapan bilik",
     "messagePinned": "Mesej disemat",
     "messageUnpinned": "Mesej dinyahsemat",
-    "online": "{{count}} dalam talian"
+    "online": "{{count}} dalam talian",
+    "onlineHint": "{{count}} orang berada dalam sembang ini sekarang"
   },
   "aiChat": {
     "title": "Pembantu",
@@ -2595,7 +2603,11 @@
     "sending": "Menghantar",
     "retrySend": "Cuba semula",
     "discardSend": "Alih keluar",
-    "notSent": "Tidak dihantar"
+    "notSent": "Tidak dihantar",
+    "unreadMarkerOne": "1 mesej belum dibaca",
+    "unreadMarkerMany": "{{value}} mesej belum dibaca",
+    "jumpToUnread": "Lompat ke mesej pertama yang belum dibaca",
+    "jumpToLatest": "Lompat ke mesej terkini"
   },
   "music": {
     "listeningCount_one": "{{count}} mendengar",
@@ -4321,7 +4333,8 @@
       "memberCount": "{{n}} ahli",
       "approvalNote": "Pengurus perlu mengesahkan permintaan anda sebelum anda boleh menyertai."
     },
-    "bannedFromCommunity": "Anda diblok oleh komuniti ini"
+    "bannedFromCommunity": "Anda diblok oleh komuniti ini",
+    "newChat": {"channelRow":"Saluran · {{formattedCount}} ahli","groupRow":"Kumpulan · {{formattedCount}} ahli","newChannel":"Saluran baharu","newGroup":"Kumpulan baharu","channelName":"Nama saluran","groupName":"Nama kumpulan","description":"Tentang apa? (pilihan)","whoCanJoin":"Siapa boleh sertai","public":"Awam","publicDetail":"Sesiapa sahaja boleh cari dan sertai","inviteOnly":"Jemputan sahaja","private":"Peribadi","privateDetail":"Orang sertai melalui jemputan atau kelulusan anda","entry":"Kemasukan","free":"Percuma","freeDetail":"Percuma untuk sertai","paid":"Dibayar","paidDetail":"Satu bayaran dalam token, terus kepada anda","price":"Harga dalam token","channelNote":"Hanya anda dan admin anda boleh menyiarkan. Ahli membaca dan memberi reaksi.","createChannel":"Cipta saluran","createGroup":"Cipta kumpulan","message":"Mesej baharu","messageDetail":"Sembang peribadi dengan seorang","groupDetail":"Sembang dengan ramai orang, awam atau peribadi","channelDetail":"Siarkan kepada pengikut, percuma atau berbayar","title":"Mulakan sesuatu"}
   },
   "prompt": {
     "seoTitle": "Gesaan suapan anda | Riftn",
@@ -13099,7 +13112,8 @@
     "shareKindCommunity": "Komuniti",
     "shareGroups": "Kumpulan",
     "shareKindChannel": "Saluran",
-    "reportMessage": "Laporkan mesej"
+    "reportMessage": "Laporkan mesej",
+    "attachAnything": "Lampirkan foto, video, audio atau fail"
   },
   "credits": {
     "earningsWorth": "Bernilai {{amount}}",
@@ -21137,5 +21151,17 @@
     "promptCatchUp": "Kemas kini saya tentang apa yang {{handle}} hantar baru-baru ini",
     "promptMessage": "Bantu saya tulis mesej kepada {{handle}}",
     "promptAbout": "Tentang {{handle}}: {{question}}"
-  }
+  },
+  "ownKeys": {"working":"Sedang bekerja","invalid":"Ditolak, gantikannya","noCredit":"Kredit habis","disabled":"Dimatikan oleh Riftn","failed":"Ada sesuatu yang tidak kena. Cuba lagi.","savedNoCredit":"Kunci {{name}} disimpan, tetapi kredit akaun telah habis.","saved":"Kunci {{name}} disimpan. Alat pada {{name}} kini menggunakan akaun anda.","removed":"Kunci {{name}} dibuang.","title":"Kunci AI anda sendiri","description":"Tambah kunci daripada penyedia AI dan alat Creator akan berjalan pada akaun anda. Riftn tidak mengenakan apa-apa caj untuk kerja tersebut. Kunci disulitkan dan tidak akan dipaparkan lagi.","check":"Semak","remove":"Alih keluar","add":"Tambah kunci","paste":"Tampal kunci {{name}} anda","save":"Simpan","cancel":"Batal","getKey":"Dapatkan kunci {{name}}","showLess":"Tunjukkan kunci saya sahaja","addAnother":"Tambah penyedia lain"},
+  "resetWallet": {"mismatch":"Kata laluan tidak cocok","tooShort":"Kata laluan mestilah sekurang-kurangnya {{count}} aksara","breached":"Kata laluan ini pernah muncul dalam kebocoran data. Pilih yang lain","weak":"Pilih kata laluan yang lebih kuat (campurkan huruf, nombor dan simbol)","failed":"Tidak dapat menetapkan semula dompet anda. Tiada apa-apa dipindahkan. Cuba lagi.","twoFactor":"Masukkan kod daripada aplikasi pengesah anda untuk memindahkan akaun anda.","funds":"Token, NFT dan baki lain tidak berpindah. Ia kekal di alamat lama. Jika anda masih boleh membuka dompet lama, hantarkannya keluar dahulu.","doneTitle":"Akaun anda kini menggunakan dompet baharunya","logOut":"Log keluar","intro":"Mencipta dompet Riftn baharu dan memindahkan nama pengguna, hantaran, pengikut dan mesej anda ke dalamnya. Gunakan ini jika dompet anda hilang atau orang lain mempunyai kuncinya. Dompet lama tidak lagi berfungsi untuk log masuk.","password":"Kata laluan dompet baharu (min {{count}} aksara)","confirm":"Sahkan kata laluan","twoFactorPlaceholder":"Kod pengesah","ack":"Saya faham bahawa dana lama saya tetap di dompet lama.","submit":"Tetapkan semula dompet","title":"Tetapkan semula dompet","rowDesc":"Dompet hilang, atau orang lain mempunyai kuncinya? Pindahkan akaun anda ke dompet baharu. Nama pengguna, hantaran dan pengikut anda ikut bersama."},
+  "twoFactor": {"turnOn":"Hidupkan","wrongCode":"Kod itu tidak sepadan. Cuba kod terbaru dalam aplikasi anda.","signingInAs":"Mendaftar masuk sebagai","signIn":"Daftar masuk","trustDevice":"Jangan tanya lagi pada peranti ini selama 30 hari","useBackupShort":"Gunakan kod sandaran","useApp":"Gunakan aplikasi pengesah saya","useAnotherShort":"Akaun berbeza","lostEverything":"Hilangkan telefon anda dan kod sandaran anda? Hubungi sokongan","turnedOff":"Daftar masuk dua langkah dimatikan","introTitle":"Tambah kunci kedua","linkTitle":"Sambungkan aplikasi pengesah anda","codesTitle":"Simpan kod sandaran anda","newCodesTitle":"Dapatkan kod sandaran baru","turnOff":"Matikan","backupCodes":"Kod sandaran"},
+  "chatTextSize": {"title":"Saiz teks"},
+  "notes": {"replyTo":"Balas kepada {{name}}…"},
+  "chatBulk": {"toolbar":"Sembang dipilih","selected":"{{count}} yang dipilih","cancel":"Batal","read":"Tanda dibaca","unread":"Tanda belum dibaca","reply":"Balasan","delete":"Padam","replyHint":"Setiap orang menerima ini sebagai mesej biasa dalam sembang mereka sendiri.","replyPlaceholder":"Tulis mesej…","sendAll":"Hantar kepada {{count}}","partSent":"Dihantar kepada {{ok}} daripada {{total}} sembang","notSent":"Tidak dapat menghantar. Cuba lagi."},
+  "chatTabs": {"addToTab":"Tambah ke tab","newWith":"Tab baharu…","hide":"Sembunyikan tab","edit":"Sunting tab","renameEdit":"Namakan semula dan sunting","addChats":"Tambah sembang","moveLeft":"Alih ke kiri","moveRight":"Alih ke kanan","delete":"Padam tab","new":"Tab baharu","editTab":"Sunting tab","create":"Cipta tab","emoji":"Pilih emoji","namePlaceholder":"Nama tab","noEmoji":"Tiada emoji","sFriends":"Rakan","sWork":"Kerja","sTrading":"Perdagangan","sCreators":"Pencipta","sGaming":"Permainan","chatsInTab":"Sembang dalam tab ini","picked":"{{n}} dipilih","deleteTitle":"Padam “{{name}}”?","deleteBody":"Tab akan hilang. Sembangnya kekal dalam Semua dan mengekalkan mesejnya.","builtIn":"Terbina dalam","chatCount":"{{n}} sembang","moveUp":"Pindah ke atas","moveDown":"Pindah ke bawah","alwaysOn":"Sentiasa dihidupkan","show":"Tunjukkan tab","emptyTitle":"{{name}} kosong","emptyBody":"Tambah sembang di sini dan ia kekal dalam Semua juga.","removedFrom":"Dibuang daripada {{name}}","addedTo":"Ditambah ke {{name}}","kindPublic":"Awam","kindChannel":"Saluran","kindGroup":"Kumpulan","kindCommunity":"Komuniti","kindDirect":"Langsung","tooMany":"Anda boleh mempunyai sehingga 10 tab","deleted":"{{name}} dipadam"},
+  "msgSelect": {"partForwarded":"Dimajukan {{ok}} daripada {{total}}","nothingToCopy":"Tiada apa-apa untuk disalin dalam mesej yang dipilih","toolbar":"Mesej dipilih","selected":"{{count}} yang dipilih","copy":"Salin","forward":"Majukan","deleteSome":"Padam {{count}}"},
+  "dmSafety": {"notReal":"Ini bukan {{name}} yang sebenar.","neverLink":"Pasukan Riftn tidak akan sekali-kali menghantar DM pautan kepada anda untuk membaiki profil atau dompet anda. Jangan buka pautan, sambungkan dompet atau tandatangan apa-apa. Sekat dan laporkan akaun ini."},
+  "post": {"destruct":{"offBody":"Hantaran kekal disiarkan.","onBody":"Hantaran akan memadam dirinya {{value1}} selepas disiarkan."}},
+  "dmPaidLock": {"lockOnUsd":"Dikunci · {{price}}","lockVideo":"Kunci video","lockPhoto":"Kunci foto","lockCustom":"Lain-lain","lockCustomUsdLabel":"Harga tersuai dalam dolar","lockHint":"Mereka melihatnya kabur sehingga mereka membayar anda. Fail yang dikunci tidak disulitkan hujung ke hujung."},
+  "chatReactions": {"oneNamed":"{{name}} memberi reaksi {{emoji}} kepada mesej anda","one":"Memberi reaksi {{emoji}} kepada mesej anda"}
 }

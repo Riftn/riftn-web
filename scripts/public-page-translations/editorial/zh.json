@@ -1,0 +1,8 @@
+{
+  "/guides/is-riftn-the-same-as-dehub": {
+    "title": "Riftn 和 DeHub 是同一个平台吗？是的，看看有哪些变化",
+    "h1": "Riftn 和 DeHub 是同一个平台吗？哪些变了，哪些没变",
+    "description": "Riftn 是 DeHub 的新名字。这个由用户拥有的开源社交网络保留了原有团队和账户，只更换了名称和网址。",
+    "md": "**是的。Riftn 是 DeHub 的新名字。** 这是同一个由用户拥有的开源社交网络，自 2021 年起由同一团队开发。名称和网址于 2026 年 11 月变更。您的账户、帖子和关注者保持不变。\n\n## 有哪些变化\n\n- **名称。** DeHub 现在叫 Riftn。\n- **网址。** dehub.io 已改为 [riftn.com](https://riftn.com)。旧链接会跳转到新网址上的对应页面。\n- **代币。** $RIFT 是 Riftn 的代币。如果您持有 DHB，原有余额会保留。代币上线交易后，只需登录一次即可领取。\n\n## 哪些保持不变\n\n- **账户。** 按照原来的方式登录即可。\n- **帖子、关注者、消息和钱包。** 这些内容都已保留。\n- **应用。** 您可以通过网页、Google Play 和 App Store 使用 Riftn。\n- **代码。** 项目仍然开源。\n\n## DeHub 为什么改名？\n\n作为重新推出计划的一部分，新名称于 2026 年 10 月提交社区讨论。详细原因见 [DeHub 的新篇章](/guides/dehub-next-chapter-riftn-bnb-recovery-relaunch)。\n\n## dehub.io 还能安全使用吗？\n\n可以。dehub.io 仍由我们管理，并会跳转到 riftn.com。登录前，请确认地址栏显示 riftn.com。\n\n## Riftn 与德保罗大学的 DeHUB 或罗文大学的 DEHub 有关吗？\n\n这两项大学服务碰巧与我们的旧名称相同。Riftn 与它们均无关联。\n\n## 如何开始\n\n第一次来？阅读 [什么是 Riftn？](/guides/what-is-dehub)，或者打开 [riftn.com](https://riftn.com) 看看。无需账户即可浏览。"
+  }
+}

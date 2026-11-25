@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "ערוך וידאו", "hiddenTag": "מוסתר", "tapToEdit": "הקש כדי לערוך", "cover": "כיסוי", "trim": "חיתוך", "mirror": "שיקוף", "rotate": "סיבוב", "hide": "הסתרה", "timer": "טיימר", "sheetTitleAny": "ערוך לפני השליחה", "close": "סגירה", "replace": "החלף", "hiddenUntilTap": "מוסתר עד להקשה", "pause": "השהיה", "play": "הפעל סרטון", "mute": "השתק", "unmute": "בטל השתקה", "scrub": "גלילה בסרטון", "addMore": "הוספת תמונות או סרטונים", "trimAria": "גרור את הקצוות כדי לחתוך", "coverAria": "הקש על פריים כדי לקבוע ככיסוי", "coverHint": "הקש על פריים כדי לקבוע ככיסוי", "coverOwn": "התמונה שלך", "coverAuto": "אוטומטי", "uploadCover": "העלאת תמונת כיסוי", "mirrored": "משוקף", "original": "מקור", "rotate90": "סיבוב 90°", "showNormally": "הצג כרגיל", "showNormallyBody": "הם רואים את זה מיד", "hideUntilTap": "הסתר עד להקשה", "hideUntilTapBody": "מטושטש עד להקשה", "hidePrice": "הסתר מאחורי מחיר", "hidePriceBody": "מטושטש עד לתשלום", "priceUnavailable": "לא בצ'אט הזה", "timerOff": "כבוי", "timerOffBody": "הוא נשאר בצ'אט.", "timerViewBody": "אחרי שהם ראו את זה, הוא נעלם לשניכם.", "confirm": "אשר", "lockedFor": "בטל נעילה עבור {{value1}} אסימונים", "lockedForUsd": "פתח נעילה ל-{{value1}}", "editItem": "ערוך פריט {{value1}}", "kept": "{{time}} נשמר", "timerTimeBody": "אחרי שתשלחו אותו, הוא נעלם לשניכם {{value1}}"},
+  "dmVideo": {"edit": "ערוך וידאו", "hiddenTag": "מוסתר", "tapToEdit": "הקש כדי לערוך", "cover": "כיסוי", "trim": "חיתוך", "mirror": "שיקוף", "rotate": "סיבוב", "hide": "הסתרה", "timer": "טיימר", "sheetTitleAny": "ערוך לפני השליחה", "close": "סגירה", "replace": "החלף", "hiddenUntilTap": "מוסתר עד להקשה", "pause": "השהיה", "play": "הפעל סרטון", "mute": "השתק", "unmute": "בטל השתקה", "scrub": "גלילה בסרטון", "addMore": "הוספת תמונות או סרטונים", "trimAria": "גרור את הקצוות כדי לחתוך", "coverAria": "הקש על פריים כדי לקבוע ככיסוי", "coverHint": "הקש על פריים כדי לקבוע ככיסוי", "coverOwn": "התמונה שלך", "coverAuto": "אוטומטי", "uploadCover": "העלאת תמונת כיסוי", "mirrored": "משוקף", "original": "מקור", "rotate90": "סיבוב 90°", "showNormally": "הצג כרגיל", "showNormallyBody": "הם רואים את זה מיד", "hideUntilTap": "הסתר עד להקשה", "hideUntilTapBody": "מטושטש עד להקשה", "hidePrice": "הסתר מאחורי מחיר", "hidePriceBody": "מטושטש עד לתשלום", "priceUnavailable": "לא בצ'אט הזה", "timerOff": "כבוי", "timerOffBody": "הוא נשאר בצ'אט.", "timerViewBody": "אחרי שהם ראו את זה, הוא נעלם לשניכם.", "confirm": "אשר", "lockedFor": "בטל נעילה עבור {{value1}} אסימונים", "lockedForUsd": "פתח נעילה ל-{{value1}}", "editItem": "ערוך פריט {{value1}}", "kept": "{{time}} נשמר", "timerTimeBody": "אחרי שתשלחו אותו, הוא נעלם לשניכם {{value1}}", "destruct": {"60":"דקה 1","3600":"שעה 1","43200":"12 שעות","86400":"יום 1","604800":"שבוע 1","31536000":"שנה 1","view":"צפייה 1"}, "destructShort": {"view":"צפייה 1"}, "destructSecs": "{{n}} שניות", "destructShortSecs": "{{n}} שניות"},
   "postBg": {
     "addMedia": "הוספת תמונה, GIF או סרטון",
     "changeMedia": "החלפת תמונה, GIF או סרטון",
@@ -664,7 +664,9 @@
       "main": "ראשי",
       "money": "כסף",
       "riftn": "Riftn"
-    }
+    },
+    "moveGroupHint": "הנמך על לשונית אחרת כדי להעביר אותה שם",
+    "reorderHintGroups": "חזק והגר סמל כלשהו כדי לשנות סדר, או על לשונית אחרת כדי להעביר אותו"
   },
   "feed": {
     "viewProfile": "הצגת הפרופיל של {{name}}",
@@ -1321,7 +1323,12 @@
     "menuLayoutSectionsDesc": "כל הדפים בבת אחת, תחת כותרות קבוצה",
     "menuLayoutFoldersDesc": "הדפים הראשיים שלך, ואז תיקייה לכל קבוצה",
     "publicChatInBar": "צ'אט ציבורי בסרגל התחתון",
-    "publicChatInBarDesc": "הקשה אחת לצ'אט הציבורי מהסרגל בתחתית המסך"
+    "publicChatInBarDesc": "הקשה אחת לצ'אט הציבורי מהסרגל בתחתית המסך",
+    "notificationShowCount": "הצג את המספר על הפעמון",
+    "notificationShowCountDesc": "ראה כמה התראות לא נקראו במקום רק את הזוהר",
+    "messagesShowCount": "הצג את המספר על הודעות",
+    "messagesShowCountDesc": "ראה כמה הודעות לא נקראו במקום רק את הזוהר",
+    "chatTextSize": "גודל טקסט בצ'אט"
   },
   "common": {
     "confirm": "אישור",
@@ -1354,7 +1361,8 @@
     "next": "הבא",
     "previous": "הקודם",
     "redo": "חזור על הפעולה",
-    "remove": "הסר"
+    "remove": "הסר",
+    "copy": "העתק"
   },
   "tip": {
     "title": "שלח טיפ",
@@ -1661,7 +1669,8 @@
     "roomSettings": "הגדרות חדר",
     "messagePinned": "ההודעה הוצמדה",
     "messageUnpinned": "ההודעה הוסרה מהצמדה",
-    "online": "{{count}} מחוברים"
+    "online": "{{count}} מחוברים",
+    "onlineHint": "{{count}} אנשים נמצאים בצ'אט הזה עכשיו"
   },
   "aiChat": {
     "title": "עוזר",
@@ -2339,7 +2348,11 @@
     "sending": "שולח",
     "retrySend": "נסו שוב",
     "discardSend": "הסר",
-    "notSent": "לא נשלחה"
+    "notSent": "לא נשלחה",
+    "unreadMarkerOne": "הודעה אחת שלא נקראה",
+    "unreadMarkerMany": "{{value}} הודעות שלא נקראו",
+    "jumpToUnread": "מעבר להודעה הראשונה שלא נקראה",
+    "jumpToLatest": "מעבר להודעה האחרונה"
   },
   "music": {
     "listeningCount_one": "{{count}} האזנה",
@@ -4069,7 +4082,8 @@
       "memberCount": "{{n}} חברים",
       "approvalNote": "המנהל צריך לאשר את בקשתך לפני שתוכל להצטרף."
     },
-    "bannedFromCommunity": "אתה נאסר להצטרף לקהילה זו"
+    "bannedFromCommunity": "אתה נאסר להצטרף לקהילה זו",
+    "newChat": {"channelRow":"ערוץ · {{formattedCount}} חברים","groupRow":"קבוצה · {{formattedCount}} חברים","newChannel":"ערוץ חדש","newGroup":"קבוצה חדשה","channelName":"שם הערוץ","groupName":"שם הקבוצה","description":"על מה זה? (אופציונלי)","whoCanJoin":"מי יכול להצטרף","public":"ציבורי","publicDetail":"כל אחד יכול למצוא ולהצטרף","inviteOnly":"בהזמנה בלבד","private":"פרטי","privateDetail":"אנשים מצטרפים בהזמנה שלך או באישורך","entry":"כניסה","free":"חינם","freeDetail":"הצטרפות ללא תשלום","paid":"שולם","paidDetail":"תשלום אחד בטוקנים, ישירות אליך","price":"מחיר בטוקנים","channelNote":"רק אתה והמנהלים שלך יכולים לפרסם. החברים קוראים ומגיבים.","createChannel":"יצירת ערוץ","createGroup":"יצירת קבוצה","message":"הודעה חדשה","messageDetail":"צ'אט פרטי עם אדם אחד","groupDetail":"צ'אט עם הרבה אנשים, ציבורי או פרטי","channelDetail":"שידור לעוקבים, בחינם או בתשלום","title":"התחל משהו"}
   },
   "prompt": {
     "seoTitle": "הגדר את הפיד שלך | Riftn",
@@ -12847,7 +12861,8 @@
     "shareKindCommunity": "קהילה",
     "shareGroups": "קבוצות",
     "shareKindChannel": "ערוץ",
-    "reportMessage": "דיווח על הודעה"
+    "reportMessage": "דיווח על הודעה",
+    "attachAnything": "צרף תמונה, סרטון, אודיו או קובץ"
   },
   "credits": {
     "earningsWorth": "שווה {{amount}}",
@@ -20983,5 +20998,17 @@
     "addQuestion": "הוסף שאלה",
     "pointsLabel": "נקודות לכל תשובה נכונה",
     "attachFailed": "הפוסט שלך עלה, אך לא ניתן היה להוסיף את החידון"
-  }
+  },
+  "ownKeys": {"working":"בעבודה","invalid":"נדחה, החלף אותו","noCredit":"נגמר הקרדיט","disabled":"הושבת על ידי Riftn","failed":"משהו השתבש. יש לנסות שוב.","savedNoCredit":"המפתח של {{name}} נשמר, אבל בחשבון נגמר הקרדיט.","saved":"המפתח של {{name}} נשמר. הכלים ב-{{name}} משתמשים עכשיו בחשבון שלך.","removed":"המפתח של {{name}} הוסר.","title":"מפתחות AI משלך","description":"הוסף מפתח מספק AI, וכלי ה-Creator ירוצו על החשבון שלך במקום. Riftn לא גובה דבר על המשימות האלה. המפתחות מוצפנים ולא יוצגו שוב לעולם.","check":"בדוק","remove":"הסר","add":"הוספת מפתח","paste":"הדבק את המפתח שלך ל-{{name}}","save":"שמור","cancel":"ביטול","getKey":"קבלת מפתח ל-{{name}}","showLess":"הצג רק את המפתחות שלי","addAnother":"הוספת ספק נוסף"},
+  "resetWallet": {"mismatch":"הסיסמאות לא תואמות","tooShort":"הסיסמה חייבת להכיל לפחות {{count}} תווים","breached":"הסיסמה הזו הופיעה בדליפת מידע. בחר סיסמה אחרת","weak":"בחר סיסמה חזקה יותר (שלב אותיות, מספרים וסמלים)","failed":"לא ניתן לאפס את הארנק שלך. שום דבר לא הועבר. נסה שוב.","twoFactor":"הזן את הקוד מאפליקציית האימות שלך כדי להעביר את החשבון.","funds":"טוקנים, NFT ויתרות אחרות לא עוברים. הם נשארים בכתובת הישנה. אם אתה עדיין יכול לפתוח את הארנק הישן, שלח אותם ממנו קודם.","doneTitle":"החשבון שלך נמצא בארנק החדש שלו","logOut":"התנתקות","intro":"יוצר ארנק Riftn חדש ומעביר אליו את שם המשתמש, הפוסטים, העוקבים וההודעות שלך. השתמש בזה אם הארנק שלך אבד או שלמישהו אחר יש את המפתח שלו. הארנק הישן יפסיק לעבוד להתחברות.","password":"סיסמת הארנק החדש (מינימום {{count}} תווים)","confirm":"אימות סיסמה","twoFactorPlaceholder":"קוד אימות","ack":"אני מבין שהכספים הישנים שלי נשארים בכיסוי הישן.","submit":"איפוס ארנק","title":"איפוס ארנק","rowDesc":"איבדת את הארנק, או שלמישהו אחר יש את המפתח שלו? העבר את החשבון שלך לארנק חדש. שם המשתמש, הפוסטים והעוקבים שלך עוברים איתך."},
+  "twoFactor": {"turnOn":"הפעל","wrongCode":"הקוד הזה לא תואם. נסה את האחרון באפליקציה שלך.","signingInAs":"התחברות כ-","signIn":"התחבר","trustDevice":"אל תבקש שוב במכשיר זה ל-30 ימים","useBackupShort":"השתמש בקוד גיבוי","useApp":"השתמש באפליקציית האימות שלי","useAnotherShort":"חשבון אחר","lostEverything":"איבדת את הטלפון וקודי הגיבוי שלך? צור קשר עם התמיכה","turnedOff":"התחברות דו-שלבית כבויה","introTitle":"הוסף נעילה שנייה","linkTitle":"קשר את אפליקציית האימות שלך","codesTitle":"שמור את קודי הגיבוי שלך","newCodesTitle":"קבל קודים חדשים לגיבוי","turnOff":"כבה","backupCodes":"קודי גיבוי"},
+  "chatTextSize": {"title":"גודל טקסט"},
+  "notes": {"replyTo":"השב ל־{{name}}…"},
+  "chatBulk": {"toolbar":"צ'אטים שנבחרו","selected":"{{count}} נבחר","cancel":"ביטול","read":"סימון כנקרא","unread":"סימון כלא נקרא","reply":"תגובה","delete":"מחק","replyHint":"כל אדם מקבל את זה כהודעה רגילה בצ'אט שלו.","replyPlaceholder":"כתוב הודעה…","sendAll":"שליחה ל-{{count}}","partSent":"נשלח ל-{{ok}} מתוך {{total}} צ'אטים","notSent":"השליחה נכשלה. נסה שוב."},
+  "chatTabs": {"addToTab":"הוספה ללשונית","newWith":"לשונית חדשה…","hide":"הסתרת לשונית","edit":"עריכת לשוניות","renameEdit":"שינוי שם ועריכה","addChats":"הוספת צ'אטים","moveLeft":"הזזה שמאלה","moveRight":"הזזה ימינה","delete":"מחיקת לשונית","new":"לשונית חדשה","editTab":"עריכת לשונית","create":"יצירת לשונית","emoji":"בחר אימוג'י","namePlaceholder":"שם הלשונית","noEmoji":"ללא אימוג'י","sFriends":"חברים","sWork":"עבודה","sTrading":"מסחר","sCreators":"יוצרים","sGaming":"גיימינג","chatsInTab":"צ'אטים בלשונית הזו","picked":"{{n}} נבחרו","deleteTitle":"למחוק את „{{name}}”?","deleteBody":"הלשונית תיעלם. הצ'אטים שלה נשארים בהכול ושומרים על ההודעות שלהם.","builtIn":"מובנה","chatCount":"{{n}} צ'אטים","moveUp":"העלה","moveDown":"הורד","alwaysOn":"בכל זמן","show":"הצגת לשונית","emptyTitle":"{{name}} ריקה","emptyBody":"הוסף לכאן צ'אטים והם יישארו גם בהכול.","removedFrom":"הוסר מ-{{name}}","addedTo":"נוסף ל-{{name}}","kindPublic":"ציבורי","kindChannel":"ערוץ","kindGroup":"קבץ","kindCommunity":"קהילה","kindDirect":"ישירה","tooMany":"אפשר ליצור עד 10 לשוניות","deleted":"{{name}} נמחקה"},
+  "msgSelect": {"partForwarded":"הועברו {{ok}} מתוך {{total}}","nothingToCopy":"אין מה להעתיק בהודעות שנבחרו","toolbar":"הודעות שנבחרו","selected":"{{count}} נבחר","copy":"העתק","forward":"העבר","deleteSome":"מחיקת {{count}}"},
+  "dmSafety": {"notReal":"זה לא {{name}} האמיתי.","neverLink":"צוות Riftn לעולם לא ישלח לך בהודעה פרטית קישור לתיקון הפרופיל או הארנק שלך. אל תפתח קישורים, אל תחבר את הארנק ואל תחתום על שום דבר. חסום ודווח על החשבון הזה."},
+  "post": {"destruct":{"offBody":"הפוסט נשאר באוויר.","onBody":"הפוסט נמחק מעצמו {{value1}} אחרי שהוא עולה."}},
+  "dmPaidLock": {"lockOnUsd":"נעול · {{price}}","lockVideo":"נעילת סרטון","lockPhoto":"נעילת תמונה","lockCustom":"אחר","lockCustomUsdLabel":"מחיר מותאם בדולרים","lockHint":"הם רואים את זה מטושטש עד שהם משלמים לך. קבצים נעולים אינם מוצפנים מקצה לקצה."},
+  "chatReactions": {"oneNamed":"{{name}} הגיב {{emoji}} להודעה שלך","one":"הגיבו {{emoji}} להודעה שלך"}
 }

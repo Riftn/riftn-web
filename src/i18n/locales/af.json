@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Wysig video", "hiddenTag": "Versteek", "tapToEdit": "Tik om te wysig", "cover": "Deksel", "trim": "Sny", "mirror": "Spieël", "rotate": "Draai", "hide": "Versteek", "timer": "Timer", "sheetTitleAny": "Wysig voor stuur", "close": "Maak toe", "replace": "Vervang", "hiddenUntilTap": "Verborge totdat hulle daarop tik", "pause": "Pouseer", "play": "Speel video af", "mute": "Demp", "unmute": "Ontdemp", "scrub": "Blaai deur die video", "addMore": "Voeg foto's of video's by", "trimAria": "Sleep die punte om te snoei", "coverAria": "Tik op 'n raam om die voorblad te stel", "coverHint": "Tik op 'n raam om die voorblad te stel", "coverOwn": "Jou foto", "coverAuto": "Outo", "uploadCover": "Laai 'n voorbladfoto op", "mirrored": "Gespieël", "original": "Oorspronklik", "rotate90": "Draai 90°", "showNormally": "Wys normaalweg", "showNormallyBody": "Hulle sien dit dadelik", "hideUntilTap": "Versteek totdat daar op dit getik word", "hideUntilTapBody": "Vervaag totdat hulle daarop tik", "hidePrice": "Versteek agter 'n prys", "hidePriceBody": "Vervaag totdat hulle jou betaal", "priceUnavailable": "Nie in hierdie gesels nie", "timerOff": "Af", "timerOffBody": "Dit bly in die gesels.", "timerViewBody": "Weg vir julle albei sodra hulle dit gesien het.", "confirm": "Bevestig", "lockedFor": "Ontsluit vir {{value1}} tokens", "lockedForUsd": "Ontsluit vir {{value1}}", "editItem": "Wysig item {{value1}}", "kept": "{{time}} behou", "timerTimeBody": "Weg vir julle albei {{value1}} nadat jy dit gestuur het."},
+  "dmVideo": {"edit": "Wysig video", "hiddenTag": "Versteek", "tapToEdit": "Tik om te wysig", "cover": "Deksel", "trim": "Sny", "mirror": "Spieël", "rotate": "Draai", "hide": "Versteek", "timer": "Timer", "sheetTitleAny": "Wysig voor stuur", "close": "Maak toe", "replace": "Vervang", "hiddenUntilTap": "Verborge totdat hulle daarop tik", "pause": "Pouseer", "play": "Speel video af", "mute": "Demp", "unmute": "Ontdemp", "scrub": "Blaai deur die video", "addMore": "Voeg foto's of video's by", "trimAria": "Sleep die punte om te snoei", "coverAria": "Tik op 'n raam om die voorblad te stel", "coverHint": "Tik op 'n raam om die voorblad te stel", "coverOwn": "Jou foto", "coverAuto": "Outo", "uploadCover": "Laai 'n voorbladfoto op", "mirrored": "Gespieël", "original": "Oorspronklik", "rotate90": "Draai 90°", "showNormally": "Wys normaalweg", "showNormallyBody": "Hulle sien dit dadelik", "hideUntilTap": "Versteek totdat daar op dit getik word", "hideUntilTapBody": "Vervaag totdat hulle daarop tik", "hidePrice": "Versteek agter 'n prys", "hidePriceBody": "Vervaag totdat hulle jou betaal", "priceUnavailable": "Nie in hierdie gesels nie", "timerOff": "Af", "timerOffBody": "Dit bly in die gesels.", "timerViewBody": "Weg vir julle albei sodra hulle dit gesien het.", "confirm": "Bevestig", "lockedFor": "Ontsluit vir {{value1}} tokens", "lockedForUsd": "Ontsluit vir {{value1}}", "editItem": "Wysig item {{value1}}", "kept": "{{time}} behou", "timerTimeBody": "Weg vir julle albei {{value1}} nadat jy dit gestuur het.", "destruct": {"3600":"1 uur","43200":"12 uur","86400":"1 dag","31536000":"1 jaar","view":"1 uitsig"}, "destructShort": {"view":"1 uitsig"}, "destructSecs": "{{n}} sek"},
   "postBg": {
     "addMedia": "Voeg 'n prent, GIF of video by",
     "changeMedia": "Verander prent, GIF of video",
@@ -664,7 +664,9 @@
       "main": "Hoof",
       "money": "Geld",
       "riftn": "Riftn"
-    }
+    },
+    "moveGroupHint": "Los dit op 'n ander oortjie om dit daarheen te skuif",
+    "reorderHintGroups": "Hou en sleep enige ikoon om dit te herrangskik, of na 'n ander oortjie om dit te verskuif"
   },
   "feed": {
     "viewProfile": "Bekyk {{name}} se profiel",
@@ -1322,7 +1324,12 @@
     "menuLayoutSectionsDesc": "Elke bladsy gelyktydig, onder groepopskrifte",
     "menuLayoutFoldersDesc": "Jou hoofbladsye, dan 'n vouer vir elke groep",
     "publicChatInBar": "Publieke Klets in die onderste balk",
-    "publicChatInBarDesc": "Een tik na Publieke Klets vanaf die balk onderaan die skerm"
+    "publicChatInBarDesc": "Een tik na Publieke Klets vanaf die balk onderaan die skerm",
+    "notificationShowCount": "Wys die getal op die klokkie",
+    "notificationShowCountDesc": "Sien hoeveel kennisgewings ongelees is in plaas van net die gloed",
+    "messagesShowCount": "Wys die getal op Boodskappe",
+    "messagesShowCountDesc": "Sien hoeveel boodskappe ongelees is in plaas van net die gloed",
+    "chatTextSize": "Kletsteksgrootte"
   },
   "common": {
     "confirm": "Bevestig",
@@ -1355,7 +1362,8 @@
     "next": "Volgende",
     "previous": "Vorige",
     "redo": "Herdoen",
-    "remove": "Verwyder"
+    "remove": "Verwyder",
+    "copy": "Kopieer"
   },
   "tip": {
     "title": "Stuur Fooitjie",
@@ -1662,7 +1670,8 @@
     "roomSettings": "Kamerinstellings",
     "messagePinned": "Boodskap vasgespeld",
     "messageUnpinned": "Boodskap ontspeld",
-    "online": "{{count}} aanlyn"
+    "online": "{{count}} aanlyn",
+    "onlineHint": "{{count}} mense is nou in hierdie klets"
   },
   "aiChat": {
     "title": "Assistent",
@@ -2362,7 +2371,11 @@
     "sending": "Stuur",
     "notSent": "Nie gestuur nie",
     "retrySend": "Probeer weer",
-    "discardSend": "Verwyder"
+    "discardSend": "Verwyder",
+    "unreadMarkerOne": "1 ongeleesde boodskap",
+    "unreadMarkerMany": "{{value}} ongeleesde boodskappe",
+    "jumpToUnread": "Spring na eerste ongeleesde boodskap",
+    "jumpToLatest": "Spring na nuutste boodskap"
   },
   "music": {
     "listeningCount_one": "{{count}} luister",
@@ -4098,7 +4111,8 @@
       "memberCount": "{{n}} lede",
       "approvalNote": "'n Beheerder moet jou versoek goedkeur voordat jy aan hierdie gemeenskap kan sluit."
     },
-    "bannedFromCommunity": "Jy word van hierdie gemeenskap uitgesluit"
+    "bannedFromCommunity": "Jy word van hierdie gemeenskap uitgesluit",
+    "newChat": {"channelRow":"Kanaal · {{formattedCount}} lede","groupRow":"Groep · {{formattedCount}} lede","newChannel":"Nuwe kanaal","newGroup":"Nuwe groep","channelName":"Kanaalnaam","groupName":"Groepnaam","description":"Waaroor gaan dit? (opsioneel)","whoCanJoin":"Wie kan aansluit","public":"Publiek","publicDetail":"Enigiemand kan dit vind en aansluit","inviteOnly":"Slegs op uitnodiging","private":"Privaat","privateDetail":"Mense sluit aan met jou uitnodiging of jou goedkeuring","entry":"Toegang","free":"Gratis","freeDetail":"Geen koste om aan te sluit nie","paid":"Betaal","paidDetail":"Een betaling in tokens, direk aan jou","price":"Prys in tokens","channelNote":"Net jy en jou administrateurs kan plaas. Lede lees en reageer.","createChannel":"Skep kanaal","createGroup":"Skep groep","message":"Nuwe boodskap","messageDetail":"'n Private klets met een persoon","groupDetail":"Klets met baie mense, publiek of privaat","channelDetail":"Saai uit aan volgers, gratis of betaald","title":"Begin iets"}
   },
   "prompt": {
     "seoTitle": "Stel jou voer saam | Riftn",
@@ -12927,7 +12941,8 @@
     "shareKindCommunity": "Gemeenskap",
     "shareGroups": "Groepe",
     "shareKindChannel": "Kanaal",
-    "reportMessage": "Rapporteer boodskap"
+    "reportMessage": "Rapporteer boodskap",
+    "attachAnything": "Heg 'n foto, video, klank of lêer aan"
   },
   "credits": {
     "earningsWorth": "Die moeite werd {{amount}}",
@@ -21098,5 +21113,17 @@
     "addQuestion": "Voeg vraag by",
     "pointsLabel": "Punte per regte antwoord",
     "attachFailed": "Jou plasing is op, maar die vasvra kon nie bygevoeg word nie"
-  }
+  },
+  "ownKeys": {"working":"Besig","invalid":"Verwerp, vervang dit","noCredit":"Geen krediet oor nie","disabled":"Deur Riftn afgeskakel","failed":"Iets het verkeerd geloop, probeer weer","savedNoCredit":"{{name}}-sleutel gestoor, maar die rekening het geen krediet oor nie.","saved":"{{name}}-sleutel gestoor. Gereedskap op {{name}} gebruik nou jou rekening.","removed":"{{name}}-sleutel verwyder.","title":"Jou eie KI-sleutels","description":"Voeg 'n sleutel van 'n KI-verskaffer by en Skepper-gereedskap loop eerder op jou rekening. Riftn hef niks vir daardie take nie. Sleutels word geënkripteer en nooit weer gewys nie.","check":"Sien","remove":"Verwyder","add":"Voeg sleutel by","paste":"Plak jou {{name}}-sleutel","save":"Stoor","cancel":"Kanselleer","getKey":"Kry 'n {{name}}-sleutel","showLess":"Wys net my sleutels","addAnother":"Voeg nog 'n verskaffer by"},
+  "resetWallet": {"mismatch":"Woorde stem nie ooreen nie","tooShort":"Wagwoord moet minstens {{count}} karakters wees","breached":"Hierdie wagwoord het in 'n datalek verskyn. Kies 'n ander een","weak":"Kies 'n sterker wagwoord (meng letters, syfers en simbole)","failed":"Kon nie jou beursie herstel nie. Niks is geskuif nie. Probeer weer.","twoFactor":"Voer die kode van jou verifikasietoep in om jou rekening te skuif.","funds":"Tokens, NFT's en ander saldo's skuif nie. Hulle bly by die ou adres. As jy die ou beursie nog kan oopmaak, stuur hulle eers uit.","doneTitle":"Jou rekening is op sy nuwe beursie","logOut":"Uitlog","intro":"Maak 'n nuwe Riftn-beursie en skuif jou gebruikersnaam, plasings, volgers en boodskappe daarheen. Gebruik dit as jou beursie verlore is of iemand anders die sleutel het. Die ou beursie werk nie meer vir aanmelding nie.","password":"Nuwe beursiewagwoord (min. {{count}} karakters)","confirm":"Bevestig woordeboek","twoFactorPlaceholder":"Verifikasiekode","ack":"Ek verstaan dat my ou geld by die ou sak bly.","submit":"Herstel beursie","title":"Herstel beursie","rowDesc":"Beursie verloor, of het iemand anders die sleutel? Skuif jou rekening na 'n nuwe beursie. Jou gebruikersnaam, plasings en volgers kom saam."},
+  "twoFactor": {"turnOn":"Skakel aan","wrongCode":"Daardie kode het nie gepas nie. Probeer die nuutste een in jou app.","signingInAs":"Aanteken as","signIn":"Meld aan","trustDevice":"Moenie weer vra op hierdie toestel vir 30 dae nie","useBackupShort":"Gebruik ’n rugsteunkode","useApp":"Gebruik my verifikasie‑app","useAnotherShort":"Ander rekening","lostEverything":"Het jy jou foon en jou rugsteunkodes verloor? Kontak ondersteuning","turnedOff":"Twee‑stap aanmelding is af","introTitle":"Voeg ’n tweede slot toe","linkTitle":"Skakel jou verifikasie‑app","codesTitle":"Stoor jou rugsteunkodes","newCodesTitle":"Kry nuwe rugsteunkodes","turnOff":"Draai af","backupCodes":"Rugsteunkodes"},
+  "chatTextSize": {"title":"Tekstgrootte"},
+  "notes": {"replyTo":"Antwoord aan {{name}}…"},
+  "chatBulk": {"toolbar":"Gekose klets","selected":"{{count}} geselekteer","cancel":"Kanselleer","read":"Merk gelees","unread":"Merk ongelees","reply":"Antwoord","delete":"Vee uit","replyHint":"Elke persoon kry dit as 'n gewone boodskap in hul eie klets.","replyPlaceholder":"Skryf 'n boodskap…","sendAll":"Stuur aan {{count}}","partSent":"Na {{ok}} van {{total}} klets gestuur","notSent":"Kon nie stuur nie. Probeer weer."},
+  "chatTabs": {"addToTab":"Voeg by oortjie","newWith":"Nuwe oortjie…","hide":"Versteek oortjie","edit":"Wysig oortjies","renameEdit":"Hernoem en wysig","addChats":"Voeg klets by","moveLeft":"Skuif links","moveRight":"Skuif regs","delete":"Vee oortjie uit","new":"Nuwe oortjie","editTab":"Wysig oortjie","create":"Skep oortjie","emoji":"Kies 'n emoji","namePlaceholder":"Oortjienaam","noEmoji":"Geen emoji","sFriends":"Vriende","sWork":"Werk","sTrading":"Handel","sCreators":"Skeppers","sGaming":"Speletjies","chatsInTab":"Klets in hierdie oortjie","picked":"{{n}} gekies","deleteTitle":"Vee “{{name}}” uit?","deleteBody":"Die oortjie verdwyn. Sy klets bly in Alles en behou hul boodskappe.","builtIn":"Ingebou","chatCount":"{{n}} klets","moveUp":"Beweeg op","moveDown":"Beweeg af","alwaysOn":"Altyd aan","show":"Wys oortjie","emptyTitle":"{{name}} is leeg","emptyBody":"Voeg klets hier by en hulle bly ook in Alles.","removedFrom":"Uit {{name}} verwyder","addedTo":"By {{name}} gevoeg","kindPublic":"Publiek","kindChannel":"Kanaal","kindGroup":"Groepeer","kindCommunity":"Gemeenskap","kindDirect":"Direk","tooMany":"Jy kan tot 10 oortjies hê","deleted":"{{name}} uitgevee"},
+  "msgSelect": {"partForwarded":"{{ok}} van {{total}} aangestuur","nothingToCopy":"Niks om te kopieer in die gekose boodskappe nie","toolbar":"Gekose boodskappe","selected":"{{count}} geselekteer","copy":"Kopieer","forward":"Aanstuur","deleteSome":"Vee {{count}} uit"},
+  "dmSafety": {"notReal":"Dit is nie die regte {{name}} nie.","neverLink":"Die Riftn-span sal jou nooit 'n skakel DM om jou profiel of beursie reg te maak nie. Moenie skakels oopmaak, jou beursie koppel of enigiets teken nie. Blokkeer en rapporteer hierdie rekening."},
+  "post": {"destruct":{"offBody":"Die plasing bly staan.","onBody":"Die plasing vee homself {{value1}} nadat dit geplaas is uit."}},
+  "dmPaidLock": {"lockOnUsd":"Gesluit · {{price}}","lockVideo":"Sluit video","lockPhoto":"Sluit foto","lockCustom":"Ander","lockCustomUsdLabel":"Eie prys in dollar","lockHint":"Hulle sien dit vervaag totdat hulle jou betaal. Geslote lêers is nie end-tot-end geënkripteer nie."},
+  "chatReactions": {"oneNamed":"{{name}} het met {{emoji}} op jou boodskap gereageer","one":"Het met {{emoji}} op jou boodskap gereageer"}
 }

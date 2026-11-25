@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "编辑视频", "hiddenTag": "隐藏", "tapToEdit": "点击以编辑", "cover": "封面", "trim": "修剪", "mirror": "镜像", "rotate": "旋转", "hide": "隐藏", "timer": "定时器", "sheetTitleAny": "发送前编辑", "close": "关闭", "replace": "替换", "hiddenUntilTap": "隐藏直到他们点击", "pause": "暂停", "play": "播放视频", "mute": "静音", "unmute": "取消静音", "scrub": "快进视频", "addMore": "添加照片或视频", "trimAria": "拖动两端修剪", "coverAria": "点击一帧设为封面", "coverHint": "点击一帧设为封面", "coverOwn": "你的图片", "coverAuto": "自动", "uploadCover": "上传封面图片", "mirrored": "镜像", "original": "原始", "rotate90": "顺时针旋转90°", "showNormally": "正常显示", "showNormallyBody": "他们会立即看到", "hideUntilTap": "隐藏直到被点击", "hideUntilTapBody": "直到他们点击才清晰", "hidePrice": "隐藏在价格后面", "hidePriceBody": "直到他们付款才清晰", "priceUnavailable": "不在此聊天中", "timerOff": "关闭", "timerOffBody": "它会留在聊天记录里。", "timerViewBody": "一旦他们看到了，你们两个就都完了。", "confirm": "确认", "lockedFor": "解锁需 {{value1}} 代币", "lockedForUsd": "解锁 {{value1}}", "editItem": "编辑项目 {{value1}}", "kept": "已保留 {{time}}", "timerTimeBody": "你们两个都完了 {{value1}} 在你发送之后。"},
+  "dmVideo": {"edit": "编辑视频", "hiddenTag": "隐藏", "tapToEdit": "点击以编辑", "cover": "封面", "trim": "修剪", "mirror": "镜像", "rotate": "旋转", "hide": "隐藏", "timer": "定时器", "sheetTitleAny": "发送前编辑", "close": "关闭", "replace": "替换", "hiddenUntilTap": "隐藏直到他们点击", "pause": "暂停", "play": "播放视频", "mute": "静音", "unmute": "取消静音", "scrub": "快进视频", "addMore": "添加照片或视频", "trimAria": "拖动两端修剪", "coverAria": "点击一帧设为封面", "coverHint": "点击一帧设为封面", "coverOwn": "你的图片", "coverAuto": "自动", "uploadCover": "上传封面图片", "mirrored": "镜像", "original": "原始", "rotate90": "顺时针旋转90°", "showNormally": "正常显示", "showNormallyBody": "他们会立即看到", "hideUntilTap": "隐藏直到被点击", "hideUntilTapBody": "直到他们点击才清晰", "hidePrice": "隐藏在价格后面", "hidePriceBody": "直到他们付款才清晰", "priceUnavailable": "不在此聊天中", "timerOff": "关闭", "timerOffBody": "它会留在聊天记录里。", "timerViewBody": "一旦他们看到了，你们两个就都完了。", "confirm": "确认", "lockedFor": "解锁需 {{value1}} 代币", "lockedForUsd": "解锁 {{value1}}", "editItem": "编辑项目 {{value1}}", "kept": "已保留 {{time}}", "timerTimeBody": "你们两个都完了 {{value1}} 在你发送之后。", "destruct": {"60":"1 分钟","3600":"1 小时","43200":"12 小时","86400":"1 天","604800":"1 周","31536000":"1 年","view":"1 次观看"}, "destructShort": {"view":"1次观看"}, "destructSecs": "{{n}} 秒", "destructShortSecs": "{{n}}秒"},
   "postBg": {
     "addMedia": "添加图片、GIF 或视频",
     "changeMedia": "更换图片、GIF 或视频",
@@ -675,7 +675,9 @@
       "discover": "发现",
       "money": "资金",
       "riftn": "Riftn"
-    }
+    },
+    "moveGroupHint": "拖动到另一个标签页即可将其移至该处",
+    "reorderHintGroups": "按住并拖动任意图标即可重新排列，或将其拖动到另一个标签页以进行移动"
   },
   "feed": {
     "viewProfile": "查看{{name}}的个人资料",
@@ -1332,7 +1334,12 @@
     "chatDeleteMeDesc": "从你的聊天中消失，其他人仍可看到",
     "chatDeleteEveryone": "为所有人删除",
     "chatDeleteEveryoneDesc": "在可行时。群组中他人的消息仍仅为你删除",
-    "ensSection": "ENS"
+    "ensSection": "ENS",
+    "notificationShowCount": "在铃铛上显示数字",
+    "notificationShowCountDesc": "查看未读通知数量，而不是仅仅显示光晕",
+    "messagesShowCount": "在消息中显示数字",
+    "messagesShowCountDesc": "查看未读消息数量，而不是仅仅显示光晕",
+    "chatTextSize": "聊天文字大小"
   },
   "common": {
     "confirm": "确认",
@@ -1365,7 +1372,8 @@
     "next": "下一步",
     "previous": "上一步",
     "redo": "重做",
-    "remove": "删除"
+    "remove": "删除",
+    "copy": "复制"
   },
   "tip": {
     "title": "发送打赏",
@@ -1672,7 +1680,8 @@
     "roomSettings": "房间设置",
     "messagePinned": "消息已置顶",
     "messageUnpinned": "已取消置顶",
-    "online": "{{count}}人在线"
+    "online": "{{count}}人在线",
+    "onlineHint": "现在有 {{count}} 人在这个聊天中"
   },
   "aiChat": {
     "title": "助手",
@@ -2350,7 +2359,11 @@
     "sending": "发送中",
     "notSent": "未发送",
     "retrySend": "重试",
-    "discardSend": "移除"
+    "discardSend": "移除",
+    "unreadMarkerOne": "1 条未读消息",
+    "unreadMarkerMany": "{{value}} 条未读消息",
+    "jumpToUnread": "跳到第一条未读消息",
+    "jumpToLatest": "跳到最新消息"
   },
   "music": {
     "listeningCount_one": "{{count}}听",
@@ -4080,7 +4093,8 @@
       "memberCount": "{{n}} 成员",
       "approvalNote": "管理员必须批准您的请求才能加入。"
     },
-    "bannedFromCommunity": "您已被此社区禁止"
+    "bannedFromCommunity": "您已被此社区禁止",
+    "newChat": {"channelRow":"频道 · {{formattedCount}} 名成员","groupRow":"群组 · {{formattedCount}} 名成员","newChannel":"新频道","newGroup":"新群组","channelName":"频道名称","groupName":"群组名称","description":"这是关于什么的？（可选）","whoCanJoin":"谁可以加入","public":"公开","publicDetail":"任何人都可以找到并加入","inviteOnly":"仅限邀请","private":"私密","privateDetail":"人们通过你的邀请或经你批准后加入","entry":"加入费用","free":"免费","freeDetail":"加入无需付费","paid":"已付款","paidDetail":"以代币支付一次，直接转给你","price":"代币价格","channelNote":"只有你和你的管理员可以发布内容。成员可以阅读并做出反应。","createChannel":"创建频道","createGroup":"创建群组","message":"新消息","messageDetail":"与一人的私聊","groupDetail":"与多人聊天，公开或私密","channelDetail":"向关注者广播，免费或付费","title":"开启新内容"}
   },
   "prompt": {
     "seoTitle": "提示你的内容 | Riftn",
@@ -12858,7 +12872,8 @@
     "shareKindGroup": "群组",
     "shareKindChannel": "频道",
     "shareKindCommunity": "社区",
-    "reportMessage": "举报消息"
+    "reportMessage": "举报消息",
+    "attachAnything": "添加照片、视频、音频或文件"
   },
   "credits": {
     "earningsWorth": "值{{amount}}",
@@ -20885,5 +20900,17 @@
     "promptCatchUp": "告诉我{{handle}}最近发了什么",
     "promptMessage": "帮我给{{handle}}写一条消息",
     "promptAbout": "关于{{handle}}：{{question}}"
-  }
+  },
+  "ownKeys": {"working":"处理中","invalid":"已拒绝，请替换它","noCredit":"额度不足","disabled":"已被 Riftn 关闭","failed":"出错了。请重试。","savedNoCredit":"{{name}} 密钥已保存，但该账户额度不足。","saved":"{{name}} 密钥已保存。{{name}} 上的工具现在使用您的账户。","removed":"{{name}} 密钥已移除。","title":"您自己的 AI 密钥","description":"添加来自 AI 提供商的密钥，创作者工具将改用您的账户运行。Riftn 不会对这些任务收取任何费用。密钥已加密，且之后不会再显示。","check":"检查","remove":"移除","add":"添加密钥","paste":"粘贴您的 {{name}} 密钥","save":"保存","cancel":"取消","getKey":"获取 {{name}} 密钥","showLess":"仅显示我的密钥","addAnother":"添加其他提供商"},
+  "resetWallet": {"mismatch":"密码不匹配","tooShort":"密码至少需要 {{count}} 个字符","breached":"此密码曾出现在数据泄露中。请选择另一个。","weak":"选择更强密码（混合字母、数字和符号）","failed":"无法重置您的钱包。未移动任何内容。请重试。","twoFactor":"请输入来自验证器应用的验证码以移动您的账户。","funds":"代币、NFT 和其他余额不会转移。它们将保留在旧地址。如果您仍能打开旧钱包，请先将它们转出。","doneTitle":"您的账户已转移到新钱包","logOut":"注销","intro":"创建一个新的 Riftn 钱包，并将您的用户名、帖子、粉丝和消息转移到新钱包。如果您的钱包丢失或他人持有其密钥，请使用此功能。旧钱包将不再用于登录。","password":"新钱包密码（最少 {{count}} 个字符）","confirm":"确认密码","twoFactorPlaceholder":"验证器代码","ack":"我理解我的旧资金将保留在旧钱包。","submit":"重置钱包","title":"重置钱包","rowDesc":"钱包丢失，或他人持有其密钥？将您的账户转移到新钱包。您的用户名、帖子和粉丝将随您一起转移。"},
+  "twoFactor": {"turnOn":"开启","wrongCode":"该代码不匹配。请尝试应用中的最新代码。","signingInAs":"正在登录为","signIn":"登录","trustDevice":"在此设备上 30 天内不再询问","useBackupShort":"使用备份代码","useApp":"使用我的身份验证器应用","useAnotherShort":"其他账户","lostEverything":"手机和备份代码都丢了？联系支持团队","turnedOff":"两步登录已关闭","introTitle":"添加第二重锁","linkTitle":"关联您的身份验证器应用","codesTitle":"保存您的备份代码","newCodesTitle":"获取新备份代码","turnOff":"关闭","backupCodes":"备份代码"},
+  "chatTextSize": {"title":"文字大小"},
+  "notes": {"replyTo":"回复 {{name}}…"},
+  "chatBulk": {"toolbar":"已选聊天","selected":"{{count}} 已选择","cancel":"取消","read":"标记为已读","unread":"标记为未读","reply":"回复","delete":"删除","replyHint":"每个人都会在各自的聊天中收到此消息，就像普通消息一样。","replyPlaceholder":"编写消息…","sendAll":"发送至 {{count}}","partSent":"已发送至 {{ok}} / {{total}} 个聊天","notSent":"无法发送。请重试。"},
+  "chatTabs": {"addToTab":"添加到标签","newWith":"新标签…","hide":"隐藏标签","edit":"编辑标签","renameEdit":"重命名并编辑","addChats":"添加聊天","moveLeft":"左移","moveRight":"右移","delete":"删除标签","new":"新标签","editTab":"编辑标签","create":"创建标签","emoji":"选择表情","namePlaceholder":"标签名称","noEmoji":"无表情","sFriends":"朋友","sWork":"工作","sTrading":"交易","sCreators":"创作者","sGaming":"游戏","chatsInTab":"此标签中的聊天","picked":"已选 {{n}} 个","deleteTitle":"删除“{{name}}”？","deleteBody":"标签将被移除，其中的聊天及消息仍保留在“全部”中。","builtIn":"内置","chatCount":"{{n}} 个聊天","moveUp":"上移","moveDown":"下移","alwaysOn":"始终显示","show":"显示标签","emptyTitle":"{{name}} 是空的","emptyBody":"在此添加聊天，它们也会保留在“全部”中。","removedFrom":"已从 {{name}} 移除","addedTo":"已添加到 {{name}}","kindPublic":"公开","kindChannel":"频道","kindGroup":"群组","kindCommunity":"社区","kindDirect":"私信","tooMany":"最多可以有 10 个标签","deleted":"已删除 {{name}}"},
+  "msgSelect": {"partForwarded":"转发了 {{ok}}/{{total}} 消息","nothingToCopy":"选中的消息中没有可复制的内容","toolbar":"已选消息","selected":"{{count}} 已选择","copy":"复制","forward":"转发","deleteSome":"删除 {{count}}"},
+  "dmSafety": {"notReal":"这不是真正的 {{name}}。","neverLink":"Riftn 团队绝不会私信你发送用于修复个人资料或钱包的链接。请勿打开链接、连接钱包或签署任何内容。请屏蔽并举报此账号。"},
+  "post": {"destruct":{"offBody":"该帖子将保留。","onBody":"该帖子发布 {{value1}} 后会自动删除。"}},
+  "dmPaidLock": {"lockOnUsd":"已锁定 · {{price}}","lockVideo":"锁定视频","lockPhoto":"锁定照片","lockCustom":"其他","lockCustomUsdLabel":"自定义美元价格","lockHint":"在他们向你付款前，内容将保持模糊。锁定文件并非端到端加密。"},
+  "chatReactions": {"oneNamed":"{{name}} 对你的消息回应了 {{emoji}}","one":"对你的消息回应了 {{emoji}}"}
 }

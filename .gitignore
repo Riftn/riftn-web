@@ -97,6 +97,7 @@ scripts/*
 !scripts/build-seo-i18n.mjs
 !scripts/build-developer-docs-content.mjs
 !scripts/seo-i18n-copy/
+!scripts/public-page-translations/
 !scripts/check-entry-bundle.mjs
 !scripts/critical-css.mjs
 !scripts/generate-blog-manifest.mjs
@@ -125,3 +126,4 @@ scripts/*
 !scripts/build-emoji-data.mjs
 
 /public/locale-packs/
+!scripts/fill-public-article-locales.mjs

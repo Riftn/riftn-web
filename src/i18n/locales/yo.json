@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Ṣàtúnṣe fídíò", "hiddenTag": "Ó wà ní ìkọ̀kọ̀", "tapToEdit": "Tẹ láti ṣàtúnṣe", "cover": "Iboju", "trim": "Ge", "mirror": "Iro", "rotate": "Yiyi", "hide": "Fipamọ", "timer": "Akoko", "sheetTitleAny": "Ṣàtúnṣe kí o tó fi ránṣẹ́", "close": "Pa", "replace": "Rọ́pò", "hiddenUntilTap": "Titi di igba ti wọn ba tẹ e", "pause": "Duro", "play": "Ṣe fidio", "mute": "Pa ohùn", "unmute": "Tan ohùn", "scrub": "Ṣiṣan fidio naa", "addMore": "Fi awọn fọto tabi awọn fidio kun", "trimAria": "Fa awọn opin lati ge", "coverAria": "Tẹ fireemu kan lati ṣeto iboju", "coverHint": "Tẹ fireemu kan lati ṣeto iboju", "coverOwn": "Àwòrán rẹ", "coverAuto": "Àdáṣiṣẹ́", "uploadCover": "Po si aworan iboju", "mirrored": "Ti a ṣe afẹfẹ", "original": "Atilẹba", "rotate90": "Yiyi 90°", "showNormally": "Ṣe afihan ni deede", "showNormallyBody": "Wọn ri i lẹsẹkẹsẹ", "hideUntilTap": "Fipamọ titi ti wọn yoo tẹ", "hideUntilTapBody": "Ti a fi blur titi ti wọn yoo tẹ", "hidePrice": "Fipamọ lẹyin owo kan", "hidePriceBody": "Ti a fi blur titi ti wọn yoo sanwo fun ọ", "priceUnavailable": "Kò sí nínú ibaraẹnisọrọ yìí", "timerOff": "Pa", "timerOffBody": "Ó máa wà nínú ì tánràn náà.", "timerViewBody": "Ó máa parẹ́ fún ẹ̀yin méjèèjì ní kété tí wọ́n bá ti rí i.", "confirm": "Ìmúdájú", "lockedFor": "Ṣí i fún {{value1}} awọn ami-ami", "lockedForUsd": "Ṣí àtìpà fún {{value1}}", "editItem": "Ṣàtúnṣe nǹkan {{value1}}", "kept": "{{time}} pa mọ́", "timerTimeBody": "Ó máa parẹ́ fún ẹ̀yin méjèèjì {{value1}} lẹ́yìn tí o bá ti rán an."},
+  "dmVideo": {"edit": "Ṣàtúnṣe fídíò", "hiddenTag": "Ó wà ní ìkọ̀kọ̀", "tapToEdit": "Tẹ láti ṣàtúnṣe", "cover": "Iboju", "trim": "Ge", "mirror": "Iro", "rotate": "Yiyi", "hide": "Fipamọ", "timer": "Akoko", "sheetTitleAny": "Ṣàtúnṣe kí o tó fi ránṣẹ́", "close": "Pa", "replace": "Rọ́pò", "hiddenUntilTap": "Titi di igba ti wọn ba tẹ e", "pause": "Duro", "play": "Ṣe fidio", "mute": "Pa ohùn", "unmute": "Tan ohùn", "scrub": "Ṣiṣan fidio naa", "addMore": "Fi awọn fọto tabi awọn fidio kun", "trimAria": "Fa awọn opin lati ge", "coverAria": "Tẹ fireemu kan lati ṣeto iboju", "coverHint": "Tẹ fireemu kan lati ṣeto iboju", "coverOwn": "Àwòrán rẹ", "coverAuto": "Àdáṣiṣẹ́", "uploadCover": "Po si aworan iboju", "mirrored": "Ti a ṣe afẹfẹ", "original": "Atilẹba", "rotate90": "Yiyi 90°", "showNormally": "Ṣe afihan ni deede", "showNormallyBody": "Wọn ri i lẹsẹkẹsẹ", "hideUntilTap": "Fipamọ titi ti wọn yoo tẹ", "hideUntilTapBody": "Ti a fi blur titi ti wọn yoo tẹ", "hidePrice": "Fipamọ lẹyin owo kan", "hidePriceBody": "Ti a fi blur titi ti wọn yoo sanwo fun ọ", "priceUnavailable": "Kò sí nínú ibaraẹnisọrọ yìí", "timerOff": "Pa", "timerOffBody": "Ó máa wà nínú ì tánràn náà.", "timerViewBody": "Ó máa parẹ́ fún ẹ̀yin méjèèjì ní kété tí wọ́n bá ti rí i.", "confirm": "Ìmúdájú", "lockedFor": "Ṣí i fún {{value1}} awọn ami-ami", "lockedForUsd": "Ṣí àtìpà fún {{value1}}", "editItem": "Ṣàtúnṣe nǹkan {{value1}}", "kept": "{{time}} pa mọ́", "timerTimeBody": "Ó máa parẹ́ fún ẹ̀yin méjèèjì {{value1}} lẹ́yìn tí o bá ti rán an.", "destruct": {"60":"Ìṣẹ́jú 1","3600":"Wákàtí 1","43200":"Wákàtí 12","86400":"Ọjọ́ 1","604800":"Ọ̀sẹ̀ 1","31536000":"Ọdún 1","view":"Ìwò 1"}, "destructShort": {"view":"Ìwò 1"}, "destructSecs": "{{n}} ìṣẹ́jú àáyá"},
   "postBg": {
     "addMedia": "Ṣàfikún àwòrán, GIF tàbí fídíò",
     "changeMedia": "Yí àwòrán, GIF tàbí fídíò padà",
@@ -664,7 +664,9 @@
       "liveStudio": "lọ lásìkò, ìgbóhùnsáfẹ́fẹ́, sísanwọ̀, OBS, ìbòrí, ìkìlọ̀, widget",
       "launchpad": "ṣe ìfilọ́lẹ̀ token, ṣẹ̀dá coin, ṣe coin, meme coin, bonding curve, sọ di token",
       "getTheApp": "gba app sílẹ̀, Android, iPhone, app fóònù, fi sórí ẹ̀rọ, APK, app kọ̀ǹpútà, fi sórí kọ̀ǹpútà, Windows, Mac"
-    }
+    },
+    "moveGroupHint": "Fa a sọ́rí tàbù míràn láti gbé e lọ síbẹ̀",
+    "reorderHintGroups": "Di mọ́ kí o sì fa àmì èyíkéyìí láti tún un tò, tàbí kí o fà á sí orí tàbù míràn láti gbé e lọ."
   },
   "feed": {
     "viewProfile": "Wo fáìlì {{name}}",
@@ -1320,7 +1322,12 @@
     "menuLayoutSectionsDesc": "Gbogbo ojú-ìwé ní ẹ̀ẹ̀kan, lábẹ́ àkọlé ẹgbẹ́",
     "menuLayoutFoldersDesc": "Àwọn ojú-ìwé pàtàkì rẹ, lẹ́yìn náà fódà fún ẹgbẹ́ kọ̀ọ̀kan",
     "publicChatInBar": "Ìbánisọ̀rọ̀ Gbangba nínú ọ̀pá ìsàlẹ̀",
-    "publicChatInBarDesc": "Tẹ̀ẹ́ lẹ́ẹ̀kan wọ Ìbánisọ̀rọ̀ Gbangba láti ọ̀pá ìsàlẹ̀ ìbòjú"
+    "publicChatInBarDesc": "Tẹ̀ẹ́ lẹ́ẹ̀kan wọ Ìbánisọ̀rọ̀ Gbangba láti ọ̀pá ìsàlẹ̀ ìbòjú",
+    "notificationShowCount": "Fi nọ́ńbà hàn lórí agogo",
+    "notificationShowCountDesc": "Wo iye ìfitónilétí tí a kò kà dípò ìtànná nìkan",
+    "messagesShowCount": "Fi nọ́ńbà hàn lórí Ìfiránṣẹ́",
+    "messagesShowCountDesc": "Wo iye ìfiránṣẹ́ tí a kò kà dípò ìtànná nìkan",
+    "chatTextSize": "Ìtóbi ọ̀rọ̀ ìbánisọ̀rọ̀"
   },
   "common": {
     "confirm": "Jẹrisi",
@@ -1353,7 +1360,8 @@
     "next": "Tẹ̀lé e",
     "previous": "Ti ṣáájú",
     "redo": "Ṣe é lẹ́ẹ̀kan síi",
-    "remove": "Yọ kúrò"
+    "remove": "Yọ kúrò",
+    "copy": "Ṣe àdàkọ"
   },
   "tip": {
     "title": "Fi Ẹ̀bùn Ránṣẹ́",
@@ -1660,7 +1668,8 @@
     "roomSettings": "Ètò yàrá",
     "messagePinned": "A ti tì ìfiránṣẹ́",
     "messageUnpinned": "A ti tú ìfiránṣẹ́",
-    "online": "{{count}} lórí ẹ̀rọ"
+    "online": "{{count}} lórí ẹ̀rọ",
+    "onlineHint": "Àwọn èèyàn {{count}} wà nínú ìbánisọ̀rọ̀ yìí báyìí"
   },
   "aiChat": {
     "title": "Olùrànlọ́wọ́",
@@ -2339,7 +2348,11 @@
     "retrySend": "Gbìyànjú lẹ́ẹ̀kan sí i",
     "discardSend": "Yọ kúrò",
     "encryptionReconnect": "Tún so àpò owó rẹ pọ̀ láti tan ìfipamọ́ àṣírí.",
-    "notSent": "A kò fi ránṣẹ́"
+    "notSent": "A kò fi ránṣẹ́",
+    "unreadMarkerOne": "Ìfiránṣẹ́ 1 tí a kò kà",
+    "unreadMarkerMany": "Ìfiránṣẹ́ {{value}} tí a kò kà",
+    "jumpToUnread": "Lọ sí ìfiránṣẹ́ àkọ́kọ́ tí a kò kà",
+    "jumpToLatest": "Lọ sí ìfiránṣẹ́ tuntun jùlọ"
   },
   "music": {
     "listeningCount_one": "{{count}} gbigbọ",
@@ -4065,7 +4078,8 @@
       "memberCount": "{{n}} awọn ọmọ ẹgbẹ",
       "approvalNote": "Olùṣàkóso ní láti fọwọ́ sí ìbéèrè rẹ kí o tó lè darapọ̀ mọ́ wọn."
     },
-    "bannedFromCommunity": "A ti fòfin de ọ láti inú àwùjọ yìí."
+    "bannedFromCommunity": "A ti fòfin de ọ láti inú àwùjọ yìí.",
+    "newChat": {"channelRow":"Ikanni · ọmọ ẹgbẹ́ {{formattedCount}}","groupRow":"Ẹgbẹ́ · ọmọ ẹgbẹ́ {{formattedCount}}","newChannel":"Ikanni tuntun","newGroup":"Ẹgbẹ́ tuntun","channelName":"Orúkọ ikanni","groupName":"Orúkọ ẹgbẹ́","description":"Kí ni ó dá lé lórí? (àṣàyàn)","whoCanJoin":"Ta ló lè dara pọ̀","public":"Gbangba","publicDetail":"Ẹnikẹ́ni lè rí i kí ó sì dara pọ̀","inviteOnly":"Nípasẹ̀ ìpè nìkan","private":"Àdáni","privateDetail":"Àwọn èèyàn máa dara pọ̀ pẹ̀lú ìpè rẹ tàbí ìfọwọ́sí rẹ","entry":"Ìwọlé","free":"FREE","freeDetail":"Kò sí owó láti dara pọ̀","paid":"Ti sanwo","paidDetail":"Ìsanwó kan ní owó àmì, tààrà sí ọ","price":"Iye ní owó àmì","channelNote":"Ìwọ àti àwọn alákòóso rẹ nìkan ló lè firánṣẹ́. Àwọn ọmọ ẹgbẹ́ máa ń kà, wọ́n sì máa ń hùwà sí i.","createChannel":"Ṣẹ̀dá ikanni","createGroup":"Ṣẹ̀dá ẹgbẹ́","message":"Ìfiránṣẹ́ tuntun","messageDetail":"Ìbánisọ̀rọ̀ ìkọ̀kọ̀ pẹ̀lú ẹnì kan","groupDetail":"Bá ọ̀pọ̀ èèyàn sọ̀rọ̀, ní gbangba tàbí ní ìkọ̀kọ̀","channelDetail":"Gbóhùn sáfẹ́fẹ́ sí àwọn olùtẹ̀lé, lọ́fẹ̀ẹ́ tàbí ní owó","title":"Bẹ̀rẹ̀ nǹkan kan"}
   },
   "prompt": {
     "seoTitle": "Se ohun tí o fẹ́ kà | Riftn",
@@ -12843,7 +12857,8 @@
     "shareKindCommunity": "Àwùjọ",
     "shareGroups": "Àwọn ẹgbẹ́",
     "shareKindChannel": "Ikanni",
-    "reportMessage": "Ròyìn ìfiránṣẹ́"
+    "reportMessage": "Ròyìn ìfiránṣẹ́",
+    "attachAnything": "So fọ́tò, fídíò, ohùn tàbí fáìlì mọ́ ọn"
   },
   "credits": {
     "earningsWorth": "Iye {{amount}}",
@@ -20881,5 +20896,17 @@
     "promptCatchUp": "Sọ fún mi ohun tí {{handle}} ti fi síta láìpẹ́",
     "promptMessage": "Ràn mí lọ́wọ́ láti kọ ìfiranṣẹ́ sí {{handle}}",
     "promptAbout": "Nípa {{handle}}: {{question}}"
-  }
+  },
+  "ownKeys": {"working":"Ṣiṣẹ","invalid":"A kọ̀ ọ́, rọ́pò rẹ̀","noCredit":"Kírẹ́dítì ti tán","disabled":"Riftn ti pa á","failed":"Nǹkan kan kò lọ dáadáa. Gbìyànjú lẹ́ẹ̀kan síi.","savedNoCredit":"A ti fi kọ́kọ́rọ́ {{name}} pamọ́, ṣùgbọ́n kírẹ́dítì àkọọ́lẹ̀ náà ti tán.","saved":"A ti fi kọ́kọ́rọ́ {{name}} pamọ́. Àwọn irinṣẹ́ lórí {{name}} ń lo àkọọ́lẹ̀ rẹ báyìí.","removed":"A ti yọ kọ́kọ́rọ́ {{name}} kúrò.","title":"Àwọn kọ́kọ́rọ́ AI tìrẹ","description":"Fi kọ́kọ́rọ́ kan láti ọ̀dọ̀ olùpèsè AI kún un, àwọn irinṣẹ́ Creator yóò sì máa ṣiṣẹ́ lórí àkọọ́lẹ̀ rẹ dípò. Riftn kò ní gba owó kankan fún àwọn iṣẹ́ wọ̀nyẹn. A máa fi àṣírí pa àwọn kọ́kọ́rọ́ mọ́, a kò sì ní fi wọ́n hàn mọ́.","check":"Ṣayẹwo","remove":"Yọ kúrò","add":"Fi kọ́kọ́rọ́ kún un","paste":"Lẹ kọ́kọ́rọ́ {{name}} rẹ","save":"Fi pamọ́","cancel":"Fagilé","getKey":"Gba kọ́kọ́rọ́ {{name}}","showLess":"Fi àwọn kọ́kọ́rọ́ mi nìkan hàn","addAnother":"Fi olùpèsè mìíràn kún un"},
+  "resetWallet": {"mismatch":"Àwọn ọ̀rọ̀ àṣírí kò bá ara wọn mu","tooShort":"Ọ̀rọ̀ aṣínà gbọ́dọ̀ ní ó kéré tán ẹyọ ọ̀rọ̀ {{count}}","breached":"Ọ̀rọ̀ aṣínà yìí ti hàn nínú jíjò dátà kan. Yan òmíràn","weak":"Yan ọ̀rọ̀ aṣínà tó lágbára jù (da lẹ́tà, nọ́ńbà àti àmì pọ̀)","failed":"Kò ṣeé ṣe láti tún àpò owó rẹ ṣe. A kò gbé nǹkan kan lọ. Gbìyànjú lẹ́ẹ̀kan sí i.","twoFactor":"Tẹ kóòdù láti inú àpù authenticator rẹ láti gbé àkọọ́lẹ̀ rẹ lọ.","funds":"Owó àmì, NFT àti àwọn ìwọ̀ntúnwọ̀nsì mìíràn kò ní gbéra. Wọ́n máa wà ní àdírẹ́sì àtijọ́. Tí o bá ṣì lè ṣí àpò owó àtijọ́, kọ́kọ́ fi wọ́n ránṣẹ́ jáde.","doneTitle":"Àkọọ́lẹ̀ rẹ ti wà lórí àpò owó tuntun rẹ̀","logOut":"Wọle jade","intro":"Ó ń ṣe àpò owó Riftn tuntun, ó sì ń gbé orúkọ oníṣàmúlò, ìfiránṣẹ́, olùtẹ̀lé àti ìbánisọ̀rọ̀ rẹ lọ sórí rẹ̀. Lo èyí tí àpò owó rẹ bá sọnù tàbí tí ẹlòmíràn bá ní kọ́kọ́rọ́ rẹ̀. Àpò owó àtijọ́ kò ní ṣiṣẹ́ fún ìwọlé mọ́.","password":"Ọ̀rọ̀ aṣínà àpò owó tuntun (ó kéré tán {{count}} ẹyọ)","confirm":"Fìdí ọ̀rọ̀-ìpamọ́ múlẹ̀","twoFactorPlaceholder":"Kóòdù authenticator","ack":"Mo lóye pé àwọn owó mi àtijọ́ yóò wà nínú àpò owó àtijọ́ náà.","submit":"Tún àpò owó ṣe","title":"Tún àpò owó ṣe","rowDesc":"Ṣé àpò owó rẹ sọnù, tàbí ẹlòmíràn ní kọ́kọ́rọ́ rẹ̀? Gbé àkọọ́lẹ̀ rẹ lọ sí àpò owó tuntun. Orúkọ oníṣàmúlò, ìfiránṣẹ́ àti olùtẹ̀lé rẹ máa bá ọ lọ."},
+  "twoFactor": {"turnOn":"Tan an","wrongCode":"Kóòdì yẹn kò bá a mu. Gbìyànjú èyí tó tuntun nínú àpùlẹ́ẹ̀sì (app) rẹ.","signingInAs":"Wíwọlé gẹ́gẹ́ bí","signIn":"Wọlé","trustDevice":"Má ṣe béèrè lẹ́ẹ̀kan sí i lórí ẹ̀rọ yìí fún ọjọ́ 30","useBackupShort":"Lo kóòdì àfẹ́yinti","useApp":"Lo àpùlẹ́ẹ̀sì ìdánilójú (authenticator app) mi","useAnotherShort":"Àkọọ́lẹ̀ mìíràn","lostEverything":"Ṣé o pàdánù fóònù rẹ àti àwọn kóòdì àfẹ́yinti rẹ? Kàn sí ìrànwọ́","turnedOff":"Wíwọlé ní ìgbésẹ̀ méjì wà ní ipò pípà","introTitle":"Fi títìpà kejì kún un","linkTitle":"So àpùlẹ́ẹ̀sì ìdánilójú rẹ pọ̀","codesTitle":"Pa àwọn kóòdì àfẹ́yinti rẹ mọ́","newCodesTitle":"Rí àwọn koodu àfẹ́yìn tuntun","turnOff":"Pa á","backupCodes":"Àwọn koodu àfẹ́yìn"},
+  "chatTextSize": {"title":"Ìtóbi ọ̀rọ̀"},
+  "notes": {"replyTo":"Fèsì sí {{name}}…"},
+  "chatBulk": {"toolbar":"Àwọn ìbánisọ̀rọ̀ tí a yàn","selected":"{{count}} yan","cancel":"Fagilé","read":"Sàmì sí i pé a ti kà á","unread":"Sàmì sí i pé a kò kà á","reply":"Ìdáhùn","delete":"Parẹ́","replyHint":"Ẹnì kọ̀ọ̀kan máa gba èyí bí ìfiránṣẹ́ lásán nínú ìbánisọ̀rọ̀ tirẹ̀.","replyPlaceholder":"Kọ ìfiránṣẹ́ kan…","sendAll":"Fi ránṣẹ́ sí {{count}}","partSent":"A fi ránṣẹ́ sí {{ok}} nínú ìbánisọ̀rọ̀ {{total}}","notSent":"Kò ṣeé ṣe láti fi ránṣẹ́. Gbìyànjú lẹ́ẹ̀kan sí i."},
+  "chatTabs": {"addToTab":"Fi kún táàbù","newWith":"Táàbù tuntun…","hide":"Fi táàbù pamọ́","edit":"Ṣàtúnṣe àwọn táàbù","renameEdit":"Yí orúkọ padà kí o sì ṣàtúnṣe","addChats":"Fi ìbánisọ̀rọ̀ kún un","moveLeft":"Gbé e sí òsì","moveRight":"Gbé e sí ọ̀tún","delete":"Pa táàbù rẹ́","new":"Táàbù tuntun","editTab":"Ṣàtúnṣe táàbù","create":"Ṣẹ̀dá táàbù","emoji":"Yan emoji kan","namePlaceholder":"Orúkọ táàbù","noEmoji":"Kò sí emoji","sFriends":"Àwọn ọ̀rẹ́","sWork":"Iṣẹ́","sTrading":"Ìṣòwò","sCreators":"Àwọn olùdásílẹ̀","sGaming":"Eré","chatsInTab":"Àwọn ìbánisọ̀rọ̀ nínú táàbù yìí","picked":"{{n}} tí a yàn","deleteTitle":"Pa “{{name}}” rẹ́?","deleteBody":"Táàbù náà máa lọ. Àwọn ìbánisọ̀rọ̀ rẹ̀ máa wà nínú Gbogbo, wọ́n sì máa pa ìfiránṣẹ́ wọn mọ́.","builtIn":"Tí a kọ́ sínú","chatCount":"Ìbánisọ̀rọ̀ {{n}}","moveUp":"Gbe soke","moveDown":"Gbe si isalẹ","alwaysOn":"Wà lórí ẹ̀ nígbà gbogbo","show":"Fi táàbù hàn","emptyTitle":"{{name}} ṣófo","emptyBody":"Fi ìbánisọ̀rọ̀ kún un níbí, wọ́n á sì tún wà nínú Gbogbo.","removedFrom":"A yọ ọ́ kúrò nínú {{name}}","addedTo":"A fi kún {{name}}","kindPublic":"Gbangba","kindChannel":"Ikanni","kindGroup":"Ikọ̀","kindCommunity":"Àwùjọ","kindDirect":"Tààrà","tooMany":"O lè ní táàbù tó tó 10","deleted":"A ti pa {{name}} rẹ́"},
+  "msgSelect": {"partForwarded":"A dá {{ok}} nínú {{total}} síwájú","nothingToCopy":"Kò sí ohun tí a lè daakọ nínú àwọn ìfiránṣẹ́ tí a yàn","toolbar":"Àwọn ìfiránṣẹ́ tí a yàn","selected":"{{count}} yan","copy":"Daakọ","forward":"Firánṣẹ́ síwájú","deleteSome":"Pa {{count}} rẹ́"},
+  "dmSafety": {"notReal":"Èyí kì í ṣe {{name}} gidi.","neverLink":"Ẹgbẹ́ Riftn kò ní fi ìjápọ̀ ránṣẹ́ sí ọ nínú DM láé láti tún profaili tàbí àpò owó rẹ ṣe. Má ṣe ṣí ìjápọ̀, má ṣe so àpò owó rẹ pọ̀, má sì ṣe buwọ́lu ohunkóhun. Dí àkọọ́lẹ̀ yìí kí o sì ròyìn rẹ̀."},
+  "post": {"destruct":{"offBody":"Ìfiránṣẹ́ náà máa wà níbẹ̀.","onBody":"Ìfiránṣẹ́ náà máa pa ara rẹ̀ rẹ́ ní {{value1}} lẹ́yìn tí ó jáde."}},
+  "dmPaidLock": {"lockOnUsd":"A tì í pa · {{price}}","lockVideo":"Tì fídíò pa","lockPhoto":"Tì fọ́tò pa","lockCustom":"Mìíràn","lockCustomUsdLabel":"Iye àdáni ní dọ́là","lockHint":"Wọ́n máa rí i ní bàìbàì títí wọ́n á fi sanwó fún ọ. Àwọn fáìlì tí a tì pa kò ní ìfipamọ́ àṣírí láti òpin dé òpin."},
+  "chatReactions": {"oneNamed":"{{name}} hùwà {{emoji}} sí ìfiránṣẹ́ rẹ","one":"Hùwà {{emoji}} sí ìfiránṣẹ́ rẹ"}
 }

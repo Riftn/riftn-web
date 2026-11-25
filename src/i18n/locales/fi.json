@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Muokkaa videota", "hiddenTag": "Piilotettu", "tapToEdit": "Napauta muokataksesi", "cover": "Kansikuva", "trim": "Leikkaa", "mirror": "Peili", "rotate": "Käännä", "hide": "Piilota", "timer": "Ajastin", "sheetTitleAny": "Muokkaa ennen lähettämistä", "close": "Sulje", "replace": "Korvaa", "hiddenUntilTap": "Piilotettu, kunnes he napauttavat sitä", "pause": "Tauko", "play": "Toista video", "mute": "Mykistä", "unmute": "Poista mykistys", "scrub": "Selaa videota", "addMore": "Lisää valokuvia tai videoita", "trimAria": "Vedä päät leikkääksesi", "coverAria": "Napauta kuvaa asettaaksesi sen kansikuvaksi", "coverHint": "Napauta kuvaa asettaaksesi sen kansikuvaksi", "coverOwn": "Kuvasi", "coverAuto": "Automaattinen", "uploadCover": "Lataa kansikuva", "mirrored": "Peilattu", "original": "Alkuperäinen", "rotate90": "Käännä 90°", "showNormally": "Näytä normaalisti", "showNormallyBody": "He näkevät sen heti", "hideUntilTap": "Piilota, kunnes napautetaan", "hideUntilTapBody": "Sumennettu, kunnes he napauttavat sitä", "hidePrice": "Piilota hintan takana", "hidePriceBody": "Sumennettu, kunnes maksat", "priceUnavailable": "Ei tässä keskustelussa", "timerOff": "Pois", "timerOffBody": "Se pysyy chatissa.", "timerViewBody": "Kuin pois molemmille teille, kun he ovat nähneet sen.", "confirm": "Vahvista", "lockedFor": "Avaa lukitus {{value1}} tokenia", "lockedForUsd": "Avaa lukitus käyttäjälle {{value1}}", "editItem": "Muokkaa kohdetta {{value1}}", "kept": "{{time}} säilytetty", "timerTimeBody": "Poistunut molemmille teille {{value1}} lähettämisen jälkeen."},
+  "dmVideo": {"edit": "Muokkaa videota", "hiddenTag": "Piilotettu", "tapToEdit": "Napauta muokataksesi", "cover": "Kansikuva", "trim": "Leikkaa", "mirror": "Peili", "rotate": "Käännä", "hide": "Piilota", "timer": "Ajastin", "sheetTitleAny": "Muokkaa ennen lähettämistä", "close": "Sulje", "replace": "Korvaa", "hiddenUntilTap": "Piilotettu, kunnes he napauttavat sitä", "pause": "Tauko", "play": "Toista video", "mute": "Mykistä", "unmute": "Poista mykistys", "scrub": "Selaa videota", "addMore": "Lisää valokuvia tai videoita", "trimAria": "Vedä päät leikkääksesi", "coverAria": "Napauta kuvaa asettaaksesi sen kansikuvaksi", "coverHint": "Napauta kuvaa asettaaksesi sen kansikuvaksi", "coverOwn": "Kuvasi", "coverAuto": "Automaattinen", "uploadCover": "Lataa kansikuva", "mirrored": "Peilattu", "original": "Alkuperäinen", "rotate90": "Käännä 90°", "showNormally": "Näytä normaalisti", "showNormallyBody": "He näkevät sen heti", "hideUntilTap": "Piilota, kunnes napautetaan", "hideUntilTapBody": "Sumennettu, kunnes he napauttavat sitä", "hidePrice": "Piilota hintan takana", "hidePriceBody": "Sumennettu, kunnes maksat", "priceUnavailable": "Ei tässä keskustelussa", "timerOff": "Pois", "timerOffBody": "Se pysyy chatissa.", "timerViewBody": "Kuin pois molemmille teille, kun he ovat nähneet sen.", "confirm": "Vahvista", "lockedFor": "Avaa lukitus {{value1}} tokenia", "lockedForUsd": "Avaa lukitus käyttäjälle {{value1}}", "editItem": "Muokkaa kohdetta {{value1}}", "kept": "{{time}} säilytetty", "timerTimeBody": "Poistunut molemmille teille {{value1}} lähettämisen jälkeen.", "destruct": {"3600":"1 tunti","43200":"12 tuntia","86400":"1 päivä","604800":"1 viikko","31536000":"1 vuosi","view":"1 katselukerta"}, "destructShort": {"view":"1 katselukerta"}, "destructSecs": "{{n}} sek"},
   "postBg": {
     "addMedia": "Lisää kuva, GIF tai video",
     "changeMedia": "Vaihda kuva, GIF tai video",
@@ -664,7 +664,9 @@
       "main": "Pää",
       "money": "Raha",
       "riftn": "Riftn"
-    }
+    },
+    "moveGroupHint": "Pudota toiseen välilehteen siirtääksesi sen sinne",
+    "reorderHintGroups": "Pidä kuvaketta painettuna ja raahaa sitä järjestääksesi sen uudelleen, tai raahaa se toiseen välilehteen siirtääksesi sen."
   },
   "feed": {
     "viewProfile": "Näytä henkilön {{name}} profiili",
@@ -1320,7 +1322,12 @@
     "menuLayoutSectionsDesc": "Kaikki sivut kerralla ryhmäotsikoiden alla",
     "menuLayoutFoldersDesc": "Pääsivusi ja sitten kansio kullekin ryhmälle",
     "publicChatInBar": "Julkinen keskustelu alapalkissa",
-    "publicChatInBarDesc": "Yhdellä napautuksella Julkiseen keskusteluun näytön alareunan palkista"
+    "publicChatInBarDesc": "Yhdellä napautuksella Julkiseen keskusteluun näytön alareunan palkista",
+    "notificationShowCount": "Näytä määrä kellossa",
+    "notificationShowCountDesc": "Näe lukemattomien ilmoitusten määrä pelkän hehkun sijaan",
+    "messagesShowCount": "Näytä määrä Viesteissä",
+    "messagesShowCountDesc": "Näe lukemattomien viestien määrä pelkän hehkun sijaan",
+    "chatTextSize": "Chatin tekstikoko"
   },
   "common": {
     "confirm": "Vahvista",
@@ -1353,7 +1360,8 @@
     "next": "Seuraava",
     "previous": "Edellinen",
     "redo": "Tee uudelleen",
-    "remove": "Poista"
+    "remove": "Poista",
+    "copy": "Kopioi"
   },
   "tip": {
     "title": "Lähetä tippi",
@@ -1660,7 +1668,8 @@
     "roomSettings": "Huoneen asetukset",
     "messagePinned": "Viesti kiinnitetty",
     "messageUnpinned": "Kiinnitys poistettu",
-    "online": "{{count}} paikalla"
+    "online": "{{count}} paikalla",
+    "onlineHint": "{{count}} ihmistä on tässä keskustelussa juuri nyt"
   },
   "aiChat": {
     "title": "Tekoälyavustaja",
@@ -2338,7 +2347,11 @@
     "sending": "Lähetetään",
     "retrySend": "Yritä uudelleen",
     "discardSend": "Poista",
-    "notSent": "Ei lähetetty"
+    "notSent": "Ei lähetetty",
+    "unreadMarkerOne": "1 lukematon viesti",
+    "unreadMarkerMany": "{{value}} lukematonta viestiä",
+    "jumpToUnread": "Siirry ensimmäiseen lukemattomaan viestiin",
+    "jumpToLatest": "Siirry uusimpaan viestiin"
   },
   "music": {
     "listeningCount_one": "{{count}} kuuntelee",
@@ -4064,7 +4077,8 @@
       "memberCount": "{{n}} jäsentä",
       "approvalNote": "Ylläpitäjän on hyväksyttävä pyyntösi ennen kuin voit liittyä."
     },
-    "bannedFromCommunity": "Sinut on estetty tältä yhteisöltä"
+    "bannedFromCommunity": "Sinut on estetty tältä yhteisöltä",
+    "newChat": {"channelRow":"Kanava · {{formattedCount}} jäsentä","groupRow":"Ryhmä · {{formattedCount}} jäsentä","newChannel":"Uusi kanava","newGroup":"Uusi ryhmä","channelName":"Kanavan nimi","groupName":"Ryhmän nimi","description":"Mistä siinä on kyse? (valinnainen)","whoCanJoin":"Kuka voi liittyä","public":"Julkinen","publicDetail":"Kuka tahansa voi löytää sen ja liittyä","inviteOnly":"Vain kutsusta","private":"Yksityinen","privateDetail":"Ihmiset liittyvät kutsullasi tai hyväksynnälläsi","entry":"Liittyminen","free":"Ilmainen","freeDetail":"Liittyminen on ilmaista","paid":"Maksettu","paidDetail":"Yksi maksu tokeneina, suoraan sinulle","price":"Hinta tokeneina","channelNote":"Vain sinä ja ylläpitäjäsi voitte julkaista. Jäsenet lukevat ja reagoivat.","createChannel":"Luo kanava","createGroup":"Luo ryhmä","message":"Uusi viesti","messageDetail":"Yksityinen keskustelu yhden henkilön kanssa","groupDetail":"Keskustele monen ihmisen kanssa, julkisesti tai yksityisesti","channelDetail":"Lähetä seuraajille, ilmaiseksi tai maksullisesti","title":"Aloita jotain"}
   },
   "prompt": {
     "seoTitle": "Ohjaa syötteesi: Riftn",
@@ -12842,7 +12856,8 @@
     "shareKindCommunity": "Yhteisö",
     "shareGroups": "Ryhmät",
     "shareKindChannel": "Kanava",
-    "reportMessage": "Ilmoita viestistä"
+    "reportMessage": "Ilmoita viestistä",
+    "attachAnything": "Liitä kuva, video, ääni tai tiedosto"
   },
   "credits": {
     "earningsWorth": "Arvo {{amount}}",
@@ -20979,5 +20994,17 @@
     "addQuestion": "Lisää kysymys",
     "pointsLabel": "Pisteitä per oikea vastaus",
     "attachFailed": "Julkaisusi on näkyvillä, mutta tietovisaa ei voitu lisätä"
-  }
+  },
+  "ownKeys": {"working":"Käynnissä","invalid":"Hylätty, vaihda se","noCredit":"Krediitit loppu","disabled":"Riftn on poistanut käytöstä","failed":"Jokin meni pieleen. Yritä uudelleen.","savedNoCredit":"{{name}}-avain tallennettu, mutta tililtä on krediitit loppu.","saved":"{{name}}-avain tallennettu. {{name}}-työkalut käyttävät nyt tiliäsi.","removed":"{{name}}-avain poistettu.","title":"Omat tekoälyavaimesi","description":"Lisää avain tekoälypalvelulta, niin Creator-työkalut toimivat sen sijaan omalla tililläsi. Riftn ei veloita näistä töistä mitään. Avaimet salataan eikä niitä näytetä enää uudelleen.","check":"Tarkista","remove":"Poista","add":"Lisää avain","paste":"Liitä {{name}}-avaimesi","save":"Tallenna","cancel":"Peruuta","getKey":"Hanki {{name}}-avain","showLess":"Näytä vain omat avaimeni","addAnother":"Lisää toinen palveluntarjoaja"},
+  "resetWallet": {"mismatch":"Salasanat eivät täsmää","tooShort":"Salasanassa on oltava vähintään {{count}} merkkiä","breached":"Tämä salasana on esiintynyt tietovuodossa. Valitse toinen","weak":"Valitse vahvempi salasana (yhdistele kirjaimia, numeroita ja symboleita)","failed":"Lompakkoasi ei voitu nollata. Mitään ei siirretty. Yritä uudelleen.","twoFactor":"Anna todennussovelluksesi koodi siirtääksesi tilisi.","funds":"Tokenit, NFT:t ja muut saldot eivät siirry. Ne jäävät vanhaan osoitteeseen. Jos pystyt vielä avaamaan vanhan lompakon, lähetä ne ensin pois.","doneTitle":"Tilisi on nyt uudessa lompakossa","logOut":"Kirjaudu ulos","intro":"Luo uuden Riftn-lompakon ja siirtää käyttäjänimesi, julkaisusi, seuraajasi ja viestisi siihen. Käytä tätä, jos lompakkosi on kadonnut tai jollakulla muulla on sen avain. Vanha lompakko lakkaa toimimasta kirjautumisessa.","password":"Uuden lompakon salasana (väh. {{count}} merkkiä)","confirm":"Vahvista salasana","twoFactorPlaceholder":"Todennuskoodi","ack":"Ymmärrän, että vanhat rahoit pysyvät vanhassa taskussa.","submit":"Nollaa lompakko","title":"Nollaa lompakko","rowDesc":"Kadotitko lompakkosi, tai onko jollakulla muulla sen avain? Siirrä tilisi uuteen lompakkoon. Käyttäjänimesi, julkaisusi ja seuraajasi tulevat mukana."},
+  "twoFactor": {"turnOn":"Ota käyttöön","wrongCode":"Se koodi ei vastannut. Kokeile uusinta sovelluksessasi.","signingInAs":"Kirjaudutaan sisään","signIn":"Kirjaudu sisään","trustDevice":"Älä kysy uudelleen tälle laitteelle 30 päivän ajan","useBackupShort":"Käytä varmistuskoodia","useApp":"Käytä omaa autentikointisovellustasi","useAnotherShort":"Eri tili","lostEverything":"Kadotit puhelimesi ja varmistuskoodisi? Ota yhteyttä tukeen","turnedOff":"Kaksivaiheinen kirjautuminen on pois päältä","introTitle":"Lisää toinen lukko","linkTitle":"Yhdistä autentikointisovelluksesi","codesTitle":"Tallenna varmistuskoodisi","newCodesTitle":"Hae uudet varmistuskoodit","turnOff":"Poista","backupCodes":"Varmistuskoodit"},
+  "chatTextSize": {"title":"Tekstin koko"},
+  "notes": {"replyTo":"Vastaa osoitteeseen {{name}}…"},
+  "chatBulk": {"toolbar":"Valitut keskustelut","selected":"{{count}} valittu","cancel":"Peruuta","read":"Merkitse luetuksi","unread":"Merkitse lukemattomaksi","reply":"Vastaa","delete":"Poista","replyHint":"Jokainen saa tämän tavallisena viestinä omaan keskusteluunsa.","replyPlaceholder":"Kirjoita viesti…","sendAll":"Lähetä ({{count}})","partSent":"Lähetetty {{ok}}/{{total}} keskusteluun","notSent":"Lähetys epäonnistui. Yritä uudelleen."},
+  "chatTabs": {"addToTab":"Lisää välilehteen","newWith":"Uusi välilehti…","hide":"Piilota välilehti","edit":"Muokkaa välilehtiä","renameEdit":"Nimeä uudelleen ja muokkaa","addChats":"Lisää keskusteluja","moveLeft":"Siirrä vasemmalle","moveRight":"Siirrä oikealle","delete":"Poista välilehti","new":"Uusi välilehti","editTab":"Muokkaa välilehteä","create":"Luo välilehti","emoji":"Valitse emoji","namePlaceholder":"Välilehden nimi","noEmoji":"Ei emojia","sFriends":"Ystävät","sWork":"Työ","sTrading":"Kaupankäynti","sCreators":"Tekijät","sGaming":"Pelit","chatsInTab":"Tämän välilehden keskustelut","picked":"{{n}} valittu","deleteTitle":"Poistetaanko ”{{name}}”?","deleteBody":"Välilehti poistuu. Sen keskustelut pysyvät Kaikki-kohdassa ja säilyttävät viestinsä.","builtIn":"Sisäänrakennettu","chatCount":"{{n}} keskustelua","moveUp":"Siirrä ylös","moveDown":"Siirrä alas","alwaysOn":"Pysy aina päällä","show":"Näytä välilehti","emptyTitle":"{{name}} on tyhjä","emptyBody":"Lisää keskusteluja tänne, niin ne pysyvät myös Kaikki-kohdassa.","removedFrom":"Poistettu kohteesta {{name}}","addedTo":"Lisätty: {{name}}","kindPublic":"Julkinen","kindChannel":"Kanava","kindGroup":"Ryhmittele","kindCommunity":"Yhteisö","kindDirect":"Suora","tooMany":"Sinulla voi olla enintään 10 välilehteä","deleted":"Poistettu {{name}}"},
+  "msgSelect": {"partForwarded":"Välitetty {{ok}}/{{total}}","nothingToCopy":"Valituissa viesteissä ei ole kopioitavaa","toolbar":"Valitut viestit","selected":"{{count}} valittu","copy":"Kopioi","forward":"Välitä","deleteSome":"Poista {{count}}"},
+  "dmSafety": {"notReal":"Tämä ei ole oikea {{name}}.","neverLink":"Riftn-tiimi ei koskaan lähetä sinulle yksityisviestinä linkkiä profiilisi tai lompakkosi korjaamiseen. Älä avaa linkkejä, yhdistä lompakkoasi tai allekirjoita mitään. Estä ja ilmoita tämä tili."},
+  "post": {"destruct":{"offBody":"Julkaisu pysyy näkyvillä.","onBody":"Julkaisu poistaa itsensä {{value1}} julkaisemisen jälkeen."}},
+  "dmPaidLock": {"lockOnUsd":"Lukittu · {{price}}","lockVideo":"Lukitse video","lockPhoto":"Lukitse kuva","lockCustom":"Muu","lockCustomUsdLabel":"Oma hinta dollareina","lockHint":"He näkevät sen sumennettuna, kunnes maksavat sinulle. Lukittuja tiedostoja ei ole päästä päähän salattu."},
+  "chatReactions": {"oneNamed":"{{name}} reagoi {{emoji}} viestiisi","one":"Reagoi {{emoji}} viestiisi"}
 }

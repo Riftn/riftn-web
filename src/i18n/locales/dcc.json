@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "ویڈیو ایڈٹ کرو", "hiddenTag": "چھپا ہوا", "tapToEdit": "ایڈٹ کرنے واسطے ٹیپ کرو", "cover": "کور", "trim": "ٹرم", "mirror": "مِرر", "rotate": "روٹیٹ", "hide": "ہائڈ", "timer": "ٹائمر", "sheetTitleAny": "بھیجنے سے پہلے ایڈٹ کرو", "close": "کلوز", "replace": "بدلو", "hiddenUntilTap": "جب تک وہ ٹیپ نہ کریں چھپا ہوا", "pause": "پاز", "play": "پلے ویڈیو", "mute": "آواز بند کرو", "unmute": "آواز کھولو", "scrub": "ویڈیو کے ذریعے سکرب کریں", "addMore": "فوٹوز یا ویڈیوز شامل کریں", "trimAria": "آخر کو ڈریگ کریں ٹرم کیلئے", "coverAria": "فریم پر ٹیپ کریں تاکہ کور سیٹ ہو", "coverHint": "فریم پر ٹیپ کریں تاکہ کور سیٹ ہو", "coverOwn": "تمھاری تصویر", "coverAuto": "آٹو", "uploadCover": "کور تصویر اپلوڈ کریں", "mirrored": "مِررڈ", "original": "اورجنل", "rotate90": "روٹیٹ 90°", "showNormally": "نارمل دکھائیں", "showNormallyBody": "وہ فوراً دیکھتے ہیں", "hideUntilTap": "ٹیپ ہونے تک چھپائیں", "hideUntilTapBody": "ٹیپ تک دھندلا", "hidePrice": "قیمت کے پیچھے چھپائیں", "hidePriceBody": "آپ کی ادائیگی تک دھندلا", "priceUnavailable": "اس چیٹ میں نہیں", "timerOff": "آف", "timerOffBody": "یہ چیٹ میں رہتا ہے۔", "timerViewBody": "دونوں کے لیے غائب ہو جاتا ہے جب وہ اسے دیکھ چکے ہوں۔", "confirm": "تصدیق کریں", "lockedFor": "{{value1}} ٹوکنز کے واسطے ان لاک کرو", "lockedForUsd": "{{value1}} کے لیے انلاک کریں", "editItem": "آئٹم ایڈٹ کریں {{value1}}", "kept": "{{time}} رکھا گیا", "timerTimeBody": "آپ کے بھیجنے کے بعد دونوں کے لیے {{value1}} غائب ہو جائے گا۔"},
+  "dmVideo": {"edit": "ویڈیو ایڈٹ کرو", "hiddenTag": "چھپا ہوا", "tapToEdit": "ایڈٹ کرنے واسطے ٹیپ کرو", "cover": "کور", "trim": "ٹرم", "mirror": "مِرر", "rotate": "روٹیٹ", "hide": "ہائڈ", "timer": "ٹائمر", "sheetTitleAny": "بھیجنے سے پہلے ایڈٹ کرو", "close": "کلوز", "replace": "بدلو", "hiddenUntilTap": "جب تک وہ ٹیپ نہ کریں چھپا ہوا", "pause": "پاز", "play": "پلے ویڈیو", "mute": "آواز بند کرو", "unmute": "آواز کھولو", "scrub": "ویڈیو کے ذریعے سکرب کریں", "addMore": "فوٹوز یا ویڈیوز شامل کریں", "trimAria": "آخر کو ڈریگ کریں ٹرم کیلئے", "coverAria": "فریم پر ٹیپ کریں تاکہ کور سیٹ ہو", "coverHint": "فریم پر ٹیپ کریں تاکہ کور سیٹ ہو", "coverOwn": "تمھاری تصویر", "coverAuto": "آٹو", "uploadCover": "کور تصویر اپلوڈ کریں", "mirrored": "مِررڈ", "original": "اورجنل", "rotate90": "روٹیٹ 90°", "showNormally": "نارمل دکھائیں", "showNormallyBody": "وہ فوراً دیکھتے ہیں", "hideUntilTap": "ٹیپ ہونے تک چھپائیں", "hideUntilTapBody": "ٹیپ تک دھندلا", "hidePrice": "قیمت کے پیچھے چھپائیں", "hidePriceBody": "آپ کی ادائیگی تک دھندلا", "priceUnavailable": "اس چیٹ میں نہیں", "timerOff": "آف", "timerOffBody": "یہ چیٹ میں رہتا ہے۔", "timerViewBody": "دونوں کے لیے غائب ہو جاتا ہے جب وہ اسے دیکھ چکے ہوں۔", "confirm": "تصدیق کریں", "lockedFor": "{{value1}} ٹوکنز کے واسطے ان لاک کرو", "lockedForUsd": "{{value1}} کے لیے انلاک کریں", "editItem": "آئٹم ایڈٹ کریں {{value1}}", "kept": "{{time}} رکھا گیا", "timerTimeBody": "آپ کے بھیجنے کے بعد دونوں کے لیے {{value1}} غائب ہو جائے گا۔", "destruct": {"3600":"ایک گھنٹہ","43200":"بارہ گھنٹے","86400":"ایک دن","604800":"ایک ہفتہ","31536000":"ایک سال","view":"۱ ویو"}, "destructShort": {"view":"۱ ویو"}, "destructSecs": "{{n}} سیکنڈ"},
   "postBg": {
     "addMedia": "تصویر، GIF یا ویڈیو شامل کریں",
     "changeMedia": "تصویر، GIF یا ویڈیو تبدیل کریں",
@@ -664,7 +664,9 @@
       "riftn": "ڈےہب",
       "main": "خاص",
       "money": "پیسے"
-    }
+    },
+    "moveGroupHint": "دوسرے ٹیب پر ڈراپ کرو تاکہ وہ وہاں منتقل ہو جائے۔",
+    "reorderHintGroups": "کوئی بھی آئیکن کو پکڑ کر ڈریگ کرو تاکہ اس کی جگہ بدل سکو، یا پھر دوسرے ٹیب پر ڈال کر اسے وہاں منتقل کرو۔"
   },
   "feed": {
     "viewProfile": "{{name}} کی پروفائل دیکھو",
@@ -1320,7 +1322,12 @@
     "menuLayoutSectionsDesc": "سب صفحے ایک ساتھ، گروپ ہیڈر کے نیچے",
     "menuLayoutFoldersDesc": "آپ کے خاص صفحے، پھر ہر گروپ کے لئے ایک فولڈر",
     "publicChatInBar": "نیچے کی بار میں پبلک چیٹ",
-    "publicChatInBarDesc": "سکرین کے نیچے کی بار سے ایک ٹیپ میں پبلک چیٹ"
+    "publicChatInBarDesc": "سکرین کے نیچے کی بار سے ایک ٹیپ میں پبلک چیٹ",
+    "notificationShowCount": "گھنٹی پر نمبر دکھاؤ",
+    "notificationShowCountDesc": "صرف چمک کی جگہ دیکھو کتنے نوٹیفکیشنز بغیر پڑھے ہیں",
+    "messagesShowCount": "Messages پر نمبر دکھاؤ",
+    "messagesShowCountDesc": "صرف چمک کی جگہ دیکھو کتنے میسجز بغیر پڑھے ہیں",
+    "chatTextSize": "چیٹ ٹیکسٹ سائز"
   },
   "common": {
     "confirm": "توثیق کریں",
@@ -1353,7 +1360,8 @@
     "next": "اگلے",
     "previous": "پچھلے",
     "redo": "پہلے سے دوبارہ",
-    "remove": "ہٹا دیے"
+    "remove": "ہٹا دیے",
+    "copy": "کاپی"
   },
   "tip": {
     "title": "ٹپ بھیجو",
@@ -1660,7 +1668,8 @@
     "roomSettings": "روم سیٹنگز",
     "messagePinned": "پیغام پن ہو گیا",
     "messageUnpinned": "پیغام ان پن ہو گیا",
-    "online": "{{count}} آن لائن"
+    "online": "{{count}} آن لائن",
+    "onlineHint": "ابھی اس چیٹ میں {{count}} لوگ ہیں"
   },
   "aiChat": {
     "title": "مددگار",
@@ -2338,7 +2347,11 @@
     "sending": "بجھا کر بھجوانا ہے",
     "retrySend": "پھر کوشش کرو",
     "discardSend": "ہٹاؤ",
-    "notSent": "نئیں گیا"
+    "notSent": "نئیں گیا",
+    "unreadMarkerOne": "1 بغیر پڑھا میسج",
+    "unreadMarkerMany": "{{value}} بغیر پڑھے میسجز",
+    "jumpToUnread": "پہلے بغیر پڑھے میسج پر جاؤ",
+    "jumpToLatest": "تازہ میسج پر جاؤ"
   },
   "music": {
     "listeningCount_one": "{{count}} سن رہے ہیں",
@@ -4064,7 +4077,8 @@
       "memberCount": "{{n}} ممبران",
       "approvalNote": "تُمہاری درخواست جوائن کرنے سے پہلے ایڈمن کو اپروو کرنا پڑے گا۔"
     },
-    "bannedFromCommunity": "تُم کو اس کمیونٹی سے بین کر دیا گیا ہے"
+    "bannedFromCommunity": "تُم کو اس کمیونٹی سے بین کر دیا گیا ہے",
+    "newChat": {"channelRow":"چینل · {{formattedCount}} ممبرز","groupRow":"گروپ · {{formattedCount}} ممبرز","newChannel":"نیا چینل","newGroup":"نیا گروپ","channelName":"چینل کا نام","groupName":"گروپ کا نام","description":"یہ کس بارے میں ہے؟ (اختیاری)","whoCanJoin":"کون شامل ہو سکتا","public":"پبلک","publicDetail":"کوئی بھی ڈھونڈ کر شامل ہو سکتا","inviteOnly":"صرف دعوت سے","private":"پرائیویٹ","privateDetail":"لوگ آپ کی دعوت یا منظوری سے شامل ہوتے","entry":"داخلہ","free":"مفت","freeDetail":"شامل ہونے کی کوئی فیس نئیں","paid":"پےڈ","paidDetail":"ٹوکنز میں ایک پیمنٹ، سیدھا آپ کو","price":"ٹوکنز میں قیمت","channelNote":"صرف آپ اور آپ کے ایڈمنز پوسٹ کر سکتے۔ ممبرز پڑھتے اور ری ایکٹ کرتے۔","createChannel":"چینل بناؤ","createGroup":"گروپ بناؤ","message":"نیا میسج","messageDetail":"ایک بندے کے ساتھ پرائیویٹ چیٹ","groupDetail":"کئی لوگاں کے ساتھ چیٹ، پبلک یا پرائیویٹ","channelDetail":"فالوورز کو براڈکاسٹ، مفت یا پیسے والا","title":"کچھ شروع کرو"}
   },
   "prompt": {
     "seoTitle": "دہیب کا ایک پریس ہے",
@@ -12835,7 +12849,8 @@
     "shareKindCommunity": "کامونٹی",
     "shareGroups": "گروپس",
     "shareKindChannel": "چینل",
-    "reportMessage": "پیغام رپورٹ کرو"
+    "reportMessage": "پیغام رپورٹ کرو",
+    "attachAnything": "فوٹو، ویڈیو، آڈیو یا فائل جوڑو"
   },
   "credits": {
     "earningsWorth": "قیمت {{amount}}",
@@ -20976,5 +20991,17 @@
     "addQuestion": "سوال شامل کریں",
     "pointsLabel": "فی درست جواب پوائنٹس",
     "attachFailed": "آپ کی پوسٹ ہو گئی ہے، لیکن کوئز شامل نہیں کیا جا سکا"
-  }
+  },
+  "ownKeys": {"working":"کام ہو رہا ہے","invalid":"رد ہو گئی، بدل دو","noCredit":"کریڈٹ ختم","disabled":"Riftn نے بند کیا","failed":"کچھ گڑبڑ ہو گئی۔ پھر سے کوشش کرو۔","savedNoCredit":"{{name}} کی محفوظ ہو گئی، لیکن کھاتے میں کریڈٹ ختم ہے۔","saved":"{{name}} کی محفوظ ہو گئی۔ {{name}} پر ٹولز اب آپ کا کھاتا استعمال کرتے۔","removed":"{{name}} کی ہٹا دی۔","title":"آپ کی اپنی AI کیز","description":"کسی AI پرووائیڈر کی کی جوڑو تو Creator ٹولز آپ کے کھاتے پر چلتے۔ ان کاموں کے لیے Riftn کچھ چارج نئیں کرتا۔ کیز انکرپٹڈ ہوتی ہیں اور دوبارہ کبھی نئیں دکھتیں۔","check":"جانچ","remove":"ہٹاؤ","add":"کی جوڑو","paste":"اپنی {{name}} کی پیسٹ کرو","save":"محفوظ کرو","cancel":"رہنے دو","getKey":"{{name}} کی لو","showLess":"صرف میری کیز دکھاؤ","addAnother":"دوسرا پرووائیڈر جوڑو"},
+  "resetWallet": {"mismatch":"پاسورڈز میچ نہیں ہو رہے","tooShort":"پاس ورڈ کم سے کم {{count}} حروف کا ہونا چاہیے","breached":"یہ پاس ورڈ ڈیٹا لیک میں آ چکا ہے۔ دوسرا چنو","weak":"مضبوط پاس ورڈ چنو (حروف، نمبرز اور علامتیں ملاؤ)","failed":"آپ کا والیٹ ری سیٹ نئیں ہو سکا۔ کچھ منتقل نئیں ہوا۔ دوبارہ کوشش کرو۔","twoFactor":"اپنا کھاتا منتقل کرنے کے لیے اپنی authenticator ایپ کا کوڈ ڈالو۔","funds":"ٹوکنز، NFTs اور دوسرے بیلنس منتقل نئیں ہوتے۔ وہ پرانے ایڈریس پر رہتے۔ اگر آپ ابھی بھی پرانا والیٹ کھول سکتے تو پہلے ان کو باہر بھیج دو۔","doneTitle":"آپ کا کھاتا اپنے نئے والیٹ پر ہے","logOut":"خروج کرنے کے لئے لوج آؤٹ","intro":"نیا Riftn والیٹ بناتا اور آپ کا یوزرنیم، پوسٹس، فالوورز اور میسجز اس پر منتقل کرتا۔ اگر آپ کا والیٹ کھو گیا یا کسی اور کے پاس اس کی کی ہے تو یہ استعمال کرو۔ پرانا والیٹ سائن ان کے لیے کام کرنا بند کر دیتا۔","password":"نئے والیٹ کا پاس ورڈ (کم سے کم {{count}} حروف)","confirm":"پاس ورڈ کوں تصدیق کرو","twoFactorPlaceholder":"Authenticator کوڈ","ack":"میں نے سمجھا کہ میری پوری پچھلی رقم میرے پچھلے والٹ میں رہتی ہے۔","submit":"والیٹ ری سیٹ کرو","title":"والیٹ ری سیٹ کرو","rowDesc":"والیٹ کھو گیا، یا کسی اور کے پاس اس کی کی ہے؟ اپنا کھاتا نئے والیٹ پر منتقل کرو۔ آپ کا یوزرنیم، پوسٹس اور فالوورز ساتھ آتے۔"},
+  "twoFactor": {"turnOn":"آن کریں","wrongCode":"وہ کوڈ میل نہیں کھایا۔ اپنے ایپ میں نیا ترین کوڈ آزمائیں۔","signingInAs":"سائن ان کر رہے ہیں","signIn":"سائن ان","trustDevice":"اس ڈیوائس پر 30 دن تک دوبارہ نہ پوچھیں","useBackupShort":"بیک اپ کوڈ استعمال کریں","useApp":"میرا آتھنٹیکیشن ایپ استعمال کریں","useAnotherShort":"مختلف اکاؤنٹ","lostEverything":"اپنا فون اور بیک اپ کوڈ گم ہو گئے؟ سپورٹ سے رابطہ کریں","turnedOff":"ٹو-اسٹیپ سائن ان بند ہے","introTitle":"دوسرا لاک شامل کریں","linkTitle":"اپنی آتھنٹیکیشن ایپ کو لنک کریں","codesTitle":"اپنے بیک اپ کوڈ محفوظ کریں","newCodesTitle":"نئے بیک اپ کوڈز حاصل کریں","turnOff":"بند کریں","backupCodes":"بیک اپ کوڈز"},
+  "chatTextSize": {"title":"متن کا سائز"},
+  "notes": {"replyTo":"{{name}} کو جواب دو…"},
+  "chatBulk": {"toolbar":"چنی ہوئی چیٹس","selected":"{{count}} منتخب","cancel":"رہنے دو","read":"پڑھا ہوا مارک کرو","unread":"بغیر پڑھا مارک کرو","reply":"جواب دو","delete":"مٹاؤ","replyHint":"ہر بندے کو یہ اپنی چیٹ میں عام میسج کی طرح ملتا۔","replyPlaceholder":"میسج لکھو…","sendAll":"{{count}} کو بھیجو","partSent":"{{total}} میں سے {{ok}} چیٹس کو بھیجا","notSent":"بھیج نئیں سکے۔ دوبارہ کوشش کرو۔"},
+  "chatTabs": {"addToTab":"ٹیب میں جوڑو","newWith":"نیا ٹیب…","hide":"ٹیب چھپاؤ","edit":"ٹیبز ایڈٹ کرو","renameEdit":"نام بدلو اور ایڈٹ کرو","addChats":"چیٹس جوڑو","moveLeft":"بائیں منتقل کرو","moveRight":"دائیں منتقل کرو","delete":"ٹیب مٹاؤ","new":"نیا ٹیب","editTab":"ٹیب ایڈٹ کرو","create":"ٹیب بناؤ","emoji":"ایموجی چنو","namePlaceholder":"ٹیب کا نام","noEmoji":"کوئی ایموجی نئیں","sFriends":"دوست","sWork":"کام","sTrading":"ٹریڈنگ","sCreators":"بنانے والے","sGaming":"گیمنگ","chatsInTab":"اس ٹیب کی چیٹس","picked":"{{n}} چنے","deleteTitle":"“{{name}}” مٹانا ہے؟","deleteBody":"ٹیب چلا جاتا۔ اس کی چیٹس All میں رہتی ہیں اور اپنے میسجز رکھتی ہیں۔","builtIn":"پہلے سے موجود","chatCount":"{{n}} چیٹس","moveUp":"اُپری جانب","moveDown":"ہٹاؤ","alwaysOn":"ہمیشہ چالو","show":"ٹیب دکھاؤ","emptyTitle":"{{name}} خالی ہے","emptyBody":"یہاں چیٹس جوڑو، وہ All میں بھی رہتی ہیں۔","removedFrom":"{{name}} سے ہٹا دیا","addedTo":"{{name}} میں جوڑ دیا","kindPublic":"پبلک","kindChannel":"چینل","kindGroup":"گروپ","kindCommunity":"کامونٹی","kindDirect":"براہ راست","tooMany":"آپ کے 10 تک ٹیبز ہو سکتے","deleted":"{{name}} مٹ گیا"},
+  "msgSelect": {"partForwarded":"{{total}} میں سے {{ok}} فارورڈ ہوئے","nothingToCopy":"چنے ہوئے میسجز میں کاپی کرنے کو کچھ نئیں","toolbar":"چنے ہوئے میسجز","selected":"{{count}} منتخب","copy":"کاپی","forward":"آگے بھیجو","deleteSome":"{{count}} مٹاؤ"},
+  "dmSafety": {"notReal":"یہ اصلی {{name}} نئیں۔","neverLink":"Riftn ٹیم آپ کو کبھی آپ کا پروفائل یا والیٹ ٹھیک کرنے کا لنک DM نئیں کرے گی۔ لنکس نکو کھولو، اپنا والیٹ نکو جوڑو اور کچھ بھی سائن نکو کرو۔ اس کھاتے کو بلاک اور رپورٹ کرو۔"},
+  "post": {"destruct":{"offBody":"پوسٹ لگی رہتی۔","onBody":"پوسٹ لگنے کے {{value1}} بعد اپنے آپ مٹ جاتی۔"}},
+  "dmPaidLock": {"lockOnUsd":"لاک · {{price}}","lockVideo":"ویڈیو لاک کرو","lockPhoto":"فوٹو لاک کرو","lockCustom":"اور","lockCustomUsdLabel":"ڈالر میں اپنی قیمت","lockHint":"آپ کو پیسے دینے تک وہ اس کو دھندلا دیکھتے۔ لاک فائلیں اینڈ ٹو اینڈ انکرپٹڈ نئیں ہوتیں۔"},
+  "chatReactions": {"oneNamed":"{{name}} نے آپ کے میسج پر {{emoji}} ری ایکٹ کیا","one":"آپ کے میسج پر {{emoji}} ری ایکٹ کیا"}
 }

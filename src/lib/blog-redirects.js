@@ -108,6 +108,19 @@ export const EXCLUDED_WITHOUT_COUNTERPART = [
  * independent DAO governed by its token holders, not a company subsidiary;
  * governance is the page that answers the question the old post was asked for.
  */
+/** Former standalone translations now served as variants of the original guide. */
+export const LOCALIZED_GUIDE_REDIRECTS = {
+  'redes-sociais-descentralizadas-2026': { slug: 'best-decentralised-social-media-platforms-2026', language: 'pt' },
+};
+
+export function localizedGuideRedirect(slug, search) {
+  if (!Object.hasOwn(LOCALIZED_GUIDE_REDIRECTS, slug)) return null;
+  const target = LOCALIZED_GUIDE_REDIRECTS[slug];
+  const params = new URLSearchParams(search);
+  if (!params.get('hl')) params.set('hl', target.language);
+  return '/guides/' + target.slug + '?' + params.toString();
+}
+
 export const RETIRED_GUIDES = {
   'official-standing-delabs-ltd-incorporated---a-dehub-milestone-from-q3-2022': '/docs/token/governance',
   // The old name's look-alike guide stopped making sense once the brand became Riftn.

@@ -657,7 +657,9 @@
       "discover": "Discover",
       "money": "Moni",
       "riftn": "Riftn"
-    }
+    },
+    "moveGroupHint": "Drop am for anoda tab make e move go there",
+    "reorderHintGroups": "Hold and drag any icon make you rearrange am, or put am for another tab make you move am"
   },
   "feed": {
     "viewProfile": "View {{name}}'s profile",
@@ -1313,7 +1315,11 @@
     "menuLayoutFolders": "Folders",
     "menuLayoutFoldersDesc": "Your main pages, then one folder for each group",
     "publicChatInBar": "Public Chat for di bottom bar",
-    "publicChatInBarDesc": "One tap enter Public Chat from di bar for bottom of di screen"
+    "publicChatInBarDesc": "One tap enter Public Chat from di bar for bottom of di screen",
+    "notificationShowCount": "Show the number for the bell",
+    "notificationShowCountDesc": "See how many notifications you never read, no be only the glow",
+    "messagesShowCount": "Show the number for Messages",
+    "messagesShowCountDesc": "See how many messages you never read, no be only the glow"
   },
   "common": {
     "confirm": "Confam",
@@ -1653,7 +1659,8 @@
     "roomSettings": "Room setins",
     "messagePinned": "Message don pin",
     "messageUnpinned": "Message don unpin",
-    "online": "{{count}} dey online"
+    "online": "{{count}} dey online",
+    "onlineHint": "{{count}} people dey this chat now"
   },
   "aiChat": {
     "title": "Assistant",
@@ -2332,7 +2339,11 @@
     "encryptionReconnect": "Connect your wallet again make you on encryption.",
     "checkingTokenBalance": "We dey check your token balance...",
     "sending": "E dey send",
-    "notSent": "E never send"
+    "notSent": "E never send",
+    "unreadMarkerOne": "1 message wey you never read",
+    "unreadMarkerMany": "{{value}} messages wey you never read",
+    "jumpToUnread": "Jump go first message wey you never read",
+    "jumpToLatest": "Jump go latest message"
   },
   "music": {
     "listeningCount_one": "{{count}} dey listen",
@@ -4048,7 +4059,8 @@
     "activityShowMore": "Show more ({{total}})",
     "activityEmptyDesc": "Joins, mentions and announcements from your communities go show here.",
     "pendingRequestsShort": "{{count}} request(s) dey wait for approval",
-    "manageMembersHint": "Roles, restrictions, invite links and recent actions"
+    "manageMembersHint": "Roles, restrictions, invite links and recent actions",
+    "newChat": {"description":"Wetin e dey about? (optional)","whoCanJoin":"Who fit join","public":"Everybody","publicDetail":"Anybody fit find am join","inviteOnly":"Na only invite","privateDetail":"People go join with your invite or if you approve","freeDetail":"E no cost anything to join","paid":"Dem don pay","paidDetail":"One payment for tokens, straight to you","price":"Price for tokens","channelNote":"Na only you and your admins fit post. Members go read and react.","messageDetail":"Private chat with one person","groupDetail":"Chat with plenty people, public or private"}
   },
   "prompt": {
     "seoTitle": "Tell us wetin go show for your feed | Riftn",
@@ -12820,7 +12832,8 @@
     "shareGroups": "Groups",
     "shareKindGroup": "Group",
     "shareKindChannel": "Channel",
-    "reportMessage": "Report message"
+    "reportMessage": "Report message",
+    "attachAnything": "Attach photo, video, audio or file"
   },
   "credits": {
     "earningsWorth": "E worth {{amount}}",
@@ -20882,5 +20895,16 @@
     "promptCatchUp": "Tell me wetin {{handle}} don post lately",
     "promptMessage": "Help me write message give {{handle}}",
     "promptAbout": "About {{handle}}: {{question}}"
-  }
+  },
+  "ownKeys": {"working":"E dey work","invalid":"Dem reject am, change am","noCredit":"Credit don finish","disabled":"Riftn don off am","failed":"Something no work well. Try again.","savedNoCredit":"{{name}} key don save, but credit don finish for the account.","saved":"{{name}} key don save. Tools for {{name}} go use your account now.","removed":"{{name}} key don comot.","description":"Add key from AI provider and Creator tools go run for your account instead. Riftn no go charge anything for those jobs. Keys dey encrypted and we no go show dem again.","remove":"Comot am","save":"Save Am","cancel":"Cancel am","getKey":"Get {{name}} key"},
+  "resetWallet": {"mismatch":"Passwords no match","tooShort":"Password must reach at least {{count}} characters","breached":"This password don show for data breach before. Choose another one","weak":"Choose stronger password (mix letters, numbers and symbols)","failed":"We no fit reset your wallet. Nothing move. Try again.","twoFactor":"Put the code from your authenticator app to move your account.","funds":"Tokens, NFTs and other balances no dey move. Dem go stay for the old address. If you still fit open the old wallet, first send dem comot.","doneTitle":"Your account don dey the new wallet","logOut":"Comot","intro":"E go make new Riftn wallet and move your username, posts, followers and messages enter am. Use this if your wallet don lost or another person get the key. The old wallet no go work for sign-in again.","ack":"I understand say my old money still dey inside the old wallet.","rowDesc":"Your wallet don lost, or another person get the key? Move your account go new wallet. Your username, posts and followers go follow you."},
+  "twoFactor": {"wrongCode":"Na dem code no dey fit. Try wey new one be in your app.","trustDevice":"No go ask again for dis device for 30 days.","useBackupShort":"Backup code.","lostEverything":"Your phone and backup codes don lost? Contact support","turnedOff":"Two-step sign-in don off","introTitle":"Add second lock","linkTitle":"Connect your authenticator app","newCodesTitle":"Collect new backup codes"},
+  "chatTextSize": {"title":"Size for text"},
+  "chatBulk": {"toolbar":"Chats wey you select","selected":"You don select {{count}}","cancel":"Cancel am","read":"Mark as read","unread":"Mark as unread","reply":"Reply am","delete":"Delete Am","replyHint":"Each person go get this as normal message for their own chat.","replyPlaceholder":"Write message…","partSent":"E send to {{ok}} of {{total}} chats","notSent":"E no send. Try again."},
+  "chatTabs": {"addToTab":"Add am to tab","renameEdit":"Change name and edit","moveLeft":"Move go left","moveRight":"Move go right","emoji":"Pick emoji","chatsInTab":"Chats wey dey this tab","picked":"{{n}} don pick","deleteBody":"The tab go comot. Its chats go stay for All and keep their messages.","moveUp":"Move am up","moveDown":"Move am down","alwaysOn":"Always on.","emptyTitle":"Nothing dey {{name}}","emptyBody":"Add chats here and dem go still dey All.","removedFrom":"E don comot from {{name}}","addedTo":"E don add to {{name}}","kindPublic":"Everybody","kindCommunity":"Gburugburu","tooMany":"You fit get up to 10 tabs","deleted":"{{name}} don delete"},
+  "msgSelect": {"partForwarded":"Forward {{ok}} of {{total}}","nothingToCopy":"Nothing to copy for the messages wey you pick","toolbar":"Messages wey you select","selected":"You don select {{count}}","forward":"Forward am"},
+  "dmSafety": {"notReal":"This one no be the real {{name}}.","neverLink":"Riftn team no go ever DM you link to fix your profile or wallet. No open links, no connect your wallet, no sign anything. Block and report this account."},
+  "post": {"destruct":{"offBody":"The post go stay.","onBody":"The post go delete itself {{value1}} after e go up."}},
+  "dmPaidLock": {"lockOnUsd":"E don lock · {{price}}","lockCustom":"Oda","lockCustomUsdLabel":"Your own price for dollars","lockHint":"Dem go see am blur until dem pay you. Locked files no get end-to-end encryption."},
+  "chatReactions": {"oneNamed":"{{name}} react {{emoji}} for your message","one":"E react {{emoji}} for your message"}
 }

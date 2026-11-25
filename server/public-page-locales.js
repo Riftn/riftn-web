@@ -1,4 +1,7 @@
 const LABELS = {
+  pt: ["Abrir Riftn", "Documentação", "Blog", "Explorar", "Feed inicial", "Feed de vídeos", "Shorts", "Música", "Explorar o Riftn", "Mais documentação", "Mais do blog do Riftn", "Todos os artigos do Riftn", "Página inicial do Riftn", "Abrir no Riftn", "Por", "Riftn: mídia de código aberto, controlada pelos usuários e resistente à censura."],
+  de: ["Riftn öffnen", "Dokumentation", "Blog", "Entdecken", "Startseite", "Video-Feed", "Kurzvideos", "Musik", "Riftn entdecken", "Weitere Dokumentation", "Mehr aus dem Riftn-Blog", "Alle Riftn-Artikel", "Riftn-Startseite", "In Riftn öffnen", "Von", "Riftn: quelloffene, nutzereigene und zensurresistente Medien."],
+  ja: ["Riftnを開く", "ドキュメント", "ブログ", "見つける", "ホーム", "動画フィード", "ショート", "音楽", "Riftnを探索", "その他のドキュメント", "Riftnブログの他の記事", "Riftnブログの全記事", "Riftnホーム", "Riftnで開く", "著者", "Riftnは、利用者が所有する検閲耐性を備えたオープンソースのメディアです。"],
   ar: ['افتح Riftn', 'الوثائق', 'المدونة', 'استكشف', 'الصفحة الرئيسية', 'مقاطع الفيديو', 'مقاطع قصيرة', 'الموسيقى', 'استكشف Riftn', 'المزيد من الوثائق', 'المزيد من مدونة Riftn', 'جميع مقالات مدونة Riftn', 'الصفحة الرئيسية لـ dehub.io', 'افتح في Riftn', 'بقلم', 'Riftn — وسائط مفتوحة المصدر يملكها المستخدمون ومقاومة للرقابة.'],
   es: ['Abrir Riftn', 'Documentación', 'Blog', 'Explorar', 'Inicio', 'Vídeos', 'Vídeos cortos', 'Música', 'Explorar Riftn', 'Más documentación', 'Más del blog de Riftn', 'Todos los artículos de Riftn', 'Inicio de dehub.io', 'Abrir en Riftn', 'Por', 'Riftn: medios de código abierto, propiedad de sus usuarios y resistentes a la censura.'],
   fr: ['Ouvrir Riftn', 'Documentation', 'Blog', 'Explorer', 'Accueil', 'Vidéos', 'Vidéos courtes', 'Musique', 'Explorer Riftn', 'Plus de documentation', 'Plus sur le blog Riftn', 'Tous les articles Riftn', 'Accueil de dehub.io', 'Ouvrir dans Riftn', 'Par', 'Riftn — des médias open source, détenus par leurs utilisateurs et résistants à la censure.'],
@@ -7,6 +10,9 @@ const LABELS = {
 };
 const ENGLISH = ['Open Riftn', 'Docs', 'Blog', 'Explore', 'Home Feed', 'Video Feed', 'Shorts', 'Music', 'Explore Riftn', 'More documentation', 'More from the Riftn Blog', '← All Riftn blog posts', 'dehub.io home', 'Open in Riftn', 'By', 'Riftn — open source, user owned and censorship resistant media.'];
 const FEED_LABELS = {
+  pt: ["Vídeos recentes", "Shorts recentes", "Novidades no Riftn", "Faixas recentes", "visualizações"],
+  de: ["Neueste Videos", "Neueste Kurzvideos", "Neu auf Riftn", "Neueste Titel", "Aufrufe"],
+  ja: ["最新の動画", "最新のショート", "Riftnの新着", "最新の曲", "回視聴"],
   ar: ['أحدث مقاطع الفيديو', 'أحدث المقاطع القصيرة', 'أحدث المنشورات على Riftn', 'أحدث المقاطع الموسيقية', 'مشاهدة'],
   es: ['Últimos vídeos', 'Últimos vídeos cortos', 'Lo último en Riftn', 'Últimas pistas', 'visualizaciones'],
   fr: ['Dernières vidéos', 'Dernières vidéos courtes', 'Dernières publications sur Riftn', 'Derniers morceaux', 'vues'],
@@ -18,10 +24,10 @@ const decodeHtml = value => value.replaceAll('&quot;', '"').replaceAll('&#39;', 
 
 /** Only site-owned labels and links are localized; creator posts keep their text. */
 export function localizePublicChrome(html, route, lang, table) {
-  const labels = LABELS[lang];
-  if (!labels) return html;
+  const labels = LABELS[lang] || ENGLISH;
+  const feed = FEED_LABELS[lang] || ['Latest videos', 'Latest shorts', 'Latest on Riftn', 'Latest tracks', 'views'];
   const dictionary = Object.fromEntries(ENGLISH.map((source, i) => [source, labels[i]]));
-  ['Latest videos', 'Latest shorts', 'Latest on Riftn', 'Latest tracks'].forEach((source, i) => { dictionary[source] = FEED_LABELS[lang][i]; });
+  ['Latest videos', 'Latest shorts', 'Latest on Riftn', 'Latest tracks'].forEach((source, i) => { dictionary[source] = feed[i]; });
   const creatorCopy = [];
   html = html.replace(/<([a-z][\w-]*)\b[^>]*\bdata-creator-copy(?:="[^"]*")?[^>]*>[\s\S]*?<\/\1>/gi, content => {
     creatorCopy.push(content); return '<!--creator-copy-' + (creatorCopy.length - 1) + '-->';
@@ -44,7 +50,7 @@ export function localizePublicChrome(html, route, lang, table) {
     return `${before}${escapeHtml(url.toString())}${after}${translated ? escapeHtml(translated) : text}${close}`;
   });
   out = out.replace(/(<span data-public-by>)[\s\S]*?(<\/span>)/g, match => match.replace('>by ', '>' + escapeHtml(labels[14]) + ' '));
-  out = out.replace(/<span data-public-views="(\d+)">[^<]*<\/span>/g, (_, count) => '<span data-public-views="' + count + '">' + new Intl.NumberFormat(lang).format(Number(count)) + ' ' + FEED_LABELS[lang][4] + '</span>');
+  out = out.replace(/<span data-public-views="(\d+)">[^<]*<\/span>/g, (_, count) => '<span data-public-views="' + count + '">' + new Intl.NumberFormat(lang.replace("_", "-")).format(Number(count)) + ' ' + feed[4] + '</span>');
   return out.replace(/<!--creator-copy-(\d+)-->/g, (_, index) => creatorCopy[Number(index)]);
 }
 
@@ -59,7 +65,7 @@ export function localizePageJsonLd(value, route, lang, page) {
         const base = 'https://riftn.com' + route;
         const ownsDocument = out.url === base || out['@id'] === base || out.mainEntityOfPage === base || out.mainEntityOfPage?.['@id'] === canonical || ((!out.url && !out['@id']) && (depth === 0 || graphChild));
         if (ownsDocument && type.some(item => ['Article', 'TechArticle', 'BlogPosting', 'WebPage', 'CollectionPage', 'Blog', 'WebApplication', 'SoftwareApplication', 'MusicPlaylist', 'DefinedTermSet', 'Table', 'VideoGame'].includes(item))) {
-          out.inLanguage = lang;
+          out.inLanguage = lang === "zh_tw" ? "zh-TW" : lang;
           if (out.name) out.name = page.title;
           if (out.headline) out.headline = page.h1 || page.title;
           if (out.description) out.description = page.description;
@@ -73,7 +79,7 @@ export function localizePageJsonLd(value, route, lang, page) {
             .map(([, question, answer]) => ({ question: plain(question), answer: plain(answer) }))
             .filter(item => /[?؟]$/.test(item.question));
           if (!questions.length) return null;
-          out.inLanguage = lang;
+          out.inLanguage = lang === "zh_tw" ? "zh-TW" : lang;
           out.mainEntity = questions.map(item => ({ '@type': 'Question', name: item.question, acceptedAnswer: { '@type': 'Answer', text: item.answer } }));
         }
         if (out.item === `https://riftn.com${route}`) { out.item = canonical; out.name = page.h1 || page.title; }

@@ -3,7 +3,7 @@ import { localizedPageUrl } from '@/lib/seo/public-locales';
 
 import React, { useLayoutEffect } from 'react';
 import { useParams, Link, useLocation, Navigate } from 'react-router-dom';
-import { MILESTONE_REDIRECTS, cleanBlogSlug } from '@/lib/blog-redirects.js';
+import { MILESTONE_REDIRECTS, cleanBlogSlug, localizedGuideRedirect } from '@/lib/blog-redirects.js';
 import { RotateCw } from "lucide-react";
 import ArrowLeft from "@/components/ui/cut-icons/back";
 
@@ -215,6 +215,11 @@ const BlogPost = () => {
 const BlogPostRoute = () => {
   const { slug } = useParams<{ slug: string }>();
   const location = useLocation();
+  const localizedGuide = slug ? localizedGuideRedirect(slug, location.search) : null;
+  useLayoutEffect(() => {
+    if (localizedGuide) window.location.replace(localizedGuide + location.hash);
+  }, [localizedGuide, location.hash]);
+  if (localizedGuide) return null;
   if (slug) {
     const target = (MILESTONE_REDIRECTS as Record<string, string>)[slug] || cleanBlogSlug(slug);
     if (target && target !== slug) {

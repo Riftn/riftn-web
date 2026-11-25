@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "ویڈیو ایڈٹ کرو", "hiddenTag": "لُکایا ہویا", "tapToEdit": "ایڈٹ کرݨ کیتے ٹیپ کرو", "cover": "کور", "trim": "ٹرم", "mirror": "مرر", "rotate": "گھماؤ", "hide": "لُکاؤ", "timer": "ٹائمر", "sheetTitleAny": "بھیڄݨ توں پہلے ایڈٹ کرو", "close": "بند کرو", "replace": "تبدیل کرو", "hiddenUntilTap": "اُس وقت تک لُکا ہوا جب تک اوہ کلک نہ کرن", "pause": "روکو", "play": "ویڈیو چلاؤ", "mute": "آواز بند کرو", "unmute": "آواز چالو کرو", "scrub": "ویڈیو کوں اگوں پچھوں کرو", "addMore": "فوٹوز یا ویڈیوز شامل کرو", "trimAria": "ٹرم کرݨ کیتے کناریاں کوں کھچو", "coverAria": "کور سیٹ کرݨ کیتے ہک فریم تے کلک کرو", "coverHint": "کور سیٹ کرݨ کیتے ہک فریم تے کلک کرو", "coverOwn": "تہاڈی تصویر", "coverAuto": "آٹو", "uploadCover": "ہک کور پکچر اپ لوڈ کرو", "mirrored": "مرر شدہ", "original": "اصل", "rotate90": "90 ڈگری گھماؤ", "showNormally": "عام طریقے نال ڈکھاؤ", "showNormallyBody": "اوہ ایں کوں فوراً ڈیکھ گھندے ہن", "hideUntilTap": "کلک کرݨ تئیں لُکا رکھو", "hideUntilTapBody": "کلک کرݨ تئیں دھندلا رکھو", "hidePrice": "ہک قیمت دے پچھوں لُکاؤ", "hidePriceBody": "پیسے ڈیوݨ تئیں دھندلا رکھو", "priceUnavailable": "ایں چیٹ وچ کائے نی", "timerOff": "بند", "timerOffBody": "ایہہ چیٹ وچ رہندا اے۔", "timerViewBody": "جدو تُسیں ایہہ دیکھ لیندے او، اوہ تُہاڈے لئی دونوں لئی غائب ہو جاندی اے۔", "confirm": "تصدیق", "lockedFor": "{{value1}} ٹوکنز کیتے ان لاک کرو", "lockedForUsd": "انلاک کرو {{value1}}", "editItem": "شے ایڈٹ کرو {{value1}}", "kept": "{{time}} رکھ گھدا گیا", "timerTimeBody": "تُہاڈے لئی دونوں لئی غائب {{value1}} بعد جدو تُسیں ایہہ بھیج دیو۔"},
+  "dmVideo": {"edit": "ویڈیو ایڈٹ کرو", "hiddenTag": "لُکایا ہویا", "tapToEdit": "ایڈٹ کرݨ کیتے ٹیپ کرو", "cover": "کور", "trim": "ٹرم", "mirror": "مرر", "rotate": "گھماؤ", "hide": "لُکاؤ", "timer": "ٹائمر", "sheetTitleAny": "بھیڄݨ توں پہلے ایڈٹ کرو", "close": "بند کرو", "replace": "تبدیل کرو", "hiddenUntilTap": "اُس وقت تک لُکا ہوا جب تک اوہ کلک نہ کرن", "pause": "روکو", "play": "ویڈیو چلاؤ", "mute": "آواز بند کرو", "unmute": "آواز چالو کرو", "scrub": "ویڈیو کوں اگوں پچھوں کرو", "addMore": "فوٹوز یا ویڈیوز شامل کرو", "trimAria": "ٹرم کرݨ کیتے کناریاں کوں کھچو", "coverAria": "کور سیٹ کرݨ کیتے ہک فریم تے کلک کرو", "coverHint": "کور سیٹ کرݨ کیتے ہک فریم تے کلک کرو", "coverOwn": "تہاڈی تصویر", "coverAuto": "آٹو", "uploadCover": "ہک کور پکچر اپ لوڈ کرو", "mirrored": "مرر شدہ", "original": "اصل", "rotate90": "90 ڈگری گھماؤ", "showNormally": "عام طریقے نال ڈکھاؤ", "showNormallyBody": "اوہ ایں کوں فوراً ڈیکھ گھندے ہن", "hideUntilTap": "کلک کرݨ تئیں لُکا رکھو", "hideUntilTapBody": "کلک کرݨ تئیں دھندلا رکھو", "hidePrice": "ہک قیمت دے پچھوں لُکاؤ", "hidePriceBody": "پیسے ڈیوݨ تئیں دھندلا رکھو", "priceUnavailable": "ایں چیٹ وچ کائے نی", "timerOff": "بند", "timerOffBody": "ایہہ چیٹ وچ رہندا اے۔", "timerViewBody": "جدو تُسیں ایہہ دیکھ لیندے او، اوہ تُہاڈے لئی دونوں لئی غائب ہو جاندی اے۔", "confirm": "تصدیق", "lockedFor": "{{value1}} ٹوکنز کیتے ان لاک کرو", "lockedForUsd": "انلاک کرو {{value1}}", "editItem": "شے ایڈٹ کرو {{value1}}", "kept": "{{time}} رکھ گھدا گیا", "timerTimeBody": "تُہاڈے لئی دونوں لئی غائب {{value1}} بعد جدو تُسیں ایہہ بھیج دیو۔", "destruct": {"60":"1 منٹ","3600":"1 گھنٹہ","43200":"12 گھنٹے","86400":"1 دن","604800":"1 ہفتہ","31536000":"1 سال","view":"1 دیکھ"}, "destructShort": {"view":"1 دیکھ"}, "destructSecs": "{{n}} سیکنڈ"},
   "postBg": {
     "addMedia": "تصویر، GIF یا ویڈیو شامل کرو",
     "changeMedia": "تصویر، GIF یا ویڈیو بدلو",
@@ -664,7 +664,9 @@
       "riftn": "ڈی ہیب",
       "main": "مین",
       "money": "پیسہ"
-    }
+    },
+    "moveGroupHint": "ہک ہور ٹیب تے ڈراپ کرو ایہنوں اوتھیں موو کرن لئی",
+    "reorderHintGroups": "کسی وی آئکن نوں ہولڈ کر کے ڈریگ کرو ترتیب بدلݨ لئی، یا ہک ہور ٹیب تے لے جا کے موو کرو"
   },
   "feed": {
     "viewProfile": "{{name}} دی پروفائل ویکھو",
@@ -1320,7 +1322,12 @@
     "menuLayoutSectionsDesc": "سارے صفحے ہکو ویلے، گروپ سرخیاں دے تلے",
     "menuLayoutFoldersDesc": "تہاݙے مین صفحے، ول ہر گروپ کیتے ہک فولڈر",
     "publicChatInBar": "تلے والی بار وچ پبلک چیٹ",
-    "publicChatInBarDesc": "سکرین دے تلے والی بار توں ہک ٹیپ نال پبلک چیٹ وچ ونڄو"
+    "publicChatInBarDesc": "سکرین دے تلے والی بار توں ہک ٹیپ نال پبلک چیٹ وچ ونڄو",
+    "notificationShowCount": "گھنٹی تے ڳݨتی ݙکھاؤ",
+    "notificationShowCountDesc": "صرف چمک دی بجائے ݙیکھو جو کتنے نوٹیفکیشن اݨ پڑھے ہن",
+    "messagesShowCount": "Messages تے ڳݨتی ݙکھاؤ",
+    "messagesShowCountDesc": "صرف چمک دی بجائے ݙیکھو جو کتنے پیغام اݨ پڑھے ہن",
+    "chatTextSize": "چیٹ متن دا سائز"
   },
   "common": {
     "confirm": "توثیق کریں",
@@ -1353,7 +1360,8 @@
     "next": "اگلا",
     "previous": "پچھلا",
     "redo": "ولا کرو",
-    "remove": "لَا دَو"
+    "remove": "لَا دَو",
+    "copy": "کاپی کرو"
   },
   "tip": {
     "title": "ٹِپ گھلو",
@@ -1660,7 +1668,8 @@
     "roomSettings": "روم ترتیباں",
     "messagePinned": "پیغام پِن ہو گیا",
     "messageUnpinned": "پیغام اَن پِن ہو گیا",
-    "online": "{{count}} آن لائن"
+    "online": "{{count}} آن لائن",
+    "onlineHint": "ہݨے ایں چیٹ وچ {{count}} لوک ہن"
   },
   "aiChat": {
     "title": "معاون",
@@ -2338,7 +2347,11 @@
     "sending": "بُجھا کرنا",
     "retrySend": "ولدا کوشش کرو",
     "discardSend": "ہٹاؤ",
-    "notSent": "نئیں ڳیا"
+    "notSent": "نئیں ڳیا",
+    "unreadMarkerOne": "1 اݨ پڑھیا پیغام",
+    "unreadMarkerMany": "{{value}} اݨ پڑھے پیغام",
+    "jumpToUnread": "پہلے اݨ پڑھے پیغام تے ونڄو",
+    "jumpToLatest": "تازہ ترین پیغام تے ونڄو"
   },
   "music": {
     "listeningCount_one": "{{count}} سنیں دے رہے ہے",
@@ -4064,7 +4077,8 @@
     "bannedFromCommunity": "آپ کو اس کمیونٹی سے پابندی ہے",
     "sendInMessage": "دعوت بھیجو",
     "inviteToCommunity": "کمیونٹی وچ سݙو",
-    "inviteSent": "دعوت بھیج ݙتی ڳئی"
+    "inviteSent": "دعوت بھیج ݙتی ڳئی",
+    "newChat": {"channelRow":"چینل · {{formattedCount}} ممبر","groupRow":"گروپ · {{formattedCount}} ممبر","newChannel":"نواں چینل","newGroup":"نواں گروپ","channelName":"چینل دا ناں","groupName":"گروپ دا ناں","description":"ایہ کیں بارے ہے؟ (اختیاری)","whoCanJoin":"کوݨ شامل تھی سڳدا ہے","public":"عام","publicDetail":"کوئی وی لبھ تے شامل تھی سڳدا ہے","inviteOnly":"صرف دعوت نال","private":"نجی","privateDetail":"لوک تہاݙی دعوت یا منظوری نال شامل تھیندے ہن","entry":"داخلہ","free":"مفت","freeDetail":"شامل تھیوݨ دی کوئی فیس کائنی","paid":"پے","paidDetail":"ٹوکناں وچ ہک ادائیگی، سدھی تہاکوں","price":"ٹوکناں وچ قیمت","channelNote":"صرف تساں تے تہاݙے ایڈمن پوسٹ کر سڳدے ہو۔ ممبر پڑھدے تے ری ایکٹ کریندے ہن۔","createChannel":"چینل بݨاؤ","createGroup":"گروپ بݨاؤ","message":"نواں پیغام","messageDetail":"ہک بندے نال نجی چیٹ","groupDetail":"ٻہوں لوکاں نال چیٹ، عوامی یا نجی","channelDetail":"فالوورز کوں نشر کرو، مفت یا ادا شدہ","title":"کجھ شروع کرو"}
   },
   "prompt": {
     "seoTitle": "اپنڑا فیڈ پرامپٹ کیو, Riftn",
@@ -12838,7 +12852,8 @@
     "shareKindCommunity": "کمیونٹی",
     "shareGroups": "گروپ",
     "shareKindChannel": "چینل",
-    "reportMessage": "پیغام دی رپورٹ کرو"
+    "reportMessage": "پیغام دی رپورٹ کرو",
+    "attachAnything": "تصویر، ویڈیو، آڈیو یا فائل نال لاؤ"
   },
   "credits": {
     "earningsWorth": "قیمت {{amount}}",
@@ -20879,5 +20894,17 @@
     "promptCatchUp": "میکوں ڈسو {{handle}} حالیہ کیا پوسٹ کیتے",
     "promptMessage": "{{handle}} کوں پیغام لکھݨ وچ میݙی مدد کرو",
     "promptAbout": "{{handle}} بارے: {{question}}"
-  }
+  },
+  "ownKeys": {"working":"کام","invalid":"رد تھی ڳئی، بدلو","noCredit":"کریڈٹ مُک ڳیا","disabled":"Riftn ولوں بند","failed":"کُجھ غلط تھی گیا اے۔ دوبارہ کوشش کرو۔","savedNoCredit":"{{name}} کی سیو تھی ڳئی، پر اکاؤنٹ دا کریڈٹ مُک ڳیا اے۔","saved":"{{name}} کی سیو تھی ڳئی۔ {{name}} والے ٹولز ہݨ تہاݙا اکاؤنٹ ورتیندے ہن۔","removed":"{{name}} کی ہٹا ݙتی ڳئی۔","title":"تہاݙیاں اپݨیاں AI کیز","description":"کہیں AI فراہم کنندہ دی کی لاؤ تے کریئیٹر ٹولز تہاݙے اکاؤنٹ تے چلسن۔ Riftn اوہناں کماں دے کوئی پیسے نئیں گھندا۔ کیز انکرپٹ تھیندیاں ہن تے ولا کݙاہیں نئیں ݙکھدیاں۔","check":"چیک کرو","remove":"ہٹاؤ","add":"کی لاؤ","paste":"اپݨی {{name}} کی پیسٹ کرو","save":"محفوظ کرو","cancel":"رد کرو","getKey":"{{name}} کی گھنو","showLess":"صرف میݙیاں کیز ݙکھاؤ","addAnother":"ٻیا فراہم کنندہ لاؤ"},
+  "resetWallet": {"mismatch":"پاس ورڈز نہیں مل رہے ہیں","tooShort":"پاس ورڈ گھٹ توں گھٹ {{count}} اکھراں دا ہووݨا چاہیدا اے","breached":"ایہ پاس ورڈ ڈیٹا لیک وچ آ چکیا اے۔ کوئی ٻیا چُݨو","weak":"مضبوط پاس ورڈ چُݨو (اکھر، نمبر تے نشان رلاؤ)","failed":"تہاݙا بٹوا ری سیٹ نئیں تھی سڳیا۔ کجھ منتقل نئیں تھیا۔ ولا کوشش کرو۔","twoFactor":"اکاؤنٹ منتقل کرݨ کیتے اپݨی آتھنٹیکیٹر ایپ دا کوڈ لکھو۔","funds":"ٹوکن، NFT تے ٻئے بیلنس منتقل نئیں تھیندے۔ اوہ پراݨے پتے تے رہندے ہن۔ جے تساں حالی وی پراݨا بٹوا کھول سڳدے ہو تاں پہلے اوہ ٻاہر بھیڄ ݙیوو۔","doneTitle":"تہاݙا اکاؤنٹ ہݨ نویں بٹوے تے اے","logOut":"لاگ آؤٹ","intro":"ہک نواں Riftn بٹوا بݨیندا اے تے تہاݙا یوزر نیم، پوسٹاں، فالوورز تے پیغام اوندے اتے منتقل کریندا اے۔ ایہ تݙاں ورتو جݙاں تہاݙا بٹوا گم تھی ڳیا ہووے یا کہیں ٻئے کول اوندی کی ہووے۔ پراݨا بٹوا سائن ان کیتے کم کرݨ چھوڑ ݙیندا اے۔","password":"نویں بٹوے دا پاس ورڈ (گھٹ توں گھٹ {{count}} اکھر)","confirm":"پاسورڈ تائید کریں","twoFactorPlaceholder":"آتھنٹیکیٹر کوڈ","ack":"میں جانتا ہوں کہ میرے پرانے فنڈز پرانے ویلٹ میں ہیں۔","submit":"بٹوا ری سیٹ کرو","title":"بٹوا ری سیٹ کرو","rowDesc":"بٹوا گم تھی ڳیا، یا کہیں ٻئے کول اوندی کی اے؟ اپݨا اکاؤنٹ نویں بٹوے تے منتقل کرو۔ تہاݙا یوزر نیم، پوسٹاں تے فالوورز نال آندے ہن۔"},
+  "twoFactor": {"turnOn":"آن کرو","wrongCode":"او کوڈ میچ کائنی تھیا۔ اپݨی ایپ وچ نواں کوڈ ٹرائی کرو۔","signingInAs":"سائن ان تھیندے پئے او بطور","signIn":"سائن ان","trustDevice":"ایں ڈیوائس تے 30 ݙینہاں تئیں دوبارہ نہ پچھو","useBackupShort":"بیک اپ کوڈ استعمال کرو","useApp":"میݙی اتھنٹیکیٹر ایپ استعمال کرو","useAnotherShort":"ٻیا اکاؤنٹ","lostEverything":"فون تے بیک اپ کوڈ گم تھی گن؟ سپورٹ نال رابطہ کرو","turnedOff":"ٹو-اسٹیپ سائن ان آف ہے","introTitle":"ہک ٻیا لاک شامل کرو","linkTitle":"اپݨی اتھنٹیکیٹر ایپ لنک کرو","codesTitle":"اپݨے بیک اپ کوڈ محفوظ کرو","newCodesTitle":"نویں بیک اپ کوڈز گھنو","turnOff":"بند کرو","backupCodes":"بیک اپ کوڈز"},
+  "chatTextSize": {"title":"ٹیکسٹ سائز"},
+  "notes": {"replyTo":"جواب دیو {{name}}…"},
+  "chatBulk": {"toolbar":"چُݨیاں چیٹاں","selected":"{{count}} چھیٹیاں","cancel":"رد کرو","read":"پڑھیا دا نشان لاؤ","unread":"اݨ پڑھیا دا نشان لاؤ","reply":"جواب","delete":"مٹاؤ","replyHint":"ہر بندے کوں ایہ اوندی اپݨی چیٹ وچ عام پیغام وانگوں ملسی۔","replyPlaceholder":"پیغام لکھو…","sendAll":"{{count}} کوں بھیڄو","partSent":"{{total}} وچوں {{ok}} چیٹاں کوں بھیڄ ݙتا","notSent":"نئیں بھیڄ سڳیا۔ ولا کوشش کرو۔"},
+  "chatTabs": {"addToTab":"ٹیب وچ لاؤ","newWith":"نویں ٹیب…","hide":"ٹیب لُکاؤ","edit":"ٹیباں ایڈٹ کرو","renameEdit":"ناں بدلو تے ایڈٹ کرو","addChats":"چیٹاں لاؤ","moveLeft":"کھٻے کرو","moveRight":"سڄے کرو","delete":"ٹیب مٹاؤ","new":"نویں ٹیب","editTab":"ٹیب ایڈٹ کرو","create":"ٹیب بݨاؤ","emoji":"ایموجی چُݨو","namePlaceholder":"ٹیب دا ناں","noEmoji":"کوئی ایموجی کائنی","sFriends":"سنگتی","sWork":"کم","sTrading":"تجارت","sCreators":"بݨاوݨ آلے","sGaming":"گیمنگ","chatsInTab":"ایں ٹیب دیاں چیٹاں","picked":"{{n}} چُݨیاں","deleteTitle":"“{{name}}” مٹاؤ؟","deleteBody":"ٹیب ہٹ ویندی اے۔ اوندیاں چیٹاں سارے وچ رہندیاں ہن تے اپݨے پیغام رکھدیاں ہن۔","builtIn":"بلٹ ان","chatCount":"{{n}} چیٹاں","moveUp":"چلنا چلنا","moveDown":"تلے کرو","alwaysOn":"سب ہمیشہ فعال ہیں","show":"ٹیب ݙکھاؤ","emptyTitle":"{{name}} خالی اے","emptyBody":"اتھاں چیٹاں لاؤ تے اوہ سارے وچ وی رہسن۔","removedFrom":"{{name}} وچوں ہٹا ݙتا","addedTo":"{{name}} وچ لا ݙتا","kindPublic":"عام","kindChannel":"چینل","kindGroup":"گروپ ڪريو","kindCommunity":"کمیونٹی","kindDirect":"براہ راست","tooMany":"تساں 10 ٹیباں تئیں رکھ سڳدے ہو","deleted":"{{name}} مٹ ڳیا"},
+  "msgSelect": {"partForwarded":"{{total}} وچوں {{ok}} اڳوں بھیڄے","nothingToCopy":"چُݨے پیغاماں وچ کاپی کرݨ کیتے کجھ کائنی","toolbar":"چُݨے پیغام","selected":"{{count}} چھیٹیاں","copy":"کاپی","forward":"اڳوں بھیجو","deleteSome":"{{count}} مٹاؤ"},
+  "dmSafety": {"notReal":"ایہ اصل {{name}} کائنی۔","neverLink":"Riftn ٹیم تہاکوں پروفائل یا بٹوا ٹھیک کرݨ کیتے کݙاہیں وی DM وچ لنک نہ بھیڄسی۔ لنک نہ کھولو، اپݨا بٹوا نہ جوڑو تے کہیں شے تے دستخط نہ کرو۔ ایں اکاؤنٹ کوں بلاک کرو تے رپورٹ کرو۔"},
+  "post": {"destruct":{"offBody":"پوسٹ لڳی رہندی ہے۔","onBody":"پوسٹ لڳݨ دے {{value1}} بعد آپ مٹ ویندی ہے۔"}},
+  "dmPaidLock": {"lockOnUsd":"لاک · {{price}}","lockVideo":"ویڈیو لاک کرو","lockPhoto":"تصویر لاک کرو","lockCustom":"ہور","lockCustomUsdLabel":"ڈالراں وچ اپݨی قیمت","lockHint":"اوہ پیسے ݙیوݨ تئیں دھندلا ݙیکھدے ہن۔ لاک فائلاں اینڈ ٹو اینڈ انکرپٹڈ کائنی۔"},
+  "chatReactions": {"oneNamed":"{{name}} نے تہاݙے پیغام تے {{emoji}} ری ایکشن ݙتا","one":"تہاݙے پیغام تے {{emoji}} ری ایکشن"}
 }
