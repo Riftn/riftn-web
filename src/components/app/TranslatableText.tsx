@@ -1041,9 +1041,10 @@ export function useTranslation(
         translationCache.delete(cacheKey);
         schedulePersist();
       } else if (isNoOpTranslation(cached.translated, text)) {
-        if (!isChat || inTargetLanguage(cached.sourceLang)) {
-          setSourceLang(isChat ? targetLang : cached.sourceLang);
-          if (isChat) showChatNoOp(true);
+        const alreadyInLanguage = isChat && inTargetLanguage(cached.sourceLang);
+        if (!isChat || silent || alreadyInLanguage) {
+          setSourceLang(alreadyInLanguage ? targetLang : cached.sourceLang);
+          if (isChat) showChatNoOp(alreadyInLanguage);
           return;
         }
         translationCache.delete(cacheKey);
@@ -1095,7 +1096,7 @@ export function useTranslation(
       if (data.sameLanguage === true || isNoOpTranslation(translated, text)) {
         const alreadyInLanguage = data.sameLanguage === true || (isChat && inTargetLanguage(reported));
         const source = isChat && alreadyInLanguage ? targetLang : detected;
-        if (!isChat || alreadyInLanguage) cacheTranslation(cacheKey, { translated, sourceLang: source });
+        if (!isChat || silent || alreadyInLanguage) cacheTranslation(cacheKey, { translated, sourceLang: source });
         if (current()) {
           setSourceLang(source);
           if (isChat) showChatNoOp(alreadyInLanguage);
@@ -1180,8 +1181,7 @@ export function useTranslation(
     // Already known — the cache survives a reload, so this is the common case on
     // a refresh. No request to schedule, and waiting for idle would only show
     // the reader a paragraph they cannot read before swapping it out.
-    const cached = translationCache.get(key);
-    if (cached && (!isChat || !isNoOpTranslation(cached.translated, text) || cached.sourceLang === userLang)) {
+    if (translationCache.has(key)) {
       autoDoneRef.current = key;
       void translateRef.current(true);
       return;
@@ -1201,7 +1201,7 @@ export function useTranslation(
       autoDoneRef.current = key;
       return translateRef.current(true);
     });
-  }, [text, userLang, isTooShort, auto, autoEnabled, nearScreen, nearRef, isChat]);
+  }, [text, userLang, isTooShort, auto, autoEnabled, nearScreen, nearRef]);
 
   return {
     userLang,
