@@ -3170,7 +3170,7 @@ function FreeAccessListSection() {
                   </div>
                 </div>
                 {selected ? (
-                  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-primary/15 px-3 py-1.5 text-xs font-semibold text-primary">
+                  <span className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl bg-primary/15 px-3 text-xs font-semibold text-primary">
                     <Check className="size-3.5" aria-hidden="true" />
                     {t('settings.freeDmSelected', 'Selected')}
                   </span>
