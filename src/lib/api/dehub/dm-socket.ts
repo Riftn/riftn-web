@@ -163,9 +163,10 @@ function getDmSocket(): Socket {
       auth: handshakeAuth,
       query: handshakeAuth,
       path: '/socket.io',
-      // Polling-only: websocket upgrade to api.dehub.io often fails in browsers (see console wss errors);
-      // paid/pending messages depend on a stable /dm socket.
-      transports: ['polling'],
+      // Start with a direct WebSocket so a broken HTTP polling path cannot
+      // prevent chat from connecting. Keep polling for networks that block WebSockets.
+      transports: ['websocket', 'polling'],
+      tryAllTransports: true,
       upgrade: false,
       forceNew: true,
       autoConnect: true,
