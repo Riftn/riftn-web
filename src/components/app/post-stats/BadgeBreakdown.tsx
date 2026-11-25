@@ -5,6 +5,7 @@
  * 100%.
  */
 
+import { useBadgeTierLabel } from '@/i18n/badge-tier-label';
 import { useTranslation } from 'react-i18next';
 import { badgeImage } from '@/lib/staking-badges';
 import type { PostStatsBadge } from '@/lib/api/dehub/post-stats';
@@ -85,13 +86,14 @@ export function BadgeBreakdown({
   limit?: number;
 }) {
   const { t } = useTranslation();
+  const tierLabel = useBadgeTierLabel();
   const withBadge = badges.filter((b) => b.tier >= 0);
   const noBadge = badges.find((b) => b.tier < 0)?.people ?? 0;
   const shown = limit ? withBadge.slice(0, limit) : withBadge;
   const folded = limit ? withBadge.slice(limit).reduce((s, b) => s + b.people, 0) : 0;
 
   const rows: Row[] = [
-    ...shown.map((b) => ({ key: `t${b.tier}`, name: b.name ?? '', image: badgeImage(b.name), people: b.people })),
+    ...shown.map((b) => ({ key: `t${b.tier}`, name: b.name ? tierLabel(b.name) : '', image: badgeImage(b.name), people: b.people })),
     ...(folded ? [{ key: 'other', name: t('postStats.otherBadges', 'Other badges'), image: null, people: folded }] : []),
     ...(noBadge ? [{ key: 'none', name: t('postStats.noBadge', 'No badge'), image: null, people: noBadge }] : []),
     ...(signedOut ? [{ key: 'out', name: t('postStats.signedOutViewers', 'Signed out'), image: null, people: signedOut }] : []),

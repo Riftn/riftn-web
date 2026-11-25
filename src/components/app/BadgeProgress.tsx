@@ -1,3 +1,4 @@
+import { useBadgeTierLabel } from '@/i18n/badge-tier-label';
 import { useTranslation as _useCopy } from 'react-i18next';
 /**
  * BadgeProgress — where a holder sits on the badge ladder, and what the next
@@ -69,6 +70,7 @@ function formatUsd(value: number): string {
 
 export function BadgeProgress({ balance, username, lock, variant = 'full', className }: BadgeProgressProps) {
   const { t: _copy } = _useCopy();
+  const tierLabel = useBadgeTierLabel();
   // Read the context directly rather than through useAuth: badges render on
   // surfaces above AuthProvider, where the hook throws.
   const auth = useContext(AuthContext);
@@ -108,7 +110,7 @@ export function BadgeProgress({ balance, username, lock, variant = 'full', class
 
         <div className="min-w-0 flex-1">
           <div className="text-sm sm:text-base font-semibold text-white truncate">
-            {standing.tier ?? _copy("copy.2270efa16745", { defaultValue: "No badge yet" })}
+            {standing.tier ? tierLabel(standing.tier) : _copy("copy.2270efa16745", { defaultValue: "No badge yet" })}
           </div>
           <div className="text-[11px] sm:text-xs text-white/50 font-mono truncate">
             {formatDhb(standing.balance)} <DhbCoin />
@@ -120,7 +122,7 @@ export function BadgeProgress({ balance, username, lock, variant = 'full', class
           {standing.nextTier ? (
             <>
               <div className="text-[10px] uppercase tracking-wider text-white/30">{_copy("copy.1ff57a29d7c9", { defaultValue: "Next" })}</div>
-              <div className="text-xs sm:text-sm font-medium text-white/80">{standing.nextTier}</div>
+              <div className="text-xs sm:text-sm font-medium text-white/80">{tierLabel(standing.nextTier)}</div>
             </>
           ) : (
             <div className="text-[10px] uppercase tracking-wider text-white/40">{_copy("copy.b10700f112ad", { defaultValue: "Top tier" })}</div>
@@ -135,7 +137,7 @@ export function BadgeProgress({ balance, username, lock, variant = 'full', class
         aria-valuenow={percent}
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-label={standing.nextTier ? _copy("copy.afc70b19df93", { defaultValue: "Progress to {{value1}}", value1: standing.nextTier }) : _copy("copy.0b69d8573e32", { defaultValue: "Top tier reached" })}
+        aria-label={standing.nextTier ? _copy("copy.afc70b19df93", { defaultValue: "Progress to {{value1}}", value1: tierLabel(standing.nextTier) }) : _copy("copy.0b69d8573e32", { defaultValue: "Top tier reached" })}
         className="relative mt-4 h-2.5 rounded-full bg-white/[0.06] border border-white/10 overflow-hidden"
       >
         <motion.div
@@ -166,7 +168,7 @@ export function BadgeProgress({ balance, username, lock, variant = 'full', class
                 <Trans
                   i18nKey="copy.6ed656c2254e"
                   defaults="<amount></amount> to {{value1}}"
-                  values={{ value1: standing.nextTier }}
+                  values={{ value1: tierLabel(standing.nextTier) }}
                   components={{ amount: <DhbAmount amount={formatDhb(standing.remaining)} /> }}
                 />
               </>
@@ -195,12 +197,13 @@ function BadgeMedallion({
   tier: string | null;
 }) {
   const { t: _copy } = _useCopy();
+  const tierLabel = useBadgeTierLabel();
   return (
     <div className="relative w-12 h-12 sm:w-14 sm:h-14 shrink-0">
       {url ? (
         <img
           src={url}
-          alt={tier || _copy("copy.002474e36821", { defaultValue: "Badge" })}
+          alt={tier ? tierLabel(tier) : _copy("copy.002474e36821", { defaultValue: "Badge" })}
           className="w-full h-full object-contain drop-shadow-[0_0_6px_rgba(255,255,255,0.5)]"
         />
       ) : (
@@ -222,12 +225,14 @@ function BadgeLadderRail({
   reduceMotion: boolean;
   price?: number;
 }) {
+  const tierLabel = useBadgeTierLabel();
   return (
     <div className="mt-4 -mx-1 flex items-center gap-0.5 md:gap-1.5 overflow-x-auto md:overflow-visible px-1 pb-1 scrollbar-hide">
       {ladder.map((rung, i) => {
         const earned = i <= index;
         const current = i === index;
         const art = badgeImage(rung.name);
+        const label = tierLabel(rung.name);
 
         return (
           <Tooltip key={rung.name}>
@@ -245,7 +250,7 @@ function BadgeLadderRail({
                 {art && (
                   <img
                     src={art}
-                    alt={rung.name}
+                    alt={label}
                     loading="lazy"
                     decoding="async"
                     className={cn(
@@ -258,7 +263,7 @@ function BadgeLadderRail({
               </motion.div>
             </TooltipTrigger>
             <TooltipContent side="top" className="text-xs">
-              <span className="font-medium">{rung.name}</span>
+              <span className="font-medium">{label}</span>
               <span className="text-white/50">
                 {' '}
                 · {formatDhb(rung.min)} <DhbCoin />
