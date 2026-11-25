@@ -46,25 +46,32 @@ it('leaves faces with nothing up alone, in one request for the whole list', asyn
   const onRow = vi.fn();
   const { container } = render(
     <>
-      <button type="button" onClick={onRow}><MomentFace address={NOBODY} size={48}><span>face</span></MomentFace></button>
+      <button type="button" onClick={onRow}><MomentFace address={NOBODY} size={48} outline><span>face</span></MomentFace></button>
       <MomentFace address="0x6666666666666666666666666666666666666665" size={48}><span>face</span></MomentFace>
     </>,
   );
   await waitFor(() => expect(getStoryRings).toHaveBeenCalledTimes(1));
   expect(container.querySelector('[data-moment-peek]')).toBeNull();
+  expect(container.querySelector('[data-moment-outline]')).toBeNull();
   fireEvent.click(container.querySelector('button span span')!);
   expect(onRow).toHaveBeenCalled();
   expect(getUserStories).not.toHaveBeenCalled();
 });
 
-it('draws no corner thumbnail on profiles but a tap still opens their Moments', async () => {
-  useStoriesStore.setState({ viewer: null });
-  const { container } = render(
-    <MomentFace address={ELLA} size={96} noPeek name="Ella"><span>face</span></MomentFace>,
+it('outlines the avatar and opens Moments without triggering the conversation row', async () => {
+  const onRow = vi.fn();
+  const { container, getByText } = render(
+    <button type="button" onClick={onRow}>
+      <MomentFace address={ELLA} size={48} outline name="Ella"><span>face</span></MomentFace>
+      <span>conversation</span>
+    </button>,
   );
-  await waitFor(() => expect(container.querySelector('[data-moment-face="unseen"]')).not.toBeNull());
+  await waitFor(() => expect(container.querySelector('[data-moment-outline]')).not.toBeNull());
   expect(container.querySelector('[data-moment-peek]')).toBeNull();
   expect(container.querySelector('[data-moment-count]')).toBeNull();
-  fireEvent.click(container.querySelector('[data-moment-face]')!);
+  fireEvent.click(getByText('face'));
   await waitFor(() => expect(useStoriesStore.getState().viewer?.entries[0].items).toHaveLength(2));
+  expect(onRow).not.toHaveBeenCalled();
+  fireEvent.click(getByText('conversation'));
+  expect(onRow).toHaveBeenCalledOnce();
 });
