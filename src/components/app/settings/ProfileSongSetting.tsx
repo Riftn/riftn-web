@@ -121,6 +121,7 @@ export function ProfileSongSetting({ previewSong }: { /** State gallery: show th
       {pickerOpen && (
         <SoundPicker
           isOpen={pickerOpen}
+          profileSongUploadWallet={preview ? undefined : address}
           onClose={() => setPickerOpen(false)}
           onSelect={(sound) => {
             setPickerOpen(false);
