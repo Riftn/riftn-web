@@ -497,6 +497,7 @@ html[data-system-tone="light"] .login-stack__title[data-look="flat"] {
 [data-login-stack-sheet] .login-stack-scroll .login-stack__lanes {
   /* Keep the space behind the overlapping wordmark when the sheet is short. */
   min-height: 152px;
+  contain: size;
 }
 .login-stack-scroll > .login-stack-form {
   flex-shrink: 0;
