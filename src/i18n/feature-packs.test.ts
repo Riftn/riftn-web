@@ -28,4 +28,17 @@ describe('feature language packs', () => {
     expect(i18n.getResource('fr', 'translation', 'common.offlineProbe')).toBe('Hors ligne');
     expect(fetchPack.mock.calls.every(([url]) => !String(url).endsWith('/core.json'))).toBe(true);
   });
+
+  it('uses the previous build’s language pack when an update starts offline', async () => {
+    vi.resetModules();
+    const oldKey = 'locale-pack:previous-build:fr:core';
+    localStorage.setItem(oldKey, JSON.stringify({ common: { offlineProbe: 'Hors ligne' } }));
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')));
+
+    const { default: i18n, loadLanguage } = await import('./index');
+    expect(await loadLanguage('fr')).toBe(true);
+    expect(await loadLanguage('fr')).toBe(true);
+    expect(i18n.getResource('fr', 'translation', 'common.offlineProbe')).toBe('Hors ligne');
+    expect(localStorage.getItem(oldKey)).not.toBeNull();
+  });
 });
