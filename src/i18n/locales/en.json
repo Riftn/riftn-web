@@ -4608,6 +4608,10 @@
     "suggestion5": "Football highlights"
   },
   "arcade": {
+    "riftnOriginals": "Riftn originals",
+    "otherGames": "Other games",
+    "gameCount_one": "{{count}} game",
+    "gameCount_other": "{{count}} games",
     "title": "Arcade",
     "intro": "A collection of Riftn built and open sourced games, worlds or experiences.",
     "seoTitle": "Arcade | Riftn",

@@ -4612,6 +4612,10 @@
     "suggestion5": "Faits saillants du football"
   },
   "arcade": {
+    "riftnOriginals": "Jeux originaux de Riftn",
+    "otherGames": "Autres jeux",
+    "gameCount_one": "{{count}} jeu",
+    "gameCount_other": "{{count}} jeux",
     "title": "Arcade",
     "intro": "Une collection de jeux, mondes et expériences créés et publiés en open source par Riftn.",
     "seoTitle": "Arcade | Riftn",
