@@ -223,6 +223,11 @@ export function getProfile(id: string): StoredProfile | null {
   return readStore().find((p) => p.id === id) ?? null;
 }
 
+export function clearProfiles(): void {
+  localStorage.removeItem(PROFILES_STORAGE_KEY);
+  window.dispatchEvent(new Event(PROFILES_CHANGED_EVENT));
+}
+
 export function removeProfile(id: string): void {
   writeStore(readStore().filter((p) => p.id !== id));
 }

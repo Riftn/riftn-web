@@ -293,7 +293,7 @@ import { useAppTheme, DEFAULT_THEME_HUES } from '@/contexts/ThemeContext';
 import { THEME_COLOR, isSpecialThemeColor } from '@/lib/theme-color';
 import { extractBrandColors } from '@/lib/brand-colors';
 import { DeHubPageLoader, ButtonLoader } from '@/components/app/DeHubLoader';
-import { usePendingAction } from '@/hooks/use-pending-action';
+import { useAccountSignOut } from '@/components/app/AccountSignOut';
 import { useScrollFadeMask } from '@/components/app/feeds/useScrollFadeMask';
 import { ThemePreviewCard } from '@/components/app/settings/ThemePreviewCard';
 import { KeywordFiltersSection } from '@/components/app/settings/KeywordFiltersSection';
@@ -328,7 +328,7 @@ export default function SettingsPage({ initialTab }: { initialTab?: string } = {
   const { layerRef: settingsTabLayerRef, setRef: setSettingsTabRef, rect: settingsTabRect, onScroll: onSettingsTabScroll } = useTabIndicator(activeTab, undefined, settingsIsDraggingRef);
 
   const { theme, themeChoice, setTheme } = useAppTheme();
-  const { isAuthenticated, disconnect } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   const { t } = useTranslation();
 
@@ -361,20 +361,9 @@ export default function SettingsPage({ initialTab }: { initialTab?: string } = {
     if (anchor) revealSettingAnchor(anchor);
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      // Explicit sign-out forgets this account on the device; other saved
-      // profiles remain switchable from the Profiles list above.
-      await disconnect({ forgetProfile: true });
-      toast.success(t('settings.loggedOut'));
-    } catch {
-      toast.error(t('settings.logoutFailed'));
-    }
-  };
-
-  // Signing out is a network round trip plus a session teardown, so the button
-  // holds the Riftn mark until it lands rather than looking like a missed tap.
-  const { pending: isLoggingOut, run: runLogout } = usePendingAction(handleLogout);
+  const { pending: isLoggingOut, requestSignOut, signOutDialog } = useAccountSignOut({
+    onComplete: () => toast.success(t('settings.loggedOut')),
+  });
 
   // Drag-to-swipe for settings tab indicator (before conditional return to satisfy hooks rules)
   const settingsTabPositions = useRef<Partial<Record<string, HTMLElement | null>>>({});
@@ -452,6 +441,7 @@ export default function SettingsPage({ initialTab }: { initialTab?: string } = {
 
   return (
     <div className="min-h-screen">
+      {signOutDialog}
       <SEOHead title={_copy("copy.5171c5a15461", { defaultValue: "Settings: Manage Your Account" })} description={_copy("copy.6f1213e68e58", { defaultValue: "Customize your Riftn experience. Update your profile, privacy settings, notification preferences, and connected wallets." })} url="https://riftn.com/app/settings" />
       <h1 className="sr-only">{_copy("copy.4761c6b1cd64", { defaultValue: "Riftn Settings — Decentralised Social Media, Censorship Resistant & Freedom of Speech" })}</h1>
       {/* Header + tab nav — anchored (sticky) so it stays pinned while the
@@ -463,7 +453,7 @@ export default function SettingsPage({ initialTab }: { initialTab?: string } = {
         subtitle={t('settings.manageAccount')}
         actions={
           <div className="hidden md:flex items-center">
-            <IslandAction label={t('settings.logOut')} onClick={() => void runLogout()} disabled={isLoggingOut}>
+            <IslandAction label={t('settings.logOut')} onClick={requestSignOut} disabled={isLoggingOut}>
               {isLoggingOut ? <ButtonLoader /> : <LogOut className="h-[18px] w-[18px]" />}
             </IslandAction>
           </div>
