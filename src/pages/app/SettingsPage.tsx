@@ -111,7 +111,8 @@ import { useAuth as useAuthContext } from '@/contexts/AuthContext';
 import { useMatureContent } from '@/hooks/use-mature-content';
 import { useKidsMode } from '@/hooks/use-kids-mode';
 import { KidsModeDrawer } from '@/components/app/settings/KidsModeDrawer';
-import { Baby, RectangleHorizontal, ThumbsDown, UserCheck, Hash } from 'lucide-react';
+import { Baby, RectangleHorizontal, ThumbsDown, UserCheck, Hash, Check } from 'lucide-react';
+import type { FreeAccessUser } from '@/lib/api/dehub/dm';
 import { JungleMoodToggle } from '@/components/app/jungle/JungleMoodToggle';
 import { useJungleMood } from '@/lib/jungle-mood';
 import { useHideWatched } from '@/hooks/use-watched-videos';
@@ -3051,63 +3052,113 @@ function ContentSettings() {
 function FreeAccessListSection() {
   const { t: _copy } = _useCopy();
   const { t } = useTranslation();
-  const { isAuthenticated } = useAuthContext();
+  const { isAuthenticated, walletAddress } = useAuthContext();
   const queryClient = useQueryClient();
-  const [revokingAddress, setRevokingAddress] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+  const term = search.trim().replace(/^@/, '').toLowerCase();
+  const debouncedTerm = useDebouncedValue(term, 250);
+  const currentSearch = term.length >= 2 && term === debouncedTerm;
+  const listKey = ['free-dm-access', walletAddress] as const;
+  const searchLabel = t('settings.freeDmSearch', 'Search by username');
 
-  // Cached: this section is conditionally mounted from two tabs, and the old
-  // raw fetch refired with a spinner on every tab return.
-  const { data: freeAccessUsers = [], isLoading: isLoadingList } = useQuery({
-    queryKey: ['free-dm-access'],
+  const list = useQuery({
+    queryKey: listKey,
     queryFn: async () => {
       const { getFreeDmAccessList } = await import('@/lib/api/dehub');
       return getFreeDmAccessList();
     },
     enabled: isAuthenticated,
-    staleTime: 5 * 60_000,
+  });
+  const matches = useQuery({
+    queryKey: ['free-dm-access-search', walletAddress, debouncedTerm],
+    queryFn: async () => {
+      const { searchUsers } = await import('@/lib/api/dehub');
+      const { data } = await searchUsers({ q: debouncedTerm, limit: 20 });
+      return (data ?? []).flatMap(user => {
+        const { address, username } = user;
+        if (!address || address.toLowerCase() === walletAddress?.toLowerCase() || !username?.toLowerCase().includes(debouncedTerm)) {
+          return [];
+        }
+        return [{ address, username, displayName: user.displayName, avatarImageUrl: user.avatarImageUrl }];
+      });
+    },
+    enabled: isAuthenticated && currentSearch,
   });
 
-  const handleRevoke = async (address: string) => {
-    setRevokingAddress(address);
-    try {
-      const { revokeFreeDmAccess } = await import('@/lib/api/dehub');
-      await revokeFreeDmAccess(address);
-      queryClient.setQueryData<typeof freeAccessUsers>(['free-dm-access'], prev =>
-        (prev ?? []).filter(u => u.address !== address)
-      );
-      toast.success(_copy("copy.dbadc4f1e698", { defaultValue: "Free access revoked" }));
-    } catch {
-      toast.error(_copy("copy.d461cbfcf242", { defaultValue: "Failed to revoke access" }));
-    } finally {
-      setRevokingAddress(null);
-    }
-  };
+  const changeAccess = useMutation({
+    mutationFn: async ({ user, grant }: { user: FreeAccessUser; grant: boolean }) => {
+      const { grantFreeDmAccess, revokeFreeDmAccess } = await import('@/lib/api/dehub');
+      const action = grant ? grantFreeDmAccess : revokeFreeDmAccess;
+      if (!(await action(user.address)).success) throw new Error('Could not update free DM access');
+      await queryClient.cancelQueries({ queryKey: listKey, exact: true });
+      queryClient.setQueryData<FreeAccessUser[]>(listKey, previous => {
+        const remaining = (previous ?? []).filter(item => item.address.toLowerCase() !== user.address.toLowerCase());
+        return grant ? [user, ...remaining] : remaining;
+      });
+    },
+    onSuccess: (_, { grant }) => toast.success(grant
+      ? t('settings.freeDmGranted', 'Free access granted')
+      : _copy('copy.dbadc4f1e698', { defaultValue: 'Free access revoked' })),
+    onError: (_, { grant }) => toast.error(grant
+      ? t('settings.freeDmGrantFailed', 'Failed to grant access')
+      : _copy('copy.d461cbfcf242', { defaultValue: 'Failed to revoke access' })),
+  });
+
+  const freeAccessUsers = list.data ?? [];
+  const granted = new Set(freeAccessUsers.map(user => user.address.toLowerCase()));
+  const searching = Boolean(term);
+  const users = searching ? (currentSearch ? matches.data ?? [] : []) : freeAccessUsers;
+  const loading = list.isLoading || (term.length >= 2 && (!currentSearch || matches.isLoading));
+  const failedQuery = list.isError ? list : currentSearch && matches.isError ? matches : null;
 
   return (
     <div data-setting-anchor="free-dm-access">
       <h3 className={SETTINGS_HEADING_CLASS}>
         <Gift className="size-4" />
-        {t('settings.freeAccessList', 'Free DM Access')}
+        {t('settings.freeAccessList', 'Free DM Access List')}
       </h3>
       <p className="text-zinc-500 text-sm mb-4">{t('settings.freeAccessListDesc', 'Users who can message you for free, bypassing your message fee.')}</p>
-      
-      {isLoadingList ? (
+      <div className="relative mb-3">
+        <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-400" aria-hidden="true" />
+        <Input
+          type="search"
+          value={search}
+          onChange={event => setSearch(event.target.value)}
+          aria-label={searchLabel}
+          placeholder={searchLabel}
+          autoComplete="off"
+          className={cn(SETTINGS_FIELD_CLASS, 'w-full pl-9')}
+        />
+      </div>
+
+      {loading ? (
         <div className="flex items-center justify-center py-6">
           <Loader2 className="w-5 h-5 animate-spin text-zinc-500" />
         </div>
-      ) : freeAccessUsers.length === 0 ? (
-        <div className="text-center py-6 text-zinc-500 text-sm">
-          {t('settings.noFreeAccess', 'No users have free access. Grant access from a DM conversation.')}
+      ) : failedQuery ? (
+        <div className="flex flex-col items-center gap-2 py-6 text-sm text-zinc-500">
+          {t('common.failedToLoad', 'Failed to load')}
+          <Button type="button" variant="outline" size="sm" className={SETTINGS_CONTROL_CLASS} onClick={() => void failedQuery.refetch()}>
+            {t('common.retry', 'Retry')}
+          </Button>
+        </div>
+      ) : users.length === 0 ? (
+        <div role="status" className="text-center py-6 text-zinc-500 text-sm">
+          {!searching ? t('settings.freeDmEmpty', 'No users have free access yet. Search for a username to add someone.')
+            : term.length < 2 ? t('settings.freeDmSearchMin', 'Enter at least two characters.')
+              : t('settings.freeDmNoMatches', 'No matching users.')}
         </div>
       ) : (
         <div className="space-y-2">
-          {freeAccessUsers.map((u) => {
+          {users.map((u) => {
             const name = u.displayName || u.username || `${u.address.slice(0, 6)}...${u.address.slice(-4)}`;
             const avatarUrl = u.avatarImageUrl
               ? (u.avatarImageUrl.startsWith('http') ? u.avatarImageUrl : `https://cdn.dehub.io/${u.avatarImageUrl}`)
               : undefined;
+            const selected = searching && granted.has(u.address.toLowerCase());
+            const busy = changeAccess.isPending && changeAccess.variables?.user.address === u.address;
             return (
-              <div key={u.address} className="flex items-center justify-between gap-3 rounded-xl border border-zinc-700/50 bg-zinc-800/50 p-3">
+              <div key={u.address} className={cn('flex items-center justify-between gap-3 rounded-xl border p-3', selected ? 'border-primary/30 bg-primary/10' : 'border-zinc-700/50 bg-zinc-800/50')}>
                 <div className="flex items-center gap-3 min-w-0">
                   <Avatar className="size-9">
                     {avatarUrl && <AvatarImage src={avatarUrl} />}
@@ -3118,16 +3169,24 @@ function FreeAccessListSection() {
                     {u.username && <p className="text-zinc-500 text-xs truncate">@{u.username}</p>}
                   </div>
                 </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className={cn(SETTINGS_CONTROL_CLASS, 'shrink-0')}
-                  onClick={() => handleRevoke(u.address)}
-                  loading={revokingAddress === u.address}
-                >
-                  {t('settings.revoke', 'Revoke')}
-                </Button>
+                {selected ? (
+                  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-primary/15 px-3 py-1.5 text-xs font-semibold text-primary">
+                    <Check className="size-3.5" aria-hidden="true" />
+                    {t('settings.freeDmSelected', 'Selected')}
+                  </span>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className={cn(SETTINGS_CONTROL_CLASS, 'shrink-0')}
+                    onClick={() => changeAccess.mutate({ user: u, grant: searching })}
+                    disabled={!isAuthenticated || changeAccess.isPending}
+                    loading={busy}
+                  >
+                    {searching ? t('settings.freeDmSelect', 'Select') : t('common.remove', 'Remove')}
+                  </Button>
+                )}
               </div>
             );
           })}
