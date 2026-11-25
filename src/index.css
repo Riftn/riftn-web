@@ -3149,33 +3149,22 @@ html[data-system-tone="light"] .text-zinc-500 {
   color: var(--ink-muted) !important;
 }
 
-/* Radix switches are styled dark-first (white track, near-black thumb),
-   which disappears on paper. Remap: unchecked track = visible grey wash,
-   checked track = ink, thumb = paper in both states.
-   Keyed to the switch's own hooks, not `[role='switch']`: EditPostModal's
-   comments toggle puts that role on the whole full-width ROW, so
-   `button[role="switch"] > span` filled its label block with paper and flushed
-   the green track to paper along with it. The hooks only ever land on the real
-   Radix parts. */
-html[data-theme="light"] [data-switch-track][data-state="unchecked"] {
-  /* 0.18 put a paper thumb on a near-paper wash — 1.52:1, so the knob was only
-     findable by its shadow. 0.32 keeps the wash quiet and clears 2:1. */
-  background-color: rgba(0, 0, 0, 0.32) !important;
+/* Keep both the track and thumb visible in the off state. Scope these
+   colours to the shared switch parts because some rows also use role=switch. */
+html[data-theme="system"]:not([data-system-tone="light"]) [data-switch-track][data-state="unchecked"] {
+  background-color: color-mix(in srgb, hsl(var(--foreground)) 48%, hsl(var(--background)));
 }
-html[data-system-tone="light"] [data-switch-track][data-state="unchecked"] {
-  background-color: rgba(0, 0, 0, 0.32) !important;
+html:is([data-theme="light"], [data-system-tone="light"]) [data-switch-track][data-state="unchecked"] {
+  background-color: color-mix(in srgb, var(--ink) 58%, var(--paper)) !important;
 }
-html[data-theme="light"] [data-switch-track][data-state="checked"] {
+html:is([data-theme="light"], [data-system-tone="light"]) [data-switch-track][data-state="checked"] {
   background-color: var(--ink) !important;
 }
-html[data-system-tone="light"] [data-switch-track][data-state="checked"] {
-  background-color: var(--ink) !important;
-}
-html[data-theme="light"] [data-switch-thumb] {
+html:is([data-theme="light"], [data-system-tone="light"]) [data-switch-thumb] {
   background-color: var(--paper) !important;
 }
-html[data-system-tone="light"] [data-switch-thumb] {
-  background-color: var(--paper) !important;
+html:is([data-theme="system"], [data-theme="light"]) [data-switch-track]:disabled {
+  opacity: 0.65;
 }
 
 /* Sonner toasts: hardcoded white text/icons become invisible on the light
