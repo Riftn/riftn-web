@@ -37,7 +37,8 @@ export function VolumeSoundCue({ level, active, trackHeight, thumbRadius }: Volu
     const draw = (now: number) => {
       frame = 0;
       if (!visible()) return;
-      const dt = Math.min(.05, (now - last) / 1000); last = now;
+      // A queued frame can carry a timestamp from before kick ran.
+      const dt = Math.max(0, Math.min(.05, (now - last) / 1000)); last = now;
       const on = live.current.active && live.current.level > 0;
       if (on) clock += dt;
       fade += ((on ? 1 : 0) - fade) * Math.min(1, dt * 5);

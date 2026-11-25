@@ -95,15 +95,16 @@ function RiftnWordmark({ light = false }: { light?: boolean }) {
 }
 
 interface DesktopSidebarProps {
+  onSignOut: () => void;
   onPostClick: () => void;
 }
 
-export function DesktopSidebar({ onPostClick }: DesktopSidebarProps) {
+export function DesktopSidebar({ onPostClick, onSignOut }: DesktopSidebarProps) {
   const { t: _copy } = _useCopy();
   const location = useLocation();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { isAuthenticated, user, walletAddress, connect, isConnecting, needsSignature, disconnect } = useAuth();
+  const { isAuthenticated, user, walletAddress, connect, isConnecting, needsSignature } = useAuth();
 
   
   const { isCollapsed, toggleCollapse } = useSidebarCollapse();
@@ -837,7 +838,7 @@ export function DesktopSidebar({ onPostClick }: DesktopSidebarProps) {
                 variant="desktop"
                 collapsed={true}
                 forceCollapsed={isCollapsed}
-                onClick={() => { void disconnect({ forgetProfile: true }); }}
+                onClick={onSignOut}
                 layoutId={isCollapsed ? 'sidebar-nav-collapsed' : 'sidebar-nav-expanded'}
               />
               {/* Only while the fade is actually over the list. Once the list

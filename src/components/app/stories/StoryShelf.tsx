@@ -24,7 +24,6 @@ import type { ShelfEntry } from '@/lib/api/dehub/stories';
 import { handleOf, localAge, nameOf, playable } from './story-utils';
 import { expectedShelfSeat, rememberShelfSeat, type ShelfSeat } from '@/lib/story-shelf-seat';
 import { StoryCreatePill, StoryCreateTile } from './StoryCreatePill';
-import { useMomentPreviewsBlurred } from '@/lib/moment-preview-blur';
 import { formatCount } from '@/lib/format-count';
 import { useLiveAudience } from '@/hooks/use-live-audience';
 import { setActivityBarHidden, useActivityShelfPreferences } from '@/lib/activity-shelf-preferences';
@@ -220,8 +219,7 @@ function LoadingPill() {
 
 /** Small covers of someone's Moments, for a pill that has the room. */
 function MomentCovers({ entry }: { entry: ShelfEntry | null }) {
-  const blurred = useMomentPreviewsBlurred();
-  if (!entry || blurred) return null;
+  if (!entry) return null;
   const covers = entry.items
     .map(item => item.posterUrl || (item.type === 'photo' ? item.mediaUrl : null))
     .filter((url): url is string => !!url)

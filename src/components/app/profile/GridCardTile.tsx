@@ -437,13 +437,3 @@ export function GridCardFace({ card, tokenId, quotedPost, ...face }: GridCardTil
       return <>{face.fallback}</>;
   }
 }
-
-/**
- * A text post with no link may still carry a poll; the feed API has no
- * "has poll" flag, so ask (batched, one request per page of tiles).
- */
-export function GridPollProbe({ tokenId, words, chip, fallback, poster }: FaceProps & { tokenId: number; poster: ReactNode }) {
-  const { data: poll } = usePoll(tokenId, tokenId > 0);
-  if (!poll) return <>{poster}</>;
-  return <PollFace tokenId={tokenId} words={words} chip={chip} fallback={fallback} />;
-}
