@@ -123,7 +123,7 @@ export function HoldToTalkButton({ onText, disabled, beforeStart }: Props) {
       onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerCancel={onPointerUp}
       onKeyDown={onKeyDown} onContextMenu={event => event.preventDefault()}
       className={cn(
-        'rounded-lg px-2 select-none [touch-action:none] [-webkit-touch-callout:none]',
+        'px-2 select-none [touch-action:none] [-webkit-touch-callout:none]',
         recording && 'bg-red-500/15 text-red-500 ring-1 ring-red-500/40 hover:bg-red-500/20 hover:text-red-500',
       )}>
       {working
