@@ -143,6 +143,8 @@ export interface UpdateProfileData {
    * blob and silently drops the rest.
    */
   showMatureContent?: boolean;
+  defaultProfileView?: DeHubUser['defaultProfileView'];
+  profileViewOthers?: DeHubUser['profileViewOthers'];
   notificationPreferences?: string;
   /** The app's language (a 2-3 letter code), so pushes are written in it. */
   preferredLanguage?: string;
@@ -201,6 +203,8 @@ export async function updateProfile(data: UpdateProfileData): Promise<{ result: 
   if (data.isPrivate !== undefined) formData.append("isPrivate", String(data.isPrivate));
   if (data.hideBadgeAndBalance !== undefined) formData.append("hideBadgeAndBalance", String(data.hideBadgeAndBalance));
   if (data.showMatureContent !== undefined) formData.append("showMatureContent", String(data.showMatureContent));
+  if (data.defaultProfileView !== undefined) formData.append("defaultProfileView", data.defaultProfileView);
+  if (data.profileViewOthers !== undefined) formData.append("profileViewOthers", data.profileViewOthers);
   if (data.notificationPreferences !== undefined) formData.append("notificationPreferences", data.notificationPreferences);
   if (data.preferredLanguage !== undefined) formData.append("preferredLanguage", data.preferredLanguage);
   if (data.twitterLink !== undefined) formData.append("twitterLink", data.twitterLink);
