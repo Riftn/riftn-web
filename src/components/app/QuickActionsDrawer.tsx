@@ -12,18 +12,19 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useSubmitFeatureRequest } from '@/hooks/use-feature-requests';
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
 import { ProfilesSection } from './settings/ProfilesSection';
+import { useAccountSignOut } from './AccountSignOut';
 import { captureBugScreenshot, describePageBug, enrichPageBugContext, type PageBugContext } from '@/lib/page-bug-report';
 
 export default function QuickActionsDrawer({ context, initialReport, onClose }: { context: PageBugContext; initialReport: boolean; onClose: () => void }) {
   const { t } = useTranslation();
-  const { isAuthenticated, openLoginModal, disconnect, walletAddress } = useAuth();
+  const { isAuthenticated, openLoginModal, walletAddress } = useAuth();
   const [view, setView] = useState<'menu' | 'report' | 'profiles'>(initialReport ? 'report' : 'menu');
   const [message, setMessage] = useSurfaceDraft('quick-page-bug', '', context.page);
   const [details, setDetails] = useState(context);
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [capturing, setCapturing] = useState(false);
-  const [busy, setBusy] = useState(false);
+  const { pending: busy, requestSignOut, signOutDialog } = useAccountSignOut({ onStart: onClose });
   const [error, setError] = useState(false);
   const submit = useSubmitFeatureRequest();
   const submitted = useRef(false);
@@ -56,7 +57,8 @@ export default function QuickActionsDrawer({ context, initialReport, onClose }: 
     } catch { setError(true); } finally { submitted.current = false; }
   };
   const row = 'flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm hover:bg-white/10 disabled:opacity-50';
-  return <Drawer open onOpenChange={open => { if (!open) close(); }} dismissible={!busy && !submit.isPending}>
+  return <>
+    <Drawer open onOpenChange={open => { if (!open) close(); }} dismissible={!busy && !submit.isPending}>
     <DrawerContent data-quick-actions-ui column className="px-4 pb-6 text-white">
       <DrawerHeader className="px-0 pr-10 text-left">
         <DrawerTitle>{view === 'report' ? t('quickActions.question') : view === 'profiles' ? t('sidebar.switchAccount') : t('quickActions.title')}</DrawerTitle>
@@ -67,7 +69,7 @@ export default function QuickActionsDrawer({ context, initialReport, onClose }: 
         <button className={row} onClick={() => setView('report')}><Bug size={20} />{t('settings.reportBug')}</button>
         <button className={row} onClick={() => window.location.reload()}><RefreshCw size={20} />{t('quickActions.refresh')}</button>
         <button className={row} onClick={() => setView('profiles')}><Users size={20} />{t('sidebar.switchAccount')}</button>
-        <button className={row} disabled={!isAuthenticated || busy} onClick={async () => { setBusy(true); try { await disconnect({ forgetProfile: true }); onClose(); } catch { setError(true); setBusy(false); } }}><LogOut size={20} />{t('quickActions.logout')}</button>
+        <button className={row} disabled={!isAuthenticated || busy} onClick={requestSignOut}><LogOut size={20} />{t('quickActions.logout')}</button>
       </div>}
       {view === 'profiles' && <div className="max-h-[65dvh] overflow-y-auto"><ProfilesSection onSelect={onClose} /></div>}
       {view === 'report' && <div className="space-y-3 overflow-y-auto">
@@ -82,5 +84,7 @@ export default function QuickActionsDrawer({ context, initialReport, onClose }: 
       </div>}
       {error && <p role="alert" className="mt-3 text-sm text-destructive">{t('quickActions.failed')}</p>}
     </DrawerContent>
-  </Drawer>;
+    </Drawer>
+    {signOutDialog}
+  </>;
 }
