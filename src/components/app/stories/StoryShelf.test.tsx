@@ -64,7 +64,10 @@ it('gives every pill a face, a name and a line', () => {
     expect(tile?.querySelector('[data-st-avatar]')).toBeTruthy();
     expect(tile?.querySelector('[data-st-label]')).toBeTruthy();
   }
-  expect(container.querySelector('[data-kind="live"] [data-st-live]')).toHaveAttribute('aria-label', 'LIVE');
+  const liveAvatar = screen.getByRole('img', { name: 'LIVE' });
+  expect(liveAvatar.querySelector('[data-st-avatar]')).toBeTruthy();
+  expect(liveAvatar).toHaveAttribute('data-live-orbit', 'shelf');
+  expect(container.querySelector('[data-kind="person"] [data-live-orbit]')).toBeNull();
   // Your own tile only shows with a Moment up; the Create tile leads the row.
   expect(container.querySelector('[data-kind="me"]')).toBeNull();
   expect(screen.getByRole('listitem', { name: 'Create' })).toHaveAttribute('aria-haspopup', 'menu');
