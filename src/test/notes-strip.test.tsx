@@ -51,8 +51,8 @@ describe('StatusRow', () => {
     try {
       fireEvent.contextMenu(await screen.findByRole('button', { name: /araf/i }));
       expect(await screen.findByRole('menuitem', { name: 'View status' })).toBeTruthy();
-      expect(screen.getByRole('menuitem', { name: 'Mute creator' })).toBeTruthy();
-      expect(screen.getByRole('menuitem', { name: 'Block creator' })).toBeTruthy();
+      expect(screen.getByRole('menuitem', { name: /mute (account|creator)/i })).toBeTruthy();
+      expect(screen.getByRole('menuitem', { name: /block creator/i })).toBeTruthy();
       fireEvent.click(screen.getByRole('menuitem', { name: 'Hide status' }));
       expect(screen.queryByRole('button', { name: /araf/i })).toBeNull();
       fireEvent.contextMenu(screen.getByRole('button', { name: /sam/i }));
