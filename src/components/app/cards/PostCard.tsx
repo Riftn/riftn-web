@@ -83,7 +83,7 @@ import { cacheTextPostForNavigation } from '@/lib/post-cache';
 import { warmPostPage } from '@/lib/preload-post-page';
 import { useCreatePoll } from '@/hooks/use-polls';
 import { PollCard } from './PollCard';
-import { QuizCard } from '@/components/app/quiz/QuizCard';
+import { LazyQuizCard } from '@/components/app/quiz/LazyQuizCard';
 import { PostUtilityMenuItems } from './PostUtilityMenuItems';
 import { usePostMenuContext } from '@/lib/post-menu';
 import { useBlockAuthor } from '@/hooks/use-block-author';
@@ -900,7 +900,7 @@ const PostCardBody = memo(function PostCard({ post, threadSlot, onOpenComments }
         />
 
         {!isLocked && !isSubGated && parseInt(post.id, 10) > 0 && <PollCard tokenId={parseInt(post.id, 10)} />}
-        {!isLocked && !isSubGated && post.hasQuiz && parseInt(post.id, 10) > 0 && <QuizCard tokenId={parseInt(post.id, 10)} />}
+        {!isLocked && !isSubGated && post.hasQuiz && parseInt(post.id, 10) > 0 && <LazyQuizCard tokenId={parseInt(post.id, 10)} />}
 
         {/* The creator's Shop board — affiliate links, opened in place. */}
         <ShopBoardLazy tokenId={post.id} links={post.shopLinks} listingCount={post.shopListingCount} variant="inline" />
