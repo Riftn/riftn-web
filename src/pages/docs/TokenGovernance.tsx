@@ -13,7 +13,7 @@ const TokenGovernance = () => {
     <div className="max-w-4xl mx-auto space-y-8">
       <div>
         <h1 className="text-4xl font-bold text-foreground mb-4">{t('tokenGovernance.title')}</h1>
-        <p className="text-lg text-muted-foreground leading-relaxed">{t('tokenGovernance.subtitle')}</p>
+        <p className="text-lg text-muted-foreground leading-relaxed">{t('tokenGovernance.subtitleCurrent')}</p>
       </div>
 
       <Card>
@@ -24,7 +24,7 @@ const TokenGovernance = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground leading-relaxed">{t('tokenGovernance.fairVotingDesc')}</p>
+          <p className="text-muted-foreground leading-relaxed">{t('tokenGovernance.fairVotingDescCurrent')}</p>
         </CardContent>
       </Card>
 
@@ -37,7 +37,7 @@ const TokenGovernance = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground leading-relaxed">{t('tokenGovernance.preventingWhalesDesc')}</p>
+            <p className="text-muted-foreground leading-relaxed">{t('tokenGovernance.preventingWhalesDescCurrent')}</p>
           </CardContent>
         </Card>
 
@@ -49,7 +49,7 @@ const TokenGovernance = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground leading-relaxed">{t('tokenGovernance.encouragingEngagementDesc')}</p>
+            <p className="text-muted-foreground leading-relaxed">{t('tokenGovernance.encouragingEngagementDescCurrent')}</p>
           </CardContent>
         </Card>
       </div>
@@ -59,10 +59,10 @@ const TokenGovernance = () => {
           <CardTitle className="text-xl">{t('tokenGovernance.solvingTitle')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground leading-relaxed mb-4">{t('tokenGovernance.solvingDesc')}</p>
+          <p className="text-muted-foreground leading-relaxed mb-4">{t('tokenGovernance.solvingDescCurrent')}</p>
           <div className="p-4 docs-glass rounded-lg">
-            <p className="text-foreground font-medium">{t('tokenGovernance.launchNote')}</p>
-            <p className="text-muted-foreground mt-2">{t('tokenGovernance.stayTuned')}</p>
+            <p className="text-foreground font-medium">{t('tokenGovernance.launchNoteCurrent')}</p>
+            <p className="text-muted-foreground mt-2">{t('tokenGovernance.stayTunedCurrent')}</p>
           </div>
         </CardContent>
       </Card>
@@ -72,7 +72,7 @@ const TokenGovernance = () => {
           <CardTitle className="text-xl text-foreground">{t('tokenGovernance.disclaimer')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground leading-relaxed text-sm">{t('tokenGovernance.disclaimerText')}</p>
+          <p className="text-muted-foreground leading-relaxed text-sm">{t('faq.a4LaunchCurrent')}</p>
         </CardContent>
       </Card>
     </div>

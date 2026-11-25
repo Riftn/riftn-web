@@ -26,7 +26,7 @@ const TokenOverview = () => {
       <div>
         <h1 className="text-4xl font-bold text-foreground mb-4">{t('tokenOverview.title')}</h1>
         <h2 className="text-2xl font-semibold text-muted-foreground mb-6">{t('tokenOverview.subtitle')}</h2>
-        <p className="text-muted-foreground leading-relaxed">{t('tokenOverview.intro')}</p>
+        <p className="text-muted-foreground leading-relaxed">{t('tokenOverview.introCurrent')}</p>
       </div>
 
       <Card>
@@ -34,8 +34,8 @@ const TokenOverview = () => {
           <CardTitle className="text-xl">{t('tokenOverview.howItWorksTitle')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-muted-foreground leading-relaxed">{t('tokenOverview.howItWorksDesc1')}</p>
-          <p className="text-muted-foreground leading-relaxed">{t('tokenOverview.howItWorksDesc2')}</p>
+          <p className="text-muted-foreground leading-relaxed">{t('tokenOverview.howItWorksDesc1Current')}</p>
+          <p className="text-muted-foreground leading-relaxed">{t('tokenOverview.howItWorksDesc2Current')}</p>
         </CardContent>
       </Card>
 

@@ -6,7 +6,7 @@ export const whatIsDehubPost: BlogPostType = {
   title: 'What is Riftn?',
   seoTitle: 'What is Riftn? The Open Source, User-Owned Social Platform Explained',
   seoDescription:
-    'Riftn is the open source, user-owned and censorship-resistant social platform for Web3 creators and communities. Who we are, how it works, the DHB token, and how creators earn.',
+    'Riftn is the open source, user-owned and censorship-resistant social platform for Web3 creators and communities. Who we are, how it works, the in-app $RIFT currency, and how creators earn.',
   excerpt:
     'Riftn is the open source, user-owned and censorship-resistant social platform for Web3 creators and communities. Here is who we are, what that actually means, how it works, and why it exists.',
   content: `
@@ -16,7 +16,7 @@ Our mission is simple: **give creators and their communities ownership of the pl
 
 ## Who's behind Riftn
 
-Riftn isn't an anonymous token with a whitepaper and a promise. It's a shipping product built by a team of **gamers, streamers and entertainment entrepreneurs**, and run as an **independent DAO**, governed on-chain by DHB holders, with no company owning or controlling it.
+Riftn isn't an anonymous token with a whitepaper and a promise. It's a shipping product built by a team of **gamers, streamers and entertainment entrepreneurs**, and run as an **independent DAO**, governed through free community voting, with no company owning or controlling it.
 
 The team came together in **2021**, assembled a core group of developers, and grew to more than a dozen people across three time zones within the first year. What matters most about how we started: Riftn shipped a **fully built app before it ever launched a token.** There was no venture round and no private presale funding development, the only fundraising was community liquidity generation on BNB, and from day one the community itself voted on the chain, the price, the supply and the exchange listings. That "product first, community-owned" DNA is still exactly how the project runs today.
 
@@ -55,7 +55,7 @@ Creator subscriptions on Riftn are on-chain and tradable. If a creator you backe
 
 ### The Riftn token
 
-The new Riftn token is coming soon and is not trading yet. There is no contract address or exchange listing yet.
+$RIFT is Riftn’s in-app currency. You can already use it inside Riftn. The on-chain token has yet to launch and has no official contract address or exchange listing. See the [official launch status](/docs/token/where-to-buy).
 
 ### Gaming
 Riftn's gaming arm has shipped a play-and-earn arcade sustained entirely by fee generation, no dilution or inflation needed to reward engagement, and is building **Last Chad Standing**, a fighter battle royale featuring licensed fighters from top fight leagues.
@@ -81,13 +81,13 @@ Riftn is built by a team of gamers, streamers and entertainment entrepreneurs an
 Yes. Browsing, posting and streaming are free. A wallet is created for you behind the scenes, you can bring your own, but you don't need to know anything about crypto to start. Gas is sponsored for social, email and SMS signups.
 
 ### What chain is Riftn on?
-The DHB token and subscription contracts live on Base (Ethereum L2), with contracts also deployed on BNB Chain and Polygon.
+Legacy DHB and platform contracts are separate from $RIFT. $RIFT has yet to launch on chain and has no official contract address.
 
 ### How do creators earn on Riftn?
 Tokenized uploads (pay-per-view and token-gated), tradable subscriptions with resale royalties, live-stream tips, watch-to-earn bounties, and a share of ad revenue, up to 90% of which flows to the ecosystem rather than the platform.
 
 ### How is Riftn governed?
-Through on-chain community voting. Stakeholder weight is multiplied within capped limits to prevent whale manipulation, and each vote burns DHB to discourage bad actors while rewarding meaningful participation.
+Voting is free and your staking badge determines your vote weight. Voting stays open for seven days. A proposal needs at least ten distinct wallets to vote and a weighted majority to pass.
 
 ### Is Riftn really open source?
 Yes, the code is public under the [Riftn organization on GitHub](https://github.com/Riftn), including the web app and the E2EE messaging implementation.
@@ -101,7 +101,8 @@ On Riftn itself at [riftn.com](https://riftn.com), on X at [@riftn_com](https://
     name: 'Riftn Team',
   },
   publishedAt: '2026-06-23T10:30:00.000Z',
-  tags: ['Riftn', 'Explainer', 'Web3', 'Social Media', 'DHB'],
+  updatedAt: '2026-11-25T00:00:00.000Z',
+  tags: ['Riftn', 'Explainer', 'Web3', 'Social Media', '$RIFT'],
   readingTime: 7,
   featured: true,
   status: 'published',

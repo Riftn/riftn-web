@@ -16,12 +16,12 @@ export function TokenComingSoonPage({ path, title }: { path: string; title?: str
   return (
     <div className="min-h-screen" data-token-coming-soon-page>
       <SEOHead
-        title={t('tokenLaunch.seoTitle')}
-        description={t('tokenLaunch.seoDescription')}
+        title={t('tokenLaunch.riftTitle')}
+        description={t('tokenLaunch.riftSeoDescription')}
         url={url}
         jsonLd={{ '@context': 'https://schema.org', '@type': 'WebPage', name: 'Riftn token launching soon', url, isPartOf: { '@type': 'WebSite', name: 'Riftn', url: 'https://riftn.com' } }}
       />
-      <h1 className="sr-only">{t('tokenLaunch.title')}</h1>
+      <h1 className="sr-only">{t('tokenLaunch.riftTitle')}</h1>
       <PageIsland back onBack={() => navigate(-1)} icon="buy" title={title ?? t('buyCoins.title')} />
       <PageBody className="max-w-lg mx-auto">
         <TokenLaunchNotify />

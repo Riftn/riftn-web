@@ -5,7 +5,7 @@ export const whatIsWatchToEarnPost: BlogPostType = {
   slug: 'what-is-watch-to-earn',
   title: 'What Is Watch-to-Earn? How Riftn Actually Pays You to Watch (2026)',
   seoTitle: 'What Is Watch-to-Earn? How It Works in 2026 | Riftn',
-  seoDescription: 'What is watch to earn? A plain-English guide to how watch-to-earn works, why it exists, honest earnings caveats, and how Riftn pays you to watch on-chain.',
+  seoDescription: 'What is watch to earn? A plain-English guide to how watch-to-earn works, why it exists, honest earnings caveats, and how Riftn rewards eligible viewing inside the app.',
   excerpt: 'Watch-to-earn pays viewers a share of the value their attention creates. Here is what watch to earn actually means, how it works, and how Riftn does it honestly.',
   content: `Watch-to-earn (often written as watch2earn) is a model where you receive a small crypto reward for watching video content, rather than handing all of that value to a platform and its advertisers for free. If you have ever wondered what watch to earn is in plain terms: it is the attention economy, inverted. Instead of your viewing time funding someone else's ad business, part of that value flows back to you as the viewer.
 
@@ -63,11 +63,11 @@ Riftn is a decentralised, user-owned social network, and watch-to-earn is one na
 
 On Riftn, watch-to-earn is powered by creator-funded bounties. A creator can attach a bounty to a video to reward the people who watch it, drawing on a real, defined pool rather than freshly minted tokens sold to newcomers. That is a crucial structural difference. Because the reward is funded by someone with a genuine reason to want views, the incentive is honest: the creator is effectively buying attention directly from viewers instead of buying it from an ad network that keeps the margin.
 
-Rewards on Riftn are denominated in the ecosystem token, $DHB, which lives primarily on Base (an Ethereum Layer 2), with contracts also on BNB Chain and Polygon. $DHB is a real, tradable asset listed on CoinGecko and CoinMarketCap and available on DEXs and on Coinbase, so what you earn is not points trapped inside an app.
+$RIFT rewards are usable inside Riftn. The on-chain token has yet to launch and those rewards cannot yet be traded as $RIFT.
 
 ### On-chain-verifiable payouts
 
-Every payout is verifiable on-chain. This is the part that separates a claim from a fact. Because Riftn records the relevant activity on a public blockchain, you do not have to take the platform's word that viewers are being paid; the transactions exist independently of any marketing page. Transparency of this kind is only meaningful when it is externally checkable, which is the whole point of doing it on-chain.
+Eligible rewards appear in your Riftn account. See the [official launch status](/docs/token/where-to-buy) for updates.
 
 ### No NFT-glasses paywall, no browser extension
 
@@ -105,7 +105,7 @@ Not on Riftn. There is no NFT you must purchase and no browser extension to inst
 
 ### How does watch-to-earn work mechanically?
 
-A funding source (advertising revenue or a creator's bounty) pays for the rewards, the platform verifies that you actually watched, and a small crypto reward is issued to your wallet, ideally recorded on-chain so it can be independently checked. Anti-abuse limits stop bots from draining the pool. On Riftn, payouts are creator-funded and on-chain-verifiable, and the reward is paid in the ecosystem token, $DHB.
+A funding source (advertising revenue or a creator's bounty) pays for the rewards, the platform verifies that you actually watched, and a small crypto reward is issued to your wallet, ideally recorded on-chain so it can be independently checked. Anti-abuse limits stop bots from draining the pool. On Riftn, eligible creator-funded rewards are paid in in-app $RIFT.
 
 ### Is watch-to-earn the same as play-to-earn?
 

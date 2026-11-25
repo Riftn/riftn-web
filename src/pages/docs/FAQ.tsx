@@ -10,6 +10,8 @@ const FAQ = () => {
 
   const faqKeys = Array.from({ length: 30 }, (_, i) => i + 1);
 
+  const currentAnswers = new Set([2, 3, 4, 5, 6, 11, 28]);
+
   // The FAQPage markup for this route is emitted by the edge worker
   // (`faqJsonLd` in CLOUDFLARE_WORKER_SEO.js), not from here: react-helmet's
   // client-side output never reaches a crawler, and every JSON-LD block
@@ -36,7 +38,7 @@ const FAQ = () => {
                     {t(`faq.q${i}`)}
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground pb-4 leading-relaxed">
-                    {t(i === 4 ? 'faq.a4Launch' : `faq.a${i}`)}
+                    {t(i === 4 ? 'faq.a4LaunchCurrent' : `faq.a${i}${currentAnswers.has(i) ? 'Current' : ''}`)}
                   </AccordionContent>
                 </AccordionItem>
               ))}
