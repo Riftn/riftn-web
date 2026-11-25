@@ -13652,6 +13652,7 @@
     "shareGroups": "Gruplar",
     "opened": {"photoA11y": "Fotoğraf, {{time}} açıldı", "videoA11y": "Video, {{time}} açıldı", "seenAt": "Görüldü {{time}}", "replyCamera": "Kamerayla yanıtla", "quotePhoto": "Fotoğraf · Açıldı", "quoteVideo": "Video · Açıldı", "cameraTitle": "Bu fotoğrafa yanıt ver", "cameraOff": "Kamera erişimi kapalı. Bunun yerine fotoğraf veya video yükle.", "takePhoto": "Fotoğraf çek", "uploadInstead": "Bunun yerine yükle"},
     "openTimer": {
+      "sent": "Gönderildi",
       "secs": "{{n}} sn",
       "oneMin": "1 dk",
       "chip": "Açılınca {{time}}",

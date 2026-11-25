@@ -13680,6 +13680,7 @@
     "shareGroups": "المجموعات",
     "opened": {"photoA11y": "صورة، فُتحت {{time}}", "videoA11y": "فيديو، فُتح {{time}}", "seenAt": "شوهدت {{time}}", "replyCamera": "الرد بالكاميرا", "quotePhoto": "صورة · فُتحت", "quoteVideo": "فيديو · فُتح", "cameraTitle": "الرد على هذه الصورة", "cameraOff": "الوصول إلى الكاميرا متوقف. ارفع صورة أو فيديو بدلاً من ذلك.", "takePhoto": "التقط صورة", "uploadInstead": "ارفع ملفاً"},
     "openTimer": {
+      "sent": "تم الإرسال",
       "secs": "{{n}} ث",
       "oneMin": "دقيقة واحدة",
       "chip": "{{time}} بعد الفتح",
