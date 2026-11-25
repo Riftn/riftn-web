@@ -6373,6 +6373,72 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://riftn.com/admin-manual"/>
   </url>
   <url>
+    <loc>https://riftn.com/stores</loc>
+    <lastmod>2026-11-25</lastmod>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://riftn.com/stores?hl=ar"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://riftn.com/stores"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://riftn.com/stores?hl=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://riftn.com/stores?hl=fr"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://riftn.com/stores?hl=nl"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://riftn.com/stores?hl=tr"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://riftn.com/stores"/>
+  </url>
+  <url>
+    <loc>https://riftn.com/stores?hl=ar</loc>
+    <lastmod>2026-11-25</lastmod>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://riftn.com/stores?hl=ar"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://riftn.com/stores"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://riftn.com/stores?hl=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://riftn.com/stores?hl=fr"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://riftn.com/stores?hl=nl"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://riftn.com/stores?hl=tr"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://riftn.com/stores"/>
+  </url>
+  <url>
+    <loc>https://riftn.com/stores?hl=es</loc>
+    <lastmod>2026-11-25</lastmod>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://riftn.com/stores?hl=ar"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://riftn.com/stores"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://riftn.com/stores?hl=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://riftn.com/stores?hl=fr"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://riftn.com/stores?hl=nl"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://riftn.com/stores?hl=tr"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://riftn.com/stores"/>
+  </url>
+  <url>
+    <loc>https://riftn.com/stores?hl=fr</loc>
+    <lastmod>2026-11-25</lastmod>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://riftn.com/stores?hl=ar"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://riftn.com/stores"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://riftn.com/stores?hl=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://riftn.com/stores?hl=fr"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://riftn.com/stores?hl=nl"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://riftn.com/stores?hl=tr"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://riftn.com/stores"/>
+  </url>
+  <url>
+    <loc>https://riftn.com/stores?hl=nl</loc>
+    <lastmod>2026-11-25</lastmod>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://riftn.com/stores?hl=ar"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://riftn.com/stores"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://riftn.com/stores?hl=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://riftn.com/stores?hl=fr"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://riftn.com/stores?hl=nl"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://riftn.com/stores?hl=tr"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://riftn.com/stores"/>
+  </url>
+  <url>
+    <loc>https://riftn.com/stores?hl=tr</loc>
+    <lastmod>2026-11-25</lastmod>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://riftn.com/stores?hl=ar"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://riftn.com/stores"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://riftn.com/stores?hl=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://riftn.com/stores?hl=fr"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://riftn.com/stores?hl=nl"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://riftn.com/stores?hl=tr"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://riftn.com/stores"/>
+  </url>
+  <url>
     <loc>https://riftn.com/guides/fastest-blockchains-2026</loc>
     <lastmod>2026-11-25T00:00:00.000Z</lastmod>
     <changefreq>monthly</changefreq>
@@ -10678,7 +10744,7 @@
   </url>
   <url>
     <loc>https://riftn.com/guides/what-is-dehub</loc>
-    <lastmod>2026-06-23T10:30:00.000Z</lastmod>
+    <lastmod>2026-11-25T00:00:00.000Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="ar" href="https://riftn.com/guides/what-is-dehub?hl=ar"/>
@@ -10691,7 +10757,7 @@
   </url>
   <url>
     <loc>https://riftn.com/guides/what-is-dehub?hl=ar</loc>
-    <lastmod>2026-06-23T10:30:00.000Z</lastmod>
+    <lastmod>2026-11-25T00:00:00.000Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="ar" href="https://riftn.com/guides/what-is-dehub?hl=ar"/>
@@ -10704,7 +10770,7 @@
   </url>
   <url>
     <loc>https://riftn.com/guides/what-is-dehub?hl=es</loc>
-    <lastmod>2026-06-23T10:30:00.000Z</lastmod>
+    <lastmod>2026-11-25T00:00:00.000Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="ar" href="https://riftn.com/guides/what-is-dehub?hl=ar"/>
@@ -10717,7 +10783,7 @@
   </url>
   <url>
     <loc>https://riftn.com/guides/what-is-dehub?hl=fr</loc>
-    <lastmod>2026-06-23T10:30:00.000Z</lastmod>
+    <lastmod>2026-11-25T00:00:00.000Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="ar" href="https://riftn.com/guides/what-is-dehub?hl=ar"/>
@@ -10730,7 +10796,7 @@
   </url>
   <url>
     <loc>https://riftn.com/guides/what-is-dehub?hl=nl</loc>
-    <lastmod>2026-06-23T10:30:00.000Z</lastmod>
+    <lastmod>2026-11-25T00:00:00.000Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="ar" href="https://riftn.com/guides/what-is-dehub?hl=ar"/>
@@ -10743,7 +10809,7 @@
   </url>
   <url>
     <loc>https://riftn.com/guides/what-is-dehub?hl=tr</loc>
-    <lastmod>2026-06-23T10:30:00.000Z</lastmod>
+    <lastmod>2026-11-25T00:00:00.000Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="ar" href="https://riftn.com/guides/what-is-dehub?hl=ar"/>
@@ -22089,71 +22155,5 @@
     <xhtml:link rel="alternate" hreflang="nl" href="https://riftn.com/docs/troubleshooting?hl=nl"/>
     <xhtml:link rel="alternate" hreflang="tr" href="https://riftn.com/docs/troubleshooting?hl=tr"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://riftn.com/docs/troubleshooting"/>
-  </url>
-  <url>
-    <loc>https://riftn.com/stores</loc>
-    <lastmod>2026-11-25</lastmod>
-    <xhtml:link rel="alternate" hreflang="ar" href="https://riftn.com/stores?hl=ar"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://riftn.com/stores"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://riftn.com/stores?hl=es"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://riftn.com/stores?hl=fr"/>
-    <xhtml:link rel="alternate" hreflang="nl" href="https://riftn.com/stores?hl=nl"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://riftn.com/stores?hl=tr"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://riftn.com/stores"/>
-  </url>
-  <url>
-    <loc>https://riftn.com/stores?hl=ar</loc>
-    <lastmod>2026-11-25</lastmod>
-    <xhtml:link rel="alternate" hreflang="ar" href="https://riftn.com/stores?hl=ar"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://riftn.com/stores"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://riftn.com/stores?hl=es"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://riftn.com/stores?hl=fr"/>
-    <xhtml:link rel="alternate" hreflang="nl" href="https://riftn.com/stores?hl=nl"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://riftn.com/stores?hl=tr"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://riftn.com/stores"/>
-  </url>
-  <url>
-    <loc>https://riftn.com/stores?hl=es</loc>
-    <lastmod>2026-11-25</lastmod>
-    <xhtml:link rel="alternate" hreflang="ar" href="https://riftn.com/stores?hl=ar"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://riftn.com/stores"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://riftn.com/stores?hl=es"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://riftn.com/stores?hl=fr"/>
-    <xhtml:link rel="alternate" hreflang="nl" href="https://riftn.com/stores?hl=nl"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://riftn.com/stores?hl=tr"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://riftn.com/stores"/>
-  </url>
-  <url>
-    <loc>https://riftn.com/stores?hl=fr</loc>
-    <lastmod>2026-11-25</lastmod>
-    <xhtml:link rel="alternate" hreflang="ar" href="https://riftn.com/stores?hl=ar"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://riftn.com/stores"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://riftn.com/stores?hl=es"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://riftn.com/stores?hl=fr"/>
-    <xhtml:link rel="alternate" hreflang="nl" href="https://riftn.com/stores?hl=nl"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://riftn.com/stores?hl=tr"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://riftn.com/stores"/>
-  </url>
-  <url>
-    <loc>https://riftn.com/stores?hl=nl</loc>
-    <lastmod>2026-11-25</lastmod>
-    <xhtml:link rel="alternate" hreflang="ar" href="https://riftn.com/stores?hl=ar"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://riftn.com/stores"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://riftn.com/stores?hl=es"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://riftn.com/stores?hl=fr"/>
-    <xhtml:link rel="alternate" hreflang="nl" href="https://riftn.com/stores?hl=nl"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://riftn.com/stores?hl=tr"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://riftn.com/stores"/>
-  </url>
-  <url>
-    <loc>https://riftn.com/stores?hl=tr</loc>
-    <lastmod>2026-11-25</lastmod>
-    <xhtml:link rel="alternate" hreflang="ar" href="https://riftn.com/stores?hl=ar"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://riftn.com/stores"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://riftn.com/stores?hl=es"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://riftn.com/stores?hl=fr"/>
-    <xhtml:link rel="alternate" hreflang="nl" href="https://riftn.com/stores?hl=nl"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://riftn.com/stores?hl=tr"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://riftn.com/stores"/>
   </url>
 </urlset>

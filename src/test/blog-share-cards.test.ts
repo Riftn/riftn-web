@@ -50,6 +50,11 @@ function makeEnv() {
             return new Response(readFileSync(file, 'utf8'), { status: 200, headers: { 'Content-Type': 'application/json' } });
           }
         }
+        if (u.pathname.startsWith('/guides/')) {
+          return new Response('<html lang="en"><head><title>Riftn</title><meta name="description" content="Riftn home"></head><body><div id="root"></div><script type="module" src="/assets/app.js"></script></body></html>', {
+            headers: { 'Content-Type': 'text/html' },
+          });
+        }
         return new Response('nope', { status: 404 });
       }),
     },
@@ -140,6 +145,20 @@ describe('clean blog slugs', () => {
 });
 
 describe('blog post crawler markup', () => {
+  it('gives browser navigations the article and preserves the app entry', async () => {
+    const response = await worker.fetch(new Request('https://riftn.com/guides/' + NEW_SLUG, {
+      headers: { Accept: 'text/html', 'User-Agent': 'Mozilla/5.0 Chrome/149.0.0.0 Safari/537.36' },
+    }), makeEnv(), { waitUntil() {} });
+    expect(response.status).toBe(200);
+    expect(response.headers.get('Cache-Control')).toBe('no-store');
+    const html = await response.text();
+    expect(html).toContain('edge-public-content');
+    expect(html).toContain('<article>');
+    expect(html).toContain('href="https://riftn.com/guides/' + NEW_SLUG + '"');
+    expect(html).toContain('src="/assets/app.js"');
+    expect(html).not.toContain('content="Riftn home"');
+  });
+
   it('has a short description, canonical, robots and BlogPosting data', async () => {
     const res = await get(`/guides/${NEW_SLUG}`);
     const description = meta(res.body, 'description');
