@@ -1,4 +1,8 @@
 {
+  "/stores": {
+    "h1": "Tiendas de Riftn",
+    "body": "<p>Los creadores gestionan sus propias tiendas en Riftn. Pueden ofrecer productos digitales, merchandising, arte y servicios junto a las obras que comparten en su perfil.</p>"
+  },
   "/": {
     "h1": "Riftn | Redes sociales de código abierto, propiedad de sus usuarios",
     "lede": "riftn.com es un medio de código abierto, propiedad de sus usuarios y resistente a la censura. Únete al futuro de la libertad de expresión y del alcance.",

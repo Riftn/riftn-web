@@ -5222,6 +5222,8 @@
     "resolve": "Resolve"
   },
   "stores": {
+    "seoTitle": "Riftn Stores",
+    "seoDescription": "Browse digital goods, merchandise, art and services from independent creators on the Riftn marketplace.",
     "podToggle": "Print-on-demand item",
     "podHint": "Link a product from your print-on-demand shop. The provider prints and ships each order, so you hold no stock.",
     "podUrlLabel": "Product link",

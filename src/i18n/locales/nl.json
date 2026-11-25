@@ -5412,6 +5412,8 @@
     "resolve": "Oplossen"
   },
   "stores": {
+    "seoTitle": "Riftn-winkels",
+    "seoDescription": "Ontdek digitale producten, merchandise, kunst en diensten van onafhankelijke makers op de marktplaats van Riftn.",
     "podToggle": "Print-on-demand-artikel",
     "podHint": "Koppel een product uit je print-on-demand-winkel. De aanbieder drukt en verzendt elke bestelling, dus je hebt geen voorraad nodig.",
     "podUrlLabel": "Productlink",

@@ -42,6 +42,7 @@ export const APP_PAGE_PATHS: readonly string[] = [
   '/affiliate',
   '/app/jobs',
   '/app/fractions',
+  '/stores',
   '/usernames',
   '/accounts',
   '/app/ads',

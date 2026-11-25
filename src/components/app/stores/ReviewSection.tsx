@@ -1,3 +1,4 @@
+import { formatCount } from '@/lib/format-count';
 import { useTranslation as _useCopy } from 'react-i18next';
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
 /**
@@ -99,7 +100,7 @@ export function ReviewSection({ listingId, sellerAddress }: ReviewSectionProps) 
                           style={{ width: `${d.pct}%` }}
                         />
                       </div>
-                      <span className="text-[10px] text-zinc-500 w-4">{d.count}</span>
+                      <span className="text-[10px] text-zinc-500 w-4">{formatCount(d.count)}</span>
                     </div>
                   ))}
                 </div>

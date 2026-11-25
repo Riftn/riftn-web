@@ -5227,6 +5227,8 @@
     "resolve": "Régler"
   },
   "stores": {
+    "seoTitle": "Boutiques Riftn",
+    "seoDescription": "Découvrez des produits numériques, des articles, des œuvres d’art et des services de créateurs indépendants sur Riftn.",
     "podToggle": "Article en impression à la demande",
     "podHint": "Liez un produit de votre boutique d'impression à la demande. Le prestataire imprime et expédie chaque commande, sans stock de votre côté.",
     "podUrlLabel": "Lien du produit",

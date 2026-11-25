@@ -1,4 +1,8 @@
 {
+  "/stores": {
+    "h1": "Riftn-winkels",
+    "body": "<p>Makers beheren hun eigen winkel op Riftn. Ze kunnen er digitale producten, merchandise, kunst en diensten aanbieden naast het werk dat ze op hun profiel delen.</p>"
+  },
   "/": {
     "h1": "Riftn | Opensource sociaal netwerk in handen van gebruikers",
     "lede": "riftn.com is opensource, in handen van gebruikers en bestand tegen censuur. Doe mee aan de toekomst van vrije meningsuiting en bereik.",
