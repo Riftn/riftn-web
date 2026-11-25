@@ -17,6 +17,7 @@ import { Loader2 } from "lucide-react";
 import Check from "@/components/ui/cut-icons/check";
 import Music from "@/components/ui/cut-icons/music";
 import Back from "@/components/ui/cut-icons/back";
+import Upload from "@/components/ui/cut-icons/upload";
 
 import Search from "@/components/ui/cut-icons/search";
 import Play from "@/components/ui/cut-icons/play";
@@ -32,7 +33,10 @@ import { bindSoundWindow, clock, soundWindow, suggestedSoundStart, withSoundWind
 import { AppState } from '@/components/app/AppState';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { walletScopedClient } from '@/lib/supabase-wallet-client';
+import { toast } from 'sonner';
 import type { AttachedSound } from '../hooks/usePostSound';
 
 export type Library = 'audius' | 'riftn' | 'commons';
@@ -62,6 +66,7 @@ interface SoundPickerProps {
   isOpen: boolean;
   onClose: () => void;
   onSelect: (sound: AttachedSound) => void;
+  profileSongUploadWallet?: string;
   currentSound?: AttachedSound | null;
   aboveMomentEditor?: boolean;
   /** Length of the attached video, in seconds: the part matches it. */
@@ -74,6 +79,36 @@ interface SoundPickerProps {
 
 const LENGTHS = [15, 30, 60] as const;
 const PAGE = 20;
+const SONG_BUCKET = 'soundboard-sounds';
+const SONG_MAX_MB = 15;
+const SONG_FORMATS = {
+  mp3: 'audio/mpeg', wav: 'audio/wav', m4a: 'audio/mp4', aac: 'audio/aac',
+  ogg: 'audio/ogg', flac: 'audio/flac', webm: 'audio/webm',
+};
+type SongExtension = keyof typeof SONG_FORMATS;
+type PickedSound = SoundCandidate & { upload?: { file: File; extension: SongExtension } };
+
+function readLocalSongDuration(url: string, signal: AbortSignal): Promise<number> {
+  const audio = new Audio();
+  return new Promise((resolve, reject) => {
+    const finish = (duration?: number) => {
+      clearTimeout(timeout);
+      signal.removeEventListener('abort', onError);
+      audio.onloadedmetadata = audio.onerror = null;
+      audio.removeAttribute('src');
+      audio.load();
+      if (duration && Number.isFinite(duration) && duration > 0) resolve(duration);
+      else reject(new Error('Could not read audio metadata'));
+    };
+    const onError = () => finish();
+    const timeout = setTimeout(onError, 15000);
+    signal.addEventListener('abort', onError, { once: true });
+    audio.preload = 'metadata';
+    audio.onloadedmetadata = () => finish(audio.duration);
+    audio.onerror = onError;
+    audio.src = url;
+  });
+}
 
 async function fetchOutside(source: 'audius' | 'commons', q: string, offset: number) {
   const params = new URLSearchParams({ source, offset: String(offset) });
@@ -159,16 +194,21 @@ function waveFor(seed: string, count: number): number[] {
   });
 }
 
-export function SoundPicker({ isOpen, onClose, onSelect, currentSound, clipSeconds, initialPicked, aboveMomentEditor = false }: SoundPickerProps) {
+export function SoundPicker({ isOpen, onClose, onSelect, currentSound, clipSeconds, initialPicked, aboveMomentEditor = false, profileSongUploadWallet }: SoundPickerProps) {
   const { t: _copy } = _useCopy();
   const { t } = useTranslation();
   const [search, setSearch] = useSurfaceDraft("features/post/components/SoundPicker.tsx:search", '');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [playingKey, setPlayingKey] = useState<string | null>(null);
-  const [picked, setPicked] = useState<SoundCandidate | null>(initialPicked ?? null);
+  const [picked, setPicked] = useState<PickedSound | null>(initialPicked ?? null);
   const [start, setStart] = useState(initialPicked ? 42 : 0);
   const [length, setLength] = useState<number>(30);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
+  const pendingUpload = useRef<AbortController | null>(null);
+  const [readingFile, setReadingFile] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [draggingFile, setDraggingFile] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search.trim()), 400);
@@ -213,6 +253,13 @@ export function SoundPicker({ isOpen, onClose, onSelect, currentSound, clipSecon
     if (!isOpen) { stopPreview(); setPicked(null); }
   }, [isOpen, stopPreview]);
 
+  useEffect(() => () => { pendingUpload.current?.abort(); }, []);
+
+  const localPreviewUrl = picked?.upload ? picked.url : undefined;
+  useEffect(() => () => {
+    if (localPreviewUrl) URL.revokeObjectURL(localPreviewUrl);
+  }, [localPreviewUrl]);
+
   // The part's length: the video's, or a chosen length for photos.
   const fixedLength = clipSeconds && clipSeconds > 0 ? Math.max(3, Math.round(clipSeconds)) : undefined;
   const duration = picked?.duration && picked.duration > 0 ? picked.duration : undefined;
@@ -221,7 +268,7 @@ export function SoundPicker({ isOpen, onClose, onSelect, currentSound, clipSecon
   const maxStart = duration && !wholeSong ? Math.max(0, duration - partLength) : 0;
   const end = wholeSong ? undefined : start + partLength;
 
-  const pick = useCallback((track: SoundCandidate) => {
+  const pick = useCallback((track: PickedSound) => {
     stopPreview();
     setPicked(track);
     const resumed = currentSound && currentSound.title === track.title && currentSound.url.split('#')[0] === track.url
@@ -231,27 +278,83 @@ export function SoundPicker({ isOpen, onClose, onSelect, currentSound, clipSecon
     setStart(resumed);
   }, [currentSound, stopPreview, fixedLength, length]);
 
+  const pickFile = async (file?: File) => {
+    if (!file || !profileSongUploadWallet || pendingUpload.current) return;
+    const extension = file.name.split('.').pop()?.toLowerCase() as SongExtension | undefined;
+    if (!extension || !Object.prototype.hasOwnProperty.call(SONG_FORMATS, extension) || !file.size) {
+      toast.error(t('profileSong.invalidAudio', 'Choose a playable audio file.'));
+      return;
+    }
+    if (file.size > SONG_MAX_MB * 1024 * 1024) {
+      toast.error(t('profileSong.audioTooLarge', { defaultValue: 'Choose an audio file under {{max}} MB.', max: SONG_MAX_MB }));
+      return;
+    }
+    const request = new AbortController();
+    const url = URL.createObjectURL(file);
+    pendingUpload.current = request;
+    setReadingFile(true);
+    let retainPreview = false;
+    try {
+      const duration = await readLocalSongDuration(url, request.signal);
+      if (request.signal.aborted) return;
+      const id = crypto.randomUUID();
+      pick({
+        key: id, library: 'riftn', url, duration, creator: '', tokenId: '0',
+        title: file.name.replace(/\.[^.]+$/, '').trim() || file.name,
+        upload: { file, extension },
+      });
+      retainPreview = true;
+    } catch {
+      if (!request.signal.aborted) toast.error(t('profileSong.invalidAudio', 'Choose a playable audio file.'));
+    } finally {
+      if (!retainPreview) URL.revokeObjectURL(url);
+      pendingUpload.current = null;
+      if (!request.signal.aborted) setReadingFile(false);
+    }
+  };
+
   const partUrl = useCallback((track: SoundCandidate) => withSoundWindow(
     track.url,
     wholeSong && start <= 0 ? null : { start, end },
     track.library === 'riftn' ? null : { source: track.library, page: track.pageUrl, license: track.license, licenseUrl: track.licenseUrl },
   ), [wholeSong, start, end]);
 
-  const confirm = useCallback(() => {
-    if (!picked) return;
+  const confirm = async () => {
+    if (!picked || pendingUpload.current) return;
     stopPreview();
+    let track = picked;
+    if (picked.upload && profileSongUploadWallet) {
+      const request = new AbortController();
+      pendingUpload.current = request;
+      setUploading(true);
+      try {
+        const { file, extension } = picked.upload;
+        const path = `${profileSongUploadWallet.toLowerCase()}/profile-songs/${crypto.randomUUID()}.${extension}`;
+        const storage = walletScopedClient(profileSongUploadWallet).storage.from(SONG_BUCKET);
+        const { error } = await storage.upload(path, file, { contentType: SONG_FORMATS[extension], upsert: false });
+        if (error) throw error;
+        if (request.signal.aborted) return;
+        track = { ...picked, url: storage.getPublicUrl(path).data.publicUrl };
+      } catch {
+        if (!request.signal.aborted) toast.error(t('profileSong.uploadFailed', 'Could not upload this song. Try again.'));
+        return;
+      } finally {
+        pendingUpload.current = null;
+        if (!request.signal.aborted) setUploading(false);
+      }
+    }
     onSelect({
-      url: partUrl(picked),
-      title: picked.title,
-      creator: picked.creator,
-      creatorAvatar: picked.artwork,
-      tokenId: picked.tokenId,
-      duration: picked.duration,
-      source: picked.library,
+      url: partUrl(track),
+      title: track.title,
+      creator: track.creator,
+      creatorAvatar: track.artwork,
+      tokenId: track.tokenId,
+      duration: track.duration,
+      source: track.library,
     });
     setPicked(null);
     onClose();
-  }, [picked, stopPreview, onSelect, partUrl, onClose]);
+  };
 
   // Moving the part restarts the preview at its new start.
   useEffect(() => {
@@ -273,7 +376,7 @@ export function SoundPicker({ isOpen, onClose, onSelect, currentSound, clipSecon
     : '';
 
   return (
-    <Drawer open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+    <Drawer open={isOpen} onOpenChange={(open) => { if (!open && !uploading) onClose(); }}>
       <DrawerContent column glass
         overlayClassName={aboveMomentEditor ? 'z-[2147482101]' : undefined}
         className={cn('border-t border-white/10 max-h-[90dvh]', aboveMomentEditor && 'z-[2147482102]')}>
@@ -282,6 +385,7 @@ export function SoundPicker({ isOpen, onClose, onSelect, currentSound, clipSecon
             {picked ? (
               <button
                 type="button"
+                disabled={uploading}
                 onClick={() => { stopPreview(); setPicked(null); }}
                 className="-ml-1 grid h-8 w-8 place-items-center rounded-full hover:bg-white/10"
                 aria-label={t('common.back')}
@@ -374,13 +478,56 @@ export function SoundPicker({ isOpen, onClose, onSelect, currentSound, clipSecon
             <button
               type="button"
               onClick={confirm}
+              disabled={uploading}
+              aria-busy={uploading || undefined}
               className="h-12 w-full rounded-full bg-white text-base font-semibold text-black transition-opacity hover:opacity-90"
             >
-              {_copy("copy.0418db35eb35", { defaultValue: "Use this sound" })}
+              {uploading ? t('profileSong.uploading', 'Uploading song…') : _copy("copy.0418db35eb35", { defaultValue: "Use this sound" })}
             </button>
           </div>
         ) : (
           <>
+            {profileSongUploadWallet && (
+              <div
+                className="px-4 pt-3"
+                onDragOver={(event) => {
+                  if (!event.dataTransfer.types.includes('Files')) return;
+                  event.preventDefault();
+                  event.dataTransfer.dropEffect = readingFile ? 'none' : 'copy';
+                  setDraggingFile(!readingFile);
+                }}
+                onDragLeave={(event) => {
+                  if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDraggingFile(false);
+                }}
+                onDrop={(event) => {
+                  event.preventDefault();
+                  setDraggingFile(false);
+                  void pickFile(event.dataTransfer.files[0]);
+                }}
+              >
+                <input
+                  ref={fileInput}
+                  type="file"
+                  accept={Object.keys(SONG_FORMATS).map((extension) => `.${extension}`).join(',')}
+                  hidden
+                  onChange={(event) => {
+                    const file = event.currentTarget.files?.[0];
+                    event.currentTarget.value = '';
+                    void pickFile(file);
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  loading={readingFile}
+                  className={cn('w-full border-dashed', draggingFile && 'ring-1 ring-ring')}
+                  onClick={() => fileInput.current?.click()}
+                >
+                  {!readingFile && <Upload aria-hidden />}
+                  {t('profileSong.uploadOrDrop', 'Upload or drop an audio file')}
+                </Button>
+              </div>
+            )}
             {/* Search */}
             <div className="px-4 py-3">
               <div className="relative">
@@ -419,8 +566,8 @@ export function SoundPicker({ isOpen, onClose, onSelect, currentSound, clipSecon
                         key={track.key}
                         role="button"
                         tabIndex={0}
-                        onClick={() => pick(track)}
-                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(track); } }}
+                        onClick={() => { if (!pendingUpload.current) pick(track); }}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (!pendingUpload.current) pick(track); } }}
                         className={cn('w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-white/5 transition-colors cursor-pointer', isSelected && 'bg-white/10')}
                       >
                         <button
