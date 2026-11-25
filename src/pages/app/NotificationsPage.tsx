@@ -2434,7 +2434,7 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
       aria-label={t('notifications.settings')}
       title={t('notifications.settings')}
     >
-      <Settings className="h-[18px] w-[18px] text-white" />
+      <Settings className="size-5 text-white" />
     </button>
   );
   const settingsBody = (
@@ -2699,7 +2699,7 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
                         setSearch({ query: '', from: btn ? { left: btn.left, right: btn.right } : null });
                       }}
                     >
-                      <span data-notif-search-open className="flex"><SearchIcon className="h-[18px] w-[18px] text-white" /></span>
+                      <span data-notif-search-open className="flex"><SearchIcon className="size-5 text-white" /></span>
                     </IslandAction>
                   )}
                   <IslandAction
@@ -2708,9 +2708,9 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
                     disabled={totalUnread === 0 || markAllAsRead.isPending}
                   >
                     {markAllAsRead.isPending ? (
-                      <Loader2 className="h-[18px] w-[18px] animate-spin text-white" />
+                      <Loader2 className="size-5 animate-spin text-white" />
                     ) : (
-                      <Check className="h-[18px] w-[18px] text-white" />
+                      <Check className="size-5 text-white" />
                     )}
                   </IslandAction>
                 </div>
@@ -2723,7 +2723,8 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
                 return {
                   id: tab.value,
                   label: <span className="sr-only">{translateFilterLabel(tab.value)}</span>,
-                  icon: <tab.icon className={tab.value === 'reposts' ? 'h-[20px] w-[20px]' : 'h-[18px] w-[18px]'} aria-hidden="true" />,
+                  icon: <tab.icon className={tab.value === 'reposts' ? 'size-[22px]' : 'size-5'} aria-hidden="true" />,
+                  pillIconSize: tab.value === 'reposts' ? 22 : 20,
                   count: count > 0 ? count : undefined,
                   hint: String(translateFilterLabel(tab.value)),
                 };
