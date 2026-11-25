@@ -18,7 +18,7 @@ import { useTranslation as _useCopy } from 'react-i18next';
  * attributes below, so a page never paints itself per theme.
  */
 
-import { Fragment, createContext, useContext, useEffect, useId, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
+import { Fragment, createContext, useContext, useEffect, useId, useRef, useState, useSyncExternalStore, type HTMLAttributes, type ReactNode } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Search, X } from 'lucide-react';
 import ArrowLeft from "@/components/ui/cut-icons/back";
@@ -363,6 +363,7 @@ export function PageTabs<T extends string>({
   className,
   size = 'md',
   beforeTabs,
+  followSelection = false,
 }: {
   tabs: PageTab<NoInfer<T>>[];
   value: T;
@@ -371,11 +372,14 @@ export function PageTabs<T extends string>({
   size?: 'sm' | 'md';
   /** Leading controls on the same row, before the category tabs. */
   beforeTabs?: ReactNode;
+  /** Keep the active pill visible and animate it when selection can change outside the tab row. */
+  followSelection?: boolean;
 }) {
   const inPill = useContext(PillContext);
   const layoutId = useId();
   const { layerRef, setRef, rect, onScroll } = useTabIndicator(value, inPill, undefined, 5);
   const [glide, setGlide] = useState(false);
+  const reduceMotion = useReducedMotion();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [overflow, setOverflow] = useState(false);
   useEffect(() => {
@@ -397,6 +401,16 @@ export function PageTabs<T extends string>({
     el.addEventListener('scroll', check, { passive: true });
     return () => { ro.disconnect(); el.removeEventListener('scroll', check); };
   }, [inPill, tabs.length, onScroll]);
+  useEffect(() => {
+    const row = scrollRef.current;
+    if (!followSelection || !inPill || !row || row.scrollWidth <= row.clientWidth + 1) return;
+    const tab = row.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]');
+    if (!tab) return;
+    const rowBox = row.getBoundingClientRect();
+    const tabBox = tab.getBoundingClientRect();
+    const left = (tabBox.left + tabBox.right - rowBox.left - rowBox.right) / 2;
+    row.scrollBy({ left, behavior: reduceMotion ? 'instant' : 'smooth' });
+  }, [followSelection, inPill, reduceMotion, value]);
   // A row first laid out while the page is still hidden (boot, fonts) measures
   // as nothing and no resize follows, so keep trying briefly until it lands.
   useEffect(() => {
@@ -411,7 +425,7 @@ export function PageTabs<T extends string>({
         {beforeTabs ? <div data-kit-pill-before className="flex shrink-0 items-center [&_[data-kit-square]]:contents">{beforeTabs}</div> : null}
         <div ref={layerRef} className="relative min-w-0 flex-1 overflow-visible">
           <div className="pointer-events-none absolute inset-0">
-            <GlassIndicator rect={rect} borderRadius="0.75rem" layoutKey={`kit-pill-${layoutId}-${value}`} enableTransition={glide} fixedHeightPx={35} variant="nav" />
+              <GlassIndicator rect={rect} borderRadius="0.75rem" layoutKey={`kit-pill-${layoutId}-${value}`} enableTransition={glide || (followSelection && !reduceMotion)} fixedHeightPx={35} variant="nav" />
           </div>
           <div
             ref={scrollRef}
@@ -527,6 +541,7 @@ export function PageBody({
   className,
   measure,
   frameClip,
+  ...bodyProps
 }: {
   children: ReactNode;
   className?: string;
@@ -536,12 +551,12 @@ export function PageBody({
    *  transforms. For bodies inside their own scroller (the bell drawer),
    *  where iOS WebKit leaves the transformed layers unpainted. */
   frameClip?: boolean;
-}) {
+} & HTMLAttributes<HTMLDivElement>) {
   const ref = useRef<HTMLDivElement>(null);
   useFeedSwallowClip(ref, KIT_TOP_CUT, [], { allThemes: true, frameOnly: frameClip });
   return (
     <div data-feed-swallow-bounds className="w-full">
-    <div ref={ref} data-kit-body className={cn('w-full pb-28 pt-3', measure && 'max-w-2xl', className)}>
+      <div {...bodyProps} ref={ref} data-kit-body className={cn('w-full pb-28 pt-3', measure && 'max-w-2xl', className)}>
       <FeedSwallowMotion>
       {children}
       </FeedSwallowMotion>
