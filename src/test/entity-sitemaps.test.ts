@@ -58,8 +58,12 @@ describe('entity sitemaps', () => {
       [
         { id: 'aaaaaaaa-1111', name: 'Prints', banner_url: 'https://cdn.example/s.jpg?w=1&h=2', updated_at: '2026-08-01T00:00:00Z' },
         { id: 'bbbbbbbb-2222', name: '  ', updated_at: '2026-08-02T00:00:00Z' },
+        { id: 'test-store', name: 'Test', description: TEXT },
       ],
-      [{ id: 'cccccccc-3333', store_id: 'aaaaaaaa-1111', images: ['https://cdn.example/i.jpg'], updated_at: '2026-09-05T00:00:00Z' }],
+      [
+        { id: 'cccccccc-3333', store_id: 'aaaaaaaa-1111', title: 'Print collection', status: 'active', images: ['https://cdn.example/i.jpg'], updated_at: '2026-09-05T00:00:00Z' },
+        { id: 'thin-item', store_id: 'aaaaaaaa-1111', title: 'Print', status: 'active' },
+      ],
     ]);
     parses(xml);
     expect(locs(xml)).toEqual([
@@ -101,7 +105,7 @@ describe('entity sitemaps', () => {
     parses(proposals);
     expect(locs(proposals)).toEqual(['https://riftn.com/app/governance/p1']);
     const features = entitySitemapXml('features', [[
-      { id: 'f1', title: 'Dark mode for Stages', description: TEXT, status: 'open', vote_count: 3, updated_at: '2026-09-01' },
+      { id: 'f1', title: 'Dark mode for Stages', description: TEXT, status: 'open', vote_count: 3, comment_count: 2, updated_at: '2026-09-01' },
       { id: 'f2', title: 'Dark mode for Stages', description: TEXT, status: 'declined', vote_count: 9, comment_count: 9 },
       { id: 'f3', title: 'bug', description: 'broken', status: 'open', vote_count: 9, comment_count: 9 },
       // A line or two that nobody has voted on or answered is left out.
@@ -113,7 +117,6 @@ describe('entity sitemaps', () => {
     parses(features);
     expect(locs(features)).toEqual([
       'https://riftn.com/build?feature=f1',
-      'https://riftn.com/build?feature=f5',
       'https://riftn.com/build?feature=f6',
     ]);
   });

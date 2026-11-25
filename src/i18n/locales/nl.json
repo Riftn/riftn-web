@@ -21897,6 +21897,9 @@
     "enter": "Betreed de kerker"
   },
   "tokenLaunch": {
+    "riftTitle": "On-chain lancering van $RIFT",
+    "riftStatus": "$RIFT is de munt binnen Riftn. Je kunt deze al in Riftn gebruiken. De on-chain token moet nog worden gelanceerd en heeft geen officieel contractadres of beursnotering. Meld je aan voor een e-mail bij de lancering.",
+    "riftSeoDescription": "$RIFT is de munt binnen Riftn. Je kunt deze al in Riftn gebruiken. De on-chain token moet nog worden gelanceerd en heeft geen officieel contractadres of beursnotering.",
     "eyebrow": "Komt spoedig",
     "title": "Token gaat spoedig live",
     "body": "Aankopen zijn gesloten terwijl het nieuwe token wordt voorbereid. Ontvang een e-mail zodra het live gaat.",

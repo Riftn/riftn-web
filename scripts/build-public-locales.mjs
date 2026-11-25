@@ -312,6 +312,7 @@ export function buildPublicLocales(root) {
   }));
   const version = digest({ sources, dictionaries, editorial, docsCopy });
   const table = {}, assets = {}, routes = {};
+  const errors = [];
   for (const [route, source] of Object.entries(sources)) {
     table[route] = { en: { title: source.title, description: source.description, h1: source.h1 } };
     routes[route] = [...PRIORITY_LOCALES];
@@ -370,10 +371,12 @@ export function buildPublicLocales(root) {
         table[route][lang] = { title: page.title, description: page.description, h1: page.h1, asset };
         if (extra) routes[route].push(lang);
       } catch (error) {
-        if (!extra || !MISSING_COPY.test(error.message)) throw error;
+        if (!MISSING_COPY.test(error.message)) throw error;
+        if (!extra) errors.push(error.message);
       }
     }
   }
+  if (errors.length) throw new Error(errors.join('\n'));
   for (const lang of languages) {
     const metadata = {};
     for (const [route, source] of Object.entries(sources)) {

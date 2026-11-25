@@ -34,9 +34,8 @@ export { EditorPresenceRoom } from './server/editor-presence.ts';
  *   - /app/communities/:slug
  *   - /:username (profile pages)
  *
- * Regular browsers always fall through to the React SPA.
- * Serving SSR HTML to browsers caused an infinite reload loop because the
- * embedded `window.location.href` redirect pointed back to the same URL.
+ * Browsers run the React SPA. Public documents can include the edge-rendered
+ * content in their initial HTML, which React replaces when it mounts.
  */
 
 // Shared with the app (src/lib/reserved-usernames.js is plain JS so wrangler's
@@ -676,7 +675,7 @@ function absolutizeImage(url) {
  * (ogSourceResponse), which still covers both.
  */
 const BLOG_CARD_PAD = 'fit=pad,width=1200,height=630,background=%230a0a0b,format=jpeg,quality=82';
-function buildBlogShareImage(post) {
+function blogCardTransformUrl(post) {
   const banner = absolutize(post.bannerImage);
   if (banner && banner.startsWith(`${APP_URL}/media/`)) {
     const w = Number(post.bannerWidth), h = Number(post.bannerHeight);
@@ -685,6 +684,10 @@ function buildBlogShareImage(post) {
     return `${IMAGE_TRANSFORM_BASE}${fit}/${TRANSFORM_SOURCE_ORIGIN}${banner.slice(APP_URL.length)}`;
   }
   return `${IMAGE_TRANSFORM_BASE}${CARD_COVER}/${TRANSFORM_SOURCE_ORIGIN}${OG_SOURCE_PREFIX}blog/${encodeURIComponent(post.slug)}`;
+}
+
+function buildBlogShareImage(post) {
+  return APP_URL + '/_og/blog-card/' + encodeURIComponent(post.slug) + '.jpg';
 }
 
 /**
@@ -1248,7 +1251,7 @@ const MARKETING_PAGES = {
   },
   'buy': {
     title: 'Buy: Purchase Crypto on Riftn',
-    description: '$RIFT is Riftn\'s in-app currency. You can already use it inside Riftn. The on-chain token has yet to launch and has no official contract address or exchange listing.',
+    description: '$RIFT is Riftn’s in-app currency. You can already use it inside Riftn. The on-chain token has yet to launch and has no official contract address or exchange listing.',
     heading: 'Buy Crypto on Riftn',
     bodyHtml: `<p>$RIFT is Riftn’s in-app currency. You can already use it inside Riftn. The on-chain token has yet to launch and has no official contract address or exchange listing.</p>
 <p><a href="${APP_URL}/docs/token/where-to-buy">Check the official $RIFT launch status</a>.</p>`,
@@ -2002,7 +2005,7 @@ function comparisonHighlights() {
   const rows = FEATURES.filter(feature => COMPARE_HIGHLIGHT_IDS.includes(feature.id));
   return '<section aria-label="Comparison highlights"><h2>Comparison highlights</h2>' + rows.map(feature => {
     const entries = [{ id: 'dehub', name: 'Riftn' }, ...PLATFORMS.filter(platform =>
-      platform.id !== 'dehub' && feature.peers[platform.id]?.source &&
+      feature.peers[platform.id]?.source &&
       ['documented', 'limited', 'ecosystem'].includes(feature.peers[platform.id].status))];
     return '<h3>' + escHtml(feature.name) + '</h3><ul>' + entries.map(platform => {
       const entry = entryFor(feature, platform.id);
@@ -6789,15 +6792,24 @@ async function withInitialPublicContent(shell, page, pageStatus) {
   const html = await shell.text();
   const root = '<div id="root">';
   if (!html.includes(root)) return new Response(html, shell);
-  const meta = (page.match(/<head>([\s\S]*?)<\/head>/i)?.[1].match(PAGE_META_TAGS) || []).join('\n');
+  const head = page.match(/<head>([\s\S]*?)<\/head>/i)?.[1] || '';
+  const metadata = (head.match(PAGE_META_TAGS) || []).join('\n');
+  const graph = [...head.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/gi)]
+    .flatMap(([, source]) => {
+      try { const node = JSON.parse(source); return node['@graph'] || [node]; } catch { return []; }
+    });
+  const meta = metadata + (graph.length
+    ? '<script id="seo-jsonld" type="application/ld+json">' +
+      jsonLdScript({ '@context': 'https://schema.org', '@graph': graph }) + '</script>'
+    : '');
   const body = page.match(/<body[^>]*>([\s\S]*?)<\/body>/i)?.[1] || '';
   const language = page.match(/<html\b[^>]*\blang="([^"]+)"/i)?.[1];
   const style = '<style>#root .edge-public-content{box-sizing:border-box;max-width:74ch;margin:0 auto;padding:2rem 1rem;color:CanvasText;background:Canvas;line-height:1.55;overflow-wrap:anywhere}#root .edge-public-content img{max-width:100%;height:auto}#root .edge-public-content .dh-cta{display:none}</style>';
   const snapshot = '<div class="edge-public-content">' + body + '</div>';
   const result = html.replace(PAGE_META_TAGS, '')
-    .replace('<head>', '<head>' + meta + style)
+    .replace('<head>', () => '<head>' + meta + style)
     .replace(/<html\b[^>]*>/i, tag => language ? tag.replace(/\blang="[^"]*"/i, 'lang="' + language + '"') : tag)
-    .replace(root, root + snapshot);
+    .replace(root, () => root + snapshot);
   const response = new Response(result, { status: pageStatus, headers: shell.headers });
   for (const name of ['Content-Length', 'Content-Encoding', 'ETag']) response.headers.delete(name);
   response.headers.append('Vary', 'User-Agent');
@@ -7761,6 +7773,21 @@ async function handleRequest(request, env, ctx) {
     let id = entityCard[2];
     try { id = decodeURIComponent(id); } catch { /* keep raw; the query check rejects it */ }
     return handleEntityShareImage(request, env, ctx, entityCard[1], id, supabaseLookup);
+  }
+  const blogCardMatch = pathname.match(/^\/_og\/blog-card\/([a-z0-9-]+)\.jpg$/);
+  if (blogCardMatch) {
+    const post = (await getBlogManifest(request, env)).get(blogCardMatch[1]);
+    if (!post) return new Response('Not found', { status: 404 });
+    const image = await fetch(blogCardTransformUrl(post), { signal: AbortSignal.timeout(5000) }).catch(() => null);
+    if (!image?.ok || !image.headers.get('Content-Type')?.startsWith('image/')) {
+      return new Response('Image temporarily unavailable', { status: 503, headers: { 'Retry-After': '60' } });
+    }
+    return new Response(request.method === 'HEAD' ? null : image.body, {
+      headers: {
+        'Content-Type': image.headers.get('Content-Type'),
+        'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
+      },
+    });
   }
   if (pathname.startsWith(OG_SOURCE_PREFIX)) return ogSourceResponse(request, env, pathname);
 

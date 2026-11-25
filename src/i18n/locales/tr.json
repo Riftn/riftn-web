@@ -21649,6 +21649,9 @@
     "enter": "Zindana gir"
   },
   "tokenLaunch": {
+    "riftTitle": "Zincir üstü $RIFT lansmanı",
+    "riftStatus": "$RIFT, Riftn’in uygulama içi para birimidir. Riftn’de şimdiden kullanılabilir. Zincir üstü token henüz piyasaya sürülmedi ve resmî sözleşme adresi veya borsa listelemesi yok. Lansman e-postası için kaydol.",
+    "riftSeoDescription": "$RIFT, Riftn’in uygulama içi para birimidir. Riftn’de şimdiden kullanılabilir. Zincir üstü token henüz piyasaya sürülmedi ve resmî sözleşme adresi veya borsa listelemesi yok.",
     "eyebrow": "Yakında çıkacak!",
     "title": "Token başlıyor yakın zamanda",
     "body": "Alışveriş kapalı, yeni token hazırlanırken. Canlı olunca hemen bir e-posta alacaksın.",

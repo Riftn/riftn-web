@@ -93,19 +93,19 @@ describe('blog share cards', () => {
     expect(res.status).toBe(200);
     const post = manifest.find((p) => p.slug === NEW_SLUG)!;
     const image = meta(res.body, 'og:image');
-    expect(image).toContain('/cdn-cgi/image/');
-    expect(image).toContain('width=1200,height=630');
-    expect(image.endsWith(`https://dehub.io${post.bannerImage}`)).toBe(true);
+    expect(image).toBe('https://riftn.com/_og/blog-card/' + NEW_SLUG + '.jpg');
     expect(meta(res.body, 'twitter:image')).toBe(image);
     expect(meta(res.body, 'og:image:alt')).toBe(post.bannerImageAlt);
     expect(meta(res.body, 'twitter:card')).toBe('summary_large_image');
   });
 
-  it('pads a banner far from 1.91:1 instead of cropping it', async () => {
+  it('advertises a 1200 by 630 first-party card for wide banners', async () => {
     const odd = manifest.find((p) => p.bannerWidth! / p.bannerHeight! > 2.2)!;
     expect(odd).toBeTruthy();
     const res = await get(`/guides/${odd.slug}`);
-    expect(meta(res.body, 'og:image')).toContain('fit=pad');
+    expect(meta(res.body, 'og:image')).toBe('https://riftn.com/_og/blog-card/' + odd.slug + '.jpg');
+    expect(meta(res.body, 'og:image:width')).toBe('1200');
+    expect(meta(res.body, 'og:image:height')).toBe('630');
   });
 });
 
