@@ -6,7 +6,7 @@
  * last. Pills share the row's width; with one or two up they also show who
  * is watching or the Moments themselves. A pill opens the full-screen viewer.
  */
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { Eye } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
@@ -27,7 +27,8 @@ import { StoryCreatePill, StoryCreateTile } from './StoryCreatePill';
 import { formatCount } from '@/lib/format-count';
 import { useLiveAudience } from '@/hooks/use-live-audience';
 import { setActivityBarHidden, useActivityShelfPreferences } from '@/lib/activity-shelf-preferences';
-import type { ActivityMenuRequest, ActivityTarget } from './ActivityShelfMenu';
+import { activityMenuEvents as menuEvents, useActivityMenu } from '@/hooks/use-activity-menu';
+import type { ActivityTarget } from './ActivityShelfMenu';
 import '@/styles/stories.css';
 import '@/styles/live-ripple.css';
 
@@ -49,16 +50,7 @@ export function StoryShelf() {
   return <VisibleStoryShelf dismissed={dismissed} />;
 }
 
-type OpenActivityMenu = (event: MouseEvent<HTMLElement> | KeyboardEvent<HTMLElement>, target?: ActivityTarget) => void;
-
-function menuEvents(openMenu: OpenActivityMenu) {
-  return {
-    onContextMenu: (event: MouseEvent<HTMLElement>) => openMenu(event),
-    onKeyDown: (event: KeyboardEvent<HTMLElement>) => {
-      if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) openMenu(event);
-    },
-  };
-}
+type OpenActivityMenu = Parameters<typeof menuEvents>[0];
 
 const liveKey = (item: LiveNowItem) => `${item.kind}:${item.id}`;
 
@@ -75,19 +67,7 @@ function VisibleStoryShelf({ dismissed }: { dismissed: string[] }) {
   const openViewer = useStoriesStore(s => s.openViewer);
   const openCreator = useStoriesStore(s => s.openCreator);
   const pending = useStoriesStore(s => s.pending);
-  const [menu, setMenu] = useState<ActivityMenuRequest | null>();
-  const closeMenu = useCallback(() => setMenu(null), []);
-  const openMenu: OpenActivityMenu = (event, target) => {
-    if (event.defaultPrevented) return;
-    event.preventDefault();
-    event.stopPropagation();
-    const anchor = event.target instanceof Element ? event.target.closest('button') ?? event.currentTarget : event.currentTarget;
-    const rect = anchor.getBoundingClientRect();
-    const point = 'clientX' in event && (event.clientX || event.clientY)
-      ? { x: event.clientX, y: event.clientY }
-      : { x: rect.left, y: rect.bottom };
-    setMenu({ point, target });
-  };
+  const { request: menu, open: openMenu, close: closeMenu } = useActivityMenu();
   const menuElement = menu !== undefined && (
     <Suspense fallback={null}><ActivityShelfMenu request={menu} onClose={closeMenu} /></Suspense>
   );

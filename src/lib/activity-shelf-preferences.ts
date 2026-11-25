@@ -1,17 +1,18 @@
 import { useSyncExternalStore } from 'react';
 
 const KEY = 'dehub.activityShelf';
-type Preferences = { hidden: boolean; dismissed: string[] };
+type Preferences = { hidden: boolean; statusesHidden: boolean; dismissed: string[] };
 
 function readPreferences(): Preferences {
   try {
     const saved = JSON.parse(localStorage.getItem(KEY) ?? '{}');
     return {
       hidden: saved?.hidden === true,
+      statusesHidden: saved?.statusesHidden === true,
       dismissed: Array.isArray(saved?.dismissed) ? saved.dismissed.filter((id: unknown) => typeof id === 'string') : [],
     };
   } catch {
-    return { hidden: false, dismissed: [] };
+    return { hidden: false, statusesHidden: false, dismissed: [] };
   }
 }
 
@@ -23,10 +24,10 @@ function subscribe(listener: () => void) {
   return () => { listeners.delete(listener); };
 }
 
-const getPreferences = () => preferences;
+export const getActivityShelfPreferences = () => preferences;
 
 export function useActivityShelfPreferences() {
-  return useSyncExternalStore(subscribe, getPreferences, getPreferences);
+  return useSyncExternalStore(subscribe, getActivityShelfPreferences, getActivityShelfPreferences);
 }
 
 function save(next: Preferences) {
@@ -35,8 +36,8 @@ function save(next: Preferences) {
   listeners.forEach(listener => listener());
 }
 
-export function setActivityBarHidden(hidden: boolean) {
-  save({ ...preferences, hidden });
+export function setActivityBarHidden(hidden: boolean, bar: 'activity' | 'status' = 'activity') {
+  save({ ...preferences, [bar === 'status' ? 'statusesHidden' : 'hidden']: hidden });
 }
 
 export function setActivityItemsHidden(ids: string[], hidden: boolean) {
