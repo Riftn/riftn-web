@@ -154,7 +154,7 @@ export const SETTINGS_SEARCH_INDEX: SettingsSearchEntry[] = [
   // Messages
   { tab: 'messages', anchor: 'allow-dms', label: 'Allow direct messages', labelKey: 'settings.allowDirectMessages', keywords: 'dm who can message inbox' },
   { tab: 'messages', anchor: 'message-fee', label: 'Message fee', labelKey: 'settings.messageFee', keywords: 'paid dm price dhb' },
-  { tab: 'messages', anchor: 'free-dm-access', label: 'Free DM Access', labelKey: 'settings.freeAccessList', keywords: 'free list bypass fee' },
+  { tab: 'messages', anchor: 'free-dm-access', label: 'Free DM Access List', labelKey: 'settings.freeAccessList', keywords: 'free list bypass fee add remove username' },
   { tab: 'messages', anchor: 'do-not-disturb', label: 'Do not disturb', labelKey: 'settings.doNotDisturb', keywords: 'dnd mute silence' },
   { tab: 'messages', anchor: 'smart-replies', label: 'Suggested replies', labelKey: 'settings.smartReplies', keywords: 'ai smart reply drafts orb suggestions' },
   { tab: 'messages', anchor: 'e2e-encryption', label: 'End-to-End Encryption', labelKey: 'settings.e2eEncryption', keywords: 'encrypted secure' },

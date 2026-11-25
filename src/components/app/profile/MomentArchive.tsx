@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { Archive, Film, Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -12,19 +12,19 @@ export function MomentArchive({ profileAddress }: { profileAddress: string }) {
   const { walletAddress, isAuthenticated } = useAuth();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const privacyDescriptionId = useId();
   const address = walletAddress?.toLowerCase();
   if (!isAuthenticated || !address || profileAddress.toLowerCase() !== address) return null;
 
   return (
     <section className="mt-3">
-      <button type="button" aria-expanded={open} onClick={() => setOpen(!open)}
+      <button type="button" aria-expanded={open} aria-describedby={privacyDescriptionId} onClick={() => setOpen(!open)}
         className="inline-flex min-h-10 items-center gap-2 rounded-lg px-2 font-medium hover:bg-white/10">
-        <Archive aria-hidden size={17} />{t('stories.momentArchive', { defaultValue: 'Moment archive' })}
+        <Archive aria-hidden size={17} />
+        {t('stories.momentArchive', { defaultValue: 'Moment archive' })}
+        <Lock aria-hidden size={12} className="shrink-0 opacity-60" />
       </button>
-      {/* Nobody else gets this list from the server; say so. */}
-      <span className="ml-1 inline-flex items-center gap-1 text-xs opacity-60">
-        <Lock aria-hidden size={12} />{t('stories.archiveOnlyYou', { defaultValue: 'Only you can see this' })}
-      </span>
+      <span hidden id={privacyDescriptionId}>{t('stories.archiveOnlyYou', { defaultValue: 'Only you can see this' })}</span>
       {open && <ArchiveItems address={address} />}
     </section>
   );

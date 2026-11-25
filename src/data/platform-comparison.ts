@@ -18,6 +18,10 @@ export const PLATFORMS = [
 ] as const;
 export type PlatformId = typeof PLATFORMS[number]['id'];
 export type Status = 'documented' | 'code' | 'limited' | 'ecosystem' | 'unverified' | 'not_documented' | 'not_offered' | 'announced';
+export const COMPARISON_FALLBACK_NOTES = {
+  unavailable: 'Not available on Riftn yet.',
+  unverified: 'An equivalent has not been verified in this comparison. This does not mean the platform lacks the feature.',
+} as const;
 export const STATUS_LABELS: Record<Status, string> = {
   documented: 'Documented', code: 'Source reviewed', limited: 'Conditional', ecosystem: 'Related product', unverified: 'Not verified',
   not_documented: 'Not established by sources', not_offered: 'Explicit limitation', announced: 'Announced / availability unconfirmed',
@@ -373,14 +377,14 @@ const NOT_YET: ComparisonFeature[] = ([
   ['community-notes', 'Safety and personalization', 'Community Notes fact-checks'],
   ['disappearing-messages', 'Communities and messages', 'Disappearing messages'],
 ] as const).map(([id, category, name]) => ({
-  id, category, name, dehub: e('dehub', 'Not available on Riftn yet.', 'not_offered'), peers: {}, iosRestricted: false,
+  id, category, name, dehub: e('dehub', COMPARISON_FALLBACK_NOTES.unavailable, 'not_offered'), peers: {}, iosRestricted: false,
 }));
 /** The rival-first inventory: features gathered from each competitor's own docs, with Riftn ticked honestly. */
 const RIVAL_FEATURES: ComparisonFeature[] = RIVAL_ROWS.map(row => ({
   id: row.id, category: row.category, name: row.name, iosRestricted: false,
   dehub: row.marks.dehub === 'yes' ? e('dehub', 'Available on Riftn.')
     : row.marks.dehub === 'partial' ? e('dehub', 'Partly available on Riftn.', 'ecosystem')
-    : e('dehub', 'Not available on Riftn yet.', 'not_offered'),
+    : e('dehub', COMPARISON_FALLBACK_NOTES.unavailable, 'not_offered'),
   peers: Object.fromEntries(PLATFORMS.flatMap(({ id }) => {
     const mark = row.marks[id];
     if (!mark) return [];
@@ -421,7 +425,7 @@ const rank = (category: string) => { const at = CATEGORY_ORDER.indexOf(category)
 export const CATEGORIES = [...new Set(FEATURES.map(feature => feature.category))].sort((a, b) => rank(a) - rank(b));
 export function entryFor(feature: ComparisonFeature, platform: PlatformId | 'dehub'): ComparisonEntry {
   if (platform === 'dehub') return feature.dehub;
-  return feature.peers[platform] ?? { status: 'unverified', note: 'An equivalent has not been verified in this comparison. This does not mean the platform lacks the feature.' };
+  return feature.peers[platform] ?? { status: 'unverified', note: COMPARISON_FALLBACK_NOTES.unverified };
 }
 export function filterFeatures(query: string, category: string): ComparisonFeature[] {
   const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean);

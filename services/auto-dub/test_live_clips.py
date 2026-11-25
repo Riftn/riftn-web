@@ -116,27 +116,38 @@ class EndToEndTests(unittest.TestCase):
         return Response(b"")
 
     def test_grab_then_render(self):
+        self.grab_then_render(silent=False)
+
+    def test_grab_then_render_without_audio(self):
+        self.grab_then_render(silent=True)
+
+    def grab_then_render(self, silent):
         with patch.object(live_clips.requests, "get", self.get), patch.object(live_clips.requests, "put", self.put), \
                 tempfile.TemporaryDirectory() as tmp:
             grabbed = live_clips.grab({"hlsUrl": "https://cdn/live/index.m3u8", "maxSeconds": 8, "uploadUrl": "https://up/source", "path": "s.mp4"}, tmp)
             self.assertTrue(grabbed["ok"])
             self.assertGreaterEqual(grabbed["durationSeconds"], 7)
             source = os.path.join(tmp, "source.mp4")
+            if silent:
+                silent_source = os.path.join(tmp, "silent.mp4")
+                live_clips.clips.sh("ffmpeg", "-v", "error", "-i", source, "-c:v", "copy", "-an", silent_source)
+                source = silent_source
 
             uploads = {k: {"url": f"https://up/{k}", "path": k} for k in ("video", "poster", "card")}
             ass = "[Script Info]\nScriptType: v4.00+\nPlayResX: 1080\nPlayResY: 1920\n\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n"
             # render() takes an https URL; point ffmpeg at the local file instead.
-            real_render_cmd = live_clips.clips.render_cmd
-            with patch.object(live_clips.clips, "render_cmd", lambda _s, *a: real_render_cmd(source, *a)), \
-                    patch.object(live_clips, "card_cmd", lambda _s, at, out: CARD(source, at, out)), \
-                    tempfile.TemporaryDirectory() as work:
-                result = live_clips.render({"sourceUrl": "https://cdn/source.mp4", "start": 1, "end": 6, "ass": ass, "uploads": uploads}, work)
+            real_sh = live_clips.clips.sh
+
+            def local_sh(*cmd, **kwargs):
+                return real_sh(*(source if arg == "https://cdn/source.mp4" else arg for arg in cmd), **kwargs)
+
+            with patch.object(live_clips.clips, "sh", local_sh), tempfile.TemporaryDirectory() as work:
+                result = live_clips.render({"sourceUrl": "https://cdn/source.mp4", "start": 1.4, "end": 4.4, "ass": ass, "uploads": uploads}, work)
             self.assertTrue(result["ok"])
             self.assertEqual(set(self.puts), {"https://up/source", "https://up/video", "https://up/poster", "https://up/card"})
             self.assertTrue(self.puts["https://up/poster"][:2] == b"\xff\xd8")
 
 
-CARD = live_clips.card_cmd
 
 if __name__ == "__main__":
     unittest.main()

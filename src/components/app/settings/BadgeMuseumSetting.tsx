@@ -6,7 +6,7 @@ import { ChevronRight, Landmark } from 'lucide-react';
 import { AuthContext } from '@/contexts/AuthContext';
 import { getAccountInfo, updateProfile } from '@/lib/api/dehub';
 import { Switch } from '@/components/ui/switch';
-import { BADGE_MUSEUM_VISIBILITY_KEY, badgeMuseumIsShown, earnedByRarity, useMilestones } from '@/hooks/use-milestones';
+import { badgeMuseumIsShown, earnedByRarity, useMilestones } from '@/hooks/use-milestones';
 import { BadgeMuseumSheet, MedalPodium } from '@/components/app/profile/BadgeMuseum';
 import { formatCount } from '@/lib/format-count';
 import { cn } from '@/lib/utils';
@@ -17,16 +17,15 @@ import { SETTINGS_LABEL_CLASS } from './SettingsRow';
  * so it shows here and nowhere else until "Show Badge Museum on my profile"
  * is switched on. "View my Badge Museum" opens the full museum (earned and
  * locked, with progress) for yourself either way.
- *
- * The switch saves on its own, merged into a fresh copy of `customs` so no
- * other setting is lost (the server replaces the whole blob).
+
  */
 export function BadgeMuseumSetting({ previewAddress }: { /** State gallery: draw for this address, switch saves nothing. */ previewAddress?: string } = {}) {
   const { t } = useTranslation();
   const auth = useContext(AuthContext);
   const address = previewAddress ?? auth?.user?.address;
   const queryClient = useQueryClient();
-  const [shown, setShown] = useState<boolean | null>(null);
+  const [preference, setPreference] = useState<{ address: string; shown: boolean } | null>(null);
+  const shown = preference?.address === address ? preference?.shown ?? null : null;
   const [saving, setSaving] = useState(false);
   const [open, setOpen] = useState(false);
   const { data } = useMilestones(address);
@@ -34,16 +33,16 @@ export function BadgeMuseumSetting({ previewAddress }: { /** State gallery: draw
   useEffect(() => {
     if (!address) return;
     if (previewAddress) {
-      setShown(false);
+      setPreference({ address, shown: false });
       return;
     }
     let cancelled = false;
     getAccountInfo(address)
       .then((info) => {
-        if (!cancelled) setShown(badgeMuseumIsShown(info?.customs as Record<string, unknown> | undefined));
+        if (!cancelled) setPreference({ address, shown: badgeMuseumIsShown(info?.customs) });
       })
       .catch(() => {
-        if (!cancelled) setShown(false);
+        if (!cancelled) setPreference(null);
       });
     return () => {
       cancelled = true;
@@ -53,23 +52,17 @@ export function BadgeMuseumSetting({ previewAddress }: { /** State gallery: draw
   if (!address) return null;
 
   const toggle = async (next: boolean) => {
+    if (shown === null || saving) return;
     const before = shown;
-    setShown(next);
+    setPreference({ address, shown: next });
     if (previewAddress) return;
     setSaving(true);
     try {
-      const info = await getAccountInfo(address);
-      const merged: Record<string, string | number | boolean> = {};
-      for (const [key, value] of Object.entries((info?.customs as Record<string, unknown> | undefined) ?? {})) {
-        if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') merged[key] = value;
-      }
-      merged[BADGE_MUSEUM_VISIBILITY_KEY] = next ? 'public' : 'hidden';
-      await updateProfile({ customs: merged });
-      auth?.patchUser?.({ customs: merged } as never);
+      await updateProfile({ badgeMuseumVisibility: next ? 'public' : 'hidden' });
       void queryClient.invalidateQueries({ queryKey: ['profile-milestones'] });
       void queryClient.invalidateQueries({ queryKey: ['dehub-profile'] });
     } catch {
-      setShown(before);
+      setPreference((current) => current?.address === address ? { address, shown: before } : current);
       toast.error(t('badgeMuseum.saveFailed', 'Could not save. Try again.'));
     } finally {
       setSaving(false);

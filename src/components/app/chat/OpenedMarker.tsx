@@ -5,15 +5,13 @@
  * person who got it also has a camera button after a thin line, to answer
  * that photo with a photo or video of their own (sent as a reply to it).
  *
- * Phones: the camera button is the phone's own camera (file input with
- * `capture`). Computers: a small camera card with the laptop camera, and
- * "Upload instead" for a photo or video from the computer.
  * Same pill as the app's components/DM/OpenedMarker.tsx.
  */
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Camera, CheckCheck, Image as ImageIcon, Upload, Video, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { formatMessageTime } from '@/i18n/date-locale';
 
 const coarsePointer = () => {
@@ -34,12 +32,18 @@ export function OpenedBubble({
 }) {
   const { t } = useTranslation();
   const [cardOpen, setCardOpen] = useState(false);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const galleryRef = useRef<HTMLInputElement>(null);
   const when = openedAt ? formatMessageTime(new Date(openedAt)) : '';
   const KindIcon = kind === 'video' ? Video : ImageIcon;
   const pick = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (file) onCameraFile?.(file);
+  };
+  const openCamera = () => {
+    if (coarsePointer()) cameraRef.current?.click();
+    else setCardOpen(true);
   };
   return (
     <div
@@ -67,27 +71,32 @@ export function OpenedBubble({
       {onCameraFile && (
         <>
           <span aria-hidden className="w-px self-stretch my-1 bg-current opacity-20" />
-          {coarsePointer() ? (
-            <label
-              onClick={(e) => e.stopPropagation()}
-              className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full"
-              style={{ background: 'color-mix(in srgb, currentColor 14%, transparent)' }}
-              aria-label={t('dm.opened.replyCamera', 'Reply with the camera')}
-            >
-              <Camera className="h-5 w-5" />
-              <input type="file" accept="image/*,video/*" capture="environment" className="sr-only" onChange={pick} />
-            </label>
-          ) : (
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); setCardOpen(true); }}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-opacity hover:opacity-80"
-              style={{ background: 'color-mix(in srgb, currentColor 14%, transparent)' }}
-              aria-label={t('dm.opened.replyCamera', 'Reply with the camera')}
-            >
-              <Camera className="h-5 w-5" />
-            </button>
-          )}
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-opacity hover:opacity-80"
+                style={{ background: 'color-mix(in srgb, currentColor 14%, transparent)' }}
+                aria-label={t('dm.opened.replyMedia', 'Reply with a photo or video')}
+              >
+                <Camera className="h-5 w-5" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="z-[150]" onClick={(e) => e.stopPropagation()}>
+              <DropdownMenuItem className="gap-2.5 rounded-xl px-3 py-2.5 font-semibold" onSelect={openCamera}>
+                <Camera className="h-4 w-4" />
+                {t('dm.opened.camera', 'Camera')}
+              </DropdownMenuItem>
+              <DropdownMenuItem className="gap-2.5 rounded-xl px-3 py-2.5 font-semibold" onSelect={() => galleryRef.current?.click()}>
+                <ImageIcon className="h-4 w-4" />
+                {t('dm.opened.gallery', 'Gallery')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <input ref={cameraRef} type="file" accept="image/*,video/*" capture="environment" hidden onClick={(e) => e.stopPropagation()} onChange={pick} />
+          <input ref={galleryRef} type="file" accept="image/*,video/*" hidden onClick={(e) => e.stopPropagation()} onChange={pick} />
         </>
       )}
       {cardOpen && onCameraFile && (

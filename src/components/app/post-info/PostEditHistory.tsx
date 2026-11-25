@@ -15,7 +15,7 @@ import { ChevronRight } from 'lucide-react';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { Switch } from '@/components/ui/switch';
 import { getPostEditHistory, type PostVersion } from '@/lib/api/dehub';
-import { formatTimeAgo } from '@/lib/feed-utils';
+import { formatPostAge, formatPostDate, parsePostTimestamp } from '@/i18n/post-timestamp';
 import { diffWords } from '@/lib/post-edit-diff';
 
 function Marked({ before, after }: { before: string; after: string }) {
@@ -51,9 +51,8 @@ export function PostEditHistoryViewer({ versions }: { versions: PostVersion[] })
   const previous = index > 0 ? versions[index - 1] : null;
   if (!version) return null;
 
-  const when = version.at
-    ? new Date(version.at).toLocaleString(i18n.language || undefined, { dateStyle: 'medium', timeStyle: 'short' })
-    : '';
+  const date = parsePostTimestamp(version.at);
+  const when = date ? formatPostDate(date, i18n.language, { dateStyle: 'medium', timeStyle: 'short' }) : '';
   const marks = showChanges && !!previous;
 
   return (
@@ -107,7 +106,7 @@ export function PostEditHistoryDrawer({
   onOpenChange: (open: boolean) => void;
   versions: PostVersion[];
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent
@@ -130,9 +129,9 @@ export function PostEditHistoryDrawer({
 
 /** The line itself, without the fetch. */
 export function PostEditHistoryLineView({ editCount, versions }: { editCount: number; versions: PostVersion[] }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
-  const lastEdit = versions[versions.length - 1]?.at;
+  const lastEdit = parsePostTimestamp(versions[versions.length - 1]?.at);
   if (editCount < 1 || versions.length < 2) return null;
   return (
     <>
@@ -146,7 +145,7 @@ export function PostEditHistoryLineView({ editCount, versions }: { editCount: nu
         <span className="flex min-w-0 items-center gap-1 text-white/60">
           {lastEdit && (
             <span className="truncate">
-              {t('postEditHistory.lastEdit', { time: formatTimeAgo(lastEdit), defaultValue: 'Last edit {{time}}' })}
+              {t('postEditHistory.lastEdit', { time: formatPostAge(lastEdit, i18n.language, t), defaultValue: 'Last edit {{time}}' })}
             </span>
           )}
           <ChevronRight className="h-4 w-4 shrink-0" />

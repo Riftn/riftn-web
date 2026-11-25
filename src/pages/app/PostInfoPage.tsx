@@ -32,6 +32,7 @@ import User from "@/components/ui/cut-icons/profile";
 import Plus from "@/components/ui/cut-icons/add";
 
 import { useTranslation } from 'react-i18next';
+import { formatPostDate, parsePostTimestamp } from '@/i18n/post-timestamp';
 import { toast } from 'sonner';
 import { DhbAmount } from '@/components/app/DhbAmount';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -116,7 +117,7 @@ export default function PostInfoPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { walletAddress } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   
   // Fetch NFT info with React Query
@@ -247,25 +248,7 @@ export default function PostInfoPage() {
       .catch(() => toast.error(t('postInfo.copyFailed')));
   };
   
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString(undefined, {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
-  
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString(undefined, {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      timeZoneName: 'short',
-    });
-  };
+  const created = parsePostTimestamp(nftInfo?.createdAt);
   
   const truncateAddress = (address: string) => {
     if (!address) return 'Unknown';
@@ -490,13 +473,15 @@ export default function PostInfoPage() {
               )}
             </div>
 
-            <div className="border-t border-white/10 pt-4">
-              <h2 className="text-sm font-medium text-white/60 mb-2">{t('postInfo.mintedOn')}</h2>
-              <div className="space-y-1">
-                <p className="text-white font-medium">{formatDate(nftInfo.createdAt)}</p>
-                <p className="text-sm text-white/60">{formatTime(nftInfo.createdAt)}</p>
+            {created && (
+              <div className="border-t border-white/10 pt-4">
+                <h2 className="text-sm font-medium text-white/60 mb-2">{t('postInfo.mintedOn')}</h2>
+                <div className="space-y-1">
+                  <p className="text-white font-medium">{formatPostDate(created, i18n.language, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                  <p className="text-sm text-white/60">{formatPostDate(created, i18n.language, { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short' })}</p>
+                </div>
               </div>
-            </div>
+            )}
 
             {nftInfo.mintTxHash && (
               <div className="border-t border-white/10 pt-4">

@@ -1137,19 +1137,14 @@ export async function unpinDmMessage(dmId: string, messageId: string, address: s
  * Get list of users who have been granted free DM access.
  */
 export async function getFreeDmAccessList(): Promise<FreeAccessUser[]> {
-  try {
-    const response = await apiCall<any>('/api/dm/free-access', {
-      method: 'GET',
-      requiresAuth: true,
-    });
-    // The list is in `data`. None of `result.items`, `result` or `items` has
-    // ever been a key on this response, so even a 200 used to read as empty.
-    const items = response?.data ?? [];
-    return Array.isArray(items) ? items : [];
-  } catch (error) {
-    console.error('[DM API] getFreeDmAccessList failed:', error);
-    return [];
+  const response = await apiCall<{ success?: boolean; data?: FreeAccessUser[] }>('/api/dm/free-access', {
+    method: 'GET',
+    requiresAuth: true,
+  });
+  if (response?.success === false || !Array.isArray(response?.data)) {
+    throw new Error('Could not load free DM access');
   }
+  return response.data.filter(user => Boolean(user?.address));
 }
 
 /**

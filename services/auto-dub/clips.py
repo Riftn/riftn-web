@@ -64,7 +64,7 @@ def has_video(path: str) -> bool:
     return "video" in out
 
 
-def filter_graph(clip_s: float, video: bool, image: bool) -> str:
+def filter_graph(clip_s: float, video: bool, image: bool, audio: bool = True) -> str:
     """The filter_complex for one clip. Input 0 is the recording, already cut to
     the window; input 1 is the looped background image when `image`. Output pads
     are [v] and [a]; the overlay is read from clip.ass in the working directory."""
@@ -77,7 +77,7 @@ def filter_graph(clip_s: float, video: bool, image: bool) -> str:
             f"[src_bg]scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},boxblur=24:2,eq=brightness=-0.15[bg]",
             f"[src_fg]scale={W}:{H}:force_original_aspect_ratio=decrease[fg]",
             f"[bg][fg]overlay=(W-w)/2:(H-h)/2,fps={FPS}[base]",
-            "[0:a]anull[speech]",
+            "[0:a]anull[speech]" if audio else f"anullsrc=r=44100:cl=stereo:d={clip_s:.3f}[speech]",
         ]
     else:
         if image:
@@ -103,13 +103,13 @@ def filter_graph(clip_s: float, video: bool, image: bool) -> str:
     return ";".join(parts)
 
 
-def render_cmd(recording: str, start: float, clip_s: float, video: bool, image: str | None, out: str) -> list[str]:
+def render_cmd(recording: str, start: float, clip_s: float, video: bool, image: str | None, out: str, *, audio: bool = True) -> list[str]:
     total = clip_s + END_CARD_S
     cmd = ["ffmpeg", "-y", "-v", "error", "-ss", f"{start:.3f}", "-t", f"{clip_s:.3f}", "-i", recording]
     if image and not video:
         cmd += ["-loop", "1", "-framerate", str(FPS), "-t", f"{clip_s:.3f}", "-i", image]
     cmd += [
-        "-filter_complex", filter_graph(clip_s, video, bool(image) and not video),
+        "-filter_complex", filter_graph(clip_s, video, bool(image) and not video, audio),
         "-map", "[v]", "-map", "[a]", "-t", f"{total:.3f}",
         "-c:v", "libx264", "-preset", "veryfast", "-crf", "23", "-profile:v", "high", "-r", str(FPS),
         "-c:a", "aac", "-b:a", "128k", "-ac", "2",

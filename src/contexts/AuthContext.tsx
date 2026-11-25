@@ -106,7 +106,7 @@ export interface AuthContextType {
    * one takes over (most recently used first). Only the last account signs
    * the browser out completely.
    */
-  disconnect: (options?: { forgetProfile?: boolean }) => Promise<void>;
+  disconnect: (options?: { forgetProfile?: boolean; allAccounts?: boolean }) => Promise<void>;
   refreshUser: () => Promise<void>;
   patchUser: (patch: Partial<DeHubUser>) => void;
   /**

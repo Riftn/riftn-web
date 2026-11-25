@@ -25,6 +25,8 @@
 
 export type DisplaySurface = 'browser' | 'window' | 'monitor' | 'unknown';
 
+const MIN_DISPLAY_FRAME_RATE = 5;
+
 interface CaptureControllerLike {
   setFocusBehavior?: (behavior: 'focus-captured-surface' | 'no-focus-change') => void;
 }
@@ -153,7 +155,18 @@ export async function requestDisplayCapture(video: MediaTrackConstraints): Promi
     if ((error as { name?: string } | null)?.name !== 'OverconstrainedError' && !(error instanceof TypeError)) throw error;
     stream = await navigator.mediaDevices.getDisplayMedia({ ...options, audio: true });
   }
-  tuneDisplayTrack(stream.getVideoTracks()[0]);
+  const track = stream.getVideoTracks()[0];
+  tuneDisplayTrack(track);
+  if (track?.applyConstraints) {
+    // Chromium uses the minimum to refresh a screencast during gaps in new
+    // frames. Set it on the selected track: the picker itself rejects min.
+    const frameRate = typeof video.frameRate === 'number' ? { ideal: video.frameRate } : video.frameRate;
+    try {
+      await track.applyConstraints({ ...video, frameRate: { min: MIN_DISPLAY_FRAME_RATE, ...frameRate } });
+    } catch {
+      // Keep the original capture if the browser cannot meet the minimum.
+    }
+  }
   const audio = stream.getAudioTracks?.()[0] ?? null;
   tuneDisplayAudio(audio);
   sharedAudioTrack = audio;

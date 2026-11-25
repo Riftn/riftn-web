@@ -73,6 +73,17 @@ afterEach(() => {
 });
 
 describe('snapshotCurrentSession', () => {
+  it('keeps distinct accounts with the same cached handle available for switching', () => {
+    seedAccountA();
+    adoptCurrentProfile();
+    seedAccountB();
+    localStorage.setItem('dehub_user', JSON.stringify({ username: 'alice' }));
+    adoptCurrentProfile();
+
+    expect(listProfiles()).toHaveLength(2);
+    expect(beginProfileSwitch('uid-a')?.address).toBe(ADDR_A);
+  });
+
   it('records an explicitly adopted account with its session keys', () => {
     seedAccountA();
     adoptCurrentProfile();

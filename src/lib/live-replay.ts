@@ -36,3 +36,12 @@ export function isReplayTruncated(stream: unknown): boolean {
   const recording = (stream as { recording?: RecordingRecord })?.recording;
   return recording?.status === 'ready' && !!recording.truncated;
 }
+
+/** Format a replay playhead or duration in seconds. */
+export function formatReplayTime(seconds: number): string {
+  const total = Math.max(0, Math.floor(Math.round(seconds * 1000) / 1000));
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor(total % 3600 / 60);
+  const remainder = String(total % 60).padStart(2, '0');
+  return hours > 0 ? `${hours}:${String(minutes).padStart(2, '0')}:${remainder}` : `${minutes}:${remainder}`;
+}
