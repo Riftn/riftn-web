@@ -1029,7 +1029,7 @@
     "connectAi": "Yapay Zekâyı Bağla",
     "converter": "Dönüştürücü",
     "affiliate": "Satış Ortaklığı",
-    "compareRiftn": "Riftn ile karşılaştır"
+    "compareRiftn": "Riftn’i karşılaştır"
   },
   "feed": {
     "viewProfile": "{{name}} adlı kişinin profilini görüntüleyin",
@@ -22859,7 +22859,9 @@
     "viewSocial": "Sadece sosyal",
     "viewLacks": "Riftn'in eksikleri",
     "seoTitle": "Riftn, YouTube, X, TikTok, Twitch ve daha fazlasına karşı: her özellik karşılaştırıldı",
-    "title": "Riftn'i karşılaştır",
+    "seoDescription": "Riftn, YouTube, X, Kick, Twitch, Facebook, Instagram, TikTok, Rumble, Mastodon, Bluesky ve Farcaster’ın {{total}} özelliğini tek tabloda karşılaştırın. En çok özelliği hangi platformun sunduğunu görün.",
+    "unavailableOnRiftn": "Riftn’de henüz sunulmuyor.",
+    "title": "Riftn’i karşılaştır",
     "search": "Özellikleri ara",
     "matrixHeadline": "En çok özelliğe kim sahip?",
     "matrixIntroRival": "{{count}} özellik, sadece Riftn'in listesinden değil, her platformun kendi yardım sayfalarından toplandı. Riftn {{dehub}} ({{dehubShare}}) özelliğe sahip ve {{rival}}, {{rivalCount}} ({{rivalShare}}) ile onu takip ediyor. Riftn'in hala {{lacking}} özelliği eksik.",
@@ -22870,7 +22872,7 @@
     "empty": "Eşleşen özellik yok",
     "emptyBody": "Başka bir kelime deneyin.",
     "reset": "Aramayı temizle",
-    "features": "özellikler",
+    "features": "özellik",
     "shareHint": "Grafikteki her bir özelliğin payı",
     "method": "Bu grafik nasıl okunur",
     "rivalMethod": "Liste nasıl oluşturuldu: Her platformun kendi yardım merkezi, içerik üreticisi, premium, reklam ve geliştirici sayfalarını inceledik ve sunduklarını listeledik, ardından Riftn dahil her platformu tüm liste üzerinden işaretledik. Riftn, bir şeyin eksik olduğu her yerde çarpı işareti alır. Rakip satırları, geldikleri yardım sayfasına bağlantı verir.",
