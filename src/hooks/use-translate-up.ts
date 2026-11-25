@@ -82,16 +82,19 @@ export function useTranslateUp(
   at: unknown,
   canJoin: boolean,
   translate: () => Promise<unknown> | void,
+  translateEarlier = translate,
 ): () => void {
   const translateRef = useRef(translate);
   translateRef.current = translate;
+  const translateEarlierRef = useRef(translateEarlier);
+  translateEarlierRef.current = translateEarlier;
   const joinRef = useRef(canJoin);
   joinRef.current = canJoin;
   const time = messageTime(at);
 
   useEffect(() => onTranslateUp((request) => {
     if (request.scope !== scope || request.excludeId === id || !joinRef.current || time > request.upTo) return null;
-    return { at: time, run: () => translateRef.current() };
+    return { at: time, run: () => translateEarlierRef.current() };
   }), [scope, id, time]);
 
   return useCallback(() => {

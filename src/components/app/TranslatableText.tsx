@@ -24,7 +24,7 @@ import Languages from "@/components/ui/cut-icons/language";
 
 import { supabase } from '@/integrations/supabase/client';
 import { autoTranslateEnabled, setAutoTranslateEnabled, subscribeAutoTranslate } from '@/lib/auto-translate-setting';
-import { chatLineIsForeign } from '@/lib/chat-language-hint';
+import { chatLineIsForeign, chatLineMatchesLanguage } from '@/lib/chat-language-hint';
 import { takeAutoTranslateSlot } from '@/lib/auto-translate-budget';
 import { useUserLanguage, LANGUAGE_NAMES } from '@/hooks/use-user-language';
 import { recordTickerSearch } from '@/lib/ticker-search-tracker';
@@ -1006,13 +1006,31 @@ export function useTranslation(
   // Nothing worth sending to the translator
   const isTooShort = !hasTranslatableText(text);
 
-  const handleTranslate = useCallback(async () => {
+  const isChat = auto === 'chat';
+  const runTranslate = useCallback(async (silent: boolean) => {
     if (!hasTranslatableText(text) || inFlightRef.current) return;
 
     const generation = generationRef.current;
     const current = () => generation === generationRef.current;
     const targetLang = userLang;
     const cacheKey = `${text}-${targetLang}`;
+    const languageCode = (lang: string) => {
+      const code = lang.toLowerCase().replace(/_/g, '-');
+      return /^zh-(hant|tw|hk|mo)(-|$)/.test(code) ? 'zh-tw' : code.split('-')[0];
+    };
+    const inTargetLanguage = (source?: string | null) => {
+      const code = source ? languageCode(source) : 'unknown';
+      return ['auto', 'und', 'unknown'].includes(code)
+        ? chatLineMatchesLanguage(text, targetLang)
+        : code === languageCode(targetLang);
+    };
+    const showChatNoOp = (alreadyInLanguage: boolean) => {
+      if (silent) return;
+      setError(alreadyInLanguage
+        ? _copy('copy.caac88c81c38', { defaultValue: 'Already in your language' })
+        : _copy('copy.81cb3cf414b1', { defaultValue: 'Translation unavailable' }));
+      setTimeout(() => { if (current()) setError(null); }, 3000);
+    };
 
     if (translationCache.has(cacheKey)) {
       const cached = translationCache.get(cacheKey)!;
@@ -1023,9 +1041,15 @@ export function useTranslation(
         translationCache.delete(cacheKey);
         schedulePersist();
       } else if (isNoOpTranslation(cached.translated, text)) {
-        setSourceLang(cached.sourceLang);
-        return;
+        if (!isChat || inTargetLanguage(cached.sourceLang)) {
+          setSourceLang(isChat ? targetLang : cached.sourceLang);
+          if (isChat) showChatNoOp(true);
+          return;
+        }
+        translationCache.delete(cacheKey);
+        schedulePersist();
       } else {
+        setError(null);
         setTranslatedText(cached.translated);
         setSourceLang(cached.sourceLang);
         setIsTranslated(true);
@@ -1062,11 +1086,6 @@ export function useTranslation(
         return;
       }
 
-      // Cache either way — a post already in the reader's language is a settled
-      // answer, and not storing it means auto-translate asks again on every
-      // mount for the rest of the session.
-      cacheTranslation(cacheKey, { translated, sourceLang: detected });
-
       // Nothing changed, so do not claim anything did. The server returns the
       // body untouched when the text is already in the target language, and
       // flipping to the translated state on that put a "Show original" control
@@ -1074,10 +1093,17 @@ export function useTranslation(
       // reader's language, which is most of them, every post looked translated
       // and none of them were.
       if (data.sameLanguage === true || isNoOpTranslation(translated, text)) {
-        if (current()) setSourceLang(detected);
+        const alreadyInLanguage = data.sameLanguage === true || (isChat && inTargetLanguage(reported));
+        const source = isChat && alreadyInLanguage ? targetLang : detected;
+        if (!isChat || alreadyInLanguage) cacheTranslation(cacheKey, { translated, sourceLang: source });
+        if (current()) {
+          setSourceLang(source);
+          if (isChat) showChatNoOp(alreadyInLanguage);
+        }
         return;
       }
 
+      cacheTranslation(cacheKey, { translated, sourceLang: detected });
       if (!current()) return;
       setTranslatedText(translated);
       setSourceLang(detected);
@@ -1093,7 +1119,10 @@ export function useTranslation(
         setIsLoading(false);
       }
     }
-  }, [text, userLang, publicContent, _copy]);
+  }, [text, userLang, publicContent, isChat, _copy]);
+
+  const handleTranslate = useCallback(() => runTranslate(false), [runTranslate]);
+  const handleTranslateSilently = useCallback(() => runTranslate(true), [runTranslate]);
 
   const handleShowOriginal = useCallback(() => {
     generationRef.current += 1;
@@ -1126,8 +1155,8 @@ export function useTranslation(
   // message accepts that; doing it silently to every message they receive does
   // not, and a direct message is not ours to upload on their behalf.
   const [nearScreen, setNearScreen] = useState(false);
-  const translateRef = useRef(handleTranslate);
-  useEffect(() => { translateRef.current = handleTranslate; }, [handleTranslate]);
+  const translateRef = useRef(runTranslate);
+  useEffect(() => { translateRef.current = runTranslate; }, [runTranslate]);
 
   useEffect(() => {
     if (!auto) return;
@@ -1151,9 +1180,10 @@ export function useTranslation(
     // Already known — the cache survives a reload, so this is the common case on
     // a refresh. No request to schedule, and waiting for idle would only show
     // the reader a paragraph they cannot read before swapping it out.
-    if (translationCache.has(key)) {
+    const cached = translationCache.get(key);
+    if (cached && (!isChat || !isNoOpTranslation(cached.translated, text) || cached.sourceLang === userLang)) {
       autoDoneRef.current = key;
-      void translateRef.current();
+      void translateRef.current(true);
       return;
     }
 
@@ -1169,9 +1199,9 @@ export function useTranslation(
       // Translate control still works.
       if (!takeAutoTranslateSlot()) return Promise.resolve();
       autoDoneRef.current = key;
-      return translateRef.current();
+      return translateRef.current(true);
     });
-  }, [text, userLang, isTooShort, auto, autoEnabled, nearScreen, nearRef]);
+  }, [text, userLang, isTooShort, auto, autoEnabled, nearScreen, nearRef, isChat]);
 
   return {
     userLang,
@@ -1182,6 +1212,7 @@ export function useTranslation(
     error,
     isTooShort,
     handleTranslate,
+    handleTranslateSilently,
     handleShowOriginal,
   };
 }
