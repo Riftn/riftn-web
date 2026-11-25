@@ -154,6 +154,7 @@ export interface UpdateProfileData {
   youtubeLink?: string;
   facebookLink?: string;
   customs?: Record<string, string | number | boolean>;
+  badgeMuseumVisibility?: 'public' | 'hidden';
   dmSettings?: { disables?: string[]; minTipDhb?: number };
   avatarImg?: File;
   coverImg?: File;
@@ -213,6 +214,9 @@ export async function updateProfile(data: UpdateProfileData): Promise<{ result: 
   
   if (data.customs !== undefined) {
     formData.append("customs", JSON.stringify(data.customs));
+  }
+  if (data.badgeMuseumVisibility !== undefined) {
+    formData.append("badgeMuseumVisibility", data.badgeMuseumVisibility);
   }
   if (data.dmSettings !== undefined) {
     formData.append("dmSettings", JSON.stringify(data.dmSettings));
