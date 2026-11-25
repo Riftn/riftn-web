@@ -192,6 +192,7 @@ export function usePrivacySettings({ refreshOnMount = true } = {}) {
         profileUpdate.profileViewOthers = updates.default_profile_view;
       }
       if (updates.reader_profile_view !== undefined) profileUpdate.profileViewOthers = updates.reader_profile_view;
+      if (profileUpdate.profileViewOthers !== undefined) profileUpdate.layoutViewer = walletAddress;
       if (updates.show_dislikes !== undefined) {
         customsUpdates[DISLIKES_VISIBILITY_KEY] = updates.show_dislikes ? 'public' : 'private';
       }

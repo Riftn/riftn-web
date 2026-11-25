@@ -145,6 +145,7 @@ export interface UpdateProfileData {
   showMatureContent?: boolean;
   defaultProfileView?: DeHubUser['defaultProfileView'];
   profileViewOthers?: DeHubUser['profileViewOthers'];
+  layoutViewer?: string;
   notificationPreferences?: string;
   /** The app's language (a 2-3 letter code), so pushes are written in it. */
   preferredLanguage?: string;
@@ -205,6 +206,7 @@ export async function updateProfile(data: UpdateProfileData): Promise<{ result: 
   if (data.showMatureContent !== undefined) formData.append("showMatureContent", String(data.showMatureContent));
   if (data.defaultProfileView !== undefined) formData.append("defaultProfileView", data.defaultProfileView);
   if (data.profileViewOthers !== undefined) formData.append("profileViewOthers", data.profileViewOthers);
+  if (data.layoutViewer !== undefined) formData.append("layoutViewer", data.layoutViewer);
   if (data.notificationPreferences !== undefined) formData.append("notificationPreferences", data.notificationPreferences);
   if (data.preferredLanguage !== undefined) formData.append("preferredLanguage", data.preferredLanguage);
   if (data.twitterLink !== undefined) formData.append("twitterLink", data.twitterLink);
