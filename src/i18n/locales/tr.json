@@ -8583,6 +8583,7 @@
       "banned": "Akışlarınızdan yasaklandı",
       "unban": "Yasağı Kaldır",
       "noBans": "Kimse yasaklı değil.",
+      "delegatedBans": "Moderatörlüğünü yaptığın yayınlardaki yasaklar",
       "log": "Son işlemler",
       "noLog": "Henüz bir şey yok",
       "actions": {

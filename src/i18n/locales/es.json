@@ -8583,6 +8583,7 @@
       "banned": "Prohibido en tus transmisiones",
       "unban": "Desprohibir",
       "noBans": "Nadie está prohibido.",
+      "delegatedBans": "Usuarios vetados en las emisiones que moderas",
       "log": "Acciones recientes",
       "noLog": "Aún no hay nada.",
       "actions": {
