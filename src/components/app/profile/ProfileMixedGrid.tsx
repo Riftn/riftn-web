@@ -155,7 +155,7 @@ function TextGridTile({ post, entry, bg, chip, grip, tileProps, onOpen }: {
   const words = translatable && isTranslated
     ? plainText(card ? wordsWithoutLinks(translatedText) : translatedText) || originalWords
     : originalWords;
-  const translationLabel = error || (isLoading ? t('common.translating') : isTranslated ? t('common.showOriginal') : t('common.translate'));
+  const translationLabel = error || (isLoading ? t('common.translating') : isTranslated ? t('common.showOriginal') : t('copy.8fe147696fbf', { defaultValue: 'Translate' }));
   const TranslationIcon = isLoading ? Loader2 : isTranslated ? RotateCcw : Languages;
   const poster = (
     <>
