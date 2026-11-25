@@ -111,6 +111,30 @@ export function isWebPushSupported(): boolean {
   );
 }
 
+/** Close system alerts that deep-link to the conversation being read. */
+export async function dismissReadMessageNotifications(conversationId: string): Promise<void> {
+  if (!isWebPushSupported() || document.visibilityState !== 'visible' || Notification.permission !== 'granted') return;
+  const readThrough = Date.now();
+  try {
+    const registration = await navigator.serviceWorker.getRegistration();
+    if (!registration?.getNotifications) return;
+    const notifications = await registration.getNotifications();
+    const origin = window.location.origin;
+    for (const notification of notifications) {
+      if (notification.timestamp > readThrough || typeof notification.data?.url !== 'string') continue;
+      let url: URL;
+      try { url = new URL(notification.data.url, origin); } catch { continue; }
+      if (url.origin !== origin) continue;
+      const id = url.pathname === '/app/messages' || url.pathname === '/chat'
+        ? url.searchParams.get('conversation')
+        : url.pathname.match(/^\/(?:app\/)?dm\/([^/]+)\/?$/)?.[1];
+      if (id === conversationId) notification.close();
+    }
+  } catch {
+    // A browser tray failure must not interfere with the read receipt.
+  }
+}
+
 let inFlight: Promise<boolean> | null = null;
 
 /**
