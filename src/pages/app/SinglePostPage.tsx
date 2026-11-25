@@ -66,7 +66,7 @@ import dehubCoin from '@/assets/dehub-coin.png';
 import { getNFTInfo, getLiveStream, resolveArticleSlug, type DeHubNFT } from '@/lib/api/dehub';
 import { parseSoundtrackTag, findCachedFeedPost } from '@/hooks/use-unified-feed';
 import { PollCard } from '@/components/app/cards/PollCard';
-import { QuizCard } from '@/components/app/quiz/QuizCard';
+import { LazyQuizCard } from '@/components/app/quiz/LazyQuizCard';
 import { useStreamLiveStatus } from '@/hooks/use-stream-live-status';
 
 import { buildAvatarUrl, extractAvatarPath, buildImageUrl, buildFeedImageUrls, buildVideoUrl, buildHlsUrl } from '@/lib/media-url';
@@ -1701,7 +1701,7 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
         >
           {renderContent()}
           {contentType === 'image' && parseInt(id, 10) > 0 && <div className="px-3"><PollCard tokenId={parseInt(id, 10)} /></div>}
-          {contentType === 'image' && parseInt(id, 10) > 0 && <div className="px-3"><QuizCard tokenId={parseInt(id, 10)} /></div>}
+          {contentType === 'image' && parseInt(id, 10) > 0 && <div className="px-3"><LazyQuizCard tokenId={parseInt(id, 10)} /></div>}
         </PostStagePhone>
         {commentsSplitSheet}
       </div>
@@ -1977,7 +1977,7 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
           <ImmersiveVideoHeader onBack={goBack} />
           {renderContent()}
           {post && id && parseInt(id, 10) > 0 && <div className="px-3"><PollCard tokenId={parseInt(id, 10)} /></div>}
-          {post && id && parseInt(id, 10) > 0 && <div className="px-3"><QuizCard tokenId={parseInt(id, 10)} /></div>}
+          {post && id && parseInt(id, 10) > 0 && <div className="px-3"><LazyQuizCard tokenId={parseInt(id, 10)} /></div>}
         </div>
         <div className="px-2 sm:px-3">{pageComments}</div>
         {showRelated && id && <div className="px-2 sm:px-3"><NoFocusComment><RelatedImagesFeed currentPostId={id} /></NoFocusComment></div>}
@@ -2011,7 +2011,7 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
             {renderContent()}
             {/* A video card draws its own poll; a photo card leaves it to the page. */}
             {!isTextPost && contentType !== 'video' && id && parseInt(id, 10) > 0 && <PollCard tokenId={parseInt(id, 10)} />}
-          {!isTextPost && contentType !== 'video' && id && parseInt(id, 10) > 0 && <QuizCard tokenId={parseInt(id, 10)} />}
+          {!isTextPost && contentType !== 'video' && id && parseInt(id, 10) > 0 && <LazyQuizCard tokenId={parseInt(id, 10)} />}
             {/* Desktop: comments open inside the post's bento, attached to it like on the feed. */}
             {!isMobileView && !isLivePost && !commentsSplit && pageComments}
           </div>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { fireEvent, render, screen, waitFor, cleanup } from '@testing-library/react';
-import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, beforeEach, expect, it, vi } from 'vitest';
 import QuickActionsDrawer from '@/components/app/QuickActionsDrawer';
 
 const mocks = vi.hoisted(() => ({ submit: vi.fn(), capture: vi.fn(), login: vi.fn(), disconnect: vi.fn(), profiles: vi.fn((): { id: string }[] => []), authenticated: true }));
@@ -20,6 +20,7 @@ vi.mock('@/components/ui/drawer', () => {
 vi.mock('@/lib/page-bug-report', async importOriginal => ({ ...await importOriginal<object>(), captureBugScreenshot: mocks.capture, enrichPageBugContext: async (context: unknown) => context }));
 const context = { page: 'https://riftn.com/app/home', capturedAt: '2026-10-11T12:00:00Z', device: 'Android 16', viewport: '400 × 800', model: 'Pixel', userAgent: 'Browser' };
 beforeEach(() => { mocks.submit.mockReset(); mocks.capture.mockReset().mockResolvedValue(null); mocks.login.mockReset(); mocks.disconnect.mockReset().mockResolvedValue(undefined); mocks.profiles.mockReturnValue([]); mocks.authenticated = true; });
+beforeAll(async () => { await import('@/components/app/AccountSignOutDialog'); });
 afterEach(cleanup);
 
 it('sends a short report and automatic context even when capture is unavailable', async () => {
