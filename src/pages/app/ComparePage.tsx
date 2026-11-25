@@ -18,7 +18,6 @@ const inView = (feature: ComparisonFeature, view: View) =>
   view === 'all' || (view === 'social' ? !EDITOR_CATEGORIES.has(feature.category) : markFor(entryFor(feature, 'dehub')) !== 'yes');
 /** Stable i18n key for a section title: "Posts and discovery" -> "postsAndDiscovery". */
 const categoryKey = (category: string) => category.toLowerCase().replace(/[^a-z0-9]+(.)?/g, (_, c: string | undefined) => (c ? c.toUpperCase() : ''));
-const percent = (part: number, whole: number) => `${whole ? Math.round((part / whole) * 100) : 0}%`;
 /** Riftn first, then everyone else from most features to fewest. */
 const COLUMNS: Column[] = [
   { id: 'dehub', name: 'Riftn', short: 'Riftn' },
@@ -53,6 +52,8 @@ const MARK_TONE: Record<Mark, string> = {
 export default function ComparePage() {
   const { t, i18n } = useTranslation();
   const locale = (i18n.resolvedLanguage ?? i18n.language)?.replace('_', '-');
+  const percentFormat = useMemo(() => new Intl.NumberFormat(locale, { style: 'percent' }), [locale]);
+  const percent = (part: number, whole: number) => percentFormat.format(whole ? part / whole : 0);
   const copy = (key: string, fallback: string, vars: Record<string, string | number> = {}) => t(`comparison.${key}`, { defaultValue: fallback, ...vars });
   // Feature names and section titles are English in the data file; each has a key so the table reads in the viewer's language.
   const featureName = (feature: ComparisonFeature) => t(`comparison.f.${feature.id}`, { defaultValue: feature.name });
