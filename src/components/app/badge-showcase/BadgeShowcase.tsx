@@ -7,6 +7,7 @@
  *
  * Loaded on demand by BadgeShowcaseHost; three.js lives in this chunk only.
  */
+import { useBadgeTierLabel } from '@/i18n/badge-tier-label';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -107,6 +108,7 @@ function formatUsd(value: number): string {
 
 export default function BadgeShowcase({ tier, promotedFrom, anchor, onClose }: BadgeShowcaseProps) {
   const { t } = useTranslation();
+  const tierLabel = useBadgeTierLabel();
   // Read the context directly: badges render above AuthProvider in places.
   const auth = useContext(AuthContext);
   const self = useSelfBadge();
@@ -133,13 +135,13 @@ export default function BadgeShowcase({ tier, promotedFrom, anchor, onClose }: B
     () =>
       BADGE_ORDER.map((name, i) => ({
         key: name,
-        label: name,
+        label: tierLabel(name),
         art: artFor(name),
         thumb: badgeImage(name) ?? '',
         finish: finishFor(i),
         tilt: tiltAt(i),
       })),
-    [],
+    [tierLabel],
   );
 
   const owned = (i: number) => !!standing && standing.index >= i;
@@ -159,7 +161,7 @@ export default function BadgeShowcase({ tier, promotedFrom, anchor, onClose }: B
       anchor={anchor}
       onClose={onClose}
       intro={intro}
-      dialogLabel={(i) => t('badgeShowcase.dialogLabel', { tier: BADGE_ORDER[i] })}
+      dialogLabel={(i) => t('badgeShowcase.dialogLabel', { tier: tierLabel(BADGE_ORDER[i]) })}
       dockLabel={t('badgeShowcase.badges')}
       owned={owned}
       footer={(api) => <HolderActions api={api} />}
@@ -201,6 +203,7 @@ function HolderDetails({
   owned: (i: number) => boolean;
 }) {
   const { t, i18n } = useTranslation();
+  const tierLabel = useBadgeTierLabel();
   const { index } = api;
   const count = BADGE_ORDER.length;
 
@@ -253,6 +256,7 @@ function HolderDetails({
   };
 
   const name = BADGE_ORDER[index];
+  const nameLabel = tierLabel(name);
   const threshold = ladder[index].min;
   // On the tier just reached, the header congratulates instead of counting.
   const celebrating = promotedTo === index;
@@ -310,7 +314,7 @@ function HolderDetails({
               transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
               className="text-[22px] font-black uppercase leading-none tracking-[-0.02em] lg:text-[30px]"
             >
-              {SHORT_NAMES[name] ?? name}
+              {nameLabel === name ? SHORT_NAMES[name] ?? nameLabel : nameLabel}
             </motion.h2>
           </AnimatePresence>
           <span className="inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-white/20 bg-white/10 pl-1.5 pr-2.5 text-[13px] font-bold tabular-nums backdrop-blur-xl">
@@ -322,7 +326,7 @@ function HolderDetails({
         </div>
         <p className="min-h-4 text-[12px] leading-4 text-white/55">
           {celebrating
-            ? t('badgeAscension.reached', { tier: name })
+            ? t('badgeAscension.reached', { tier: nameLabel })
             : standing
             ? owned(index)
               ? t('badgeShowcase.youHaveThis')
@@ -378,7 +382,7 @@ function HolderDetails({
           )}
           <SliderPrimitive.Thumb
             aria-label={t('badgeShowcase.sliderLabel')}
-            aria-valuetext={t('badgeShowcase.sliderValue', { amount: nf.format(amount), tier: name })}
+            aria-valuetext={t('badgeShowcase.sliderValue', { amount: nf.format(amount), tier: nameLabel })}
             className="block h-5 w-5 overflow-hidden rounded-full border-2 border-white bg-black shadow-[0_0_0_4px_rgba(255,255,255,0.12),0_4px_14px_rgba(0,0,0,0.5)] outline-none transition-transform focus-visible:scale-110 active:scale-110"
           >
             <img src={badgeImage(name) ?? ''} alt="" className="h-full w-full object-contain p-[1px]" />
