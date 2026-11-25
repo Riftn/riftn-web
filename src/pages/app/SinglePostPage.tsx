@@ -59,6 +59,7 @@ import Gem from "@/components/ui/cut-icons/diamond";
 
 import { ThemedIcon } from '@/components/app/war/WarHudIcon';
 import { useTranslation as useI18n } from 'react-i18next';
+import { formatPostAge, parsePostTimestamp } from '@/i18n/post-timestamp';
 import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
 import dehubCoin from '@/assets/dehub-coin.png';
@@ -306,6 +307,7 @@ function toVideoItem(nft: DeHubNFT): VideoItem {
     channelAvatar: avatar,
     verified: false,
     views,
+    createdAt: timestamp,
     uploadedAgo: formatTimeAgo(timestamp),
     status: nft.status,
     transcodingStatus: nft.transcodingStatus,
@@ -406,6 +408,7 @@ function toImagePost(nft: DeHubNFT): ImagePost {
     comments: nft.commentCount || nft.comment_count || 0,
     status: nft.status,
     views,
+    createdAt: timestamp,
     timeAgo: formatTimeAgo(timestamp),
     creatorId: resolvedAddress,
     creatorUsername: nft.minterUsername || nft.mintername || creatorObj?.username || ownerObj?.username,
@@ -977,7 +980,7 @@ export default function SinglePostPage(props: SinglePostPageProps = {}) {
 function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = false, onSharedHold }: SinglePostPageProps = {}) {
   const { postId, tokenId, commentId } = useParams<{ postId?: string; tokenId?: string; commentId?: string }>();
   const navigate = useNavigate();
-  const { t } = useI18n();
+  const { t, i18n } = useI18n();
   const { t: _copy } = _useCopy();
   const id = overrideId || postId || tokenId;
   const location = useLocation();
@@ -1643,6 +1646,7 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
     retainedCommentsRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
   }, [detailsOnly, detailsExpanded, post, pageCommentsInitialTab]);
 
+  const postAge = (timestamp?: string) => formatPostAge(parsePostTimestamp(timestamp), i18n.language, t);
   const renderStage = () => {
     if (!post || !id) return null;
     const isText = isTextPost;
@@ -1653,18 +1657,18 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
     if (contentType === 'video') {
       const v = toVideoItem(post);
       kind = isAudioPost ? 'audio' : 'video';
-      subtitle = [v.channel, v.uploadedAgo].filter(Boolean).join(' · ');
+      subtitle = [v.channel, postAge(v.createdAt)].filter(Boolean).join(' · ');
       thumbnail = v.thumbnail;
     } else if (contentType === 'image') {
       const ip = toImagePost(post);
       kind = 'image';
       title = ip.title || ip.description || '';
-      subtitle = [ip.username, ip.timeAgo].filter(Boolean).join(' · ');
+      subtitle = [ip.username, postAge(ip.createdAt)].filter(Boolean).join(' · ');
       thumbnail = ip.imageUrls?.[0] || ip.image;
     } else {
       const tp = toTextPost(post);
       title = tp.title || tp.content.split('\n')[0] || '';
-      subtitle = [tp.author.name, formatTimeAgo(tp.createdAt || undefined)].filter(Boolean).join(' · ');
+      subtitle = [tp.author.name, postAge(tp.createdAt)].filter(Boolean).join(' · ');
       thumbnail = tp.author.avatarSeed;
     }
     const commentCount = Number(post.commentCount ?? post.comment_count ?? 0) || 0;

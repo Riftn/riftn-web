@@ -490,6 +490,15 @@ html[data-system-tone="light"] .login-stack__title[data-look="flat"] {
   min-height: 0;
   flex: 1;
 }
+[data-login-stack-sheet] .login-stack-scroll > .login-stack {
+  flex-shrink: 1;
+  min-height: min-content;
+}
+[data-login-stack-sheet] .login-stack-scroll .login-stack__lanes {
+  /* Keep the space behind the overlapping wordmark when the sheet is short. */
+  min-height: 152px;
+  contain: size;
+}
 .login-stack-scroll > .login-stack-form {
   flex-shrink: 0;
   margin-top: 6px;

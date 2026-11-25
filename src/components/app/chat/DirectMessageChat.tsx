@@ -161,7 +161,7 @@ import { DmVideoCallButton } from '@/components/app/chat/calls/DmVideoCallButton
 import { useCallActions } from '@/contexts/CallContext';
 import { dismissKeyboard } from '@/hooks/use-keyboard-open';
 import { formatUnreadCount } from '@/lib/unread-count';
-import { isDmCallNotice } from '@/lib/dm-call-notice';
+import { isDmCallNotice, localizeDmCallPreview } from '@/lib/dm-call-notice';
 import { CallNoteCard } from './calls/CallNoteCard';
 import { VoiceStripPlayer } from '@/components/app/audio/VoiceStripPlayer';
 import { QUICK_CHAT_REACTIONS } from './reaction-options';
@@ -664,8 +664,7 @@ const MessageBubble = memo(function MessageBubble({
     // pendingAgeMs is time-derived; the timer only needs scheduling while visible
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showPaymentPending, message._id]);
-  // Call message — detect by emoji prefix in content (📞/📹/📵). The branch
-  // it drives lives below the hooks; see the note there.
+  // The call notice branch lives below the hooks.
   const isCallMessage = message.msgType === 'msg' && isDmCallNotice(message.content);
 
   const avatarUrl = buildAvatarUrl(message.sender?.address || '', message.sender?.avatarImageUrl);
@@ -1089,7 +1088,7 @@ const MessageBubble = memo(function MessageBubble({
       {!isOwnMessage && !cozyShowAvatar && <div aria-hidden className="w-8 flex-shrink-0" />}
       {!isOwnMessage && cozyShowAvatar && (() => {
         const avatar = (
-          <MomentFace address={message.sender?.address} size={32} name={displayName} className="rounded-lg">
+          <MomentFace address={message.sender?.address} size={32} outline name={displayName} className="rounded-lg">
             <Avatar className="w-8 h-8 flex-shrink-0">
               {avatarUrl && <AvatarImage src={avatarUrl} />}
               <AvatarFallback className="bg-zinc-700 text-white text-xs font-medium">
@@ -1143,7 +1142,7 @@ const MessageBubble = memo(function MessageBubble({
                     : (message.replyTo.destruct?.kind === 'video' ? tr('dm.video', { defaultValue: 'Video' }) : tr('dm.photo', { defaultValue: 'Photo' }))}
                 </span>
               ) : (
-                <span className="min-w-0 truncate">{message.replyTo.content || (message.replyTo.encMedia ? encryptedMediaLabel(message.replyTo.encMedia, _copy) : _copy("copy.2bc85f36b3e4", { defaultValue: "📎 Media" }))}</span>
+                <span className="min-w-0 truncate">{localizeDmCallPreview(message.replyTo, tr) || message.replyTo.content || (message.replyTo.encMedia ? encryptedMediaLabel(message.replyTo.encMedia, _copy) : _copy("copy.2bc85f36b3e4", { defaultValue: "📎 Media" }))}</span>
               )}
             </button>
           </div>
@@ -2587,7 +2586,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
         ? (replyTarget.destruct?.kind === 'video' || replyTarget.encMedia?.kind === 'video'
           ? tr('dm.opened.quoteVideo', { defaultValue: 'Video · Opened' })
           : tr('dm.opened.quotePhoto', { defaultValue: 'Photo · Opened' }))
-        : replyTarget.content
+        : localizeDmCallPreview(replyTarget, tr) || replyTarget.content
         || (replyTarget.encMedia ? encryptedMediaLabel(replyTarget.encMedia, _copy) : replyTarget.msgType === 'voice' ? _copy("copy.e7d42aa1a046", { defaultValue: "🎤 Voice" }) : ''),
       timestamp: new Date(replyTarget.createdAt),
       type: replyTarget.msgType === 'gif' ? 'gif' as const : replyTarget.msgType === 'msg' ? 'text' as const : 'image' as const,
@@ -3512,7 +3511,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
             </Button>
           </div>
           <Link to={profileLink} data-chat-header-who className="flex min-w-0 flex-1 flex-col items-center">
-            <MomentFace address={otherUser?.address} size={40} name={displayName} className="rounded-[9px]">
+            <MomentFace address={otherUser?.address} size={40} outline name={displayName} className="rounded-[9px]">
               <Avatar className="h-10 w-10 rounded-[9px]">
                 {avatarUrl && <AvatarImage src={avatarUrl} className="rounded-[9px]" />}
                 <AvatarFallback className="rounded-[9px] bg-zinc-700 text-white font-medium">
@@ -3565,7 +3564,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
           )}
 
           <Link to={profileLink} className={`flex items-center min-w-0 ${dock ? 'gap-2' : 'gap-3'}`}>
-            <MomentFace address={otherUser?.address} size={dock ? 32 : 40} name={displayName} className="rounded-lg">
+            <MomentFace address={otherUser?.address} size={dock ? 32 : 40} outline name={displayName} className="rounded-lg">
               <Avatar className={dock ? 'w-8 h-8 shrink-0' : 'w-10 h-10'}>
                 {avatarUrl && <AvatarImage src={avatarUrl} />}
                 <AvatarFallback className="bg-zinc-700 text-white font-medium">
@@ -3674,7 +3673,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
           <Pin className="w-3.5 h-3.5 text-white/80 flex-shrink-0 fill-current" />
           <div className="flex flex-col min-w-0 flex-1">
             <span className="text-zinc-300 text-[10px] font-semibold uppercase tracking-wide leading-none mb-0.5">{_copy("copy.2aa60e3c77ee", { defaultValue: "Pinned Message" })}</span>
-            <span className="text-zinc-400 text-xs truncate">{pinnedMessage.content || (pinnedMessage.encMedia ? encryptedMediaLabel(pinnedMessage.encMedia, _copy) : _copy("copy.2bc85f36b3e4", { defaultValue: "📎 Media" }))}</span>
+            <span className="text-zinc-400 text-xs truncate">{localizeDmCallPreview(pinnedMessage, tr) || pinnedMessage.content || (pinnedMessage.encMedia ? encryptedMediaLabel(pinnedMessage.encMedia, _copy) : _copy("copy.2bc85f36b3e4", { defaultValue: "📎 Media" }))}</span>
           </div>
           <X
             onClick={(e) => { e.stopPropagation(); handleUnpinMessage(); }}

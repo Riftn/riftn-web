@@ -18,7 +18,7 @@
  */
 
 const MARKERS: Record<string, string> = {
-  en: 'the and is are was were of to it that this with for you your on be have has not but what will my we they just from at so if can do about there their been would hello hi hey thanks thank good morning evening night everyone guys all welcome happy',
+  en: 'the and is are was were of to it that this with for you your on be have has not but what will my we they just from at so if can do about there their been would should some every works yes hello hi hey thanks thank good morning evening night everyone guys all welcome happy',
   es: 'el la los las que y es por una para con se del al lo como más pero su muy está hay ser yo mi tu esto esta hola buenos buenas días dias gracias todos amigos noche tarde qué cómo bien hermano',
   pt: 'o os as que e do da dos das em um uma para com não é se na no mais mas seu sua muito está isso eu você bom boa dia noite tarde obrigado obrigada galera pessoal tudo bem irmão olá oi',
   fr: 'le la les des et est une du que pour dans pas qui sur avec ce il je vous nous sont mais très cette au aux bonjour bonsoir merci salut tout monde tous ça oui',
@@ -54,13 +54,15 @@ function base(lang: string): string {
   return lang.toLowerCase().split(/[-_]/)[0];
 }
 
-/** The language a Latin chat line clearly reads as, or null when it does not say. */
-export function chatLineLanguage(text: string): string | null {
-  const tokens = text
+function chatWords(text: string): string[] {
+  return text
     .replace(/https?:\/\/\S+|www\.\S+/gi, ' ')
     .replace(/[@#$][\p{L}\p{N}_.-]+/gu, ' ')
     .toLowerCase()
     .match(/\p{L}+/gu) ?? [];
+}
+
+function languageFromWords(tokens: string[]): string | null {
   if (tokens.length < 2) return null;
   let best: string | null = null;
   let bestHits = 0;
@@ -74,6 +76,18 @@ export function chatLineLanguage(text: string): string | null {
   // Two words of the same language, and clearly more than any other language.
   if (bestHits < 2 || bestHits <= runnerUp) return null;
   return best;
+}
+
+/** The language a Latin chat line clearly reads as, or null when it does not say. */
+export function chatLineLanguage(text: string): string | null {
+  return languageFromWords(chatWords(text));
+}
+
+/** A local hint for classifying an unchanged translation response. */
+export function chatLineMatchesLanguage(text: string, language: string): boolean {
+  const words = chatWords(text);
+  return words.every(word => /^\p{Script=Latin}+$/u.test(word))
+    && languageFromWords([...new Set(words)]) === base(language);
 }
 
 /** True when the line plainly reads as a language other than the reader's. */

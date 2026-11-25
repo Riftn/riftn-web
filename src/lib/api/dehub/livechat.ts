@@ -513,6 +513,21 @@ export interface StreamModerationLogEntry {
   at: string;
 }
 
+export interface DelegatedStreamBans {
+  bans: { creator: StreamModerationPerson; banned: StreamModerationPerson[] }[];
+}
+
+export async function getDelegatedStreamBans(): Promise<DelegatedStreamBans> {
+  return apiCall<DelegatedStreamBans>('/api/livechat/moderation/delegated/bans', { requiresAuth: true });
+}
+
+export async function unbanFromModeratedStreams(creator: string, address: string): Promise<void> {
+  await apiCall('/api/livechat/moderation/delegated/' + encodeURIComponent(creator) + '/bans/' + encodeURIComponent(address), {
+    method: 'DELETE',
+    requiresAuth: true,
+  });
+}
+
 export interface MyStreamModeration {
   settings: StreamModerationSettings;
   moderators: StreamModerationPerson[];

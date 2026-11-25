@@ -9107,7 +9107,7 @@
     "close": "ปิด",
     "callbackRequest": "คำขอเรียกกลับ",
     "tryAgain": "ลองอีกครั้ง",
-    "ended": "Call ended",
+    "ended": "วางสายแล้ว",
     "declined": "Call declined",
     "noAnswer": "No answer",
     "missed": "Missed call",

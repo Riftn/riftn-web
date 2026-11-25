@@ -7,10 +7,10 @@ import { useSurfaceDraft } from '@/hooks/use-surface-draft';
  * tier table here is the same one the creator-packs function enforces.
  */
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { ChevronDown, Loader2 } from "lucide-react";
 import Plus from "@/components/ui/cut-icons/add";
@@ -21,6 +21,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import {
   createPack,
+  savePack,
   useInvalidatePacks,
   useOwnedPacks,
   usePackStatus,
@@ -52,12 +53,13 @@ function usePopularPacks(kind: PackKind) {
   });
 }
 
-function PackCard({ pack }: { pack: CreatorPack }) {
+function PackCard({ pack, action }: { pack: CreatorPack; action?: ReactNode }) {
   const { t } = useTranslation();
-  return (
+  const material = 'rounded-xl border border-white/[0.12] bg-white/[0.03] p-3';
+  const details = (
     <Link
       to={`/packs/${pack.slug}`}
-      className="flex items-center gap-3 rounded-xl border border-white/[0.12] bg-white/[0.03] p-3 hover:bg-white/[0.07] transition-colors"
+      className={cn('flex items-center gap-3', action ? 'min-w-0 flex-1' : `${material} hover:bg-white/[0.07] transition-colors`)}
     >
       <div className="w-12 h-12 rounded-lg bg-white/5 overflow-hidden flex-shrink-0 p-1">
         <PackCover pack={pack} className="w-full h-full" />
@@ -70,6 +72,8 @@ function PackCard({ pack }: { pack: CreatorPack }) {
       </div>
     </Link>
   );
+  if (!action) return details;
+  return <div className={cn(material, 'flex flex-wrap items-center gap-2')}>{details}{action}</div>;
 }
 
 function TierTable() {
@@ -131,6 +135,14 @@ export default function PacksPage() {
   const saved = useSavedPacks(walletAddress);
   const popular = usePopularPacks(kind);
   const invalidate = useInvalidatePacks();
+  const addToPicker = useMutation({
+    mutationFn: ({ wallet, packId }: { wallet: string; packId: string }) => savePack(wallet, packId),
+    onSuccess: async () => {
+      await invalidate();
+      toast.success(t('creatorPacks.addedToPicker'));
+    },
+    onError: (err) => toast.error(packErrorMessage(err, t)),
+  });
 
   const mine = (owned.data ?? []).filter((p) => p.kind === kind);
   const added = (saved.data ?? []).filter((p) => p.kind === kind);
@@ -259,7 +271,33 @@ export default function PacksPage() {
         {popular.isLoading ? (
           <Loader2 className="w-4 h-4 animate-spin text-zinc-500" />
         ) : popular.data?.length ? (
-          <div className="grid sm:grid-cols-2 gap-2">{popular.data.map((p) => <PackCard key={p.id} pack={p} />)}</div>
+          <div className="grid sm:grid-cols-2 gap-2">
+            {popular.data.map((pack) => (
+              <PackCard
+                key={pack.id}
+                pack={pack}
+                action={pack.owner !== walletAddress?.toLowerCase() && !added.some((p) => p.id === pack.id) ? (
+                  <KitButton
+                    variant="quiet"
+                    disabled={addToPicker.isPending}
+                    onClick={() => {
+                      if (!isAuthenticated || !walletAddress) return openLoginModal();
+                      addToPicker.mutate({ wallet: walletAddress, packId: pack.id });
+                    }}
+                  >
+                    {t(isAuthenticated ? 'creatorPacks.addToPicker' : 'creatorPacks.signInToAdd')}
+                  </KitButton>
+                ) : undefined}
+              />
+            ))}
+          </div>
+        ) : popular.isError ? (
+          <>
+            <p className="text-xs text-zinc-500">{t('creatorPacks.errors.generic')}</p>
+            <KitButton variant="quiet" disabled={popular.isFetching} onClick={() => void popular.refetch()}>
+              {t('common.retry')}
+            </KitButton>
+          </>
         ) : (
           <p className="text-xs text-zinc-500">{t('creatorPacks.noneYet')}</p>
         )}

@@ -1,6 +1,6 @@
 import { toast } from 'sonner';
 import { createDraftVideo } from '@/lib/api/dehub/content';
-import { createStory, getStory, type CreateStoryFields } from '@/lib/api/dehub/stories';
+import { createStory, getStory, type CreateStoryFields, type StoryItem } from '@/lib/api/dehub/stories';
 import { useStoriesStore } from '@/store/storiesStore';
 import { translateCopy } from '@/i18n/copy';
 
@@ -24,24 +24,31 @@ const POLL_LIMIT_MS = 4 * 60 * 1000;
 export function shareMoment(moment: MomentToShare, onDone: () => void) {
   const { setPending } = useStoriesStore.getState();
   const key = `${Date.now()}`;
+  let pendingPostStory: StoryItem | undefined;
+  let running = false;
   const update = (patch: Partial<NonNullable<ReturnType<typeof useStoriesStore.getState>['pending']>>) =>
     setPending(p => (p && p.key === key ? { ...p, ...patch } : p));
 
   const run = async () => {
+    if (running) return;
+    running = true;
     setPending({ key, preview: moment.preview, progress: 2, state: 'uploading' });
     try {
       let created;
       if (moment.kind === 'photo') {
         created = await createStory(moment.fields, { photo: moment.file ?? undefined }, { onProgress: p => update({ progress: Math.max(2, p) }) });
       } else if (!moment.file) {
-        created = await createStory({ ...moment.fields, type: 'video' }, { overlay: moment.overlay ?? null }, { onProgress: p => update({ progress: Math.max(2, Math.round(p * 0.92)) }) });
+        created = pendingPostStory ?? await createStory({ ...moment.fields, type: 'video' }, { overlay: moment.overlay ?? null }, { onProgress: p => update({ progress: Math.max(2, Math.round(p * 0.92)) }) });
+        pendingPostStory = created;
         update({ state: 'processing', progress: 100 });
         const started = Date.now();
         while (created.status === 'processing' && Date.now() - started < POLL_LIMIT_MS) {
           await new Promise(r => setTimeout(r, POLL_MS));
-          created = (await getStory(created.id).catch(() => ({ item: created }))).item;
+          created = (await getStory(created.id, true).catch(() => ({ item: created }))).item;
         }
-        if (created.status === 'failed') throw new Error(created.error || 'failed');
+        // After a timeout, retry checking the same Moment so late completion cannot create a duplicate.
+        pendingPostStory = created.status === 'processing' ? created : undefined;
+        if (created.status !== 'ready') throw new Error(created.error || 'Moment video is not ready');
       } else {
         const file = moment.file instanceof File ? moment.file : new File([moment.file], `moment.${moment.file.type.includes('mp4') ? 'mp4' : 'webm'}`, { type: moment.file.type || 'video/webm' });
         const draft = await createDraftVideo(file, 'short', { onProgress: p => update({ progress: Math.max(2, Math.round(p * 0.92)) }) });
@@ -65,6 +72,8 @@ export function shareMoment(moment: MomentToShare, onDone: () => void) {
       update({ state: 'failed', error: message, retry: () => void run() });
       toast.error(message);
       onDone();
+    } finally {
+      running = false;
     }
   };
   void run();
