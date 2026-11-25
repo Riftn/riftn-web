@@ -2,7 +2,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { createHash } from 'node:crypto';
-import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import { mdToHtml } from './markdown-html.mjs';
 import { pruneLocaleVersions } from './locale-retention.mjs';
@@ -13,7 +12,7 @@ import * as dehubAppPage from '../src/lib/dehub-app-page.js';
 export const PRIORITY_LOCALES = ['ar', 'es', 'fr', 'nl', 'tr'];
 // The crawler accepts ISO 639-1 codes. Publish a locale only after a route
 // has a complete translation, even if the interface already supports it.
-export const EXTRA_LOCALES = fs.readdirSync(fileURLToPath(new URL('../src/i18n/locales/', import.meta.url)))
+export const EXTRA_LOCALES = fs.readdirSync(path.resolve('src/i18n/locales'))
   .filter(file => /^(?:[a-z]{2}|zh_tw)\.json$/.test(file))
   .map(file => file.slice(0, -5))
   .filter(code => code !== 'en' && !PRIORITY_LOCALES.includes(code))

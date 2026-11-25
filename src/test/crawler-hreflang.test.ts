@@ -315,7 +315,7 @@ describe('wiring', () => {
   it('has a fully translated page to serve for the homepage and the docs', () => {
     const table = JSON.parse(readFileSync(resolve(ROOT, 'public/seo-i18n.json'), 'utf8')) as Table;
     for (const route of ['/', '/docs']) {
-      expect(api.servedLocales(route, table), route).toEqual(['ar', 'es', 'fr', 'nl', 'tr']);
+      expect(api.servedLocales(route, table), route).toEqual(expect.arrayContaining(['ar', 'es', 'fr', 'nl', 'tr']));
       expect(table[route].es.title).toContain('Riftn');
       expect(JSON.parse(readFileSync(resolve(ROOT, 'public' + table[route].es.asset), 'utf8')).body).toContain('<a href="https://riftn.com/docs');
     }

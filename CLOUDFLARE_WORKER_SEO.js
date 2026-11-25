@@ -1715,16 +1715,6 @@ ${DEHUB_APP_PAGE.faq.map(({ q, a }) => `<h3>${q}</h3>\n<p>${a}</p>`).join('\n')}
 <li><strong>Fixed-price contracts</strong>: hire creators for logos, video, translation and community work.</li>
 </ul>`,
   },
-  'nfts': {
-    title: 'NFT Market: Buy & Sell NFTs on BNB Chain and Base',
-    description: 'Buy, sell and make offers on NFTs on BNB Chain and Base. Pay in BNB, ETH or DHB. Every trade swaps the NFT and the payment in one step, so nobody waits on the other side.',
-    heading: 'Riftn NFT Market',
-    bodyHtml: `<p>The Riftn NFT market is where any NFT on BNB Chain or Base changes hands: Riftn posts minted as NFTs, and any other collection in your wallet. List one at a fixed price, buy a listing, or make an offer in DHB that the holder can accept.</p>
-<h2>How a trade works</h2>
-<p>Trades settle on Seaport, the open NFT swap contract. The NFT and the payment move in the same transaction, so a buyer never pays without receiving and a seller never sends without being paid. Riftn never holds your NFTs or your money.</p>
-<h2>Fees</h2>
-<p>Riftn takes 2% of a sale paid in BNB or ETH, and 1% when paid in DHB. Creators receive the royalty their collection sets, capped at 10%. The seller receives the rest the moment the trade settles.</p>`,
-  },
   'usernames': {
     title: 'Username Marketplace: Buy & Sell Riftn Handles for tokens',
     description: 'Browse Riftn usernames for sale and buy one with tokens. Short, numeric and original handles, transferred on-chain the moment payment clears, or list your own.',
