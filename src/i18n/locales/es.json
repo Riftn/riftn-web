@@ -5223,6 +5223,8 @@
     "resolve": "Resolver"
   },
   "stores": {
+    "seoTitle": "Tiendas de Riftn",
+    "seoDescription": "Descubre productos digitales, merchandising, arte y servicios de creadores independientes en el mercado de Riftn.",
     "podToggle": "Artículo de impresión bajo demanda",
     "podHint": "Enlaza un producto de tu tienda de impresión bajo demanda. El proveedor imprime y envía cada pedido, así que no necesitas inventario.",
     "podUrlLabel": "Enlace del producto",

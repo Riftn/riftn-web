@@ -241,6 +241,7 @@ const ComparePage = React.lazy(() => import("./pages/app/ComparePage"));
 const PromptLanding = React.lazy(() => import("./pages/PromptLanding"));
 const CommunityPage = React.lazy(() => import("./pages/app/CommunityPage"));
 const CommunityInvitePage = React.lazy(() => import("./pages/app/CommunityInvitePage"));
+const StoreDetailPage = React.lazy(() => import("./pages/app/StoreDetailPage"));
 const EventPage = React.lazy(() => import("./pages/EventPage"));
 const LaunchpadPage = React.lazy(() => import("./pages/app/LaunchpadPage"));
 const LaunchpadCreatePage = React.lazy(() => import("./pages/app/LaunchpadCreatePage"));
@@ -877,8 +878,8 @@ function AppContent() {
               <Route path="events/:eventNumber" element={<Suspense fallback={<PageLoader />}><EventPage /></Suspense>} />
               <Route path="communities" element={null} />
               <Route path="fractions" element={null} />
-              {/* Stores closed; old shop links land on Home. */}
-              <Route path="stores/*" element={<Navigate to="/app" replace />} />
+              <Route path="stores" element={null} />
+              <Route path="stores/:storeId" element={<Suspense fallback={<PageLoader />}><StoreDetailPage /></Suspense>} />
               <Route path="usernames" element={null} />
               <Route path="nfts" element={<NftsRedirect />} />
               <Route path="accounts" element={null} />
@@ -951,7 +952,8 @@ function AppContent() {
                 `/wallet` is deliberately absent: a real account registered
                 that handle in Feb 2026, and routing the bare path would take
                 their profile away. /app/wallet still works. */}
-            <Route path="/stores/*" element={<Navigate to="/app" replace />} />
+            <Route path="/stores" element={null} />
+            <Route path="/stores/:storeId" element={<Suspense fallback={<PageLoader />}><StoreDetailPage /></Suspense>} />
             <Route path="/fractions" element={null} />
             <Route path="/planned" element={null} />
             <Route path="/superpowers" element={<Suspense fallback={<PageLoader />}><SuperPowersPage /></Suspense>} />

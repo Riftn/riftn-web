@@ -5223,6 +5223,8 @@
     "resolve": "Çöz"
   },
   "stores": {
+    "seoTitle": "Riftn Mağazaları",
+    "seoDescription": "Riftn pazar yerinde bağımsız içerik üreticilerinin dijital ürünlerini, hediyelik eşyalarını, sanat eserlerini ve hizmetlerini keşfedin.",
     "podToggle": "İsteğe bağlı baskı ürünü",
     "podHint": "İsteğe bağlı baskı mağazanızdan bir ürün bağlayın. Sağlayıcı her siparişi basar ve gönderir, stok tutmanız gerekmez.",
     "podUrlLabel": "Ürün bağlantısı",

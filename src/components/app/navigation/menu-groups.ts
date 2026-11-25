@@ -29,7 +29,7 @@ export const MENU_GROUPS: readonly MenuGroupDef[] = [
   { id: 'main', labelKey: 'nav.groups.main', fallback: 'Main', labels: ['Profile', 'Explore', 'Notifications', 'Messages', 'Communities', 'Bookmarks', 'Assistant', 'Wallet', 'Settings'] },
   { id: 'create', labelKey: 'nav.groups.create', fallback: 'Create', labels: ['Creator', 'Editor', 'Stages', 'Live TV', 'Prompt', 'Command', 'Converter', 'Migrate', 'Packs'] },
   { id: 'discover', labelKey: 'nav.groups.discover', fallback: 'Discover', labels: ['Events', 'Arcade', 'Apps', 'Leaderboard', 'Stats', 'AI Agents', 'Creators'] },
-  { id: 'money', labelKey: 'nav.groups.money', fallback: 'Money', labels: ['Staking', 'SuperPowers', 'Fractions', 'Usernames', 'Accounts', 'Bounties', 'Affiliate', 'Advertising'] },
+  { id: 'money', labelKey: 'nav.groups.money', fallback: 'Money', labels: ['Staking', 'SuperPowers', 'Fractions', 'Usernames', 'Accounts', 'Bounties', 'Affiliate', 'Advertising', 'Stores'] },
   { id: 'riftn', labelKey: 'nav.groups.riftn', fallback: 'Riftn', labels: ['Feature Requests', 'Feedback', 'Governance', 'DAO', 'Careers', 'Guide', 'Glossary', 'Compare Riftn', 'Docs', 'Blog', 'Connect AI'] },
 ];
 

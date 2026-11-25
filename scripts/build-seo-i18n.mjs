@@ -43,6 +43,7 @@ export const SEO_I18N_ROUTES = {
   dex: '/dex',
   events: '/events',
   fractions: '/fractions',
+  stores: '/stores',
   jobs: '/jobs',
   launchpad: '/launchpad',
   // The namespace is `migrate`; the page has always lived at /migrate-youtube.

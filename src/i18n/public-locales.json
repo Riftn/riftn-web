@@ -1,5 +1,5 @@
 {
-  "version": "7228ba79ece85071",
+  "version": "5b4f7cb5a0b519cc",
   "routes": {
     "/": [
       "ar",
@@ -1891,6 +1891,13 @@
       "tr"
     ],
     "/stats": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/stores": [
       "ar",
       "es",
       "fr",
