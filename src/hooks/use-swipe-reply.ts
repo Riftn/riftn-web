@@ -33,7 +33,11 @@ export function useSwipeReply(
       dx = 0;
     };
     const onStart = (e: TouchEvent) => {
-      if (e.touches.length !== 1) { state = 'off'; return; }
+      if (e.touches.length !== 1) {
+        if (state === 'drag') reset();
+        state = 'off';
+        return;
+      }
       const t = e.touches[0];
       x0 = t.clientX;
       y0 = t.clientY;
@@ -41,7 +45,7 @@ export function useSwipeReply(
       state = 'maybe';
     };
     const onMove = (e: TouchEvent) => {
-      if (state === 'off' || state === 'idle') return;
+      if (state === 'off' || state === 'idle' || e.touches.length !== 1) return;
       const t = e.touches[0];
       const mx = t.clientX - x0;
       const my = t.clientY - y0;
@@ -75,6 +79,7 @@ export function useSwipeReply(
       el.removeEventListener('touchend', onEnd);
       el.removeEventListener('touchcancel', reset);
       el.style.transform = '';
+      el.style.transition = '';
     };
   }, [ref, enabled, !!onReply]); // eslint-disable-line react-hooks/exhaustive-deps
 }
