@@ -40,7 +40,7 @@ import {
   type LiveMini,
 } from '@/lib/live-mini';
 import { LIVE_HLS_CONFIG, playsNativeHls } from '@/lib/live/hls-standby';
-import { watchLiveProgress } from '@/lib/live/stall-watchdog';
+import { nativeLiveEdge, watchLiveProgress } from '@/lib/live/stall-watchdog';
 import { BIG_EVENT_HLS_CONFIG, isBigEventPlayback } from '@/lib/live-ingest';
 import { canPictureInPicture, catchUpToLiveEdge, onReturnToTab, togglePictureInPicture, useAutoPictureInPicture } from '@/lib/live-background';
 import { videoPlaybackManager } from '@/lib/video-playback-manager';
@@ -208,33 +208,45 @@ function LiveMiniSession({ mini }: { mini: LiveMini }) {
     };
 
     const session = mini.session;
-    let stopWatch: (() => void) | undefined;
+    const fallBack = () => {
+      if (disposed || !session || getLiveMini()?.session !== session) return;
+      video.srcObject = null;
+      dropLiveMiniSession();
+      void startHls();
+    };
     if (session) {
-      const fallBack = () => {
-        if (disposed || getLiveMini()?.session !== session) return;
-        stopWatch?.();
-        video.srcObject = null;
-        dropLiveMiniSession();
-        void startHls();
-      };
       session.setStateListener((state) => {
         if (state === 'failed') fallBack();
       });
       video.srcObject = session.stream;
       if (wantPlayRef.current) play();
-      stopWatch = watchLiveProgress(video, {
-        stallMs: 6000,
-        shouldWatch: () => wantPlayRef.current && visualActivity.isLivePlaybackAllowed(),
-        onStall: fallBack,
-      });
     } else {
       void startHls();
     }
 
+    const stopWatch = watchLiveProgress(video, {
+      stallMs: 6000,
+      watchInPictureInPicture: true,
+      shouldWatch: () => wantPlayRef.current && visualActivity.isLivePlaybackAllowed(),
+      onStall: (count) => {
+        if (video.srcObject) { fallBack(); return; }
+        const hls = hlsRef.current;
+        const edge = hls?.liveSyncPosition ?? nativeLiveEdge(video);
+        if (count === 1 && edge != null && Number.isFinite(edge) && edge > video.currentTime + 0.25) {
+          video.currentTime = edge;
+        } else if (hls) {
+          hls.recoverMediaError();
+        } else {
+          video.load();
+          play();
+        }
+      },
+    });
+
     return () => {
       disposed = true;
       clearTimeout(retry);
-      stopWatch?.();
+      stopWatch();
       session?.setStateListener(undefined);
       hlsRef.current?.destroy();
       hlsRef.current = null;

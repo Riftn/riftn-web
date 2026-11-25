@@ -7,11 +7,12 @@
  * The viewer sees a still picture and nothing ever recovers it.
  *
  * This watches the element instead of its events: while the video is meant to
- * be running (not paused, page visible) it checks every couple of seconds
+ * be running (not paused, with a visible playback surface) it checks every couple of seconds
  * whether the clock or the decoded frame count moved. When neither has for
  * `stallMs`, `onStall` gets called with how many stalls in a row this is, so
  * the caller can escalate (jump to live edge first, reload after).
  */
+import { isVideoInPictureInPicture } from '@/lib/picture-in-picture';
 
 export interface LiveStallWatchOptions {
   /** How long without progress counts as frozen. */
@@ -20,6 +21,8 @@ export interface LiveStallWatchOptions {
   onStall: (count: number) => void;
   /** Extra gate, e.g. "playback was requested". Defaults to always. */
   shouldWatch?: () => boolean;
+  /** Check a visible system PiP window even while its tab is hidden. */
+  watchInPictureInPicture?: boolean;
 }
 
 const CHECK_EVERY_MS = 2000;
@@ -34,7 +37,7 @@ function decodedFrames(video: HTMLVideoElement): number {
 
 export function watchLiveProgress(
   video: HTMLVideoElement,
-  { stallMs, onStall, shouldWatch }: LiveStallWatchOptions,
+  { stallMs, onStall, shouldWatch, watchInPictureInPicture = false }: LiveStallWatchOptions,
 ): () => void {
   let lastTime = video.currentTime;
   let lastFrames = decodedFrames(video);
@@ -51,7 +54,7 @@ export function watchLiveProgress(
     const watching =
       !video.paused &&
       typeof document !== 'undefined' &&
-      document.visibilityState === 'visible' &&
+      (document.visibilityState === 'visible' || (watchInPictureInPicture && isVideoInPictureInPicture(video))) &&
       (shouldWatch?.() ?? true);
     if (!watching) {
       rebase();

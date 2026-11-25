@@ -31,4 +31,22 @@ describe('watchLiveProgress', () => {
     expect(onStall).not.toHaveBeenCalled();
     stop();
   });
+
+  it('checks a floating video while its tab is hidden', () => {
+    vi.useFakeTimers();
+    const visibility = vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden');
+    const video = Object.assign(fakeVideo(), { webkitPresentationMode: 'inline' });
+    const onStall = vi.fn();
+    const stop = watchLiveProgress(video, { stallMs: 6000, onStall, watchInPictureInPicture: true });
+    try {
+      vi.advanceTimersByTime(6000);
+      expect(onStall).not.toHaveBeenCalled();
+      video.webkitPresentationMode = 'picture-in-picture';
+      vi.advanceTimersByTime(6000);
+      expect(onStall).toHaveBeenCalledOnce();
+    } finally {
+      stop();
+      visibility.mockRestore();
+    }
+  });
 });
