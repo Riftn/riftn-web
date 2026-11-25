@@ -61,8 +61,8 @@ it('hides a story without hiding live activity and can restore the full bar', as
   try {
     fireEvent.contextMenu(screen.getByRole('listitem', { name: 'River Song' }));
     expect(await screen.findByRole('menuitem', { name: 'Watch' })).toBeTruthy();
-    expect(screen.getByRole('menuitem', { name: 'Mute creator' })).toBeTruthy();
-    expect(screen.getByRole('menuitem', { name: 'Block creator' })).toBeTruthy();
+    expect(screen.getByRole('menuitem', { name: 'Mute Account' })).toBeTruthy();
+    expect(screen.getByRole('menuitem', { name: 'Block Creator' })).toBeTruthy();
     fireEvent.click(screen.getByRole('menuitem', { name: 'Hide story' }));
     expect(screen.queryByRole('listitem', { name: 'River Song' })).toBeNull();
     const live = screen.getByRole('listitem', { name: 'Live now' });
