@@ -395,13 +395,14 @@ export function UserPreferencesProvider({ children }: { children: ReactNode }) {
  * *push* changes outward (see `useUserPreferences().setPref`).
  */
 function LocalStoragePrefBridge() {
-  useSyncedPreference<string>(
+  useSyncedPreference<string | undefined>(
     'language',
-    readLS(LANGUAGE_LS_KEY) ?? 'en',
+    readLS(LANGUAGE_LS_KEY) ?? undefined,
     (v) => {
-      const lang = typeof v === 'string' && v ? v : 'en';
+      // Only a saved account setting can override the device's choice.
+      if (typeof v !== 'string' || !v) return;
+      const lang = v;
       try { localStorage.setItem(LANGUAGE_LS_KEY, lang); } catch { /* ignore */ }
-      document.documentElement.lang = lang;
       // Retarget everything already reading the language — otherwise a feed
       // rendered before preferences hydrated keeps translating into whatever
       // language this device happened to have.
@@ -410,11 +411,11 @@ function LocalStoragePrefBridge() {
       // reload fully applies even if the runtime switch is partial.
       if (i18n.language !== lang) {
         void loadLanguage(lang).then((ok) => {
-          if (ok && i18n.language !== lang) void i18n.changeLanguage(lang);
+          if (ok && readLS(LANGUAGE_LS_KEY) === lang && i18n.language !== lang) void i18n.changeLanguage(lang);
         });
       }
     },
-    'en',
+    undefined,
   );
 
   useSyncedPreference<boolean>(

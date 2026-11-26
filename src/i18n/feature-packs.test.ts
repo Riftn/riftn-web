@@ -41,4 +41,30 @@ describe('feature language packs', () => {
     expect(i18n.getResource('fr', 'translation', 'common.offlineProbe')).toBe('Hors ligne');
     expect(localStorage.getItem(oldKey)).not.toBeNull();
   });
+
+  it('starts in the saved language while the replacement core pack is still downloading', async () => {
+    vi.resetModules();
+    const manifest = (await import('./locale-manifest.json')).default;
+    const oldKey = 'locale-pack:previous-build:tr:core';
+    const currentKey = `locale-pack:${manifest.version}:tr:core`;
+    localStorage.setItem('user-preferred-language', 'tr');
+    localStorage.setItem(oldKey, JSON.stringify({ common: { offlineProbe: 'Çevrimdışı' } }));
+    let finishDownload!: (response: Response) => void;
+    const download = new Promise<Response>(resolve => { finishDownload = resolve; });
+    const fetchPack = vi.fn().mockReturnValue(download);
+    vi.stubGlobal('fetch', fetchPack);
+
+    const { default: i18n } = await import('./index');
+    expect(i18n.language).toBe('tr');
+    expect(document.documentElement.lang).toBe('tr');
+    expect(i18n.t('common.offlineProbe')).toBe('Çevrimdışı');
+    expect(fetchPack).toHaveBeenCalledTimes(1);
+    expect(localStorage.getItem(oldKey)).not.toBeNull();
+
+    finishDownload(new Response(JSON.stringify({ common: { offlineProbe: 'Güncel' } })));
+    await vi.waitFor(() => expect(i18n.t('common.offlineProbe')).toBe('Güncel'));
+    expect(localStorage.getItem(currentKey)).not.toBeNull();
+    expect(localStorage.getItem(oldKey)).toBeNull();
+    expect(localStorage.getItem('user-preferred-language')).toBe('tr');
+  });
 });
