@@ -150,9 +150,8 @@ interface TranslateRequest {
   /** Sent by call sites whose text anyone can read. Absent means private. */
   public?: boolean;
   /**
-   * 'i18n' from the locale fill scripts (scripts/i18n-fanout.mjs and
-   * scripts/docs-i18n-fanout.mjs). Answers are identical; only the cache's read
-   * counters leave that traffic out.
+   * 'i18n' excludes locale fills from cache read counters. 'chat' uses
+   * conversational translation for the supplied message only.
    */
   purpose?: string;
 }
@@ -310,14 +309,14 @@ async function translateWithMyMemory(text: string, targetLang: string, sourceLan
  */
 async function translateWithFreeModels(
   text: string,
-  targetLanguageName: string,
+  systemPrompt: string,
   publicContent: boolean,
   accepts: (output: unknown) => boolean,
   usage: TranslationUsage,
 ): Promise<{ result: TranslateResponse; provider: string } | null> {
   const res = await tryFree({
     messages: [
-      { role: 'system', content: TRANSLATOR_SYSTEM_PROMPT(targetLanguageName) },
+      { role: 'system', content: systemPrompt },
       { role: 'user', content: text },
     ],
     temperature: 0.1,
@@ -354,6 +353,12 @@ Rules:
 - Translate ALL of the text, do not skip any part
 - If there is nothing to translate (only links, tags, numbers, emoji, or a name), or the text is already in ${targetLanguageName}, return the input EXACTLY as given
 - Never refuse and never ask for clarification: your entire output must work as a drop-in replacement for the input`;
+
+const CHAT_TRANSLATION_RULES = `
+- Read the whole message before translating, including any code-switching. Use idiomatic equivalents for slang, jokes and idioms when the meaning is clear from the message.
+- Keep the speaker's tone and level of formality, including sarcasm, affection, anger and hesitation. Keep questions, uncertainty and negation intact.
+- Preserve who did what, names, times, amounts and other details. Where the wording is ambiguous, preserve that ambiguity rather than inventing context or choosing a more specific meaning.
+- Translate the message as written. Never reply to it, explain a joke, add details or leave out a clause.`;
 
 // A model that decides it cannot translate says so INSTEAD of translating, and
 // before this guard existed that prose was cached and rendered as the post's
@@ -469,7 +474,7 @@ function translationOpenAiKey(): string | Promise<string | null> {
 
 async function translateWithLuna(
   text: string,
-  targetLanguageName: string,
+  systemPrompt: string,
   accepts: (output: unknown) => boolean,
   maxOutputTokens: number,
   usage: TranslationUsage,
@@ -486,7 +491,7 @@ async function translateWithLuna(
       body: JSON.stringify({
         model,
         messages: [
-          { role: 'system', content: TRANSLATOR_SYSTEM_PROMPT(targetLanguageName) },
+          { role: 'system', content: systemPrompt },
           { role: 'user', content: text },
         ],
         reasoning_effort: 'none',
@@ -546,7 +551,7 @@ let geminiQuotaUntil = 0;
  */
 async function translateWithGemini(
   text: string,
-  targetLanguageName: string,
+  systemPrompt: string,
   accepts: (output: unknown) => boolean,
   maxOutputTokens: number,
   usage: TranslationUsage,
@@ -559,7 +564,7 @@ async function translateWithGemini(
 
   const body = JSON.stringify({
     systemInstruction: {
-      parts: [{ text: TRANSLATOR_SYSTEM_PROMPT(targetLanguageName) }],
+      parts: [{ text: systemPrompt }],
     },
     contents: [{ role: 'user', parts: [{ text }] }],
     generationConfig: {
@@ -668,7 +673,7 @@ let falParkedUntil = 0;
  */
 async function translateWithFal(
   text: string,
-  targetLanguageName: string,
+  systemPrompt: string,
   accepts: (output: unknown) => boolean,
   maxOutputTokens: number,
   usage: TranslationUsage,
@@ -689,7 +694,7 @@ async function translateWithFal(
       },
       body: JSON.stringify({
         model: 'anthropic/claude-haiku-4.5',
-        system_prompt: TRANSLATOR_SYSTEM_PROMPT(targetLanguageName),
+        system_prompt: systemPrompt,
         prompt: text,
         temperature: 0.1,
         // 2000 silently truncated long posts, and a truncation that gets
@@ -736,7 +741,7 @@ async function translateWithFal(
  */
 async function translateWithAI(
   text: string,
-  targetLanguageName: string,
+  systemPrompt: string,
   accepts: (output: unknown) => boolean,
   maxOutputTokens: number,
   usage: TranslationUsage,
@@ -760,7 +765,7 @@ async function translateWithAI(
       body: JSON.stringify({
         model: 'google/gemini-2.5-flash-lite',
         messages: [
-          { role: 'system', content: TRANSLATOR_SYSTEM_PROMPT(targetLanguageName) },
+          { role: 'system', content: systemPrompt },
           { role: 'user', content: text },
         ],
         temperature: 0.1,
@@ -817,6 +822,7 @@ serve(async (req) => {
     const { text, targetLang, sourceLang: suppliedSource, public: isPublicRequest, purpose }: TranslateRequest = await req.json();
     const isPublicText = isPublicRequest === true;
     const isLocaleFill = purpose === 'i18n';
+    const isChat = purpose === 'chat';
     if (typeof text !== 'string' || !text.trim() || typeof targetLang !== 'string' || !targetLang) {
       return new Response(
         JSON.stringify({ error: 'Missing required fields: text, targetLang' }),
@@ -840,8 +846,9 @@ serve(async (req) => {
       code: 'UNSUPPORTED_TARGET_LANGUAGE',
     }, 503);
 
-    // Short captions and link-heavy bodies cannot substantiate a legacy hint.
-    const sourceLang = letterCount >= 60 && typeof suppliedSource === 'string'
+    // A chat message can switch languages mid-sentence. Let the model read the
+    // whole line instead of treating one source hint as a dictionary pair.
+    const sourceLang = !isChat && letterCount >= 60 && typeof suppliedSource === 'string'
       && suppliedSource.toLowerCase() !== 'zh' && languageNameFor(suppliedSource)
       ? comparableLanguage(suppliedSource) : 'auto';
     const comparableTarget = comparableLanguage(targetLang);
@@ -855,7 +862,8 @@ serve(async (req) => {
       return accepts(output) && output.trim() !== text.trim();
     };
     const isChineseVariant = comparableTarget === 'zh' || comparableTarget === 'zh-tw';
-    const namespace = !isPublicText ? 'v4-private' : isChineseVariant ? 'v4-chinese' : 'v3';
+    const contentNamespace = !isPublicText ? 'v4-private' : isChineseVariant ? 'v4-chinese' : 'v3';
+    const namespace = isChat ? `${contentNamespace}-chat` : contentNamespace;
     const textHash = await getTextHash(text, namespace);
     const cacheKey = `${textHash}:${targetLang}:${sourceLang}`;
     const cached = translationCache.get(cacheKey);
@@ -913,10 +921,11 @@ serve(async (req) => {
 
     // Models see full context for long, ambiguous, dialect and mixed-language
     // text. Each attempt reserves capacity before its network request.
+    const systemPrompt = TRANSLATOR_SYSTEM_PROMPT(targetLanguageName) + (isChat ? CHAT_TRANSLATION_RULES : '');
     usage = createTranslationUsage(isLocaleFill, workStarted + 240000);
     const maxOutputTokens = Math.max(4000, Math.min(12000, new TextEncoder().encode(text).length));
     const free = maxOutputTokens === 4000
-      ? await translateWithFreeModels(text, targetLanguageName, isPublicText, accepts, usage)
+      ? await translateWithFreeModels(text, systemPrompt, isPublicText, accepts, usage)
       : null;
     if (free) return respond(free.result, `free-llm:${free.provider}`);
 
@@ -932,17 +941,17 @@ serve(async (req) => {
     }
     usage.skip('free', isPublicText ? 'unavailable' : 'private_unavailable');
 
-    const luna = await translateWithLuna(text, targetLanguageName, accepts, maxOutputTokens, usage);
+    const luna = await translateWithLuna(text, systemPrompt, accepts, maxOutputTokens, usage);
     if (luna) return respond(luna, 'openai:gpt-6-luna');
 
-    const gemini = await translateWithGemini(text, targetLanguageName, accepts, maxOutputTokens, usage);
+    const gemini = await translateWithGemini(text, systemPrompt, accepts, maxOutputTokens, usage);
     if (gemini) return respond(gemini, 'gemini');
 
-    const fal = await translateWithFal(text, targetLanguageName, accepts, maxOutputTokens, usage);
+    const fal = await translateWithFal(text, systemPrompt, accepts, maxOutputTokens, usage);
     if (fal) return respond(fal, 'fal');
 
     const gatewayReason = usage.fallback;
-    const gateway = await translateWithAI(text, targetLanguageName, accepts, maxOutputTokens, usage);
+    const gateway = await translateWithAI(text, systemPrompt, accepts, maxOutputTokens, usage);
     if (gateway) return respond(gateway, `lovable-gateway${isPublicText ? '' : ':private'} [${gatewayReason}]`);
 
     // All endpoints failed

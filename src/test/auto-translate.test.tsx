@@ -257,7 +257,7 @@ describe('auto-translate', () => {
 
     await waitFor(() => expect(invoke).toHaveBeenCalled());
     // Chat is private unless the call site marks it public.
-    expect(invoke).toHaveBeenCalledWith('translate-text', { body: { text: LINE, targetLang: 'es' } });
+    expect(invoke).toHaveBeenCalledWith('translate-text', { body: { text: LINE, targetLang: 'es', purpose: 'chat' } });
   });
 
   it('leaves a chat line with almost no letters alone', async () => {

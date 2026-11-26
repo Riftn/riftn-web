@@ -657,7 +657,7 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
     setIsTranslating(true);
     try {
       const { data, error } = await supabase.functions.invoke('translate-text', {
-        body: { text: draft, targetLang: code },
+        body: { text: draft, targetLang: code, purpose: 'chat' },
       });
       const out: string | undefined = data?.translatedText;
       if (error || !out) {

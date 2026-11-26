@@ -44,7 +44,7 @@ const luna = (content = translated, finishReason = 'stop') => Response.json({
   model: 'gpt-6-luna', choices: [{ finish_reason: finishReason, message: { content } }],
   usage: { prompt_tokens: 20, completion_tokens: 5, completion_tokens_details: { reasoning_tokens: 0 } },
 });
-const request = (text = source, options: { targetLang?: string; public?: boolean; sourceLang?: string } = {}) => new Request('https://fixture.invalid/translate-text', {
+const request = (text = source, options: { targetLang?: string; public?: boolean; sourceLang?: string; purpose?: 'chat' } = {}) => new Request('https://fixture.invalid/translate-text', {
   method: 'POST', body: JSON.stringify({ text, targetLang: 'es', public: false, ...options }),
 });
 
@@ -245,6 +245,31 @@ it('reserves the translation memory for known public standard language pairs', a
   expect(result.cached).toBeUndefined();
   expect(requests).toHaveLength(2);
   expect(requests[1]).toContain('googleapis');
+});
+
+it('uses the whole chat message and isolates conversational cache entries by visibility', async () => {
+  const text = 'Yeah, right. I am definitely not holding my breath until Friday. Ni de broma.\n@ana https://example.com/plan';
+  const expected = 'Sí, claro. No pienso hacerme ilusiones hasta el viernes. Ni de broma.\n@ana https://example.com/plan';
+  provider = url => url.includes('mymemory')
+    ? Response.json({ responseStatus: 200, responseData: { translatedText: `Vieja traducción. @ana https://example.com/plan` } })
+    : native(expected);
+  await import('../../supabase/functions/translate-text/index');
+  const standard = await (await hooks.handler!(request(text, { public: true, sourceLang: 'en' }))).json();
+  expect(standard.translatedText).toBe('Vieja traducción. @ana https://example.com/plan');
+
+  const publicChat = () => request(text, { public: true, sourceLang: 'es', purpose: 'chat' });
+  expect(await (await hooks.handler!(publicChat())).json()).toMatchObject({ translatedText: expected });
+  const modelCall = vi.mocked(fetch).mock.calls.find(([url]) => String(url).includes('googleapis'));
+  const payload = JSON.parse(String(modelCall?.[1]?.body));
+  expect(payload.contents[0].parts[0].text).toBe(text);
+  expect(payload.systemInstruction.parts[0].text).toContain('Keep questions, uncertainty and negation intact');
+  expect(await (await hooks.handler!(publicChat())).json()).toMatchObject({ translatedText: expected, cached: true });
+
+  const privateChat = await (await hooks.handler!(request(text, { purpose: 'chat' }))).json();
+  expect(privateChat).toMatchObject({ translatedText: expected });
+  expect(privateChat.cached).toBeUndefined();
+  expect(requests.filter(url => url.includes('mymemory'))).toHaveLength(1);
+  expect(requests.filter(url => url.includes('googleapis'))).toHaveLength(2);
 });
 
 it.each([
