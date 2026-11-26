@@ -4674,6 +4674,12 @@
   "arcade": {
     "riftnOriginals": "ألعاب Riftn الأصلية",
     "otherGames": "ألعاب أخرى",
+    "hideListing": "إخفاء من الأركيد",
+    "showListing": "إظهار في الأركيد",
+    "listingActionLabel": "{{action}} · {{game}}",
+    "listingHint": "يمكن لعب الألعاب المخفية عبر رابط مباشر.",
+    "listingUpdateError": "تعذّر تحديث ظهور اللعبة في الأركيد. حاول مجددًا.",
+    "listingsLoadError": "تعذّر تحميل بعض ألعاب الأركيد.",
     "gameCount_one": "{{count}} لعبة",
     "gameCount_two": "{{count}} لعبة",
     "gameCount_few": "{{count}} ألعاب",

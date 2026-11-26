@@ -4650,6 +4650,12 @@
   "arcade": {
     "riftnOriginals": "Originales de Riftn",
     "otherGames": "Otros juegos",
+    "hideListing": "Ocultar del Arcade",
+    "showListing": "Mostrar en el Arcade",
+    "listingActionLabel": "{{action}} · {{game}}",
+    "listingHint": "Los juegos ocultos siguen disponibles mediante un enlace directo.",
+    "listingUpdateError": "No se pudo cambiar la visibilidad en el Arcade. Inténtalo de nuevo.",
+    "listingsLoadError": "No se pudieron cargar algunos juegos del Arcade.",
     "gameCount_one": "{{count}} juego",
     "gameCount_other": "{{count}} juegos",
     "title": "Arcade",

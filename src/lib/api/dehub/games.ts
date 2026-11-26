@@ -10,6 +10,21 @@
  */
 import { apiCall } from './core';
 
+export interface ArcadeListingState {
+  hidden: string[];
+  editable: string[];
+}
+
+export const getArcadeListings = (signedIn: boolean) =>
+  apiCall<ArcadeListingState>('/api/games/arcade-listings', { requiresAuth: signedIn });
+
+export const setArcadeListing = (slug: string, hidden: boolean) =>
+  apiCall<{ slug: string; hidden: boolean }>(`/api/games/arcade-listings/${encodeURIComponent(slug)}`, {
+    method: 'POST',
+    requiresAuth: true,
+    body: { hidden },
+  });
+
 export interface GamePlayer {
   address: string;
   username: string | null;

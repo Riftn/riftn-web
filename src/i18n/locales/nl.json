@@ -4839,6 +4839,12 @@
   "arcade": {
     "riftnOriginals": "Originele Riftn-games",
     "otherGames": "Andere games",
+    "hideListing": "Verbergen in Arcade",
+    "showListing": "Tonen in Arcade",
+    "listingActionLabel": "{{action}} · {{game}}",
+    "listingHint": "Verborgen games blijven speelbaar via een directe link.",
+    "listingUpdateError": "De zichtbaarheid in Arcade kon niet worden aangepast. Probeer het opnieuw.",
+    "listingsLoadError": "Sommige Arcade-games konden niet worden geladen.",
     "gameCount_one": "{{count}} game",
     "gameCount_other": "{{count}} games",
     "title": "Arcade",
