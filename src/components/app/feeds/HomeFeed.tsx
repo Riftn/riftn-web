@@ -115,11 +115,7 @@ import { useHideWatched, useWatchedVideoIds } from '@/hooks/use-watched-videos';
 import { useFollowGroupList } from '@/lib/follow-groups';
 import { AD_INTERVALS, useAdLoad } from '@/lib/ad-load';
 import { useOptimisticPosts } from '@/hooks/use-optimistic-posts';
-import { RadioStationCard } from '@/components/app/radio/RadioStationCard';
 import { SwipeableCarousel } from '@/components/app/SwipeableCarousel';
-import { MobileWhoToFollowCarousel } from '@/components/app/mobile';
-import { NewMembersCarousel } from '@/components/app/NewMembersCarousel';
-import { LeaderboardCarousel } from '@/components/app/feeds/LeaderboardCarousel';
 import { HomeShortcuts } from '../navigation/HomeShortcuts';
 import { StoryShelf } from '@/components/app/stories/StoryShelf';
 import { PromptFlowModalLazy as PromptFlowModal } from '@/components/app/feeds/PromptFlowModalLazy';
@@ -134,6 +130,10 @@ import { useFollowTag } from './FollowTagBar';
 import type { FeedFilterLineItem } from './FeedFilterLine';
 // Inside the filter panel: kept off the boot path.
 const FeedPresetsRow = lazy(() => import('./FeedFilterLine').then((m) => ({ default: m.FeedPresetsRow })));
+const RadioStationCard = lazy(() => import('@/components/app/radio/RadioStationCard').then((m) => ({ default: m.RadioStationCard })));
+const MobileWhoToFollowCarousel = lazy(() => import('@/components/app/mobile/MobileWhoToFollowCarousel').then((m) => ({ default: m.MobileWhoToFollowCarousel })));
+const NewMembersCarousel = lazy(() => import('@/components/app/NewMembersCarousel').then((m) => ({ default: m.NewMembersCarousel })));
+const LeaderboardCarousel = lazy(() => import('@/components/app/feeds/LeaderboardCarousel'));
 import {
   FEED_PRESETS_CHANGED_EVENT,
   deleteFeedPreset,
@@ -1861,7 +1861,7 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
         case 'post':
           return <PostCard key={`post-${item.data.id}`} post={item.data} />;
         case 'video':
-          return <VideoCard key={`video-${item.data.id}`} video={item.data} aboveFold={index < 3} firstFeedPost={firstFeedPost} />;
+          return <VideoCard key={`video-${item.data.id}`} video={item.data} aboveFold={index < 3} deferMediaOnBoot firstFeedPost={firstFeedPost} />;
         case 'image':
           return <ImageCard key={`image-${item.data.id}`} post={item.data} aboveFold={index < 3} />;
         case 'shorts':
@@ -2035,6 +2035,14 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
       }
     });
     if (start < listedItems.length) segments.push({ items: listedItems.slice(start), start, inserts: [], shorts: false });
+    const renderInsert = (node: ReactElement) => {
+      const height = insertEstimate(String(node.key));
+      return (
+        <WindowedFeedItem key={node.key} className="my-3" estimatedHeight={height}>
+          <Suspense fallback={<div aria-hidden="true" style={{ height }} />}>{node}</Suspense>
+        </WindowedFeedItem>
+      );
+    };
     // One column: every card and insert is a sibling in one list, each under
     // its own key. Grouping them into segments keyed by start index meant a
     // row arriving late (a Shorts batch, the live row) re-keyed every segment
@@ -2048,9 +2056,7 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
             ...segment.items.map((item, offset) => renderFeedItem(item, segment.start + offset, 'feed',
               segment.shorts && offset === segment.items.length - 1,
               offset === 0 && index > 0 && segments[index - 1].shorts)),
-            ...segment.inserts.map(node => (
-              <WindowedFeedItem key={node.key} className="my-3" estimatedHeight={insertEstimate(String(node.key))}>{node}</WindowedFeedItem>
-            )),
+            ...segment.inserts.map(renderInsert),
           ])}
         </div>
       );
@@ -2067,9 +2073,7 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
       // cannot remount a Shorts viewer or reset its horizontal scroll.
       // Shorts rows and carousels hold the most media on the page; windowed like
       // the cards so a row far above lets go of its videos and posters.
-      ...segment.inserts.map(node => (
-        <WindowedFeedItem key={node.key} className="my-3" estimatedHeight={insertEstimate(String(node.key))}>{node}</WindowedFeedItem>
-      )),
+      ...segment.inserts.map(renderInsert),
     ])}</>;
   };
 
