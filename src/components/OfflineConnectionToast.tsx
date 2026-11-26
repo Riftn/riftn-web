@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { toast } from '@/components/ui/sonner';
+import { RTL_LANGUAGES } from '@/i18n';
 import titles from '@/i18n/offline-connection-titles.json';
 import { resolveLanguage } from '@/lib/user-language-store';
 
@@ -23,9 +24,13 @@ export function OfflineConnectionToast() {
       const requested = new URLSearchParams(window.location.search).get('hl')?.toLowerCase();
       const language = requested && hasTitle(requested) ? requested : resolveLanguage();
       const code = hasTitle(language) ? language : 'en';
-      toast.message(<bdi lang={code.replace('_', '-')}>{titlesByLanguage[code]}</bdi>, {
+      // A render function keeps Sonner's standard title layout and close-button clearance.
+      toast.message(() => <bdi lang={code.replace('_', '-')}>{titlesByLanguage[code]}</bdi>, {
         id: TOAST_ID,
         duration: 8000,
+        // Locale packs may not have set the document's direction yet.
+        style: { direction: RTL_LANGUAGES.has(code) ? 'rtl' : 'ltr' },
+        classNames: { closeButton: '!start-auto !end-2' },
       });
     }
 

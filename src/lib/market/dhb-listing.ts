@@ -27,6 +27,8 @@ const DHB_ADDRESSES = new Set(
  * `$DEHUB`), the bare tickers `RIFT` and `DHB`, or a DHB contract address. Bare "dehub"
  * stays a brand search for the @d account.
  */
+export const RIFT_REFERENCE_PRICE = '$0.001';
+
 export function isDhbListingQuery(query: string): boolean {
   const q = query.trim();
   if (!q) return false;

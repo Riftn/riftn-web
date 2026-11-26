@@ -57,7 +57,22 @@
     "cancel": "Annuler",
     "getKey": "Obtenir une clé {{name}}",
     "showLess": "Afficher uniquement mes clés",
-    "addAnother": "Ajouter un autre fournisseur"
+    "addAnother": "Ajouter un autre fournisseur",
+    "providerDescriptions": {
+      "openai": "Builder (modèles GPT)",
+      "fal": "Outils d’image, de vidéo, de 3D et de photo",
+      "kie": "Images et vidéos",
+      "replicate": "Images et vidéos",
+      "xai": "Chat et images avec Grok",
+      "elevenlabs": "Voix, doublage, musique et effets sonores",
+      "gemini": "Traduction, aide à la rédaction et résumés",
+      "venice": "Discussion avec l’assistant",
+      "perplexity": "Recherche web avec l’assistant",
+      "deepgram": "Transcriptions et sous-titres en direct",
+      "openrouter": "Des centaines de modèles de chat et de texte avec une seule clé",
+      "groq": "Chat et texte rapides",
+      "mistral": "Chat et texte"
+    }
   },
   "resetWallet": {
     "mismatch": "Les mots de passe ne correspondent pas",
@@ -21673,6 +21688,12 @@
     "enter": "Entrer dans le donjon"
   },
   "tokenLaunch": {
+    "tickerInfo": "Infos",
+    "tickerContract": "Adresse du contrat",
+    "tickerBuy": "Acheter",
+    "referencePrice": "Prix de référence dans l’app",
+    "contractPending": "À confirmer",
+    "earnOnly": "Pour l’instant, vous pouvez uniquement gagner des jetons en utilisant l’application.",
     "riftTitle": "Lancement de $RIFT sur chaîne",
     "riftStatus": "$RIFT est la monnaie interne de Riftn. Vous pouvez déjà l’utiliser dans Riftn. Le jeton sur chaîne reste à lancer et ne dispose d’aucune adresse de contrat ni cotation officielle. Inscrivez-vous pour recevoir un e-mail au lancement.",
     "riftSeoDescription": "$RIFT est la monnaie interne de Riftn. Vous pouvez déjà l’utiliser dans Riftn. Le jeton sur chaîne reste à lancer et ne dispose d’aucune adresse de contrat ni cotation officielle.",

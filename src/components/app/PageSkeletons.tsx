@@ -130,9 +130,8 @@ export function ShelfSeatSkeleton() {
   }
   return (
     <div data-shelf-seat="row" aria-hidden="true" className="flex gap-2 overflow-hidden py-[2px] mb-[10px]">
-      <div className="home-skeleton-block flex-none w-[52px] h-[52px] rounded-[17px]" />
-      {[0, 1, 2].map(index => (
-        <div key={index} className="home-skeleton-block flex-none w-[150px] h-[52px] rounded-[17px]" />
+      {[0, 1, 2, 3].map(index => (
+        <div key={index} className="home-skeleton-block flex-none w-[80px] h-[96px] rounded-xl" />
       ))}
     </div>
   );

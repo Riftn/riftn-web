@@ -1172,7 +1172,7 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
       {/* Input Area */}
       <div className={isSearchOpen ? 'hidden' : 'relative'}>
         {pendingShareId && (!sharedLiveUrl || !selectedRoomId) && (
-          <p role="status" className="px-4 py-2 text-sm text-muted-foreground">{t('common.loading')}</p>
+          <p role="status" className="px-4 py-2 text-sm text-zinc-400">{t('common.loading')}</p>
         )}
         <ChatInput
         voiceMaxDuration={29}
