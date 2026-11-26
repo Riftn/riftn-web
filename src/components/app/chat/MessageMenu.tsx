@@ -8,6 +8,7 @@ import { pushRecent, readRecents } from '@/lib/emoji';
 import { InlineEmoji } from '@/components/app/emoji/EmojiText';
 import { ChatReactorsList, reactionEntries, reactorCount, type ReactorsSource } from './ChatReactorsList';
 import { ReactorFaces } from './ReactorFaces';
+import { placeMessageMenu } from './message-menu-position';
 import '@/styles/chat-hold.css';
 
 export interface MessageMenuAction {
@@ -42,10 +43,11 @@ export interface MessageMenuProps {
   width?: number;
   /** A line of who and what at the head of the card, e.g. a post's author. */
   header?: ReactNode;
+  /** Keep the menu inside the positioned modal that owns the chat. */
+  container?: HTMLElement;
 }
 
 const MENU_W = 248;
-const EDGE = 10;
 const EASE = [0.2, 0.9, 0.25, 1] as const;
 
 const keep = (event: SyntheticEvent) => event.stopPropagation();
@@ -66,11 +68,12 @@ const KEEP = {
  * Opens at the pointer, flips to stay on screen, grows from the corner nearest
  * the pointer. Arrow keys move through the actions, Enter picks, Esc closes.
  */
-export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact, allowMore = true, actions, reactors, meta, label, width = MENU_W, header }: MessageMenuProps) {
+export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact, allowMore = true, actions, reactors, meta, label, width = MENU_W, header, container }: MessageMenuProps) {
   const { t } = useTranslation();
   const open = !!point;
   const wrapRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+  const openerRef = useRef<HTMLElement | null>(null);
   const [view, setView] = useState<'main' | 'emoji' | 'people'>('main');
   const [focus, setFocus] = useState(-1);
   const [pos, setPos] = useState<{ left: number; top: number; originX: string; originY: string } | null>(null);
@@ -86,23 +89,20 @@ export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact
     setFocus(-1);
   }, [open, point?.x, point?.y]);
 
-  // Place against the real size: below-right of the pointer, flipped left or
-  // up when that would leave the window, never closer than EDGE to a side.
+  useLayoutEffect(() => {
+    if (!open || !container) return;
+    const active = document.activeElement;
+    if (active === wrapRef.current) return;
+    openerRef.current = active instanceof HTMLElement && container.contains(active) ? active : null;
+    wrapRef.current?.focus({ preventScroll: true });
+  }, [open, container]);
+
+  // Measure the menu before flipping or clamping it to the available space.
   useLayoutEffect(() => {
     if (!point) { setPos(null); return; }
     const el = wrapRef.current;
-    const w = el?.offsetWidth || width;
-    const h = el?.offsetHeight || 360;
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const flipX = point.x + w + EDGE > vw;
-    const flipY = point.y + h + EDGE > vh && point.y - h - EDGE > 0;
-    let left = flipX ? point.x - w : point.x;
-    let top = flipY ? point.y - h : point.y;
-    left = Math.max(EDGE, Math.min(left, vw - w - EDGE));
-    top = Math.max(EDGE, Math.min(top, vh - h - EDGE));
-    setPos({ left, top, originX: flipX ? 'right' : 'left', originY: flipY ? 'bottom' : 'top' });
-  }, [point, view, actions.length, showReactors, width]);
+    setPos(placeMessageMenu(point, el?.offsetWidth || width, el?.offsetHeight || 360, container));
+  }, [point, view, actions.length, showReactors, width, container]);
 
   const close = useCallback(() => onClose(), [onClose]);
 
@@ -119,8 +119,14 @@ export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault();
-        if (view !== 'main') setView('main');
-        else close();
+        if (container) e.stopPropagation();
+        if (view !== 'main') {
+          setView('main');
+          if (container) wrapRef.current?.focus({ preventScroll: true });
+        } else {
+          close();
+          openerRef.current?.focus({ preventScroll: true });
+        }
         return;
       }
       if (view !== 'main') return;
@@ -133,7 +139,7 @@ export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact
         });
         return;
       }
-      if (e.key === 'Enter' && focus >= 0 && actions[focus]) {
+      if (e.key === 'Enter' && focus >= 0 && actions[focus] && (!container || cardRef.current?.contains(document.activeElement))) {
         e.preventDefault();
         actions[focus].onSelect();
         close();
@@ -157,7 +163,7 @@ export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact
       window.removeEventListener('blur', close);
       window.removeEventListener('keydown', onKey, true);
     };
-  }, [open, close, view, actions, focus]);
+  }, [open, close, view, actions, focus, container]);
 
   useEffect(() => {
     if (focus < 0) return;
@@ -168,6 +174,7 @@ export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact
     if (!/^:.*:$/.test(emoji)) pushRecent(emoji);
     onReact?.(emoji);
     close();
+    openerRef.current?.focus({ preventScroll: true });
   };
 
   // With the chevron, the row side-scrolls: this person's recent reactions
@@ -203,26 +210,30 @@ export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact
           key="msg-menu"
           ref={wrapRef}
           role="menu"
+          tabIndex={container ? -1 : undefined}
           aria-label={label ?? t('chatHold.title', 'Message options')}
           data-msg-menu
           data-no-navigate
+          data-vaul-no-drag={container ? true : undefined}
           {...KEEP}
           initial={{ opacity: 0, scale: 0.92 }}
           animate={{ opacity: pos ? 1 : 0, scale: 1 }}
           exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.1 } }}
           transition={{ duration: 0.16, ease: EASE }}
           style={{
-            position: 'fixed',
-            left: pos?.left ?? point!.x,
-            top: pos?.top ?? point!.y,
+            position: container ? 'absolute' : 'fixed',
+            left: pos?.left,
+            top: pos?.top,
             width: view === 'emoji' ? Math.max(340, width) : width,
+            maxWidth: container ? 'calc(100% - 20px)' : undefined,
+            maxHeight: container ? 'calc(100% - 20px)' : undefined,
             zIndex: 260,
             transformOrigin: pos ? `${pos.originX} ${pos.originY}` : 'left top',
           }}
           className="flex flex-col gap-1.5"
         >
           {showEmoji && view === 'main' && (
-            <div className={`flex items-center gap-0.5 self-stretch rounded-full py-1 pl-1.5 ${allowMore ? 'pr-3.5' : 'pr-1.5'} ${width > MENU_W && !allowMore ? 'justify-between' : ''}`} data-msg-menu-surface data-msg-menu-emoji>
+            <div className={`flex items-center gap-0.5 shrink-0 self-stretch rounded-full py-1 pl-1.5 ${allowMore ? 'pr-3.5' : 'pr-1.5'} ${width > MENU_W && !allowMore ? 'justify-between' : ''}`} data-msg-menu-surface data-msg-menu-emoji>
               <div className={allowMore ? 'flex min-w-0 flex-1 items-center gap-0.5 -my-1.5 overflow-x-auto overscroll-x-contain py-1.5 [mask-image:linear-gradient(to_right,#000_88%,transparent)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden' : 'contents'} data-msg-menu-emoji-scroll>
               {chips.map((emoji, i) => (
                 <motion.button
@@ -258,7 +269,7 @@ export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact
             </div>
           )}
 
-          <div ref={cardRef} className="overflow-hidden rounded-[16px] p-1" data-msg-menu-surface>
+          <div ref={cardRef} className={container ? "min-h-0 overflow-y-auto overscroll-contain rounded-[16px] p-1" : "overflow-hidden rounded-[16px] p-1"} data-msg-menu-surface>
             {view === 'emoji' && (
               <div>
                 <button type="button" onClick={() => setView('main')} className="mb-1 flex items-center gap-1 rounded-[10px] px-2 py-1.5 text-[13px] font-semibold" data-msg-menu-item>
@@ -325,6 +336,6 @@ export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact
         </motion.div>
       )}
     </AnimatePresence>,
-    document.body,
+    container ?? document.body,
   );
 }
