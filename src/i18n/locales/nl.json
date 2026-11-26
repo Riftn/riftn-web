@@ -1272,6 +1272,8 @@
     "newFollowers": "Nieuwe volgers",
     "newFollowersDesc": "Wanneer iemand je volgt",
     "directMessages": "Directe berichten",
+    "privateMessagePushOnly": "Privéberichten alleen via pushmeldingen",
+    "privateMessagePushOnlyDesc": "Ontvang meldingen over nieuwe één-op-éénberichten alleen via push. Meldingen die al in je inbox staan, blijven daar.",
     "directMessagesDesc": "Wanneer je nieuwe berichten ontvangt",
     "quietHours": "Stille uren",
     "enableQuietHours": "Stille uren inschakelen",

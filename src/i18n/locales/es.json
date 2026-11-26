@@ -1272,6 +1272,8 @@
     "newFollowers": "Nuevos seguidores",
     "newFollowersDesc": "Cuando alguien te sigue",
     "directMessages": "Mensajes directos",
+    "privateMessagePushOnly": "Mensajes privados solo por notificación push",
+    "privateMessagePushOnlyDesc": "Recibe las alertas de nuevos mensajes privados solo por notificación push. Las alertas que ya están en tu bandeja de notificaciones se conservan.",
     "directMessagesDesc": "Cuando recibes nuevos mensajes",
     "quietHours": "Horas de silencio",
     "enableQuietHours": "Activar horas de silencio",

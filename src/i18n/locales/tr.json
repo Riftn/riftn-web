@@ -1272,6 +1272,8 @@
     "newFollowers": "Yeni Takipçiler",
     "newFollowersDesc": "Birisi sizi takip ettiğinde",
     "directMessages": "Direkt Mesajlar",
+    "privateMessagePushOnly": "Özel mesajlar için yalnızca anlık bildirim",
+    "privateMessagePushOnlyDesc": "Yeni bire bir mesajların bildirimlerini yalnızca anlık bildirim olarak al. Bildirim kutundaki mevcut bildirimler orada kalır.",
     "directMessagesDesc": "Yeni mesaj aldığınızda",
     "quietHours": "Sessiz Saatler",
     "enableQuietHours": "Sessiz Saatleri Etkinleştir",

@@ -1272,6 +1272,8 @@
     "newFollowers": "متابعون جدد",
     "newFollowersDesc": "عندما يتابعك شخص ما",
     "directMessages": "الرسائل المباشرة",
+    "privateMessagePushOnly": "الرسائل الخاصة عبر الإشعارات الفورية فقط",
+    "privateMessagePushOnlyDesc": "تلقّ تنبيهات الرسائل الفردية الجديدة كإشعارات فورية فقط. تبقى التنبيهات الموجودة في صندوق الوارد.",
     "directMessagesDesc": "عندما تتلقى رسائل جديدة",
     "quietHours": "ساعات الهدوء",
     "enableQuietHours": "تفعيل ساعات الهدوء",
