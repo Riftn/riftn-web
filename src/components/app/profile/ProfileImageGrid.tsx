@@ -117,7 +117,7 @@ export const ProfileImageGrid = memo(function ProfileImageGrid({ images }: Profi
                   type="button"
                   variant="outline"
                   size="icon"
-                  className="size-11"
+                  className="size-11 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current"
                   data-on-media
                   data-swipe-back
                   data-swipe-back-protect-sideways
