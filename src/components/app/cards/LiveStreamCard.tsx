@@ -29,7 +29,7 @@ import {
   releaseMediaSession,
   setMediaSessionPlaying,
 } from '@/lib/media-session';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import MoreVertical from "@/components/ui/cut-icons/morevertical";
 import { Heart, StopCircle, Activity, Loader2, ChevronDown, Headphones } from "lucide-react";
 import AssistantNavIcon from "@/components/ui/AssistantNavIcon";
@@ -109,6 +109,8 @@ import { peekLiveSession, snapshot as snapshotLiveFrame, takeLiveSession } from 
 import { claimLiveMini, getLiveMiniVideo, openLiveMini, type LiveMiniMode } from '@/lib/live-mini';
 import { useStreamActions, useStreamActivities } from '@/hooks/use-livestream';
 import { useBlockAuthor } from '@/hooks/use-block-author';
+import { useLiveRoomSwipe } from '@/hooks/use-live-room-swipe';
+import { liveSwipeDirection } from '@/lib/live/room-swipe';
 import { useNotifyWhenLive } from '@/hooks/use-notify-when-live';
 import { GatedMedia } from './GatedMedia';
 import { useFeedViewTracking } from '@/hooks/use-view-tracking';
@@ -481,7 +483,17 @@ export function LiveStreamCard({ stream: streamProp, postPage, chatSlot, immersi
   const [fundingGift, setFundingGift] = useState(false);
   const [dhbBalance, setDhbBalance] = useState<string | null>(null);
   const [balanceLoading, setBalanceLoading] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [portraitLive, setPortraitLive] = useState(false);
+  const updatePortrait = useCallback(() => {
+    const video = videoRef.current;
+    setPortraitLive(!!video && video.videoWidth > 0 && video.videoHeight > video.videoWidth);
+  }, []);
+  const setLiveVideoRef = useCallback((video: HTMLVideoElement | null) => {
+    videoRef.current?.removeEventListener('resize', updatePortrait);
+    videoRef.current = video;
+    if (immersive && !swipeFeed) video?.addEventListener('resize', updatePortrait);
+  }, [immersive, swipeFeed, updatePortrait]);
   const playbackAllowed = useFeedPlaybackAllowed();
   // The live itself keeps playing with the tab in the background or the
   // window unfocused (see lib/live-background); only a call or leaving the
@@ -490,12 +502,11 @@ export function LiveStreamCard({ stream: streamProp, postPage, chatSlot, immersi
   useEffect(() => {
     if (!livePlaybackAllowed && (!isVideoInPictureInPicture(videoRef.current) || visualActivity.isCallBusy())) videoRef.current?.pause();
   }, [livePlaybackAllowed]);
-  // Full-bleed only. A live can't be paused, so the picture itself is the
-  // clear button: a tap on it, or a swipe down over the lower half as the
-  // shorts viewer does, clears the chrome. Only a small rotate button stays,
-  // to flip between portrait and landscape. A tap or a swipe up brings it all
-  // back, in portrait.
-  const [chromeHidden, setChromeHidden] = useState(false);
+  // Keep the open picture clear across room switches, if the viewer cleared it.
+  const { state: routeState } = useLocation();
+  const [chromeHidden, setChromeHidden] = useState(() =>
+    immersive && !swipeFeed && routeState?.liveControlsHidden === true,
+  );
   // The click that follows the touch which cleared the chrome would land on
   // the restore layer and bring it straight back.
   const chromeToggledAt = useRef(0);
@@ -504,21 +515,14 @@ export function LiveStreamCard({ stream: streamProp, postPage, chatSlot, immersi
     chromeToggledAt.current = Date.now();
     setChromeHidden(hidden);
   }, []);
-  const swipeStart = useRef<{ x: number; y: number } | null>(null);
+  const swipeStart = useRef<{ id: number; x: number; y: number } | null>(null);
   const onSwipeStart = useCallback((e: React.TouchEvent) => {
-    if (e.touches.length !== 1) { swipeStart.current = null; return; }
-    swipeStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    const touch = e.touches.length === 1 ? e.touches[0] : null;
+    swipeStart.current = touch ? { id: touch.identifier, x: touch.clientX, y: touch.clientY } : null;
   }, []);
-  const onSwipeEnd = useCallback((e: React.TouchEvent, direction: 'down' | 'up') => {
-    const start = swipeStart.current;
+  const onSwipeCancel = useCallback(() => {
     swipeStart.current = null;
-    const touch = e.changedTouches[0];
-    if (!start || !touch) return;
-    const dy = touch.clientY - start.y;
-    const dx = Math.abs(touch.clientX - start.x);
-    if (direction === 'down' && dy > 40 && dy > dx) setHidden(true);
-    if (direction === 'up' && -dy > 40 && -dy > dx) setHidden(false);
-  }, [setHidden]);
+  }, []);
   // Landscape: the real screen lock where the browser has one (Android
   // Chrome, in fullscreen), else the picture is turned a quarter in CSS
   // (iPhone Safari has no orientation lock).
@@ -526,6 +530,7 @@ export function LiveStreamCard({ stream: streamProp, postPage, chatSlot, immersi
   // In the Shorts swipe a landscape stream fills the phone, cropped to the box
   // the creator chose. Turned to landscape it is the whole picture again.
   const cropToVertical = immersive && rotation === 'none' && swipeFeed?.verticalCrop?.enabled ? swipeFeed.verticalCrop : null;
+  const coverPortrait = immersive && !swipeFeed && rotation === 'none' && portraitLive;
   const unrotate = useCallback(() => {
     setRotation((current) => {
       if (current === 'native') {
@@ -633,6 +638,24 @@ export function LiveStreamCard({ stream: streamProp, postPage, chatSlot, immersi
       stream.creatorId &&
       walletAddress.toLowerCase() === stream.creatorId.toLowerCase()
   );
+  const { canSwitchRoom, switchRoom } = useLiveRoomSwipe(
+    immersive && !swipeFeed && !!stream.isLive && !streamEnded && !isOwnStream,
+    stream.streamId,
+    isAuthenticated,
+  );
+  const onSwipeEnd = useCallback((e: React.TouchEvent) => {
+    const start = swipeStart.current;
+    swipeStart.current = null;
+    const touch = e.changedTouches[0];
+    if (!start || !touch || start.id !== touch.identifier || e.touches.length !== 0 || keyboardOpen) return;
+    const direction = liveSwipeDirection(touch.clientX - start.x, touch.clientY - start.y);
+    if (!direction) return;
+    if (canSwitchRoom && rotation === 'none') {
+      switchRoom(direction, chromeHidden);
+    } else if (direction === (chromeHidden ? 1 : -1)) {
+      setHidden(!chromeHidden);
+    }
+  }, [canSwitchRoom, chromeHidden, keyboardOpen, rotation, setHidden, switchRoom]);
   // Ask to join sits in the live's own controls (not on the picture); it
   // hides itself unless the host takes requests.
   const canAskToJoin = !!stream.streamId && !!stream.isLive && !streamEnded && !isOwnStream;
@@ -2190,9 +2213,10 @@ export function LiveStreamCard({ stream: streamProp, postPage, chatSlot, immersi
             <div style={cropToVertical ? VERTICAL_FRAME_STYLE : PASS_THROUGH_STYLE}>
             <div style={cropToVertical ? VERTICAL_WINDOW_STYLE : PASS_THROUGH_STYLE}>
             <video
-              ref={videoRef}
-              className={cropToVertical ? 'object-cover' : 'w-full h-full object-contain'}
+              ref={setLiveVideoRef}
+              className={cropToVertical ? 'object-cover' : cn('w-full h-full', coverPortrait ? 'object-cover' : 'object-contain')}
               style={cropToVertical ? verticalCropStyle(cropToVertical) : chatBeside ? CHAT_BESIDE_STYLE : undefined}
+              onLoadedMetadata={immersive && !swipeFeed ? updatePortrait : undefined}
               autoPlay
               playsInline
               {...{"webkit-playsinline": ""}}
@@ -2450,11 +2474,8 @@ export function LiveStreamCard({ stream: streamProp, postPage, chatSlot, immersi
         {/* Full-bleed chrome. Inside the media container so it travels with
             the picture, and after the overlays so nothing is drawn on top
             of the close button. */}
-        {/* Clear the chrome: a tap anywhere on the open picture, or a swipe
-            down over its lower half. Under the chrome, so the chat and
-            buttons keep their own touches. Once cleared, the whole frame
-            takes a tap or a swipe up to bring it all back, and only the
-            rotate button is drawn. */}
+        {/* The open picture handles room swipes and the tap to clear or
+            restore controls. Chat and playback controls sit above it. */}
         {immersive && !chromeHidden && (
           <div
             aria-hidden
@@ -2462,7 +2483,8 @@ export function LiveStreamCard({ stream: streamProp, postPage, chatSlot, immersi
             data-live-swipe-zone
             className="absolute inset-0 z-[15] touch-pan-x"
             onTouchStart={swipeFeed ? undefined : onSwipeStart}
-            onTouchEnd={swipeFeed ? undefined : (e) => onSwipeEnd(e, 'down')}
+            onTouchEnd={swipeFeed ? undefined : onSwipeEnd}
+            onTouchCancel={swipeFeed ? undefined : onSwipeCancel}
             onClick={(e) => { e.stopPropagation(); setHidden(true); }}
           />
         )}
@@ -2473,7 +2495,9 @@ export function LiveStreamCard({ stream: streamProp, postPage, chatSlot, immersi
             onRestore={() => setHidden(false)}
             onRotate={() => void toggleRotation()}
             onTouchStart={swipeFeed ? undefined : onSwipeStart}
-            onTouchEnd={swipeFeed ? undefined : (e) => onSwipeEnd(e, 'up')}
+            onTouchEnd={swipeFeed ? undefined : onSwipeEnd}
+            onTouchCancel={swipeFeed ? undefined : onSwipeCancel}
+            swipeRooms={canSwitchRoom && rotation === 'none'}
           />
         )}
         {immersive && (

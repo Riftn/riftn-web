@@ -12,8 +12,8 @@ const EMPTY: VideoPicture = { left: 0, top: 0, width: 0, height: 0, portrait: fa
  *
  * Measured against the `<video>` element's own box, not the layer's: in
  * fullscreen with chat open the container also holds the chat column, so the
- * picture sits in only part of it. Inside that box the frame is drawn
- * `object-contain`, so the picture is narrower still on a letterboxed stream.
+ * picture sits in only part of it. The video's fit determines whether the
+ * picture sits inside the box or extends beyond its clipped edges.
  *
  * Kept current across resizes, rotation, fullscreen and a change of stream
  * resolution: a WebRTC stream can switch size mid-broadcast, and a screen share
@@ -41,7 +41,8 @@ export function useVideoPictureRect(
         const videoBox = v ? v.getBoundingClientRect() : layerBox;
         const vw = v?.videoWidth ?? 0;
         const vh = v?.videoHeight ?? 0;
-        const inVideo = containedPicture(videoBox.width, videoBox.height, vw, vh);
+        const cover = v !== null && window.getComputedStyle(v).objectFit === 'cover';
+        const inVideo = containedPicture(videoBox.width, videoBox.height, vw, vh, cover);
         const next: VideoPicture = {
           left: videoBox.left - layerBox.left + inVideo.left,
           top: videoBox.top - layerBox.top + inVideo.top,
