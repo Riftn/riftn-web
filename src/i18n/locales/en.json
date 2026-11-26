@@ -21482,6 +21482,18 @@
     "followFailed": "Could not follow. Try again."
   },
   "appTokens": {
+    "previewTitle": "$RIFT off-chain preview",
+    "previewReadOnly": "Read only",
+    "previewExplanation": "Credit amounts show past activity and are already reflected in your in-app balance.",
+    "previewUnavailable": "RIFT preview unavailable.",
+    "previewBalance": "Available in-app balance",
+    "previewFanSiteCredit": "Fan.site merger credit",
+    "previewNoFanSiteCredit": "No recorded credit",
+    "previewCredits": "Recent transfers received and account credits",
+    "previewAccountCredit": "Account credit",
+    "previewReceivedFrom": "Received from {{name}}",
+    "previewReceived": "Transfer received",
+    "previewNoCredits": "No recent transfers or account credits.",
     "reviewTransfer": "Review transfer",
     "transferComplete": "Transfer complete",
     "balanceAfterSend": "After sending: {{amount}} {{symbol}}",

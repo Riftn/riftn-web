@@ -21547,6 +21547,18 @@
     "followFailed": "تعذرت المتابعة. حاول مرة أخرى."
   },
   "appTokens": {
+    "previewTitle": "معاينة $RIFT خارج السلسلة",
+    "previewReadOnly": "للقراءة فقط",
+    "previewExplanation": "تعرض المبالغ المضافة النشاط السابق وقد احتُسبت بالفعل ضمن رصيدك في التطبيق.",
+    "previewUnavailable": "معاينة RIFT غير متاحة.",
+    "previewBalance": "الرصيد المتاح في التطبيق",
+    "previewFanSiteCredit": "رصيد اندماج Fan.site",
+    "previewNoFanSiteCredit": "لا يوجد رصيد مضاف مسجّل",
+    "previewCredits": "التحويلات الواردة والمبالغ المضافة إلى الحساب مؤخرًا",
+    "previewAccountCredit": "مبلغ مضاف إلى الحساب",
+    "previewReceivedFrom": "تحويل وارد من {{name}}",
+    "previewReceived": "تحويل وارد",
+    "previewNoCredits": "لا توجد تحويلات واردة أو مبالغ مضافة إلى الحساب مؤخرًا.",
     "reviewTransfer": "مراجعة التحويل",
     "transferComplete": "اكتمل التحويل",
     "balanceAfterSend": "بعد الإرسال: {{amount}} {{symbol}}",

@@ -21508,6 +21508,18 @@
     "followFailed": "No se pudo seguir. Inténtalo de nuevo."
   },
   "appTokens": {
+    "previewTitle": "Vista previa de $RIFT fuera de la cadena",
+    "previewReadOnly": "Solo lectura",
+    "previewExplanation": "Los importes abonados corresponden a operaciones anteriores y ya están incluidos en tu saldo de la aplicación.",
+    "previewUnavailable": "Vista previa de RIFT no disponible.",
+    "previewBalance": "Saldo disponible en la aplicación",
+    "previewFanSiteCredit": "Abono por la fusión con Fan.site",
+    "previewNoFanSiteCredit": "No hay ningún abono registrado",
+    "previewCredits": "Transferencias recibidas y abonos recientes",
+    "previewAccountCredit": "Abono en cuenta",
+    "previewReceivedFrom": "Recibido de {{name}}",
+    "previewReceived": "Transferencia recibida",
+    "previewNoCredits": "No hay transferencias recibidas ni abonos recientes.",
     "reviewTransfer": "Revisar transferencia",
     "transferComplete": "Transferencia completada",
     "balanceAfterSend": "Después del envío: {{amount}} {{symbol}}",
