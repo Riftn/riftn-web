@@ -1543,6 +1543,16 @@ function NotificationSettings() {
     updatePrefMutation.mutate({ key, value: checked });
   };
 
+  const privateMessagePushOnlyMutation = useMutation({
+    mutationFn: async (value: boolean) => {
+      const { updatePrivateMessagePushOnly } = await import('@/lib/api/dehub');
+      const response = await updatePrivateMessagePushOnly(value);
+      if (!response?.result) throw new Error('Could not save private message notification settings');
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: prefsKey }),
+    onError: () => toast.error(t('settings.failedUpdateProfile')),
+  });
+
   const isDisabled = prefsLoading || updatePrefMutation.isPending;
 
   return (
@@ -1619,14 +1629,15 @@ function NotificationSettings() {
             onCheckedChange={handleToggle('newFollowers')}
             disabled={isDisabled}
           />
-          {/*
-            No Direct Messages row here on purpose. The preferences API models
-            engagement / social / monetization / content / system and has no
-            `directMessages` key anywhere, so this toggle wrote to a field the
-            server does not store and read back a value that never existed —
-            it always displayed ON and did nothing. Removed rather than left
-            lying to users. Restore it the moment the API grows the key.
-          */}
+          <SettingToggle
+            icon={MessageSquare}
+            anchor="private-message-push-only"
+            title={t('settings.privateMessagePushOnly', 'Private messages: push only')}
+            description={t('settings.privateMessagePushOnlyDesc', 'Send new one-to-one message alerts as push only. Alerts already in your inbox stay there.')}
+            defaultChecked={notifPrefs?.privateMessagePushOnly === true}
+            onCheckedChange={value => privateMessagePushOnlyMutation.mutate(value)}
+            disabled={!notifPrefs || privateMessagePushOnlyMutation.isPending}
+          />
           <SettingToggle
             icon={MessageSquare}
             anchor="notify-comment-replies"

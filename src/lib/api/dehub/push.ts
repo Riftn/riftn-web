@@ -221,6 +221,7 @@ export async function resetPushPreferences(): Promise<{ result: boolean }> {
 
 /** The account document's notification block. Keys match NotificationKey exactly. */
 export interface AccountNotificationPreferences {
+  privateMessagePushOnly?: boolean;
   inAppEnabled?: boolean;
   pushEnabled?: boolean;
   /** Opt-in, and only meaningful for an account that has linked an email. */
@@ -270,6 +271,10 @@ export async function getAccountNotificationPreferences(
     { requiresAuth: true },
   );
   return response?.result?.notificationPreferences ?? {};
+}
+
+export async function updatePrivateMessagePushOnly(value: boolean): Promise<{ result: boolean }> {
+  return updateProfile({ notificationPreferences: JSON.stringify({ privateMessagePushOnly: value }) });
 }
 
 /** Read one in-app toggle. Absent means on — the server treats `!== false` as enabled. */
