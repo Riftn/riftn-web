@@ -1,0 +1,82 @@
+name: Verify milestone medals on production profiles
+
+on:
+  push:
+    branches: [verify/profile-milestone-medals]
+
+permissions:
+  contents: read
+
+jobs:
+  profile-badges:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check the live profile and Museum
+        run: |
+          npm install --prefix "$RUNNER_TEMP/badge-browser" --no-save --no-package-lock --ignore-scripts playwright@1.64.0
+          mkdir badge-profile-results
+          node <<'NODE'
+          const assert = require('node:assert/strict');
+          const { chromium } = require(process.env.RUNNER_TEMP + '/badge-browser/node_modules/playwright');
+
+          async function verify() {
+            const production = 'https://dehub.io';
+            const checks = [
+              { name: 'desktop', viewport: { width: 1280, height: 900 } },
+              { name: 'mobile-web', viewport: { width: 400, height: 870 }, isMobile: true, hasTouch: true },
+            ];
+            const browser = await chromium.launch({ channel: 'chrome' });
+            try {
+              const version = await fetch(production + '/version.json').then((response) => response.json());
+              console.log('Production web commit:', version.id);
+              for (const { name, ...device } of checks) {
+                const page = await browser.newPage({ ...device, locale: 'en-US' });
+                try {
+                  const data = page.waitForResponse((response) => response.ok() && /\/milestones(?:\?|$)/.test(response.url()));
+                  await page.goto(production + '/karincatraders', { waitUntil: 'domcontentloaded' });
+                  const visible = (await (await data).json()).result;
+                  assert.equal(visible.hidden, false);
+                  assert.ok(visible.earned >= 3);
+                  await page.locator('[data-profile-identity]').waitFor();
+                  const panel = page.locator('[data-badge-museum-panel]');
+                  await panel.waitFor();
+                  assert.equal(await page.locator('[data-milestone-chip]').count(), 0);
+                  assert.equal(await panel.locator('[data-medal-podium] [data-medal]').count(), 3);
+                  const badge = page.locator('[data-inline-name-badges] img[alt]:not([alt=""])').first();
+                  await badge.waitFor({ state: 'visible' });
+                  console.log(name, 'name badge:', await badge.getAttribute('alt'));
+                  await panel.locator('[data-badge-museum-open]').click();
+                  await page.locator('[data-badge-museum]').waitFor();
+                  assert.ok(await page.locator('[data-badge-museum] [data-medal]').count() >= 3);
+                  await page.screenshot({ path: 'badge-profile-results/' + name + '-museum.png' });
+
+                  const hiddenData = page.waitForResponse((response) => response.ok() && /\/milestones(?:\?|$)/.test(response.url()));
+                  await page.goto(production + '/maldoteth', { waitUntil: 'domcontentloaded' });
+                  assert.equal((await (await hiddenData).json()).result.hidden, true);
+                  await page.locator('[data-profile-identity]').waitFor();
+                  assert.equal(await page.locator('[data-badge-museum-panel], [data-milestone-chip]').count(), 0);
+                  console.log(name, 'public Museum and hidden Museum verified');
+                } catch (error) {
+                  await page.screenshot({ path: 'badge-profile-results/' + name + '-failure.png' });
+                  throw error;
+                } finally {
+                  await page.close();
+                }
+              }
+            } finally {
+              await browser.close();
+            }
+          }
+
+          verify().catch((error) => { console.error(error); process.exitCode = 1; });
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: production-badge-profiles
+          path: badge-profile-results/
+          retention-days: 14
