@@ -1,6 +1,6 @@
 import { useTranslation as _useCopy } from 'react-i18next';
 import { confirmChatDelivery, roomMessageMatches } from '@/lib/chat-delivery';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
 import {
   getLiveChatRooms,
@@ -401,8 +401,16 @@ export interface LiveChatPagingOptions {
 export function useLiveChatMessages(roomId: string | null, options: LiveChatPagingOptions = {}) {
   const pageSize = options.pageSize;
   const { t: _copy } = _useCopy();
-  const [messages, setMessages] = useState<SupabaseLiveChatMessage[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [messageRows, setMessages] = useState<SupabaseLiveChatMessage[]>([]);
+  const [loadedRoom, setLoadedRoom] = useState<string | null>(null);
+  const [loading, setIsLoading] = useState(true);
+  const [historyError, setHistoryError] = useState(false);
+  const historyScope = useRef(0);
+  useLayoutEffect(() => {
+    return () => { historyScope.current += 1; };
+  }, [roomId]);
+  const messages = loadedRoom === roomId ? messageRows : (roomId && liveChatMessagesCache.get(roomId)) || [];
+  const isLoading = !!roomId && (loadedRoom !== roomId || loading);
   const [isSending, setIsSending] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [isBanned, setIsBanned] = useState(false);
@@ -454,11 +462,13 @@ export function useLiveChatMessages(roomId: string | null, options: LiveChatPagi
     if (!roomId) return;
     // Reading old history: the newest window would land far below a gap.
     if (hasNewerRef.current) return;
+    const scope = historyScope.current;
     if (showLoading) setIsLoading(true);
     try {
       let apiMessages: LiveChatMessage[];
       if (pageSize) {
         const page = await getLiveChatMessagePage(roomId, { limit: pageSize, signedIn: authRef.current });
+        if (scope !== historyScope.current) return;
         apiMessages = page.messages;
         // Only the opening read decides; a refresh keeps the scrollback state.
         if (olderPagesRef.current === 0) setHasOlder(page.hasMore);
@@ -466,6 +476,8 @@ export function useLiveChatMessages(roomId: string | null, options: LiveChatPagi
       } else {
         apiMessages = await fetchApiMessages(roomId, { limit: 200 });
       }
+      if (scope !== historyScope.current) return;
+      setHistoryError(false);
       const mapped = apiMessages.map((m) => apiMsgToLocal(m, roomId));
       setMessages((prev) => {
         // Confirmed copies take over their pending line's client key; lines
@@ -485,9 +497,11 @@ export function useLiveChatMessages(roomId: string | null, options: LiveChatPagi
         return next;
       });
     } catch (err) {
+      if (scope !== historyScope.current) return;
       console.error('[LiveChat] REST messages fetch failed:', err);
+      setHistoryError(true);
     } finally {
-      setIsLoading(false);
+      if (scope === historyScope.current) setIsLoading(false);
     }
   }, [roomId, pageSize]);
 
@@ -655,16 +669,11 @@ export function useLiveChatMessages(roomId: string | null, options: LiveChatPagi
   }, []);
 
   useEffect(() => {
-    if (!roomId) {
-      setMessages([]);
-      setIsLoading(false);
-      return;
-    }
-    const cached = liveChatMessagesCache.get(roomId);
-    if (cached?.length) setMessages(cached);
-    fetchMessages(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roomId]);
+    setLoadedRoom(roomId);
+    setMessages((roomId && liveChatMessagesCache.get(roomId)) || []);
+    setHistoryError(false);
+    if (roomId) void fetchMessages(true);
+  }, [roomId, fetchMessages]);
 
   // Socket connection for real-time updates
   useEffect(() => {
@@ -1162,10 +1171,10 @@ export function useLiveChatMessages(roomId: string | null, options: LiveChatPagi
 
   // Stable: Public Chat's ban/unban handlers depend on it, and a new function
   // each render redrew every line on screen while scrolling.
-  const refetch = useCallback(() => fetchMessages(false), [fetchMessages]);
+  const refetch = useCallback(() => fetchMessages(true), [fetchMessages]);
 
   return {
-    messages, isLoading, isSending, isConnected, isBanned, isModerator, mutedUntil, staff, isSuperModerator,
+    messages, isLoading, historyError, isSending, isConnected, isBanned, isModerator, mutedUntil, staff, isSuperModerator,
     send, retrySend, discardSend, addReaction, removeReaction, editMessage, deleteMessage,
     refetch,
     hasOlder, loadingOlder, loadOlder, signInWall,

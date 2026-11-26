@@ -72,7 +72,7 @@ function ChatLocation() {
   return <output>{search} share {state?.shareLiveTokenId ?? 'none'}</output>;
 }
 
-it('keeps the stream share when Public Chat adds its back entry', async () => {
+it('keeps the stream share when opening a Public Chat link', async () => {
   render(
     <MemoryRouter initialEntries={[{ pathname: '/app/messages', search: '?chat=public', state: { shareLiveTokenId: '42' } }]}>
       <MessagesPage />
@@ -80,7 +80,7 @@ it('keeps the stream share when Public Chat adds its back entry', async () => {
     </MemoryRouter>,
   );
 
-  expect(await screen.findByText('?chat=1 share 42')).toBeInTheDocument();
+  expect(await screen.findByText('?chat=public share 42')).toBeInTheDocument();
 });
 
 describe('conversation unread state', () => {
