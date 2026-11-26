@@ -134,7 +134,11 @@ test('public route handles CORS and HEAD, rejects unavailable data without inven
 test('Turkish finance copy shares accounting and the cache with the default response', async () => {
   const upstream = {
     ...summary,
-    sources: [{ id: 'dhb_card', label: 'DHB bought by card', status: 'ok', note: 'Card purchases of DHB through Riftn Pay that settled and were not refunded, at the amount charged.' }],
+    sources: [
+      { id: 'dhb_card', label: 'DHB bought by card', status: 'ok', note: 'Card purchases of DHB through Riftn Pay that settled and were not refunded, at the amount charged.' },
+      { id: 'dhb_crypto', label: 'DHB bought with crypto', status: 'ok', note: 'Crypto purchases of DHB through Riftn Pay that completed, at the USD value that settled.' },
+      { id: 'stripe_fees', label: 'Card processing', status: 'ok', note: 'Stripe’s fee on each card purchase of DHB.' },
+    ],
     notes: ['1234 text requests lack complete token usage; reported costs are incomplete.', 'A new disclosure from the provider.'],
   };
   const env = { ASSETS: { fetch: async request => Response.json(request.url.endsWith('bnb-sharing.json') ? sharing : history) } };
@@ -158,15 +162,21 @@ test('Turkish finance copy shares accounting and the cache with the default resp
   assert.deepEqual(await cachedTr.json(), localized);
   assert.deepEqual(localized.days, english.days);
   assert.deepEqual(localized.taxSplit, english.taxSplit);
-  assert.equal(english.sources[0].label, 'DHB bought by card');
-  assert.equal(localized.sources[0].label, 'Kartla alınan DHB');
-  assert.match(localized.sources[0].note, /iade edilmeyen DHB alımları/);
+  assert.deepEqual(english.sources.slice(0, 2).map(source => source.label), ['RIFT bought by card', 'RIFT bought with crypto']);
+  assert.deepEqual(localized.sources.slice(0, 2).map(source => source.label), ['Kartla alınan RIFT', 'Kriptoyla alınan RIFT']);
+  assert.deepEqual(localized.sources.slice(0, 3).map(source => source.id), ['dhb_card', 'dhb_crypto', 'stripe_fees']);
+  assert.match(localized.sources[0].note, /iade edilmeyen RIFT alımları/);
+  assert.match(localized.sources[1].note, /kriptoyla yapılan tamamlanmış RIFT alımları/);
+  assert.match(localized.sources[2].note, /her RIFT alımından/);
   assert.equal(localized.sources[0].status, english.sources[0].status);
   assert.match(localized.notes[0], /^1\.234 metin isteğinin/);
   assert.equal(localized.notes[1], upstream.notes[1]);
   const head = await handleFinanceRequest(new Request(endpoint + '?lang=tr', { method: 'HEAD' }), env, fetcher, cache);
   assert.equal(head.headers.get('Content-Language'), 'tr');
   assert.equal(await head.text(), '');
+  const ledger = mergeFinanceLedger({ ...upstream, items: [{ date: '2026-11-26', source: 'dhb_card', unit: 'DHB', amount: 10 }], addresses: [] }, history);
+  assert.equal(ledger.sources[0].label, 'RIFT bought by card');
+  assert.ok(ledger.items.some(item => item.source === 'dhb_card' && item.unit === 'DHB' && item.amount === 10));
 });
 
 test('five-minute internal caching never turns into a four-hour browser cache', async () => {
@@ -176,7 +186,7 @@ test('five-minute internal caching never turns into a four-hour browser cache', 
   const cache = {
     match: async () => stored?.clone(),
     put: async (key, value) => {
-      assert.ok(key.url.includes('accounting=live-april-v2'));
+      assert.ok(key.url.includes('accounting=live-april-v3'));
       assert.equal(value.headers.get('Cache-Control'), 'public, max-age=300, s-maxage=300');
       assert.equal(value.headers.get('CDN-Cache-Control'), null);
       stored = value;

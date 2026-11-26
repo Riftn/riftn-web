@@ -2,8 +2,8 @@
 // function. Match the English descriptions as delivered so a newly introduced
 // source or revised accounting disclosure keeps its original wording.
 const labels = new Map([
-  ['DHB bought by card', 'Kartla alınan DHB'],
-  ['DHB bought with crypto', 'Kriptoyla alınan DHB'],
+  ['RIFT bought by card', 'Kartla alınan RIFT'],
+  ['RIFT bought with crypto', 'Kriptoyla alınan RIFT'],
   ['Pro plans', 'Pro planları'],
   ['AI generations', 'Yapay zekâ üretimleri'],
   ['Ads', 'Reklamlar'],
@@ -34,8 +34,8 @@ const labels = new Map([
 ]);
 
 const descriptions = new Map([
-  ['Card purchases of DHB through Riftn Pay that settled and were not refunded, at the amount charged.', 'Riftn Pay üzerinden kartla yapılan, tamamlanan ve iade edilmeyen DHB alımları, tahsil edilen tutar üzerinden hesaplanır.'],
-  ['Crypto purchases of DHB through Riftn Pay that completed, at the USD value that settled.', 'Riftn Pay üzerinden kriptoyla yapılan tamamlanmış DHB alımları, tahsil edilen tutarın USD karşılığı üzerinden hesaplanır.'],
+  ['Card purchases of RIFT through Riftn Pay that settled and were not refunded, at the amount charged.', 'Riftn Pay üzerinden kartla yapılan, tamamlanan ve iade edilmeyen RIFT alımları, tahsil edilen tutar üzerinden hesaplanır.'],
+  ['Crypto purchases of RIFT through Riftn Pay that completed, at the USD value that settled.', 'Riftn Pay üzerinden kriptoyla yapılan tamamlanmış RIFT alımları, tahsil edilen tutarın USD karşılığı üzerinden hesaplanır.'],
   ['Paid subscription invoices in Stripe for the Creator, Ultra, Team and Scale plans.', 'Creator, Ultra, Team ve Scale planlarının Stripe üzerinden ödenen abonelik faturaları.'],
   ['DHB paid for image, video, music and 3D generations, less refunds for jobs that failed, plus generations paid from credits.', 'Görsel, video, müzik ve 3B üretimler için ödenen DHB. Başarısız işlemlerin iadeleri düşülür, kredilerle ödenen üretimler dahil edilir.'],
   ['Ad budget top-ups, at the USD value recorded when they were paid.', 'Reklam bütçesine yapılan yüklemeler, ödeme sırasında kaydedilen USD değeriyle hesaplanır.'],
@@ -50,7 +50,7 @@ const descriptions = new Map([
   ['What fal, kie and Replicate billed for each successful generation — paid and free — worked back from the price and markup it ran at.', 'Ücretli ve ücretsiz her başarılı üretim için fal, kie ve Replicate’in faturalandırdığı tutar, işlem fiyatı ve uygulanan kâr payı üzerinden geriye dönük hesaplanır.'],
   ['Known text-model tokens at list price before account allowances, caching discounts or reseller adjustments. Incomplete prices and missing usage are reported; this is not a reconciled invoice.', 'Fiyatı bilinen metin modeli tokenları, hesap kotaları, önbellek indirimleri ve bayi düzeltmeleri öncesindeki liste fiyatıyla hesaplanır. Eksik fiyat ve kullanım verileri belirtilir. Bu tutar, mutabakatı yapılmış bir fatura değildir.'],
   ['DigitalOcean’s own invoices, and its month-to-date usage for the month still running.', 'DigitalOcean’ın faturaları ve içinde bulunulan ayın bugüne kadarki kullanımı.'],
-  ['Stripe’s fee on each card purchase of DHB.', 'Stripe’ın kartla yapılan her DHB alımından aldığı ücret.'],
+  ['Stripe’s fee on each card purchase of RIFT.', 'Stripe’ın kartla yapılan her RIFT alımından aldığı ücret.'],
   ['Cloudflare billing charges in USD, recorded on their billing date. Bills can arrive after usage; unbilled usage is not estimated. Billing access is unavailable until a read-only billing token is connected.', 'Cloudflare ücretleri fatura tarihinde USD olarak kaydedilir. Faturalar kullanımdan sonra gelebilir. Faturalanmamış kullanım için tahmin yapılmaz. Salt okunur bir faturalandırma anahtarı bağlanana kadar faturalara erişilemez.'],
   ['Cloudflare USD charges, refunds and credits on their billing date, refreshed every five minutes. Unbilled usage is excluded until Cloudflare reports a charge.', 'Cloudflare ücretleri, iadeleri ve alacakları fatura tarihinde USD olarak kaydedilir ve beş dakikada bir güncellenir. Cloudflare bir ücret bildirene kadar faturalanmamış kullanım hesaba katılmaz.'],
   ['Verified successful Purchased events from the production NFT checkout, reconciled to actual receipts in the shop wallet. Internal company purchases are listed as transfers instead of new revenue.', 'Canlı NFT ödeme sistemindeki başarılı Purchased olayları doğrulanır ve mağaza cüzdanındaki gerçek tahsilatlarla karşılaştırılır. Şirket içi alımlar transfer olarak gösterilir.'],
