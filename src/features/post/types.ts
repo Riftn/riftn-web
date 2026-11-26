@@ -82,6 +82,8 @@ export interface PostFormState {
   isSubscribersOnly: boolean;
   isPPV: boolean;
   ppvAmount: string;
+  ppvPreviewSeconds: string;
+  canConfigurePpvPreview: boolean;
   ppvCurrency: Currency;
   isWatch2Earn: boolean;
   w2eViews: string;
@@ -131,6 +133,7 @@ export interface PostFormActions {
   setIsSubscribersOnly: (value: boolean) => void;
   setIsPPV: (value: boolean) => void;
   setPpvAmount: (value: string) => void;
+  setPpvPreviewSeconds: (value: string) => void;
   setPpvCurrency: (value: Currency) => void;
   setIsWatch2Earn: (value: boolean) => void;
   setW2eViews: (value: string) => void;
