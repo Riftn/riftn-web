@@ -8,8 +8,10 @@ import {
   parsePostBg,
   postBgById,
   postBgFromStored,
+  postBgFromToken,
   postBgIsVideo,
   postBgPaletteIndex,
+  postBgToken,
   postBgVariant,
   withPostBgColors,
   type PostBg,
@@ -263,6 +265,8 @@ export interface PostBgSave {
   colors: PostBgPalette | null;
   /** A new picture or GIF to upload for "Your photo". */
   file?: File | null;
+  /** The saved photo shown in the selected scope when no new file was picked. */
+  photoUrl?: string | null;
   /** 'post': only the post that was held. 'all': the whole profile, every post. */
   scope?: PostBgScope;
 }
@@ -282,7 +286,7 @@ export interface PostBgPickerProps {
   saving?: boolean;
   /**
    * Set when the picker was opened from one post: shows "This post / All posts".
-   * `postCurrent` is that post's own backdrop (undefined = it uses the profile's).
+   * `postCurrent` is that post's own backdrop (null = it uses the profile's).
    */
   postId?: string | null;
   postCurrent?: PostBg | null;
@@ -302,10 +306,11 @@ const MAX_VIDEO_MB = 90;
  */
 export function PostBgPicker({ open, current: profileCurrent, name, handle, avatarUrl, sampleText, photoUrl, saving, postId, postCurrent, onCancel, onSave }: PostBgPickerProps) {
   const { t } = useTranslation();
-  const [scope, setScope] = useState<PostBgScope>('all');
+  const [scope, setScope] = useState<PostBgScope>(postId ? 'post' : 'all');
   useEffect(() => { if (open) setScope(postId ? 'post' : 'all'); }, [open, postId]);
   // In "This post", start from what that post shows now.
-  const current = scope === 'post' && postCurrent !== undefined ? postCurrent : profileCurrent;
+  const currentToken = postBgToken(scope === 'post' ? postCurrent ?? null : profileCurrent);
+  const current = useMemo(() => postBgFromToken(currentToken), [currentToken]);
   const [sel, setSel] = useState<string | null>(current?.id ?? null);
   // Colours per backdrop while the picker is open, so flicking away and back keeps a choice.
   const [colorsById, setColorsById] = useState<Record<string, PostBgPalette>>({});
@@ -316,6 +321,7 @@ export function PostBgPicker({ open, current: profileCurrent, name, handle, avat
   const fileInput = useRef<HTMLInputElement>(null);
   const stripRef = useRef<HTMLDivElement>(null);
   const settle = useRef<number>(0);
+  const focusPanel = useCallback((panel: HTMLDivElement | null) => panel?.focus({ preventScroll: true }), []);
   const order = useMemo(() => [null, POST_BG_PHOTO_ID, ...MOVING.map((b) => b.id), ...STILL.map((b) => b.id)] as (string | null)[], []);
 
   const centre = useCallback((id: string | null, smooth: boolean) => {
@@ -336,8 +342,12 @@ export function PostBgPicker({ open, current: profileCurrent, name, handle, avat
     const id = requestAnimationFrame(() => centre(current?.id ?? null, false));
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    return () => { cancelAnimationFrame(id); document.body.style.overflow = prev; };
-  }, [open, current, centre]);
+    return () => {
+      cancelAnimationFrame(id);
+      window.clearTimeout(settle.current);
+      document.body.style.overflow = prev;
+    };
+  }, [open, current, scope, centre]);
 
   useEffect(() => {
     if (!file) { setFileUrl(null); return; }
@@ -363,7 +373,8 @@ export function PostBgPicker({ open, current: profileCurrent, name, handle, avat
     }, 90);
   };
 
-  const photoSrc = fileUrl ?? photoUrl ?? null;
+  const savedPhoto = current?.kind === 'photo' ? current.image ?? photoUrl : photoUrl;
+  const photoSrc = fileUrl ?? savedPhoto ?? null;
   const pickPhotoFile = () => fileInput.current?.click();
 
   const pick = (id: string | null) => {
@@ -450,7 +461,7 @@ export function PostBgPicker({ open, current: profileCurrent, name, handle, avat
   return createPortal(
     <ProfilePostBgArtContext.Provider value={avatarUrl ?? null}>
     <div className="pbg-picker" role="presentation" onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}>
-      <div className="pbg-picker-panel" role="dialog" aria-modal="true" aria-label={t('postBg.title', 'Post background')} onKeyDown={onKeyDown} tabIndex={-1} ref={(el) => el?.focus({ preventScroll: true })}>
+      <div className="pbg-picker-panel" role="dialog" aria-modal="true" aria-label={t('postBg.title', 'Post background')} onKeyDown={onKeyDown} tabIndex={-1} ref={focusPanel}>
         <div className="pbg-picker-top">
           <button type="button" className="pbg-picker-btn" onClick={onCancel}>{t('common.cancel', 'Cancel')}</button>
           <h2>{t('postBg.title', 'Post background')}</h2>
@@ -458,7 +469,13 @@ export function PostBgPicker({ open, current: profileCurrent, name, handle, avat
             type="button"
             className="pbg-picker-btn pbg-picker-btn--done"
             disabled={!canSave}
-            onClick={() => onSave({ id: sel, colors: bg && bg.palettes.length ? bg.colors ?? null : null, file: sel === POST_BG_PHOTO_ID ? file : null, scope: postId ? scope : 'all' })}
+            onClick={() => onSave({
+              id: sel,
+              colors: bg && bg.palettes.length ? bg.colors ?? null : null,
+              file: sel === POST_BG_PHOTO_ID ? file : null,
+              photoUrl: sel === POST_BG_PHOTO_ID && !file ? savedPhoto : null,
+              scope: postId ? scope : 'all',
+            })}
           >
             <span>{saving ? t('postBg.saving', 'Saving') : t('common.done', 'Done')}</span>
           </button>
@@ -467,10 +484,10 @@ export function PostBgPicker({ open, current: profileCurrent, name, handle, avat
         <div className="pbg-picker-stage">
           {postId && (
             <div className="pbg-chips pbg-scope" role="radiogroup" aria-label={t('postBg.scope', 'Apply to')}>
-              <button type="button" role="radio" aria-checked={scope === 'post'} aria-pressed={scope === 'post'} className="pbg-chip" onClick={() => setScope('post')}>
+              <button type="button" role="radio" aria-checked={scope === 'post'} aria-pressed={scope === 'post'} className="pbg-chip" disabled={saving} onClick={() => setScope('post')}>
                 {t('postBg.thisPost', 'This post')}
               </button>
-              <button type="button" role="radio" aria-checked={scope === 'all'} aria-pressed={scope === 'all'} className="pbg-chip" onClick={() => setScope('all')}>
+              <button type="button" role="radio" aria-checked={scope === 'all'} aria-pressed={scope === 'all'} className="pbg-chip" disabled={saving} onClick={() => setScope('all')}>
                 {t('postBg.allPosts', 'All posts')}
               </button>
             </div>

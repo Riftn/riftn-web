@@ -47,7 +47,7 @@ function readCloseFriends(): DeHubUser[] {
 }
 
 /** `blob` is missing only for a video shared from a post: the server cuts it from the post's file. */
-type Media = { kind: 'photo' | 'video'; url: string; blob?: Blob; duration?: number; postTokenId?: number };
+type Media = { kind: 'photo' | 'video'; url: string; blob?: Blob; duration?: number; postTokenId?: number; caption?: string };
 type Tool = null | 'text' | 'draw' | 'mention' | 'trim' | 'timer' | 'lifetime' | 'audience' | 'sticker' | 'effects';
 
 /** Stickers are big glyph layers: emoji keep their own colours, the shapes take the text colour. */
@@ -112,7 +112,7 @@ export function StoryCreator({ onClose, remixSource, postTokenId }: { onClose: (
         />
       ) : postTokenId != null ? (
         <div data-sc-stage data-sc-post-loading className="grid place-items-center">
-          <span className="w-8 h-8 rounded-full border-2 border-white/25 border-t-white animate-spin" aria-label={t('common.loading', { defaultValue: 'Loading' })} />
+          <span role="status" className="w-8 h-8 rounded-full border-2 border-white/25 border-t-white animate-spin" aria-label={t('common.loading', { defaultValue: 'Loading' })} />
           <div data-sc-top>
             <button type="button" data-sc-btn data-sc-close onClick={onClose} aria-label={t('common.close', { defaultValue: 'Close' })}><Close className="w-5 h-5" /></button>
           </div>
@@ -563,7 +563,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
           };
         }
       }
-      const fields = { audience, allowReplies, audienceAddresses: restrictPeople ? audiencePeople.map(user => user.address!) : undefined, expiresInHours: customLifetime ? lifetime : undefined, mentions, song: songField, muted: media.kind === 'video' ? muted : false, remixSourceId, postTokenId: media.postTokenId };
+      const fields = { audience, allowReplies, audienceAddresses: restrictPeople ? audiencePeople.map(user => user.address!) : undefined, expiresInHours: customLifetime ? lifetime : undefined, mentions, song: songField, muted: media.kind === 'video' ? muted : false, caption: media.caption, remixSourceId, postTokenId: media.postTokenId };
       if (media.kind === 'photo') {
         const img = imgRef.current!;
         if (!img.complete) await new Promise(r => { img.onload = r; });

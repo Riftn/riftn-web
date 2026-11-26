@@ -1,17 +1,18 @@
 /**
- * "Share to Moment": turn one of your own posts into what the moment editor
- * starts from. Photos come in as a picture (so text and stickers can be drawn
- * on it); videos stay on the CDN and the server cuts the moment from the post.
+ * Prepare a linked post for the Moment editor. Photos and stream covers can
+ * be edited as pictures. Video Moments are cut from the original by the server.
  */
 import { getNFTInfo } from '@/lib/api/dehub/feed';
 import { getMediaUrl } from '@/lib/api/dehub/core';
 import { buildFeedImageUrls, buildImageUrl, cdnImageSource } from '@/lib/media-url';
+import { hasStreamEnded, isStreamLive } from '@/lib/live-status';
 
 export interface PostMomentMedia {
   kind: 'photo' | 'video';
   url: string;
   blob?: Blob;
   duration?: number;
+  caption?: string;
   postTokenId: number;
 }
 
@@ -39,6 +40,25 @@ export async function loadPostMoment(tokenId: number): Promise<PostMomentMedia> 
   if (!post) throw new PostMomentError('load');
   if (isGatedPost(post)) throw new PostMomentError('gated');
   const type = String(post.postType || '');
+  if (type === 'live') {
+    const stream = post.stream;
+    if (post.isHidden || post.justMe || post.mediaPrivate || (stream && isGatedPost(stream))) throw new PostMomentError('gated');
+    if (!isStreamLive(stream) && !hasStreamEnded(stream)) throw new PostMomentError('load');
+    // A broadcast can start before its first cover is ready, and live covers
+    // can be replaced between fetching the post and downloading its image.
+    const cover = getMediaUrl(stream?.thumbnail || post.imageUrl);
+    const title = [stream?.title, post.title, post.name].find(value => typeof value === 'string' && value.trim());
+    for (const source of [cover, '/og/live-studio.jpg']) {
+      if (!source) continue;
+      const res = await fetch(cdnImageSource(source), { mode: 'cors', cache: 'no-store' }).catch(() => null);
+      if (!res?.ok) continue;
+      const blob = await res.blob();
+      if (blob.size && blob.type.startsWith('image/')) {
+        return { kind: 'photo', url: URL.createObjectURL(blob), blob, postTokenId: tokenId, caption: title?.trim().slice(0, 300) };
+      }
+    }
+    throw new PostMomentError('load');
+  }
   if (VIDEO_TYPES.has(type) && post.videoUrl) {
     const url = getMediaUrl(post.videoUrl);
     if (!url) throw new PostMomentError('load');
