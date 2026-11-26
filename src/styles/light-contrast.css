@@ -100,6 +100,9 @@ html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_
   color: #fff !important;
 }
 html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_) [data-swipe-back][data-on-media] svg { color: #fff !important; }
+html[data-theme='system'][data-system-tone='light']:not(#_):not(#_):not(#_):not(#_) [data-profile-photo-dialog] [data-swipe-back][data-on-media] {
+  border-radius: 12px !important;
+}
 
 /* System Light feed filters drawer: the pale glass let the dark video tiles
    under it smear behind the labels. Near-solid paper keeps the frost. */
