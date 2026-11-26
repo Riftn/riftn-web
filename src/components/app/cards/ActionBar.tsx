@@ -1082,7 +1082,7 @@ export function ActionBar({
             if (isAuthenticated) onShareToPublicChat();
             else openLoginModal();
           }}
-          className="h-auto min-h-11 w-full justify-start gap-3 whitespace-normal px-4 py-3 text-left text-foreground hover:bg-muted [&_svg]:size-5"
+          className="h-auto min-h-14 w-full justify-start gap-3 whitespace-normal p-4 text-left text-base text-zinc-200 hover:bg-white/10 hover:text-white focus-visible:ring-current focus-visible:ring-offset-0 [&_svg]:size-5"
         >
           <PublicChatIcon />
           {_copy('publicChat.title')}
