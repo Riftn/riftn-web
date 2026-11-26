@@ -226,6 +226,7 @@ function LiveMiniSession({ mini }: { mini: LiveMini }) {
 
     const stopWatch = watchLiveProgress(video, {
       stallMs: 6000,
+      preferVideoFrames: () => !!video.srcObject,
       watchInPictureInPicture: true,
       shouldWatch: () => wantPlayRef.current && visualActivity.isLivePlaybackAllowed(),
       onStall: (count) => {

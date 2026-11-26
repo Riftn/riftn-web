@@ -149,6 +149,8 @@ export function LiveFeedPreview({ eager = false, urls, thumbnail, className, fal
   const [playing, setPlaying] = useState(false);
   const [loading, setLoading] = useState(false);
   const { broadcastPaused, broadcastEnded, waitingTooLong } = useLivePlaybackFeedback(streamId, loading, visible && !postOpen, streamStatus);
+  const broadcastPausedRef = useRef(broadcastPaused);
+  broadcastPausedRef.current = broadcastPaused;
   const wasBroadcastPaused = useRef(broadcastPaused);
   useEffect(() => {
     if (wasBroadcastPaused.current && !broadcastPaused) setFailed(false);
@@ -233,6 +235,12 @@ export function LiveFeedPreview({ eager = false, urls, thumbnail, className, fal
     const onPicture = () => {
       if (el.srcObject && hasRealPicture(el)) dropWarmLiveHls(src);
     };
+    const stopWatch = watchLiveProgress(el, {
+      stallMs: 6000,
+      preferVideoFrames: () => true,
+      shouldWatch: () => !broadcastPausedRef.current && !!el.srcObject && hasRealPicture(el),
+      onStall: fallBack,
+    });
     el.addEventListener('resize', onPicture);
     el.addEventListener('loadeddata', onPicture);
 
@@ -286,6 +294,7 @@ export function LiveFeedPreview({ eager = false, urls, thumbnail, className, fal
       cancelled = true;
       clearTimeout(timer);
       clearTimeout(connectTimer);
+      stopWatch();
       el.removeEventListener('resize', onPicture);
       el.removeEventListener('loadeddata', onPicture);
       whepSessionsOpen = Math.max(0, whepSessionsOpen - 1);

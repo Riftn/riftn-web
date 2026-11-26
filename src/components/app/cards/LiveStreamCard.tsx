@@ -425,6 +425,8 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
   // If stream.isLive is false, treat as ended immediately — don't try to play a dead HLS URL
   const [streamEnded, setStreamEnded] = useState(!liveNow);
   const { broadcastPaused, broadcastEnded, waitingTooLong } = useLivePlaybackFeedback(stream.streamId, isBuffering, liveNow && !streamEnded, stream.liveStatus);
+  const broadcastPausedRef = useRef(broadcastPaused);
+  broadcastPausedRef.current = broadcastPaused;
   // The room says it is over: show the ended state now, not on the next refetch.
   useEffect(() => { if (broadcastEnded) setStreamEnded(true); }, [broadcastEnded]);
   const replayTokenId = stream.tokenId;
@@ -779,6 +781,7 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
 
     let cancelled = false;
     let session: WhepSubscription | null = null;
+    let stopWatch: (() => void) | undefined;
 
     const fallBack = (reason: string) => {
       if (cancelled) return;
@@ -818,6 +821,7 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
     // to the ladder as before.
     const failOver = async (reason: string) => {
       if (cancelled) return;
+      stopWatch?.();
       // Whatever this attempt still has on the way is no longer wanted.
       attempts += 1;
       // Answered, and still no way through for the media: that is this
@@ -902,6 +906,12 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
         session = opened;
         whepSessionRef.current = opened;
         video.srcObject = opened.stream;
+        stopWatch = watchLiveProgress(video, {
+          stallMs: 6000,
+          preferVideoFrames: () => true,
+          shouldWatch: () => playbackRequestedRef.current && !broadcastPausedRef.current && video.videoWidth > 0,
+          onStall: () => void failOver('frozen picture'),
+        });
         if (!hasRealPicture(video)) {
           if (connected) arm(WHEP_FRAME_TIMEOUT_MS, 'no frames');
           else arm(WHEP_CONNECT_TIMEOUT_MS, 'no media route');
@@ -957,19 +967,10 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
 
     void open();
 
-    // A session can stay "connected" while the picture stops (common on
-    // iPhones switching networks). Once frames have flowed, a still picture
-    // for a few seconds is a failure like any other.
-    const stopWatch = watchLiveProgress(video, {
-      stallMs: 6000,
-      shouldWatch: () => playbackRequestedRef.current && video.videoWidth > 0,
-      onStall: () => void failOver('frozen picture'),
-    });
-
     return () => {
       cancelled = true;
       clearTimeout(timer);
-      stopWatch();
+      stopWatch?.();
       video.removeEventListener('resize', onPicture);
       video.removeEventListener('loadeddata', onPicture);
       videoPlaybackManager.unregister(videoId);
