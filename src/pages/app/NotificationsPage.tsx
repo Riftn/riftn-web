@@ -2065,10 +2065,12 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
   const markAllCustomAsRead = useMarkAllCustomNotificationsAsRead();
   
   const [isClearingAll, setIsClearingAll] = useState(false);
-  const [clearedAtTs, setClearedAtTs] = useState(() => {
-    const stored = localStorage.getItem('notifications_cleared_at');
-    return stored ? parseInt(stored, 10) : 0;
-  });
+  const [localClear, setLocalClear] = useState<{ key: string; at: number } | null>(null);
+  // The previous key had no owner. Applying it to any signed-in wallet could
+  // hide another person's retained history on a shared browser.
+  const clearKey = pageWalletAddress ? `notifications_cleared_at:${pageWalletAddress.toLowerCase()}` : '';
+  const storedClearAt = useMemo(() => clearKey ? Number(localStorage.getItem(clearKey)) || 0 : 0, [clearKey]);
+  const clearedAtTs = localClear?.key === clearKey ? localClear.at : storedClearAt;
   
   // Rows the user should never see: cleared before the "clear all" mark, or
   // raised by their own action (the backend sends the sender a DM notification).
@@ -2376,6 +2378,8 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
   };
 
   const handleClearAllNotifications = async () => {
+    if (!clearKey) return;
+    const now = Date.now();
     setIsClearingAll(true);
     try {
       // Mark all as read first via API
@@ -2389,17 +2393,14 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
           supabase
             .from('custom_notifications')
             .delete()
-            .eq('recipient_address', pageWalletAddress.toLowerCase()),
+            .eq('recipient_address', pageWalletAddress.toLowerCase())
+            .lte('created_at', new Date(now).toISOString()),
           pageWalletAddress
         );
       }
       
-      // Store the "cleared at" timestamp — all notifications before this will be hidden
-      const now = Date.now();
-      localStorage.setItem('notifications_cleared_at', String(now));
-      
-      // Update state to trigger memo recalculation
-      setClearedAtTs(now);
+      localStorage.setItem(clearKey, String(now));
+      setLocalClear({ key: clearKey, at: now });
 
       // Invalidate custom notification caches
       queryClient.invalidateQueries({ queryKey: ['custom-notifications'] });
