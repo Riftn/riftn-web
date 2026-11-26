@@ -7,6 +7,7 @@ import { AvatarPrompt } from "@/components/app/AvatarPrompt";
 import { NonFollowerOffer } from "@/components/app/NonFollowerOffer";
 import { HalloweenGhostPrompt } from "@/components/app/halloween/HalloweenGhostPrompt";
 import { PushBlockedToast } from "@/components/app/PushBlockedToast";
+import { OfflineNotice } from "@/components/app/OfflineNotice";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { NativeTitleTooltips } from "@/components/app/NativeTitleTooltips";
 import { MutationCache, QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
@@ -586,6 +587,7 @@ function AppContent() {
   return (
     <>
       <SelfBadgeSync />
+      <OfflineNotice />
       <DefaultChainSync />
       <QuickActionsHost />
       <PostMenuGate />
