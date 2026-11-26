@@ -677,7 +677,7 @@ function LivePostWithStatus({ liveData, post, chatSlot, immersive }: { liveData:
     ...liveData,
     isLive: !hasStreamEnded((post as any).stream) && (liveData.isLive || !!isLiveFromSupabase),
   };
-  return <Suspense fallback={<QuietPostLoading />}><LiveStreamCard key={tokenId} stream={mergedStream} chatSlot={chatSlot} immersive={immersive} /></Suspense>;
+  return <Suspense fallback={<QuietPostLoading />}><LiveStreamCard key={liveData.streamId ?? tokenId} stream={mergedStream} chatSlot={chatSlot} immersive={immersive} /></Suspense>;
 }
 
 /**
