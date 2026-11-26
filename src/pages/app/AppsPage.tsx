@@ -101,6 +101,16 @@ export default function AppsPage() {
   }, [apps, query, category, scores]);
   const rising = useMemo(() => (apps ?? []).filter((a) => scores.get(a.id)?.is_new), [apps, scores]);
   const navigate = useNavigate();
+  const builtInApps = [
+    {
+      slug: 'binary-metal',
+      href: '/music/binary-metal',
+      art: '/og/music-binary-metal.jpg',
+      title: t('binaryMetal.title'),
+      tagline: t('binaryMetal.cardBlurb'),
+    },
+    ...ARCADE_GAMES.map((game) => ({ ...game, href: `/arcade/${game.slug}` })),
+  ];
 
   // A failed read is kept apart from an empty store: it gets a retry, and a
   // list already on screen stays put.
@@ -227,11 +237,11 @@ export default function AppsPage() {
         {!query && category === 'all' ? (
           <section data-feed-item>
             <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-              {ARCADE_GAMES.map((game) => (
+              {builtInApps.map((game) => (
                 <Link
                   key={game.slug}
                   data-kit-section
-                  to={`/arcade/${game.slug}`}
+                  to={game.href}
                   className="flex items-center gap-3 rounded-2xl bg-zinc-900/60 p-3 ring-1 ring-white/[0.06] transition-colors hover:bg-zinc-900"
                 >
                   <img src={game.art} alt="" loading="lazy" className="h-14 w-14 shrink-0 rounded-xl object-cover" />
