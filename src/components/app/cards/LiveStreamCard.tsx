@@ -1,4 +1,5 @@
 import { hasStreamEnded } from '@/lib/live-status';
+import { getStreamMomentTokenId } from '@/lib/moment-share';
 import Minimize from "@/components/ui/cut-icons/exit-fullscreen";
 import { useTranslation as _useCopy } from 'react-i18next';
 import { useSurfaceDraft, draftIdentity } from '@/hooks/use-surface-draft';
@@ -283,6 +284,7 @@ export function LiveStreamCard({ stream: streamProp, postPage, chatSlot, immersi
     () => (lateReplay && !streamProp.replayUrl ? { ...streamProp, replayUrl: lateReplay } : streamProp),
     [streamProp, lateReplay],
   );
+  const streamMomentTokenId = getStreamMomentTokenId(stream);
   const keyboardOpen = useKeyboardOpen(immersive);
   // Live is a dark room in every theme: a light theme runs as its dark twin
   // while the stream is open, chat, sheets and portals included.
@@ -2318,6 +2320,7 @@ export function LiveStreamCard({ stream: streamProp, postPage, chatSlot, immersi
                       dislikeCount={stream.dislikeCount}
                       commentCount={stream.commentCount}
                       nativeShare={{ title: stream.title }}
+                      streamMomentTokenId={streamMomentTokenId}
                     />
                   </div>
                   )}
@@ -2579,6 +2582,7 @@ export function LiveStreamCard({ stream: streamProp, postPage, chatSlot, immersi
                 tipCount={tipCount}
                 onTip={() => setShowGiftDrawer(true)}
                 nativeShare={{ title: stream.title }}
+                streamMomentTokenId={streamMomentTokenId}
               />
               {canAskToJoin && (
                 <Suspense fallback={null}>
@@ -2611,6 +2615,7 @@ export function LiveStreamCard({ stream: streamProp, postPage, chatSlot, immersi
             tipCount={tipCount}
             onTip={() => setShowGiftDrawer(true)}
             nativeShare={{ title: stream.title }}
+            streamMomentTokenId={streamMomentTokenId}
             utilityDesktopAnchor
             onComment={() => setShowComments(prev => !prev)}
             className="p-0 mb-2"
