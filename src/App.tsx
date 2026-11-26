@@ -301,6 +301,7 @@ const ArcadeSillyCoinPage = React.lazy(() => import("./pages/ArcadeSillyCoinPage
 const ArcadeGratitudePage = React.lazy(() => import("./pages/ArcadeGratitudePage"));
 // Chestard: dice-drop arcade game, server-rolled dice and a top 10 (riftn-backend src/games).
 const ArcadeChestardPage = React.lazy(() => import("./pages/ArcadeChestardPage"));
+const ArcadeSplurgePage = React.lazy(() => import("./pages/ArcadeSplurgePage"));
 // Mini app player: standalone like the arcade player, because the app owns the
 // viewport and dehub draws only its own header above it.
 const MiniAppPage = React.lazy(() => import("./pages/MiniAppPage"));
@@ -783,6 +784,7 @@ function AppContent() {
           <Route path="/arcade/sillycoin" element={<Suspense fallback={<PageLoader />}><ArcadeSillyCoinPage /></Suspense>} />
           <Route path="/arcade/gratitude" element={<Suspense fallback={<PageLoader />}><ArcadeGratitudePage /></Suspense>} />
           <Route path="/arcade/chestard" element={<Suspense fallback={<PageLoader />}><ArcadeChestardPage /></Suspense>} />
+          <Route path="/arcade/splurge" element={<Suspense fallback={<PageLoader />}><ArcadeSplurgePage /></Suspense>} />
           <Route path="/arcade/:slug" element={<Suspense fallback={<PageLoader />}><ArcadeGamePage /></Suspense>} />
 
           {/* Online chess: the King's Gambit lobby and live board. Standalone

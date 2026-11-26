@@ -3,6 +3,7 @@ import { useSurfaceDraft } from '@/hooks/use-surface-draft';
 import { DIRECT_TIP_TOKENS } from '@/lib/direct-tip-tokens';
 import { useState, useEffect, useId, useMemo, type ReactNode } from 'react';
 import { DhbAmount, DhbCoin } from '@/components/app/DhbAmount';
+import { ppvTokenLabel } from '@/lib/token-label';
 import { useTranslation as useI18n } from 'react-i18next';
 import { Ticket, Shield, Hash, Save, Type, ShoppingBag, Baby, Quote, MessageSquareReply, Scissors } from "lucide-react";
 import type { RemixPolicy } from "@/lib/remix-links";
@@ -692,7 +693,7 @@ export function PostAccessToggles({
             <Ticket className="w-4 h-4 text-white" />
             <span className="text-sm text-white">{_copy("copy.bd9e3879bc60", { defaultValue: "PPV" })}</span>
             {isPPV && ppvAmount && (
-              <span className="text-xs text-white/50">({ppvAmount} {ppvCurrency})</span>
+              <span className="text-xs text-white/50">({ppvAmount} {ppvTokenLabel(ppvCurrency)})</span>
             )}
           </div>
           <Switch checked={isPPV} onCheckedChange={handlePpvToggle} className="data-[state=checked]:bg-white scale-75" onClick={e => e.stopPropagation()} />
@@ -1074,13 +1075,13 @@ export function PostAccessToggles({
                         : "bg-transparent text-zinc-400 border-white/10 hover:bg-white/5"
                     )}
                   >
-                    {cur === 'DHB' ? 'RIFT Tokens' : cur}
+                    {ppvTokenLabel(cur)}
                   </button>
                 ))}
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-sm text-white/70">{t('drawers.price')} ({tempPpvCurrency === 'DHB' ? 'RIFT Tokens' : tempPpvCurrency})</label>
+              <label className="text-sm text-white/70">{t('drawers.price')} ({ppvTokenLabel(tempPpvCurrency)})</label>
               <input
                 type="number"
                 value={tempPpvAmount}

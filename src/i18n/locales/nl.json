@@ -23664,6 +23664,26 @@
       "intro": "Zeg om de beurt waar je dankbaar voor bent. Geen herhalingen. Mis je beurt en de ander wint.",
       "cardBlurb": "Zeg om de beurt waar je dankbaar voor bent. Geen herhalingen. Mis je beurt en de ander wint."
     },
+    "splurge": {
+      "title": "Splurge",
+      "cardBlurb": "Krijg een willekeurig budget en bedenk wat je zou kopen in de moderne of CRT-weergave.",
+      "arcade": "Arcade",
+      "intro": "Een willekeurig budget. Waar zou je het aan uitgeven? Alle bedragen zijn fictief.",
+      "modern": "Modern",
+      "crt": "CRT",
+      "budget": "Je budget",
+      "prompt": "Wat zou je kopen?",
+      "placeholder": "Een treinreis door Europa",
+      "spend": "Uitgeven",
+      "retry": "Opnieuw proberen",
+      "saveError": "Deze beurt kon niet worden opgeslagen. Probeer het opnieuw om deze aan je overzicht toe te voegen.",
+      "history": "Uitgavenoverzicht",
+      "loading": "Je overzicht wordt geladen…",
+      "historyError": "Je overzicht kon niet worden geladen.",
+      "empty": "Je aankopen verschijnen hier.",
+      "more": "Oudere aankopen laden",
+      "guest": "Gastbeurten blijven alleen tijdens dit bezoek bewaard. Log in om volgende beurten in je account op te slaan."
+    },
     "chestard": {
       "title": "Chestard",
       "cardBlurb": "Gooi de dobbelsteen, laat de schijf vallen, maak de onderste rij vol. Retro arcade met top 10.",

@@ -185,7 +185,7 @@ const OG_CARD_ROUTES = new Set([
   'arcade', 'arcade/kings-gambit', 'arcade/claude-of-duty', 'arcade/jungle-trail',
   'arcade/street-slayer',
   'arcade/trenchstar', 'arcade/love-lock-bridge',
-  'arcade/correspondence-chess', 'arcade/okey', 'arcade/sillycoin', 'arcade/gratitude', 'arcade/chestard',
+  'arcade/correspondence-chess', 'arcade/okey', 'arcade/sillycoin', 'arcade/gratitude', 'arcade/chestard', 'arcade/splurge',
   'music/binary-metal',
   'apps', 'apps/dev',
   // App surfaces that had no card of their own and unfurled as the homepage.
@@ -1523,6 +1523,14 @@ const MARKETING_PAGES = {
     bodyHtml: `<p>Six columns, nine rows and one die. Every roll drops a checker into the column the die shows. When the bottom row is full it clears, everything above falls one row and you score a line bonus. Every cleared line also raises your points per drop.</p>
 <p>If any column fills to the top, the game is over. Every die is rolled fairly by the server, so the top 10 is real games. Play in your browser or the Riftn app, with chip-tune sound effects you can switch off.</p>
 <p><a href="${APP_URL}/arcade/chestard">Play Chestard</a> or <a href="${APP_URL}/arcade">see the whole arcade</a>.</p>`,
+  },
+  'arcade/splurge': {
+    title: 'Splurge | Riftn Arcade',
+    description: 'Get a fictional budget in your local currency, dream up what to buy and do it again in Modern or CRT.',
+    heading: 'Splurge',
+    ...arcadeGameLd('/og/arcade-splurge.jpg'),
+    bodyHtml: `<p>What would you buy with a random budget? Type your answer and press Enter to get a new amount. Switch between Modern and an amber CRT display, and sign in to save your private spending log across web and app.</p>
+<p><a href="${APP_URL}/arcade/splurge">Play Splurge</a> or <a href="${APP_URL}/arcade">see the whole arcade</a>.</p>`,
   },
   'arcade/street-slayer': {
     title: 'Street Slayer | Riftn Arcade',

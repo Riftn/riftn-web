@@ -1,3 +1,4 @@
+import { ppvTokenLabel } from '@/lib/token-label';
 import { canShareToMoment, getStreamMomentTokenId } from '@/lib/moment-share';
 import Minimize from "@/components/ui/cut-icons/exit-fullscreen";
 import FastForward from "@/components/ui/cut-icons/fast-forward";
@@ -1597,8 +1598,10 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
   // scrubber and both timestamps outright: the feed had a seek bar and the
   // profile had none. Asking for the media as soon as the controls come up
   // costs one small range request and only for the card being looked at.
+  // Paused controls are visible on Home's initial render. Wait for the same
+  // interaction gate as autoplay before requesting timeline metadata there.
   useEffect(() => {
-    if (!controlsVisible || (!nearViewport && !showControls) || duration > 0 || video.isAudio || !playableVideoUrl) return;
+    if (!homeMediaReady || !controlsVisible || (!nearViewport && !showControls) || duration > 0 || video.isAudio || !playableVideoUrl) return;
     setNearViewport(true);
     const vid = videoRef.current;
     if (!vid) return;
@@ -1610,7 +1613,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
     } else if (vid.readyState === 0) {
       try { vid.load(); } catch { /* noop */ }
     }
-  }, [controlsVisible, nearViewport, showControls, duration, video.isAudio, playableVideoUrl]);
+  }, [homeMediaReady, controlsVisible, nearViewport, showControls, duration, video.isAudio, playableVideoUrl]);
 
   // The saved volume only ever reached the element through an explicit
   // adjustment, so a viewer who had turned a video down got full volume back on
@@ -2828,7 +2831,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
               </div>
               <p className="text-white font-semibold text-sm mb-1">{t('drawers.ppvTitle')}</p>
               <p className="text-white/70 text-xs">
-                {t('drawers.unlockFor')} {formatCompact(Number(video.ppvPrice))} {video.ppvCurrency || 'USDC'}
+                {t('drawers.unlockFor')} {formatCompact(Number(video.ppvPrice))} {ppvTokenLabel(video.ppvCurrency || 'DHB')}
               </p>
               
             </div>

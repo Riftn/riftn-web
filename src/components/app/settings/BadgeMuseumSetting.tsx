@@ -14,6 +14,8 @@ import { formatCount } from '@/lib/format-count';
 import { cn } from '@/lib/utils';
 import { SETTINGS_LABEL_CLASS } from './SettingsRow';
 
+const FOCUS_RING_CLASS = 'focus-visible:ring-[color:var(--control-ink,white)] focus-visible:ring-offset-transparent';
+
 /**
  * Settings > Profile > Badge Museum: the museum's home. It is off by default,
  * so it shows here and nowhere else until "Show Badge Museum on my profile"
@@ -64,7 +66,7 @@ export function BadgeMuseumSetting({ previewAddress }: { /** State gallery: draw
       <div className="flex items-center gap-3">
         <div className="min-w-0 flex-1">
           <span className={cn(SETTINGS_LABEL_CLASS, 'mb-0.5')}>{title}</span>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-zinc-400">
             {data
               ? t('badgeMuseum.summary', {
                   defaultValue: '{{earned}} of {{total}} badges earned',
@@ -80,7 +82,7 @@ export function BadgeMuseumSetting({ previewAddress }: { /** State gallery: draw
             variant="ghost"
             onClick={() => setOpen(true)}
             aria-label={t('badgeMuseum.viewMine', 'View my Badge Museum')}
-            className="h-auto min-h-11 flex-none p-1"
+            className={cn('h-auto min-h-11 flex-none p-1', FOCUS_RING_CLASS)}
           >
             <MedalPodium medals={earned.slice(0, 3)} sizes={[28, 36]} />
           </Button>
@@ -89,10 +91,10 @@ export function BadgeMuseumSetting({ previewAddress }: { /** State gallery: draw
 
       <div className="flex items-center justify-between gap-4">
         <div>
-          <label htmlFor="settings-badge-museum" className="block text-sm text-foreground">
+          <label htmlFor="settings-badge-museum" className={cn(SETTINGS_LABEL_CLASS, 'mb-0')}>
             {t('badgeMuseum.showSetting', 'Show Badge Museum on my profile')}
           </label>
-          <p id="settings-badge-museum-hint" className="mt-0.5 text-sm text-muted-foreground">{t('badgeMuseum.showSettingHint', 'Off: only you can see it here.')}</p>
+          <p id="settings-badge-museum-hint" className="mt-0.5 text-sm text-zinc-400">{t('badgeMuseum.showSettingHint', 'Off: only you can see it here.')}</p>
         </div>
         <Switch
           id="settings-badge-museum"
@@ -100,6 +102,7 @@ export function BadgeMuseumSetting({ previewAddress }: { /** State gallery: draw
           aria-busy={busy}
           checked={shown}
           disabled={disabled}
+          className={FOCUS_RING_CLASS}
           onCheckedChange={toggle}
         />
       </div>
@@ -109,11 +112,11 @@ export function BadgeMuseumSetting({ previewAddress }: { /** State gallery: draw
         variant="ghost"
         data-badge-museum-view
         onClick={() => setOpen(true)}
-        className="-mx-2 h-auto min-h-11 w-[calc(100%+1rem)] justify-start gap-2.5 whitespace-normal px-2 py-2.5 text-left text-foreground"
+        className={cn('-mx-2 h-auto min-h-11 w-[calc(100%+1rem)] justify-start gap-2.5 whitespace-normal px-2 py-2.5 text-left', FOCUS_RING_CLASS)}
       >
-        <ThemedIcon icon="dao" aria-hidden className="size-[18px] flex-none text-muted-foreground" />
+        <ThemedIcon icon="dao" aria-hidden className="size-[18px] flex-none text-zinc-400" />
         {t('badgeMuseum.viewMine', 'View my Badge Museum')}
-        <ChevronRight aria-hidden className="ml-auto flex-none text-muted-foreground" />
+        <ChevronRight aria-hidden className="ml-auto flex-none text-zinc-400" />
       </Button>
 
       <BadgeMuseumSheet address={address} open={open} onOpenChange={setOpen} />
