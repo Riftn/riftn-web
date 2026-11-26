@@ -15,11 +15,13 @@ import { ChevronDown } from 'lucide-react';
 import Check from '@/components/ui/cut-icons/check';
 import Plus from '@/components/ui/cut-icons/add';
 import SwitchAccounts from '@/components/ui/cut-icons/switch-accounts';
+import X from '@/components/ui/cut-icons/close';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { AuthContext } from '@/contexts/AuthContext';
 import { buildAvatarUrl, deviceWidth } from '@/lib/media-url';
 import { SavedProfileName } from '@/components/app/profile/SavedProfileName';
+import { RemoveSavedProfileDialog } from '@/components/app/profile/RemoveSavedProfileDialog';
 import {
   listProfiles,
   currentProfileId,
@@ -55,6 +57,7 @@ export function MenuAccountSwitcher({ onNavigate }: { onNavigate?: () => void })
   const [activeId, setActiveId] = useState<string | null>(() => currentProfileId());
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [removeTarget, setRemoveTarget] = useState<StoredProfile | null>(null);
 
   useEffect(() => {
     const sync = () => {
@@ -65,8 +68,9 @@ export function MenuAccountSwitcher({ onNavigate }: { onNavigate?: () => void })
     return () => window.removeEventListener(PROFILES_CHANGED_EVENT, sync);
   }, []);
 
-  const others = profiles.filter((p) => p.id !== activeId);
-  const me = profiles.find((p) => p.id === activeId);
+  const activeAddress = auth?.walletAddress?.toLowerCase();
+  const me = profiles.find((p) => p.id === activeId || p.address.toLowerCase() === activeAddress);
+  const others = profiles.filter((p) => p !== me);
   const myName = (me && label(me)) || user?.displayName || user?.username || '';
 
   const handleSwitch = async (id: string) => {
@@ -92,7 +96,9 @@ export function MenuAccountSwitcher({ onNavigate }: { onNavigate?: () => void })
   const rows = me ? [me, ...others] : others;
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={(nextOpen) => {
+      if (!removeTarget) setOpen(nextOpen);
+    }}>
       <PopoverTrigger asChild>
         <button
           type="button"
@@ -137,30 +143,43 @@ export function MenuAccountSwitcher({ onNavigate }: { onNavigate?: () => void })
           {t('sidebar.switchAccount', 'Switch account')}
         </p>
         {rows.map((profile) => {
-          const isActive = profile.id === activeId;
+          const isActive = profile === me;
           return (
-            <button
-              key={profile.id}
-              type="button"
-              onClick={() => { if (!isActive) void handleSwitch(profile.id); }}
-              disabled={busy}
-              aria-current={isActive ? 'true' : undefined}
-              className="flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left text-sm text-zinc-200 transition-colors hover:bg-white/5 disabled:opacity-50"
-            >
-              <Face address={profile.address} path={profile.avatarPath} name={label(profile)} className="h-8 w-8 flex-shrink-0 rounded-full" />
-              <span className="min-w-0 flex-1">
-                <SavedProfileName profile={profile} className="font-medium text-white" />
-                {(profile.username || (!profile.session && !isActive)) && (
-                  <span className="block truncate text-[12px] text-zinc-500">
-                    {[
-                      profile.username && `@${profile.username}`,
-                      !profile.session && !isActive && t('settings.profileSignedOut', 'sign in to switch'),
-                    ].filter(Boolean).join(' · ')}
-                  </span>
-                )}
-              </span>
-              {isActive && <Check className="h-4 w-4 flex-shrink-0 text-white" />}
-            </button>
+            <div key={profile.id} className="flex items-center">
+              <button
+                type="button"
+                onClick={() => { if (!isActive) void handleSwitch(profile.id); }}
+                disabled={busy}
+                aria-current={isActive ? 'true' : undefined}
+                className="flex min-w-0 flex-1 items-center gap-3 rounded-xl px-2.5 py-2 text-left text-sm text-zinc-200 transition-colors hover:bg-white/5 disabled:opacity-50"
+              >
+                <Face address={profile.address} path={profile.avatarPath} name={label(profile)} className="h-8 w-8 flex-shrink-0 rounded-full" />
+                <span className="min-w-0 flex-1">
+                  <SavedProfileName profile={profile} className="font-medium text-white" />
+                  {(profile.username || (!profile.session && !isActive)) && (
+                    <span className="block truncate text-[12px] text-zinc-500">
+                      {[
+                        profile.username && `@${profile.username}`,
+                        !profile.session && !isActive && t('settings.profileSignedOut', 'sign in to switch'),
+                      ].filter(Boolean).join(' · ')}
+                    </span>
+                  )}
+                </span>
+                {isActive && <Check className="h-4 w-4 flex-shrink-0 text-white" />}
+              </button>
+              {!!activeId && !isActive && (
+                <button
+                  type="button"
+                  onClick={() => setRemoveTarget(profile)}
+                  disabled={busy}
+                  aria-label={t('settings.profileRemoveNamed', 'Remove {{name}}', { name: profile.username ? `@${profile.username}` : profile.name || profile.address })}
+                  title={t('settings.profileRemove', 'Remove profile')}
+                  className="flex size-11 shrink-0 items-center justify-center rounded-xl text-zinc-400 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-50"
+                >
+                  <X className="size-4" />
+                </button>
+              )}
+            </div>
           );
         })}
         {canAddProfile(profiles) && (
@@ -177,6 +196,7 @@ export function MenuAccountSwitcher({ onNavigate }: { onNavigate?: () => void })
           </button>
         )}
       </PopoverContent>
+      <RemoveSavedProfileDialog profile={removeTarget} onClose={() => setRemoveTarget(null)} />
     </Popover>
   );
 }

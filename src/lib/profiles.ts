@@ -107,10 +107,12 @@ function readStore(): StoredProfile[] {
   }
 }
 
-function writeStore(profiles: StoredProfile[]): void {
+function writeStore(profiles: StoredProfile[], reportFailure = false): void {
   try {
     localStorage.setItem(PROFILES_STORAGE_KEY, JSON.stringify(profiles));
-  } catch { /* private mode — the list just doesn't persist */ }
+  } catch (error) {
+    if (reportFailure) throw error;
+  }
   try {
     window.dispatchEvent(new Event(PROFILES_CHANGED_EVENT));
   } catch { /* ignore */ }
@@ -230,6 +232,19 @@ export function clearProfiles(): void {
 
 export function removeProfile(id: string): void {
   writeStore(readStore().filter((p) => p.id !== id));
+}
+
+/** Forget every saved row for an inactive account, including legacy duplicates. */
+export function removeSavedProfile(address: string): void {
+  const target = address.toLowerCase();
+  const live = currentIdentity();
+  if (switchGuarded || !live || live.address.toLowerCase() === target) {
+    throw new Error('Cannot remove a profile while it is active or switching');
+  }
+
+  const profiles = readStore();
+  const kept = profiles.filter((profile) => profile.address.toLowerCase() !== target);
+  if (kept.length !== profiles.length) writeStore(kept, true);
 }
 
 /**

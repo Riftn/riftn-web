@@ -22,11 +22,11 @@ import { useSelfBadge } from '@/hooks/use-self-badge-balance';
 import { buildAvatarUrl, deviceWidth } from '@/lib/media-url';
 import { ButtonLoader } from '@/components/app/DeHubLoader';
 import { SavedProfileName } from '@/components/app/profile/SavedProfileName';
+import { RemoveSavedProfileDialog } from '@/components/app/profile/RemoveSavedProfileDialog';
 import {
   listProfiles,
   currentProfileId,
   profileAllowance,
-  removeProfile,
   PROFILES_CHANGED_EVENT,
   type StoredProfile,
 } from '@/lib/profiles';
@@ -37,11 +37,12 @@ function profileLabel(profile: StoredProfile): string {
 
 export function ProfilesSection({ onSelect }: { onSelect?: () => void } = {}) {
   const { t } = useTranslation();
-  const { switchToProfile, openLoginModal } = useAuth();
+  const { switchToProfile, openLoginModal, walletAddress } = useAuth();
   const { balance: liveBadgeBalance } = useSelfBadge();
   const [profiles, setProfiles] = useState<StoredProfile[]>(() => listProfiles());
   const [activeId, setActiveId] = useState<string | null>(() => currentProfileId());
   const [switchingId, setSwitchingId] = useState<string | null>(null);
+  const [removeTarget, setRemoveTarget] = useState<StoredProfile | null>(null);
 
   // How many fit is a staking-badge allowance: two with no badge, one more per
   // tier (see lib/profile-limits.ts). Priced off the best tier saved on the
@@ -61,13 +62,6 @@ export function ProfilesSection({ onSelect }: { onSelect?: () => void } = {}) {
     window.addEventListener(PROFILES_CHANGED_EVENT, sync);
     return () => window.removeEventListener(PROFILES_CHANGED_EVENT, sync);
   }, []);
-
-  const handleRemove = (id: string) => {
-    // Forgetting a profile drops the stored session with it — the account is
-    // untouched, it just has to be signed into again to come back.
-    removeProfile(id);
-    setProfiles(listProfiles());
-  };
 
   const handleSwitch = async (id: string) => {
     onSelect?.();
@@ -118,7 +112,7 @@ export function ProfilesSection({ onSelect }: { onSelect?: () => void } = {}) {
           a two-up grid left a ragged half-row whenever the count was odd. */}
       <div className="space-y-2">
         {profiles.map((profile) => {
-          const isActive = profile.id === activeId;
+          const isActive = profile.id === activeId || profile.address.toLowerCase() === walletAddress?.toLowerCase();
           return (
             // The remove control is a sibling of the row button, not a child:
             // a button inside a button is invalid, and React strips it.
@@ -169,9 +163,9 @@ export function ProfilesSection({ onSelect }: { onSelect?: () => void } = {}) {
               {!isActive && (
                 <button
                   type="button"
-                  onClick={() => handleRemove(profile.id)}
+                  onClick={() => setRemoveTarget(profile)}
                   disabled={!!switchingId}
-                  aria-label={t('settings.profileRemove', 'Remove profile')}
+                  aria-label={t('settings.profileRemoveNamed', 'Remove {{name}}', { name: profile.username ? `@${profile.username}` : profile.name || profile.address })}
                   title={t('settings.profileRemove', 'Remove profile')}
                   className="absolute top-1/2 -translate-y-1/2 right-2 p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-white/10 transition-colors"
                 >
@@ -203,6 +197,7 @@ export function ProfilesSection({ onSelect }: { onSelect?: () => void } = {}) {
         <Plus className="w-4 h-4" />
         <span className="text-sm font-medium">{t('settings.addProfile', 'Add profile')}</span>
       </button>
+      <RemoveSavedProfileDialog profile={removeTarget} onClose={() => setRemoveTarget(null)} />
     </div>
   );
 }
