@@ -549,13 +549,16 @@ export function useLiveChatMessages(roomId: string | null, options: LiveChatPagi
    * result). If the line is not among those held, the list becomes the window
    * around it; `loadNewer` then reads forward until it meets the live tail.
    */
-  const jumpTo = useCallback(async (messageId: string): Promise<boolean> => {
+  const jumpTo = useCallback(async (messageId: string, onSignInRequired?: () => void): Promise<boolean> => {
     if (!roomId || !pageSize) return false;
     if (messagesRef.current.some((m) => m.id === messageId)) return true;
+    const scope = historyScope.current;
     try {
       const page = await getLiveChatMessagePage(roomId, { limit: AROUND_WINDOW, around: messageId, signedIn: authRef.current });
+      if (scope !== historyScope.current) return false;
       if (page.signInRequired) {
         setSignInWall(true);
+        onSignInRequired?.();
         return false;
       }
       const mapped = page.messages.map((m) => apiMsgToLocal(m, roomId));

@@ -374,6 +374,14 @@ export async function markNotificationAsRead(notificationId: string): Promise<{ 
   });
 }
 
+export function clearAllNotifications(wallet: string, through: number): Promise<{ clearedThrough: string }> {
+  return apiCall('/api/notification/clear-all', {
+    method: 'POST',
+    body: { wallet, through },
+    requiresAuth: true,
+  });
+}
+
 export async function markAllNotificationsAsRead(category?: NotificationCategory): Promise<{ message: string; count: number }> {
   const params: Record<string, string> = {};
   if (category) {

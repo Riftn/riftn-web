@@ -101,6 +101,7 @@ export const SETTINGS_SEARCH_INDEX: SettingsSearchEntry[] = [
   { tab: 'notifications', anchor: 'notification-filters', label: 'Filter notifications', labelKey: 'notificationFilters.title', keywords: 'filter strangers new accounts spam followers people you follow mute' },
   { tab: 'notifications', anchor: 'notify-likes', label: 'Likes', labelKey: 'settings.likes', keywords: 'reactions hearts' },
   { tab: 'notifications', anchor: 'notify-comments', label: 'Comments', labelKey: 'settings.comments' },
+  { tab: 'notifications', anchor: 'private-message-push-only', label: 'Private messages: push only', labelKey: 'settings.privateMessagePushOnly', keywords: 'direct message dm alerts inbox history' },
   { tab: 'notifications', anchor: 'notify-new-followers', label: 'New Followers', labelKey: 'settings.newFollowers', keywords: 'follows' },
   { tab: 'notifications', anchor: 'notify-comment-replies', label: 'Comment Replies', labelKey: 'copy.68be60ea70c8', keywords: 'replies' },
   { tab: 'notifications', anchor: 'notify-mentions', label: 'Mentions', labelKey: 'copy.6f32e692ede0', keywords: 'tagged @' },

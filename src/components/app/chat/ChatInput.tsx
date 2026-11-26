@@ -1,3 +1,4 @@
+import { DM_PHOTO_BATCH_LIMIT } from '@/lib/dm-e2ee/media';
 import { useTranslation as _useCopy } from 'react-i18next';
 import BarChart3 from "@/components/ui/cut-icons/stats";
 import Quote from "@/components/ui/cut-icons/quote";
@@ -65,6 +66,7 @@ export interface ChatInputSendArgs {
   content: string;
   type: 'msg' | 'media' | 'gif' | 'voice';
   mediaFile?: File;
+  photoBatch?: { files: File[]; id: string };
   gifUrl?: string;
   duration?: number;
   /** Trim, cover, mirror, rotation and hide choices for a video. */
@@ -80,6 +82,7 @@ interface ChatInputProps {
   phoneB?: boolean;
   /** Put the caret in the box on mount (a chat just opened from New message, keyboard already up). */
   autoFocus?: boolean;
+  groupPhotos?: boolean;
   onSendMessage: (args: ChatInputSendArgs) => Promise<boolean>;
   onTipClick?: () => void;
   /**
@@ -160,7 +163,7 @@ interface ChatInputProps {
   allowLock?: boolean;
 }
 
-export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, scheduledCount = 0, onPollClick, onNoteClick, sendDisabled, sendDisabledReason, isSendingFee, feeAmount, confirmBeforeSend, canSend, replyTo, onCancelReply, incomingFile, initialText, incomingLink, onIncomingLinkApplied, thread, peerName, draftKey, allowDocuments = true, voiceMaxDuration = 59, allowLock = false, autoFocus = false, phoneB = false }: ChatInputProps) {
+export function ChatInput({ onSendMessage, groupPhotos = false, onTipClick, onScheduleClick, scheduledCount = 0, onPollClick, onNoteClick, sendDisabled, sendDisabledReason, isSendingFee, feeAmount, confirmBeforeSend, canSend, replyTo, onCancelReply, incomingFile, initialText, incomingLink, onIncomingLinkApplied, thread, peerName, draftKey, allowDocuments = true, voiceMaxDuration = 59, allowLock = false, autoFocus = false, phoneB = false }: ChatInputProps) {
   const { t: _copy } = _useCopy();
   const { t } = useTranslation();
   const [message, setMessage] = useDraft(draftKey, initialText ?? '');
@@ -371,8 +374,7 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
     }
 
     if (studioItems.length) {
-      // One file per message: send them in order, the caption riding on the
-      // first. Whatever fails stays in the edit screen to try again.
+      // Preserve order and put the caption on the first message.
       const queue = [...studioItems];
       const caption = message;
       // Back to the chat at once; the uploads show there as they go.
@@ -381,12 +383,21 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
       setStudioActive(0);
       setMessage.complete(caption, '');
       resetComposerHeight();
-      for (let i = 0; i < queue.length; i++) {
+      const ordinaryPhoto = (item: DmStudioItem) => item.kind === 'image' && !item.destruct && !item.lockPrice;
+      for (let i = 0; i < queue.length;) {
         const it = queue[i];
+        let end = i + 1;
+        if (groupPhotos && ordinaryPhoto(it)) {
+          while (end < queue.length && end - i < DM_PHOTO_BATCH_LIMIT && ordinaryPhoto(queue[end])) end++;
+        }
+        const batch = queue.slice(i, end);
+        const photoBatch = batch.length > 1
+          ? { files: batch.map(item => item.file), id: crypto.randomUUID().replace(/-/g, '') }
+          : undefined;
         const sent = await onSendMessage({
           content: i === 0 ? caption.trim() : '',
           type: 'media',
-          mediaFile: it.file,
+          ...(photoBatch ? { photoBatch } : { mediaFile: it.file }),
           ...(it.kind === 'video' ? { mediaOptions: cleanVideoOptions(it.options, it.duration) } : {}),
           ...(it.destruct && allowDocuments ? { destruct: withReplay(it.destruct, it.destructReplay) } : {}),
           ...(allowLock && it.lockPrice ? { lockPrice: it.lockPrice } : {}),
@@ -398,8 +409,11 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
           if (i === 0 && caption.trim()) setMessage(caption);
           return;
         }
-        URL.revokeObjectURL(it.url);
-        studioUrls.current = studioUrls.current.filter((u) => u !== it.url);
+        for (const item of batch) {
+          URL.revokeObjectURL(item.url);
+          studioUrls.current = studioUrls.current.filter((u) => u !== item.url);
+        }
+        i = end;
       }
       return;
     }

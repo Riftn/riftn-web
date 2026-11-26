@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Milestone, Milestones } from '@/hooks/use-milestones';
-import { BadgeMuseumPanel, BadgeMuseumSheet, MilestoneChips } from '@/components/app/profile/BadgeMuseum';
+import { BadgeMuseumPanel, BadgeMuseumSheet } from '@/components/app/profile/BadgeMuseum';
 import { BadgeMuseumSetting } from '@/components/app/settings/BadgeMuseumSetting';
 
 /** State gallery (`?museum=1`, `?museum=sheet`): the Badge Museum on fixed data. */
@@ -45,10 +45,7 @@ export function BadgeMuseumGallery({ sheet }: { sheet: boolean }) {
   const profile = (address: string, label: string) => (
     <section data-page-bento data-museum-profile={label} className="rounded-3xl border border-white/10 bg-white/[0.04] p-4">
       <h2 className="mb-3 text-xs font-semibold text-zinc-500">{label}</h2>
-      <div className="flex flex-wrap items-center gap-1.5">
-        <span className="text-xl font-bold text-white">Mira Sol</span>
-        <MilestoneChips address={address} own />
-      </div>
+      <p className="text-xl font-bold text-white">Mira Sol</p>
       <p className="text-sm text-zinc-400">@mirasol</p>
       <p className="mt-2 text-sm text-white/80">
         <b className="text-white">182</b> Following · <b className="text-white">440</b> Followers · <b className="text-white">35.6K</b> reach

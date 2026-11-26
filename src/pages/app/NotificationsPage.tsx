@@ -27,7 +27,6 @@ import Check from "@/components/ui/cut-icons/check";
 import UserPlus from "@/components/ui/cut-icons/add-account";
 import Trophy from "@/components/ui/cut-icons/leaderboard";
 import Video from "@/components/ui/cut-icons/video";
-import Trash2 from "@/components/ui/cut-icons/delete";
 import Store from "@/components/ui/cut-icons/store";
 import UsersRound from "@/components/ui/cut-icons/communities";
 import Lightbulb from "@/components/ui/cut-icons/feature-requests";
@@ -77,7 +76,7 @@ import { useQueries, useQuery, useMutation, useQueryClient, type InfiniteData } 
 
 import { buildAvatarUrl, extractAvatarPath } from '@/lib/media-url';
 import { stageLiveSentence, stageReminderSentence, stageNotificationPath } from '@/lib/stage-notifications';
-import { supabase } from '@/integrations/supabase/client';
+import { ClearNotificationsControl } from '@/components/app/notifications/ClearNotificationsControl';
 import { seedProfileCache } from '@/lib/profile-cache-seed';
 import { warmNotificationTarget } from '@/lib/notification-prefetch';
 import { SEOHead } from '@/components/SEOHead';
@@ -2157,7 +2156,7 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
   // Unfiltered feed. Drives the per-tab unread badges and the browser
   // notification hand-off, both of which need to see every type. On the All tab
   // this is the same query key as the list below, so it costs no extra request.
-  const { notifications: unfilteredNotifications } = useNotifications();
+  const { notifications: unfilteredNotifications, hasNextPage: hasMoreUnfiltered } = useNotifications();
 
   // The list itself. Ask the API for just this tab's types; the client-side
   // filter below still runs, because it also covers the Supabase-backed types
@@ -2175,23 +2174,23 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
   const markCustomAsRead = useMarkCustomNotificationAsRead();
   const markAllCustomAsRead = useMarkAllCustomNotificationsAsRead();
   
-  const [isClearingAll, setIsClearingAll] = useState(false);
-  const [localClear, setLocalClear] = useState<{ key: string; at: number } | null>(null);
-  // The previous key had no owner. Applying it to any signed-in wallet could
-  // hide another person's retained history on a shared browser.
-  const clearKey = pageWalletAddress ? `notifications_cleared_at:${pageWalletAddress.toLowerCase()}` : '';
-  const storedClearAt = useMemo(() => clearKey ? Number(localStorage.getItem(clearKey)) || 0 : 0, [clearKey]);
-  const clearedAtTs = localClear?.key === clearKey ? localClear.at : storedClearAt;
-  
-  // Rows the user should never see: cleared before the "clear all" mark, or
-  // raised by their own action (the backend sends the sender a DM notification).
+  // Keep history cleared on this browser before the server operation existed.
+  const clearedAtTs = useMemo(() => {
+    if (!pageWalletAddress) return 0;
+    try {
+      return Number(localStorage.getItem(`notifications_cleared_at:${pageWalletAddress.toLowerCase()}`)) || 0;
+    } catch {
+      return 0;
+    }
+  }, [pageWalletAddress]);
+
   const isVisibleNotification = useCallback(
     (n: DeHubNotification) => {
       if (clearedAtTs && new Date(n.createdAt).getTime() <= clearedAtTs) return false;
       if (!pageWalletAddress || !n.actorAddress) return true;
       return n.actorAddress.toLowerCase() !== pageWalletAddress.toLowerCase();
     },
-    [pageWalletAddress, clearedAtTs]
+    [clearedAtTs, pageWalletAddress]
   );
 
   const byNewestFirst = (a: DeHubNotification, b: DeHubNotification) =>
@@ -2533,42 +2532,6 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
     markAllCustomAsRead.mutate();
   };
 
-  const handleClearAllNotifications = async () => {
-    if (!clearKey) return;
-    const now = Date.now();
-    setIsClearingAll(true);
-    try {
-      // Mark all as read first via API
-      markAllAsRead.mutate(undefined);
-      markAllCustomAsRead.mutate();
-      
-      // Also delete all custom notifications from DB so they don't reappear
-      if (pageWalletAddress) {
-        const { withWalletHeader } = await import('@/lib/supabase-wallet-client');
-        await withWalletHeader(
-          supabase
-            .from('custom_notifications')
-            .delete()
-            .eq('recipient_address', pageWalletAddress.toLowerCase())
-            .lte('created_at', new Date(now).toISOString()),
-          pageWalletAddress
-        );
-      }
-      
-      localStorage.setItem(clearKey, String(now));
-      setLocalClear({ key: clearKey, at: now });
-
-      // Invalidate custom notification caches
-      queryClient.invalidateQueries({ queryKey: ['custom-notifications'] });
-      
-      toast.success(_copy("copy.0e99a6d38dbd", { defaultValue: "All notifications cleared" }));
-    } catch (error) {
-      toast.error(_copy("copy.da97d1dae94f", { defaultValue: "Failed to clear notifications" }));
-    } finally {
-      setIsClearingAll(false);
-    }
-  };
-
   // Get total unread count (Riftn + custom)
   const totalUnread = (unreadCount?.total ?? 0) + (customUnreadCount ?? 0);
   
@@ -2622,19 +2585,13 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
           </div>
         </button>
                 
-        <button
-          onClick={handleClearAllNotifications}
-          disabled={isClearingAll || allNotifications.length === 0}
-          className="w-full flex items-center gap-3 p-4 rounded-xl bg-white/10 hover:bg-white/15 transition-colors disabled:opacity-50"
-        >
-          <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
-            {isClearingAll ? <Loader2 className="w-5 h-5 text-white animate-spin" /> : <Trash2 className="w-5 h-5 text-white" />}
-          </div>
-          <div className="flex-1 text-left">
-            <p className="text-white font-medium">{t('notifications.clearAll')}</p>
-            <p className="text-white/50 text-sm">{t('notifications.removeHistory')}</p>
-          </div>
-        </button>
+        {pageWalletAddress && (
+          <ClearNotificationsControl
+            key={pageWalletAddress}
+            wallet={pageWalletAddress}
+            disabled={markAllAsRead.isPending || (!hasMoreUnfiltered && allNotifications.length === 0 && countableNotifications.length === 0 && totalUnread === 0)}
+          />
+        )}
       </div>
               
       {/* This Browser Section */}

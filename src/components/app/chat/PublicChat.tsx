@@ -401,6 +401,21 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
   }, []);
   useEffect(() => () => stopFocus.current?.(), []);
 
+  const handleReplyPress = useCallback(async (id: string) => {
+    if (hiddenLines.has(id)) {
+      toast.error(_copy('chatSearch.gone', { defaultValue: 'That message is no longer here' }));
+      return;
+    }
+    followLatest.current = false;
+    let signInRequired = false;
+    const found = await jumpTo(id, () => {
+      signInRequired = true;
+      promptSignIn();
+    });
+    if (found) focusRow(id);
+    else if (!signInRequired) toast.error(_copy('chatSearch.gone', { defaultValue: 'That message is no longer here' }));
+  }, [hiddenLines, jumpTo, promptSignIn, focusRow, _copy]);
+
   /** Open the chat on one search result, reading the next page of results if it is not loaded yet. */
   const openResult = useCallback(async (index: number) => {
     if (index < 0 || jumping) return;
@@ -782,6 +797,7 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
   // unread marker does. Kept as one memoised list so scroll-driven state
   // (the jump button, unread counts) re-renders the frame, not every line.
   const messageRows = useMemo(() => filteredMessages.map((message) => {
+      const replyTargetId = message.replyTo?.id;
       const row = (
       message.id.startsWith('buy-alert-') ? (
         buyBotHidden ? null : (
@@ -795,9 +811,11 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
       ) : isAssistantAddress(message.userId) || message.id.startsWith('assistant-reply-') ? (
         <AssistantReplyCard
           key={message.id}
+          rowId={chatMessageDomId(message.id)}
           content={message.content}
           timestamp={message.timestamp}
           replyToName={message.replyTo?.senderName}
+          onReplyPress={replyTargetId ? () => handleReplyPress(replyTargetId) : undefined}
         />
       ) : (
       <ChatMessage
@@ -813,6 +831,7 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
         onReact={isAuthenticated ? addReaction : promptSignIn}
         onRemoveReaction={removeReaction}
         onReply={isAuthenticated ? handleReply : undefined}
+        onReplyPress={handleReplyPress}
         onRetrySend={retrySend}
         onDiscardSend={discardSend}
         onSeeMessages={handleSeeMessages}
@@ -832,7 +851,7 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
           {row}
         </Fragment>
       );
-    }), [filteredMessages, buyBotHidden, hideBuyBot, isModerator, roomDetails?.moderators, walletAddress, handleBanUser, canBanSender, handleUnbanUser, handleDeleteMessage, handleEditMessage, isAuthenticated, addReaction, promptSignIn, removeReaction, handleReply, retrySend, discardSend, handleSeeMessages, handleCopyLink, replyTo, handleTogglePin, pinnedMessage?.id, unreadAnchor, selectedRoomId]);
+    }), [filteredMessages, buyBotHidden, hideBuyBot, isModerator, roomDetails?.moderators, walletAddress, handleBanUser, canBanSender, handleUnbanUser, handleDeleteMessage, handleEditMessage, isAuthenticated, addReaction, promptSignIn, removeReaction, handleReply, handleReplyPress, retrySend, discardSend, handleSeeMessages, handleCopyLink, replyTo, handleTogglePin, pinnedMessage?.id, unreadAnchor, selectedRoomId]);
 
   return (
     <div data-page-bento data-bento-flat className="flex flex-col h-full overflow-hidden overflow-x-hidden">
