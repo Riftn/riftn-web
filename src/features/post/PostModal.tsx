@@ -586,24 +586,6 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
           />
         </Suspense>
       )}
-      {isOpen && freeImagesTarget && (
-        <Suspense fallback={null}>
-          <FreeImagesSheet
-            open
-            onOpenChange={open => { if (!open) setFreeImagesTarget(null); }}
-            initialQuery={freeImagesTarget === 'post' ? state.text : undefined}
-            forArticleCover={freeImagesTarget === 'article-cover'}
-            onPick={(file, credit) => {
-              if (freeImagesTarget === 'article-cover') {
-                changeArticleCover(file);
-                return;
-              }
-              actions.addImageFiles([file]);
-              if (credit && !state.text.includes(credit)) actions.setText(state.text ? `${state.text}\n\n${credit}` : credit);
-            }}
-          />
-        </Suspense>
-      )}
       {taggerOpen && (
         <PhotoTagger
           open={taggerOpen}
@@ -626,11 +608,28 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
       )}
       </>
       )}
+      {isOpen && freeImagesTarget && (
+        <Suspense fallback={null}>
+          <FreeImagesSheet
+            open
+            onOpenChange={open => { if (!open) setFreeImagesTarget(null); }}
+            initialQuery={freeImagesTarget === 'post' ? state.text : undefined}
+            forArticleCover={freeImagesTarget === 'article-cover'}
+            onPick={(file, credit) => {
+              if (freeImagesTarget === 'article-cover') {
+                changeArticleCover(file);
+                return;
+              }
+              actions.addImageFiles([file]);
+              if (credit && !state.text.includes(credit)) actions.setText(state.text ? `${state.text}\n\n${credit}` : credit);
+            }}
+          />
+        </Suspense>
+      )}
     </>
   );
 
-  // Prevent drawer from closing when camera is open
-  const canDismiss = () => !state.isCameraModalOpen && !mediaFullscreenOpen;
+  const canDismiss = () => !state.isCameraModalOpen && !mediaFullscreenOpen && !freeImagesTarget;
   const closePendingRef = useRef(false);
   const handleDrawerChange = (open: boolean) => {
     if (!open && !canDismiss()) return;
@@ -653,7 +652,7 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
         open={isOpen}
         onOpenChange={handleDrawerChange}
         repositionInputs={false}
-        dismissible={!mediaFullscreenOpen}
+        dismissible={!mediaFullscreenOpen && !freeImagesTarget}
         onRelease={flick.onRelease}
         // Slide away from wherever the finger let go, instead of vanishing.
         animatedExit
