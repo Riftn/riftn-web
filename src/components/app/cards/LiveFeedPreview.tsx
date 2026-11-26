@@ -203,6 +203,7 @@ export function LiveFeedPreview({ eager = false, urls, thumbnail, className, fal
     }
 
     let cancelled = false;
+    const controller = new AbortController();
     let session: WhepSubscription | null = null;
     setLoading(true);
     whepSessionsOpen += 1;
@@ -256,6 +257,7 @@ export function LiveFeedPreview({ eager = false, urls, thumbnail, className, fal
             provider: source.provider,
             playbackId: source.playbackId,
           }),
+          signal: controller.signal,
           onStateChange: (state) => {
             if (cancelled) return;
             if (state === 'playing') { connected = true; clearTimeout(connectTimer); }
@@ -277,8 +279,9 @@ export function LiveFeedPreview({ eager = false, urls, thumbnail, className, fal
         }
         el.srcObject = session.stream;
         await el.play().catch(() => { if (!cancelled) setLoading(false); });
-        if (cancelled || (!mayPlayNow(el, mutedRef.current))) el.pause();
+        if (el.srcObject === session.stream && (cancelled || !mayPlayNow(el, mutedRef.current))) el.pause();
       } catch (e) {
+        if (cancelled) return;
         // The server said no (a stream WebRTC cannot carry): HLS from now on.
         // Not for a 404, which is a stream between two broadcasts.
         if ((e as Error)?.name === 'WhepRefusedError' && (e as { status?: number }).status !== 404) {
@@ -292,6 +295,7 @@ export function LiveFeedPreview({ eager = false, urls, thumbnail, className, fal
 
     return () => {
       cancelled = true;
+      controller.abort();
       clearTimeout(timer);
       clearTimeout(connectTimer);
       stopWatch();
@@ -309,7 +313,7 @@ export function LiveFeedPreview({ eager = false, urls, thumbnail, className, fal
       }
       // A dead srcObject left attached stops HLS ever getting a picture onto
       // this element.
-      if (el.srcObject) el.srcObject = null;
+      if (session && el.srcObject === session.stream) el.srcObject = null;
       });
     };
     // src and selfHosted follow `source`; listing them would only restart a playing session.

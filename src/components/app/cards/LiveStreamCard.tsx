@@ -775,6 +775,7 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
     if (!video) return;
 
     let cancelled = false;
+    let pendingWhep: AbortController | null = null;
     let session: WhepSubscription | null = null;
     let stopWatch: (() => void) | undefined;
 
@@ -818,7 +819,9 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
       if (cancelled) return;
       stopWatch?.();
       // Whatever this attempt still has on the way is no longer wanted.
-      attempts += 1;
+      const failedAttempt = ++attempts;
+      clearTimeout(timer);
+      pendingWhep?.abort();
       // Answered, and still no way through for the media: that is this
       // network, not this stream. The next live opens on the route after.
       const blocked = reason === 'no media route' || (route === 'relay' && (reason === 'no answer' || reason === NO_RELAY_CANDIDATE));
@@ -834,6 +837,7 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
       if (relayNext) {
         triedRelay = true;
         const relay = await fetchTurnServers();
+        if (cancelled || failedAttempt !== attempts) return;
         if (relay.length) {
           logger.info('WHEP direct failed; retrying via the signaling edge', {
             reason,
@@ -882,15 +886,22 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
         } else {
           const { subscribeToWhep } = await import('@/lib/livepeer/whep');
           if (cancelled || attempt !== attempts) return;
-          opened = await subscribeToWhep({
-            playbackId: whepPlaybackId,
-            endpoint: (which === 'relay' ? edgeWhepEndpointFor : whepEndpointFor)({
-              provider: whepSource?.provider,
+          const controller = new AbortController();
+          pendingWhep = controller;
+          try {
+            opened = await subscribeToWhep({
               playbackId: whepPlaybackId,
-            }),
-            iceServers,
-            onStateChange,
-          });
+              endpoint: (which === 'relay' ? edgeWhepEndpointFor : whepEndpointFor)({
+                provider: whepSource?.provider,
+                playbackId: whepPlaybackId,
+              }),
+              iceServers,
+              signal: controller.signal,
+              onStateChange,
+            });
+          } finally {
+            if (pendingWhep === controller) pendingWhep = null;
+          }
         }
         // Given up on while its answer was on the way: hang it up, or it
         // would take the element back from whatever replaced it.
@@ -912,15 +923,18 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
           else arm(WHEP_CONNECT_TIMEOUT_MS, 'no media route');
         }
         if (playbackRequestedRef.current && visualActivity.isLivePlaybackAllowed()) {
-          await video.play().catch(() => setIsBuffering(false));
+          await video.play().catch(() => {
+            if (!cancelled && attempt === attempts) setIsBuffering(false);
+          });
         }
+        if (cancelled || attempt !== attempts) return;
         videoPlaybackManager.register(videoId, () => {
           setPlaybackWanted(false);
           video.pause();
           setIsPlaying(false);
         }, undefined, undefined, () => video, true);
       } catch (e) {
-        if (attempt !== attempts) return;
+        if (cancelled || attempt !== attempts) return;
         // Answered with a refusal: no other route changes that. A 404 is a
         // stream between two broadcasts, which says nothing about the next
         // one, so only the other refusals are remembered.
@@ -964,6 +978,7 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
 
     return () => {
       cancelled = true;
+      pendingWhep?.abort();
       clearTimeout(timer);
       stopWatch?.();
       video.removeEventListener('resize', onPicture);
@@ -972,14 +987,14 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
       if (whepSessionRef.current === session) whepSessionRef.current = null;
       // Minimised: the corner window owns the session now.
       if (session && handedToMiniRef.current === session) {
-        if (video.srcObject) video.srcObject = null;
+        if (video.srcObject === session.stream) video.srcObject = null;
         return;
       }
       releaseAfterPictureInPicture(video, () => {
         void session?.stop();
         // Leaving a dead srcObject attached stops the HLS path from ever
         // getting a picture onto this element.
-        if (video.srcObject) video.srcObject = null;
+        if (session && video.srcObject === session.stream) video.srcObject = null;
       });
     };
     // urlsToTry is read for the standby only; a new list for the same stream
