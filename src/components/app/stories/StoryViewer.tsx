@@ -605,7 +605,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, openComm
               src={item.mediaUrl ?? undefined}
               poster={item.posterUrl ?? undefined}
               playsInline
-              autoPlay
+              autoPlay={!sheet}
               muted={muted || item.muted}
               onLoadedData={() => setLoaded()}
               onTimeUpdate={e => {
