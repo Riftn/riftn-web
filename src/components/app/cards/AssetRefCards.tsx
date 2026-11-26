@@ -37,7 +37,7 @@ import type { PricePoint } from '@/hooks/use-token-chart';
 import { useAsset24hSeries, useResolvedAsset } from '@/hooks/use-asset-ref';
 import { recordTickerSearch } from '@/lib/ticker-search-tracker';
 import { isDhbSymbol } from '@/lib/market/dhb-market-cap';
-import { isDhbListingQuery } from '@/lib/market/dhb-listing';
+import { isDhbListingQuery, RIFT_REFERENCE_PRICE } from '@/lib/market/dhb-listing';
 import riftnCoin from '@/assets/dehub-coin.png';
 
 const CARD_HEIGHT = 'min-h-[92px]';
@@ -264,9 +264,7 @@ function AssetCard({ asset }: { asset: ResolvedAsset }) {
 
 /**
  * $RIFT, $RIFTN, $DHB, $DEHUB and the old contract addresses all mean our
- * token, and the new one is not trading yet. So there is no lookup, no price
- * and no contract: the card says it is coming soon, and a tap opens the
- * launch list on explore.
+ * token. Its in-app reference price opens the launch details on Explore.
  */
 function isOwnTokenRef(ref: AssetRef): boolean {
   return ref.kind === 'ticker' ? isDhbSymbol(ref.value) : isDhbListingQuery(ref.value);
@@ -301,7 +299,7 @@ function OwnTokenComingSoonCard() {
       <img src={riftnCoin} alt="" className="w-9 h-9 rounded-full bg-white/10 object-cover shrink-0" />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-white font-bold text-sm">{tokenLabel()}</span>
+          <span className="text-white font-bold text-sm">$RIFT</span>
           <span className="text-white/50 text-xs">Riftn</span>
           <span className="text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded-full bg-white/10 text-white/70">
             {t('tokenLaunch.eyebrow', 'Coming soon')}
@@ -312,6 +310,7 @@ function OwnTokenComingSoonCard() {
           {t('dhbListing.body', "Riftn tokens aren't trading yet. Get an email when trading opens.")}
         </p>
       </div>
+      <span className="shrink-0 text-sm font-semibold text-white">{RIFT_REFERENCE_PRICE}</span>
     </div>
   );
 }

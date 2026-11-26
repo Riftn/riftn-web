@@ -95,6 +95,7 @@ export function useSwipeBack() {
       // otherwise plain history back, so every page that can go back does.
       const control = findSwipeBackControl(target, overlayOpen);
       if (!control && (overlayOpen || !canGoBackInApp(window.location.pathname))) return;
+      if (control?.hasAttribute('data-swipe-back-protect-sideways') && target?.closest('[data-no-swipe]')) return;
       start = { id: touch.identifier, x: touch.clientX, y: touch.clientY, at: performance.now(), control, edge };
       held = event.target;
       held?.addEventListener('touchmove', move as EventListener, { passive: false });

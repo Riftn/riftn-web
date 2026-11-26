@@ -15,10 +15,11 @@ export default function StoriesHost() {
     <>
       {viewer && (
         <StoryViewer
-          key={`${viewer.entries[viewer.author]?.author.address}-${viewer.item}-${viewer.entries[viewer.author]?.items[viewer.item]?.id ?? ''}`}
+          key={`${viewer.entries[viewer.author]?.author.address}-${viewer.item}-${viewer.entries[viewer.author]?.items[viewer.item]?.id ?? ''}-${viewer.openComments}`}
           entries={viewer.entries}
           startAuthor={viewer.author}
           startItem={viewer.item}
+          openComments={viewer.openComments}
           onClose={closeViewer}
         />
       )}

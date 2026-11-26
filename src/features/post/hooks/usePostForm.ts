@@ -66,6 +66,7 @@ import type { PostChainId } from '@/components/app/ChainSelector';
 import { normalizeCategoryList } from '@/lib/category-names';
 import { trackFirstPost } from '@/lib/analytics';
 import { extractUrlsFromText } from '@/lib/api/link-preview';
+import { restoreFormattedEditor } from '@/lib/editor-text';
 import { translateDraft, rememberTranslateLang } from '@/features/post/post-translate';
 import { LANGUAGE_NAMES } from '@/hooks/use-user-language';
 
@@ -835,7 +836,7 @@ export function usePostForm(
       setTitleText(title);
       setText(description);
       if (editorRef.current) {
-        editorRef.current.innerText = description;
+        restoreFormattedEditor(editorRef.current, description);
       }
     }
     
@@ -965,7 +966,7 @@ export function usePostForm(
       setTitleText(title);
       setText(description);
       if (editorRef.current) {
-        editorRef.current.innerText = description;
+        restoreFormattedEditor(editorRef.current, description);
       }
     }
     
@@ -1202,7 +1203,7 @@ export function usePostForm(
         setText(data.enhancedText);
         // Update the editor content as well
         if (editorRef.current) {
-          editorRef.current.innerText = data.enhancedText;
+          restoreFormattedEditor(editorRef.current, data.enhancedText);
         }
         toast.success(mode === 'spellcheck' ? _copy("copy.7d61d28cb660", { defaultValue: "Spell checked!" }) : _copy("copy.e116b32c9c80", { defaultValue: "Style applied!" }));
       } else if (data?.error) {
@@ -1218,7 +1219,7 @@ export function usePostForm(
 
   const writeDraft = useCallback((next: string) => {
     setText(next);
-    if (editorRef.current) editorRef.current.innerText = next;
+    if (editorRef.current) restoreFormattedEditor(editorRef.current, next);
   }, [setText]);
 
   const handleTranslateDraft = useCallback(async (lang: string) => {
@@ -1466,7 +1467,7 @@ export function usePostForm(
   const loadDraft = useCallback((draft: Draft) => {
     setText(draft.text);
     if (editorRef.current) {
-      editorRef.current.innerText = draft.text;
+      restoreFormattedEditor(editorRef.current, draft.text);
     }
     // Everything else the draft carried. A missing key means the draft predates
     // that setting (or came from mobile), so the composer's default stands —

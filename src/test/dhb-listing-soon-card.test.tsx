@@ -1,78 +1,84 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { DhbListingSoonCard } from '@/components/app/DhbListingSoonCard';
 
-const listing = vi.hoisted(() => ({
-  getSignInEmail: vi.fn(),
-  joinDhbListingWaitlist: vi.fn(),
-  readJoinedEmail: vi.fn(),
-  rememberJoinedEmail: vi.fn(),
+const launch = vi.hoisted(() => ({
+  getTokenLaunchStatus: vi.fn(),
+  joinTokenLaunch: vi.fn(),
 }));
 
 vi.mock('@/contexts/AuthContext', async (importOriginal) => ({
   ...await importOriginal<typeof import('@/contexts/AuthContext')>(),
-  useAuth: () => ({ user: { username: 'mal' }, walletAddress: '0xabc' }),
+  useAuth: () => ({ isAuthenticated: true, walletAddress: '0xabc' }),
 }));
-vi.mock('react-i18next', () => ({
+vi.mock('react-i18next', async (importOriginal) => ({
+  ...await importOriginal<typeof import('react-i18next')>(),
   useTranslation: () => ({
-    t: (_key: string, fallback: string, vars?: Record<string, string>) =>
-      fallback.replace(/\{\{(\w+)\}\}/g, (_m, k) => vars?.[k] ?? ''),
+    i18n: { language: 'en' },
+    t: (key: string, fallback?: string | Record<string, string>) => {
+      if (typeof fallback === 'string') return fallback;
+      if (key === 'tokenLaunch.notifyMe') return 'Notify me';
+      if (key === 'tokenLaunch.emailLabel') return 'Email address';
+      if (key === 'tokenLaunch.joinedTitle') return "You're on the list";
+      return key;
+    },
   }),
 }));
-vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
-vi.mock('@/lib/market/dhb-listing', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/lib/market/dhb-listing')>()),
-  ...listing,
+vi.mock('@/lib/api/dehub/token-launch', () => ({
+  ...launch,
+  isValidLaunchEmail: (value: string) => value.includes('@'),
 }));
 
-import { DhbListingSoonCard } from '@/components/app/DhbListingSoonCard';
+function renderTicker() {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return render(<QueryClientProvider client={client}><DhbListingSoonCard /></QueryClientProvider>);
+}
 
 afterEach(() => {
   cleanup();
+  localStorage.clear();
   vi.resetAllMocks();
 });
 
-describe('DhbListingSoonCard', () => {
-  it('signs a person up with their sign-in email in one tap', async () => {
-    listing.readJoinedEmail.mockReturnValue(null);
-    listing.getSignInEmail.mockResolvedValue('mal@example.com');
-    listing.joinDhbListingWaitlist.mockResolvedValue({ alreadyJoined: false });
-
-    render(<DhbListingSoonCard />);
-    expect(screen.getByText('Token launching soon')).toBeTruthy();
+describe('RIFT ticker', () => {
+  it('shows the reference price, launch status and unconfirmed contract', () => {
+    renderTicker();
     expect(screen.getByText('$RIFT')).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: /notify me/i }));
-
-    await waitFor(() => expect(screen.getByText(/We'll email mal@example.com/)).toBeTruthy());
-    expect(listing.joinDhbListingWaitlist).toHaveBeenCalledWith({
-      email: 'mal@example.com',
-      walletAddress: '0xabc',
-      username: 'mal',
-      source: 'explore',
-    });
+    expect(screen.getByText('$0.001')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Info' }));
+    expect(screen.getByRole('status').textContent).toBe('Coming soon');
+    fireEvent.click(screen.getByRole('button', { name: 'Contract address' }));
+    expect(screen.getByRole('status').textContent).toBe('To be confirmed');
   });
 
-  it('asks for an email when the account has none', async () => {
-    listing.readJoinedEmail.mockReturnValue(null);
-    listing.getSignInEmail.mockResolvedValue(null);
-    listing.joinDhbListingWaitlist.mockResolvedValue({ alreadyJoined: false });
-
-    render(<DhbListingSoonCard />);
-    fireEvent.click(screen.getByRole('button', { name: /notify me/i }));
-
-    const input = await screen.findByLabelText('Enter your email');
-    expect(listing.joinDhbListingWaitlist).not.toHaveBeenCalled();
-
-    fireEvent.change(input, { target: { value: 'new@fan.io' } });
-    fireEvent.click(screen.getByRole('button', { name: /notify me/i }));
-
-    await waitFor(() => expect(screen.getByText(/We'll email new@fan.io/)).toBeTruthy());
-    expect(listing.joinDhbListingWaitlist).toHaveBeenCalledWith(expect.objectContaining({ email: 'new@fan.io' }));
+  it('uses the established launch signup with the account email', async () => {
+    launch.getTokenLaunchStatus.mockResolvedValue({ joined: false, accountEmail: 'fan@example.com' });
+    launch.joinTokenLaunch.mockResolvedValue({ joined: true, email: 'f***@example.com' });
+    renderTicker();
+    fireEvent.click(screen.getByRole('button', { name: 'Buy' }));
+    expect(screen.getByText('For now, you can only earn tokens by using the app.')).toBeTruthy();
+    fireEvent.click(await screen.findByRole('button', { name: 'Notify me' }));
+    expect(await screen.findByText("You're on the list")).toBeTruthy();
+    expect(launch.joinTokenLaunch).toHaveBeenCalledWith({ useAccountEmail: true, locale: 'en' });
   });
 
-  it('shows "on the list" straight away for someone who already signed up here', () => {
-    listing.readJoinedEmail.mockReturnValue('mal@example.com');
-    render(<DhbListingSoonCard />);
-    expect(screen.queryByRole('button', { name: /notify me/i })).toBeNull();
-    expect(screen.getByText(/You're on the list/)).toBeTruthy();
+  it('lets a fan enter an email when the account has none', async () => {
+    launch.getTokenLaunchStatus.mockResolvedValue({ joined: false, accountEmail: null });
+    launch.joinTokenLaunch.mockResolvedValue({ joined: true, email: 'f***@example.com' });
+    renderTicker();
+    fireEvent.click(screen.getByRole('button', { name: 'Buy' }));
+    fireEvent.change(await screen.findByLabelText('Email address'), { target: { value: 'fan@example.com' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Notify me' }));
+    await waitFor(() => expect(launch.joinTokenLaunch).toHaveBeenCalledWith({ email: 'fan@example.com', locale: 'en' }));
+  });
+
+  it('recognizes a signup already recorded on this device', async () => {
+    localStorage.setItem('dehub.tokenLaunch.joined', 'f***@example.com');
+    launch.getTokenLaunchStatus.mockResolvedValue({ joined: false, accountEmail: null });
+    renderTicker();
+    fireEvent.click(screen.getByRole('button', { name: 'Buy' }));
+    expect(await screen.findByText("You're on the list")).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Notify me' })).toBeNull();
   });
 });

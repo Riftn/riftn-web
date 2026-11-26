@@ -47,9 +47,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useBookmarkPost } from '@/hooks/use-bookmarks';
 import { useBlockAuthor } from '@/hooks/use-block-author';
 import { useNotifyWhenLive } from '@/hooks/use-notify-when-live';
+import { LiveAudienceProfileContext, usePreviewAudienceProfile } from '../live/live-audience-profile';
 import type { LiveStream } from '@/types/feed.types';
 
 import { formatCount } from '@/lib/format-count';
+import { publicChatShareTokenId } from '@/lib/live-public-chat-share';
 interface LiveCardProps {
   stream: LiveStream;
 }
@@ -61,6 +63,10 @@ export function LiveCard({ stream }: LiveCardProps) {
   const [showAIChat, setShowAIChat] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const navigate = useNavigate();
+  const shareTokenId = publicChatShareTokenId(stream);
+  const { previewHandoff, openAudienceProfile } = usePreviewAudienceProfile(
+    stream.tokenId ?? stream.id, stream.title, stream.streamer, stream.avatar,
+  );
   const { openLoginModal, walletAddress } = useAuth();
   // "Tuned in" on the card is the post's all-time views (`stream.viewers`);
   // who is in the room right now lives on the live page itself.
@@ -203,6 +209,7 @@ export function LiveCard({ stream }: LiveCardProps) {
               urls={[stream.playbackUrl, ...(stream.playbackUrls || [])]}
               thumbnail={stream.thumbnail ? cdnImage(stream.thumbnail, { width: 720 }) : undefined}
               fallbackLabel={t('feed.live')}
+              audienceHandoff={previewHandoff}
             />
           </Suspense>
         ) : stream.isLive && stream.thumbnail ? (
@@ -236,7 +243,10 @@ export function LiveCard({ stream }: LiveCardProps) {
       {/* Info & Actions */}
       <div className="pt-3">
         <ActionBar
+          liveShare
+          visibility={stream.visibility}
           onLiveReaction={sendLiveReaction}
+          onShareToPublicChat={shareTokenId ? () => navigate('/app/messages?chat=public', { state: { shareLiveTokenId: shareTokenId } }) : undefined}
           postId={stream.id}
           tokenId={parseInt(stream.id, 10) || undefined}
           utilityDesktopAnchor
@@ -260,7 +270,9 @@ export function LiveCard({ stream }: LiveCardProps) {
       {showComments && (
         <div className="mt-3" data-no-navigate onClick={(e) => e.stopPropagation()}>
           <Suspense fallback={null}>
-            <LivePostChat tokenId={stream.id} streamId={stream.streamId} isOffline={!stream.isLive} />
+            <LiveAudienceProfileContext.Provider value={openAudienceProfile}>
+              <LivePostChat tokenId={stream.id} streamId={stream.streamId} isOffline={!stream.isLive} />
+            </LiveAudienceProfileContext.Provider>
           </Suspense>
         </div>
       )}

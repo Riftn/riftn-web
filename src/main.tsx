@@ -99,6 +99,9 @@ const postPageReady = POST_LINK && !SAVE_DATA
     ])
   : undefined;
 void import("./lib/first-touch").then((m) => m.captureFirstTouch(landing)).catch(() => undefined);
+if (new URLSearchParams(landing.search).has('live_ref')) {
+  void import('./lib/affiliateRef').then((m) => m.captureAffiliateRefFromUrl(null, landing.search));
+}
 // Signs wallet-scoped REST and storage requests; see src/lib/wallet-session.ts.
 installWalletSessionFetch();
 installRecentErrorBuffer();

@@ -11,6 +11,10 @@
  * address it stands for, a <br> or a new line block as one "\n".
  */
 
+import { encodePostText, POST_TEXT_STYLES, postTextRuns, type PostTextStyle } from './post-text-format';
+
+const STYLE_TAGS = { b: 'strong', i: 'em', u: 'u' } as const;
+
 /** The text a chip stands for in the post, or null when the element is not a chip. */
 export function chipText(el: Element): string | null {
   if (el.hasAttribute('data-link-chip')) {
@@ -84,6 +88,71 @@ function walk(root: Node, visit?: (piece: Piece) => boolean | void): string {
 /** The post text the editor holds, links as full addresses. */
 export function serializeEditor(root: Node): string {
   return walk(root);
+}
+
+export function serializeFormattedEditor(root: HTMLElement): string {
+  const pieces: { start: number; length: number; styles: PostTextStyle[] }[] = [];
+  const plain = walk(root, piece => {
+    const styles = new Set<PostTextStyle>();
+    let element = piece.node.parentElement;
+    while (element && element !== root) {
+      const { fontWeight, fontStyle, textDecoration, textDecorationLine } = element.style;
+      if (element.matches('b, strong') || fontWeight === 'bold' || Number(fontWeight) >= 600) styles.add('b');
+      if (element.matches('i, em') || fontStyle === 'italic') styles.add('i');
+      if (element.matches('u') || (textDecorationLine || textDecoration).includes('underline')) styles.add('u');
+      element = element.parentElement;
+    }
+    pieces.push({ ...piece, styles: POST_TEXT_STYLES.filter(style => styles.has(style)) });
+  });
+  let result = '';
+  let start = 0;
+  let end = 0;
+  let styles: PostTextStyle[] = [];
+  for (const piece of pieces) {
+    if (piece.start !== end || piece.styles.join() !== styles.join()) {
+      result += encodePostText(plain.slice(start, end), styles) + plain.slice(end, piece.start);
+      start = piece.start;
+      styles = piece.styles;
+    }
+    end = piece.start + piece.length;
+  }
+  return result + encodePostText(plain.slice(start, end), styles) + plain.slice(end);
+}
+
+export function restoreFormattedEditor(root: HTMLElement, text: string): void {
+  root.replaceChildren(...postTextRuns(text).map(run => {
+    let node: Node = document.createTextNode(run.text);
+    for (const style of [...run.styles].reverse()) {
+      const span = document.createElement(STYLE_TAGS[style]);
+      span.appendChild(node);
+      node = span;
+    }
+    return node;
+  }));
+}
+
+/** Apply a suggestion to the editor without flattening the surrounding styles. */
+export function replaceEditorSuggestion(root: HTMLElement, next: string): void {
+  const previous = serializeEditor(root);
+  let start = 0;
+  let end = previous.length;
+  let nextEnd = next.length;
+  while (start < end && start < nextEnd && previous[start] === next[start]) start++;
+  while (end > start && nextEnd > start && previous[end - 1] === next[nextEnd - 1]) {
+    end--;
+    nextEnd--;
+  }
+  root.focus();
+  setEditorCaret(root, start);
+  const selection = window.getSelection();
+  if (!selection?.rangeCount) return;
+  const range = selection.getRangeAt(0).cloneRange();
+  setEditorCaret(root, end);
+  const ending = selection.getRangeAt(0);
+  range.setEnd(ending.endContainer, ending.endOffset);
+  range.deleteContents();
+  range.insertNode(document.createTextNode(next.slice(start, nextEnd)));
+  setEditorCaret(root, nextEnd);
 }
 
 /** Every text node outside a chip, with where it starts in the post text. */

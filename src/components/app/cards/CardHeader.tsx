@@ -45,6 +45,8 @@ interface CardHeaderProps {
   verified?: boolean;
   /** Type of content for badge display */
   contentType: ContentType;
+  /** An opened post uses its avatar as a profile control. */
+  postPage?: boolean;
   /** Whether this is a live stream (shows pulsing indicator) */
   isLive?: boolean;
   /** Creator's user ID for navigation */
@@ -93,6 +95,7 @@ export function CardHeader({
   avatarSeed, 
   verified = false, 
   contentType,
+  postPage = false,
   isLive = false,
   creatorId,
   creatorUsername,
@@ -158,6 +161,15 @@ export function CardHeader({
   // Profile page code starts loading as the pointer arrives or the finger
   // lands, so the click shows the page instead of waiting on a download.
   const warmProfilePage = () => preloadRoute('/app/profile');
+  const face = (
+    <span className="relative flex">
+      <Avatar className="w-9 h-9 rounded-md">
+        {avatarSrc && <AvatarImage src={avatarSrc} onError={() => setImageError(true)} className="rounded-md" />}
+        <AvatarFallback className="bg-zinc-700 text-white font-medium rounded-md">{username[0]?.toUpperCase()}</AvatarFallback>
+      </Avatar>
+      <CoAuthorAvatarBadge users={coAuthors} />
+    </span>
+  );
 
   return (
     // One gap under the name row for every post type, so photos, videos,
@@ -172,6 +184,7 @@ export function CardHeader({
         badgeBalance={badgeBalance}
       >
         <button
+          type="button"
           onClick={handleProfileClick}
           onMouseDown={handleProfileMouseDown}
           onPointerEnter={warmProfilePage}
@@ -184,18 +197,14 @@ export function CardHeader({
           aria-label={t('feed.viewProfile', { name: username })}
           className={`flex shrink-0 ${isClickable ? 'cursor-pointer' : 'cursor-default'}`}
         >
-          <LiveRipple ids={[creatorId, creatorUsername, handle]} orbit className="rounded-md">
-            {/* The avatar ring opens Moments; co-authored posts keep their corner badge. */}
-            <MomentFace address={coAuthors.length ? null : creatorId} size={36} outline name={username} className="rounded-md">
-              <span className="relative flex">
-                <Avatar className="w-9 h-9 rounded-md">
-                  {avatarSrc && <AvatarImage src={avatarSrc} onError={() => setImageError(true)} className="rounded-md" />}
-                  <AvatarFallback className="bg-zinc-700 text-white font-medium rounded-md">{username[0]?.toUpperCase()}</AvatarFallback>
-                </Avatar>
-                <CoAuthorAvatarBadge users={coAuthors} />
-              </span>
-            </MomentFace>
-          </LiveRipple>
+          {postPage ? face : (
+            <LiveRipple ids={[creatorId, creatorUsername, handle]} orbit className="rounded-md">
+              {/* The avatar ring opens Moments; co-authored posts keep their corner badge. */}
+              <MomentFace address={coAuthors.length ? null : creatorId} size={36} outline name={username} className="rounded-md">
+                {face}
+              </MomentFace>
+            </LiveRipple>
+          )}
         </button>
       </ProfileHoverCard>
       {/* Only the name and the @handle open the profile. The blank space

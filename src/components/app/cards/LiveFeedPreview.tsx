@@ -1,3 +1,4 @@
+import { LiveDot } from '@/components/app/live/LiveDot';
 import { useTranslation as _useCopy } from 'react-i18next';
 /**
  * Live Feed Preview
@@ -28,7 +29,7 @@ import { useTranslation as _useCopy } from 'react-i18next';
  * the garbage — it uses hls.js where MSE exists and otherwise shows the poster.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useImperativeHandle, useMemo, useRef, useState, type Ref } from 'react';
 import { nativeLiveEdge, watchLiveProgress } from '@/lib/live/stall-watchdog';
 import { forgetWhepSilent, hasRealPicture, rememberWhepRouteBlocked, rememberWhepSilent, whepRecentlySilent, whepRouteBlocked } from '@/lib/live/whep-memory';
 import { dropWarmLiveHls, SLOW_KEYFRAME_SEC, takeWarmLiveHls, warmLiveHls } from '@/lib/live/hls-standby';
@@ -45,7 +46,9 @@ import {
   BIG_EVENT_HLS_CONFIG,
 } from '@/lib/live-ingest';
 import type { WhepSubscription } from '@/lib/livepeer/whep';
-import { stashLiveSession } from '@/lib/live-handoff';
+import { snapshot, stashLiveSession } from '@/lib/live-handoff';
+import { openLiveMini } from '@/lib/live-mini';
+import type { PreviewAudienceHandoff } from '../live/live-audience-profile';
 import { Minimize, PictureInPicture2 } from "lucide-react";
 import Volume2 from "@/components/ui/cut-icons/volume";
 import VolumeX from "@/components/ui/cut-icons/mute";
@@ -88,6 +91,7 @@ interface LiveFeedPreviewProps {
   muted?: boolean;
   controlsVisible?: boolean;
   onToggleMute?: (event: React.MouseEvent) => void;
+  audienceHandoff?: Ref<PreviewAudienceHandoff>;
 }
 
 /** A negotiated session that never delivers a frame is the worst case. */
@@ -119,7 +123,7 @@ function mayPlayNow(el: HTMLVideoElement, muted: boolean): boolean {
   return visualActivity.isFeedPlaybackAllowed() || isVideoInPictureInPicture(el) || (!muted && visualActivity.isLivePlaybackAllowed());
 }
 
-export function LiveFeedPreview({ eager = false, urls, thumbnail, className, fallbackLabel, muted = true, controlsVisible = false, onToggleMute, streamId, streamStatus, creatorId, isOwner, selfReaction, onViewerCount }: LiveFeedPreviewProps) {
+export function LiveFeedPreview({ eager = false, urls, thumbnail, className, fallbackLabel, muted = true, controlsVisible = false, onToggleMute, streamId, streamStatus, creatorId, isOwner, selfReaction, onViewerCount, audienceHandoff }: LiveFeedPreviewProps) {
   const { t: _copy } = _useCopy();
   const { pathname } = useLocation();
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -149,6 +153,8 @@ export function LiveFeedPreview({ eager = false, urls, thumbnail, className, fal
   const [playing, setPlaying] = useState(false);
   const [loading, setLoading] = useState(false);
   const { broadcastPaused, broadcastEnded, waitingTooLong } = useLivePlaybackFeedback(streamId, loading, visible && !postOpen, streamStatus);
+  const broadcastPausedRef = useRef(broadcastPaused);
+  broadcastPausedRef.current = broadcastPaused;
   const wasBroadcastPaused = useRef(broadcastPaused);
   useEffect(() => {
     if (wasBroadcastPaused.current && !broadcastPaused) setFailed(false);
@@ -168,6 +174,25 @@ export function LiveFeedPreview({ eager = false, urls, thumbnail, className, fal
   // A big event is HLS everywhere, the feed included — a WebRTC session per
   // card is the per-viewer cost that mode exists to avoid.
   const bigEvent = isBigEventPlayback(src);
+  const takeWhepSession = useRef<(() => WhepSubscription | null) | null>(null);
+  useImperativeHandle(audienceHandoff, () => async (live) => {
+    const video = videoRef.current;
+    if (!video || video.paused || !streamId || !src || broadcastPaused || broadcastEnded) return;
+    const location = window.location.href;
+    const presence = ownStream ? null : await import('@/lib/api/dehub/stream-presence').catch(() => null);
+    if (videoRef.current !== video || video.paused || window.location.href !== location) return;
+    const ladder = [...new Set(urls.filter((url): url is string => !!url && url.includes('.m3u8')))];
+    openLiveMini({
+      ...live,
+      streamId,
+      playbackId: source?.playbackId ?? null,
+      urls: ladder,
+      session: takeWhepSession.current?.() ?? null,
+      poster: snapshot(video),
+      seat: presence?.joinStreamPresence(streamId) ?? null,
+    });
+    if (isFullscreen) toggleFullscreen();
+  }, [streamId, src, source, urls, ownStream, broadcastPaused, broadcastEnded, isFullscreen, toggleFullscreen]);
 
   // One WebRTC attempt per card: the transport only ever moves whep → hls, so
   // a failure cannot trade the element back and forth with the ladder.
@@ -201,7 +226,15 @@ export function LiveFeedPreview({ eager = false, urls, thumbnail, className, fal
     }
 
     let cancelled = false;
+    const controller = new AbortController();
     let session: WhepSubscription | null = null;
+    let handedOffSession: WhepSubscription | null = null;
+    const takeSession = () => {
+      if (!session || handedOffSession || el.srcObject !== session.stream) return null;
+      handedOffSession = session;
+      return session;
+    };
+    takeWhepSession.current = takeSession;
     setLoading(true);
     whepSessionsOpen += 1;
 
@@ -233,6 +266,12 @@ export function LiveFeedPreview({ eager = false, urls, thumbnail, className, fal
     const onPicture = () => {
       if (el.srcObject && hasRealPicture(el)) dropWarmLiveHls(src);
     };
+    const stopWatch = watchLiveProgress(el, {
+      stallMs: 6000,
+      preferVideoFrames: () => true,
+      shouldWatch: () => !broadcastPausedRef.current && !!el.srcObject && hasRealPicture(el),
+      onStall: fallBack,
+    });
     el.addEventListener('resize', onPicture);
     el.addEventListener('loadeddata', onPicture);
 
@@ -248,6 +287,7 @@ export function LiveFeedPreview({ eager = false, urls, thumbnail, className, fal
             provider: source.provider,
             playbackId: source.playbackId,
           }),
+          signal: controller.signal,
           onStateChange: (state) => {
             if (cancelled) return;
             if (state === 'playing') { connected = true; clearTimeout(connectTimer); }
@@ -269,8 +309,9 @@ export function LiveFeedPreview({ eager = false, urls, thumbnail, className, fal
         }
         el.srcObject = session.stream;
         await el.play().catch(() => { if (!cancelled) setLoading(false); });
-        if (cancelled || (!mayPlayNow(el, mutedRef.current))) el.pause();
+        if (!handedOffSession && el.srcObject === session.stream && (cancelled || !mayPlayNow(el, mutedRef.current))) el.pause();
       } catch (e) {
+        if (cancelled) return;
         // The server said no (a stream WebRTC cannot carry): HLS from now on.
         // Not for a 404, which is a stream between two broadcasts.
         if ((e as Error)?.name === 'WhepRefusedError' && (e as { status?: number }).status !== 404) {
@@ -284,11 +325,18 @@ export function LiveFeedPreview({ eager = false, urls, thumbnail, className, fal
 
     return () => {
       cancelled = true;
+      controller.abort();
+      if (takeWhepSession.current === takeSession) takeWhepSession.current = null;
       clearTimeout(timer);
       clearTimeout(connectTimer);
+      stopWatch();
       el.removeEventListener('resize', onPicture);
       el.removeEventListener('loadeddata', onPicture);
       whepSessionsOpen = Math.max(0, whepSessionsOpen - 1);
+      if (handedOffSession) {
+        if (el.srcObject === handedOffSession.stream) el.srcObject = null;
+        return;
+      }
       // Leaving for the post page while the picture is up: hand the running
       // session over instead of hanging up, so the post page carries on from
       // this frame rather than reconnecting from black.
@@ -300,7 +348,7 @@ export function LiveFeedPreview({ eager = false, urls, thumbnail, className, fal
       }
       // A dead srcObject left attached stops HLS ever getting a picture onto
       // this element.
-      if (el.srcObject) el.srcObject = null;
+      if (session && el.srcObject === session.stream) el.srcObject = null;
       });
     };
     // src and selfHosted follow `source`; listing them would only restart a playing session.
@@ -399,8 +447,22 @@ export function LiveFeedPreview({ eager = false, urls, thumbnail, className, fal
     };
   }, [transport, src, visible, postOpen, failed, selfHosted, bigEvent, broadcastEnded]);
 
-  if (!src || broadcastEnded) {
-    return <LiveEndedMedia thumbnail={thumbnail} label={broadcastEnded ? undefined : fallbackLabel} />;
+  if (broadcastEnded) return <LiveEndedMedia thumbnail={thumbnail} />;
+
+  const liveBadge = !broadcastPaused && (
+    <span data-on-media className="pointer-events-none absolute left-2 top-2 z-10 inline-flex items-center gap-1.5 rounded-full border border-white/30 bg-black/80 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-white">
+      <LiveDot />
+      {_copy("copy.35e0d0360a0a", { defaultValue: "LIVE" })}
+    </span>
+  );
+
+  if (!src) {
+    return (
+      <div className="absolute inset-0">
+        <LiveEndedMedia thumbnail={thumbnail} label={fallbackLabel} />
+        {liveBadge}
+      </div>
+    );
   }
 
   return (
@@ -439,6 +501,7 @@ export function LiveFeedPreview({ eager = false, urls, thumbnail, className, fal
         onPause={() => { setPaused(true); setLoading(false); }}
         onEnded={() => { setPaused(true); setPlaying(false); setLoading(false); }}
       />
+      {liveBadge}
       <LiveReactionFlow streamId={streamId} enabled={visible && !postOpen} self={selfReaction} bottom={56} />
       {visible && !postOpen && (loading || broadcastPaused || failed || (paused && playing)) && (
         <div role="status" aria-label={broadcastPaused || (paused && playing) ? _copy("copy.91b75d1b48f9", { defaultValue: "Live paused" }) : failed || waitingTooLong ? _copy("copy.510db6ad26be", { defaultValue: "Waiting for live video" }) : _copy("copy.dc380888c4e2", { defaultValue: "Loading" })} className="absolute inset-0 pointer-events-none flex items-center justify-center">
@@ -461,7 +524,6 @@ export function LiveFeedPreview({ eager = false, urls, thumbnail, className, fal
           }}>
             {paused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
           </button>
-          <span className="text-xs font-semibold text-white">{_copy("copy.35e0d0360a0a", { defaultValue: "LIVE" })}</span>
           <div className="flex-1" />
           {onToggleMute && <button type="button" aria-label={muted ? _copy("copy.ce4ee4efc5e3", { defaultValue: "Unmute" }) : _copy("copy.8dd6857baf02", { defaultValue: "Mute" })} onClick={onToggleMute} className="h-8 w-8 rounded-xl bg-black/40 border border-white/10 text-white flex items-center justify-center">
             {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}

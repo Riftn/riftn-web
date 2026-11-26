@@ -2,6 +2,7 @@ import { LanguageRouteSync } from '@/components/LanguageRouteSync';
 import MaintenanceGate from '@/components/MaintenanceGate';
 import { useTranslation as _useCopy } from 'react-i18next';
 import { Toaster as Sonner } from "@/components/ui/sonner";
+import { OfflineConnectionToast } from "@/components/OfflineConnectionToast";
 import { NotificationsPromptToast } from "@/components/app/NotificationsPromptToast";
 import { AvatarPrompt } from "@/components/app/AvatarPrompt";
 import { NonFollowerOffer } from "@/components/app/NonFollowerOffer";
@@ -563,18 +564,24 @@ function AppContent() {
   useLiveListRealtime();
 
   const wallet = walletAddress ?? (user as { walletAddress?: string | null; address?: string | null } | null)?.walletAddress ?? (user as { address?: string | null } | null)?.address ?? null;
+  const referralAccountCreatedAt = user?.username ? user.createdAt : undefined;
+  const { search } = useLocation();
 
   // Capture ?ref=CODE / ?aff=CODE on first load (first-touch wins, 90-day cookie).
   // Passing the signed-in wallet lets the shared RPC remove an owner's own
   // test visit from their affiliate analytics.
   useEffect(() => {
-    import("@/lib/affiliateRef").then(m => m.captureAffiliateRefFromUrl(wallet));
-  }, [wallet]);
+    import("@/lib/affiliateRef").then(m => m.captureAffiliateRefFromUrl(wallet, search));
+  }, [wallet, search]);
 
   // When a wallet signs in, self-attribute any pending cookie referral.
   useEffect(() => {
     if (!wallet || !isAuthenticated || requiresUsername || isConnecting || isProcessingRedirect) return;
-    import("@/lib/affiliate").then(m => m.attributeReferralIfPending(wallet)).catch(() => undefined);
+    import("@/lib/affiliate").then(m => m.attributeReferralIfPending(wallet, referralAccountCreatedAt)).catch(() => undefined);
+  }, [wallet, isAuthenticated, requiresUsername, isConnecting, isProcessingRedirect, referralAccountCreatedAt]);
+
+  useEffect(() => {
+    if (!wallet || !isAuthenticated || requiresUsername || isConnecting || isProcessingRedirect) return;
     import("@/lib/growth-session").then(m => m.syncGrowthSession(wallet)).catch(() => undefined);
   }, [wallet, isAuthenticated, requiresUsername, isConnecting, isProcessingRedirect]);
 
@@ -1122,6 +1129,7 @@ const App = () => (
           <LanguageRouteSync />
           <SEOHead />
           <Sonner />
+          <OfflineConnectionToast />
           {/* Watches /version.json for a newer deploy; renders nothing itself. */}
           <Suspense fallback={null}><NewVersionToast /></Suspense>
           {/*
