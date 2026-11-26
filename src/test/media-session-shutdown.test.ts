@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { claimMediaSession, releaseMediaSession } from '@/lib/media-session';
+import { claimMediaSession, releaseMediaSession, suspendPageMediaSessions } from '@/lib/media-session';
 
 afterEach(() => {
   window.dispatchEvent(new Event('pagehide'));
@@ -9,6 +9,26 @@ afterEach(() => {
 });
 
 describe('page playback shutdown', () => {
+  it('pauses detached players during a Story, including late requests', async () => {
+    const pause = vi.fn();
+    const stop = vi.fn();
+    const latePause = vi.fn();
+    claimMediaSession('radio', { title: 'Radio' }, { pause, stop });
+    const resume = suspendPageMediaSessions();
+    try {
+      expect(pause).toHaveBeenCalledOnce();
+      expect(stop).not.toHaveBeenCalled();
+      claimMediaSession('late', { title: 'Late' }, { pause: latePause });
+      await Promise.resolve();
+      expect(latePause).toHaveBeenCalledOnce();
+    } finally {
+      resume();
+    }
+    claimMediaSession('late', { title: 'Late' }, { pause: latePause });
+    await Promise.resolve();
+    expect(latePause).toHaveBeenCalledOnce();
+  });
+
   it('stops detached players even without the Media Session API', () => {
     const stop = vi.fn();
     claimMediaSession('radio', { title: 'Radio' }, { stop });

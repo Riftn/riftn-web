@@ -11,7 +11,9 @@
  * direct message; likes and views show only to the owner. Your own moments
  * show who watched instead of a reply bar.
  */
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { suspendPageMediaSessions } from '@/lib/media-session';
+import { pauseMediaOutside } from '@/lib/pause-media-in';
 import { type InfiniteData, type UseInfiniteQueryResult, useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
@@ -195,6 +197,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, openComm
   const room = useMomentComments(item?.id, isAuthenticated, !!item && (item.commentCount ?? 1) > 0);
   const roomComments = room.data?.comments ?? [];
 
+  const viewerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const moreButtonRef = useRef<HTMLButtonElement>(null);
@@ -207,6 +210,18 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, openComm
   const originalRequest = useRef<symbol | null>(null);
   const replyInput = useRef<HTMLInputElement>(null);
   const sendingReply = useRef(false);
+
+  const hasStory = !!entry && !!item;
+  useLayoutEffect(() => {
+    const viewer = viewerRef.current;
+    if (!hasStory || !viewer) return;
+    const releaseMedia = pauseMediaOutside(viewer);
+    const releaseSessions = suspendPageMediaSessions();
+    return () => {
+      releaseMedia();
+      releaseSessions();
+    };
+  }, [hasStory]);
 
   // ── Moving between moments ────────────────────────────────────────
   const close = useCallback(() => {
@@ -590,6 +605,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, openComm
 
   const body = (
     <div
+      ref={viewerRef}
       data-stories
       data-story-viewer
       data-keep-dark
