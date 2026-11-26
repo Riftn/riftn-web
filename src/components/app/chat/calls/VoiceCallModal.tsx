@@ -7,7 +7,7 @@ import Volume2 from '@/components/ui/cut-icons/volume';
 import Mic from '@/components/ui/cut-icons/mic';
 import { useTranslation } from 'react-i18next';
 import { useCall } from '@/contexts/CallContext';
-import { openDmDock } from '@/hooks/use-dm-dock';
+import { useMessageCallPeer } from './useMessageCallPeer';
 import {
   CallStage,
   CallIdentity,
@@ -38,6 +38,7 @@ const VoiceCallModal: React.FC = () => {
   } = useCall();
 
   const { t } = useTranslation();
+  const messageCallPeer = useMessageCallPeer();
   const [audioNeedsInteraction, setAudioNeedsInteraction] = useState(false);
 
   const peer = usePeerIdentity(isIncoming ? currentCall?.caller_address || peerAddress : peerAddress);
@@ -68,10 +69,9 @@ const VoiceCallModal: React.FC = () => {
         : <CallDuration fallback="00:00" />;
 
   const openMessages = () => {
-    const username = peer.name.startsWith('@') ? peer.name.slice(1) : undefined;
     if (isRinging) endCall();
     else minimizeCall();
-    openDmDock({ address: peerAddress, username, avatarUrl: peer.avatarUrl ?? undefined });
+    messageCallPeer(peerAddress, peer);
   };
 
   return (
