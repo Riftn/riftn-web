@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import Search from '@/components/ui/cut-icons/search';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { Input } from '@/components/ui/input';
 import { downloadFreeAsset, searchFreeAssets, type FreeAsset } from '@/lib/editor/freeAssets';
 import { cn } from '@/lib/utils';
 
@@ -69,32 +70,34 @@ export function FreeImagesSheet({ open, onOpenChange, initialQuery, onPick }: Fr
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent column glass className="border-t border-white/10 max-h-[85dvh]">
-        <DrawerHeader className="border-b border-white/10">
-          <DrawerTitle>{t('freeImages.title', { defaultValue: 'Free images' })}</DrawerTitle>
+      <DrawerContent column glass className="max-h-[85dvh] border-border text-foreground">
+        <DrawerHeader className="shrink-0 border-b border-border">
+          <DrawerTitle className="text-start">{t('freeImages.title', { defaultValue: 'Free images' })}</DrawerTitle>
         </DrawerHeader>
         <form
-          className="flex items-center gap-2 px-4 pt-3"
+          className="shrink-0 space-y-2 px-4 pt-3"
           onSubmit={(e) => { e.preventDefault(); if (query.trim()) setSubmitted(query.trim()); }}
         >
-          <div className="flex flex-1 items-center gap-2 rounded-xl border border-white/10 bg-white/10 px-3">
-            <Search className="h-4 w-4 shrink-0 text-white/60" />
-            <input
+          <div className="relative">
+            <Search aria-hidden="true" className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t('freeImages.search', { defaultValue: 'Search free photos' })}
               aria-label={t('freeImages.search', { defaultValue: 'Search free photos' })}
               enterKeyHint="search"
-              className="h-10 w-full bg-transparent text-sm text-white placeholder:text-white/50 focus:outline-none"
+              className="h-11 rounded-xl border-0 pl-9 ring-1 ring-inset ring-input rtl:pl-3 rtl:pr-9 focus-visible:ring-2 focus-visible:ring-ring"
             />
           </div>
+          <DrawerDescription className="ps-9 text-[13px] leading-[18px]">
+            {t('freeImages.note', { defaultValue: 'Free to use photos. A credit is added when the owner asks for one.' })}
+          </DrawerDescription>
         </form>
-        <p className="px-4 pt-2 text-[11px] text-white/50">{t('freeImages.note', { defaultValue: 'Free to use photos. A credit is added when the owner asks for one.' })}</p>
         <div className="min-h-[12rem] overflow-y-auto p-4">
           {loading ? (
-            <div className="flex h-40 items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-white/70" /></div>
+            <div className="flex h-40 items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
           ) : items.length === 0 ? (
-            <p className="py-10 text-center text-sm text-white/60">{t('freeImages.empty', { defaultValue: 'No photos found. Try another word.' })}</p>
+            <p className="py-10 text-center text-sm text-muted-foreground">{t('freeImages.empty', { defaultValue: 'No photos found. Try another word.' })}</p>
           ) : (
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
               {items.map((asset) => (
@@ -104,7 +107,7 @@ export function FreeImagesSheet({ open, onOpenChange, initialQuery, onPick }: Fr
                   onClick={() => pick(asset)}
                   disabled={!!picking}
                   aria-label={asset.title}
-                  className={cn('relative aspect-square overflow-hidden rounded-xl bg-white/5', picking && picking !== asset.id && 'opacity-50')}
+                  className={cn('relative aspect-square overflow-hidden rounded-xl bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2', picking && picking !== asset.id && 'opacity-50')}
                 >
                   <img src={asset.thumbnailUrl} alt={asset.title} loading="lazy" className="h-full w-full object-cover" />
                   {picking === asset.id && (
