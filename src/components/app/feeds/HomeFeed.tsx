@@ -93,6 +93,7 @@ import { MasonrySegment } from '@/components/app/feeds/MasonrySegment';
 
 
 import { 
+  HOME_FEED_PAGE_SIZE,
   useUnifiedFeed, 
   useNewPostsSignal,
   mapToVideoItem, 
@@ -156,10 +157,6 @@ type FeedItemType =
   | { type: 'shorts'; data: ShortVideo[] }
   | { type: 'ad'; data: ServedAd };
 
-// Ten posts a page: the first paint carries half the cards it used to, and
-// every later page lands in small steps instead of twenty heavy cards at once.
-// Must match the boot fetch in index.html (isBootDefaultFeedParams).
-const PAGE_SIZE = 10;
 // Start the next page about three cards before the end. At 600px a fast
 // wheel/trackpad gesture could reach the document bottom before the request
 // completed, so later wheel deltas had nowhere to go; 2400px with 20-post pages
@@ -1093,7 +1090,7 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
 
   // Common API params for all three feeds
   const commonParams = useMemo(() => ({
-    limit: PAGE_SIZE,
+    limit: HOME_FEED_PAGE_SIZE,
     sortBy,
     sortOrder,
     range,
@@ -1268,7 +1265,16 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
     ? (!!videosFeed.data || videosFeed.isError)
     : (!!singleFeed.data || singleFeed.isError);
   useEffect(() => {
-    if (primaryFeedSettled) setRailsEnabled(true);
+    if (!primaryFeedSettled) return;
+    // Let the first cards paint before enabling the supplementary queries.
+    let afterPaint = 0;
+    const beforePaint = requestAnimationFrame(() => {
+      afterPaint = requestAnimationFrame(() => setRailsEnabled(true));
+    });
+    return () => {
+      cancelAnimationFrame(beforePaint);
+      cancelAnimationFrame(afterPaint);
+    };
   }, [primaryFeedSettled]);
   // Safety net: a stalled/offline feed must never keep the rails blank forever.
   useEffect(() => {
