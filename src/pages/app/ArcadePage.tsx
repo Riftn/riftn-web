@@ -103,6 +103,15 @@ const LINK_GAMES = [
     blurbKey: 'games.gratitude.cardBlurb',
     blurb: 'Take turns saying what you are grateful for. No repeats. Miss your turn and they win.',
   },
+  {
+    href: '/arcade/spend',
+    creator: COCHRANIZ3R,
+    art: '/og/arcade-spend.jpg',
+    titleKey: 'games.spend.title',
+    title: 'SPEND!',
+    blurbKey: 'games.spend.cardBlurb',
+    blurb: 'Roll the die and dream up a purchase. Play by correspondence, at a live table, or against the computer.',
+  },
 ] as const;
 
 const CREATOR_GROUPS = groupArcadeGames([...LINK_GAMES, ...ARCADE_GAMES]);
