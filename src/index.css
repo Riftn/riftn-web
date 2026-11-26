@@ -6269,7 +6269,7 @@ html[data-system-tone="light"] [data-creator-page] .text-white {
     border-radius: 0;
   }
 
-  html[data-theme="immersive"] [data-profile-image-grid] img {
+  html[data-theme="immersive"] [data-profile-image-grid] [data-profile-photo] {
     border-radius: 0;
   }
 
