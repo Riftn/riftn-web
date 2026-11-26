@@ -7,31 +7,28 @@ const browser = await chromium.launch();
 
 try {
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, locale: 'en-GB' });
-  await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: 'https://riftn.com' });
   const page = await context.newPage();
   await page.goto('https://dehub.io/shorts?app=1', { waitUntil: 'domcontentloaded' });
 
-  const tiles = page.locator('[data-media-tile]').filter({ has: page.locator('video') });
+  const videoWithPoster = 'video[poster]:not([poster=""])';
+  const tiles = page.locator('[data-media-tile]').filter({ has: page.locator(videoWithPoster) });
   const tile = tiles.nth(2);
   await tile.waitFor({ state: 'visible', timeout: 30000 });
 
-  async function copyPostLink(locator) {
-    await page.evaluate(() => navigator.clipboard.writeText(''));
-    await locator.click({ button: 'right' });
-    await page.getByText('Copy link', { exact: true }).click({ timeout: 5000 });
-    await page.waitForFunction(async () => (await navigator.clipboard.readText()).includes('/app/post/'));
-    return new URL(await page.evaluate(() => navigator.clipboard.readText())).pathname;
+  async function posterPath(video) {
+    return video.evaluate((element) => new URL(element.poster).pathname.replace(/^\/cdn-cgi\/image\/[^/]+\//, '/'));
   }
 
-  const expected = await copyPostLink(tile);
+  const expected = await posterPath(tile.locator(videoWithPoster));
+  assert.notEqual(expected, await posterPath(tiles.first().locator(videoWithPoster)), 'choose a tile with a distinct poster');
   await tile.click();
 
   const viewer = page.locator('[data-shorts-viewer]');
-  const activePicture = viewer.locator('[data-shorts-slide][style*="z-index: 2"] [data-shorts-picture]');
-  await activePicture.waitFor({ state: 'visible', timeout: 15000 });
-  const actual = await copyPostLink(activePicture);
-  assert.equal(actual, expected, 'the first active viewer slide must link to the tapped post');
-  console.log(`The third video tile and the active viewer both link to ${actual}.`);
+  const activeVideo = viewer.locator('[data-shorts-slide][style*="z-index: 2"]').locator(videoWithPoster);
+  await activeVideo.waitFor({ state: 'visible', timeout: 15000 });
+  const actual = await posterPath(activeVideo);
+  assert.equal(actual, expected, 'the first active video must have the tapped tile’s poster');
+  console.log(`The third video tile and the active video both use ${actual}.`);
 } finally {
   await browser.close();
 }
