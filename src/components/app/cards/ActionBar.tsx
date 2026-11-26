@@ -1063,7 +1063,7 @@ export function ActionBar({
         <Button
           type="button"
           variant="ghost"
-          className="h-auto min-h-11 w-full justify-start gap-3 p-4 text-base text-foreground [&_svg]:size-5"
+          className="h-auto min-h-11 w-full justify-start gap-3 p-4 text-base text-zinc-200 hover:text-white focus-visible:ring-current focus-visible:ring-offset-0 [&_svg]:size-5"
           onClick={(e) => {
             e.stopPropagation();
             setSheetOpen(false);
