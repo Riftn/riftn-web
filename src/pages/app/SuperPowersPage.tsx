@@ -31,6 +31,7 @@ import { toast } from 'sonner';
 import { SEOHead } from '@/components/SEOHead';
 import { PageBody, PageIsland } from '@/components/app/page-kit/PageKit';
 import { BadgeProgress } from '@/components/app/BadgeProgress';
+import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { cn } from '@/lib/utils';
 import { useCleanPhone } from '@/components/app/clean/CleanKit';
@@ -50,6 +51,9 @@ import { LiveGiftBuyDrawer } from '@/components/app/live/LiveGiftBuyDrawer';
 /** Chrome type, the brand's one accent. */
 const CHROME_TEXT =
   'bg-[linear-gradient(180deg,#fff_0%,#cfd3d8_38%,#7d838b_52%,#e9ecef_70%,#9aa0a7_100%)] bg-clip-text text-transparent';
+
+const POWER_ACTION_FOCUS = 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring';
+const POWER_ACTION = `min-w-0 flex-1 whitespace-normal px-4 text-center sm:flex-none ${POWER_ACTION_FOCUS}`;
 
 /** Total slot minutes a tier holds per cycle — the number worth comparing. */
 function cycleMinutes(boosts: number, minutes: number): number {
@@ -243,40 +247,42 @@ export default function SuperPowersPage() {
                 </div>
                 <div className="flex w-full sm:w-auto shrink-0 items-center gap-2">
                   {!isTeamUp && status?.tier && (
-                    <button
+                    <Button size="lg"
                       type="button"
                       onClick={() => {
                         setHistoryPower(power);
                         void refetchStatus();
                       }}
-                      className="group inline-flex h-11 flex-1 sm:flex-none items-center justify-center gap-1 rounded-full border border-white/15 px-4 text-[13px] font-semibold text-zinc-300 hover:text-white hover:border-white/30 transition-colors"
+                      variant="secondary"
+                      className={cn("group", POWER_ACTION)}
                     >{_copy("copy.504282c0611d", { defaultValue: "Past usage" })}<ChevronRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
-                    </button>
+                    </Button>
                   )}
                   {isTeamUp ? (
-                    <button
+                    <Button size="lg"
                       type="button"
                       onClick={() => setTeamUpOpen(true)}
-                      className="inline-flex h-11 flex-1 sm:flex-none items-center justify-center rounded-full bg-white px-6 text-sm font-extrabold text-black hover:bg-zinc-200 transition-colors"
+                      className={POWER_ACTION}
                     >
                       {t('superpowers.orbit.openTeamUp', { defaultValue: 'Open Team up' })}
-                    </button>
+                    </Button>
                   ) : usable ? (
-                    <button
+                    <Button size="lg"
                       type="button"
                       onClick={() => setSpending(power)}
-                      className="inline-flex h-11 flex-1 sm:flex-none items-center justify-center rounded-full bg-white px-6 text-sm font-extrabold text-black hover:bg-zinc-200 transition-colors"
+                      className={POWER_ACTION}
                     >
                       {t('superpowers.orbit.use', { defaultValue: 'Use' })}
-                    </button>
+                    </Button>
                   ) : !status?.tier && !loadingStatus && !isError ? (
-                    <button
+                    <Button size="lg"
                       type="button"
                       onClick={() => setBuyOpen(true)}
-                      className="inline-flex h-11 flex-1 sm:flex-none items-center justify-center rounded-full border border-white/20 px-6 text-sm font-semibold text-white hover:border-white/40 transition-colors"
+                      variant="secondary"
+                      className={POWER_ACTION}
                     >
                       {t('nav.buyDhb')}
-                    </button>
+                    </Button>
                   ) : null}
                 </div>
               </div>
@@ -430,7 +436,7 @@ export default function SuperPowersPage() {
                       )}
                     </div>
                     {booking.status === 'active' && !notificationPower && (
-                      <button
+                      <Button variant="ghost" size="sm"
                         type="button"
                         onClick={() =>
                           cancelBoost.mutate(booking.id, {
@@ -447,10 +453,11 @@ export default function SuperPowersPage() {
                           })
                         }
                         disabled={cancelBoost.isPending}
-                        className="text-[12px] text-zinc-400 hover:text-white transition-colors disabled:opacity-40 shrink-0"
+                        loading={cancelBoost.isPending && cancelBoost.variables === booking.id}
+                        className={cn("shrink-0", POWER_ACTION_FOCUS)}
                       >
                         {t('common.cancel')}
-                      </button>
+                      </Button>
                     )}
                   </div>
                 );
