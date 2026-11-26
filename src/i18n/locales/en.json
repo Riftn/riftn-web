@@ -4154,6 +4154,18 @@
     "max_available_on_chain": "Max available: {{amount}} tokens on {{chain}}"
   },
   "staking": {
+    "appStake": "Stake",
+    "appUnstake": "Unstake",
+    "availableTokens": "Available tokens",
+    "stakedTokens": "Staked tokens",
+    "legacyDhb": "Legacy DHB staking",
+    "inAppDescription": "Stake from your Riftn wallet. Unstake at any time to make your tokens available again.",
+    "pendingAppStake": "Confirm the result by retrying this request.",
+    "retryAction": "Retry {{action}}",
+    "retryBalance": "Retry loading balances",
+    "retryConfig": "Retry loading staking",
+    "configError": "Could not load staking.",
+    "signInToStake": "Sign in to stake",
     "title": "Staking",
     "subtitle": "Deposit to unlock profit share, lower fees, superpowers and more!",
     "stakeDhb": "Deposit",
@@ -21441,6 +21453,9 @@
     "followFailed": "Could not follow. Try again."
   },
   "appTokens": {
+    "kindStaked": "Staked",
+    "kindUnstaked": "Unstaked",
+    "stakedBalance": "{{amount}} staked",
     "title": "Your tokens",
     "rowHint": "In-app balance",
     "explainer": "Your tokens now live inside Riftn. You started with what you held and staked onchain at launch. Sending, tipping and spending move them instantly, with no fees and nothing onchain. Balances carry over to the new token at the airdrop.",

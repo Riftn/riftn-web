@@ -141,7 +141,7 @@ export default function FullWalletPage() {
   // tokens only. Onchain DHB stays in the wallet but is not shown or sent here.
   const appTokensOn = useAppTokensEnabled();
   const { data: appTokens } = useAppTokens(appTokensOn);
-  const appDhb = Number(appTokens?.balance ?? 0);
+  const appDhb = Number(appTokens?.balance ?? 0) + Number(appTokens?.staked ?? 0);
   const [appSendOpen, setAppSendOpen] = useState(false);
 
   // Twitter World Cup giveaway credit — folded into the DHB balance for winners

@@ -4154,6 +4154,18 @@
     "max_available_on_chain": "Mevcut maksimum: {{chain}}'da {{amount}} jeton"
   },
   "staking": {
+    "appStake": "Stake et",
+    "appUnstake": "Stake’i çöz",
+    "availableTokens": "Kullanılabilir tokenlar",
+    "stakedTokens": "Stake edilen tokenlar",
+    "legacyDhb": "Eski DHB staking sistemi",
+    "inAppDescription": "Riftn cüzdanından stake et. Tokenlarını yeniden kullanabilmek için stake’i istediğin zaman çözebilirsin.",
+    "pendingAppStake": "Sonucu doğrulamak için bu isteği yeniden dene.",
+    "retryAction": "Yeniden dene: {{action}}",
+    "retryBalance": "Bakiyeleri yeniden yükle",
+    "retryConfig": "Staking’i yeniden yükle",
+    "configError": "Staking yüklenemedi.",
+    "signInToStake": "Stake etmek için giriş yap",
     "title": "Stake Et",
     "subtitle": "Kâr payı, düşük ücretler, süper güçler ve daha fazlasının kilidini açmak için yatırın!",
     "stakeDhb": "Yatır",
@@ -21467,6 +21479,9 @@
     "followFailed": "Takip edilemedi. Tekrar dene."
   },
   "appTokens": {
+    "kindStaked": "Stake edildi",
+    "kindUnstaked": "Stake çözüldü",
+    "stakedBalance": "{{amount}} stake edildi",
     "title": "Riftn’da jeton",
     "rowHint": "Uygulama içi bakiye",
     "explainer": "jeton artık Riftn içinde duruyor. Lansmanda onchain tuttuğun ve stake ettiğin miktarla başladın. Göndermek, bahşiş vermek ve harcamak anında olur, ücret yok ve hiçbir şey onchain’e gitmez. Bakiyeler airdrop’ta yeni tokene aktarılır.",

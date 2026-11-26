@@ -42,6 +42,9 @@ import { useTranslation } from 'react-i18next';
 import { SEOHead } from '@/components/SEOHead';
 import { AppState } from '@/components/app/AppState';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAppTokensConfig } from '@/hooks/use-app-tokens';
+import { AppTokenStaking } from '@/components/app/wallet/AppTokenStaking';
+import { Button } from '@/components/ui/button';
 import { confirmStake, recoverStake, readStakeEvidence, refreshConfirmedStake, stakeFromReplacement, type StakeAttempt } from '@/lib/stake-confirmation';
 import { createLogger } from '@/lib/logger';
 import { retiredStakeMessage } from '@/lib/stake-recovery-messages';
@@ -155,6 +158,38 @@ function StatCard({
 }
 
 export default function StakingPage() {
+  const { t } = useTranslation();
+  const config = useAppTokensConfig();
+  const [showLegacy, setShowLegacy] = useState(false);
+
+  if (config.isPending) return <PageBody><Loader2 className="mx-auto h-5 w-5 animate-spin" /></PageBody>;
+  if (config.isError && !config.data) {
+    return (
+      <PageBody>
+        <p role="alert">{t('staking.configError', 'Could not load staking.')}</p>
+        <Button variant="glass" onClick={() => void config.refetch()}>{t('common.retry', 'Retry')}</Button>
+      </PageBody>
+    );
+  }
+  if (!config.data?.staking) return <LegacyStakingPage withdrawalsOnly={config.data?.enabled === true} />;
+
+  return (
+    <div className="min-h-screen max-w-5xl mx-auto">
+      <SEOHead title="Stake in-app tokens on Riftn" description="Stake and unstake from your Riftn wallet." url="https://riftn.com/stake" image="https://riftn.com/og/stake.jpg" />
+      <PageIsland icon="staking" title={t('staking.title')} />
+      <h1 className="sr-only">{t('staking.title')}</h1>
+      <PageBody>
+        <AppTokenStaking />
+        <Button variant="glass" aria-expanded={showLegacy} onClick={() => setShowLegacy(value => !value)}>
+          {t('staking.legacyDhb', 'Legacy DHB staking')}
+        </Button>
+        {showLegacy && <LegacyStakingPage withdrawalsOnly embedded />}
+      </PageBody>
+    </div>
+  );
+}
+
+function LegacyStakingPage({ withdrawalsOnly = false, embedded = false }: { withdrawalsOnly?: boolean; embedded?: boolean }) {
   const { t: _copy } = _useCopy();
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
@@ -695,9 +730,11 @@ export default function StakingPage() {
   // position. The rest of `userStaked` is in the transfer pool wallet.
   const userWithdrawable = userData?.legacyStaked ?? 0;
   const poolOnlyStake = Math.max(0, userStaked - userWithdrawable);
+  const Body = embedded ? "div" : PageBody;
 
   return (
-    <div className="min-h-screen max-w-5xl mx-auto">
+    <div className={embedded ? undefined : "min-h-screen max-w-5xl mx-auto"}>
+      {!embedded && <>
       <SEOHead title={_copy("copy.5095e609c2ed", { defaultValue: "Stake tokens: Earn Rewards & Unlock Badges" })} description={_copy("copy.6b104af6acd4", { defaultValue: "Stake your Riftn tokens on Riftn to earn staking rewards, unlock staking badges and gain governance voting weight, with rewards funded by platform fees." })} url="https://riftn.com/stake" image="https://riftn.com/og/stake.jpg" jsonLd={{ '@context': 'https://schema.org', '@type': 'WebPage', name: 'Token Staking', url: 'https://riftn.com/stake', description: _copy("copy.b424c707e52c", { defaultValue: "Stake Riftn tokens to earn staking rewards and unlock badges on Riftn." }), isPartOf: { '@type': 'WebSite', name: 'Riftn', url: 'https://riftn.com' } }} />
       <h1 className="sr-only">{_copy("copy.710c2213de98", { defaultValue: "Riftn Staking — Decentralised Social Media, Censorship Resistant & Freedom of Speech" })}</h1>
       <PageIsland
@@ -710,8 +747,9 @@ export default function StakingPage() {
           </IslandAction>
         }
       />
+      </>}
 
-      <PageBody>
+      <Body>
       {/* Stats error */}
       {statsError && !stats && (
         <div className="flex items-center justify-center gap-2 text-xs text-white/50">
@@ -737,7 +775,7 @@ export default function StakingPage() {
       </div>
 
       {/* Multi-chain notice */}
-      {userData?.hasBothChains && (
+      {!withdrawalsOnly && userData?.hasBothChains && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -751,8 +789,9 @@ export default function StakingPage() {
       )}
 
       {/* Stake / Unstake Actions */}
-      <div data-kit-flat-skip className={cn("grid gap-0 sm:gap-4", userStaked > 0 ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1")}>
-        {/* Stake */}
+      <div data-kit-flat-skip className={cn("grid gap-0 sm:gap-4", !withdrawalsOnly && userStaked > 0 ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1")}>
+        {/* Keep the receipt controls available for deposits started before the switch. */}
+        {(!withdrawalsOnly || (pendingStake && pendingStake.wallet.toLowerCase() === currentWallet)) && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -765,7 +804,7 @@ export default function StakingPage() {
             <h2 className="text-sm font-semibold text-white/70 uppercase tracking-wider">{t('staking.stakeDhb')}</h2>
           </div>
           <p className="text-xs text-white/40 mb-4">
-            {t('staking.stakeDesc')}
+            {!withdrawalsOnly ? t('staking.stakeDesc') : t('staking.legacyDhb', 'Legacy DHB staking')}
           </p>
           {!isStaking && pendingStake && pendingStake.wallet.toLowerCase() === currentWallet?.toLowerCase() && (
             <div role="status" className="mb-4 rounded-xl border border-white/15 p-3 text-sm text-white/80">
@@ -779,6 +818,7 @@ export default function StakingPage() {
               }}>{t('common.close')}</button>
             </div>
           )}
+          {!withdrawalsOnly && <>
           <div className="flex gap-2">
             <LiquidGlassBubble
               shimmer={false}
@@ -832,7 +872,9 @@ export default function StakingPage() {
               <Copy className="w-3 h-3" />
             </button>
           </div>
+          </>}
         </motion.div>
+        )}
 
         {/* Unstake — only visible when user has staked balance */}
         {userStaked > 0 && (
@@ -1169,7 +1211,7 @@ export default function StakingPage() {
           </div>
         </div>
       </motion.div>
-      </PageBody>
+      </Body>
     </div>
   );
 }

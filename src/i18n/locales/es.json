@@ -4154,6 +4154,18 @@
     "max_available_on_chain": "Máximo disponible: {{amount}} tokens en {{chain}}"
   },
   "staking": {
+    "appStake": "Depositar",
+    "appUnstake": "Retirar",
+    "availableTokens": "Tokens disponibles",
+    "stakedTokens": "Tokens depositados",
+    "legacyDhb": "Staking anterior de DHB",
+    "inAppDescription": "Deposita tokens desde tu cartera de Riftn. Puedes retirarlos en cualquier momento para volver a usarlos.",
+    "pendingAppStake": "Vuelve a intentar esta solicitud para confirmar el resultado.",
+    "retryAction": "Reintentar: {{action}}",
+    "retryBalance": "Volver a cargar los saldos",
+    "retryConfig": "Volver a cargar el staking",
+    "configError": "No se pudo cargar el staking.",
+    "signInToStake": "Inicia sesión para depositar",
     "title": "Estaking",
     "subtitle": "¡Haz staking para desbloquear participación en ganancias, tarifas más bajas, superpoderes y más!",
     "stakeDhb": "Staking tokens",
@@ -21467,6 +21479,9 @@
     "followFailed": "No se pudo seguir. Inténtalo de nuevo."
   },
   "appTokens": {
+    "kindStaked": "Depositado",
+    "kindUnstaked": "Retirado",
+    "stakedBalance": "{{amount}} depositados",
     "title": "tokens en Riftn",
     "rowHint": "Saldo en la app",
     "explainer": "Tus tokens ahora viven dentro de Riftn. Empezaste con lo que tenías y tenías en staking onchain en el lanzamiento. Enviar, dar propinas y gastar los mueve al instante, sin comisiones y sin nada onchain. Los saldos pasan al nuevo token en el airdrop.",
