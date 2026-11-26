@@ -51,7 +51,7 @@ import { usePostLinkCopyCount, useTrackPostLinkCopy } from '@/hooks/use-link-cop
 import { getNFTInfo, isFollowing as checkIsFollowing, reactToPost, repostPost, voteOnPost } from '@/lib/api/dehub';
 import type { DeHubNFT } from '@/lib/api/dehub/types';
 import { dehubLinkFor } from '@/lib/dehub-links';
-import { viewerShareUrl } from '@/lib/share-url';
+import { viewerLiveShareUrl, viewerShareUrl } from '@/lib/share-url';
 import { getVoteCache } from '@/lib/vote-cache';
 import { isPostReposted, markReposted, unmarkReposted } from '@/lib/repost-cache';
 import { REACTION_LIST, type PostReaction } from '@/lib/reactions';
@@ -246,7 +246,10 @@ function PostMenuBody({ open, target, sheet, setSheet }: {
   const actions = useMemo<MessageMenuAction[]>(() => {
     const list: MessageMenuAction[] = [];
     const add = (a: MessageMenuAction | false | null | undefined) => { if (a && !(phone && ON_ACTION_BAR.has(a.key))) list.push(a); };
-    const link = viewerShareUrl(shareLink(target, tokenId));
+    const link = () => {
+      const url = shareLink(target, tokenId);
+      return target.isLivePost ? viewerLiveShareUrl(url, isPublic) : viewerShareUrl(url);
+    };
 
     add({
       key: 'comment', label: t('copy.44f5e3fbec57', 'Comment'), icon: <MessageSquare />, hint: 'C',
@@ -283,12 +286,12 @@ function PostMenuBody({ open, target, sheet, setSheet }: {
     });
     add({
       key: 'copy-link', label: t('postOptions.copyLink', 'Copy link'), icon: <Link2 />, hint: 'L', divided: !media,
-      onSelect: () => { void copy(link, t('postOptions.postUrlCopied', 'Post link copied')).then((ok) => { if (ok) trackLinkCopy(target.id, walletAddress, linkCopyCount); }); },
+      onSelect: () => { void copy(link(), t('postOptions.postUrlCopied', 'Post link copied')).then((ok) => { if (ok) trackLinkCopy(target.id, walletAddress, linkCopyCount); }); },
     });
     add(!!words && { key: 'copy-text', label: t('comments.copyText', 'Copy text'), icon: <Type />, hint: 'X', onSelect: () => { void copy(words, t('common.copied', 'Copied')); } });
     add(canShare && {
       key: 'share', label: t('postOptions.share', 'Share'), icon: <Share />,
-      onSelect: () => { navigator.share({ url: link }).catch(() => {}); },
+      onSelect: () => { navigator.share({ url: link() }).catch(() => {}); },
     });
     add(!!target.actions?.askAI && { key: 'ai', label: t('postOptions.aiOverview', 'AI overview'), icon: <AssistantNavIcon />, onSelect: () => target.actions!.askAI!() });
     add(!!target.actions?.seeEngagements && { key: 'engagements', label: t('copy.f5ab429b0727', 'See Engagements'), icon: <Stats />, onSelect: () => target.actions!.seeEngagements!() });

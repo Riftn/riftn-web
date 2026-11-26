@@ -2280,6 +2280,8 @@ export function LiveStreamCard({ stream: streamProp, postPage, chatSlot, immersi
                   >
                     <ActionBar
                       compact
+                      liveShare
+                      visibility={stream.visibility}
                       quickRepost={isFullscreen}
                       onLiveReaction={sendLiveReaction}
                       postId={stream.id}
@@ -2538,6 +2540,8 @@ export function LiveStreamCard({ stream: streamProp, postPage, chatSlot, immersi
               <ActionBar
                 compact
                 onShareToPublicChat={shareToPublicChat}
+                liveShare
+                visibility={stream.visibility}
                 onLiveReaction={sendLiveReaction}
                 postId={stream.id}
                 tokenId={parseInt(stream.id, 10) || undefined}
@@ -2567,6 +2571,8 @@ export function LiveStreamCard({ stream: streamProp, postPage, chatSlot, immersi
       ) : (
         <div className="pt-3">
           <ActionBar
+            liveShare
+            visibility={stream.visibility}
             onLiveReaction={sendLiveReaction}
             onShareToPublicChat={shareToPublicChat}
             postId={stream.id}
