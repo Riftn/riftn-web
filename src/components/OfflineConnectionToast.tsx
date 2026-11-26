@@ -23,7 +23,8 @@ export function OfflineConnectionToast() {
       const requested = new URLSearchParams(window.location.search).get('hl')?.toLowerCase();
       const language = requested && hasTitle(requested) ? requested : resolveLanguage();
       const code = hasTitle(language) ? language : 'en';
-      toast.message(<bdi lang={code.replace('_', '-')}>{titlesByLanguage[code]}</bdi>, {
+      // A render function keeps Sonner's standard title layout and close-button clearance.
+      toast.message(() => <bdi lang={code.replace('_', '-')}>{titlesByLanguage[code]}</bdi>, {
         id: TOAST_ID,
         duration: 8000,
       });

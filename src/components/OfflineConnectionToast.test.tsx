@@ -27,7 +27,9 @@ it('uses the saved language when the page starts offline', () => {
   vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
   render(<MemoryRouter><OfflineConnectionToast /></MemoryRouter>);
   expect(toast.message).toHaveBeenCalledTimes(1);
-  render(<>{vi.mocked(toast.message).mock.calls[0][0]}</>);
+  const renderTitle = vi.mocked(toast.message).mock.calls[0][0];
+  if (typeof renderTitle !== 'function') throw new Error('The notice must use the shared toast title layout');
+  render(<>{renderTitle()}</>);
   expect(screen.getByText('İnternet Bağlantısı Yok').getAttribute('lang')).toBe('tr');
 });
 
