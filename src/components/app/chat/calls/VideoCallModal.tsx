@@ -9,7 +9,7 @@ import Mic from '@/components/ui/cut-icons/mic';
 import { useTranslation } from 'react-i18next';
 import { useCall } from '@/contexts/CallContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { openDmDock } from '@/hooks/use-dm-dock';
+import { useMessageCallPeer } from './useMessageCallPeer';
 import {
   CallStage,
   CallIdentity,
@@ -50,6 +50,7 @@ const VideoCallModal: React.FC = () => {
   } = useCall();
 
   const { t } = useTranslation();
+  const messageCallPeer = useMessageCallPeer();
   const fxAvailable = useCallBackgroundAvailable();
   const [fxOpen, setFxOpen] = React.useState(false);
 
@@ -72,10 +73,9 @@ const VideoCallModal: React.FC = () => {
         : <CallDuration fallback="00:00" />;
 
   const openMessages = () => {
-    const username = peer.name.startsWith('@') ? peer.name.slice(1) : undefined;
     if (isRinging) endCall();
     else minimizeCall();
-    openDmDock({ address: peerAddress, username, avatarUrl: peer.avatarUrl ?? undefined });
+    messageCallPeer(peerAddress, peer);
   };
 
   const selfPreview = !isIncoming ? (

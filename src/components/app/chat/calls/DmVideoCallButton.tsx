@@ -13,8 +13,9 @@ interface DmVideoCallButtonProps {
 
 export const DmVideoCallButton: React.FC<DmVideoCallButtonProps> = ({ recipientAddress, className }) => {
   const { t: _copy } = _useCopy();
-  const { startCall, isCallActive, isConnecting } = useCall();
+  const { startCall, currentCall } = useCall();
   const { walletAddress } = useAuth();
+  const label = _copy("copy.7b79b4f67293", { defaultValue: "Video call" });
 
   const handleStartCall = () => {
     if (walletAddress && recipientAddress && walletAddress !== recipientAddress) {
@@ -30,11 +31,12 @@ export const DmVideoCallButton: React.FC<DmVideoCallButtonProps> = ({ recipientA
     <Button
       type="button"
       onClick={handleStartCall}
-      disabled={isCallActive || isConnecting}
+      disabled={!!currentCall}
       variant="ghost"
       size="icon"
       className={className}
-      title={_copy("copy.7b79b4f67293", { defaultValue: "Video call" })}
+      aria-label={label}
+      title={label}
     >
       <Video className="h-5 w-5" />
     </Button>

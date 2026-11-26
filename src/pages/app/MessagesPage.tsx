@@ -1262,6 +1262,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     <DirectMessageChat
       key={conversationIdentity(selectedConversation)}
       conversation={selectedConversation}
+      fullscreen
       initialComposerText={composerPrefill?.convId === selectedConversation.id ? composerPrefill.text : undefined}
       focusComposer={composerFocusFor === conversationIdentity(selectedConversation)}
       onBack={closeChat}
