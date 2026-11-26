@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import Search from '@/components/ui/cut-icons/search';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
-import { downloadFreeAsset, searchFreeAssets, type FreeAsset } from '@/lib/editor/freeAssets';
+import { downloadFreeAsset, searchFreeAssets, searchFreeCoverPhotos, type FreeAsset } from '@/lib/editor/freeAssets';
 import { cn } from '@/lib/utils';
 
 interface FreeImagesSheetProps {
@@ -16,17 +16,6 @@ interface FreeImagesSheetProps {
   forArticleCover?: boolean;
   /** The picked photo, ready to join the post, plus its credit line. */
   onPick: (file: File, credit: string | null) => void;
-}
-
-const COVER_IMAGE_TYPE = /^image\/(?:jpe?g|png|webp)$/i;
-
-function canUseAsCover(asset: FreeAsset) {
-  const license = asset.licenseUrl ?? '';
-  return asset.attributionRequired === false
-    && COVER_IMAGE_TYPE.test(asset.mimeType.split(';')[0].trim())
-    && (/^https?:\/\/creativecommons\.org\/publicdomain\/(?:zero|mark)\/1\.0\/?$/i.test(license)
-      || (asset.source === 'Pexels' && license === 'https://www.pexels.com/license/')
-      || (asset.source === 'Pixabay' && license === 'https://pixabay.com/service/license-summary/'));
 }
 
 /**
@@ -56,8 +45,11 @@ export function FreeImagesSheet({ open, onOpenChange, initialQuery, forArticleCo
     if (!open || !submitted) return;
     const controller = new AbortController();
     setLoading(true);
-    searchFreeAssets({ kind: 'photo', query: submitted, signal: controller.signal })
-      .then((result) => { if (!controller.signal.aborted) setItems(forArticleCover ? result.items.filter(canUseAsCover) : result.items); })
+    const results = forArticleCover
+      ? searchFreeCoverPhotos(submitted, controller.signal)
+      : searchFreeAssets({ kind: 'photo', query: submitted, signal: controller.signal }).then(result => result.items);
+    results
+      .then((photos) => { if (!controller.signal.aborted) setItems(photos); })
       .catch(() => { if (!controller.signal.aborted) setItems([]); })
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
@@ -71,7 +63,7 @@ export function FreeImagesSheet({ open, onOpenChange, initialQuery, forArticleCo
     try {
       const file = await downloadFreeAsset(asset, controller.signal);
       if (controller.signal.aborted) return;
-      if (forArticleCover && !COVER_IMAGE_TYPE.test(file.type)) throw new Error('Unsupported cover image type');
+      if (forArticleCover && !/^image\/(?:jpeg|png|webp)$/.test(file.type)) throw new Error('Unsupported cover image type');
       const credit = asset.attributionRequired && asset.creator
         ? t('freeImages.credit', { defaultValue: 'Photo: {{creator}} ({{license}})', creator: asset.creator, license: asset.license })
         : null;
