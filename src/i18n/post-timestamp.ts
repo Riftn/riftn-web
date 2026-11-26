@@ -10,7 +10,7 @@ const ageUnits = [
   { unit: 'minute', minutes: 1, suffix: 'm', key: 'comments.timeMinutes' },
 ] as const;
 
-const unitFormats = new Map<string, Intl.NumberFormat | null>();
+const relativeFormats = new Map<string, Intl.RelativeTimeFormat | null>();
 
 export function formatPostAge(date: Date | null, language: string, t: TFunction, now = Date.now()): string {
   if (!date || !Number.isFinite(date.getTime())) return '';
@@ -20,20 +20,25 @@ export function formatPostAge(date: Date | null, language: string, t: TFunction,
   const age = ageUnits.find(({ minutes: size }) => minutes >= size) ?? ageUnits[5];
   const count = Math.floor(minutes / age.minutes);
   const locale = language.replace(/_/g, '-');
-  if (/^en(?:-|$)/i.test(locale)) return `${count}${age.suffix}`;
+  const compactAge = `${count}${age.suffix}`;
+  if (/^en(?:-|$)/i.test(locale)) return `${compactAge} ago`;
 
-  const key = `${locale}:${age.unit}`;
-  if (!unitFormats.has(key)) {
+  if (!relativeFormats.has(locale)) {
     try {
-      const supported = Intl.NumberFormat.supportedLocalesOf(locale);
-      const options = { style: 'unit', unit: age.unit, unitDisplay: 'short' } as const;
-      unitFormats.set(key, supported.length ? new Intl.NumberFormat(supported, options) : null);
+      const supported = Intl.RelativeTimeFormat.supportedLocalesOf(locale);
+      relativeFormats.set(locale, supported.length
+        ? new Intl.RelativeTimeFormat(supported, { numeric: 'always', style: 'short' })
+        : null);
     } catch {
-      // Some mobile runtimes lack unit formatting. Use the app's translations.
-      unitFormats.set(key, null);
+      relativeFormats.set(locale, null);
     }
   }
-  return unitFormats.get(key)?.format(count) ?? t(age.key, { count, defaultValue: `${count}${age.suffix}` });
+  // Hermes on iOS can convert hour and minute measurements into seconds.
+  const relativeFormat = relativeFormats.get(locale);
+  if (relativeFormat) return relativeFormat.format(-count, age.unit);
+
+  const time = t(age.key, { count, defaultValue: compactAge });
+  return t('stories.agoLabel', { time, defaultValue: '{{time}} ago' });
 }
 
 export function parsePostTimestamp(value?: string | null): Date | null {
