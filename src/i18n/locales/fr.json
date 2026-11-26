@@ -21512,6 +21512,18 @@
     "followFailed": "Impossible de suivre. Réessaie."
   },
   "appTokens": {
+    "previewTitle": "Aperçu de $RIFT hors chaîne",
+    "previewReadOnly": "Lecture seule",
+    "previewExplanation": "Les montants crédités correspondent à des opérations passées et sont déjà inclus dans votre solde dans l’application.",
+    "previewUnavailable": "Aperçu de RIFT indisponible.",
+    "previewBalance": "Solde disponible dans l’application",
+    "previewFanSiteCredit": "Crédit lié à la fusion avec Fan.site",
+    "previewNoFanSiteCredit": "Aucun crédit enregistré",
+    "previewCredits": "Virements reçus et crédits récents",
+    "previewAccountCredit": "Crédit sur le compte",
+    "previewReceivedFrom": "Reçu de {{name}}",
+    "previewReceived": "Virement reçu",
+    "previewNoCredits": "Aucun virement reçu ni crédit récent.",
     "reviewTransfer": "Vérifier le transfert",
     "transferComplete": "Transfert terminé",
     "balanceAfterSend": "Après l’envoi : {{amount}} {{symbol}}",

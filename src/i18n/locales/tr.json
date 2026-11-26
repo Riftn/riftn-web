@@ -21511,6 +21511,18 @@
     "followFailed": "Takip edilemedi. Tekrar dene."
   },
   "appTokens": {
+    "previewTitle": "$RIFT zincir dışı önizlemesi",
+    "previewReadOnly": "Salt okunur",
+    "previewExplanation": "Hesabına eklenen tutarlar geçmiş işlemleri gösterir ve uygulama içi bakiyene zaten yansıtılmıştır.",
+    "previewUnavailable": "RIFT önizlemesi kullanılamıyor.",
+    "previewBalance": "Kullanılabilir uygulama içi bakiye",
+    "previewFanSiteCredit": "Fan.site birleşmesi kredisi",
+    "previewNoFanSiteCredit": "Kayıtlı kredi yok",
+    "previewCredits": "Son alınan transferler ve hesaba eklenen tutarlar",
+    "previewAccountCredit": "Hesaba eklenen tutar",
+    "previewReceivedFrom": "{{name}} tarafından gönderildi",
+    "previewReceived": "Transfer alındı",
+    "previewNoCredits": "Yakın zamanda alınan transfer veya hesaba eklenen tutar yok.",
     "reviewTransfer": "Transferi incele",
     "transferComplete": "Transfer tamamlandı",
     "balanceAfterSend": "Gönderimden sonra: {{amount}} {{symbol}}",

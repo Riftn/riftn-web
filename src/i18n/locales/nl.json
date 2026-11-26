@@ -21756,6 +21756,18 @@
     "followFailed": "Volgen mislukt. Probeer het opnieuw."
   },
   "appTokens": {
+    "previewTitle": "Off-chain voorbeeld van $RIFT",
+    "previewReadOnly": "Alleen-lezen",
+    "previewExplanation": "Bijgeschreven bedragen zijn eerdere transacties en zijn al verwerkt in je saldo in de app.",
+    "previewUnavailable": "RIFT-voorbeeld niet beschikbaar.",
+    "previewBalance": "Beschikbaar saldo in de app",
+    "previewFanSiteCredit": "Bijschrijving voor de fusie met Fan.site",
+    "previewNoFanSiteCredit": "Geen bijschrijving geregistreerd",
+    "previewCredits": "Recent ontvangen overdrachten en bijschrijvingen",
+    "previewAccountCredit": "Bijschrijving op je account",
+    "previewReceivedFrom": "Ontvangen van {{name}}",
+    "previewReceived": "Overdracht ontvangen",
+    "previewNoCredits": "Geen recent ontvangen overdrachten of bijschrijvingen.",
     "reviewTransfer": "Overdracht controleren",
     "transferComplete": "Overdracht voltooid",
     "balanceAfterSend": "Na verzenden: {{amount}} {{symbol}}",
