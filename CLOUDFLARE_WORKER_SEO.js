@@ -1528,7 +1528,7 @@ const MARKETING_PAGES = {
     title: 'Splurge | Riftn Arcade',
     description: 'Get a fictional budget in your local currency, dream up what to buy and do it again in Modern or CRT.',
     heading: 'Splurge',
-    ...arcadeGameLd('/arcade/splurge.webp'),
+    ...arcadeGameLd('/og/arcade-splurge.jpg'),
     bodyHtml: `<p>What would you buy with a random budget? Type your answer and press Enter to get a new amount. Switch between Modern and an amber CRT display, and sign in to save your private spending log across web and app.</p>
 <p><a href="${APP_URL}/arcade/splurge">Play Splurge</a> or <a href="${APP_URL}/arcade">see the whole arcade</a>.</p>`,
   },

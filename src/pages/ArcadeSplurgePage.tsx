@@ -125,7 +125,7 @@ export default function ArcadeSplurgePage() {
 
   return (
     <main data-glass-page data-theme-page-surface className="min-h-screen bg-background text-foreground">
-      <SEOHead title={`${title} | Riftn Arcade`} description={t('games.splurge.cardBlurb')} url={PAGE_URL} image="https://riftn.com/arcade/splurge.webp" />
+      <SEOHead title={`${title} | Riftn Arcade`} description={t('games.splurge.cardBlurb')} url={PAGE_URL} image="https://riftn.com/og/arcade-splurge.jpg" />
       <div className="mx-auto max-w-[960px] px-4 pb-24 pt-6 sm:px-8">
         <Button asChild variant="ghost" size="lg" className="-ms-4 px-4">
           <Link to="/arcade">
