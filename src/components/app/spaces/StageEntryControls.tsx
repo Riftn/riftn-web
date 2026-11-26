@@ -1,3 +1,5 @@
+import { newStageChannelName } from '@/lib/stage-radio-show';
+import { FunctionsHttpError } from '@supabase/supabase-js';
 import { stageRoomLabel, stageTopicLabel } from '@/i18n/stage-room-copy';
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -26,6 +28,20 @@ export function StageEntryControls({ spaceId, wallet }: { spaceId: string; walle
       return data;
     },
   });
+  const entryGate = useQuery({
+    queryKey: ['stage-entry-gate'],
+    enabled: expanded,
+    staleTime: 60_000,
+    queryFn: async () => {
+      // A recognised Stage channel must exist before the new token gate issues a token.
+      const { error } = await supabase.functions.invoke('agora-token', {
+        body: { channelName: newStageChannelName(), role: 'subscriber' },
+      });
+      if (!(error instanceof FunctionsHttpError) || error.context.status !== 404) return false;
+      const result = await error.context.json();
+      return result?.error === 'Stage not found.';
+    },
+  });
   const pending = useQuery({
     queryKey: requestsKey,
     enabled: expanded && lock.data?.entry_locked === true,
@@ -47,6 +63,7 @@ export function StageEntryControls({ spaceId, wallet }: { spaceId: string; walle
   });
   const toggle = useMutation({
     mutationFn: async (patch: { entry_locked?: boolean; title?: string; topic?: StageTopic | null }) => {
+      if (patch.entry_locked === true && entryGate.data !== true) throw new Error('Stage entry gate is unavailable');
       const { data, error } = await withWalletHeader(supabase.from('audio_spaces').update(patch)
         .eq('id', spaceId).eq('status', 'live').select('entry_locked, title, topic').maybeSingle(), wallet);
       if (error || !data) throw error ?? new Error('Stage is no longer live');
@@ -104,10 +121,14 @@ export function StageEntryControls({ spaceId, wallet }: { spaceId: string; walle
                   {STAGE_TOPICS.map((topic) => <option key={topic} value={topic}>{stageTopicLabel(t, topic)}</option>)}
                 </select>
               </label>
-              <p className="text-white/75">{stageRoomLabel(t, 'entryHelp')}</p>
-              <KitButton variant="quiet" disabled={toggle.isPending} onClick={() => toggle.mutate({ entry_locked: !lock.data?.entry_locked })}>
-                {lock.data.entry_locked ? stageRoomLabel(t, 'unlockEntry') : stageRoomLabel(t, 'lockEntry')}
-              </KitButton>
+              {(entryGate.data === true || lock.data.entry_locked) && (
+                <>
+                  <p className="text-white/75">{stageRoomLabel(t, 'entryHelp')}</p>
+                  <KitButton variant="quiet" disabled={toggle.isPending} onClick={() => toggle.mutate({ entry_locked: !lock.data?.entry_locked })}>
+                    {lock.data.entry_locked ? stageRoomLabel(t, 'unlockEntry') : stageRoomLabel(t, 'lockEntry')}
+                  </KitButton>
+                </>
+              )}
             </>
           )}
           {lock.data?.entry_locked === true && (
