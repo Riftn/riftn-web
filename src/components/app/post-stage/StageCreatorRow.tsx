@@ -19,7 +19,6 @@ import { VerifiedBadge } from '@/components/app/VerifiedBadge';
 import MoreHorizontal from "@/components/ui/cut-icons/more";
 
 import { usePostStage } from './post-stage-context';
-import { LiveRipple } from '@/components/app/LiveRipple';
 import { useCoAuthors } from '@/lib/co-author-store';
 import { CoAuthorAvatarBadge, CoAuthorNames } from '@/components/app/cards/CoAuthorByline';
 import { profilePath } from '@/lib/profile-path';
@@ -90,8 +89,7 @@ export function StageCreatorRow({ name, avatar, handle, creatorId, badgeBalance,
         disabled={!cleanHandle && !creatorId}
         className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
       >
-        <LiveRipple ids={[creatorId, cleanHandle]} className="rounded-lg">
-          <span className="relative flex shrink-0">
+        <span className="relative flex shrink-0">
           {avatar && avatar.startsWith('http') && !avatarError ? (
             <img
               src={avatar}
@@ -106,8 +104,7 @@ export function StageCreatorRow({ name, avatar, handle, creatorId, badgeBalance,
             </span>
           )}
           <CoAuthorAvatarBadge users={coAuthors} />
-          </span>
-        </LiveRipple>
+        </span>
         <span className="flex min-w-0 flex-col">
           <span className="flex min-w-0 items-center gap-1">
             <BadgedName

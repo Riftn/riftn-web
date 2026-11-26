@@ -95,6 +95,9 @@ export function TokenLaunchNotify({ className, compact }: { className?: string; 
       </p>
       <h2 className="mt-1 text-[19px] font-semibold text-white">{t('tokenLaunch.riftTitle')}</h2>
 
+      <p className="mx-auto mt-2 max-w-xs text-[13px] leading-relaxed text-zinc-400">
+        {t('tokenLaunch.earnOnly', 'For now, you can only earn tokens by using the app.')}
+      </p>
       {joinedEmail ? (
         <div className="mt-4 flex flex-col items-center gap-2" role="status">
           <span className="flex items-center gap-2 rounded-[10px] bg-emerald-500/15 px-3 py-2 text-[14px] font-semibold text-emerald-400">

@@ -1,10 +1,10 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import { expect, it, vi } from 'vitest';
+import { beforeAll, expect, it, vi } from 'vitest';
 import { StoryShelf } from './StoryShelf';
 import { setActivityBarHidden, setActivityItemsHidden } from '@/lib/activity-shelf-preferences';
 
-const prefs = vi.hoisted(() => ({ storiesEnabled: true, hiddenBadge: false }));
-const actions = vi.hoisted(() => ({ openLive: vi.fn(), mute: vi.fn(), block: vi.fn() }));
+const prefs = vi.hoisted(() => ({ storiesEnabled: true, hiddenBadge: false, seen: false }));
+const actions = vi.hoisted(() => ({ openLive: vi.fn(), openCreator: vi.fn(), openViewer: vi.fn(), mute: vi.fn(), block: vi.fn() }));
 vi.mock('@/hooks/use-mute-author', () => ({ useMuteAuthor: () => ({ muteAuthor: actions.mute }) }));
 vi.mock('@/hooks/use-block-author', () => ({ useBlockAuthor: () => ({ blockAuthor: actions.block }) }));
 vi.mock('@/hooks/use-badge-balance', () => ({
@@ -23,9 +23,16 @@ vi.mock('@/components/app/feeds/LiveNowBar', () => ({
   useLiveNowItems: () => ({ items: [{ wallet: 'host', id: '1', kind: 'stage', title: 'Live now' }], open: actions.openLive }),
   faceUrlOf: () => null,
 }));
+vi.mock('@/store/storiesStore', () => ({
+  useStoriesStore: (pick: (state: typeof actions) => unknown) => pick(actions),
+}));
+vi.mock('@/lib/media-url', async importOriginal => ({
+  ...await importOriginal<typeof import('@/lib/media-url')>(),
+  buildAvatarUrl: (_address: string, url: string) => url,
+}));
 vi.mock('@/hooks/use-story-shelf', () => ({
   useStoryShelf: () => ({ data: { askedHosts: 'host', liveHosts: ['host'], shelf: [{
-    author: { address: 'reader', username: 'creator', displayName: 'River Song' }, items: [
+    author: { address: 'reader', username: 'creator', displayName: 'River Song', avatarImageUrl: '/portrait.jpg' }, seen: prefs.seen, items: [
       { id: 'seen', status: 'ready', type: 'photo', mediaUrl: '/seen.jpg', viewed: true },
       { status: 'ready', type: 'video', mediaUrl: '/private.mp4', posterUrl: '/mature.jpg', isMature: true },
       { id: 'clip', status: 'ready', type: 'video', mediaUrl: '/clip.mp4', posterUrl: '/opening.jpg' },
@@ -33,22 +40,29 @@ vi.mock('@/hooks/use-story-shelf', () => ({
   }] } }),
 }));
 
-it('shows the visible Moments as small covers when there is room, and keeps lives when Stories are hidden', () => {
+beforeAll(async () => {
+  // Keep the interaction checks independent of the lazy module load time.
+  await import('./ActivityShelfMenu');
+});
+
+it('uses the author portrait and keeps mature content out of the viewer queue', () => {
   prefs.storiesEnabled = true;
   const view = render(<StoryShelf />);
-  const covers = [...screen.getByRole('listitem', { name: 'River Song' }).querySelectorAll('[data-st-stack] img')].map(img => img.getAttribute('src'));
-  expect(covers).toEqual(['/seen.jpg', '/opening.jpg']);
+  const tile = screen.getByRole('button', { name: 'River Song' });
+  expect([...tile.querySelectorAll('[data-st-portrait-media] img')].map(img => img.getAttribute('src'))).toEqual(['/portrait.jpg']);
+  fireEvent.click(tile);
+  expect(actions.openViewer.mock.lastCall?.[0][0].items.map((item: { id: string }) => item.id)).toEqual(['seen', 'clip']);
   prefs.storiesEnabled = false;
   view.rerender(<StoryShelf />);
-  expect(screen.queryByRole('listitem', { name: 'River Song' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'River Song' })).toBeNull();
   expect(view.container.querySelector('[data-kind="me"]')).toBeNull();
-  expect(screen.getByRole('listitem', { name: 'Live now' })).toBeTruthy();
+  expect(screen.getByRole('button', { name: 'Live now' })).toBeTruthy();
 });
 
 it('opens the stage context menu from the keyboard and joins the selected stage', async () => {
   prefs.storiesEnabled = true;
   render(<StoryShelf />);
-  fireEvent.keyDown(screen.getByRole('listitem', { name: 'Live now' }), { key: 'F10', shiftKey: true });
+  fireEvent.keyDown(screen.getByRole('button', { name: 'Live now' }), { key: 'F10', shiftKey: true });
   expect(await screen.findByRole('menuitem', { name: 'Hide live' })).toBeTruthy();
   expect(screen.queryByRole('menuitem', { name: 'Hide story' })).toBeNull();
   fireEvent.click(screen.getByRole('menuitem', { name: 'Join' }));
@@ -59,19 +73,19 @@ it('hides a story without hiding live activity and can restore the full bar', as
   prefs.storiesEnabled = true;
   const view = render(<StoryShelf />);
   try {
-    fireEvent.contextMenu(screen.getByRole('listitem', { name: 'River Song' }));
+    fireEvent.contextMenu(screen.getByRole('button', { name: 'River Song' }));
     expect(await screen.findByRole('menuitem', { name: 'Watch' })).toBeTruthy();
     expect(screen.getByRole('menuitem', { name: 'Mute Account' })).toBeTruthy();
     expect(screen.getByRole('menuitem', { name: 'Block Creator' })).toBeTruthy();
     fireEvent.click(screen.getByRole('menuitem', { name: 'Hide story' }));
-    expect(screen.queryByRole('listitem', { name: 'River Song' })).toBeNull();
-    const live = screen.getByRole('listitem', { name: 'Live now' });
+    expect(screen.queryByRole('button', { name: 'River Song' })).toBeNull();
+    const live = screen.getByRole('button', { name: 'Live now' });
     fireEvent.contextMenu(live);
     fireEvent.click(screen.getByRole('menuitem', { name: 'Hide activity bar' }));
-    expect(screen.queryByRole('listitem', { name: 'Live now' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Live now' })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Show activity bar' }));
-    expect(screen.getByRole('listitem', { name: 'Live now' })).toBeTruthy();
-    expect(screen.queryByRole('listitem', { name: 'River Song' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Live now' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'River Song' })).toBeNull();
   } finally {
     view.unmount();
     setActivityBarHidden(false);
@@ -93,20 +107,31 @@ it('labels moments and live hosts with their display name and visible badge', ()
   expect(screen.queryByAltText('Dolphin')).toBeNull();
 });
 
-it('gives every pill a face, a name and a line', () => {
+it('places the Add a moment tile first and opens the creator directly', () => {
   prefs.storiesEnabled = true;
   const { container } = render(<StoryShelf />);
-  for (const kind of ['live', 'person']) {
-    const tile = container.querySelector(`[data-kind="${kind}"]`);
-    expect(tile?.querySelector('[data-st-line]')).toBeTruthy();
-    expect(tile?.querySelector('[data-st-avatar]')).toBeTruthy();
-    expect(tile?.querySelector('[data-st-label]')).toBeTruthy();
-  }
-  const liveAvatar = screen.getByRole('img', { name: 'LIVE' });
-  expect(liveAvatar.querySelector('[data-st-avatar]')).toBeTruthy();
-  expect(liveAvatar).toHaveAttribute('data-live-orbit', 'shelf');
-  expect(container.querySelector('[data-kind="person"] [data-live-orbit]')).toBeNull();
-  // Your own tile only shows with a Moment up; the Create tile leads the row.
+  const add = screen.getByRole('button', { name: 'Add a moment' });
+  expect(container.querySelector('[data-story-shelf]')?.firstElementChild).toBe(add);
+  expect(add).toHaveAttribute('data-story-portrait');
+  fireEvent.click(add);
+  expect(actions.openCreator).toHaveBeenCalledTimes(1);
   expect(container.querySelector('[data-kind="me"]')).toBeNull();
-  expect(screen.getByRole('listitem', { name: 'Create' })).toHaveAttribute('aria-haspopup', 'menu');
+  const liveAvatar = screen.getByRole('img', { name: 'LIVE' });
+  expect(liveAvatar).toHaveAttribute('data-live-orbit', 'shelf');
+});
+
+it('keeps the same portrait when its watched state changes', () => {
+  prefs.storiesEnabled = true;
+  const view = render(<StoryShelf />);
+  try {
+    const tile = screen.getByRole('button', { name: 'River Song' });
+    expect(tile).toHaveAttribute('data-seen', 'false');
+    prefs.seen = true;
+    view.rerender(<StoryShelf />);
+    expect(screen.getByRole('button', { name: 'River Song' })).toBe(tile);
+    expect(tile).toHaveAttribute('data-seen', 'true');
+    expect(tile).toHaveAccessibleDescription('2 watched');
+  } finally {
+    prefs.seen = false;
+  }
 });

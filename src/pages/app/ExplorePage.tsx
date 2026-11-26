@@ -905,7 +905,7 @@ export default function ExplorePage() {
 
                 {/* Stock / Crypto Cashtag Result Switcher */}
                 {!isDebouncingSearch && (isDhbQuery ? (
-                  <DhbListingSoonCard source="explore" />
+                  <DhbListingSoonCard />
                 ) : hasPriceResult && (
                   <CashtagResultSwitcher
                     stockData={stockData ?? null}

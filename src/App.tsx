@@ -2,6 +2,7 @@ import { LanguageRouteSync } from '@/components/LanguageRouteSync';
 import MaintenanceGate from '@/components/MaintenanceGate';
 import { useTranslation as _useCopy } from 'react-i18next';
 import { Toaster as Sonner } from "@/components/ui/sonner";
+import { OfflineConnectionToast } from "@/components/OfflineConnectionToast";
 import { NotificationsPromptToast } from "@/components/app/NotificationsPromptToast";
 import { AvatarPrompt } from "@/components/app/AvatarPrompt";
 import { NonFollowerOffer } from "@/components/app/NonFollowerOffer";
@@ -1122,6 +1123,7 @@ const App = () => (
           <LanguageRouteSync />
           <SEOHead />
           <Sonner />
+          <OfflineConnectionToast />
           {/* Watches /version.json for a newer deploy; renders nothing itself. */}
           <Suspense fallback={null}><NewVersionToast /></Suspense>
           {/*

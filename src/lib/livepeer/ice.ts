@@ -38,8 +38,9 @@ export function waitForIceGathering(
   enough?: RTCIceCandidateType | 'any',
   /** How long to hold the offer for that candidate. */
   capMs: number = ICE_GATHERING_TIMEOUT_MS,
+  signal?: AbortSignal,
 ): Promise<void> {
-  if (pc.iceGatheringState === 'complete') return Promise.resolve();
+  if (pc.iceGatheringState === 'complete' || signal?.aborted) return Promise.resolve();
 
   return new Promise((resolve) => {
     let settled = false;
@@ -49,6 +50,7 @@ export function waitForIceGathering(
       settled = true;
       pc.removeEventListener('icegatheringstatechange', onChange);
       pc.removeEventListener('icecandidate', onCandidate);
+      signal?.removeEventListener('abort', finish);
       clearTimeout(timer);
       clearTimeout(grace);
       resolve();
@@ -71,6 +73,7 @@ export function waitForIceGathering(
       logger.warn('ICE gathering timed out, continuing with the candidates gathered so far');
       finish();
     }, capMs);
+    signal?.addEventListener('abort', finish);
   });
 }
 

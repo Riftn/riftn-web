@@ -30,6 +30,8 @@ import MessageSquare from "@/components/ui/cut-icons/messages";
 import Share2 from "@/components/ui/cut-icons/postshare";
 import Repeat2 from "@/components/ui/cut-icons/repost";
 import Send from "@/components/ui/cut-icons/send";
+import PublicChatIcon from "@/components/ui/cut-icons/chat";
+import { Button } from '@/components/ui/button';
 
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -114,6 +116,8 @@ interface ActionBarProps {
    * /app/post/<id>). Omitted → the post's own link.
    */
   shareUrl?: string;
+  /** Opens the Public Chat composer with a public stream's link. */
+  onShareToPublicChat?: () => void;
   /** Handler for comment action */
   onComment?: () => void;
   /** Handler for share action */
@@ -379,6 +383,7 @@ export function ActionBar({
   newPostSlug,
   articleSlug,
   shareUrl,
+  onShareToPublicChat,
   onComment,
   onShare,
   onRepost,
@@ -1060,6 +1065,22 @@ export function ActionBar({
           <Send className="w-5 h-5" />
           <span className="font-medium"><TranslationText name="copy.20e392c29da3" fallback={"Send in a message"} /></span>
         </button>
+      )}
+      {isPublicPost && onShareToPublicChat && (
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={(e) => {
+            e.stopPropagation();
+            setSheetOpen(false);
+            if (isAuthenticated) onShareToPublicChat();
+            else openLoginModal();
+          }}
+          className="h-auto min-h-11 w-full justify-start gap-3 whitespace-normal px-4 py-3 text-left text-foreground hover:bg-muted [&_svg]:size-5"
+        >
+          <PublicChatIcon />
+          {_copy('publicChat.title')}
+        </Button>
       )}
       <button
         onClick={(e) => { e.stopPropagation(); handleCopyLink(); }}

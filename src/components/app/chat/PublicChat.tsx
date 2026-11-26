@@ -30,6 +30,8 @@ import { useHiddenLines } from '@/lib/public-chat-hidden';
 import { RoomSettingsModal } from './RoomSettingsModal';
 import { useLiveChatRooms, useLiveChatMessages, useLiveChatRoomDetails, useLiveChatPresence, type SupabaseLiveChatMessage } from '@/hooks/use-livechat';
 import { getMediaUrl, banLiveChatUser, unbanLiveChatUser, uploadChatImage, uploadLiveChatVoice, pinLiveChatMessage, unpinLiveChatMessage, type LiveChatRoom } from '@/lib/api/dehub';
+import { getNFTInfo } from '@/lib/api/dehub/feed';
+import { canDraftPublicLivePost } from '@/lib/live-public-chat-share';
 import { Pin, X as XIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { buildAvatarUrl } from '@/lib/media-url';
@@ -68,6 +70,8 @@ import Plus from '@/components/ui/cut-icons/add';
 import { CHAT_MENU_CONTENT } from './ChatOptionsMenu';
 import { cn } from '@/lib/utils';
 import { formatCount } from '@/lib/format-count';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { dehubLinkFor } from '@/lib/dehub-links';
 
 /** A row in the phone + menu, same as the Messages list menu's rows. */
 const PC_ROW = 'flex cursor-pointer items-center gap-3 rounded-xl px-2.5 py-2 text-[14px] text-zinc-100 outline-none focus:bg-white/10 data-[highlighted]:bg-white/10 data-[disabled]:opacity-40 [&>svg]:h-[17px] [&>svg]:w-[17px] [&>svg]:text-zinc-400';
@@ -164,6 +168,32 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
   const bottomRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { isAuthenticated, walletAddress, openLoginModal } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const shareTokenId = location.state?.shareLiveTokenId;
+  const pendingShareId = !embedded && isAuthenticated && typeof shareTokenId === 'string' && /^[1-9]\d*$/.test(shareTokenId)
+    ? shareTokenId : undefined;
+  const [confirmedShare, setConfirmedShare] = useState<{ key: string; account: string | null | undefined; url: string } | null>(null);
+  const sharedLiveUrl = pendingShareId && confirmedShare?.key === location.key && confirmedShare.account === walletAddress
+    ? confirmedShare.url : undefined;
+  const clearSharedLive = useCallback(() => {
+    navigate({ pathname: location.pathname, search: location.search }, { replace: true, preventScrollReset: true, state: null });
+  }, [location.pathname, location.search, navigate]);
+  useEffect(() => {
+    if (!pendingShareId) return;
+    let cancelled = false;
+    const unavailable = () => {
+      if (cancelled) return;
+      toast.error(t('profile.replyThread.postUnavailable'));
+      clearSharedLive();
+    };
+    void getNFTInfo(pendingShareId).then(post => {
+      if (cancelled) return;
+      if (!canDraftPublicLivePost(post, pendingShareId)) { unavailable(); return; }
+      setConfirmedShare({ key: location.key, account: walletAddress, url: dehubLinkFor.post(pendingShareId) });
+    }, unavailable);
+    return () => { cancelled = true; };
+  }, [pendingShareId, location.key, walletAddress, clearSharedLive, t]);
 
   // Signed out, the room reads but does not write. Anything that would write
   // opens the sign-in sheet, and signing in lands back here in this room.
@@ -206,11 +236,15 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
   // link names.
   useEffect(() => {
     if (!rooms.length) return;
+    if (pendingShareId) {
+      setSelectedRoomId(rooms[0].id);
+      return;
+    }
     const linked = peekPendingChatLink('public')?.target;
     const linkedRoom = linked?.kind === 'public' && linked.roomId && rooms.some((r) => r.id === linked.roomId) ? linked.roomId : null;
     if (linkedRoom && linkedRoom !== selectedRoomId) setSelectedRoomId(linkedRoom);
     else if (!selectedRoomId) setSelectedRoomId(rooms[0].id);
-  }, [rooms, selectedRoomId]);
+  }, [rooms, selectedRoomId, pendingShareId]);
 
   const {
     messages: apiMessages, isLoading: messagesLoading, isBanned,
@@ -903,7 +937,7 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
           </DropdownMenu>
         </div>
         ) : (
-        <div data-live-chat-toolbar data-public-chat-wide-tools className="flex shrink-0 items-center gap-3">
+        <div data-live-chat-toolbar data-public-chat-wide-tools className="flex shrink-0 items-center gap-1">
           {/* Online count first, so the call buttons sit with the other
               buttons instead of being split from them by the number. */}
           {selectedRoomId && <LiveChatOnlineCount count={onlineCount} />}
@@ -1137,6 +1171,9 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
       
       {/* Input Area */}
       <div className={isSearchOpen ? 'hidden' : 'relative'}>
+        {pendingShareId && (!sharedLiveUrl || !selectedRoomId) && (
+          <p role="status" className="px-4 py-2 text-sm text-muted-foreground">{t('common.loading')}</p>
+        )}
         <ChatInput
         voiceMaxDuration={29}
           onSendMessage={handleSendMessage}
@@ -1145,6 +1182,8 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
           replyTo={replyTo}
           onCancelReply={handleCancelReply}
           draftKey={selectedRoomId ? `room:${selectedRoomId}` : null}
+          incomingLink={selectedRoomId && selectedRoomId === rooms[0]?.id ? sharedLiveUrl : undefined}
+          onIncomingLinkApplied={clearSharedLive}
         />
       </div>
 

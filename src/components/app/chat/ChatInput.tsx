@@ -126,6 +126,9 @@ interface ChatInputProps {
    * the user reviews the fee and sends with one tap instead of retyping).
    */
   initialText?: string;
+  /** A link the user explicitly shared to this composer. */
+  incomingLink?: string;
+  onIncomingLinkApplied?: () => void;
   /**
    * Recent turns, oldest first. Supplying this turns on the reply orb; leave it
    * off and the composer is exactly what it was (Public Chat passes nothing).
@@ -152,7 +155,7 @@ interface ChatInputProps {
   allowLock?: boolean;
 }
 
-export function ChatInput({ onSendMessage, groupPhotos = false, onTipClick, onScheduleClick, scheduledCount = 0, onPollClick, onNoteClick, sendDisabled, sendDisabledReason, isSendingFee, feeAmount, confirmBeforeSend, canSend, replyTo, onCancelReply, incomingFile, initialText, thread, peerName, draftKey, allowDocuments = true, voiceMaxDuration = 59, allowLock = false, autoFocus = false, phoneB = false }: ChatInputProps) {
+export function ChatInput({ onSendMessage, groupPhotos = false, onTipClick, onScheduleClick, scheduledCount = 0, onPollClick, onNoteClick, sendDisabled, sendDisabledReason, isSendingFee, feeAmount, confirmBeforeSend, canSend, replyTo, onCancelReply, incomingFile, initialText, incomingLink, onIncomingLinkApplied, thread, peerName, draftKey, allowDocuments = true, voiceMaxDuration = 59, allowLock = false, autoFocus = false, phoneB = false }: ChatInputProps) {
   const { t: _copy } = _useCopy();
   const { t } = useTranslation();
   const [message, setMessage] = useDraft(draftKey, initialText ?? '');
@@ -163,6 +166,13 @@ export function ChatInput({ onSendMessage, groupPhotos = false, onTipClick, onSc
   useEffect(() => {
     if (initialText) setMessage(prev => (prev ? prev : initialText));
   }, [initialText, setMessage]);
+  useEffect(() => {
+    if (!incomingLink) return;
+    setMessage(previous => previous.split(/\s+/).includes(incomingLink)
+      ? previous
+      : previous.trim() ? `${previous.trimEnd()}\n${incomingLink}` : incomingLink);
+    onIncomingLinkApplied?.();
+  }, [incomingLink, onIncomingLinkApplied, setMessage]);
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [translateTo, setTranslateTo] = useState<string>(() => {
     try { return localStorage.getItem(TRANSLATE_TO_KEY) || 'en'; } catch { return 'en'; }

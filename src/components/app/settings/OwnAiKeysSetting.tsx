@@ -107,8 +107,10 @@ export function OwnAiKeysSetting({ preview, previewEditing, previewShowAll }: { 
                     {row.label}
                     {row.saved ? <span className="ml-2 font-mono text-xs text-zinc-500">••••{row.saved.last4}</span> : null}
                   </p>
-                  <p className="truncate text-xs text-zinc-500">
-                    {row.saved ? statusLabel(row.saved.status) : row.powers}
+                  <p className="break-words text-[13px] leading-snug text-muted-foreground">
+                    {row.saved
+                      ? statusLabel(row.saved.status)
+                      : t(`ownKeys.providerDescriptions.${row.id}`, { defaultValue: row.powers })}
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
