@@ -33,6 +33,7 @@ import { setFilterValue } from '@/hooks/use-persisted-feed-filter';
 import { parseDehubLink, ownSitePath } from '@/lib/dehub-links';
 import { expandEmojiTokens } from '@/components/app/emoji/EmojiText';
 import { applyBold } from '@/lib/bold-markup';
+import { postTextRuns } from '@/lib/post-text-format';
 
 export { LANGUAGE_NAMES };
 import { cn } from '@/lib/utils';
@@ -173,6 +174,20 @@ const PROFILE_HANDLE_SOURCE = '[a-zA-Z0-9_](?:[a-zA-Z0-9_.-]*[a-zA-Z0-9_])?';
  * Renders text with URLs replaced by clickable link emojis and @mentions as profile links
  */
 export function renderTextWithLinks(text: string, opts?: { flagged?: boolean }): ReactNode[] {
+  const runs = postTextRuns(text);
+  if (runs.length === 1 && !runs[0].styles.length) return renderTextRunWithLinks(text, opts);
+  return runs.map((run, index) => (
+    <span key={index} style={{
+      fontWeight: run.styles.includes('b') ? 'bolder' : undefined,
+      fontStyle: run.styles.includes('i') ? 'italic' : undefined,
+      textDecoration: run.styles.includes('u') ? 'underline' : undefined,
+    }}>
+      {renderTextRunWithLinks(run.text, opts)}
+    </span>
+  ));
+}
+
+function renderTextRunWithLinks(text: string, opts?: { flagged?: boolean }): ReactNode[] {
   const flaggedLinkProps = opts?.flagged
     ? {
         className:

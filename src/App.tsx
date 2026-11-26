@@ -564,18 +564,24 @@ function AppContent() {
   useLiveListRealtime();
 
   const wallet = walletAddress ?? (user as { walletAddress?: string | null; address?: string | null } | null)?.walletAddress ?? (user as { address?: string | null } | null)?.address ?? null;
+  const referralAccountCreatedAt = user?.username ? user.createdAt : undefined;
+  const { search } = useLocation();
 
   // Capture ?ref=CODE / ?aff=CODE on first load (first-touch wins, 90-day cookie).
   // Passing the signed-in wallet lets the shared RPC remove an owner's own
   // test visit from their affiliate analytics.
   useEffect(() => {
-    import("@/lib/affiliateRef").then(m => m.captureAffiliateRefFromUrl(wallet));
-  }, [wallet]);
+    import("@/lib/affiliateRef").then(m => m.captureAffiliateRefFromUrl(wallet, search));
+  }, [wallet, search]);
 
   // When a wallet signs in, self-attribute any pending cookie referral.
   useEffect(() => {
     if (!wallet || !isAuthenticated || requiresUsername || isConnecting || isProcessingRedirect) return;
-    import("@/lib/affiliate").then(m => m.attributeReferralIfPending(wallet)).catch(() => undefined);
+    import("@/lib/affiliate").then(m => m.attributeReferralIfPending(wallet, referralAccountCreatedAt)).catch(() => undefined);
+  }, [wallet, isAuthenticated, requiresUsername, isConnecting, isProcessingRedirect, referralAccountCreatedAt]);
+
+  useEffect(() => {
+    if (!wallet || !isAuthenticated || requiresUsername || isConnecting || isProcessingRedirect) return;
     import("@/lib/growth-session").then(m => m.syncGrowthSession(wallet)).catch(() => undefined);
   }, [wallet, isAuthenticated, requiresUsername, isConnecting, isProcessingRedirect]);
 

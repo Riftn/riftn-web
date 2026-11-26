@@ -237,12 +237,12 @@ export function ConversationItem({
           {checked && <span className="block h-[6px] w-[10px] -translate-y-px -rotate-45 border-b-2 border-l-2" style={{ borderColor: 'hsl(var(--background))' }} />}
         </span>
       )}
-      <span className="relative shrink-0">
-        <MomentFace address={selecting ? null : otherUser?.address} size={48} outline name={displayName || fallbackName} className="rounded-lg">
-          <LiveRipple ids={selecting ? [] : [otherUser?.address, otherUser?.username]} className="relative rounded-lg">
-            <Avatar className="w-12 h-12">
-              {avatarUrl && <AvatarImage src={avatarUrl} />}
-              <AvatarFallback className="bg-zinc-700 text-white font-medium">
+      <span data-chat-row-avatar className="relative shrink-0 rounded-lg">
+        <MomentFace address={selecting ? null : otherUser?.address} size={48} outline name={displayName || fallbackName} className="rounded-[inherit]">
+          <LiveRipple ids={selecting ? [] : [otherUser?.address, otherUser?.username]} className="relative rounded-[inherit]">
+            <Avatar className="w-12 h-12 rounded-[inherit]">
+              {avatarUrl && <AvatarImage src={avatarUrl} className="rounded-[inherit]" />}
+              <AvatarFallback className="bg-zinc-700 text-white font-medium rounded-[inherit]">
                 {(fallbackName.startsWith('0x') ? fallbackName.charAt(2) : fallbackName.charAt(0)).toUpperCase()}
               </AvatarFallback>
             </Avatar>
@@ -1262,6 +1262,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     <DirectMessageChat
       key={conversationIdentity(selectedConversation)}
       conversation={selectedConversation}
+      fullscreen
       initialComposerText={composerPrefill?.convId === selectedConversation.id ? composerPrefill.text : undefined}
       focusComposer={composerFocusFor === conversationIdentity(selectedConversation)}
       onBack={closeChat}

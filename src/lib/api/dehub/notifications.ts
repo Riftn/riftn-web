@@ -37,6 +37,7 @@ export type NotificationType =
   | 'story_mention'
   | 'story_comment'
   | 'video_milestone'
+  | 'new_message'
   | 'livestream_start'
   | 'signal_flare'
   | 'badge_delegated'
@@ -140,6 +141,8 @@ export interface NotificationComment {
 
 /** Only the keys the client reads; the server sends more. */
 export interface NotificationMetadata {
+  conversationId?: string;
+  deepLink?: string;
   articleUrl?: string;
   /** story_like / story_mention: the moment, and its public poster frame when it has one. */
   storyId?: string;

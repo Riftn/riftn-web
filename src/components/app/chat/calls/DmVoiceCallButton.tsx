@@ -12,8 +12,9 @@ interface DmVoiceCallButtonProps {
 
 export const DmVoiceCallButton: React.FC<DmVoiceCallButtonProps> = ({ recipientAddress, className }) => {
   const { t: _copy } = _useCopy();
-  const { startCall, isCallActive, isConnecting } = useCall();
+  const { startCall, currentCall } = useCall();
   const { walletAddress } = useAuth();
+  const label = _copy("copy.8b968cce31a0", { defaultValue: "Voice call" });
 
   const handleStartCall = () => {
     if (walletAddress && recipientAddress && walletAddress !== recipientAddress) {
@@ -29,11 +30,12 @@ export const DmVoiceCallButton: React.FC<DmVoiceCallButtonProps> = ({ recipientA
     <Button
       type="button"
       onClick={handleStartCall}
-      disabled={isCallActive || isConnecting}
+      disabled={!!currentCall}
       variant="ghost"
       size="icon"
       className={className}
-      title={_copy("copy.8b968cce31a0", { defaultValue: "Voice call" })}
+      aria-label={label}
+      title={label}
     >
       <Phone className="h-5 w-5" />
     </Button>

@@ -8,7 +8,7 @@ import { useTranslation as _useCopy } from 'react-i18next';
 
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
-import i18n, { loadLanguage } from '@/i18n';
+import { loadLanguage } from '@/i18n';
 import { useUserPreferences } from '@/contexts/UserPreferencesContext';
 import {
   LANGUAGE_STORAGE_KEY,
@@ -20,38 +20,10 @@ import { translateCopy as _translateCopy } from '@/i18n/copy';
 
 const STORAGE_KEY = LANGUAGE_STORAGE_KEY;
 
-/**
- * The side effects that go with that language — <html lang> and the i18n
- * bundle. Same reasoning: one app, one run, however many components ask.
- */
-let bootstrap: Promise<void> | null = null;
-
-function bootstrapLanguage(): Promise<void> {
-  if (bootstrap) return bootstrap;
-  bootstrap = (async () => {
-    const lang = resolveLanguage();
-
-    // Keep <html lang="..."> in sync for SEO/accessibility audits
-    document.documentElement.lang = lang;
-
-    // Always ensure i18n is synced to the correct language.
-    // Re-check i18n.language AFTER the async load in case the module-level
-    // initializer in i18n/index.ts already called changeLanguage while we awaited.
-    if (lang !== 'en' && i18n.language !== lang) {
-      const ok = await loadLanguage(lang);
-      if (ok && i18n.language !== lang) {
-        await i18n.changeLanguage(lang);
-      }
-    }
-  })();
-  return bootstrap;
-}
-
 export function useUserLanguage() {
   const { t: _copy } = _useCopy();
   // Correct on the very first render — see the store's resolveLanguage.
   const [language, setLanguage] = useState(resolveLanguage);
-  const [isLoading, setIsLoading] = useState(true);
   // Persist the language choice to the signed-in account (per-user sync).
   const prefs = useUserPreferences();
 
@@ -61,11 +33,7 @@ export function useUserLanguage() {
     const unsubscribe = subscribeToLanguage(setLanguage);
     setLanguage(resolveLanguage());
 
-    let cancelled = false;
-    bootstrapLanguage().finally(() => {
-      if (!cancelled) setIsLoading(false);
-    });
-    return () => { cancelled = true; unsubscribe(); };
+    return unsubscribe;
   }, []);
 
   const setPreferredLanguage = useCallback(async (lang: string) => {
@@ -84,7 +52,7 @@ export function useUserLanguage() {
     window.location.reload();
   }, [prefs, _copy]);
 
-  return { language, isLoading, setPreferredLanguage };
+  return { language, setPreferredLanguage };
 }
 
 // Language code to name mapping

@@ -12,6 +12,7 @@ import { ImageCard } from '@/components/app/cards/ImageCard';
 import { VideoCard } from '@/components/app/cards/VideoCard';
 import { PostCard } from '@/components/app/cards/PostCard';
 import { cn } from '@/lib/utils';
+import { stripPostTextStyles } from '@/lib/post-text-format';
 import type { ImagePost, TextPost, VideoItem } from '@/types/feed.types';
 import type { MediaFile } from '../types';
 
@@ -40,7 +41,7 @@ export function PostPreviewSheet({ open, onOpenChange, text, title, media }: Pro
     const now = new Date().toISOString();
     const justNow = t('copy.66f53417d3b7', { defaultValue: 'Just now' });
     const body = text.trim();
-    const heading = title.trim() || body.split('\n')[0] || '';
+    const heading = title.trim() || stripPostTextStyles(body).split('\n')[0] || '';
     const video = media.find((m) => m.type === 'video');
     const images = media.filter((m) => m.type === 'image');
     if (video) {

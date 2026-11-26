@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { ChevronDown, type LucideIcon } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import ChatIcon from '@/components/ui/cut-icons/chat';
 import { getAccountSummaries } from '@/lib/api/dehub/users';
 import '@/styles/call-stage.css';
 
@@ -29,25 +32,22 @@ export interface PeerIdentity {
  * address stays as the fallback while the request is in flight and if it fails.
  */
 export function usePeerIdentity(peerAddress: string): PeerIdentity {
-  const [identity, setIdentity] = useState<PeerIdentity>({
-    name: shortenAddress(peerAddress),
-    avatarUrl: null,
-  });
+  const address = peerAddress.toLowerCase();
+  const [identity, setIdentity] = useState<(PeerIdentity & { address: string }) | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    setIdentity({ name: shortenAddress(peerAddress), avatarUrl: null });
-    if (!peerAddress) return;
+    if (!address) return;
 
-    getAccountSummaries([peerAddress])
+    getAccountSummaries([address])
       .then(summaries => {
         if (cancelled) return;
-        const summary = summaries[0];
+        const summary = summaries.find(account => account.address.toLowerCase() === address);
         if (!summary) return;
         const name = summary.username
           ? `@${summary.username}`
-          : summary.displayName || shortenAddress(peerAddress);
-        setIdentity({ name, avatarUrl: summary.avatarImageUrl ?? null });
+          : summary.displayName || shortenAddress(address);
+        setIdentity({ address, name, avatarUrl: summary.avatarImageUrl === 'default-avatar' ? null : summary.avatarImageUrl || null });
       })
       .catch(() => {
         /* the shortened address is a fine answer */
@@ -56,9 +56,9 @@ export function usePeerIdentity(peerAddress: string): PeerIdentity {
     return () => {
       cancelled = true;
     };
-  }, [peerAddress]);
+  }, [address]);
 
-  return identity;
+  return identity?.address === address ? identity : { name: shortenAddress(peerAddress), avatarUrl: null };
 }
 
 export function peerInitial(name: string): string {
@@ -78,6 +78,9 @@ export function CallStage({
   remote,
   onMinimize,
   minimizeLabel,
+  direct,
+  onMessage,
+  messageLabel,
   children,
 }: {
   peer: PeerIdentity;
@@ -87,10 +90,13 @@ export function CallStage({
   remote?: React.ReactNode;
   onMinimize?: () => void;
   minimizeLabel?: string;
+  direct?: boolean;
+  onMessage?: () => void;
+  messageLabel?: string;
   children: React.ReactNode;
 }) {
   return (
-    <div className="call-stage" data-video={video ? 'true' : 'false'} data-live={live ? 'true' : 'false'} role="dialog" aria-modal="true" aria-label={peer.name}>
+    <div className="call-stage" data-video={video ? 'true' : 'false'} data-live={live ? 'true' : 'false'} data-direct={direct || undefined} data-message={!!onMessage || undefined} role="dialog" aria-modal="true" aria-label={peer.name}>
       <div className="call-stage__scrim hidden md:block" />
       <div className="call-stage__win">
         {live && remote ? (
@@ -102,9 +108,14 @@ export function CallStage({
           </>
         )}
         {onMinimize ? (
-          <button type="button" className="call-stage__min" onClick={onMinimize} aria-label={minimizeLabel} title={minimizeLabel}>
-            <ChevronDown className="h-5 w-5" />
-          </button>
+          <Button type="button" variant="ghost" size="icon" data-contrast-solid={direct && live || undefined} className="call-stage__min" onClick={onMinimize} aria-label={minimizeLabel} title={minimizeLabel}>
+            <ChevronDown />
+          </Button>
+        ) : null}
+        {onMessage ? (
+          <Button type="button" variant="ghost" size="icon" data-contrast-solid={live || undefined} className="call-stage__min call-stage__message" onClick={onMessage} aria-label={messageLabel} title={messageLabel}>
+            <ChatIcon />
+          </Button>
         ) : null}
         {children}
       </div>
@@ -119,6 +130,7 @@ export function CallIdentity({
   peer,
   status,
   ringing = false,
+  announceStatus = true,
   children,
 }: {
   kindIcon: React.ComponentType<{ className?: string }>;
@@ -126,6 +138,7 @@ export function CallIdentity({
   peer: PeerIdentity;
   status: React.ReactNode;
   ringing?: boolean;
+  announceStatus?: boolean;
   children?: React.ReactNode;
 }) {
   return (
@@ -135,11 +148,12 @@ export function CallIdentity({
         <span>{kindLabel}</span>
       </div>
       <p className="call-stage__name">{peer.name}</p>
-      <p className="call-stage__status" aria-live="polite">{status}</p>
-      <div className={`call-stage__avatar${ringing ? ' call-rings' : ''}`}>
-        {peer.avatarUrl
-          ? <img src={peer.avatarUrl} alt="" />
-          : <span>{peerInitial(peer.name)}</span>}
+      <p className="call-stage__status" aria-live={announceStatus ? 'polite' : 'off'}>{status}</p>
+      <div className={`call-stage__avatar${ringing ? ' call-rings' : ''}`} aria-hidden="true">
+        <Avatar className="call-stage__portrait">
+          {peer.avatarUrl ? <AvatarImage src={peer.avatarUrl} loading="eager" /> : null}
+          <AvatarFallback>{peerInitial(peer.name)}</AvatarFallback>
+        </Avatar>
       </div>
       {children}
     </div>
@@ -194,7 +208,7 @@ export function CallControl({
       disabled={disabled}
       aria-label={label}
       title={compact ? label : undefined}
-      aria-pressed={active ? true : undefined}
+      aria-pressed={active}
     >
       <Icon className={compact ? 'h-4 w-4' : 'h-6 w-6'} />
     </button>

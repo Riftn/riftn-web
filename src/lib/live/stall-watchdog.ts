@@ -25,6 +25,8 @@ export interface LiveStallWatchOptions {
   preferVideoFrames?: () => boolean;
   /** Check a visible system PiP window even while its tab is hidden. */
   watchInPictureInPicture?: boolean;
+  /** The caller tracks playback intent, including a start that never took. */
+  watchWhilePaused?: boolean;
 }
 
 const CHECK_EVERY_MS = 2000;
@@ -42,7 +44,10 @@ function presentedFrames(video: HTMLVideoElement): number | null {
 
 export function watchLiveProgress(
   video: HTMLVideoElement,
-  { stallMs, onStall, shouldWatch, preferVideoFrames, watchInPictureInPicture = false }: LiveStallWatchOptions,
+  {
+    stallMs, onStall, shouldWatch, preferVideoFrames,
+    watchInPictureInPicture = false, watchWhilePaused = false,
+  }: LiveStallWatchOptions,
 ): () => void {
   let lastTime = video.currentTime;
   let lastFrames = presentedFrames(video);
@@ -57,7 +62,7 @@ export function watchLiveProgress(
 
   const tick = () => {
     const watching =
-      !video.paused &&
+      (watchWhilePaused || !video.paused) &&
       typeof document !== 'undefined' &&
       (document.visibilityState === 'visible' || (watchInPictureInPicture && isVideoInPictureInPicture(video))) &&
       (shouldWatch?.() ?? true);

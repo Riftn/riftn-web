@@ -57,7 +57,22 @@
     "cancel": "İptal",
     "getKey": "Bir {{name}} anahtarı al",
     "showLess": "Sadece kendi anahtarlarımı göster",
-    "addAnother": "Başka bir sağlayıcı ekle"
+    "addAnother": "Başka bir sağlayıcı ekle",
+    "providerDescriptions": {
+      "openai": "Builder (GPT modelleri)",
+      "fal": "Görsel, video, 3D ve fotoğraf araçları",
+      "kie": "Görseller ve videolar",
+      "replicate": "Görseller ve videolar",
+      "xai": "Grok ile sohbet ve görsel oluşturma",
+      "elevenlabs": "Ses, dublaj, müzik ve ses efektleri",
+      "gemini": "Çeviri, yazma yardımı ve özetler",
+      "venice": "Asistanla sohbet",
+      "perplexity": "Asistanla web araması",
+      "deepgram": "Konuşma dökümleri ve canlı altyazılar",
+      "openrouter": "Tek anahtarla yüzlerce sohbet ve metin modeli",
+      "groq": "Hızlı sohbet ve metin",
+      "mistral": "Sohbet ve metin"
+    }
   },
   "resetWallet": {
     "mismatch": "Parolalar eşleşmiyor",
@@ -21479,6 +21494,11 @@
     "followFailed": "Takip edilemedi. Tekrar dene."
   },
   "appTokens": {
+    "reviewTransfer": "Transferi incele",
+    "transferComplete": "Transfer tamamlandı",
+    "balanceAfterSend": "Gönderimden sonra: {{amount}} {{symbol}}",
+    "addNote": "Not ekle",
+    "minimumTransfer": "En az 1 RIFT transfer edebilirsin.",
     "kindStaked": "Stake edildi",
     "kindUnstaked": "Stake çözüldü",
     "stakedBalance": "{{amount}} stake edildi",
@@ -21664,6 +21684,12 @@
     "enter": "Zindana gir"
   },
   "tokenLaunch": {
+    "tickerInfo": "Bilgi",
+    "tickerContract": "Sözleşme adresi",
+    "tickerBuy": "Satın al",
+    "referencePrice": "Uygulama içi referans fiyatı",
+    "contractPending": "Henüz doğrulanmadı",
+    "earnOnly": "Şimdilik yalnızca uygulamayı kullanarak token kazanabilirsin.",
     "riftTitle": "Zincir üstü $RIFT lansmanı",
     "riftStatus": "$RIFT, Riftn’in uygulama içi para birimidir. Riftn’de şimdiden kullanılabilir. Zincir üstü token henüz piyasaya sürülmedi ve resmî sözleşme adresi veya borsa listelemesi yok. Lansman e-postası için kaydol.",
     "riftSeoDescription": "$RIFT, Riftn’in uygulama içi para birimidir. Riftn’de şimdiden kullanılabilir. Zincir üstü token henüz piyasaya sürülmedi ve resmî sözleşme adresi veya borsa listelemesi yok.",

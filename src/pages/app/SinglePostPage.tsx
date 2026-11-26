@@ -678,7 +678,7 @@ function LivePostWithStatus({ liveData, post, chatSlot, immersive }: { liveData:
     ...liveData,
     isLive: !hasStreamEnded((post as any).stream) && (liveData.isLive || !!isLiveFromSupabase),
   };
-  return <Suspense fallback={<QuietPostLoading />}><LiveStreamCard key={tokenId} stream={mergedStream} chatSlot={chatSlot} immersive={immersive} /></Suspense>;
+  return <Suspense fallback={<QuietPostLoading />}><LiveStreamCard key={liveData.streamId ?? tokenId} stream={mergedStream} postPage chatSlot={chatSlot} immersive={immersive} /></Suspense>;
 }
 
 /**
@@ -826,6 +826,7 @@ function DesktopCreatorInfo({
   return (
     <div className="flex items-start justify-between">
       <CardHeader
+        postPage
         username={channel}
         handle={creatorUsername}
         avatarSeed={channelAvatar || ''}
@@ -1546,6 +1547,7 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
         const card = (
           <PostCard
             post={toTextPost(post)}
+            postPage
             onOpenComments={openPageComments}
             threadSlot={
               id ? <AuthorThread tokenId={String(id)} authorAddress={post.minter} highlightId={highlightCommentId} /> : undefined

@@ -143,6 +143,7 @@ import { QuotePostModalLazy } from '../modals/QuotePostModalLazy';
 import { TipModalLazy as TipModal } from '../modals/TipModalLazy';
 import { CommentsWrapper } from './CommentsWrapper';
 import { LiveEndedMedia } from './LiveEndedMedia';
+import { LiveAudienceProfileContext, usePreviewAudienceProfile } from '../live/live-audience-profile';
 // Lazy: only a live post ever renders it, and a static import would put the
 // preview (and its HLS glue) in the boot path for every card.
 const LiveFeedPreview = lazy(() => import('./LiveFeedPreview').then(m => ({ default: m.LiveFeedPreview })));
@@ -226,7 +227,7 @@ import { isLadderPlayback, setVideoSource, syncVideoLoad, videoSourceOf } from '
 import { usePlaybackRecovery } from '@/hooks/use-playback-recovery';
 import { usePostStage } from '@/components/app/post-stage/post-stage-context';
 import { StageCreatorRow } from '@/components/app/post-stage/StageCreatorRow';
-import { viewerShareUrl } from '@/lib/share-url';
+import { viewerLiveShareUrl, viewerShareUrl } from '@/lib/share-url';
 import { KeywordFilterGate } from './KeywordFilterGate';
 import { useTabletPortraitFeed } from '@/hooks/use-tablet-portrait-feed';
 import { tabletPortraitTitleSize } from '@/lib/tablet-portrait-feed';
@@ -848,6 +849,9 @@ function WideRailsRow({ enabled, rails, panel, children }: { enabled: boolean; r
 }
 
 const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack, isImmersive = false, disableAutoplay = false, hideActions = false, aboveFold = false, firstFeedPost = false, onOpenComments }: VideoCardProps) {
+  const { previewHandoff, openAudienceProfile } = usePreviewAudienceProfile(
+    video.id, video.title, video.creatorUsername ? `@${video.creatorUsername}` : video.channel, video.channelAvatar,
+  );
   const { t: _copy } = _useCopy();
   const playbackAllowed = useFeedPlaybackAllowed();
   const playbackAllowedRef = useRef(playbackAllowed);
@@ -2554,6 +2558,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
       {!isImmersive && !hideActions && !stage && (
         <div data-card-head={headerAboveMedia ? 'plain' : ''} className="flex items-start justify-between">
           <CardHeader
+            postPage={postPage}
             tokenId={videoTokenId}
             username={video.channel}
             visibility={video.visibility}
@@ -3043,6 +3048,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
                   muted={liveFeedPreview ? !liveSoundOn : isMuted}
                   controlsVisible={liveFeedPreview ? false : controlsVisible}
                   onToggleMute={toggleMute}
+                  audienceHandoff={previewHandoff}
                 />
               </Suspense>
             ) : (
@@ -3643,6 +3649,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
                 the overlay, where not leaving the stream is the point. */}
             <ShopBoardLazy tokenId={video.id} links={video.shopLinks} listingCount={video.shopListingCount} variant="inline" />
             <ActionBar
+              liveShare={video.isLivePost}
               onLiveReaction={video.isLivePost && video.isLiveNow ? sendLiveReaction : undefined}
               postId={video.id}
               articleSlug={video.articleSlug}
@@ -3697,11 +3704,13 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
               showComments && (
                 <div className="mt-3" data-no-navigate onClick={(e) => e.stopPropagation()}>
                   <Suspense fallback={null}>
-                    <LivePostChat
-                      tokenId={video.id}
-                      streamId={video.liveStreamId}
-                      isOffline={!video.isLiveNow}
-                    />
+                    <LiveAudienceProfileContext.Provider value={openAudienceProfile}>
+                      <LivePostChat
+                        tokenId={video.id}
+                        streamId={video.liveStreamId}
+                        isOffline={!video.isLiveNow}
+                      />
+                    </LiveAudienceProfileContext.Provider>
                   </Suspense>
                 </div>
               )
@@ -3861,7 +3870,8 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
             )}
             <button 
               onClick={() => {
-                const url = viewerShareUrl(`${window.location.origin}/app/post/${video.articleSlug || video.id}`);
+                const link = `${window.location.origin}/app/post/${video.articleSlug || video.id}`;
+                const url = video.isLivePost ? viewerLiveShareUrl(link, !video.visibility || video.visibility === 'public') : viewerShareUrl(link);
                 navigator.clipboard.writeText(url);
                 toast.success(t('postOptions.linkCopied'));
                 trackLinkCopy(video.id, walletAddress, linkCopyCount);

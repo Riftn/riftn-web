@@ -17,6 +17,7 @@
  *
  * @module components/app/live/LiveMiniPlayer
  */
+import { LiveDot } from '@/components/app/live/LiveDot';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -39,12 +40,12 @@ import {
   useLiveMini,
   type LiveMini,
 } from '@/lib/live-mini';
-import { LIVE_HLS_CONFIG, playsNativeHls } from '@/lib/live/hls-standby';
+import { LIVE_HLS_CONFIG, playsNativeHls, takeWarmLiveHls } from '@/lib/live/hls-standby';
 import { nativeLiveEdge, watchLiveProgress } from '@/lib/live/stall-watchdog';
 import { BIG_EVENT_HLS_CONFIG, isBigEventPlayback } from '@/lib/live-ingest';
 import { canPictureInPicture, catchUpToLiveEdge, onReturnToTab, togglePictureInPicture, useAutoPictureInPicture } from '@/lib/live-background';
 import { videoPlaybackManager } from '@/lib/video-playback-manager';
-import { visualActivity } from '@/lib/visual-activity';
+import { useLivePlaybackAllowed, visualActivity } from '@/lib/visual-activity';
 import { claimMediaSession, releaseMediaSession, setMediaSessionPlaying } from '@/lib/media-session';
 import { stopAudioPost, useAudioPostPlayback } from '@/lib/audio-post-playback';
 import { stopStageRecording, useStagePlayback } from '@/lib/stage-playback';
@@ -99,6 +100,7 @@ function LiveMiniSession({ mini }: { mini: LiveMini }) {
   const [aspect, setAspect] = useState(16 / 9);
   const [pipAvailable, setPipAvailable] = useState(false);
   const wantPlayRef = useRef(true);
+  const livePlaybackAllowed = useLivePlaybackAllowed();
   const hlsRef = useRef<Hls | null>(null);
   const streamId = mini.streamId;
 
@@ -131,15 +133,21 @@ function LiveMiniSession({ mini }: { mini: LiveMini }) {
         }
       }
       if (!wantPlayRef.current || !video.isConnected) return;
-      wantPlayRef.current = false;
-      setPlaying(false);
-      setBuffering(false);
+      // An attachment or source change can interrupt play. Keep the intent so
+      // canplay (or the stall watch) can see the same request through.
+      if (error instanceof DOMException && error.name === 'NotAllowedError') {
+        wantPlayRef.current = false;
+        videoPlaybackManager.stop(OWNER);
+        setPlaying(false);
+        setBuffering(false);
+      }
     });
   }, []);
 
   const pause = useCallback(() => {
     wantPlayRef.current = false;
     videoRef.current?.pause();
+    setBuffering(false);
     videoPlaybackManager.stop(OWNER);
   }, []);
 
@@ -174,38 +182,79 @@ function LiveMiniSession({ mini }: { mini: LiveMini }) {
       return false;
     };
 
+    let urlIndex = 0;
+    let attaching = false;
     const startHls = async () => {
-      const url = getLiveMini()?.urls[0] ?? mini.urls[0];
-      if (!url) { closeLiveMini(); return; }
+      const url = mini.urls[urlIndex];
+      if (attaching || disposed || !url) return;
       setBuffering(true);
-      if (playsNativeHls(video, url)) {
-        video.src = url;
-        if (wantPlayRef.current) play();
-        return;
-      }
-      const { default: HlsCtor } = await import('hls.js');
-      if (disposed) return;
-      if (!HlsCtor.isSupported()) {
-        video.src = url;
-        if (wantPlayRef.current) play();
-        return;
-      }
-      const hls = new HlsCtor({ ...LIVE_HLS_CONFIG, ...(isBigEventPlayback(url) ? BIG_EVENT_HLS_CONFIG : {}) });
-      hlsRef.current = hls;
-      hls.on(HlsCtor.Events.MEDIA_ATTACHED, () => {
-        if (!disposed && wantPlayRef.current) play();
-      });
-      hls.loadSource(url);
-      hls.attachMedia(video);
-      hls.on(HlsCtor.Events.ERROR, (_e, data) => {
-        if (!data.fatal || disposed) return;
-        if (data.type === HlsCtor.ErrorTypes.MEDIA_ERROR) { hls.recoverMediaError(); return; }
-        void probe(url).then((gone) => {
-          if (gone || disposed) return;
-          retry = setTimeout(() => { if (!disposed) hls.startLoad(); }, 3000);
+      attaching = true;
+      try {
+        if (playsNativeHls(video, url)) {
+          video.src = url;
+          if (wantPlayRef.current) play();
+          return;
+        }
+        const warm = await takeWarmLiveHls(url);
+        if (disposed) { warm?.hls.destroy(); return; }
+        const HlsCtor = warm?.Hls ?? (await import('hls.js')).default;
+        if (disposed) return;
+        if (!HlsCtor.isSupported()) {
+          video.src = url;
+          if (wantPlayRef.current) play();
+          return;
+        }
+        const hls = warm?.hls ?? new HlsCtor({ ...LIVE_HLS_CONFIG, ...(isBigEventPlayback(url) ? BIG_EVENT_HLS_CONFIG : {}) });
+        hlsRef.current = hls;
+        hls.on(HlsCtor.Events.MEDIA_ATTACHED, () => {
+          if (!disposed && wantPlayRef.current) play();
         });
-      });
+        hls.on(HlsCtor.Events.ERROR, (_e, data) => {
+          if (!data.fatal || disposed) return;
+          if (data.type === HlsCtor.ErrorTypes.MEDIA_ERROR) { hls.recoverMediaError(); return; }
+          retrySource(url);
+        });
+        if (!warm) hls.loadSource(url);
+        hls.attachMedia(video);
+      } catch {
+        retrySource(url);
+      } finally {
+        attaching = false;
+      }
     };
+
+    const retrySource = (url: string) => {
+      clearTimeout(retry);
+      retry = setTimeout(() => {
+        if (disposed || !wantPlayRef.current) return;
+        if (urlIndex + 1 < mini.urls.length) {
+          hlsRef.current?.destroy();
+          hlsRef.current = null;
+          urlIndex += 1;
+          void startHls();
+        } else if (mini.urls.length === 1) {
+          void probe(url).then((gone) => {
+            if (!gone && !disposed && wantPlayRef.current) void startHlsAgain();
+          });
+        } else {
+          // A single CDN's missing playlist does not mean the broadcast ended.
+          urlIndex = 0;
+          void startHlsAgain();
+        }
+      }, 3000);
+    };
+    const startHlsAgain = () => {
+      if (attaching) return;
+      hlsRef.current?.destroy();
+      hlsRef.current = null;
+      return startHls();
+    };
+    const onNativeError = () => {
+      const url = mini.urls[urlIndex];
+      if (!video.srcObject && !hlsRef.current && url) retrySource(url);
+    };
+    video.addEventListener('error', onNativeError);
+    video.addEventListener('ended', onNativeError);
 
     const session = mini.session;
     const fallBack = () => {
@@ -228,19 +277,22 @@ function LiveMiniSession({ mini }: { mini: LiveMini }) {
       stallMs: 6000,
       preferVideoFrames: () => !!video.srcObject,
       watchInPictureInPicture: true,
+      watchWhilePaused: true,
       shouldWatch: () => wantPlayRef.current && visualActivity.isLivePlaybackAllowed(),
       onStall: (count) => {
+        if (video.paused && count === 1 && (video.srcObject || video.currentSrc)) {
+          play();
+          return;
+        }
         if (video.srcObject) { fallBack(); return; }
+        if (attaching) return;
         const hls = hlsRef.current;
         const edge = hls?.liveSyncPosition ?? nativeLiveEdge(video);
         if (count === 1 && edge != null && Number.isFinite(edge) && edge > video.currentTime + 0.25) {
           video.currentTime = edge;
         } else if (hls) {
           hls.recoverMediaError();
-        } else {
-          video.load();
-          play();
-        }
+        } else void startHlsAgain();
       },
     });
 
@@ -248,6 +300,8 @@ function LiveMiniSession({ mini }: { mini: LiveMini }) {
       disposed = true;
       clearTimeout(retry);
       stopWatch();
+      video.removeEventListener('error', onNativeError);
+      video.removeEventListener('ended', onNativeError);
       session?.setStateListener(undefined);
       hlsRef.current?.destroy();
       hlsRef.current = null;
@@ -260,6 +314,11 @@ function LiveMiniSession({ mini }: { mini: LiveMini }) {
     // One stream per session (keyed on streamId).
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (livePlaybackAllowed && wantPlayRef.current && video?.paused && (video.currentSrc || video.srcObject)) play();
+  }, [livePlaybackAllowed, play]);
 
   // One sound at a time: starting here stops the others, and any of them
   // starting later closes this.
@@ -376,6 +435,7 @@ function LiveMiniSession({ mini }: { mini: LiveMini }) {
           onPlaying={() => { setPlaying(true); setBuffering(false); onPicture(); }}
           onPause={() => setPlaying(false)}
           onWaiting={() => setBuffering(true)}
+          onCanPlay={() => { if (wantPlayRef.current && videoRef.current?.paused) play(); }}
           onLoadedMetadata={onPicture}
           onResize={onPicture}
         />
@@ -518,10 +578,10 @@ function CornerWindow({
       <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-14" style={{ background: 'linear-gradient(to top, rgb(0 0 0 / 0.5), transparent)' }} />
 
       <span
-        className="pointer-events-none absolute left-2 top-2 inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold leading-none text-white"
-        style={{ background: '#EF4444' }}
+        className="pointer-events-none absolute left-2 top-2 inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold leading-none text-white bg-black/80"
+        data-on-media
       >
-        <span className="size-1.5 rounded-full bg-white" />
+        <LiveDot />
         {t('stages.liveBadge', 'LIVE')}
       </span>
 
@@ -615,7 +675,7 @@ function ListenBar({ mini, playing, loading, onOpen, onTogglePlay, onShowPicture
           <span className="min-w-0 flex-1">
             <span className="block truncate text-[13px] font-semibold leading-5 text-white">{mini.title || mini.host}</span>
             <span className="flex items-center gap-1.5 truncate text-[11px] leading-4 text-white/55">
-              <span className="size-1.5 shrink-0 rounded-full" style={{ background: '#EF4444' }} />
+              <LiveDot />
               <span className="truncate">{`${t('stages.liveBadge', 'LIVE')} · ${mini.host}`}</span>
             </span>
           </span>

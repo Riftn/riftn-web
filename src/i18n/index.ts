@@ -18,12 +18,14 @@ import { shortenCounterPlaceholder } from './counter-placeholders';
 const STORAGE_KEY = 'user-preferred-language';
 
 // Read cached language (same key as useUserLanguage hook)
-const savedLang = localStorage.getItem(STORAGE_KEY);
+const savedLang = (() => {
+  try { return localStorage.getItem(STORAGE_KEY); } catch { return null; }
+})();
 // Taiwan, Hong Kong, Macau and zh-Hant browsers read Traditional Chinese.
 const browserLang = /^zh-(tw|hk|mo)\b|^zh-hant/i.test(navigator.language || '')
   ? 'zh_tw'
   : navigator.language?.split('-')[0] || 'en';
-let defaultLang = savedLang || browserLang;
+const deviceLang = savedLang || browserLang;
 
 export const SUPPORTED_LANGUAGES = [
   { code: 'en', name: 'English', nativeName: 'English' },
@@ -153,7 +155,7 @@ const urlLang = (() => {
     return '';
   }
 })();
-if (urlLang) defaultLang = urlLang;
+const defaultLang = urlLang || deviceLang;
 
 // Dynamic import map for lazy loading locale files
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -170,8 +172,15 @@ export function applyDocumentDirection(lang: string): void {
 
 export const preferredLanguage = defaultLang;
 
-const packOrigin = '';
-const readPackCache = async (key: string) => { try { return localStorage.getItem(`locale-pack:${key}`); } catch { return null; } };
+function readPackCache(key: string): Record<string, unknown> | undefined {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (data && typeof data === 'object' && !Array.isArray(data)) return data;
+  } catch { /* A corrupt or unavailable entry can be fetched again. */ }
+}
+
 function previousPackKeys(lang: string, group: string): string[] {
   try {
     const current = `locale-pack:${manifest.version}:${lang}:${group}`;
@@ -181,68 +190,81 @@ function previousPackKeys(lang: string, group: string): string[] {
   } catch { return []; }
 }
 
+function previousPack(lang: string, group: string) {
+  for (const key of previousPackKeys(lang, group).reverse()) {
+    const bundle = readPackCache(key);
+    if (bundle) return bundle;
+  }
+}
+
 const loadedPacks = new Set<string>([`${manifest.version}:en:core`]);
 const offlinePacks = new Set<string>();
 const retryAfter = new Map<string, number>();
 const pendingPacks = new Map<string, Promise<boolean>>();
+
+function applyPack(lang: string, group: string, data: Record<string, unknown>, current: boolean) {
+  const key = `${manifest.version}:${lang}:${group}`;
+  if (current) {
+    loadedPacks.add(key);
+    offlinePacks.delete(key);
+  } else {
+    offlinePacks.add(key);
+  }
+  i18n.addResourceBundle(lang, 'translation', data, true, current);
+  fillMissingPluralForms(i18n, lang);
+}
+
 async function loadPack(lang: string, group: string, trigger = 'language-selection'): Promise<boolean> {
   if (!manifest.languages.includes(lang)) return false;
   const key = `${manifest.version}:${lang}:${group}`;
   if (loadedPacks.has(key)) return true;
+  // Feature strings can request a pack during render. Emit resource events
+  // after that render, including when the bundle comes from local storage.
+  await Promise.resolve();
+  if (loadedPacks.has(key)) return true;
   if ((retryAfter.get(key) || 0) > Date.now()) return offlinePacks.has(key);
-  if (pendingPacks.has(key)) return pendingPacks.get(key)!;
+  const existing = pendingPacks.get(key);
+  if (existing) return offlinePacks.has(key) || existing;
+
+  const storageKey = `locale-pack:${key}`;
+  const cached = readPackCache(storageKey);
+  if (cached) {
+    applyPack(lang, group, cached, true);
+    return true;
+  }
+  const fallback = offlinePacks.has(key) ? undefined : previousPack(lang, group);
+
   // Record only the first attempt for a pack, so startup audits can identify
   // the translation caller without recording user text or repeated renders.
   globalThis.performance?.mark?.('locale-pack-request', { detail: { language: lang, group, trigger } });
   const pending = (async () => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
     try {
-      const cached = await readPackCache(key);
-      let data: Record<string, unknown>;
-      if (cached) data = JSON.parse(cached);
-      else {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 8000);
-        try {
-          const response = await fetch(`${packOrigin}/locale-packs/web/${manifest.version}/${lang}/${group}.json`, { signal: controller.signal });
-          if (!response.ok) throw new Error('Locale pack unavailable');
-          data = await response.json();
-          if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('Invalid locale pack');
-        } catch {
-          retryAfter.set(key, Date.now() + 30_000);
-          if (offlinePacks.has(key)) return true;
-          for (const previousKey of previousPackKeys(lang, group).reverse()) {
-            const previous = localStorage.getItem(previousKey);
-            if (!previous) continue;
-            try {
-              const bundle = JSON.parse(previous);
-              if (!bundle || typeof bundle !== 'object' || Array.isArray(bundle)) continue;
-              offlinePacks.add(key);
-              i18n.addResourceBundle(lang, 'translation', bundle, true, true);
-              fillMissingPluralForms(i18n, lang);
-              return true;
-            } catch { /* Try another cached copy. */ }
-          }
-          return false;
-        } finally { clearTimeout(timeout); }
-        try {
-          const value = JSON.stringify(data);
-          localStorage.setItem(`locale-pack:${key}`, value);
-          if (localStorage.getItem(`locale-pack:${key}`) === value) {
-            for (const previousKey of previousPackKeys(lang, group)) localStorage.removeItem(previousKey);
-          }
-        } catch { /* The in-memory resources still work. */ }
-      }
-      // Mark first: resource events rerender consumers synchronously.
-      loadedPacks.add(key);
-      offlinePacks.delete(key);
-      i18n.addResourceBundle(lang, 'translation', data, true, true);
-      fillMissingPluralForms(i18n, lang);
+      const response = await fetch(`/locale-packs/web/${manifest.version}/${lang}/${group}.json`, { signal: controller.signal });
+      if (!response.ok) throw new Error('Locale pack unavailable');
+      const data = await response.json();
+      if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('Invalid locale pack');
+      try {
+        const value = JSON.stringify(data);
+        localStorage.setItem(storageKey, value);
+        if (localStorage.getItem(storageKey) === value) {
+          for (const previousKey of previousPackKeys(lang, group)) localStorage.removeItem(previousKey);
+        }
+      } catch { /* The in-memory resources still work. */ }
+      applyPack(lang, group, data, true);
       return true;
-    } catch { retryAfter.set(key, Date.now() + 30_000); return false; }
-    finally { pendingPacks.delete(key); }
+    } catch {
+      retryAfter.set(key, Date.now() + 30_000);
+      return offlinePacks.has(key);
+    } finally {
+      clearTimeout(timeout);
+      pendingPacks.delete(key);
+    }
   })();
   pendingPacks.set(key, pending);
-  return pending;
+  if (fallback) applyPack(lang, group, fallback, false);
+  return offlinePacks.has(key) || pending;
 }
 /**
  * Copy packs a render asked for that have not landed yet. A page rendered
@@ -256,8 +278,10 @@ export function takePendingCopy(): Promise<unknown> | null {
   return Promise.all([...pendingCopy]);
 }
 const trackCopy = (lang: string, group: string, trigger: string) => {
-  if (loadedPacks.has(`${manifest.version}:${lang}:${group}`)) return;
+  const key = `${manifest.version}:${lang}:${group}`;
+  if (loadedPacks.has(key)) return;
   const pending = loadPack(lang, group, trigger);
+  if (loadedPacks.has(key) || offlinePacks.has(key)) return;
   if (pendingCopy.has(pending)) return;
   pendingCopy.add(pending);
   void pending.finally(() => pendingCopy.delete(pending));
@@ -284,19 +308,30 @@ export async function loadLanguage(lang: string): Promise<boolean> {
   const groups = ['ar', 'es', 'fr', 'nl', 'tr'].includes(lang)
     ? [...new Set(Object.values(manifest.groups))]
     : [...requestedGroups];
-  const results = await Promise.all(groups.map(group => loadPack(lang, group)));
-  // Optional feature packs must not prevent an offline reader using cached core copy.
-  return results[groups.indexOf('core')] ?? false;
+  if (!await loadPack(lang, 'core')) return false;
+  for (const group of groups) {
+    if (group !== 'core') void loadPack(lang, group);
+  }
+  return true;
 }
 const counterFormatter = {
   type: 'formatter',
   format: (value, format, lng, options) => shortenCounterPlaceholder(value, format, lng, options) as string,
 } satisfies Pick<FormatterModule, 'type' | 'format'>;
+
+const initialLanguage = manifest.languages.includes(defaultLang) ? defaultLang : 'en';
+const initialCoreKey = `${manifest.version}:${initialLanguage}:core`;
+const currentCore = initialLanguage === 'en' ? undefined : readPackCache(`locale-pack:${initialCoreKey}`);
+const cachedCore = currentCore || (initialLanguage === 'en' ? undefined : previousPack(initialLanguage, 'core'));
+if (currentCore) loadedPacks.add(initialCoreKey);
+else if (cachedCore) offlinePacks.add(initialCoreKey);
+
 i18n.use(counterFormatter).use(initReactI18next).init({
   resources: {
     en: { translation: en },
+    ...(cachedCore && { [initialLanguage]: { translation: cachedCore } }),
   },
-  lng: 'en', // start with English, then switch after lazy load
+  lng: initialLanguage,
   fallbackLng: 'en',
   postProcess: ['featurePacks'],
   react: { bindI18nStore: 'added' },
@@ -316,31 +351,36 @@ i18n.on('languageChanged', applyDateLocale);
 // only an _other, so t(key, { count: 1 }) resolved to nothing and rendered the
 // humanised key.
 fillMissingPluralForms(i18n, 'en');
+if (cachedCore) fillMissingPluralForms(i18n, initialLanguage);
 
 // Keep <html dir> in sync so RTL languages (Arabic & dialects, Hebrew,
 // Persian, Urdu, ...) actually lay out right-to-left in the app. The docs'
 // LanguageContext manages dir independently on /docs routes.
 i18n.on('languageChanged', applyDocumentDirection);
+applyDocumentDirection(initialLanguage);
 
 // Languages whose locale file is not filled in fall back to Google's translate
 // widget rather than to English. Loaded lazily and only when one of those
 // languages is actually selected — a viewer on a translated language never
 // fetches it, never contacts Google, and never gets its DOM patch.
-i18n.on('languageChanged', (lang) => {
+const syncTranslateWidget = (lang: string) => {
   import('./translate-widget-fallback')
     .then((m) => m.syncTranslateWidget(lang))
     .catch(() => undefined);
-});
+};
+i18n.on('languageChanged', syncTranslateWidget);
 
-// If user's preferred language isn't English, lazy-load it immediately.
-// Guard: only apply startup language if the user hasn't manually changed it in the meantime.
-if (defaultLang && defaultLang !== 'en') {
-  loadLanguage(defaultLang).then((ok) => {
-    if (ok && i18n.language === 'en') {
-      i18n.changeLanguage(defaultLang);
-    }
-  });
+// Start with local copy. Refresh the core in the background and let visible
+// features request their own packs.
+if (initialLanguage !== 'en') {
+  syncTranslateWidget(initialLanguage);
+  void loadPack(initialLanguage, 'core', 'startup');
 }
+
+window.addEventListener('online', () => {
+  retryAfter.clear();
+  void loadLanguage(i18n.language);
+});
 
 // Staking / community / auth-toast bundles are merged per-language inside
 // loadLanguage() above — no static import, so they stay off the entry chunk.

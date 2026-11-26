@@ -17,14 +17,14 @@ export interface PictureRect {
   height: number;
 }
 
-/** The area `object-contain` actually paints a `videoW`×`videoH` frame into. */
-export function containedPicture(boxW: number, boxH: number, videoW: number, videoH: number): PictureRect {
+/** The area a `videoW`×`videoH` frame paints into, before clipping. */
+export function containedPicture(boxW: number, boxH: number, videoW: number, videoH: number, cover = false): PictureRect {
   if (!(boxW > 0) || !(boxH > 0)) return { left: 0, top: 0, width: 0, height: 0 };
   // Before the first frame there is no intrinsic size; the box is the best
   // guess, and the layer redraws the moment metadata arrives.
   if (!(videoW > 0) || !(videoH > 0)) return { left: 0, top: 0, width: boxW, height: boxH };
 
-  const scale = Math.min(boxW / videoW, boxH / videoH);
+  const scale = (cover ? Math.max : Math.min)(boxW / videoW, boxH / videoH);
   const width = videoW * scale;
   const height = videoH * scale;
   return { left: (boxW - width) / 2, top: (boxH - height) / 2, width, height };

@@ -90,6 +90,26 @@ describe('swipe back', () => {
     touch('touchstart', 12, 200); touch('touchend', 100, 200);
     expect(back).not.toHaveBeenCalled();
   });
+  it('closes profile photos from the photo surface and reserves the carousel at the edge', () => {
+    overlays.open = true;
+    const closePhotos = vi.fn();
+    render(<BrowserRouter>
+      <Harness />
+      <div role="dialog" aria-label="Images">
+        <button data-swipe-back data-swipe-back-protect-sideways onClick={closePhotos}>Close photos</button>
+        <div data-testid="photo-controls" />
+        <div data-no-swipe data-testid="photo-carousel" />
+        <div data-swipe-back-ignore data-testid="photo-fullscreen" />
+      </div>
+    </BrowserRouter>);
+    for (const surface of ['photo-carousel', 'photo-fullscreen', 'photo-controls']) {
+      touch('touchstart', 12, 200, 1, surface);
+      touch('touchmove', 45, 204, 1, surface);
+      touch('touchend', 100, 204, 1, surface);
+      expect(closePhotos).toHaveBeenCalledTimes(surface === 'photo-controls' ? 1 : 0);
+    }
+    expect(back).not.toHaveBeenCalled();
+  });
   it('uses the nested sheet back and ignores hidden and disabled controls', () => {
     document.body.innerHTML = '<button data-swipe-back id="page"></button><div role="dialog"><button data-swipe-back id="step"></button><button data-swipe-back disabled></button><div aria-hidden="true"><button data-swipe-back></button></div><div id="surface"></div></div>';
     expect(findSwipeBackControl(document.querySelector('#surface'), true)?.id).toBe('step');

@@ -23,6 +23,8 @@
  * Kept in step with mobile's `libs/post-title-split.ts`.
  */
 
+import { stripPostTextStyles } from '@/lib/post-text-format';
+
 /** Matches the title input's maxLength, the edit endpoint's cap and mobile. */
 export const POST_TITLE_MAX = 140;
 
@@ -59,6 +61,11 @@ function isHighSurrogate(code: number): boolean {
  */
 export function splitTitleFromText(raw: string, titleMax: number = POST_TITLE_MAX): TitleSplit {
   const text = (raw || '').trim();
+  const plain = stripPostTextStyles(text);
+  if (plain !== text) {
+    // A generated title is plain. Keep the full styled caption in the body.
+    return { title: splitTitleFromText(plain, titleMax).title, description: text };
+  }
   if (text.length <= titleMax) return { title: text, description: '' };
 
   // +1 so a break sitting exactly on the cap still counts as inside it.
