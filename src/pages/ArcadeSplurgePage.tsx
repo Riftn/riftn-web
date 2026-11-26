@@ -6,6 +6,7 @@ import { ThemedIcon } from '@/components/app/war/WarHudIcon';
 import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { SPLURGE_ITEM_LIMIT, useSplurge, type SplurgeMode } from '@/hooks/use-splurge';
 import { formatSplurgeAmount, splurgeCurrency } from '@/lib/splurge-currency';
@@ -48,7 +49,7 @@ function Splurge({ address, signIn }: { address: string | null; signIn: () => vo
             event.preventDefault();
             if (await game.submit()) field.current?.focus();
           }}>
-            <label htmlFor="splurge-item" className="block text-sm font-medium">{t('games.splurge.prompt')}</label>
+            <Label htmlFor="splurge-item" className="block leading-normal">{t('games.splurge.prompt')}</Label>
             <div className="flex flex-col gap-2 sm:flex-row">
               <Input
                 id="splurge-item"

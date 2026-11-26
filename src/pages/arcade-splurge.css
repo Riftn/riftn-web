@@ -1,7 +1,8 @@
 .splurge-play {
-  --splurge-line: hsl(var(--border));
-  --splurge-quiet: hsl(var(--muted-foreground));
-  --splurge-field: hsl(var(--background));
+  --splurge-line: color-mix(in srgb, currentColor 22%, transparent);
+  --splurge-quiet: color-mix(in srgb, currentColor 78%, transparent);
+  --splurge-field: var(--control-fill, color-mix(in srgb, currentColor 9%, transparent));
+  --splurge-field-border: color-mix(in srgb, currentColor 48%, transparent);
   display: grid;
   gap: 24px;
   padding-block: 20px;
@@ -31,7 +32,13 @@
 
 .splurge-field {
   background: var(--splurge-field);
+  border-color: var(--splurge-field-border);
   color: inherit;
+}
+
+.splurge-field:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
 }
 
 .splurge-history {
@@ -62,6 +69,7 @@
   --splurge-line: #5f4424;
   --splurge-quiet: #e7ba86;
   --splurge-field: #1a120c;
+  --splurge-field-border: #a6794d;
   color: #ffca82;
   color-scheme: dark;
   background: repeating-linear-gradient(180deg, transparent 0 3px, #0002 3px 4px),
@@ -78,12 +86,15 @@
   text-shadow: 0 0 12px #f584322d;
 }
 
-.splurge-play[data-mode="crt"] .splurge-field {
-  border-color: #916239;
+/* The CRT panel keeps its amber input, including inside System Light. */
+.splurge-play[data-mode="crt"] #splurge-item {
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
 }
 
-.splurge-play[data-mode="crt"] .splurge-field::placeholder {
-  color: #cfaa85;
+.splurge-play[data-mode="crt"] #splurge-item::placeholder {
+  color: var(--splurge-quiet) !important;
+  -webkit-text-fill-color: currentColor !important;
 }
 
 .splurge-play[data-mode="crt"] :is(input, button):focus-visible {
