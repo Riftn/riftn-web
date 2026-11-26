@@ -126,6 +126,23 @@ describe('mobile menu dismissal', () => {
     expect(screen.getByText('nav.groups.main')).toBeTruthy();
   });
 
+  it('clears the query and focus in sections, then reopens with an empty search', async () => {
+    await mount();
+    const field = screen.getByRole('textbox', { name: 'sidebar.searchMenu' }) as HTMLInputElement;
+    field.focus();
+    fireEvent.change(field, { target: { value: 'dao' } });
+    fireEvent.click(screen.getByRole('button', { name: 'sidebar.clearSearch' }));
+    expect(field.value).toBe('');
+    expect(document.activeElement).not.toBe(field);
+    expect(screen.getByTestId('menu')).toBeTruthy();
+
+    fireEvent.change(field, { target: { value: 'wallet' } });
+    fireEvent.click(screen.getByText('Dismiss twice'));
+    fireEvent.click(screen.getByRole('button', { name: 'Open menu' }));
+    const reopened = screen.getByRole('textbox', { name: 'sidebar.searchMenu' }) as HTMLInputElement;
+    expect(reopened.value).toBe('');
+  });
+
   it('keeps repeated close requests closed', async () => {
     await mount();
     fireEvent.click(screen.getByText('Dismiss twice'));
