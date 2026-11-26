@@ -33,13 +33,12 @@ export function MomentReplyPreview({ id, mention = false }: { id: string; mentio
   }, [expires]);
   const item = isSuccess && data.author && expires > Date.now() && !data.item.expired && data.item.status === 'ready'
     && (!data.item.isMature || canSeeMature) ? data.item : null;
-  const thumb = item?.posterUrl || (item?.type === 'photo' ? item.mediaUrl : null);
   const author = item && data?.author ? nameOf(data.author) : null;
   return (
     <Link to={mention ? `/app/moment/${id}` : `/app/moment/${id}?reply=1`} onClick={event => event.stopPropagation()}
       className="flex w-full items-center gap-2.5 rounded-lg border-s-2 border-current bg-white/[0.06] px-2 py-1.5 text-start hover:bg-white/10">
-      <span className={`grid shrink-0 place-items-center overflow-hidden rounded-md bg-zinc-800 text-white ${mention ? 'h-[154px] w-24' : 'h-11 w-8'}`}>
-        {thumb ? <img src={thumb} alt="" className="size-full object-cover" /> : <Layers size={16} aria-hidden />}
+      <span className="grid h-11 w-8 shrink-0 place-items-center rounded-md bg-zinc-800 text-white">
+        <Layers size={16} aria-hidden />
       </span>
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="text-xs opacity-70">{mention

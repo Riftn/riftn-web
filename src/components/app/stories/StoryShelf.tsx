@@ -3,8 +3,8 @@
  *
  * A + key first (opens the create menu), your own Moments while you have
  * some, everyone live right now, then people's Moments with watched ones
- * last. Pills share the row's width; with one or two up they also show who
- * is watching or the Moments themselves. A pill opens the full-screen viewer.
+ * last. Pills share the row's width, with room for watcher avatars on live pills
+ * when the shelf is quiet. A Moment pill opens the full-screen viewer.
  */
 import { lazy, Suspense, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { Eye } from 'lucide-react';
@@ -148,8 +148,7 @@ function VisibleStoryShelf({ dismissed }: { dismissed: string[] }) {
 
   const showMe = storiesEnabled && isAuthenticated && !!(pending || ownWatchable);
   const shownOthers = storiesEnabled ? others : [];
-  // How many pills are up: with 1 the pill stretches across the row and
-  // shows a little more (who is watching, or the Moments themselves).
+  // A live pill can show watcher avatars when the row has room.
   const upCount = isLoading ? 0 : (showMe ? 1 : 0) + eligibleLive.length + shownOthers.length;
   const roomy = upCount >= 1 && upCount <= 2;
 
@@ -164,7 +163,6 @@ function VisibleStoryShelf({ dismissed }: { dismissed: string[] }) {
             entry={ownWatchable}
             processing={!!own?.items.some(i => i.status === 'processing')}
             pending={pending}
-            roomy={roomy}
             onAdd={addMoment}
             onOpen={el => ownWatchable && openEntry(ownWatchable, el)}
             onMenu={ownWatchable && !pending ? event => openMenu(event, storyTarget(ownWatchable, event.currentTarget)) : undefined}
@@ -179,7 +177,7 @@ function VisibleStoryShelf({ dismissed }: { dismissed: string[] }) {
         ))}
         {storiesEnabled && isLoading && [0, 1, 2].map(index => <LoadingPill key={index} />)}
         {shownOthers.map(entry => (
-          <PersonTile key={entry.author.address} entry={entry} roomy={roomy} onOpen={el => openEntry(entry, el)}
+          <PersonTile key={entry.author.address} entry={entry} onOpen={el => openEntry(entry, el)}
             onMenu={event => openMenu(event, storyTarget(entry, event.currentTarget))} />
         ))}
       </div>
@@ -194,21 +192,6 @@ function LoadingPill() {
       <span data-st-avatar />
       <span data-st-text><span /><span /></span>
     </div>
-  );
-}
-
-/** Small covers of someone's Moments, for a pill that has the room. */
-function MomentCovers({ entry }: { entry: ShelfEntry | null }) {
-  if (!entry) return null;
-  const covers = entry.items
-    .map(item => item.posterUrl || (item.type === 'photo' ? item.mediaUrl : null))
-    .filter((url): url is string => !!url)
-    .slice(0, 3);
-  if (!covers.length) return null;
-  return (
-    <span data-st-stack data-covers aria-hidden="true">
-      {covers.map(url => <img key={url} src={url} alt="" loading="lazy" draggable={false} />)}
-    </span>
   );
 }
 
@@ -249,13 +232,12 @@ function momentsLine(t: TFunction, count: number) {
     : t('stories.spot.moments', { n: formatCount(count), defaultValue: '{{n}} Moments' });
 }
 
-function MeTile({ address, avatar, entry, processing, pending, roomy, onAdd, onOpen, onMenu }: {
+function MeTile({ address, avatar, entry, processing, pending, onAdd, onOpen, onMenu }: {
   address: string;
   avatar: string | null;
   entry: ShelfEntry | null;
   processing: boolean;
   pending: ReturnType<typeof useStoriesStore.getState>['pending'];
-  roomy: boolean;
   onAdd: () => void;
   onOpen: (el: HTMLElement) => void;
   onMenu?: OpenActivityMenu;
@@ -288,7 +270,6 @@ function MeTile({ address, avatar, entry, processing, pending, roomy, onAdd, onO
               : momentsLine(t, entry?.items.length ?? 0)}
         </span>
       </span>
-      {roomy && !pending && <MomentCovers entry={entry} />}
       {fill && <span data-st-fill style={{ '--st-upload-progress': fill } as CSSProperties} />}
     </button>
   );
@@ -342,7 +323,7 @@ function LiveTile({ item, roomy, onOpen, onMenu }: { item: LiveNowItem; roomy: b
   );
 }
 
-function PersonTile({ entry, roomy, onOpen, onMenu }: { entry: ShelfEntry; roomy: boolean; onOpen: (el: HTMLElement) => void; onMenu: OpenActivityMenu }) {
+function PersonTile({ entry, onOpen, onMenu }: { entry: ShelfEntry; onOpen: (el: HTMLElement) => void; onMenu: OpenActivityMenu }) {
   const { t, i18n } = useTranslation();
   const a = entry.author;
   const face = a.avatarImageUrl ? buildAvatarUrl(a.address, a.avatarImageUrl, deviceWidth(36)) : buildAvatarCdnFallbackUrl(a.address, undefined);
@@ -365,7 +346,6 @@ function PersonTile({ entry, roomy, onOpen, onMenu }: { entry: ShelfEntry; roomy
           {[localAge(entry.latestAt, i18n.language), momentsLine(t, entry.items.length)].filter(Boolean).join(' · ')}
         </span>
       </span>
-      {roomy && <MomentCovers entry={entry} />}
     </button>
   );
 }

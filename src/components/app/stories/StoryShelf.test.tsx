@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { expect, it, vi } from 'vitest';
 import { StoryShelf } from './StoryShelf';
+import { useStoriesStore } from '@/store/storiesStore';
 import { setActivityBarHidden, setActivityItemsHidden } from '@/lib/activity-shelf-preferences';
 
 const prefs = vi.hoisted(() => ({ storiesEnabled: true, hiddenBadge: false }));
@@ -33,11 +34,14 @@ vi.mock('@/hooks/use-story-shelf', () => ({
   }] } }),
 }));
 
-it('shows the visible Moments as small covers when there is room, and keeps lives when Stories are hidden', () => {
+it('keeps Moment media off the shelf, opens Moments on tap, and keeps lives when Stories are hidden', () => {
   prefs.storiesEnabled = true;
   const view = render(<StoryShelf />);
-  const covers = [...screen.getByRole('listitem', { name: 'River Song' }).querySelectorAll('[data-st-stack] img')].map(img => img.getAttribute('src'));
-  expect(covers).toEqual(['/seen.jpg', '/opening.jpg']);
+  const moment = screen.getByRole('listitem', { name: 'River Song' });
+  expect(moment.querySelector('[data-st-stack], img[src="/seen.jpg"], img[src="/opening.jpg"]')).toBeNull();
+  fireEvent.click(moment);
+  expect(useStoriesStore.getState().viewer?.entries[0].items.map(item => item.id)).toEqual(['seen', 'clip']);
+  useStoriesStore.setState({ viewer: null });
   prefs.storiesEnabled = false;
   view.rerender(<StoryShelf />);
   expect(screen.queryByRole('listitem', { name: 'River Song' })).toBeNull();

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import { expect, it, vi } from 'vitest';
@@ -25,10 +25,13 @@ it('opens the owner’s expired Moments on demand, paginates, and excludes other
   expect(archiveToggle).toHaveAccessibleDescription('stories.archiveOnlyYou');
   expect(screen.getByText('stories.archiveOnlyYou')).not.toBeVisible();
   fireEvent.click(archiveToggle);
-  expect(await screen.findByRole('link', { name: /yesterday/ })).toHaveAttribute('href', '/app/moment/expired');
+  const link = await screen.findByRole('link');
+  expect(link).toHaveAttribute('href', '/app/moment/expired');
+  expect(link).not.toHaveAccessibleName(/yesterday/);
+  expect(link.querySelector('img')).toBeNull();
   expect(screen.getAllByRole('link')).toHaveLength(1);
   fireEvent.click(screen.getByRole('button', { name: 'common.loadMore' }));
-  expect(await screen.findByRole('link', { name: /older/ })).toHaveAttribute('href', '/app/moment/older');
+  await waitFor(() => expect(screen.getAllByRole('link').map(item => item.getAttribute('href'))).toContain('/app/moment/older'));
   expect(read).toHaveBeenNthCalledWith(2, 'cursor');
   view.rerender(app('visitor'));
   expect(screen.queryByRole('link')).toBeNull();

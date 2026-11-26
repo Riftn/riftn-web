@@ -57,11 +57,11 @@ export function useFaceMoment(address: string | null | undefined): MomentPeek | 
 interface MomentFaceProps {
   /** Wallet address of the person in the avatar. */
   address: string | null | undefined;
-  /** The face's drawn size in px: the thumbnail is sized from it. */
+  /** The face's drawn size in px: the Moment badge is sized from it. */
   size: number;
   children: ReactNode;
   className?: string;
-  /** Profile-sized face: a bigger thumbnail and a count when there are several. */
+  /** Profile-sized face: a bigger badge and a count when there are several. */
   big?: boolean;
   /** Name for the button label. */
   name?: string;
@@ -71,7 +71,7 @@ interface MomentFaceProps {
 
 /**
  * A tap on the avatar opens the person's active Moments. Profiles and chats
- * outline the avatar, while feed avatars can show a cover preview.
+ * outline the avatar, while feed avatars can show a corner badge.
  */
 export function MomentFace({ address, size, children, className, big, name, outline }: MomentFaceProps) {
   const { t } = useTranslation();
@@ -112,9 +112,7 @@ export function MomentFace({ address, size, children, className, big, name, outl
           data-moment-peek={peek.state}
           data-close-friends={peek.closeFriends ? '' : undefined}
           style={{ width: w, height: h, borderRadius: Math.max(4, Math.round(w * 0.26)), right: big ? -6 : -4, bottom: big ? -6 : -4 }}
-        >
-          {peek.cover ? <img src={peek.cover} alt="" loading="lazy" decoding="async" draggable={false} /> : <span data-moment-peek-blank />}
-        </span>
+        />
       )}
       {peek && !outline && big && peek.count > 1 && (
         <span aria-hidden data-moment-count style={{ right: (big ? -6 : -4) - 9, bottom: (big ? -6 : -4) + h - 12 }}>

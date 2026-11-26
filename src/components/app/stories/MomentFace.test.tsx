@@ -27,14 +27,15 @@ beforeEach(() => {
   vi.mocked(getUserStories).mockClear();
 });
 
-it('puts the Moment on the corner of the face and a tap opens it instead of the row', async () => {
+it('marks the avatar without showing Moment art and opens the viewer on tap', async () => {
   const onRow = vi.fn();
   const { container } = render(
     <button type="button" onClick={onRow}>
       <MomentFace address={ELLA} size={48} name="Ella"><span>face</span></MomentFace>
     </button>,
   );
-  await waitFor(() => expect(container.querySelector('[data-moment-peek="unseen"] img')).toHaveAttribute('src', '/cover.jpg'));
+  await waitFor(() => expect(container.querySelector('[data-moment-peek="unseen"]')).not.toBeNull());
+  expect(container.querySelector('img[src="/cover.jpg"]')).toBeNull();
   fireEvent.click(container.querySelector('[data-moment-face]')!);
   await waitFor(() => expect(useStoriesStore.getState().viewer?.entries[0].items).toHaveLength(2));
   expect(getUserStories).toHaveBeenCalledWith(ELLA, false);
