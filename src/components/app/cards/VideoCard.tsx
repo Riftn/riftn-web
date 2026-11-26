@@ -1985,7 +1985,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
           if (!entry.isIntersecting && isPlayingRef.current) {
             pauseVideo();
             videoPlaybackManager.stop(instanceId);
-          } else if (entry.isIntersecting && surfaceActiveRef.current && isRendered(containerRef.current) && autoplayEnabledRef.current && !liteModeRef.current && !disableAutoplay && !isPlayingRef.current && videoRef.current?.dataset.userPaused !== 'true' && !video.isPPV && !isContentGated && !video.isAudio && playableVideoUrl && !hasErrorRef.current && !isVideoNotReady) {
+          } else if (entry.isIntersecting && homeMediaReady && surfaceActiveRef.current && isRendered(containerRef.current) && autoplayEnabledRef.current && !liteModeRef.current && !disableAutoplay && !isPlayingRef.current && videoRef.current?.dataset.userPaused !== 'true' && !video.isPPV && !isContentGated && !video.isAudio && playableVideoUrl && !hasErrorRef.current && !isVideoNotReady) {
             let vid = videoRef.current;
             // Another copy of this post holds the element. Take it back unless
             // that copy is on screen — the post page open over the feed.
@@ -2092,7 +2092,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
       offscreenObserver.disconnect();
       prominenceObserver.disconnect();
     };
-  }, [instanceId, pauseVideo, video.isPPV, isContentGated, playableVideoUrl, ladderUrl, ladderStartsLow, video.isAudio, isVideoNotReady, playbackAllowed, disableAutoplay, surfaceActive, autoplayEnabled, liteMode]);
+  }, [instanceId, pauseVideo, video.isPPV, isContentGated, playableVideoUrl, ladderUrl, ladderStartsLow, video.isAudio, isVideoNotReady, playbackAllowed, disableAutoplay, surfaceActive, autoplayEnabled, liteMode, homeMediaReady]);
 
   // A signed URL that lapsed mid-session fails like a broken file: fetch a
   // fresh one and pick up where it stopped. An open post that fails gets one
