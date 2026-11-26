@@ -39,10 +39,13 @@ describe('live preview loading feedback', () => {
     mount('stream-a');
     await waitFor(() => expect(presence.playback).toHaveBeenCalled());
     const playback = presence.playback.mock.calls[0][1];
+    expect(screen.getByText('LIVE').querySelector('[data-live-dot]')).toBeVisible();
     act(() => playback(true));
     expect(screen.getByRole('status', { name: 'Live paused' })).toBeVisible();
+    expect(screen.queryByText('LIVE')).toBeNull();
     act(() => playback(false));
     expect(screen.queryByRole('status', { name: 'Live paused' })).toBeNull();
+    expect(screen.getByText('LIVE').querySelector('[data-live-dot]')).toBeVisible();
   });
   it('swaps to the ended state the moment the room says the broadcast is over', async () => {
     mount('stream-a');
@@ -50,6 +53,7 @@ describe('live preview loading feedback', () => {
     const ended = presence.playback.mock.calls[0][2]!;
     act(() => ended());
     expect(screen.getByText('Poster')).toBeVisible();
+    expect(screen.queryByText('LIVE')).toBeNull();
     expect(document.querySelector('video')).toBeNull();
   });
   it('joins on actual playback and leaves when paused or scrolled out of view', async () => {
