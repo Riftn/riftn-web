@@ -367,8 +367,11 @@ html[data-theme='glass'] [data-fsc-chat] :is([data-chat-header], [data-drop-atta
     box-shadow: var(--glass-edge-flat); backdrop-filter: var(--glass-blur);
     transition: background-color .15s, box-shadow .15s;
   }
-  html[data-theme='glass'] [data-fsc-list] [data-chat-list-row] :is(.w-12.h-12, .rounded-lg:has(> .w-12.h-12)):not(#_) {
-    width: 40px; height: 40px; border-radius: 999px;
+  html[data-theme='glass'] [data-fsc-list] [data-chat-list-row] [data-chat-row-avatar]:not(#_) {
+    border-radius: 999px;
+  }
+  html[data-theme='glass'] [data-fsc-list] [data-chat-list-row] .w-12.h-12:not(#_) {
+    width: 40px; height: 40px;
   }
   html[data-theme='glass'] [data-fsc-list] [data-chat-list-row] .w-12.h-12 > img.w-8 { width: 24px; height: 24px; }
   html[data-theme='glass'] [data-fsc-list] [data-chat-list-row]:not(#_):hover {
