@@ -21664,6 +21664,12 @@
     "enter": "Entra a la mazmorra"
   },
   "tokenLaunch": {
+    "tickerInfo": "Información",
+    "tickerContract": "Dirección del contrato",
+    "tickerBuy": "Comprar",
+    "referencePrice": "Precio de referencia en la app",
+    "contractPending": "Por confirmar",
+    "earnOnly": "Por ahora, solo puedes ganar tokens usando la app.",
     "riftTitle": "Lanzamiento de $RIFT en cadena",
     "riftStatus": "$RIFT es la moneda interna de Riftn. Ya se puede usar en Riftn. El token en cadena aún no se ha lanzado y no tiene dirección de contrato ni cotización oficial. Inscríbete para recibir un correo cuando se lance.",
     "riftSeoDescription": "$RIFT es la moneda interna de Riftn. Ya se puede usar en Riftn. El token en cadena aún no se ha lanzado y no tiene dirección de contrato ni cotización oficial.",

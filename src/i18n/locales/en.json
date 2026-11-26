@@ -21638,6 +21638,12 @@
     "enter": "Enter the dungeon"
   },
   "tokenLaunch": {
+    "tickerInfo": "Info",
+    "tickerContract": "Contract address",
+    "tickerBuy": "Buy",
+    "referencePrice": "In-app reference price",
+    "contractPending": "To be confirmed",
+    "earnOnly": "For now, you can only earn tokens by using the app.",
     "eyebrow": "Coming soon",
     "title": "Token launching soon",
     "riftTitle": "$RIFT on-chain launch",
