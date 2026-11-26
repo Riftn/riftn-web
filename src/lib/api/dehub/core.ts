@@ -782,7 +782,7 @@ export async function authedUpload<T>(
     signal,
   } = options;
 
-  const dmUpload = endpoint === '/api/dm/upload';
+  const dmUpload = endpoint === '/api/dm/upload' || endpoint === '/api/dm/upload-photos';
   const totalLimit = dmUpload
     ? MAX_ATTACHMENT_SIZE + (formData.get('encryptedKind') === 'file' ? 20 + 16 * Math.ceil(MAX_ATTACHMENT_SIZE / 65536) : 0)
     : 100_000_000;

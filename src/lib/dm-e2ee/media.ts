@@ -53,8 +53,18 @@ export interface MediaDescriptor {
   wave?: number[];
   /** the caption the sender typed, if any */
   caption?: string;
+  /** Additional photos in the same message, in mediaUrls order after the first. */
+  photos?: PhotoDescriptor[];
   /** video trim, cover, mirror, rotation and hide-until-tapped */
   opts?: DmVideoOptions;
+}
+
+export type PhotoDescriptor = Pick<MediaDescriptor, 'k' | 'mime' | 'size' | 'w' | 'h'> & { kind: 'image' };
+
+export const DM_PHOTO_BATCH_LIMIT = 10;
+
+export function photoMediaKey(messageId: string, index: number): string {
+  return index ? `${messageId}:photo:${index}` : messageId;
 }
 
 function chunkNonce(prefix: Uint8Array, index: number): Uint8Array {
@@ -143,6 +153,11 @@ export function decodeMediaDescriptor(plaintext: string | null | undefined): Med
     const d = JSON.parse((plaintext as string).slice(MEDIA_PREFIX.length)) as MediaDescriptor;
     if (!d || typeof d.k !== 'string' || fromBase64(d.k).length !== 32) return null;
     if (!['image', 'video', 'audio', 'file'].includes(d.kind)) return null;
+    if (d.photos !== undefined && (
+      d.kind !== 'image' || !Array.isArray(d.photos) || !d.photos.length || d.photos.length >= DM_PHOTO_BATCH_LIMIT
+      || d.photos.some(p => !p || p.kind !== 'image' || typeof p.mime !== 'string' || !p.mime.startsWith('image/')
+        || typeof p.k !== 'string' || fromBase64(p.k).length !== 32 || !Number.isFinite(p.size) || p.size <= 0)
+    )) return null;
     return d;
   } catch {
     return null;
