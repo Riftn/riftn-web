@@ -261,7 +261,7 @@ function MeTile({ address, avatar, entry, processing, pending, onOpen, onMenu }:
       onClick={e => failed ? pending?.retry?.() : onOpen(e.currentTarget)}
     >
       <PortraitPhoto src={face} name={you} retry={failed} />
-      <span data-st-caption><span data-st-name>{label}</span></span>
+      <span data-st-caption data-st-status={busy || failed || undefined}><span data-st-name>{label}</span></span>
       {fill && <span data-st-fill style={{ '--st-upload-progress': fill } as CSSProperties} />}
     </button>
   );
