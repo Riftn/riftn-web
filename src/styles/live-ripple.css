@@ -69,17 +69,20 @@
   position: relative;
   flex: none;
   --live-orbit-radius: 12px;
+  --live-orbit-outset: 3.5px;
+  --live-orbit-stroke: 1.5px;
+  --live-orbit-base: #e7354a;
 }
 [data-live-orbit='md'] { --live-orbit-radius: calc(var(--radius) - 2px); }
 [data-live-orbit='lg'] { --live-orbit-radius: var(--profile-avatar-radius, 12px); }
 [data-live-orbit] > [data-live-orbit-ring] {
   position: absolute;
-  inset: -3.5px;
+  inset: calc(-1 * var(--live-orbit-outset));
   z-index: 1;
-  padding: 1.5px;
+  padding: var(--live-orbit-stroke);
   overflow: hidden;
-  border-radius: calc(var(--live-orbit-radius) + 3.5px);
-  background: #e7354a;
+  border-radius: calc(var(--live-orbit-radius) + var(--live-orbit-outset));
+  background: var(--live-orbit-base);
   pointer-events: none;
   mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   mask-composite: exclude;
@@ -88,7 +91,8 @@
   content: '';
   position: absolute;
   inset: -25%;
-  background: conic-gradient(#e7354a 0deg 268deg, #ff4e61 301deg, #ff9aa3 326deg, #ff576a 339deg, #e7354a 360deg);
+  /* The native sweep uses the same clockwise stops and three-second cycle. */
+  background: conic-gradient(from 0deg, var(--live-orbit-base) 0deg 268deg, #ff4e61 301deg, #ff9aa3 326deg, #ff576a 339deg, var(--live-orbit-base) 360deg);
   animation: live-avatar-orbit 3s linear infinite;
 }
 @keyframes live-avatar-orbit {
