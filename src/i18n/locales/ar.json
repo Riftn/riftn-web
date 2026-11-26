@@ -5458,6 +5458,14 @@
     "shopAllowanceUsed": "تم استخدام {{allowance}} من {{allowance}}. قم بتخزين المزيد من رموز Riftn للحصول على شارة أعلى وفتحة أخرى."
   },
   "stages": {
+    "returnToStage": "عودة",
+    "liveRadio": "راديو مباشر",
+    "stageHeadcount_zero": "{{count}} مشارك",
+    "stageHeadcount_one": "{{count}} مشارك",
+    "stageHeadcount_two": "{{count}} مشاركان",
+    "stageHeadcount_few": "{{count}} مشاركين",
+    "stageHeadcount_many": "{{count}} مشاركًا",
+    "stageHeadcount_other": "{{count}} مشارك",
     "showChat": "إظهار الدردشة",
     "hideChat": "إخفاء الدردشة",
     "radioShow": {

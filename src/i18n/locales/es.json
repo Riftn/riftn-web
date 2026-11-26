@@ -5431,6 +5431,10 @@
     "shopAllowanceUsed": "{{allowance}} de {{allowance}} usados. Haz más staking de tokens Riftn para obtener una insignia superior y otra ranura."
   },
   "stages": {
+    "returnToStage": "Volver",
+    "liveRadio": "Radio en directo",
+    "stageHeadcount_one": "{{count}} participante",
+    "stageHeadcount_other": "{{count}} participantes",
     "showChat": "Mostrar chat",
     "hideChat": "Ocultar chat",
     "radioShow": {
