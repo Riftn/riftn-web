@@ -1,12 +1,20 @@
 import { useRef, useState } from 'react';
-import { fireEvent, render, screen, within } from '@testing-library/react';
-import { expect, it, vi } from 'vitest';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { afterEach, expect, it, vi } from 'vitest';
 import { Drawer, DrawerContent, DrawerTitle } from '@/components/ui/drawer';
 import { MessageMenu } from './MessageMenu';
+
+afterEach(() => vi.unstubAllGlobals());
 
 it('keeps reactions and Escape inside the broadcaster drawer', () => {
   const react = vi.fn();
   const requestEnd = vi.fn();
+  let onResize: () => void;
+  vi.stubGlobal('ResizeObserver', class {
+    constructor(callback: () => void) { onResize = callback; }
+    observe() {}
+    disconnect() {}
+  });
 
   function Broadcast() {
     const drawer = useRef<HTMLDivElement>(null);
@@ -52,6 +60,10 @@ it('keeps reactions and Escape inside the broadcaster drawer', () => {
   const menu = within(drawer).getByRole('menu');
   expect(menu).toHaveStyle({ position: 'absolute', left: '322px', top: '30px' });
   expect(menu).toHaveFocus();
+  // The expanded picker can grow asynchronously as emoji data arrives.
+  Object.defineProperty(menu, 'offsetHeight', { value: 380 });
+  act(() => onResize());
+  expect(menu).toHaveStyle({ top: '10px' });
   const reaction = within(menu).getByRole('button', { name: '👍' });
   fireEvent.pointerDown(reaction, { pointerType: 'mouse' });
   fireEvent.pointerUp(reaction, { pointerType: 'mouse' });
