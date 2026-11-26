@@ -13,7 +13,6 @@ import Gamepad2 from "@/components/ui/cut-icons/arcade";
 import History from "@/components/ui/cut-icons/history";
 import Music2 from "@/components/ui/cut-icons/music";
 import Video from "@/components/ui/cut-icons/video";
-import Packs from "@/components/ui/cut-icons/packs";
 import Chat from "@/components/ui/cut-icons/chat";
 import Clock from "@/components/ui/cut-icons/clock";
 import Live from "@/components/ui/cut-icons/live";
@@ -482,7 +481,6 @@ export const SEARCH_ONLY_ITEMS: readonly NavItem[] = [
   { icon: Star, label: "Creators", path: '/creators' },
   { icon: Smartphone, label: "Get the App", path: '/apk' },
   { icon: Plug, label: "Connect AI", path: '/connect' },
-  { icon: Packs, label: "Packs", path: '/packs' },
   { icon: Chat, label: "Public Chat", path: '/chat' },
   { icon: Clock, label: "Planned", path: '/planned' },
   { icon: Live, label: "Live Studio", path: '/live-studio' },
