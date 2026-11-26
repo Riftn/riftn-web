@@ -652,12 +652,12 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
     return true;
   }, []);
 
-  const handleSendMessage = async (args: { content: string; type: string; gifUrl?: string; mediaFile?: File; duration?: number }) => {
+  const handleSendMessage = async (args: ChatInputSendArgs) => {
     // Signed out: the typed line stays in the box while they sign in.
     if (!isAuthenticated) { promptSignIn(); return false; }
     if (!selectedRoomId) return false;
     if (!embedded && selectedRoomId === rooms[0]?.id && walletAddress && !replyTo
-        && args.type === 'text' && isCatchUpCommand(args.content)) {
+        && args.type === 'msg' && isCatchUpCommand(args.content)) {
       void runCatchUp({ communityId: 'global', walletAddress, text: args.content, t, lang: i18n.language, navigate });
       return true;
     }
