@@ -160,6 +160,7 @@ function TabPanel({ tab, activeTab, visitedTabs, children }: {
   if (!isActive && !visitedTabs.has(tab)) return null;
   return (
     <div
+      className={isActive ? 'motion-safe:animate-[cx-fade-in_150ms_ease-out]' : undefined}
       style={isActive ? undefined : { visibility: 'hidden', height: 0, overflow: 'hidden', position: 'absolute', width: '100%' }}
       aria-hidden={!isActive}
     >
