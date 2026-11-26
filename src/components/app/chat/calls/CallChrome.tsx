@@ -47,7 +47,7 @@ export function usePeerIdentity(peerAddress: string): PeerIdentity {
         const name = summary.username
           ? `@${summary.username}`
           : summary.displayName || shortenAddress(address);
-        setIdentity({ address, name, avatarUrl: summary.avatarImageUrl || null });
+        setIdentity({ address, name, avatarUrl: summary.avatarImageUrl === 'default-avatar' ? null : summary.avatarImageUrl || null });
       })
       .catch(() => {
         /* the shortened address is a fine answer */

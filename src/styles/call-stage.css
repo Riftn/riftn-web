@@ -121,11 +121,19 @@
 .call-stage[data-direct="true"] .call-dock > .call-ctl { min-width: 0; }
 .call-stage[data-direct="true"] .call-btn:not([data-solid="true"]) { border: 1px solid var(--cs-line); }
 .call-stage[data-direct="true"] .call-stage__foot > .call-ctl { margin-top: 2px; }
-.call-row--ringing { gap: clamp(40px, 15vw, 96px); }
+.call-row.call-row--ringing { gap: clamp(40px, 15vw, 96px); }
 .call-row--ringing .call-btn { width: 68px; height: 68px; }
 .call-stage[data-direct="true"] .call-stage__foot > .call-ctl > .call-btn {
   width: 66px;
   height: 66px;
+}
+@media (max-width: 767px) and (min-height: 680px) {
+  .call-stage[data-direct="true"] .call-stage__id {
+    padding-top: calc(max(16px, env(safe-area-inset-top)) + 12dvh);
+  }
+  .call-stage[data-direct="true"] .call-stage__foot:has(.call-row--ringing) {
+    padding-bottom: max(8dvh, env(safe-area-inset-bottom));
+  }
 }
 @media (max-height: 620px) {
   .call-stage[data-direct="true"] .call-stage__id { padding-top: calc(max(12px, env(safe-area-inset-top)) + 48px); }
