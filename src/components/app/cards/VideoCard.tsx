@@ -821,6 +821,8 @@ interface VideoCardProps {
   hideActions?: boolean;
   /** First few feed items — skip lazy loading so LCP thumbnail loads immediately */
   aboveFold?: boolean;
+  /** On Home, keep nearby cards on posters until the visitor uses the feed. */
+  deferMediaOnBoot?: boolean;
   /** Square and wide landing videos keep their identity above the player. */
   firstFeedPost?: boolean;
 }
@@ -848,7 +850,7 @@ function WideRailsRow({ enabled, rails, panel, children }: { enabled: boolean; r
   );
 }
 
-const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack, isImmersive = false, disableAutoplay = false, hideActions = false, aboveFold = false, firstFeedPost = false, onOpenComments }: VideoCardProps) {
+const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack, isImmersive = false, disableAutoplay = false, hideActions = false, aboveFold = false, deferMediaOnBoot = false, firstFeedPost = false, onOpenComments }: VideoCardProps) {
   const { previewHandoff, openAudienceProfile } = usePreviewAudienceProfile(
     video.id, video.title, video.creatorUsername ? `@${video.creatorUsername}` : video.channel, video.channelAvatar,
   );
@@ -1169,6 +1171,11 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
   const [nearViewport, setNearViewport] = useState(aboveFold || isImmersive);
   const bootSettled = useBootSettled();
   const interacted = useFirstInteraction();
+  const bootReady = bootSettled && interacted;
+  const homeMediaReady = !deferMediaOnBoot || bootReady;
+  const livePreviewPoster = video.isLivePost && video.isLiveNow && (thumbnail
+    ? <img src={thumbnail} alt="" aria-hidden="true" decoding="async" className="absolute inset-0 w-full h-full object-cover" loading={aboveFold ? 'eager' : 'lazy'} fetchPriority={aboveFold ? 'high' : 'auto'} />
+    : <div className="absolute inset-0 bg-black" />);
   useEffect(() => {
     if (aboveFold) return;
     const el = containerRef.current;
@@ -1197,7 +1204,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
 
   // Releasing the src attribute alone doesn't free the decoder/buffer — an
   // explicit load() after React removes it does.
-  const mediaAttached = aboveFold ? bootSettled && interacted : nearViewport;
+  const mediaAttached = aboveFold ? bootReady : nearViewport && homeMediaReady;
   useEffect(() => {
     if (mediaAttached) return;
     const vid = videoRef.current;
@@ -1979,7 +1986,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
           if (!entry.isIntersecting && isPlayingRef.current) {
             pauseVideo();
             videoPlaybackManager.stop(instanceId);
-          } else if (entry.isIntersecting && surfaceActiveRef.current && isRendered(containerRef.current) && autoplayEnabledRef.current && !liteModeRef.current && !disableAutoplay && !isPlayingRef.current && videoRef.current?.dataset.userPaused !== 'true' && !video.isPPV && !isContentGated && !video.isAudio && playableVideoUrl && !hasErrorRef.current && !isVideoNotReady) {
+          } else if (entry.isIntersecting && homeMediaReady && surfaceActiveRef.current && isRendered(containerRef.current) && autoplayEnabledRef.current && !liteModeRef.current && !disableAutoplay && !isPlayingRef.current && videoRef.current?.dataset.userPaused !== 'true' && !video.isPPV && !isContentGated && !video.isAudio && playableVideoUrl && !hasErrorRef.current && !isVideoNotReady) {
             let vid = videoRef.current;
             // Another copy of this post holds the element. Take it back unless
             // that copy is on screen — the post page open over the feed.
@@ -2086,7 +2093,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
       offscreenObserver.disconnect();
       prominenceObserver.disconnect();
     };
-  }, [instanceId, pauseVideo, video.isPPV, isContentGated, playableVideoUrl, ladderUrl, ladderStartsLow, video.isAudio, isVideoNotReady, playbackAllowed, disableAutoplay, surfaceActive, autoplayEnabled, liteMode]);
+  }, [instanceId, pauseVideo, video.isPPV, isContentGated, playableVideoUrl, ladderUrl, ladderStartsLow, video.isAudio, isVideoNotReady, playbackAllowed, disableAutoplay, surfaceActive, autoplayEnabled, liteMode, homeMediaReady]);
 
   // A signed URL that lapsed mid-session fails like a broken file: fetch a
   // fresh one and pick up where it stopped. An open post that fails gets one
@@ -3032,9 +3039,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
               /* The preview is its own chunk, so the fallback shows the cover:
                  when a live post tops the feed this cover is the phone LCP,
                  and a black box here held it back until the chunk loaded. */
-              <Suspense fallback={thumbnail
-                ? <img src={thumbnail} alt="" aria-hidden="true" decoding="async" className="absolute inset-0 w-full h-full object-cover" loading={aboveFold ? 'eager' : 'lazy'} fetchPriority={aboveFold ? 'high' : 'auto'} />
-                : <div className="absolute inset-0 bg-black" />}>
+              !homeMediaReady ? livePreviewPoster : <Suspense fallback={livePreviewPoster}>
                 <LiveFeedPreview
                   eager={aboveFold}
                   streamId={video.liveStreamId}
