@@ -78,4 +78,24 @@ describe('watchLiveProgress', () => {
       visibility.mockRestore();
     }
   });
+
+  it('recovers a player that stayed paused after handoff, but respects an intentional pause', () => {
+    vi.useFakeTimers();
+    const video = fakeVideo();
+    video.paused = true;
+    let wantsPlayback = true;
+    const onStall = vi.fn();
+    const stop = watchLiveProgress(video, {
+      stallMs: 6000,
+      shouldWatch: () => wantsPlayback,
+      watchWhilePaused: true,
+      onStall,
+    });
+    vi.advanceTimersByTime(6000);
+    expect(onStall).toHaveBeenCalledOnce();
+    wantsPlayback = false;
+    vi.advanceTimersByTime(12000);
+    expect(onStall).toHaveBeenCalledOnce();
+    stop();
+  });
 });

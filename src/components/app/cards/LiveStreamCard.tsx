@@ -1460,19 +1460,30 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
    * a leave and a join.
    */
   const canMinimise = !swipeFeed && !!stream.streamId && !!stream.isLive && !streamEnded && hasPlaybackUrl;
+  const minimisingRef = useRef(false);
   const minimiseLive = useCallback(async (mode: LiveMiniMode = 'video') => {
     const streamId = stream.streamId;
-    if (!streamId) return;
+    const video = videoRef.current;
+    // Only the mounted, unlocked viewer can hand off playback.
+    if (!canMinimise || !streamId || !video || minimisingRef.current) return;
+    minimisingRef.current = true;
     const path = `${window.location.pathname}${window.location.search}`;
     let seat: { leave: () => void } | null = null;
     if (!isOwnStream) {
-      const { joinStreamPresence } = await import('@/lib/api/dehub/stream-presence');
-      if (path !== `${window.location.pathname}${window.location.search}`) return;
-      seat = joinStreamPresence(streamId);
+      try {
+        const { joinStreamPresence } = await import('@/lib/api/dehub/stream-presence');
+        if (videoRef.current !== video || path !== `${window.location.pathname}${window.location.search}`) {
+          minimisingRef.current = false;
+          return;
+        }
+        seat = joinStreamPresence(streamId);
+      } catch {
+        // Presence may be temporarily unavailable while the media still plays.
+      }
     }
-    const video = videoRef.current;
-    const session = transport === 'whep' ? whepSessionRef.current : null;
-    const playingUrl = hlsRef.current?.url ?? video?.currentSrc;
+    if (videoRef.current !== video) { minimisingRef.current = false; return; }
+    const session = transportRef.current === 'whep' ? whepSessionRef.current : null;
+    const playingUrl = hlsRef.current?.url ?? video.currentSrc;
     const urls = playingUrl && urlsToTry.includes(playingUrl)
       ? [playingUrl, ...urlsToTry.filter((url) => url !== playingUrl)]
       : urlsToTry;
@@ -1486,14 +1497,14 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
       avatar: stream.avatar,
       path,
       session,
-      poster: video ? snapshotLiveFrame(video) : undefined,
+      poster: snapshotLiveFrame(video),
       seat,
       mode,
     });
     if (isFullscreen) toggleFullscreen();
     if (window.history.state?.idx > 0) navigate(-1);
     else navigate('/app');
-  }, [stream.streamId, stream.title, stream.creatorUsername, stream.streamer, stream.avatar, isOwnStream, transport, whepPlaybackId, urlsToTry, isFullscreen, toggleFullscreen, navigate]);
+  }, [canMinimise, stream.streamId, stream.title, stream.creatorUsername, stream.streamer, stream.avatar, isOwnStream, whepPlaybackId, urlsToTry, isFullscreen, toggleFullscreen, navigate]);
 
   /**
    * Hold the OS media session while this stream is audible, keyed on the
