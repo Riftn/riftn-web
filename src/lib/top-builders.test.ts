@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { rankBuilders, periodStart, type BuilderRequestRow, type BuilderCommentRow } from './top-builders';
+import { fetchBuilderRows, rankBuilders, periodStart, type BuilderRequestRow, type BuilderCommentRow } from './top-builders';
 
 const profiles = [
   { address: '0xa', username: 'ann' },
@@ -10,6 +10,28 @@ const profiles = [
 const req = (id: string, wallet: string, status: string, votes: number, created: string, updated = created): BuilderRequestRow => ({
   id, author_wallet_address: wallet,
   status, vote_count: votes, created_at: created, updated_at: updated,
+});
+
+describe('fetchBuilderRows', () => {
+  it('includes qualifying activity after the API row limit', async () => {
+    const date = '2026-11-26T01:00:00Z';
+    const requests = Array.from({ length: 1000 }, (_, index) =>
+      req(String(index).padStart(4, '0'), '0xa', 'open', 0, date),
+    );
+    requests.push(req('1000', '0xA', 'shipped', 2, date));
+    const cursors: (string | null)[] = [];
+    const rows = await fetchBuilderRows(async (limit, afterId) => {
+      cursors.push(afterId);
+      return {
+        data: requests.filter(row => afterId === null || row.id > afterId).slice(0, Math.min(limit, 1000)),
+        error: null,
+      };
+    });
+
+    expect(cursors).toEqual([null, '0999']);
+    expect(rows).toEqual(requests);
+    expect(rankBuilders(rows, [], 0, profiles)[0]).toMatchObject({ wallet: '0xa', shipped: 1, votes: 2, points: 12 });
+  });
 });
 
 describe('rankBuilders', () => {

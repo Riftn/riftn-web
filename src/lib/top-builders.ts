@@ -68,6 +68,23 @@ export interface TopBuilder {
 export type BuilderPeriod = 'month' | 'all';
 
 const SHIPPED = new Set(['shipped', 'completed']);
+const BUILDER_PAGE_SIZE = 1000;
+
+/** Read past the API row limit in primary-key order. */
+export async function fetchBuilderRows<T extends { id: string }>(
+  fetchPage: (limit: number, afterId: string | null) => PromiseLike<{ data: T[] | null; error: unknown }>,
+): Promise<T[]> {
+  const rows: T[] = [];
+  let afterId: string | null = null;
+  while (true) {
+    const { data, error } = await fetchPage(BUILDER_PAGE_SIZE, afterId);
+    if (error) throw error;
+    const page = data ?? [];
+    rows.push(...page);
+    if (page.length < BUILDER_PAGE_SIZE) return rows;
+    afterId = page[page.length - 1].id;
+  }
+}
 
 export function periodStart(period: BuilderPeriod, now: Date = new Date()): number {
   if (period === 'all') return 0;
