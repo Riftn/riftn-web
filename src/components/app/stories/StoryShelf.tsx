@@ -1,7 +1,15 @@
-/** Portrait Moment cards and live activity share the Home shelf. */
+/**
+ * The stories row at the top of Home: slim pills.
+ *
+ * A + key first (opens the create menu), your own Moments while you have
+ * some, everyone live right now, then people's Moments with watched ones
+ * last. Pills share the row's width; with one or two up they also show who
+ * is watching or the Moments themselves. A pill opens the full-screen viewer.
+ */
 import { lazy, Suspense, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { Eye } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import Refresh from '@/components/ui/cut-icons/refresh';
 import { useBadgeBalance, useBadgeVisual } from '@/hooks/use-badge-balance';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,7 +21,7 @@ import { useKidsModeLock } from '@/hooks/use-kids-mode';
 import { useStoriesStore } from '@/store/storiesStore';
 import { buildAvatarUrl, buildAvatarCdnFallbackUrl, deviceWidth } from '@/lib/media-url';
 import type { ShelfEntry } from '@/lib/api/dehub/stories';
-import { handleOf, nameOf, playable } from './story-utils';
+import { handleOf, localAge, nameOf, playable } from './story-utils';
 import { expectedShelfSeat, rememberShelfSeat, type ShelfSeat } from '@/lib/story-shelf-seat';
 import { StoryCreatePill, StoryCreateTile } from './StoryCreatePill';
 import { formatCount } from '@/lib/format-count';
@@ -47,8 +55,7 @@ type OpenActivityMenu = Parameters<typeof menuEvents>[0];
 const liveKey = (item: LiveNowItem) => `${item.kind}:${item.id}`;
 
 function VisibleStoryShelf({ dismissed }: { dismissed: string[] }) {
-  const { t } = useTranslation();
-  const { isAuthenticated, walletAddress, user } = useAuth();
+  const { isAuthenticated, walletAddress, user, openLoginModal } = useAuth();
   const { items: live, open: openLive, loading: liveLoading } = useLiveNowItems();
   const { showMatureContent } = useMatureContent();
   const kidsMode = useKidsModeLock();
@@ -115,9 +122,9 @@ function VisibleStoryShelf({ dismissed }: { dismissed: string[] }) {
     if (lastSeat === 'ask') return null;
     return (
       <>
-        <div data-stories data-story-shelf data-no-swipe data-no-pull role="group" aria-label={t('settings.activity')} aria-busy="true" {...menuEvents(openMenu)}>
-          {isAuthenticated && <CreateTile onAdd={openCreator} />}
-          {[0, 1, 2].map(index => <LoadingTile key={index} />)}
+        <div data-stories data-story-shelf data-no-swipe data-no-pull role="list" aria-busy="true" {...menuEvents(openMenu)}>
+          {isAuthenticated && <StoryCreateTile />}
+          {[0, 1, 2].map(index => <LoadingPill key={index} />)}
         </div>
         {menuElement}
       </>
@@ -137,37 +144,43 @@ function VisibleStoryShelf({ dismissed }: { dismissed: string[] }) {
     creator: entry.own ? undefined : { address: entry.author.address, name: nameOf(entry.author) },
   });
 
-  const processing = !!own?.items.some(item => item.status === 'processing' && !dismissed.includes(`story:${item.id}`));
-  const showMe = storiesEnabled && isAuthenticated && !!(pending || processing || ownWatchable);
+  const addMoment = () => (isAuthenticated ? openCreator() : openLoginModal());
+
+  const showMe = storiesEnabled && isAuthenticated && !!(pending || ownWatchable);
   const shownOthers = storiesEnabled ? others : [];
-  const liveOnly = !isLoading && !showMe && shownOthers.length === 0 && eligibleLive.length === 1;
+  // How many pills are up: with 1 the pill stretches across the row and
+  // shows a little more (who is watching, or the Moments themselves).
+  const upCount = isLoading ? 0 : (showMe ? 1 : 0) + eligibleLive.length + shownOthers.length;
+  const roomy = upCount >= 1 && upCount <= 2;
 
   return (
     <>
-      <div data-stories data-story-shelf data-no-swipe data-no-pull role="group" aria-label={t('settings.activity')} data-live-only={liveOnly || undefined} {...menuEvents(openMenu)}>
-        {storiesEnabled && isAuthenticated && <CreateTile onAdd={openCreator} />}
+      <div data-stories data-story-shelf data-no-swipe data-no-pull role="list" data-up={upCount || undefined} {...menuEvents(openMenu)}>
+        {storiesEnabled && isAuthenticated && <StoryCreateTile />}
         {showMe && (
           <MeTile
             address={walletAddress ?? ''}
             avatar={user?.avatarImageUrl ?? own?.author.avatarImageUrl ?? null}
             entry={ownWatchable}
-            processing={processing}
+            processing={!!own?.items.some(i => i.status === 'processing')}
             pending={pending}
+            roomy={roomy}
+            onAdd={addMoment}
             onOpen={el => ownWatchable && openEntry(ownWatchable, el)}
-            onMenu={ownWatchable && !pending ? event => openMenu(event, storyTarget(ownWatchable, event.currentTarget)) : openMenu}
+            onMenu={ownWatchable && !pending ? event => openMenu(event, storyTarget(ownWatchable, event.currentTarget)) : undefined}
           />
         )}
-        {storiesEnabled && isLoading && [0, 1, 2].map(index => <LoadingTile key={index} />)}
-        {shownOthers.map(entry => (
-          <PersonTile key={entry.author.address} entry={entry} onOpen={el => openEntry(entry, el)}
-            onMenu={event => openMenu(event, storyTarget(entry, event.currentTarget))} />
-        ))}
         {eligibleLive.map(item => (
-          <LiveTile key={liveKey(item)} item={item} roomy={liveOnly} onOpen={() => openLive(item)}
+          <LiveTile key={liveKey(item)} item={item} roomy={roomy} onOpen={() => openLive(item)}
             onMenu={event => openMenu(event, {
               kind: item.kind, ids: [liveKey(item)], open: () => openLive(item),
               creator: { address: item.wallet, name: item.displayName || item.username },
             })} />
+        ))}
+        {storiesEnabled && isLoading && [0, 1, 2].map(index => <LoadingPill key={index} />)}
+        {shownOthers.map(entry => (
+          <PersonTile key={entry.author.address} entry={entry} roomy={roomy} onOpen={el => openEntry(entry, el)}
+            onMenu={event => openMenu(event, storyTarget(entry, event.currentTarget))} />
         ))}
       </div>
       {menuElement}
@@ -175,19 +188,28 @@ function VisibleStoryShelf({ dismissed }: { dismissed: string[] }) {
   );
 }
 
-function CreateTile({ onAdd }: { onAdd: () => void }) {
-  const { t } = useTranslation();
+function LoadingPill() {
   return (
-    <StoryCreateTile
-      label={t('stories.addMoment', { defaultValue: 'Add a moment' })}
-      title={t('stories.yourDay', { defaultValue: 'Your day' })}
-      onAdd={onAdd}
-    />
+    <div data-story-tile data-st-loading aria-hidden="true">
+      <span data-st-avatar />
+      <span data-st-text><span /><span /></span>
+    </div>
   );
 }
 
-function LoadingTile() {
-  return <div data-story-portrait data-st-loading aria-hidden="true" />;
+/** Small covers of someone's Moments, for a pill that has the room. */
+function MomentCovers({ entry }: { entry: ShelfEntry | null }) {
+  if (!entry) return null;
+  const covers = entry.items
+    .map(item => item.posterUrl || (item.type === 'photo' ? item.mediaUrl : null))
+    .filter((url): url is string => !!url)
+    .slice(0, 3);
+  if (!covers.length) return null;
+  return (
+    <span data-st-stack data-covers aria-hidden="true">
+      {covers.map(url => <img key={url} src={url} alt="" loading="lazy" draggable={false} />)}
+    </span>
+  );
 }
 
 /** A few faces of who is watching a live, and how many more. */
@@ -212,56 +234,61 @@ function LiveWatchers({ streamId }: { streamId: string }) {
   );
 }
 
-function ShelfAvatar({ src, initial }: { src?: string | null; initial?: string }) {
+function ShelfAvatar({ src }: { src?: string | null }) {
   const [brokenSrc, setBrokenSrc] = useState<string | null>(null);
   return src && brokenSrc !== src ? (
     <img data-st-avatar src={src} alt="" draggable={false} onError={() => setBrokenSrc(src)} />
   ) : (
-    <span data-st-avatar aria-hidden="true">{initial}</span>
+    <span data-st-avatar aria-hidden="true" />
   );
 }
 
-function PortraitPhoto({ src, name, retry }: { src?: string | null; name: string; retry?: boolean }) {
-  return (
-    <span data-st-portrait-media aria-hidden="true">
-      <span data-st-photo>
-        {retry ? <Refresh className="size-5" /> : <ShelfAvatar src={src} initial={name.trim().charAt(0).toUpperCase()} />}
-      </span>
-    </span>
-  );
+function momentsLine(t: TFunction, count: number) {
+  return count === 1
+    ? t('stories.spot.oneMoment', { defaultValue: '1 Moment' })
+    : t('stories.spot.moments', { n: formatCount(count), defaultValue: '{{n}} Moments' });
 }
 
-function MeTile({ address, avatar, entry, processing, pending, onOpen, onMenu }: {
+function MeTile({ address, avatar, entry, processing, pending, roomy, onAdd, onOpen, onMenu }: {
   address: string;
   avatar: string | null;
   entry: ShelfEntry | null;
   processing: boolean;
   pending: ReturnType<typeof useStoriesStore.getState>['pending'];
+  roomy: boolean;
+  onAdd: () => void;
   onOpen: (el: HTMLElement) => void;
-  onMenu: OpenActivityMenu;
+  onMenu?: OpenActivityMenu;
 }) {
   const { t } = useTranslation();
-  const face = avatar ? buildAvatarUrl(address, avatar, deviceWidth(96)) : buildAvatarCdnFallbackUrl(address, undefined);
+  const face = avatar ? buildAvatarUrl(address, avatar, deviceWidth(36)) : buildAvatarCdnFallbackUrl(address, undefined);
+  const busy = pending && pending.state !== 'failed';
   const failed = pending?.state === 'failed';
-  const busy = !failed && (!!pending || (processing && !entry));
-  const fill = pending && !failed ? `${Math.max(6, pending.state === 'processing' ? 100 : pending.progress)}%` : undefined;
+  const fill = busy ? `${Math.max(6, pending.state === 'processing' ? 100 : pending.progress)}%` : undefined;
   const you = t('stories.you', { defaultValue: 'You' });
-  const label = failed ? t('stories.tapToRetry', { defaultValue: 'Tap to retry' })
-    : busy ? t('stories.posting', { defaultValue: 'Posting…' }) : you;
 
   return (
     <button
       type="button"
-      data-story-portrait
+      role="listitem"
+      data-story-tile
       data-kind="me"
-      aria-label={label}
-      aria-busy={busy || undefined}
-      disabled={busy}
-      {...menuEvents(onMenu)}
-      onClick={e => failed ? pending?.retry?.() : onOpen(e.currentTarget)}
+      aria-label={you}
+      {...(onMenu && menuEvents(onMenu))}
+      onClick={e => (entry && !pending ? onOpen(e.currentTarget) : !busy ? (pending?.retry ? pending.retry() : onAdd()) : undefined)}
     >
-      <PortraitPhoto src={face} name={you} retry={failed} />
-      <span data-st-caption data-st-status={busy || failed || undefined}><span data-st-name>{label}</span></span>
+      {failed ? <span data-st-avatar className="grid place-items-center"><Refresh className="w-5 h-5" /></span> : <ShelfAvatar src={face} />}
+      <span data-st-text>
+        <span data-st-label><span data-st-name>{you}</span></span>
+        <span data-st-line>
+          {failed
+            ? t('stories.tapToRetry', { defaultValue: 'Tap to retry' })
+            : busy || processing
+              ? t('stories.posting', { defaultValue: 'Posting…' })
+              : momentsLine(t, entry?.items.length ?? 0)}
+        </span>
+      </span>
+      {roomy && !pending && <MomentCovers entry={entry} />}
       {fill && <span data-st-fill style={{ '--st-upload-progress': fill } as CSSProperties} />}
     </button>
   );
@@ -301,7 +328,7 @@ function LiveTile({ item, roomy, onOpen, onMenu }: { item: LiveNowItem; roomy: b
         item.views != null ? t('stories.spot.views', { n: formatCount(item.views), defaultValue: '{{n}} views' }) : '',
       ];
   return (
-    <button type="button" data-story-tile data-kind="live" onClick={onOpen} aria-label={item.title} {...menuEvents(onMenu)}>
+    <button type="button" role="listitem" data-story-tile data-kind="live" onClick={onOpen} aria-label={item.title} {...menuEvents(onMenu)}>
       <span data-live-orbit="shelf" role="img" aria-label={t('stages.liveBadge', { defaultValue: 'LIVE' })}>
         <span data-live-orbit-ring aria-hidden />
         <ShelfAvatar src={face} />
@@ -315,27 +342,30 @@ function LiveTile({ item, roomy, onOpen, onMenu }: { item: LiveNowItem; roomy: b
   );
 }
 
-function PersonTile({ entry, onOpen, onMenu }: { entry: ShelfEntry; onOpen: (el: HTMLElement) => void; onMenu: OpenActivityMenu }) {
-  const { t } = useTranslation();
+function PersonTile({ entry, roomy, onOpen, onMenu }: { entry: ShelfEntry; roomy: boolean; onOpen: (el: HTMLElement) => void; onMenu: OpenActivityMenu }) {
+  const { t, i18n } = useTranslation();
   const a = entry.author;
-  const name = nameOf(a);
-  const face = a.avatarImageUrl ? buildAvatarUrl(a.address, a.avatarImageUrl, deviceWidth(96)) : buildAvatarCdnFallbackUrl(a.address, undefined);
+  const face = a.avatarImageUrl ? buildAvatarUrl(a.address, a.avatarImageUrl, deviceWidth(36)) : buildAvatarCdnFallbackUrl(a.address, undefined);
   return (
     <button
       type="button"
-      data-story-portrait
+      role="listitem"
+      data-story-tile
       data-kind="person"
       data-seen={entry.seen ? 'true' : 'false'}
-      data-close-friends={entry.closeFriends ? '' : undefined}
+      data-close-friends={entry.closeFriends && !entry.own ? '' : undefined}
       onClick={e => onOpen(e.currentTarget)}
       {...menuEvents(onMenu)}
-      aria-label={name}
-      aria-description={entry.seen ? t('stories.watchedCount', { n: formatCount(entry.items.length) }) : undefined}
+      aria-label={nameOf(a)}
     >
-      <PortraitPhoto src={face} name={name} />
-      <span data-st-caption>
+      <ShelfAvatar src={face} />
+      <span data-st-text>
         <TileIdentity address={a.address} username={a.username} displayName={a.displayName} />
+        <span data-st-line>
+          {[localAge(entry.latestAt, i18n.language), momentsLine(t, entry.items.length)].filter(Boolean).join(' · ')}
+        </span>
       </span>
+      {roomy && <MomentCovers entry={entry} />}
     </button>
   );
 }
