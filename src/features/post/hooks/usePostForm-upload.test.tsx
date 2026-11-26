@@ -1,6 +1,7 @@
 import type { ChangeEvent } from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { expect, it, vi } from 'vitest';
+import { supabase } from '@/integrations/supabase/client';
 import { usePostForm } from './usePostForm';
 
 const { account, getPostQuota, error } = vi.hoisted(() => ({
@@ -66,5 +67,49 @@ it('uses the current account allowance when a video is picked after the composer
   } finally {
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
+  }
+});
+
+it('keeps one copy of a synced draft after reopening and clears it when deleted', async () => {
+  const saved = {
+    id: '32667e3c-f892-4c33-b8b5-a5e25d17a7e8',
+    text: 'A private draft for later',
+    created_at: new Date().toISOString(),
+  };
+  let exists = false;
+  const from = vi.spyOn(supabase, 'from').mockImplementation(() => ({
+    select: () => ({ eq: () => ({ order: () => ({ limit: async () => ({ data: exists ? [saved] : [] }) }) }) }),
+    insert: () => ({ select: () => ({ single: async () => {
+      exists = true;
+      return { data: { id: saved.id } };
+    } }) }),
+    delete: () => ({ eq: async (_column: string, id: string) => {
+      if (id === saved.id) exists = false;
+      return {};
+    } }),
+  }) as never);
+  const draftsKey = 'guest|post_drafts';
+  const originalDrafts = localStorage.getItem(draftsKey);
+  localStorage.removeItem(draftsKey);
+  try {
+    const composer = renderHook(() => usePostForm(() => {}));
+    act(() => composer.result.current.actions.setText(saved.text));
+    act(() => composer.result.current.actions.saveDraft());
+    await waitFor(() => expect(composer.result.current.state.drafts.map(draft => draft.id)).toEqual([saved.id]));
+    composer.unmount();
+
+    from.mockClear();
+    const reopened = renderHook(() => usePostForm(() => {}));
+    await waitFor(() => {
+      expect(from).toHaveBeenCalledWith('post_drafts');
+      expect(reopened.result.current.state.drafts.map(draft => draft.id)).toEqual([saved.id]);
+    });
+    act(() => reopened.result.current.actions.deleteDraft(saved.id));
+    expect(reopened.result.current.state.drafts).toEqual([]);
+    expect(exists).toBe(false);
+  } finally {
+    if (originalDrafts === null) localStorage.removeItem(draftsKey);
+    else localStorage.setItem(draftsKey, originalDrafts);
+    from.mockRestore();
   }
 });

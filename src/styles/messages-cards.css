@@ -117,9 +117,8 @@ html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-chat
 html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-chat-list-row] :is(.w-12.h-12) {
   width: 44px !important;
   height: 44px !important;
-  border-radius: 12px !important;
 }
-html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-chat-list-row] :is(.w-12.h-12) * { border-radius: 12px !important; }
+html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-chat-list-row] [data-chat-row-avatar] { border-radius: 12px !important; }
 [data-msg-cards] [data-chat-list-row] p { margin-top: 1px; }
 [data-msg-cards] [data-chat-list-row] .tabular-nums { font-size: 12.5px; }
 /* The tab is the way back from Requests. */

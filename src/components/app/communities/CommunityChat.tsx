@@ -489,7 +489,7 @@ export function CommunityChat({ communityId, community, membership, isMember, me
 
   // Open where you left off: on the "Unread messages" line when there are lines
   // you haven't seen, otherwise at the newest line.
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (didInitialScrollRef.current) return;
     if (messages.length === 0) return;
     if (!readSpot.ready) return;
@@ -522,11 +522,10 @@ export function CommunityChat({ communityId, community, membership, isMember, me
       window.setTimeout(() => { readTrackingRef.current = true; }, 1500);
       return;
     }
-    requestAnimationFrame(() => {
-      scrollContainer.scrollTop = scrollContainer.scrollHeight;
-      didInitialScrollRef.current = true;
-      readTrackingRef.current = true;
-    });
+    scrollContainer.scrollTop = scrollContainer.scrollHeight;
+    didInitialScrollRef.current = true;
+    readTrackingRef.current = true;
+    prevLastMessageIdRef.current = messages[messages.length - 1]?.id ?? null;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages.length, readSpot.ready, hasOlderMessages, isLoadingOlder]);
 
@@ -649,7 +648,7 @@ export function CommunityChat({ communityId, community, membership, isMember, me
   }, [lastMessageId]);
 
   // Preserve scroll position when loading older messages
-  useEffect(() => {
+  useLayoutEffect(() => {
     const scrollContainer = scrollRef.current;
     if (!scrollContainer) return;
     if (prevScrollHeightRef.current != null) {
@@ -1201,7 +1200,7 @@ export function CommunityChat({ communityId, community, membership, isMember, me
                   </div>
                 ))}
               </div>
-            ) : messages.length === 0 ? (
+            ) : messages.length === 0 && historyError ? null : messages.length === 0 ? (
               <AppState
                 icon="messages"
                 title={t('communities.noMessagesYet')}

@@ -185,7 +185,7 @@ const OG_CARD_ROUTES = new Set([
   'arcade', 'arcade/kings-gambit', 'arcade/claude-of-duty', 'arcade/jungle-trail',
   'arcade/street-slayer',
   'arcade/trenchstar', 'arcade/love-lock-bridge',
-  'arcade/correspondence-chess', 'arcade/okey', 'arcade/sillycoin', 'arcade/gratitude', 'arcade/chestard',
+  'arcade/correspondence-chess', 'arcade/okey', 'arcade/sillycoin', 'arcade/gratitude', 'arcade/chestard', 'arcade/splurge',
   'music/binary-metal',
   'apps', 'apps/dev',
   // App surfaces that had no card of their own and unfurled as the homepage.
@@ -416,7 +416,7 @@ const DOCS_PAGES = {
   'overview': { title: 'Riftn Abstract: The Social Media Protocol You Own', description: 'Riftn is the open source, user-owned social media protocol. What the name means, what we build, our story since 2021 and why anyone can request features.' },
   'dapps': { title: "Riftn dApps: The Complete Ecosystem", description: "Riftn's decentralized apps: streaming, feed, messaging, communities, wallet and more, how they fit together in one user-owned ecosystem." },
   'games': { title: 'Riftn Games: Play & Win On-Chain', description: "Riftn's gaming arm: the arcade and Last Chad Standing, the MMA battle-royale fighter built with top UFC stars." },
-  'token/overview': { title: 'Currency Overview | Riftn Docs', description: 'How Riftn tokens work in-app: tipping, unlocking content, rewards, AI credits, profit share and the $0.001 in-app peg.' },
+  'token/overview': { title: 'Currency Overview | Riftn Docs', description: 'Learn what you can do with your in-app $RIFT balance and check the status of the on-chain token launch.' },
   'token/economics': { title: 'Token Economics | Riftn Docs', description: 'Token economics: the 8 billion supply, how it is distributed, and the fully-diluted-from-TGE model with no emissions.' },
   'token/stake': { title: 'Staking tokens | Riftn Docs', description: 'How tokens staking works: rewards, mechanics and what staking unlocks across Riftn.' },
   'roadmap': { title: 'Riftn Roadmap | Riftn Docs', description: "Where Riftn is headed: shipped milestones and what's next across the app, token and games." },
@@ -434,10 +434,10 @@ const DOCS_PAGES = {
   // has a hand-kept public/docs-content JSON mirroring its React page; the
   // description-only body in buildDocsHtml is only the fallback for a failed
   // fetch. docs-content-coverage.test.ts fails if an entry lands without one.
-  'token/utility': { title: 'Token Utility & Holder Benefits | Riftn Docs', description: 'What holding tokens unlocks: governance rights, staking rewards, moderation power and marketplace perks across Riftn.' },
-  'token/where-to-buy': { title: 'Where to Buy Tokens | Riftn Docs', description: 'Where to buy Riftn tokens: the new token is coming soon and not trading yet. Join the launch list to get an email when trading opens.' },
-  'token/governance': { title: 'Riftn Governance: Voting & Proposals', description: 'How Riftn governance works: proposals, burn-to-vote mechanics, whale prevention and how holders steer the platform.' },
-  'token/bridge': { title: 'Bridge tokens Between BASE & BNB | Riftn Docs', description: 'How to move tokens between the BASE and BNB networks with the manual Riftn bridge, and what to expect while it processes.' },
+  'token/utility': { title: 'Token Utility & Holder Benefits | Riftn Docs', description: 'See how $RIFT is used in Riftn for tips, unlocks and rewards. The on-chain token has yet to launch, and governance voting is free.' },
+  'token/where-to-buy': { title: '$RIFT On-Chain Launch Status | Riftn Docs', description: '$RIFT is available inside Riftn. The on-chain token has yet to launch and has no official contract address or exchange listing.' },
+  'token/governance': { title: 'Riftn Governance: Voting & Proposals', description: 'Vote for free on Riftn governance proposals. See how staking badges affect vote weight, how quorum works and how proposals pass.' },
+  'token/bridge': { title: 'Legacy Token Bridge: Base & BNB | Riftn Docs', description: 'The Riftn bridge documentation covers legacy assets on Base and BNB Chain. There is no on-chain $RIFT to bridge yet.' },
   'featured-in': { title: 'Riftn in the Press: Featured In', description: 'Press and media coverage of Riftn, including US Weekly, Yahoo Finance, Entrepreneur and Investing.com.' },
   'brand-assets': { title: 'Riftn Brand Assets: Logos & Downloads', description: 'Official Riftn brand assets: logos, icons, graphics and marketing materials available to download.' },
   'brand-guidelines': { title: 'Riftn Brand Guidelines', description: 'How to use the Riftn brand: identity, logo usage, colour and design standards.' },
@@ -1523,6 +1523,14 @@ const MARKETING_PAGES = {
     bodyHtml: `<p>Six columns, nine rows and one die. Every roll drops a checker into the column the die shows. When the bottom row is full it clears, everything above falls one row and you score a line bonus. Every cleared line also raises your points per drop.</p>
 <p>If any column fills to the top, the game is over. Every die is rolled fairly by the server, so the top 10 is real games. Play in your browser or the Riftn app, with chip-tune sound effects you can switch off.</p>
 <p><a href="${APP_URL}/arcade/chestard">Play Chestard</a> or <a href="${APP_URL}/arcade">see the whole arcade</a>.</p>`,
+  },
+  'arcade/splurge': {
+    title: 'Splurge | Riftn Arcade',
+    description: 'Get a fictional budget in your local currency, dream up what to buy and do it again in Modern or CRT.',
+    heading: 'Splurge',
+    ...arcadeGameLd('/og/arcade-splurge.jpg'),
+    bodyHtml: `<p>What would you buy with a random budget? Type your answer and press Enter to get a new amount. Switch between Modern and an amber CRT display, and sign in to save your private spending log across web and app.</p>
+<p><a href="${APP_URL}/arcade/splurge">Play Splurge</a> or <a href="${APP_URL}/arcade">see the whole arcade</a>.</p>`,
   },
   'arcade/street-slayer': {
     title: 'Street Slayer | Riftn Arcade',

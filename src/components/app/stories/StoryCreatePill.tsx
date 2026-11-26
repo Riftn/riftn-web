@@ -9,7 +9,6 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ComponentType, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@/components/ui/button';
 import Add from '@/components/ui/cut-icons/add';
 import Camera from '@/components/ui/cut-icons/camera';
 import Edit from '@/components/ui/cut-icons/edit';
@@ -188,11 +187,27 @@ export function StoryCreatePill() {
   );
 }
 
-export function StoryCreateTile({ label, title, onAdd }: { label: string; title: string; onAdd: () => void }) {
+/** First tile of the row while Moments or lives are up: a centred + that opens the same menu. */
+export function StoryCreateTile() {
+  const { menuOpen, toggle, createLabel, elements } = useCreateMenu();
+  const ref = useRef<HTMLButtonElement>(null);
   return (
-    <Button type="button" variant="ghost" data-story-portrait data-kind="create" aria-label={label} onClick={onAdd}>
-      <span data-create-key aria-hidden="true"><Add /></span>
-      <span data-create-label>{title}</span>
-    </Button>
+    <>
+      <button
+        ref={ref}
+        type="button"
+        role="listitem"
+        data-story-tile
+        data-kind="create"
+        aria-haspopup="menu"
+        aria-expanded={menuOpen}
+        aria-label={createLabel}
+        onClick={() => toggle(ref.current, 'left')}
+      >
+        <span data-create-key aria-hidden="true"><Add /></span>
+        <span data-create-label>{createLabel}</span>
+      </button>
+      {elements}
+    </>
   );
 }

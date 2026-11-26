@@ -1,6 +1,6 @@
 import { normalizeSubReferral } from './affiliate-subref';
 import { supabase } from "@/integrations/supabase/client";
-import { getAffiliateRef, getAffiliateSubRef } from "@/lib/affiliateRef";
+import { getEligibleAffiliateRef, getAffiliateSubRef } from "@/lib/affiliateRef";
 import { withWalletHeader } from "@/lib/supabase-wallet-client";
 import { ensureWalletSession } from '@/lib/wallet-session';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
@@ -161,8 +161,8 @@ export async function getOrCreateAffiliateCode(
  * Self-attribute the currently signed-in wallet to a cookie-stored referral code.
  * First-touch wins via UNIQUE(referred_address). Safe to call multiple times.
  */
-export async function attributeReferralIfPending(referredAddress: string) {
-  const code = getAffiliateRef();
+export async function attributeReferralIfPending(referredAddress: string, accountCreatedAt?: string | null) {
+  const code = getEligibleAffiliateRef(accountCreatedAt);
   if (!code) return;
   if (!await ensureWalletSession(referredAddress)) throw new Error('Sign in to attribute a referral');
   const { error } = await withWalletHeader(

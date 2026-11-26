@@ -6,6 +6,7 @@ import { useTranslation as _useCopy } from 'react-i18next';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
 import { useFirstInteraction } from '@/hooks/use-boot-settled';
+import { useIsDesktopViewport } from '@/hooks/use-is-desktop';
 import { isFirstVisibleFeedCard } from '@/lib/feed-first-card';
 import { visibleFeedTokenIds } from '@/lib/feed-visible-counts';
 import { isShortsPhoto, shortsPhotoMedia } from '@/lib/shorts-photos';
@@ -93,6 +94,7 @@ import { MasonrySegment } from '@/components/app/feeds/MasonrySegment';
 
 
 import { 
+  HOME_FEED_PAGE_SIZE,
   useUnifiedFeed, 
   useNewPostsSignal,
   mapToVideoItem, 
@@ -115,11 +117,7 @@ import { useHideWatched, useWatchedVideoIds } from '@/hooks/use-watched-videos';
 import { useFollowGroupList } from '@/lib/follow-groups';
 import { AD_INTERVALS, useAdLoad } from '@/lib/ad-load';
 import { useOptimisticPosts } from '@/hooks/use-optimistic-posts';
-import { RadioStationCard } from '@/components/app/radio/RadioStationCard';
 import { SwipeableCarousel } from '@/components/app/SwipeableCarousel';
-import { MobileWhoToFollowCarousel } from '@/components/app/mobile';
-import { NewMembersCarousel } from '@/components/app/NewMembersCarousel';
-import { LeaderboardCarousel } from '@/components/app/feeds/LeaderboardCarousel';
 import { HomeShortcuts } from '../navigation/HomeShortcuts';
 import { StoryShelf } from '@/components/app/stories/StoryShelf';
 import { PromptFlowModalLazy as PromptFlowModal } from '@/components/app/feeds/PromptFlowModalLazy';
@@ -134,6 +132,10 @@ import { useFollowTag } from './FollowTagBar';
 import type { FeedFilterLineItem } from './FeedFilterLine';
 // Inside the filter panel: kept off the boot path.
 const FeedPresetsRow = lazy(() => import('./FeedFilterLine').then((m) => ({ default: m.FeedPresetsRow })));
+const RadioStationCard = lazy(() => import('@/components/app/radio/RadioStationCard').then((m) => ({ default: m.RadioStationCard })));
+const MobileWhoToFollowCarousel = lazy(() => import('@/components/app/mobile/MobileWhoToFollowCarousel').then((m) => ({ default: m.MobileWhoToFollowCarousel })));
+const NewMembersCarousel = lazy(() => import('@/components/app/NewMembersCarousel').then((m) => ({ default: m.NewMembersCarousel })));
+const LeaderboardCarousel = lazy(() => import('@/components/app/feeds/LeaderboardCarousel'));
 import {
   FEED_PRESETS_CHANGED_EVENT,
   deleteFeedPreset,
@@ -156,10 +158,6 @@ type FeedItemType =
   | { type: 'shorts'; data: ShortVideo[] }
   | { type: 'ad'; data: ServedAd };
 
-// Ten posts a page: the first paint carries half the cards it used to, and
-// every later page lands in small steps instead of twenty heavy cards at once.
-// Must match the boot fetch in index.html (isBootDefaultFeedParams).
-const PAGE_SIZE = 10;
 // Start the next page about three cards before the end. At 600px a fast
 // wheel/trackpad gesture could reach the document bottom before the request
 // completed, so later wheel deltas had nowhere to go; 2400px with 20-post pages
@@ -1093,7 +1091,7 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
 
   // Common API params for all three feeds
   const commonParams = useMemo(() => ({
-    limit: PAGE_SIZE,
+    limit: HOME_FEED_PAGE_SIZE,
     sortBy,
     sortOrder,
     range,
@@ -1268,7 +1266,16 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
     ? (!!videosFeed.data || videosFeed.isError)
     : (!!singleFeed.data || singleFeed.isError);
   useEffect(() => {
-    if (primaryFeedSettled) setRailsEnabled(true);
+    if (!primaryFeedSettled) return;
+    // Let the first cards paint before enabling the supplementary queries.
+    let afterPaint = 0;
+    const beforePaint = requestAnimationFrame(() => {
+      afterPaint = requestAnimationFrame(() => setRailsEnabled(true));
+    });
+    return () => {
+      cancelAnimationFrame(beforePaint);
+      cancelAnimationFrame(afterPaint);
+    };
   }, [primaryFeedSettled]);
   // Safety net: a stalled/offline feed must never keep the rails blank forever.
   useEffect(() => {
@@ -1424,13 +1431,13 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
   // INTERLEAVED ITEMS (from three separate feeds)
   // ============================================================================
 
-  // Text and photo posts carry link previews; warm them as their pages land.
+  // Warm previews for nearby cards after the first feed paint.
   const linkPreviewRows = useMemo(() => [
     ...flattenFeedPages(textsFeed.data?.pages),
     ...flattenFeedPages(imagesFeed.data?.pages),
     ...flattenFeedPages(singleFeed.data?.pages),
   ], [textsFeed.data, imagesFeed.data, singleFeed.data]);
-  usePrefetchLinkPreviews(linkPreviewRows);
+  usePrefetchLinkPreviews(linkPreviewRows, railsEnabled && isHomeActive);
 
   const interleavedItems = useMemo((): FeedItemType[] => {
     if (!useInterleavedFeed) return [];
@@ -1854,6 +1861,9 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
   }, [landPending, optimisticIdsKey]);
   useEffect(() => onPostLandingBegin(() => { landPending(); }), [landPending]);
 
+  // Desktop can show a row of cards. On narrow screens let viewport
+  // observation mount the next cards after the first one commits.
+  const eagerCardCount = useIsDesktopViewport() ? 3 : 1;
   const renderFeedItem = (item: FeedItemType, index: number, section: 'optimistic' | 'pinned' | 'feed' = 'feed', beforeShorts = false, afterShorts = false) => {
     const firstFeedPost = isFirstVisibleFeedCard(section, index, visibleOptimisticPosts.length, !!pinnedItem);
     const card = (() => {
@@ -1861,7 +1871,7 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
         case 'post':
           return <PostCard key={`post-${item.data.id}`} post={item.data} />;
         case 'video':
-          return <VideoCard key={`video-${item.data.id}`} video={item.data} aboveFold={index < 3} firstFeedPost={firstFeedPost} />;
+          return <VideoCard key={`video-${item.data.id}`} video={item.data} aboveFold={index < 3} deferMediaOnBoot firstFeedPost={firstFeedPost} />;
         case 'image':
           return <ImageCard key={`image-${item.data.id}`} post={item.data} aboveFold={index < 3} />;
         case 'shorts':
@@ -1906,7 +1916,7 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
       <WindowedFeedItem
         key={key}
         {...(retained ? {} : frameProps)}
-        eager={index < 3} estimatedHeight={parseInt(intrinsicH, 10)}
+        eager={index < eagerCardCount} estimatedHeight={parseInt(intrinsicH, 10)}
         // A card arriving with a new page eases in once (the slot outlives
         // windowing, so scrolling back never replays it). Single column only:
         // masonry re-packs columns and would replay it.
@@ -2035,6 +2045,14 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
       }
     });
     if (start < listedItems.length) segments.push({ items: listedItems.slice(start), start, inserts: [], shorts: false });
+    const renderInsert = (node: ReactElement) => {
+      const height = insertEstimate(String(node.key));
+      return (
+        <WindowedFeedItem key={node.key} className="my-3" estimatedHeight={height}>
+          <Suspense fallback={<div aria-hidden="true" style={{ height }} />}>{node}</Suspense>
+        </WindowedFeedItem>
+      );
+    };
     // One column: every card and insert is a sibling in one list, each under
     // its own key. Grouping them into segments keyed by start index meant a
     // row arriving late (a Shorts batch, the live row) re-keyed every segment
@@ -2048,9 +2066,7 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
             ...segment.items.map((item, offset) => renderFeedItem(item, segment.start + offset, 'feed',
               segment.shorts && offset === segment.items.length - 1,
               offset === 0 && index > 0 && segments[index - 1].shorts)),
-            ...segment.inserts.map(node => (
-              <WindowedFeedItem key={node.key} className="my-3" estimatedHeight={insertEstimate(String(node.key))}>{node}</WindowedFeedItem>
-            )),
+            ...segment.inserts.map(renderInsert),
           ])}
         </div>
       );
@@ -2067,9 +2083,7 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
       // cannot remount a Shorts viewer or reset its horizontal scroll.
       // Shorts rows and carousels hold the most media on the page; windowed like
       // the cards so a row far above lets go of its videos and posters.
-      ...segment.inserts.map(node => (
-        <WindowedFeedItem key={node.key} className="my-3" estimatedHeight={insertEstimate(String(node.key))}>{node}</WindowedFeedItem>
-      )),
+      ...segment.inserts.map(renderInsert),
     ])}</>;
   };
 

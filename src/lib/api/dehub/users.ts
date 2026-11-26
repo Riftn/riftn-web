@@ -158,6 +158,7 @@ export interface UpdateProfileData {
   facebookLink?: string;
   customs?: Record<string, string | number | boolean>;
   badgeMuseumVisibility?: 'public' | 'hidden';
+  badgeMuseumViewer?: string;
   dmSettings?: { disables?: string[]; minTipDhb?: number };
   avatarImg?: File;
   coverImg?: File;
@@ -223,6 +224,7 @@ export async function updateProfile(data: UpdateProfileData): Promise<{ result: 
   }
   if (data.badgeMuseumVisibility !== undefined) {
     formData.append("badgeMuseumVisibility", data.badgeMuseumVisibility);
+    if (data.badgeMuseumViewer !== undefined) formData.append("badgeMuseumViewer", data.badgeMuseumViewer);
   }
   if (data.dmSettings !== undefined) {
     formData.append("dmSettings", JSON.stringify(data.dmSettings));

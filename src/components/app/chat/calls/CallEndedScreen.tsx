@@ -3,7 +3,7 @@ import { Phone, MessageCircle, X } from 'lucide-react';
 import Video from '@/components/ui/cut-icons/video';
 import { useTranslation } from 'react-i18next';
 import { useCall } from '@/contexts/CallContext';
-import { openDmDock } from '@/hooks/use-dm-dock';
+import { useMessageCallPeer } from './useMessageCallPeer';
 import { CallStage, CallIdentity, CallPill, usePeerIdentity } from './CallChrome';
 
 /**
@@ -14,6 +14,7 @@ import { CallStage, CallIdentity, CallPill, usePeerIdentity } from './CallChrome
 const CallEndedScreen: React.FC = () => {
   const { callSummary, dismissCallSummary, startCall } = useCall();
   const { t } = useTranslation();
+  const messageCallPeer = useMessageCallPeer();
   const peer = usePeerIdentity(callSummary?.peerAddress ?? '');
 
   if (!callSummary) return null;
@@ -31,9 +32,8 @@ const CallEndedScreen: React.FC = () => {
         : t('calls.missed', 'Missed call');
 
   const message = () => {
-    const username = peer.name.startsWith('@') ? peer.name.slice(1) : undefined;
     dismissCallSummary();
-    openDmDock({ address: peerAddress, username, avatarUrl: peer.avatarUrl ?? undefined });
+    messageCallPeer(peerAddress, peer);
   };
 
   return (

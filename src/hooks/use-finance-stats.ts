@@ -9,6 +9,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 
 export const FINANCE_STATS_ENDPOINT = 'https://riftn.com/api/finance-stats';
 
@@ -76,8 +77,14 @@ export interface TaxSplit {
   };
 }
 
-async function fetchFinanceStats(): Promise<FinanceStats> {
-  const res = await fetch(FINANCE_STATS_ENDPOINT, { headers: { Accept: 'application/json' }, cache: 'no-store' });
+function useFinanceLanguage(): 'tr' | 'en' {
+  const { i18n } = useTranslation();
+  return i18n.language?.split(/[-_]/)[0].toLowerCase() === 'tr' ? 'tr' : 'en';
+}
+
+async function fetchFinanceStats(language: 'tr' | 'en'): Promise<FinanceStats> {
+  const endpoint = language === 'tr' ? `${FINANCE_STATS_ENDPOINT}?lang=tr` : FINANCE_STATS_ENDPOINT;
+  const res = await fetch(endpoint, { headers: { Accept: 'application/json' }, cache: 'no-store' });
   if (!res.ok) throw new Error(`finance stats endpoint returned ${res.status}`);
 
   const body = (await res.json()) as FinanceStats;
@@ -88,9 +95,10 @@ async function fetchFinanceStats(): Promise<FinanceStats> {
 }
 
 export function useFinanceStats() {
+  const language = useFinanceLanguage();
   return useQuery({
-    queryKey: ['finance-stats'],
-    queryFn: fetchFinanceStats,
+    queryKey: ['finance-stats', language],
+    queryFn: () => fetchFinanceStats(language),
     // The function caches for five minutes; polling faster re-reads the same answer.
     refetchInterval: 5 * 60_000,
     refetchOnWindowFocus: true,
@@ -148,8 +156,9 @@ export function financeLedgerEndpoint(view: LedgerView): string {
 
 export const FINANCE_LEDGER_ENDPOINT = financeLedgerEndpoint('ledger');
 
-async function fetchFinanceLedger(view: LedgerView): Promise<FinanceLedger> {
-  const res = await fetch(financeLedgerEndpoint(view), { headers: { Accept: 'application/json' }, cache: 'no-store' });
+async function fetchFinanceLedger(view: LedgerView, language: 'tr' | 'en'): Promise<FinanceLedger> {
+  const endpoint = financeLedgerEndpoint(view);
+  const res = await fetch(language === 'tr' ? `${endpoint}&lang=tr` : endpoint, { headers: { Accept: 'application/json' }, cache: 'no-store' });
   if (!res.ok) throw new Error(`finance ledger endpoint returned ${res.status}`);
   const body = (await res.json()) as FinanceLedger;
   if (!body || body.ok !== true || !Array.isArray(body.items)) {
@@ -160,9 +169,10 @@ async function fetchFinanceLedger(view: LedgerView): Promise<FinanceLedger> {
 
 /** Only fetched once someone opens the ledger — it is every line behind the totals. */
 export function useFinanceLedger(enabled: boolean, view: LedgerView = 'ledger') {
+  const language = useFinanceLanguage();
   return useQuery({
-    queryKey: ['finance-ledger', view],
-    queryFn: () => fetchFinanceLedger(view),
+    queryKey: ['finance-ledger', view, language],
+    queryFn: () => fetchFinanceLedger(view, language),
     enabled,
     staleTime: 4 * 60_000,
     retry: 1,

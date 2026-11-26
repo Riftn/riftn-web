@@ -181,7 +181,8 @@ async function searchOpenverse(options: SearchFreeAssetsOptions): Promise<FreeAs
 async function searchWikimedia(options: SearchFreeAssetsOptions): Promise<FreeAssetSearch> {
   const page = options.page || 1;
   const query = options.query || FALLBACK_QUERIES[options.kind];
-  const fileFilter = options.kind === "gif" ? "filemime:image/gif" : `filetype:${options.kind === "animation" ? "video" : options.kind}`;
+  const fileFilter = options.kind === "photo" ? "filetype:bitmap incategory:CC-Zero"
+    : options.kind === "gif" ? "filemime:image/gif" : `filetype:${options.kind === "animation" ? "video" : options.kind}`;
   const url = new URL("https://commons.wikimedia.org/w/api.php");
   url.searchParams.set("action", "query");
   url.searchParams.set("generator", "search");
@@ -203,6 +204,7 @@ async function searchWikimedia(options: SearchFreeAssetsOptions): Promise<FreeAs
     const info = (pageRow.imageinfo as Array<Record<string, unknown>> | undefined)?.[0];
     if (!info) return [];
     const meta = (info.extmetadata || {}) as Record<string, { value?: unknown }>;
+    if (options.kind === "photo" && String(meta.AttributionRequired?.value).toLowerCase() !== "false") return [];
     const downloadUrl = String(info.url || "");
     const landingUrl = String(info.descriptionurl || "");
     if (!downloadUrl || !landingUrl) return [];
@@ -237,6 +239,14 @@ async function searchWikimedia(options: SearchFreeAssetsOptions): Promise<FreeAs
     return orientationMatches(asset, options.orientation || "all") ? [asset] : [];
   });
   return { items, page, hasMore: Boolean(data.continue), providers: ["Wikimedia Commons"] };
+}
+
+export async function searchFreeCoverPhotos(query: string, signal?: AbortSignal): Promise<FreeAsset[]> {
+  // Ask for CC0 directly so the first page isn't filled with photos that need a credit.
+  const { items } = await searchWikimedia({ kind: "photo", query, signal });
+  return items.filter(asset => !asset.attributionRequired
+    && /^image\/(?:jpeg|png|webp)$/.test(asset.mimeType)
+    && /^https?:\/\/creativecommons\.org\/publicdomain\/zero\/1\.0\/(?:deed\.[a-z-]+)?$/i.test(asset.licenseUrl ?? ""));
 }
 
 async function searchDirect(options: SearchFreeAssetsOptions): Promise<FreeAssetSearch> {

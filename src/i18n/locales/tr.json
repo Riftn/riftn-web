@@ -4782,6 +4782,9 @@
       "resolution": "— bu, bu plandaki Cloudflare sınırıdır, bir tercih değil: üç günden geniş her saatlik sorguyu reddeder. 24 saat ve 3 gün görünümleri saatliktir; 7 gün ve üzeri günlüktür ve tüm zamanlar için saatlik grafik çizmenin yolu yoktur.",
       "breakdownTerm": "Ülkeler ve tarayıcılar",
       "breakdown": "— seçtiğiniz aralığı izler, ancak yalnızca {{max}} gün geriye kadar; günlük dağılım bu kadar saklanır. Daha uzun aralıklarda grafik, ülke listesinden daha fazla zamanı kapsar.",
+      "addressesTerm": "Her iki adres",
+      "addresses": "— Site 3 Kasım 2026’da {{legacyHost}} adresinden {{canonicalHost}} adresine taşındı. Cloudflare her adresi ayrı sayar. Burada her gün için {{zones}} toplamı gösterilir. {{legacyHost}} üzerinden {{canonicalHost}} adresine yönlendirilen biri aynı gün her iki adreste de sayılabilir.",
+      "addressMissing": "Şu anda veri alınamayan adresler: {{zones}}.",
       "startTerm": "Geçmiş",
       "start": "— \"tüm zamanlar\", Cloudflare'in hâlâ sakladığı her gün demektir; bugün riftn.com'nun Cloudflare'e geçtiği {{date}} tarihinden itibaren {{days}} gün. Daha eski uç verisi yoktur ve Cloudflare eskittikçe eski günler düşer.",
       "estimatedTerm": "Tahmini Gün:",
@@ -21494,6 +21497,11 @@
     "followFailed": "Takip edilemedi. Tekrar dene."
   },
   "appTokens": {
+    "reviewTransfer": "Transferi incele",
+    "transferComplete": "Transfer tamamlandı",
+    "balanceAfterSend": "Gönderimden sonra: {{amount}} {{symbol}}",
+    "addNote": "Not ekle",
+    "minimumTransfer": "En az 1 RIFT transfer edebilirsin.",
     "kindStaked": "Stake edildi",
     "kindUnstaked": "Stake çözüldü",
     "stakedBalance": "{{amount}} stake edildi",
@@ -23410,6 +23418,26 @@
       "seoDescription": "Bir arkadaşınla sırayla neye minnettar olduğunuzu söyleyin. Tekrar yok ve sırası bitmeden fikri tükenen kaybeder. Riftn'de ücretsiz.",
       "intro": "Sırayla neye minnettar olduğunu söyle. Tekrar yok. Sıranı kaçırırsan o kazanır.",
       "cardBlurb": "Sırayla neye minnettar olduğunu söyle. Tekrar yok. Sıranı kaçırırsan o kazanır."
+    },
+    "splurge": {
+      "title": "Splurge",
+      "cardBlurb": "Rastgele bir bütçeyle modern veya CRT görünümünde ne alacağını hayal et.",
+      "arcade": "Oyun salonu",
+      "intro": "Rastgele bir bütçe. Neye harcardın? Tüm tutarlar hayal ürünüdür.",
+      "modern": "Modern",
+      "crt": "CRT",
+      "budget": "Bütçen",
+      "prompt": "Ne alırdın?",
+      "placeholder": "Avrupa’da bir tren yolculuğu",
+      "spend": "Harca",
+      "retry": "Tekrar dene",
+      "saveError": "Bu tur kaydedilemedi. Harcama günlüğüne eklemek için tekrar dene.",
+      "history": "Harcama günlüğü",
+      "loading": "Günlüğün yükleniyor…",
+      "historyError": "Günlüğün yüklenemedi.",
+      "empty": "Alışverişlerin burada görünecek.",
+      "more": "Eski kayıtları yükle",
+      "guest": "Misafir turları yalnızca bu ziyaret boyunca saklanır. Sonraki turları hesabına kaydetmek için giriş yap."
     },
     "chestard": {
       "title": "Chestard",

@@ -52,7 +52,6 @@ import { HUB_ROUTE_META } from '@/lib/seo/route-meta';
 import { HomeIntro } from '@/components/app/HomeIntro';
 import { useGlobalFeedNav } from '@/contexts/GlobalFeedNavContext';
 import { preloadRoute } from '@/lib/route-preload';
-import { useFirstInteraction } from '@/hooks/use-boot-settled';
 import { warmPostPage } from '@/lib/preload-post-page';
 
 
@@ -165,22 +164,18 @@ export default function HomePage() {
   // the feed sits idle, so the first tap shows the page at once instead of
   // waiting on a chunk download after the click.
   //
-  // Only once someone is actually using the page (a touch, scroll, key or
-  // mouse move): the two pages are ~70 chunk requests, and a visit that
-  // never touches the feed — a bounce, a crawler, a tab opened for later —
-  // has no tap to make faster. The cards' own pointer-down warm-up still
-  // covers a first tap that beats the idle slot.
-  const interacted = useFirstInteraction();
+  // Reserve this broad warm-up for desktop pointer movement. On touch screens
+  // the first scroll should stay responsive; a press on a card can warm just
+  // its destination.
   const [pointerSeen, setPointerSeen] = useState(false);
   useEffect(() => {
-    if (interacted || pointerSeen) return;
+    if (pointerSeen || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
     const onMove = (event: MouseEvent) => { if (event.isTrusted) setPointerSeen(true); };
     window.addEventListener('mousemove', onMove, { passive: true });
     return () => window.removeEventListener('mousemove', onMove);
-  }, [interacted, pointerSeen]);
-  const warmPages = interacted || pointerSeen;
+  }, [pointerSeen]);
   useEffect(() => {
-    if (!warmPages) return;
+    if (!pointerSeen) return;
     const warm = () => { preloadRoute('/app/profile'); warmPostPage(); };
     const idle = (window as Window & { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number }).requestIdleCallback;
     if (idle) {
@@ -189,7 +184,7 @@ export default function HomePage() {
     }
     const timer = window.setTimeout(warm, 2500);
     return () => window.clearTimeout(timer);
-  }, [warmPages]);
+  }, [pointerSeen]);
 
   // Detect back navigation for tab-change scroll logic
   // Note: Actual scroll position restoration is handled by AppLayout

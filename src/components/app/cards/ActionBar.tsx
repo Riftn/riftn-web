@@ -32,6 +32,8 @@ import Repeat2 from "@/components/ui/cut-icons/repost";
 import Send from "@/components/ui/cut-icons/send";
 import PublicChatIcon from "@/components/ui/cut-icons/chat";
 import { Button } from '@/components/ui/button';
+import { MomentAdd } from '@/components/app/stories/moment-icons';
+import { useStoriesStore } from '@/store/storiesStore';
 
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -95,7 +97,7 @@ import {
 } from '@/components/ui/drawer';
 import type { PostStageValue } from '@/components/app/post-stage/post-stage-context';
 const RepostShareSheet = lazy(() => import('@/components/app/post-stage/RepostShareSheet').then(m => ({ default: m.RepostShareSheet })));
-import { viewerShareUrl } from '@/lib/share-url';
+import { viewerLiveShareUrl, viewerShareUrl } from '@/lib/share-url';
 import { trackShare } from '@/lib/analytics';
 import { POST_MENU_EVENT, type PostMenuBridgeDetail } from '@/lib/post-menu';
 
@@ -185,6 +187,7 @@ interface ActionBarProps {
   voteWeight?: number;
   /** Live applause is repeatable; the persisted post vote still toggles normally. */
   onLiveReaction?: (reaction: PostReaction) => void;
+  liveShare?: boolean;
   /** Tip count to display next to repost */
   tipCount?: number;
   /** Handler for tip action */
@@ -195,6 +198,8 @@ interface ActionBarProps {
   disabled?: boolean;
   /** Handler for share-as-image action (text posts only) */
   onShareAsImage?: () => Promise<void>;
+  /** A public stream that can be shared as a linked Moment. */
+  streamMomentTokenId?: number;
   /** Numeric token ID for pin functionality */
   tokenId?: number;
   /**
@@ -408,10 +413,12 @@ export function ActionBar({
   isOptimistic = false,
   voteWeight: voteWeightProp,
   onLiveReaction,
+  liveShare,
   tipCount,
   onTip,
   onSeeEngagements,
   onShareAsImage,
+  streamMomentTokenId,
   disabled: externalDisabled = false,
   tokenId,
   isOwnPost = false,
@@ -887,8 +894,12 @@ export function ActionBar({
         ? dehubLinkFor.post(postId)
         : window.location.href;
 
+  const getShareUrl = () => liveShare
+    ? viewerLiveShareUrl(shareUrlForPost(), !visibility || visibility === 'public')
+    : viewerShareUrl(shareUrlForPost());
+
   const handleCopyLink = () => {
-    const url = viewerShareUrl(shareUrlForPost());
+    const url = getShareUrl();
     navigator.clipboard.writeText(url);
     toast.success(_copy("copy.e91de547a0b8", { defaultValue: "Post URL copied to clipboard" }));
     // A copy is a share: it counts once per actor per post, next to reposts.
@@ -898,7 +909,7 @@ export function ActionBar({
 
   const canNativeShare = !!nativeShare && typeof navigator !== 'undefined' && typeof navigator.share === 'function';
   const handleNativeShare = () => {
-    const url = viewerShareUrl(shareUrlForPost());
+    const url = getShareUrl();
     setSheetOpen(false);
     navigator
       .share({ title: nativeShare?.title || undefined, url })
@@ -1048,6 +1059,23 @@ export function ActionBar({
           <span className="font-medium">{isSharingImage ? _copy("copy.58c753bf3fe8", { defaultValue: "Capturing..." }) : _copy("copy.c431035b32d3", { defaultValue: "Share as Image" })}</span>
         </button>
       )}
+      {streamMomentTokenId != null && (
+        <Button
+          type="button"
+          variant="ghost"
+          className="h-auto min-h-11 w-full justify-start gap-3 p-4 text-base text-zinc-200 hover:text-white focus-visible:ring-current focus-visible:ring-offset-0 [&_svg]:size-5"
+          onClick={(e) => {
+            e.stopPropagation();
+            setSheetOpen(false);
+            const open = () => useStoriesStore.getState().openPostMoment(streamMomentTokenId);
+            if (isAuthenticated) open();
+            else openLoginModal({ then: open });
+          }}
+        >
+          <MomentAdd />
+          {_copy('stories.shareToMoment', 'Share to Moment')}
+        </Button>
+      )}
       {onSeeEngagements && (
         <button
           onClick={(e) => { e.stopPropagation(); setSheetOpen(false); onSeeEngagements(); }}
@@ -1076,7 +1104,7 @@ export function ActionBar({
             if (isAuthenticated) onShareToPublicChat();
             else openLoginModal();
           }}
-          className="h-auto min-h-11 w-full justify-start gap-3 whitespace-normal px-4 py-3 text-left text-foreground hover:bg-muted [&_svg]:size-5"
+          className="h-auto min-h-14 w-full justify-start gap-3 whitespace-normal p-4 text-left text-base text-zinc-200 hover:bg-white/10 hover:text-white focus-visible:ring-current focus-visible:ring-offset-0 [&_svg]:size-5"
         >
           <PublicChatIcon />
           {_copy('publicChat.title')}
@@ -1317,7 +1345,7 @@ export function ActionBar({
           onQuote={handleQuote}
           canQuote={canQuote}
           canRepost={isPublicPost}
-          shareUrl={viewerShareUrl(shareUrlForPost())}
+          shareUrl={getShareUrl()}
           onCopyLink={handleCopyLink}
           quoteCount={stage.quoteCount}
           repostCount={Math.max(0, stage.repostCount + repostDelta)}

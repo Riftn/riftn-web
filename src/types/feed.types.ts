@@ -178,6 +178,7 @@ export interface TextPost extends BaseFeedItem {
  */
 export interface VideoItem extends BaseFeedItem {
   type: 'video';
+  ppvPreviewReady?: boolean;
   thumbnail: string;
   videoUrl?: string;
   /** Full HLS master playlist URL; plays instead of videoUrl where it can (lib/hls-vod). */

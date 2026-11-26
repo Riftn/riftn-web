@@ -1,9 +1,35 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 vi.mock('@/lib/connection-source', () => ({ readLastSession: () => null }));
-import { getAffiliateRef, getAffiliateSubRef, setAffiliateRef } from '../lib/affiliateRef';
+import { captureAffiliateRefFromUrl, getAffiliateRef, getAffiliateSubRef, getEligibleAffiliateRef, setAffiliateRef } from '../lib/affiliateRef';
 
 beforeEach(() => {
   for (const name of ['dehub_aff_ref', 'dehub_aff_sub']) document.cookie = `${name}=; max-age=0; path=/`;
+});
+
+describe('public live-share attribution', () => {
+  it('keeps the first live share through later invites and credits only accounts created after arrival', () => {
+    const arrival = Date.now();
+    vi.spyOn(Date, 'now').mockReturnValue(arrival);
+    try {
+      captureAffiliateRefFromUrl(null, '?live_ref=SHARER&sub=private');
+      captureAffiliateRefFromUrl(null, '?live_ref=OTHER');
+      setAffiliateRef('INVITE', 'campaign');
+      expect(getAffiliateRef()).toBeNull();
+      expect(getAffiliateSubRef()).toBeNull();
+      expect(getEligibleAffiliateRef()).toBeNull();
+      expect(getEligibleAffiliateRef(new Date(arrival - 1000).toISOString())).toBeNull();
+      expect(getEligibleAffiliateRef(new Date(arrival + 1000).toISOString())).toBe('SHARER');
+    } finally {
+      vi.restoreAllMocks();
+    }
+  });
+
+  it('keeps an earlier regular invite and its outreach tag', () => {
+    setAffiliateRef('INVITE', 'campaign');
+    captureAffiliateRefFromUrl(null, '?live_ref=SHARER');
+    expect(getEligibleAffiliateRef()).toBe('INVITE');
+    expect(getAffiliateSubRef()).toBe('campaign');
+  });
 });
 
 describe('first-touch outreach attribution', () => {

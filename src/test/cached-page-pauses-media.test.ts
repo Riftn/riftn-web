@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   pauseMediaIn,
+  pauseMediaOutside,
   pauseOffDocumentMediaIn,
   registerOffDocumentMedia,
   resumeMedia,
@@ -34,6 +35,36 @@ function fakeMedia(tag: 'video' | 'audio', playing: boolean) {
   });
   return el;
 }
+
+it('keeps a foreground Moment exclusive while allowing other playback after close', async () => {
+  const viewer = document.createElement('div');
+  const story = fakeMedia('video', true);
+  const feed = fakeMedia('video', true);
+  const detached = fakeMedia('audio', true);
+  viewer.append(story);
+  document.body.append(viewer, feed);
+  const unregister = registerOffDocumentMedia(detached, () => feed);
+  const release = pauseMediaOutside(viewer);
+  try {
+    expect(story.paused).toBe(false);
+    expect(feed.paused).toBe(true);
+    expect(detached.paused).toBe(true);
+    for (const media of [feed, detached]) {
+      await media.play();
+      media.dispatchEvent(new Event('play'));
+      expect(media.paused).toBe(true);
+    }
+  } finally {
+    release();
+    unregister();
+  }
+  expect(feed.paused).toBe(true);
+  await feed.play();
+  feed.dispatchEvent(new Event('play'));
+  expect(feed.paused).toBe(false);
+  viewer.remove();
+  feed.remove();
+});
 
 describe('pauseMediaIn — a hidden cached page stops making noise', () => {
   let root: HTMLDivElement;

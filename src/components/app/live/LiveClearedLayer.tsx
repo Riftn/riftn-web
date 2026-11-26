@@ -1,7 +1,7 @@
 /**
  * The phone live viewer once its chrome is cleared: nothing but the picture
  * and one small rotate button in the corner. A live can't be paused, so the
- * whole frame is the way back: a tap, or a swipe up, brings the chrome back.
+ * whole frame is the way back: a tap brings the controls back.
  * The app's LiveStreamPlayer draws the same thing.
  */
 import { useTranslation } from 'react-i18next';
@@ -14,12 +14,14 @@ interface Props {
   onRotate: () => void;
   onTouchStart?: (e: React.TouchEvent) => void;
   onTouchEnd?: (e: React.TouchEvent) => void;
+  onTouchCancel?: (e: React.TouchEvent) => void;
+  swipeRooms?: boolean;
   /** Shows the room over the cleared picture, YouTube style. */
   onToggleChat?: () => void;
   chatOpen?: boolean;
 }
 
-export function LiveClearedLayer({ onRestore, onRotate, onTouchStart, onTouchEnd, onToggleChat, chatOpen = false }: Props) {
+export function LiveClearedLayer({ onRestore, onRotate, onTouchStart, onTouchEnd, onTouchCancel, swipeRooms, onToggleChat, chatOpen = false }: Props) {
   const { t } = useTranslation();
   return (
     <>
@@ -29,9 +31,10 @@ export function LiveClearedLayer({ onRestore, onRotate, onTouchStart, onTouchEnd
         role="button"
         tabIndex={0}
         aria-label={t('liveAudience.showControls', 'Show controls')}
-        className="absolute inset-0 z-40"
+        className={cn('absolute inset-0 z-40', swipeRooms && 'touch-pan-x')}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
+        onTouchCancel={onTouchCancel}
         onClick={(e) => { e.stopPropagation(); onRestore(); }}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') onRestore(); }}
       />

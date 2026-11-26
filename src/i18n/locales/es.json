@@ -21494,6 +21494,11 @@
     "followFailed": "No se pudo seguir. Inténtalo de nuevo."
   },
   "appTokens": {
+    "reviewTransfer": "Revisar transferencia",
+    "transferComplete": "Transferencia completada",
+    "balanceAfterSend": "Después del envío: {{amount}} {{symbol}}",
+    "addNote": "Añadir una nota",
+    "minimumTransfer": "La transferencia mínima es de 1 RIFT.",
     "kindStaked": "Depositado",
     "kindUnstaked": "Retirado",
     "stakedBalance": "{{amount}} depositados",
@@ -23410,6 +23415,26 @@
       "seoDescription": "Por turnos con un amigo, decid por qué estáis agradecidos. Sin repeticiones, y quien se quede sin ideas antes de que acabe su turno pierde. Gratis en Riftn.",
       "intro": "Por turnos, di por qué estás agradecido. Sin repeticiones. Si pierdes tu turno, gana la otra persona.",
       "cardBlurb": "Por turnos, di por qué estás agradecido. Sin repeticiones. Si pierdes tu turno, gana la otra persona."
+    },
+    "splurge": {
+      "title": "Splurge",
+      "cardBlurb": "Recibe un presupuesto al azar e imagina qué comprar en modo moderno o CRT.",
+      "arcade": "Arcade",
+      "intro": "Un presupuesto al azar. ¿En qué lo gastarías? Todos los importes son ficticios.",
+      "modern": "Moderno",
+      "crt": "CRT",
+      "budget": "Tu presupuesto",
+      "prompt": "¿Qué comprarías?",
+      "placeholder": "Un viaje en tren por Europa",
+      "spend": "Gastar",
+      "retry": "Reintentar",
+      "saveError": "No se pudo guardar este turno. Reintenta para conservarlo en tu registro.",
+      "history": "Registro de gastos",
+      "loading": "Cargando tu registro…",
+      "historyError": "No se pudo cargar tu registro.",
+      "empty": "Tus compras aparecerán aquí.",
+      "more": "Cargar entradas anteriores",
+      "guest": "Los turnos de invitado duran esta visita. Inicia sesión para guardar los próximos en tu cuenta."
     },
     "chestard": {
       "title": "Chestard",

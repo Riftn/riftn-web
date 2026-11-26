@@ -2,6 +2,7 @@ import { useTranslation as _useCopy } from 'react-i18next';
 import type { StudioEdits } from '../lib/studioPaint';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import { BASE_POST_TEXT_CHARS } from '@/lib/post-text-limit';
 import { abbreviateUrl } from '@/lib/link-display';
 import { createLinkScanRegex, splitLeadingUrlBoundary } from '@/components/app/TranslatableText';
@@ -547,27 +548,25 @@ export function PostContentArea({
           {/* Drafts button */}
           <Tooltip>
             <TooltipTrigger asChild>
-              <motion.button
-                onClick={() => setShowDrafts(true)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className={cn(
-                  "w-9 h-9 rounded-xl flex items-center justify-center transition-all relative",
-                  "bg-white/10 backdrop-blur-xl border border-white/20",
-                  "hover:bg-white/20 hover:border-white/40"
-                )}
-              >
-                <Save className="w-4 h-4 text-white" />
-                {drafts.length > 0 && (
-                  // Forced black: the theme turns everything inside a button to the
-                  // button's light ink, which left the number white on its white dot.
-                  <span className="absolute -top-1 -right-1 min-w-4 h-4 px-[3px] rounded-full bg-white !text-black text-[10px] font-bold flex items-center justify-center">
-                    {drafts.length > 9 ? '9+' : drafts.length}
-                  </span>
-                )}
-              </motion.button>
+              <Button asChild variant="ghost" size="icon" className="relative h-9 w-9 border border-white/20 bg-white/10 backdrop-blur-xl hover:border-white/40 hover:bg-white/20">
+                <motion.button
+                  type="button"
+                  aria-label={_copy('drafts.title')}
+                  onClick={() => setShowDrafts(true)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Save className="w-4 h-4" />
+                  {drafts.length > 0 && (
+                    // Keep the number readable when the button's ink changes with the theme.
+                    <span className="absolute -top-1 -right-1 min-w-4 h-4 px-[3px] rounded-full bg-white !text-black text-[10px] font-bold flex items-center justify-center">
+                      {drafts.length > 9 ? '9+' : drafts.length}
+                    </span>
+                  )}
+                </motion.button>
+              </Button>
             </TooltipTrigger>
-            <TooltipContent>{_copy("copy.f592e6a4db3c", { defaultValue: "Drafts" })}</TooltipContent>
+            <TooltipContent>{_copy('drafts.title')}</TooltipContent>
           </Tooltip>
           </div>
           )}

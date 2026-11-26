@@ -21,6 +21,7 @@ import { useMenuLayout } from '@/lib/menu-layout';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { buildAvatarUrl } from '@/lib/media-url';
 import { useSelfBadge } from '@/hooks/use-self-badge-balance';
+import { useAppTokens, useAppTokensConfig } from '@/hooks/use-app-tokens';
 import { HIDDEN_BALANCE, setBalanceHidden, useBalanceHidden } from '@/lib/balance-privacy';
 import { BadgedName } from '@/components/app/BadgedName';
 import { useUnreadNotificationCount } from '@/hooks/use-notifications';
@@ -75,8 +76,10 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated, user, walletAddress } = useAuth();
-  // Read-only: SelfBadgeSync and the header already own these fetches.
-  const dhbBalance = useSelfBadge().balance ?? 0;
+  const legacyBalance = useSelfBadge().balance ?? 0;
+  const { data: appTokensConfig } = useAppTokensConfig(isOpen);
+  const { data: appTokens } = useAppTokens(isOpen && appTokensConfig?.enabled === true);
+  const walletBalance = appTokensConfig?.enabled ? Number(appTokens?.balance) : appTokensConfig ? legacyBalance : NaN;
   const balanceHidden = useBalanceHidden();
   const { data: unreadCount } = useUnreadNotificationCount();
   const { data: customUnread } = useCustomUnreadCount();
@@ -229,18 +232,18 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
               </p>
             ) : user.username && <p className="truncate text-[13px] text-zinc-400">@{user.username}</p>}
           </div>
-          {Math.floor(dhbBalance) > 0 && (
+          {Number.isFinite(walletBalance) && (walletBalance > 0 || legacyBalance > 0) && (
             <div data-menu-chip className="flex h-9 flex-shrink-0 items-center rounded-xl border border-white/15 bg-white/[0.06] text-[13px] font-semibold text-white tabular-nums">
               <button
                 type="button"
                 onClick={() => { closeMenu(); navigate('/app/wallet'); }}
-                aria-label={balanceHidden ? t('nav.wallet') : `${t('nav.wallet')} ${Math.floor(dhbBalance).toLocaleString()}`}
+                aria-label={balanceHidden ? t('nav.wallet') : `${t('nav.wallet')} ${walletBalance.toLocaleString()}`}
                 className="flex h-full items-center gap-1.5 pl-3 pr-1.5"
               >
                 <DhbCoin className="h-4 w-4 align-middle" />
                 {/* Compact from 10k up, so the chip never pushes into the
                     Followers / Following line beside it (Requests eaf824e2). */}
-                {balanceHidden ? HIDDEN_BALANCE : Math.floor(dhbBalance) >= 10_000 ? compactCount(Math.floor(dhbBalance)) : Math.floor(dhbBalance).toLocaleString()}
+                {balanceHidden ? HIDDEN_BALANCE : walletBalance >= 10_000 ? compactCount(walletBalance) : walletBalance.toLocaleString()}
               </button>
               {/* Eye: hide or show the number on this device (Requests 4c8cc200). */}
               <button

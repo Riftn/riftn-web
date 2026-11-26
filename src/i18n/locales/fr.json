@@ -21498,6 +21498,11 @@
     "followFailed": "Impossible de suivre. Réessaie."
   },
   "appTokens": {
+    "reviewTransfer": "Vérifier le transfert",
+    "transferComplete": "Transfert terminé",
+    "balanceAfterSend": "Après l’envoi : {{amount}} {{symbol}}",
+    "addNote": "Ajouter une note",
+    "minimumTransfer": "Le transfert minimum est de 1 RIFT.",
     "kindStaked": "Staké",
     "kindUnstaked": "Retiré",
     "stakedBalance": "{{amount}} stakés",
@@ -23414,6 +23419,26 @@
       "seoDescription": "Dites à tour de rôle avec un ami ce pour quoi vous êtes reconnaissants. Pas de répétition, et celui qui manque d'idées avant la fin de son tour perd. Gratuit sur Riftn.",
       "intro": "Dites à tour de rôle ce pour quoi vous êtes reconnaissant. Pas de répétition. Ratez votre tour et l'autre gagne.",
       "cardBlurb": "Dites à tour de rôle ce pour quoi vous êtes reconnaissant. Pas de répétition. Ratez votre tour et l'autre gagne."
+    },
+    "splurge": {
+      "title": "Splurge",
+      "cardBlurb": "Reçois un budget au hasard et imagine quoi acheter en mode moderne ou CRT.",
+      "arcade": "Arcade",
+      "intro": "Un budget au hasard. Comment le dépenserais-tu ? Tous les montants sont fictifs.",
+      "modern": "Moderne",
+      "crt": "CRT",
+      "budget": "Ton budget",
+      "prompt": "Qu’achèterais-tu ?",
+      "placeholder": "Un voyage en train à travers l’Europe",
+      "spend": "Dépenser",
+      "retry": "Réessayer",
+      "saveError": "Impossible d’enregistrer ce tour. Réessaie pour le conserver dans ton journal.",
+      "history": "Journal des dépenses",
+      "loading": "Chargement de ton journal…",
+      "historyError": "Impossible de charger ton journal.",
+      "empty": "Tes achats apparaîtront ici.",
+      "more": "Charger les entrées précédentes",
+      "guest": "Les tours en mode invité durent le temps de cette visite. Connecte-toi pour enregistrer les prochains tours dans ton compte."
     },
     "chestard": {
       "title": "Chestard",

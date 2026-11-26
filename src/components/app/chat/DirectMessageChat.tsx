@@ -158,6 +158,7 @@ import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreB
 import { copyableMediaUrl } from '@/lib/copy-media';
 import { DmVoiceCallButton } from '@/components/app/chat/calls/DmVoiceCallButton';
 import { DmVideoCallButton } from '@/components/app/chat/calls/DmVideoCallButton';
+import { DmCallMenu } from '@/components/app/chat/calls/DmCallMenu';
 import { useCallActions } from '@/contexts/CallContext';
 import { dismissKeyboard } from '@/hooks/use-keyboard-open';
 import { formatUnreadCount } from '@/lib/unread-count';
@@ -181,6 +182,7 @@ const PICKABLE_ROW = 'hover:bg-[color-mix(in_srgb,currentColor_4%,transparent)]'
 interface DirectMessageChatProps {
   conversation: DeHubConversation;
   onBack: () => void;
+  fullscreen?: boolean;
   /** Pre-fill the composer (shared-post text for fee-gated chats). */
   initialComposerText?: string;
   /**
@@ -1810,7 +1812,7 @@ const MAX_READ_SPOT_PAGES = 10;
 /** Room above the unread line when a chat opens on it, so the sticky day pill doesn't cover it. */
 const UNREAD_MARKER_TOP_GAP = 48;
 
-export function DirectMessageChat({ conversation, onBack, initialComposerText, dock = false, headerActions, focusComposer = false, cozy = false, phoneB = false, options }: DirectMessageChatProps) {
+export function DirectMessageChat({ conversation, onBack, fullscreen = false, initialComposerText, dock = false, headerActions, focusComposer = false, cozy = false, phoneB = false, options }: DirectMessageChatProps) {
   const { t: _copy } = _useCopy();
   const { user, walletAddress, openLoginModal } = useAuth();
   const isChatActive = useContext(CachedPageActiveContext);
@@ -2328,7 +2330,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
   }, [isChatActive, resolvedConversationId]);
 
   // Emit markAsRead (socket) + scroll on initial load
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (isChatActive && isInitialMount.current && messages.length > 0 && readSpot.ready) {
       const ownAddress = walletAddress?.toLowerCase();
       const ownId = user?._id;
@@ -3721,7 +3723,9 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
             />
           )}
 
-          {!isGroupChat && otherUser?.address && !isAssistantAddress(otherUser.address) && (
+          {!isGroupChat && otherUser?.address && !isAssistantAddress(otherUser.address) && (fullscreen ? (
+            <DmCallMenu recipientAddress={otherUser.address} />
+          ) : (
             <>
               <DmVoiceCallButton
                 recipientAddress={otherUser.address}
@@ -3732,7 +3736,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
                 className={`text-zinc-400 hover:text-white hover:bg-zinc-800 [html:is([data-theme=light],[data-system-tone=light])_&]:hover:!bg-transparent [html:is([data-theme=light],[data-system-tone=light])_&]:motion-safe:hover:scale-105 ${dock ? 'h-8 w-8' : ''}`}
               />
             </>
-          )}
+          ))}
 
         {headerMenu}
         {headerActions}

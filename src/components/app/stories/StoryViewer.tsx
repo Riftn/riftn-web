@@ -11,7 +11,9 @@
  * direct message; likes and views show only to the owner. Your own moments
  * show who watched instead of a reply bar.
  */
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { suspendPageMediaSessions } from '@/lib/media-session';
+import { pauseMediaOutside } from '@/lib/pause-media-in';
 import { type InfiniteData, type UseInfiniteQueryResult, useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
@@ -31,7 +33,6 @@ import { buildAvatarUrl, buildAvatarCdnFallbackUrl } from '@/lib/media-url';
 import { formatCount } from '@/lib/format-count';
 import { useStoriesStore } from '@/store/storiesStore';
 import {
-  addStoryComment,
   deleteStory,
   getStory,
   getStoryViewers,
@@ -148,7 +149,6 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, openComm
   const [sending, setSending] = useState(false);
   const [openingOriginal, setOpeningOriginal] = useState(false);
   const [drag, setDrag] = useState<{ x: number; y: number } | null>(null);
-  const [replyTo, setReplyTo] = useState<'everyone' | 'author'>('everyone');
   const [hearts, setHearts] = useState<{ id: number; x: number; d: number }[]>([]);
   const docked = useDocked();
   const [frameRef, frameSize] = useFrameSize();
@@ -193,10 +193,11 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, openComm
   const viewCount = audience.data?.pages[0]?.viewCount ?? item?.viewCount ?? 0;
   const viewsLabel = t('stories.viewsCount', { defaultValue: '{{formatted}} views', formatted: formatCount(viewCount) });
   const postPeek = item?.postTokenId != null && postPeekId === item.id;
-  const paused = held || postPeek || typing || sheet !== null || openingOriginal || !loaded;
+  const paused = held || postPeek || typing || sending || sheet !== null || openingOriginal || !loaded;
   const room = useMomentComments(item?.id, isAuthenticated, !!item && (item.commentCount ?? 1) > 0);
   const roomComments = room.data?.comments ?? [];
 
+  const viewerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const moreButtonRef = useRef<HTMLButtonElement>(null);
@@ -207,6 +208,20 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, openComm
   const viewedRef = useRef(new Set<string>());
   const changedRef = useRef(false);
   const originalRequest = useRef<symbol | null>(null);
+  const replyInput = useRef<HTMLInputElement>(null);
+  const sendingReply = useRef(false);
+
+  const hasStory = !!entry && !!item;
+  useLayoutEffect(() => {
+    const viewer = viewerRef.current;
+    if (!hasStory || !viewer) return;
+    const releaseMedia = pauseMediaOutside(viewer);
+    const releaseSessions = suspendPageMediaSessions();
+    return () => {
+      releaseMedia();
+      releaseSessions();
+    };
+  }, [hasStory]);
 
   // ── Moving between moments ────────────────────────────────────────
   const close = useCallback(() => {
@@ -243,9 +258,10 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, openComm
       setSheet(s => (s === 'viewers' ? s : null));
     }
     setOpeningOriginal(false);
-    setReplyTo('everyone');
+    setReply('');
+    setTyping(false);
     return () => { originalRequest.current = null; };
-  }, [authorIdx, itemIdx]);
+  }, [snapshot?.id]);
 
   useEffect(() => {
     if (sheet) {
@@ -428,36 +444,25 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, openComm
 
   const submitReply = async () => {
     const text = reply.trim();
-    if (!item || !text || sending) return;
+    if (!item?.allowReplies || own || !isAuthenticated || !text || sendingReply.current) return;
+    sendingReply.current = true;
     setSending(true);
-    if (replyTo === 'everyone') {
-      try {
-        const row = await addStoryComment(item.id, text);
-        queryClient.setQueryData(['moment-room-comments', item.id, isAuthenticated], (old: { comments: (typeof row)[] } | undefined) =>
-          old ? { ...old, comments: [row, ...old.comments] } : { commentCount: 1, allowComments: true, comments: [row], next: null });
-        void queryClient.invalidateQueries({ queryKey: ['moment-room-comments', item.id] });
-        setEntries(list => list.map((e, i) => i !== authorIdx ? e : { ...e, items: e.items.map(it => it.id === item.id ? { ...it, commentCount: (it.commentCount ?? 0) + 1 } : it) }));
-        setReply('');
-        (document.activeElement as HTMLElement | null)?.blur();
-      } catch (e) {
-        toast.error((e as Error)?.message || t('stories.commentFailed', { defaultValue: "Your comment didn't go up. Try again." }));
-      } finally {
-        setSending(false);
-      }
-      return;
-    }
+    const input = replyInput.current;
     try {
       const outcome = await sendStoryReply(item, text, t('stories.repliedToYourMoment', { defaultValue: 'Replied to your moment' }));
       if (outcome === 'paid-chat') {
         toast(t('stories.paidChat', { defaultValue: 'This person charges for messages. Open the chat to send it.' }));
       } else {
         toast.success(t('stories.replySent', { defaultValue: 'Reply sent' }));
-        setReply('');
-        (document.activeElement as HTMLElement | null)?.blur();
+        if (replyInput.current === input) {
+          setReply('');
+          input?.blur();
+        }
       }
     } catch {
       toast.error(t('stories.replyFailed', { defaultValue: "Couldn't send your reply. Try again." }));
     } finally {
+      sendingReply.current = false;
       setSending(false);
     }
   };
@@ -600,6 +605,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, openComm
 
   const body = (
     <div
+      ref={viewerRef}
       data-stories
       data-story-viewer
       data-keep-dark
@@ -793,20 +799,22 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, openComm
             </button>
           ) : !isAuthenticated ? (
             <button type="button" data-sv-field onClick={() => openLoginModal()}>
-              {t('stories.signInToSay', { defaultValue: 'Sign in to say something' })}
+              {t('stories.signInToReply', { defaultValue: 'Sign in to reply' })}
             </button>
           ) : item.allowReplies ? (
             <input
+              key={item.id}
+              ref={replyInput}
               data-sv-field
               value={reply}
-              maxLength={replyTo === 'everyone' ? 300 : 500}
+              maxLength={500}
+              readOnly={sending}
               onChange={e => setReply(e.target.value)}
               onFocus={() => setTyping(true)}
               onBlur={() => setTyping(false)}
-              onKeyDown={e => { if (e.key === 'Enter') submitReply(); }}
-              placeholder={replyTo === 'everyone'
-                ? t('stories.saySomething', { defaultValue: 'Say something…' })
-                : t('stories.replyTo', { name: nameOf(a), defaultValue: 'Reply to {{name}}' })}
+              onKeyDown={e => { if (e.key === 'Enter' && !e.nativeEvent.isComposing) void submitReply(); }}
+              placeholder={t('stories.privateReply', { defaultValue: 'Send a private reply…' })}
+              aria-label={t('stories.sendPrivateReply', { defaultValue: 'Send a private reply' })}
             />
           ) : (
             <span data-sv-field data-off>{t('stories.repliesOff', { defaultValue: 'Replies are off' })}</span>
@@ -822,10 +830,12 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, openComm
               {(item.commentCount ?? 0) > 0 && <span data-sv-count>{formatCount(item.commentCount ?? 0)}</span>}
             </button>
           )}
-          {!own && isAuthenticated && item.allowReplies && reply.trim() ? (
-            <button type="button" data-sv-key data-sv-send onPointerDown={e => e.preventDefault()} onClick={submitReply} disabled={sending} aria-label={t('common.send', { defaultValue: 'Send' })}>
-              {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
-            </button>
+          {!own && isAuthenticated && item.allowReplies && (typing || reply || sending) ? (
+            <Button type="button" size="icon" data-sv-key data-sv-send onPointerDown={e => e.preventDefault()}
+              onClick={submitReply} disabled={!reply.trim()} loading={sending}
+              aria-label={t('stories.sendPrivateReply', { defaultValue: 'Send a private reply' })}>
+              {!sending && <Send className="!size-5" />}
+            </Button>
           ) : shareable ? (
             <button type="button" data-sv-key onClick={() => setSheet('share')} aria-label={t('stories.share', { defaultValue: 'Share' })}>
               <MomentShare className="w-[22px] h-[22px]" />
@@ -845,6 +855,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, openComm
               {sheet === 'viewers' && own && <ViewersList item={item} audience={audience} viewsLabel={viewsLabel} onOpen={openProfile} onClose={dismissSheet} />}
               {sheet === 'comments' && (
                 <StoryComments
+                  key={item.id}
                   item={item}
                   signedIn={isAuthenticated}
                   onOpen={openProfile}
@@ -917,8 +928,10 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, openComm
       {docked && (
         <aside data-sv-panel onPointerDown={e => e.stopPropagation()}>
           <header>
-            <MomentComment className="w-5 h-5" />
-            {t('stories.momentChat', { defaultValue: 'Moment chat' })}
+            <Button type="button" variant="ghost" size="lg" className="-ml-3 gap-2 px-3 text-base font-semibold" onClick={() => setSheet('comments')}>
+              <MomentComment className="!size-5" />
+              {t('stories.comments', { defaultValue: 'Comments' })}
+            </Button>
             {own ? (
               <button type="button" data-sv-chip onClick={() => setSheet('viewers')}>
                 <Eye className="w-4 h-4" />

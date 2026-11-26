@@ -52,6 +52,7 @@ import type { LiveStream } from '@/types/feed.types';
 
 import { formatCount } from '@/lib/format-count';
 import { publicChatShareTokenId } from '@/lib/live-public-chat-share';
+import { getStreamMomentTokenId } from '@/lib/moment-share';
 interface LiveCardProps {
   stream: LiveStream;
 }
@@ -243,10 +244,13 @@ export function LiveCard({ stream }: LiveCardProps) {
       {/* Info & Actions */}
       <div className="pt-3">
         <ActionBar
+          liveShare
+          visibility={stream.visibility}
           onLiveReaction={sendLiveReaction}
           onShareToPublicChat={shareTokenId ? () => navigate('/app/messages?chat=public', { state: { shareLiveTokenId: shareTokenId } }) : undefined}
           postId={stream.id}
           tokenId={parseInt(stream.id, 10) || undefined}
+          streamMomentTokenId={getStreamMomentTokenId(stream)}
           utilityDesktopAnchor
           className="p-0 mb-2"
           onComment={() => setShowComments(prev => !prev)}

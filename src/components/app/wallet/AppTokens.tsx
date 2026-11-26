@@ -2,8 +2,10 @@ import { tokenLabel } from '@/lib/token-label';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
-import { Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
+import { Check, Loader2 } from 'lucide-react';
+import { motion, useReducedMotion } from 'framer-motion';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useAuth } from '@/contexts/AuthContext';
 import Send from '@/components/ui/cut-icons/send';
 import User from '@/components/ui/cut-icons/profile';
 import { Button } from '@/components/ui/button';
@@ -125,27 +127,41 @@ export function AppTokenSendDialog({ open, onOpenChange }: { open: boolean; onOp
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { data } = useAppTokens(open);
+  const { walletAddress } = useAuth();
   const [to, setTo] = useState('');
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState('');
   const [recipient, setRecipient] = useState<AppTokenPerson | null>(null);
   const [looking, setLooking] = useState(false);
   const [sending, setSending] = useState(false);
+  const [step, setStep] = useState<'details' | 'review' | 'sent'>('details');
+  const [receipt, setReceipt] = useState<{ balance: string; to: AppTokenPerson; amount: string } | null>(null);
+  const [sendError, setSendError] = useState('');
+  const inFlight = useRef(false);
+  const title = useRef<HTMLHeadingElement>(null);
+  const isMobile = useIsMobile();
+  const reducedMotion = useReducedMotion();
   // One key per attempt: kept across a retry of the same send, replaced once it lands.
   const keyRef = useRef(newAppTokenKey());
 
   const balance = Number(data?.balance ?? 0);
   const value = Number(amount);
   const tooMuch = value > balance;
-  const canSend = !!recipient && value > 0 && !tooMuch && !sending;
+  const canSend = !!recipient && !looking && /^\d+(\.\d{1,6})?$/.test(amount) && value >= 1 && !tooMuch;
+  const remaining = (Math.round(balance * 1_000_000) - Math.round(value * 1_000_000)) / 1_000_000;
+  const tokenSymbol = data?.symbol === 'RIFT' ? 'RIFT' : tokenLabel();
+  const stepTitle = step === 'review' ? t('appTokens.reviewTransfer', 'Review transfer')
+    : step === 'sent' ? t('appTokens.transferComplete', 'Transfer complete')
+    : t('appTokens.sendTitle');
 
   useEffect(() => {
     setRecipient(null);
+    setLooking(false);
     const text = to.trim();
     if (text.length < 2) return;
     let cancelled = false;
+    setLooking(true);
     const timer = setTimeout(async () => {
-      setLooking(true);
       try {
         const found = await findAppTokenRecipient(text);
         if (!cancelled) setRecipient(found);
@@ -159,21 +175,38 @@ export function AppTokenSendDialog({ open, onOpenChange }: { open: boolean; onOp
   }, [to]);
 
   // A changed send is a new send, so it gets a new key.
-  useEffect(() => { keyRef.current = newAppTokenKey(); }, [to, amount]);
+  useEffect(() => { keyRef.current = newAppTokenKey(); }, [to, amount, note]);
+
+  useEffect(() => {
+    if (open && step !== 'details') title.current?.focus();
+  }, [open, step]);
+
+  const close = () => {
+    if (inFlight.current) return;
+    setStep('details');
+    setReceipt(null);
+    setSendError('');
+    onOpenChange(false);
+  };
 
   const send = async () => {
-    if (!canSend || !recipient) return;
+    if (!recipient || inFlight.current || step !== 'review') return;
+    inFlight.current = true;
     setSending(true);
+    setSendError('');
     try {
-      await sendAppTokens({ to: recipient.address, amount: amount.trim(), key: keyRef.current, purpose: 'transfer', note: note.trim() || undefined });
-      toast.success(t('appTokens.sent', { amount: fmt(amount), name: personName(recipient) }));
-      keyRef.current = newAppTokenKey();
-      setTo(''); setAmount(''); setNote('');
-      void queryClient.invalidateQueries({ queryKey: [APP_TOKENS_QUERY_KEY] });
-      onOpenChange(false);
+      const result = await sendAppTokens({ to: recipient.address, amount, key: keyRef.current, purpose: 'transfer', note: note.trim() || undefined });
+      setReceipt({ ...result, amount });
+      setStep('sent');
+      setTo('');
+      setAmount('');
+      setNote('');
+      const queryKey = [APP_TOKENS_QUERY_KEY, walletAddress?.toLowerCase()];
+      queryClient.setQueryData<typeof data>(queryKey, current => current ? { ...current, balance: result.balance } : current);
+      void queryClient.invalidateQueries({ queryKey });
     } catch (err: any) {
       const code = err?.errorCode;
-      toast.error(
+      setSendError(
         code === 'INSUFFICIENT' ? t('appTokens.errorInsufficient')
           : code === 'RATE_LIMIT' ? t('appTokens.errorRateLimit')
           : code === 'NO_RECIPIENT' ? t('appTokens.errorNoRecipient')
@@ -181,17 +214,18 @@ export function AppTokenSendDialog({ open, onOpenChange }: { open: boolean; onOp
           : err?.message || t('appTokens.errorGeneric'),
       );
     } finally {
+      inFlight.current = false;
       setSending(false);
     }
   };
 
-  return (
-    <Dialog open={open} onOpenChange={v => { if (!sending) onOpenChange(v); }}>
-      <DialogContent data-wallet-page className="bg-black/60 backdrop-blur-[24px] backdrop-saturate-[180%] border-white/10 sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-white">{t('appTokens.sendTitle')}</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4 pt-2">
+  const body = (
+    <div className="space-y-4 px-1">
+      {step === 'details' && (
+        <form className="space-y-4" onSubmit={event => {
+          event.preventDefault();
+          if (canSend) { setSendError(''); setStep('review'); }
+        }}>
           <p className="text-xs leading-relaxed text-zinc-400">{t('appTokens.sendHint')}</p>
 
           <div className="space-y-2">
@@ -199,7 +233,7 @@ export function AppTokenSendDialog({ open, onOpenChange }: { open: boolean; onOp
             <Input
               id="app-token-to"
               value={to}
-              onChange={e => setTo(e.target.value)}
+              onChange={e => { setRecipient(null); setTo(e.target.value); }}
               placeholder={t('appTokens.toPlaceholder')}
               autoComplete="off"
               className="bg-white/5 border-white/10 text-white"
@@ -222,33 +256,97 @@ export function AppTokenSendDialog({ open, onOpenChange }: { open: boolean; onOp
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <label className="text-sm text-zinc-400" htmlFor="app-token-amount">{t('appTokens.amount')}</label>
-              <button type="button" className="text-xs text-zinc-400 hover:text-white" onClick={() => setAmount(String(balance))}>
-                {t('appTokens.available', { amount: fmt(balance) })}
-              </button>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-zinc-400">{t('appTokens.available', { amount: fmt(balance) })}</span>
+                <Button type="button" variant="ghost" size="sm" onClick={() => setAmount(data?.balance ?? '0')}>{t('staking.max', 'Max')}</Button>
+              </div>
             </div>
             <Input
               id="app-token-amount"
               inputMode="decimal"
               value={amount}
-              onChange={e => setAmount(e.target.value.replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1'))}
+              onChange={e => setAmount(e.target.value.replace(',', '.').replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1').replace(/(\.\d{6})\d+$/, '$1'))}
               placeholder="0"
               className="bg-white/5 border-white/10 text-white"
             />
             {tooMuch && <p className="text-xs text-red-400">{t('appTokens.errorInsufficient')}</p>}
+            {value > 0 && value < 1 && <p className="text-xs text-zinc-400">{t('appTokens.minimumTransfer', 'Minimum transfer is 1 RIFT.')}</p>}
           </div>
 
-          <Input
-            value={note}
+          <details open={note ? true : undefined}>
+            <summary className="cursor-pointer text-sm text-zinc-400">{t('appTokens.addNote', 'Add a note')}</summary>
+            <Input
+              value={note}
             maxLength={140}
             onChange={e => setNote(e.target.value)}
-            placeholder={t('appTokens.notePlaceholder')}
-            className="bg-white/5 border-white/10 text-white"
-          />
+              aria-label={t('appTokens.notePlaceholder')}
+              placeholder={t('appTokens.notePlaceholder')}
+              className="mt-2 bg-white/5 border-white/10 text-white"
+            />
+          </details>
 
-          <Button variant="glass" className="w-full h-11 rounded-xl" disabled={!canSend} onClick={send}>
-            {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : t('appTokens.sendButton')}
+          <Button type="submit" variant="glass" className="w-full h-12 rounded-xl" disabled={!canSend}>
+            {t('appTokens.reviewTransfer', 'Review transfer')}
           </Button>
+        </form>
+      )}
+
+      {step === 'review' && recipient && (
+        <div className="space-y-4">
+          <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-center">
+            {recipient.avatarImageUrl && <img src={recipient.avatarImageUrl} alt="" className="mx-auto mb-2 h-10 w-10 rounded-full object-cover" />}
+            <p className="text-3xl font-semibold tabular-nums">{fmt(amount)} <span className="text-lg">{tokenSymbol}</span></p>
+            <p className="mt-1 break-words text-sm text-zinc-400">{recipient.displayName || personName(recipient)}{recipient.displayName && recipient.username ? ' · ' + personName(recipient) : ''}</p>
+          </div>
+          {note.trim() && <p className="break-words text-sm text-zinc-400">{note.trim()}</p>}
+          <p className="text-sm text-zinc-400">{t('appTokens.balanceAfterSend', { amount: fmt(remaining), symbol: tokenSymbol, defaultValue: 'After sending: {{amount}} {{symbol}}' })}</p>
+          {sendError && <p role="alert" className="text-sm text-red-400">{sendError}</p>}
+          <div className="grid grid-cols-[auto_1fr] gap-2">
+            <Button variant="ghost" className="h-12" disabled={sending} onClick={() => setStep('details')}>{t('common.edit', 'Edit')}</Button>
+            <Button variant="glass" className="h-12 rounded-xl" disabled={sending} onClick={() => void send()}>
+              {sending ? <Loader2 className="h-4 w-4 animate-spin" aria-label={t('wallet.sending')} /> : t('appTokens.sendButton')}
+            </Button>
+          </div>
         </div>
+      )}
+
+      {step === 'sent' && receipt && (
+        <motion.div className="space-y-4 py-2 text-center" initial={reducedMotion ? false : { opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22 }}>
+          <motion.div className="mx-auto grid h-16 w-16 place-items-center rounded-full border border-emerald-400/25 bg-emerald-400/15 text-emerald-300"
+            initial={reducedMotion ? false : { scale: 0.68 }} animate={{ scale: 1 }}
+            transition={{ type: 'spring', stiffness: 290, damping: 17 }}>
+            <Check className="h-8 w-8" aria-hidden="true" />
+          </motion.div>
+          <div role="status">
+            <p className="text-3xl font-semibold tabular-nums">{fmt(receipt.amount)} <span className="text-lg">{tokenSymbol}</span></p>
+            <p className="mt-1 text-sm text-zinc-400">{t('appTokens.sent', { amount: fmt(receipt.amount), name: personName(receipt.to) })}</p>
+          </div>
+          <p className="text-sm text-zinc-400">{t('appTokens.available', { amount: fmt(receipt.balance) })}</p>
+          <Button variant="glass" className="h-12 w-full rounded-xl" onClick={close}>{t('common.done', 'Done')}</Button>
+        </motion.div>
+      )}
+    </div>
+  );
+
+  const onChange = (visible: boolean) => { if (!visible) close(); };
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={onChange} dismissible={!sending}>
+        <DrawerContent data-wallet-page className="max-h-[92dvh] border-white/10 bg-zinc-950">
+          <DrawerHeader className="text-left">
+            <DrawerTitle ref={title} tabIndex={-1} className="text-white">{stepTitle}</DrawerTitle>
+          </DrawerHeader>
+          <div className="overflow-y-auto overscroll-contain px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">{body}</div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+  return (
+    <Dialog open={open} onOpenChange={onChange}>
+      <DialogContent data-wallet-page className="bg-black/60 backdrop-blur-[24px] backdrop-saturate-[180%] border-white/10 sm:max-w-md">
+        <DialogHeader><DialogTitle ref={title} tabIndex={-1} className="text-white">{stepTitle}</DialogTitle></DialogHeader>
+        {body}
       </DialogContent>
     </Dialog>
   );

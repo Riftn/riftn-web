@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { setViewerAffiliateCode, viewerShareUrl, withAffiliateRef } from './share-url';
+import { setViewerAffiliateCode, viewerLiveShareUrl, viewerShareUrl, withAffiliateRef } from './share-url';
 
 const findAffiliateCode = vi.fn();
 vi.mock('@/lib/affiliate', () => ({
@@ -45,6 +45,15 @@ describe('viewerShareUrl', () => {
     expect(viewerShareUrl('/alice')).toBe('/alice?ref=ALICE01');
     expect(viewerShareUrl('https://example.com/page')).toBe('https://example.com/page');
   });
+});
+
+it('uses signup-only attribution for public live shares without carrying another referrer or outreach tag', () => {
+  const url = 'https://riftn.com/app/post/1?ref=OTHER&sub=campaign&c=2#chat';
+  expect(viewerLiveShareUrl(url, true)).toBe(url);
+  setViewerAffiliateCode('SHARER');
+  expect(viewerLiveShareUrl(url, false)).toBe(url);
+  expect(viewerLiveShareUrl(url, true)).toBe('https://riftn.com/app/post/1?c=2&live_ref=SHARER#chat');
+  expect(viewerLiveShareUrl('https://example.com/live', true)).toBe('https://example.com/live');
 });
 
 describe('loadViewerAffiliateCode', () => {
