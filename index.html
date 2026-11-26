@@ -66,6 +66,13 @@
                 .catch(function () { return null; })
                 .finally(function () { clearTimeout(timer); })
             };
+            if (params.get('chat') === 'public' && !params.has('msg') && !params.has('with') &&
+              window.matchMedia('(max-width: 767px)').matches) {
+              var history = window.__publicChatHistory.promise;
+              import('/chat-startup-preview.js').then(function (preview) {
+                return preview.showPublicChatPreview(history);
+              }).catch(function () {});
+            }
             return;
           }
           // Ordinary app routes still fetch the feed layout alongside the
