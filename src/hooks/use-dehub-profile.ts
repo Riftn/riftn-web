@@ -7,7 +7,7 @@
  */
 
 import { noteSignInWall } from '@/lib/sign-in-wall';
-import { useQuery, useInfiniteQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { mergeLiveCounts } from '@/lib/live-counts';
 import { shouldRetryProfile } from '@/lib/profile-retry';
 import { useMemo, useEffect } from 'react';
@@ -268,8 +268,8 @@ export function useDeHubProfile({ userId, username, address, enabled = true }: U
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: shouldRetryProfile,
     retryDelay: (attemptIndex) => Math.min(800 * 2 ** attemptIndex, 5000),
-    // Show localStorage cache instantly, then keep previous data on address change
-    placeholderData: cachedProfile ?? keepPreviousData,
+    // Only seed the requested profile. Revalidation keeps that profile in place.
+    placeholderData: cachedProfile,
   });
 
   // Persist fresh data to localStorage for next visit
