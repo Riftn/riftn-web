@@ -88,16 +88,26 @@ type Action = (typeof ACTIONS)[number];
  * Module scope on purpose: the point is that there is exactly one.
  */
 let owner: string | null = null;
-const shutdownHandlers = new Map<string, () => void>();
+const playbackHandlers = new Map<string, { pause?: () => void; stop?: () => void }>();
+let playbackSuspended = false;
 let pageClosed = false;
+
+/** Pause session players while the Story viewer owns playback in this tab. */
+export function suspendPageMediaSessions(): () => void {
+  playbackSuspended = true;
+  for (const { pause, stop } of [...playbackHandlers.values()]) {
+    try { (pause ?? stop)?.(); } catch { /* A player may already be released. */ }
+  }
+  return () => { playbackSuspended = false; };
+}
 
 /** Stop detached audio players as well as media mounted in the document. */
 export function stopPagePlayback(): void {
   pageClosed = true;
-  const callbacks = [...shutdownHandlers.values()];
-  shutdownHandlers.clear();
-  for (const stop of callbacks) {
-    try { stop(); } catch { /* Continue stopping the remaining players. */ }
+  const callbacks = [...playbackHandlers.values()];
+  playbackHandlers.clear();
+  for (const { pause, stop } of callbacks) {
+    try { (stop ?? pause)?.(); } catch { /* Continue stopping the remaining players. */ }
   }
   document.querySelectorAll<HTMLMediaElement>('audio, video').forEach(media => {
     try { media.pause(); } catch { /* A player may already be released. */ }
@@ -149,8 +159,18 @@ export function claimMediaSession(
     stop?.();
     return;
   }
-  if (stop) shutdownHandlers.set(ownerId, stop);
-  else shutdownHandlers.delete(ownerId);
+  if (stop) {
+    const callbacks = { pause: handlers.pause, stop: handlers.stop };
+    playbackHandlers.set(ownerId, callbacks);
+    if (playbackSuspended) {
+      // Some players claim before calling play; pause after that request.
+      queueMicrotask(() => {
+        if (playbackSuspended && playbackHandlers.get(ownerId) === callbacks) {
+          try { (callbacks.pause ?? callbacks.stop)?.(); } catch { /* Already released. */ }
+        }
+      });
+    }
+  } else playbackHandlers.delete(ownerId);
   const ms = session();
   if (!ms) return;
 
@@ -199,7 +219,9 @@ export function claimMediaSession(
       continue;
     }
 
-    setHandler(ms, action, fn as () => void);
+    setHandler(ms, action, action === 'play' ? () => {
+      if (!playbackSuspended) handlers.play?.();
+    } : fn as () => void);
   }
 }
 
@@ -261,7 +283,7 @@ export function setMediaSessionPosition(
  * race is normal — closing the stage drawer while a radio station plays on.
  */
 export function releaseMediaSession(ownerId: string): void {
-  shutdownHandlers.delete(ownerId);
+  playbackHandlers.delete(ownerId);
   const ms = session();
   if (!ms || owner !== ownerId) return;
 
