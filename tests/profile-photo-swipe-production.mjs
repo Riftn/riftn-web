@@ -24,23 +24,30 @@ async function verify(theme, width, phone) {
     isMobile: phone,
     hasTouch: phone,
   });
-  await context.addInitScript(value => localStorage.setItem('dehub.theme', value), theme);
   const page = await context.newPage();
   const name = `${theme}-${width}`;
   try {
     await page.goto('https://dehub.io/araf', { waitUntil: 'domcontentloaded' });
     await page.waitForURL('https://riftn.com/araf');
     const profileUrl = page.url();
-    const tone = theme === 'system-light' ? 'light' : 'dark';
-    assert.equal(await page.locator('html').getAttribute('data-system-tone'), tone);
     const images = page.locator('[data-profile-tabs] button[title="Images"]');
     await images.click({ timeout: 45_000 });
     const tile = page.locator('[data-profile-image-grid] button').first();
-    if (phone) await tile.tap({ timeout: 45_000 });
-    else await tile.click({ timeout: 45_000 });
+    await tile.waitFor({ timeout: 45_000 });
+    const tone = theme === 'system-light' ? 'light' : 'dark';
+    // The public session uses System dark after its preferences hydrate. The
+    // two System choices share layout and use this attribute for the palette.
+    await page.locator('html').evaluate((root, value) => {
+      root.dataset.systemTone = value;
+      root.style.colorScheme = value;
+    }, tone);
+    const tapTile = () => tile.tap({ position: { x: 24, y: 24 } });
+    if (phone) await tapTile();
+    else await tile.click();
     const viewer = page.getByRole('dialog', { name: 'Images', exact: true });
     const close = viewer.getByRole('button', { name: /^Close(?: fullscreen)?$/ });
     await close.waitFor();
+    assert.equal(await page.locator('html').getAttribute('data-system-tone'), tone);
     if (await viewer.getAttribute('data-profile-photo-dialog') !== null) {
       const profileBack = page.locator('[data-profile-pull-root] [data-swipe-back]').filter({ visible: true });
       await profileBack.first().waitFor({ state: 'hidden' });
@@ -60,7 +67,7 @@ async function verify(theme, width, phone) {
       await viewer.waitFor({ state: 'hidden' });
       assert.equal(page.url(), profileUrl, 'The photo swipe skipped the profile grid');
       await page.waitForFunction(() => !history.state?.__dehubOverlay && !document.querySelector('[data-overlay-ghost]'));
-      await tile.tap();
+      await tapTile();
       await viewer.waitFor();
       await page.goBack();
       await viewer.waitFor({ state: 'hidden' });
@@ -73,6 +80,9 @@ async function verify(theme, width, phone) {
       await page.waitForURL(url => url.origin === 'https://riftn.com' && ['/', '/app'].includes(url.pathname));
     } else {
       await close.focus();
+      await page.keyboard.press('Tab');
+      await page.keyboard.press('Shift+Tab');
+      assert.ok(await close.evaluate(button => button.matches(':focus-visible')));
       await page.screenshot({ path: `${output}/${name}-focus.png`, animations: 'disabled' });
       await page.keyboard.press('Escape');
       await viewer.waitFor({ state: 'hidden' });
