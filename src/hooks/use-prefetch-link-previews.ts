@@ -8,9 +8,10 @@ type FeedRow = { tokenId?: unknown; id?: unknown; description?: unknown; stream?
  * arrive, a few at a time, so each card draws its preview at full height when
  * it mounts instead of growing under the reader a moment later.
  */
-export function usePrefetchLinkPreviews(rows: readonly unknown[]): void {
+export function usePrefetchLinkPreviews(rows: readonly unknown[], enabled = true): void {
   const seen = useRef(new Set<string>());
   useEffect(() => {
+    if (!enabled) return;
     const urls: string[] = [];
     for (const row of rows as readonly FeedRow[]) {
       const key = String(row?.tokenId ?? row?.id ?? '');
@@ -22,5 +23,5 @@ export function usePrefetchLinkPreviews(rows: readonly unknown[]): void {
       if (url) urls.push(url);
     }
     if (urls.length) prefetchLinkPreviews(urls);
-  }, [rows]);
+  }, [rows, enabled]);
 }

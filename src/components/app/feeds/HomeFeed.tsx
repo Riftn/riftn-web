@@ -6,6 +6,7 @@ import { useTranslation as _useCopy } from 'react-i18next';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
 import { useFirstInteraction } from '@/hooks/use-boot-settled';
+import { useIsDesktopViewport } from '@/hooks/use-is-desktop';
 import { isFirstVisibleFeedCard } from '@/lib/feed-first-card';
 import { visibleFeedTokenIds } from '@/lib/feed-visible-counts';
 import { isShortsPhoto, shortsPhotoMedia } from '@/lib/shorts-photos';
@@ -1430,13 +1431,13 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
   // INTERLEAVED ITEMS (from three separate feeds)
   // ============================================================================
 
-  // Text and photo posts carry link previews; warm them as their pages land.
+  // Warm previews for nearby cards after the first feed paint.
   const linkPreviewRows = useMemo(() => [
     ...flattenFeedPages(textsFeed.data?.pages),
     ...flattenFeedPages(imagesFeed.data?.pages),
     ...flattenFeedPages(singleFeed.data?.pages),
   ], [textsFeed.data, imagesFeed.data, singleFeed.data]);
-  usePrefetchLinkPreviews(linkPreviewRows);
+  usePrefetchLinkPreviews(linkPreviewRows, railsEnabled && isHomeActive);
 
   const interleavedItems = useMemo((): FeedItemType[] => {
     if (!useInterleavedFeed) return [];
@@ -1860,6 +1861,9 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
   }, [landPending, optimisticIdsKey]);
   useEffect(() => onPostLandingBegin(() => { landPending(); }), [landPending]);
 
+  // Desktop can show a row of cards. On narrow screens let viewport
+  // observation mount the next cards after the first one commits.
+  const eagerCardCount = useIsDesktopViewport() ? 3 : 1;
   const renderFeedItem = (item: FeedItemType, index: number, section: 'optimistic' | 'pinned' | 'feed' = 'feed', beforeShorts = false, afterShorts = false) => {
     const firstFeedPost = isFirstVisibleFeedCard(section, index, visibleOptimisticPosts.length, !!pinnedItem);
     const card = (() => {
@@ -1912,7 +1916,7 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
       <WindowedFeedItem
         key={key}
         {...(retained ? {} : frameProps)}
-        eager={index < 3} estimatedHeight={parseInt(intrinsicH, 10)}
+        eager={index < eagerCardCount} estimatedHeight={parseInt(intrinsicH, 10)}
         // A card arriving with a new page eases in once (the slot outlives
         // windowing, so scrolling back never replays it). Single column only:
         // masonry re-packs columns and would replay it.
