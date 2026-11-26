@@ -13,6 +13,7 @@ export interface StreamInfo {
   payPerViewContractAddress?: string;
   payPerViewTokenSymbol?: string;
   payPerViewAmount?: number;
+  payPerViewPreviewSeconds?: number;
   payPerViewChainIds?: number[];
   isAddBounty?: boolean;
   addBountyTokenSymbol?: string;

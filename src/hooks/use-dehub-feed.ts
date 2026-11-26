@@ -230,6 +230,7 @@ export function mapNFTToVideoItem(nft: DeHubNFT, index: number): VideoItem {
     commentCount,
     isPPV,
     ppvPrice,
+    ppvPreviewReady: nft.ppvPreview?.ready === true,
     ppvCurrency,
     isW2E,
     bountyViews: nft.streamInfo?.addBountyFirstXViewers != null ? Number(nft.streamInfo.addBountyFirstXViewers) : undefined,

@@ -172,6 +172,7 @@ export interface ShopLink {
 
 export interface DeHubNFT {
   tokenId: number;
+  ppvPreview?: { ready?: boolean };
   id?: string;
   token_id?: string;
   name: string;

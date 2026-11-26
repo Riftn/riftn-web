@@ -79,6 +79,7 @@ export interface UnifiedFeedParams {
 
 export interface UnifiedFeedItem {
   tokenId: number;
+  ppvPreview?: { ready?: boolean };
   name: string;
   description?: string;
   articleBody?: string;
@@ -356,6 +357,7 @@ function mapVideoItem(item: UnifiedFeedItem, index: number): VideoItem {
     ppvBuyerCount: item.ppvBuyerCount || 0,
     isPPV,
     ppvPrice: item.streamInfo?.payPerViewAmount,
+    ppvPreviewReady: item.ppvPreview?.ready === true,
     ppvCurrency: item.streamInfo?.payPerViewTokenSymbol || 'DHB',
     isW2E,
     isLocked,

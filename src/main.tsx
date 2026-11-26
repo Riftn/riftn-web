@@ -28,7 +28,7 @@ import "./lib/toast-i18n-interceptor";
 // locales/en.json and other languages are merged lazily by loadLanguage()
 // (see src/i18n/index.ts). The old static import evaluated a 600-line
 // all-language map on the main thread at boot.
-import App, { preloadPostPage, preloadWalletProviders } from "./App.tsx";
+import App, { preloadAppLayout, preloadFullScreenChat, preloadPostPage, preloadWalletProviders } from "./App.tsx";
 import { loadThemeCss } from "./lib/theme-css";
 import "./i18n";
 import "./index.css";
@@ -181,9 +181,11 @@ const render = () => {
 };
 const finishMobileBootWait = beginMobileBootWait();
 const bootThemeCss = loadThemeCss(document.documentElement.dataset.theme);
+// Full-screen chat owns its viewport and never mounts the feed layout.
+const routeReady = /^\/chat\/?$/i.test(location.pathname) ? preloadFullScreenChat() : preloadAppLayout();
 const bootDependencies = import.meta.env.DEV && location.pathname === '/app/state-gallery'
   ? [bootThemeCss]
-  : [bootThemeCss, preloadWalletProviders(), postPageReady];
+  : [bootThemeCss, preloadWalletProviders(), routeReady, postPageReady];
 const renderReadyApp = () => { finishMobileBootWait(); render(); };
 Promise.all(bootDependencies).then(renderReadyApp, renderReadyApp);
 

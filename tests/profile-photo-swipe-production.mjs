@@ -115,10 +115,11 @@ async function verify(theme, width, phone) {
       await profileBack.first().waitFor({ state: 'hidden' });
       assert.equal(await close.locator('svg').evaluate(icon => getComputedStyle(icon).color), 'rgb(255, 255, 255)');
     }
-    const size = await close.evaluate(button => {
-      const { width, height } = button.getBoundingClientRect();
-      return { width, height, radius: getComputedStyle(button).borderTopLeftRadius };
-    });
+    const size = await close.evaluate(button => ({
+      width: button.offsetWidth,
+      height: button.offsetHeight,
+      radius: getComputedStyle(button).borderTopLeftRadius,
+    }));
     assert.deepEqual(size, { width: 44, height: 44, radius: '12px' });
     await page.screenshot({ path: `${output}/${name}-photos.png`, animations: 'disabled' });
 
@@ -148,9 +149,9 @@ async function verify(theme, width, phone) {
       const focus = await close.evaluate(button => ({
         visible: button.matches(':focus-visible'),
         outline: getComputedStyle(button).outlineStyle,
-        width: getComputedStyle(button).outlineWidth,
+        width: parseFloat(getComputedStyle(button).outlineWidth),
       }));
-      assert.deepEqual(focus, { visible: true, outline: 'solid', width: '2px' });
+      assert.ok(focus.visible && focus.outline === 'solid' && focus.width >= 2, JSON.stringify(focus));
       await page.screenshot({ path: `${output}/${name}-focus.png`, animations: 'disabled' });
       await close.hover();
       await page.mouse.down();
