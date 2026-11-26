@@ -24,22 +24,35 @@ async function verify(theme, width, phone) {
     isMobile: phone,
     hasTouch: phone,
   });
-  await context.addInitScript(value => localStorage.setItem('dehub.theme', value), theme);
   const page = await context.newPage();
   const name = `${theme}-${width}`;
   try {
     await page.goto('https://dehub.io/araf', { waitUntil: 'domcontentloaded' });
     await page.waitForURL('https://riftn.com/araf');
     const profileUrl = page.url();
-    const tone = theme === 'system-light' ? 'light' : 'dark';
-    assert.equal(await page.locator('html').getAttribute('data-system-tone'), tone);
     const images = page.locator('[data-profile-tabs] button[title="Images"]');
     await images.click({ timeout: 45_000 });
     const tile = page.locator('[data-profile-image-grid] button').first();
-    await tile.click({ timeout: 45_000 });
+    await tile.waitFor({ timeout: 45_000 });
+    const tone = theme === 'system-light' ? 'light' : 'dark';
+    // The public session uses System dark after its preferences hydrate. The
+    // two System choices share layout and use this attribute for the palette.
+    await page.locator('html').evaluate((root, value) => {
+      root.dataset.systemTone = value;
+      root.style.colorScheme = value;
+    }, tone);
+    const tapTile = () => tile.tap({ position: { x: 24, y: 24 } });
+    if (phone) await tapTile();
+    else await tile.click();
     const viewer = page.getByRole('dialog', { name: 'Images', exact: true });
     const close = viewer.getByRole('button', { name: /^Close(?: fullscreen)?$/ });
     await close.waitFor();
+    assert.equal(await page.locator('html').getAttribute('data-system-tone'), tone);
+    if (await viewer.getAttribute('data-profile-photo-dialog') !== null) {
+      const profileBack = page.locator('[data-profile-pull-root] [data-swipe-back]').filter({ visible: true });
+      await profileBack.first().waitFor({ state: 'hidden' });
+      assert.equal(await close.locator('svg').evaluate(icon => getComputedStyle(icon).color), 'rgb(255, 255, 255)');
+    }
     const size = await close.evaluate(button => {
       const { width, height } = button.getBoundingClientRect();
       return { width, height, radius: getComputedStyle(button).borderTopLeftRadius };
@@ -54,15 +67,23 @@ async function verify(theme, width, phone) {
       await swipe(session, 48, 30, 135, 3);
       await viewer.waitFor({ state: 'hidden' });
       assert.equal(page.url(), profileUrl, 'The photo swipe skipped the profile grid');
-      await tile.tap();
+      await page.waitForFunction(() => !history.state?.__dehubOverlay && !document.querySelector('[data-overlay-ghost]'));
+      await tapTile();
       await viewer.waitFor();
       await page.goBack();
       await viewer.waitFor({ state: 'hidden' });
       assert.equal(page.url(), profileUrl, 'Browser Back skipped the profile grid');
-      await swipe(session, 12, 180, 130, 2);
-      await page.waitForURL('https://riftn.com/app');
+      await page.waitForFunction(() => !history.state?.__dehubOverlay && !document.querySelector('[data-overlay-ghost]'));
+      await tile.scrollIntoViewIfNeeded();
+      const gridPhoto = await tile.boundingBox();
+      assert.ok(gridPhoto, 'The photo grid did not settle after Browser Back');
+      await swipe(session, gridPhoto.x + 12, gridPhoto.y + Math.min(48, gridPhoto.height / 3), 130, 2);
+      await page.waitForURL(url => url.origin === 'https://riftn.com' && ['/', '/app'].includes(url.pathname));
     } else {
       await close.focus();
+      await page.keyboard.press('Tab');
+      await page.keyboard.press('Shift+Tab');
+      assert.ok(await close.evaluate(button => button.matches(':focus-visible')));
       await page.screenshot({ path: `${output}/${name}-focus.png`, animations: 'disabled' });
       await page.keyboard.press('Escape');
       await viewer.waitFor({ state: 'hidden' });
@@ -79,10 +100,19 @@ async function verify(theme, width, phone) {
 }
 
 try {
+  const failures = [];
   for (const theme of ['system', 'system-light']) {
-    for (const width of [360, 390, 1280]) await verify(theme, width, width < 768);
+    for (const width of [360, 390, 1280]) {
+      try {
+        await verify(theme, width, width < 768);
+        console.log(`Passed ${theme} at ${width}px`);
+      } catch (error) {
+        failures.push(error);
+        console.error(`Failed ${theme} at ${width}px`, error);
+      }
+    }
   }
-  console.log('Profile photos passed at 360, 390 and 1280 px in System and System Light.');
+  if (failures.length) throw new AggregateError(failures, 'Profile photo checks failed');
 } finally {
   await browser.close();
 }
