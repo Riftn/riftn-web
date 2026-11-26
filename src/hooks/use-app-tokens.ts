@@ -6,14 +6,17 @@ import { getAppTokensConfig, getMyAppTokens } from '@/lib/api/dehub/app-tokens';
 export const APP_TOKENS_QUERY_KEY = 'app-tokens-me';
 
 /** Whether app tokens are switched on. The server decides, for web and the app at once. */
-export function useAppTokensEnabled(): boolean {
-  const { data } = useQuery({
+export function useAppTokensConfig() {
+  return useQuery({
     queryKey: ['app-tokens-config'],
     queryFn: getAppTokensConfig,
     staleTime: 5 * 60_000,
     retry: false,
   });
-  return data?.enabled === true;
+}
+
+export function useAppTokensEnabled(): boolean {
+  return useAppTokensConfig().data?.enabled === true;
 }
 
 /** The signed-in account's app-token balance and latest movements. */

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, Zap, Shield, ArrowRight } from "lucide-react";
@@ -11,6 +12,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 
 const TokenStake = () => {
   const { t } = useLanguage();
+  const { t: appCopy } = useTranslation();
 
   const userFlowItems = t('tokenStake.userFlowItems') as unknown as string[];
 
@@ -24,7 +26,9 @@ const TokenStake = () => {
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
-        <p className="text-lg text-muted-foreground leading-relaxed mb-4">{t('faq.a6Current')}</p>
+        <p className="text-lg text-muted-foreground leading-relaxed mb-4">{appCopy('staking.inAppDescription', 'Stake from your Riftn wallet. Unstake at any time to make your tokens available again.')}</p>
+        <h2 className="mb-2 text-xl font-semibold">{appCopy('staking.legacyDhb', 'Legacy DHB staking')}</h2>
+        <p className="text-muted-foreground leading-relaxed mb-4">{t('faq.a6Current')}</p>
         <p className="text-lg text-muted-foreground leading-relaxed">{t('tokenStake.introDesc')}</p>
         <p className="text-lg text-muted-foreground leading-relaxed mt-4">{t('tokenStake.introDesc2')}</p>
       </div>

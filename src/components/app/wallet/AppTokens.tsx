@@ -43,6 +43,8 @@ function EntryRow({ entry }: { entry: AppTokenEntry }) {
     refund: t('appTokens.kindRefund'),
     deposit: t('appTokens.kindDeposit'),
     adjust: t('appTokens.kindAdjust'),
+    stake: t('appTokens.kindStaked', 'Staked'),
+    unstake: t('appTokens.kindUnstaked', 'Unstaked'),
   }[entry.kind];
   const positive = !entry.amount.startsWith('-');
   return (
@@ -92,6 +94,9 @@ export function AppTokensRow({ onSend }: { onSend: () => void }) {
           <div className="px-4 pb-6 space-y-4 max-h-[70vh] overflow-y-auto">
             <div className="rounded-xl bg-white/5 border border-white/10 p-4">
               <p className="text-2xl font-bold text-white">{fmt(data?.balance ?? 0)} <DhbCoin /></p>
+              {Number(data?.staked) > 0 && (
+                <p className="mt-2 text-sm text-zinc-400">{t('appTokens.stakedBalance', { amount: fmt(data?.staked ?? 0), defaultValue: '{{amount}} staked' })}</p>
+              )}
               <p className="mt-2 text-xs leading-relaxed text-zinc-500">{t('appTokens.explainer')}</p>
             </div>
             <Button variant="glass" className="w-full h-11 rounded-xl gap-2" onClick={() => { setOpen(false); onSend(); }}>
