@@ -57,7 +57,22 @@
     "cancel": "Cancelar",
     "getKey": "Obtener una clave de {{name}}",
     "showLess": "Mostrar solo mis claves",
-    "addAnother": "Agregar otro proveedor"
+    "addAnother": "Agregar otro proveedor",
+    "providerDescriptions": {
+      "openai": "Builder (modelos GPT)",
+      "fal": "Herramientas de imagen, vídeo, 3D y fotografía",
+      "kie": "Imágenes y vídeo",
+      "replicate": "Imágenes y vídeo",
+      "xai": "Chat e imágenes con Grok",
+      "elevenlabs": "Voz, doblaje, música y efectos de sonido",
+      "gemini": "Traducción, ayuda con la escritura y resúmenes",
+      "venice": "Chat con el asistente",
+      "perplexity": "Búsqueda web con el asistente",
+      "deepgram": "Transcripciones y subtítulos en directo",
+      "openrouter": "Cientos de modelos de chat y texto con una sola clave",
+      "groq": "Chat y texto rápidos",
+      "mistral": "Chat y texto"
+    }
   },
   "resetWallet": {
     "mismatch": "Las contraseñas no coinciden",
