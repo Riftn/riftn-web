@@ -50,6 +50,19 @@ export const playsNativeHls = (video: HTMLVideoElement, url: string | undefined)
   (liveSourceFromHlsUrl(url)?.provider !== 'mediamtx' || isAacCopyUrl(url)) &&
   !!video.canPlayType('application/vnd.apple.mpegurl');
 
+/**
+ * Start the on-demand AAC copy while Safari waits for WebRTC. Its native
+ * player loads its own playlist when it takes over.
+ */
+export function warmNativeLiveHls(url: string | undefined): (() => void) | undefined {
+  if (!url || !isAacCopyUrl(url) || liveSourceFromHlsUrl(url)?.provider !== 'mediamtx') return;
+  const controller = new AbortController();
+  void fetch(url, { signal: controller.signal })
+    .then((response) => response.text())
+    .catch(() => { /* Native playback will retry the playlist on takeover. */ });
+  return () => controller.abort();
+}
+
 /** A standby nobody takes is closed: it is a rolling download while it lives. */
 const UNCLAIMED_MS = 12_000;
 

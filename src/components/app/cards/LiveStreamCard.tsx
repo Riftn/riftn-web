@@ -105,7 +105,7 @@ import { nativeLiveEdge, watchLiveProgress } from '@/lib/live/stall-watchdog';
 import { NO_RELAY_CANDIDATE, firstWhepRoute, forgetWhepRouteBlocked, forgetWhepSilent, hasRealPicture, rememberWhepRouteBlocked, rememberWhepSilent, whepRecentlySilent, whepRouteBlocked, type WhepRoute } from '@/lib/live/whep-memory';
 import { behindForRatio, liveEdgeSnap, timeForBehind, timelineSnap, type TimeshiftSnap } from '@/lib/live/timeshift';
 import { LiveTimelineBar, type LiveTimeshift } from '@/components/app/live/LiveTimeline';
-import { dropWarmLiveHls, LIVE_HLS_CONFIG, playsNativeHls, SLOW_KEYFRAME_SEC, takeWarmLiveHls, warmLiveHls } from '@/lib/live/hls-standby';
+import { dropWarmLiveHls, LIVE_HLS_CONFIG, playsNativeHls, SLOW_KEYFRAME_SEC, takeWarmLiveHls, warmLiveHls, warmNativeLiveHls } from '@/lib/live/hls-standby';
 import { peekLiveSession, snapshot as snapshotLiveFrame, takeLiveSession } from '@/lib/live-handoff';
 import { claimLiveMini, getLiveMiniVideo, openLiveMini, type LiveMiniMode } from '@/lib/live-mini';
 import { useStreamActions, useStreamActivities } from '@/hooks/use-livestream';
@@ -994,14 +994,21 @@ export function LiveStreamCard({ stream: streamProp, postPage, chatSlot, immersi
     // start on one, so when they are seconds apart HLS shows a picture first.
     // Not for a session handed over by the feed card: its picture is up.
     const standbyUrl = urlsToTry[0];
-    if (!peekLiveSession(whepPlaybackId) && !playsNativeHls(video, standbyUrl)) {
-      warmLiveHls(standbyUrl, LIVE_HLS_CONFIG, (segmentSeconds) => {
-        if (cancelled || segmentSeconds < SLOW_KEYFRAME_SEC || hasRealPicture(video)) return;
-        void failOver('slow keyframes');
-      });
+    let stopNativeStandby: (() => void) | undefined;
+    if (!peekLiveSession(whepPlaybackId)) {
+      if (playsNativeHls(video, standbyUrl)) {
+        stopNativeStandby = warmNativeLiveHls(standbyUrl);
+      } else {
+        warmLiveHls(standbyUrl, LIVE_HLS_CONFIG, (segmentSeconds) => {
+          if (cancelled || segmentSeconds < SLOW_KEYFRAME_SEC || hasRealPicture(video)) return;
+          void failOver('slow keyframes');
+        });
+      }
     }
     const onPicture = () => {
-      if (video.srcObject && hasRealPicture(video)) dropWarmLiveHls(standbyUrl);
+      if (!video.srcObject || !hasRealPicture(video)) return;
+      stopNativeStandby?.();
+      dropWarmLiveHls(standbyUrl);
     };
     video.addEventListener('resize', onPicture);
     video.addEventListener('loadeddata', onPicture);
@@ -1013,6 +1020,7 @@ export function LiveStreamCard({ stream: streamProp, postPage, chatSlot, immersi
       pendingWhep?.abort();
       clearTimeout(timer);
       stopWatch?.();
+      stopNativeStandby?.();
       video.removeEventListener('resize', onPicture);
       video.removeEventListener('loadeddata', onPicture);
       videoPlaybackManager.unregister(videoId);
