@@ -55,7 +55,10 @@ const CHROME_TEXT = cn(
   '[html:is([data-theme=light],[data-system-tone=light])_&]:text-foreground',
 );
 
-const POWER_ACTION_FOCUS = 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring';
+const POWER_ACTION_FOCUS = cn(
+  'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current',
+  '[html:is([data-theme=light],[data-system-tone=light])_&]:focus-visible:outline-ring',
+);
 const POWER_ACTION = `min-w-0 flex-1 whitespace-normal px-4 text-center sm:flex-none ${POWER_ACTION_FOCUS}`;
 
 /** Total slot minutes a tier holds per cycle — the number worth comparing. */
