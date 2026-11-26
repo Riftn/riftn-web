@@ -50,12 +50,13 @@ export function earnedByRarity(milestones: Milestone[]): Milestone[] {
  * stands. Worked out on the server from stats it already keeps, and cached
  * there for a few minutes, so the app and web show the same badges.
  */
-export function useMilestones(address?: string | null) {
+export function useMilestones(address?: string | null, { refreshOnMount = false } = {}) {
   return useQuery({
     queryKey: ['profile-milestones', address?.toLowerCase()],
     queryFn: async (): Promise<Milestones | null> => {
       const token = getAuthToken();
       const response = await fetch(`${DEHUB_API_BASE}/api/users/${encodeURIComponent(String(address))}/milestones`, {
+        cache: 'no-store',
         headers: { Accept: 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       });
       if (response.status === 404) return null;
@@ -64,6 +65,7 @@ export function useMilestones(address?: string | null) {
       return (json?.result ?? null) as Milestones | null;
     },
     enabled: !!address,
+    refetchOnMount: refreshOnMount ? 'always' : true,
     staleTime: 5 * 60_000,
     gcTime: 30 * 60_000,
     retry: 1,
