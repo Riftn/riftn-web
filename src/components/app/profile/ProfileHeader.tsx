@@ -50,7 +50,7 @@ import { BadgeIcon } from '@/components/app/BadgeIcon';
 import { NewMemberChip } from '@/components/app/NewMemberChip';
 import { OnboardingCompleteChip } from '@/components/app/OnboardingCompleteChip';
 import { EarlySupporterChip } from '@/components/app/EarlySupporterChip';
-import { BadgeMuseumPanel, MilestoneChips } from '@/components/app/profile/BadgeMuseum';
+import { BadgeMuseumPanel } from '@/components/app/profile/BadgeMuseum';
 import { useMilestones } from '@/hooks/use-milestones';
 import { BadgePatronChip } from '@/components/app/BadgePatronChip';
 import { toast } from 'sonner';
@@ -487,9 +487,6 @@ export function ProfileHeader({
                   <OnboardingCompleteChip address={profile.walletAddress} />
                   {/* One of their requests on the Requests board shipped. */}
                   <EarlySupporterChip address={profile.walletAddress} username={profile.handle} />
-                  {/* Badge Museum: their three rarest milestone badges. Tapping
-                      one opens the whole museum. */}
-                  <MilestoneChips address={profile.walletAddress} own={!!isViewingOwnProfile} />
                 </>
               )}
             </div>
