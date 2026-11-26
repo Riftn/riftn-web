@@ -8,7 +8,7 @@
  *
  * This watches the element instead of its events: while the video is meant to
  * be running (not paused, with a visible playback surface) it checks every couple of seconds
- * whether the clock or the decoded frame count moved. When neither has for
+ * whether the media made progress. When it has not for
  * `stallMs`, `onStall` gets called with how many stalls in a row this is, so
  * the caller can escalate (jump to live edge first, reload after).
  */
@@ -21,32 +21,37 @@ export interface LiveStallWatchOptions {
   onStall: (count: number) => void;
   /** Extra gate, e.g. "playback was requested". Defaults to always. */
   shouldWatch?: () => boolean;
+  /** WebRTC can keep its audio clock moving while the picture is frozen. */
+  preferVideoFrames?: () => boolean;
   /** Check a visible system PiP window even while its tab is hidden. */
   watchInPictureInPicture?: boolean;
 }
 
 const CHECK_EVERY_MS = 2000;
 
-function decodedFrames(video: HTMLVideoElement): number {
+function presentedFrames(video: HTMLVideoElement): number | null {
   try {
-    return video.getVideoPlaybackQuality?.().totalVideoFrames ?? 0;
+    const quality = video.getVideoPlaybackQuality?.();
+    // Some browsers expose the method but do not count frames for WebRTC.
+    if (!quality || quality.totalVideoFrames === 0) return null;
+    return quality.totalVideoFrames - quality.droppedVideoFrames;
   } catch {
-    return 0;
+    return null;
   }
 }
 
 export function watchLiveProgress(
   video: HTMLVideoElement,
-  { stallMs, onStall, shouldWatch, watchInPictureInPicture = false }: LiveStallWatchOptions,
+  { stallMs, onStall, shouldWatch, preferVideoFrames, watchInPictureInPicture = false }: LiveStallWatchOptions,
 ): () => void {
   let lastTime = video.currentTime;
-  let lastFrames = decodedFrames(video);
+  let lastFrames = presentedFrames(video);
   let stillFor = 0;
   let stalls = 0;
 
   const rebase = () => {
     lastTime = video.currentTime;
-    lastFrames = decodedFrames(video);
+    lastFrames = presentedFrames(video);
     stillFor = 0;
   };
 
@@ -61,10 +66,13 @@ export function watchLiveProgress(
       return;
     }
     const time = video.currentTime;
-    const frames = decodedFrames(video);
-    if (time !== lastTime || frames !== lastFrames) {
-      lastTime = time;
-      lastFrames = frames;
+    const frames = presentedFrames(video);
+    const framesMoved = frames !== lastFrames;
+    const useFrames = preferVideoFrames?.() && frames != null && lastFrames != null;
+    const moved = framesMoved || (!useFrames && time !== lastTime);
+    lastTime = time;
+    lastFrames = frames;
+    if (moved) {
       stillFor = 0;
       stalls = 0;
       return;

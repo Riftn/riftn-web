@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { watchLiveProgress } from './stall-watchdog';
 
 function fakeVideo() {
-  return { currentTime: 0, paused: false, getVideoPlaybackQuality: () => ({ totalVideoFrames: 0 }) } as unknown as HTMLVideoElement & { currentTime: number; paused: boolean };
+  return { currentTime: 0, paused: false, getVideoPlaybackQuality: () => ({ totalVideoFrames: 0, droppedVideoFrames: 0 }) } as unknown as HTMLVideoElement & { currentTime: number; paused: boolean };
 }
 
 describe('watchLiveProgress', () => {
@@ -28,6 +28,35 @@ describe('watchLiveProgress', () => {
     for (let i = 0; i < 5; i++) { video.currentTime += 2; vi.advanceTimersByTime(2000); }
     video.paused = true;
     vi.advanceTimersByTime(20000);
+    expect(onStall).not.toHaveBeenCalled();
+    stop();
+  });
+
+  it('catches a frozen WebRTC picture even when audio and dropped frames advance', () => {
+    vi.useFakeTimers();
+    const video = fakeVideo();
+    const quality = { totalVideoFrames: 20, droppedVideoFrames: 0 } as VideoPlaybackQuality;
+    video.getVideoPlaybackQuality = () => quality;
+    const onStall = vi.fn();
+    const stop = watchLiveProgress(video, { stallMs: 6000, onStall, preferVideoFrames: () => true });
+    for (let i = 0; i < 3; i++) {
+      video.currentTime += 2;
+      Object.assign(quality, { totalVideoFrames: 21 + i, droppedVideoFrames: 1 + i });
+      vi.advanceTimersByTime(2000);
+    }
+    expect(onStall).toHaveBeenCalledExactlyOnceWith(1);
+    stop();
+  });
+
+  it('uses the clock when WebRTC does not expose a frame count', () => {
+    vi.useFakeTimers();
+    const video = fakeVideo();
+    const onStall = vi.fn();
+    const stop = watchLiveProgress(video, { stallMs: 6000, onStall, preferVideoFrames: () => true });
+    for (let i = 0; i < 3; i++) {
+      video.currentTime += 2;
+      vi.advanceTimersByTime(2000);
+    }
     expect(onStall).not.toHaveBeenCalled();
     stop();
   });
