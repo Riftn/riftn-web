@@ -90,6 +90,7 @@ import { EndStreamConfirmDialog } from '@/components/app/modals/EndStreamConfirm
 import { getLiveStream, updateStreamThumbnail } from '@/lib/api/dehub/livestream';
 import { useQuery } from '@tanstack/react-query';
 import { useStreamAudience } from '@/hooks/use-stream-audience';
+import { BroadcasterViewersSheet } from '@/components/app/live/BroadcasterViewersSheet';
 import { LiveReactionFlow } from '@/components/app/live/LiveReactionFlow';
 import { createLogger } from '@/lib/logger';
 import {
@@ -697,6 +698,7 @@ export function GoLiveBroadcaster({
    * two together had no way to tell which one was their audience.
    */
   const watching = useStreamAudience(streamId, phase === 'live' || phase === 'reconnecting') ?? 0;
+  const [viewersOpen, setViewersOpen] = useState(false);
 
   // The Stages voice-effect graph, reused as-is: mic → effect chain →
   // MediaStreamDestination. The broadcast publishes that destination rather
@@ -2376,10 +2378,11 @@ export function GoLiveBroadcaster({
                 line below it — it is the number a host looks for first, and a
                 second row of floating text over a moving picture is noise. */}
             {streamId && (
-              <span className={cn(GLASS_PILL, 'gap-1.5 text-[11px] text-white')}>
+              <button type="button" className={cn(GLASS_PILL, 'gap-1.5 text-[11px] text-white')}
+                aria-label={t('liveAudience.viewers', 'Viewers')} aria-haspopup="dialog" onClick={() => setViewersOpen(true)}>
                 <Eye className="h-3.5 w-3.5" />
                 {watching}
-              </span>
+              </button>
             )}
 
             <span className={cn(GLASS_PILL, 'font-mono text-[11px] text-white')}>
@@ -2641,9 +2644,11 @@ export function GoLiveBroadcaster({
           )}
         >
           {!fullBleed && (
-            <span className="flex items-center gap-1.5">
+            <button type="button" className="flex items-center gap-1.5" disabled={!streamId}
+              aria-label={t('liveAudience.viewers', 'Viewers')} aria-haspopup="dialog" onClick={() => setViewersOpen(true)}>
               <Users className="h-3.5 w-3.5" />
-              {watching}{_copy("copy.dcb8e1a4fcaa", { defaultValue: " watching" })}</span>
+              {watching}{_copy("copy.dcb8e1a4fcaa", { defaultValue: " watching" })}
+            </button>
           )}
           <span className="flex items-center gap-1.5 leading-none">
             <Heart className="h-3.5 w-3.5 shrink-0" />
@@ -2854,6 +2859,7 @@ export function GoLiveBroadcaster({
         {fullBleed ? null : isEnding ? _copy("copy.3677a36e467e", { defaultValue: "Ending…" }) : _copy("copy.ee288ef2bd85", { defaultValue: "End Stream" })}
       </button>
 
+      {streamId && <BroadcasterViewersSheet streamId={streamId} open={viewersOpen} onOpenChange={setViewersOpen} live />}
       <EndStreamConfirmDialog
         open={confirmEnd}
         onOpenChange={setConfirmEnd}
