@@ -50,6 +50,7 @@ import { useNotifyWhenLive } from '@/hooks/use-notify-when-live';
 import type { LiveStream } from '@/types/feed.types';
 
 import { formatCount } from '@/lib/format-count';
+import { publicChatShareTokenId } from '@/lib/live-public-chat-share';
 interface LiveCardProps {
   stream: LiveStream;
 }
@@ -61,6 +62,7 @@ export function LiveCard({ stream }: LiveCardProps) {
   const [showAIChat, setShowAIChat] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const navigate = useNavigate();
+  const shareTokenId = publicChatShareTokenId(stream);
   const { openLoginModal, walletAddress } = useAuth();
   // "Tuned in" on the card is the post's all-time views (`stream.viewers`);
   // who is in the room right now lives on the live page itself.
@@ -237,6 +239,7 @@ export function LiveCard({ stream }: LiveCardProps) {
       <div className="pt-3">
         <ActionBar
           onLiveReaction={sendLiveReaction}
+          onShareToPublicChat={shareTokenId ? () => navigate('/app/messages?chat=public', { state: { shareLiveTokenId: shareTokenId } }) : undefined}
           postId={stream.id}
           tokenId={parseInt(stream.id, 10) || undefined}
           utilityDesktopAnchor

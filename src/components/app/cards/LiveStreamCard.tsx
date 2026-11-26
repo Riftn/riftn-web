@@ -162,6 +162,7 @@ import { dhbText } from '@/lib/dhb-toast';
 import { createLogger } from '@/lib/logger';
 import { EndStreamConfirmDialog } from '@/components/app/modals/EndStreamConfirmDialog';
 import type { LiveStream } from '@/types/feed.types';
+import { publicChatShareTokenId } from '@/lib/live-public-chat-share';
 import '@/styles/live-frame-ios.css';
 
 import { formatCount } from '@/lib/format-count';
@@ -304,6 +305,10 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
   const [showComments, setShowComments] = useState(!!chatSlot);
   const { t } = useI18n();
   const navigate = useNavigate();
+  const shareTokenId = publicChatShareTokenId(stream);
+  const shareToPublicChat = shareTokenId
+    ? () => navigate('/app/messages?chat=public', { state: { shareLiveTokenId: shareTokenId } })
+    : undefined;
   // Bookmark state for the three-dot menu. The same action is an icon in the
   // ActionBar's left-anchored utility cluster on desktop; both read this one
   // shared query, so they cannot disagree.
@@ -2496,6 +2501,7 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
               <div className="flex items-center gap-2">
               <ActionBar
                 compact
+                onShareToPublicChat={shareToPublicChat}
                 onLiveReaction={sendLiveReaction}
                 postId={stream.id}
                 tokenId={parseInt(stream.id, 10) || undefined}
@@ -2526,6 +2532,7 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
         <div className="pt-3">
           <ActionBar
             onLiveReaction={sendLiveReaction}
+            onShareToPublicChat={shareToPublicChat}
             postId={stream.id}
             tokenId={parseInt(stream.id, 10) || undefined}
             isLiked={stream.isLiked}
