@@ -18,6 +18,8 @@ import { useTranslation as _useCopy } from 'react-i18next';
 
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useBadgeTierLabel } from '@/i18n/badge-tier-label';
+import { localizeSuperPower } from '@/i18n/superpower-copy';
 import { Link } from 'react-router-dom';
 import { Loader2, Clock } from "lucide-react";
 import Lock from "@/components/ui/cut-icons/privacy";
@@ -75,7 +77,8 @@ function formatMinutes(total: number): string {
 
 export default function SuperPowersPage() {
   const { t: _copy } = _useCopy();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const badgeLabel = useBadgeTierLabel();
   const { data: status, isLoading: loadingStatus, isError, refetch: refetchStatus } = useSuperpowers();
   const { data: ladder, isLoading: loadingLadder } = useSuperpowerLadder();
   const cancelBoost = useCancelBoost();
@@ -84,7 +87,8 @@ export default function SuperPowersPage() {
   // Prefer the personal copy so the page lights up without a second render.
   const powers = [...(status?.powers ?? ladder?.powers ?? [])]
     .filter(power => String(power.key) !== 'golden_hour')
-    .sort((a, b) => Number(b.key === 'team_up') - Number(a.key === 'team_up'));
+    .sort((a, b) => Number(b.key === 'team_up') - Number(a.key === 'team_up'))
+    .map(power => localizeSuperPower(power, i18n?.language));
 
   const refillsOn = useMemo(() => {
     const iso = status?.cycleEndsAt ?? ladder?.cycleEndsAt;
@@ -179,7 +183,7 @@ export default function SuperPowersPage() {
                       className="w-[40%] max-w-[120px] object-contain drop-shadow-[0_0_28px_rgba(255,255,255,0.18)]"
                     />
                   )}
-                  <span className="mt-1 text-base sm:text-2xl font-extrabold text-white leading-tight">{status.tier}</span>
+                  <span className="mt-1 text-base sm:text-2xl font-extrabold text-white leading-tight">{badgeLabel(status.tier)}</span>
                   <span className={cn(CHROME_TEXT, 'mt-1 sm:mt-2 text-3xl sm:text-5xl font-extrabold tracking-tight leading-none tabular-nums')}>
                     {t('superpowers.orbit.boostsLeft', {
                       count: status.boostsLeft,
@@ -214,6 +218,7 @@ export default function SuperPowersPage() {
             const isTeamUp = power.key === 'team_up';
             const usable = unlocked && power.available;
             const unlockBadge = badgeImage(power.tier);
+            const unlockTier = power.tier ? badgeLabel(power.tier) : '';
             const allowance =
               power.key === 'signal_flare' || power.key === 'harpoon'
                 ? (status?.signalsLeft ?? status?.boostsLeft)
@@ -237,8 +242,8 @@ export default function SuperPowersPage() {
                         <>
                           {!unlocked && <Lock className="h-3 w-3" />}
                           {unlocked
-                            ? t('superpowers.orbit.unlockedAt', { tier: power.tier, defaultValue: 'Unlocked at {{tier}}' })
-                            : t('superpowers.orbit.unlocksAt', { tier: power.tier, defaultValue: 'Unlocks at {{tier}}' })}
+                            ? t('superpowers.orbit.unlockedAt', { tier: unlockTier, defaultValue: 'Unlocked at {{tier}}' })
+                            : t('superpowers.orbit.unlocksAt', { tier: unlockTier, defaultValue: 'Unlocks at {{tier}}' })}
                           {unlockBadge && <img src={unlockBadge} alt="" aria-hidden="true" className="h-5 w-5 object-contain" />}
                         </>
                       )}
@@ -326,10 +331,11 @@ export default function SuperPowersPage() {
                 const isMine = index === myTierIndex;
                 const above = myTierIndex >= 0 && index > myTierIndex;
                 const badge = badgeImage(tier.name);
+                const label = badgeLabel(tier.name);
                 return (
                   <div
                     key={tier.name}
-                    title={`${tier.name}: ${tier.boostsPerCycle} × ${tier.minutesPerBoost}m`}
+                    title={`${label}: ${tier.boostsPerCycle} × ${tier.minutesPerBoost}m`}
                     className={cn(
                       'flex min-w-[76px] flex-1 flex-col items-center gap-1 rounded-xl border px-1.5 py-2.5 text-center',
                       isMine ? 'border-white bg-white/[0.06] text-white' : 'border-white/10 text-zinc-400',
@@ -338,7 +344,7 @@ export default function SuperPowersPage() {
                     {badge && (
                       <img src={badge} alt="" aria-hidden="true" className={cn('h-8 w-8 object-contain', above && 'grayscale brightness-50')} />
                     )}
-                    <span className="w-full truncate text-[10px] font-semibold">{tier.name}</span>
+                    <span className="w-full text-pretty text-[10px] font-semibold">{label}</span>
                     <span className="font-mono text-[11px] tabular-nums">
                       {formatMinutes(cycleMinutes(tier.boostsPerCycle, tier.minutesPerBoost))}
                     </span>
