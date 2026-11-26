@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
 import type { DeHubConversation } from '@/lib/api/dehub';
@@ -64,6 +64,22 @@ vi.mock('@/components/ui/swipeable-row', () => ({ SwipeableRow: ({ children }: {
 import MessagesPage from '../MessagesPage';
 
 const inbox = () => <MemoryRouter initialEntries={['/app/messages']}><MessagesPage /></MemoryRouter>;
+
+function ChatLocation() {
+  const { search, state } = useLocation();
+  return <output>{search} share {state?.shareLiveTokenId ?? 'none'}</output>;
+}
+
+it('keeps the stream share when Public Chat adds its back entry', async () => {
+  render(
+    <MemoryRouter initialEntries={[{ pathname: '/app/messages', search: '?chat=public', state: { shareLiveTokenId: '42' } }]}>
+      <MessagesPage />
+      <ChatLocation />
+    </MemoryRouter>,
+  );
+
+  expect(await screen.findByText('?chat=1 share 42')).toBeInTheDocument();
+});
 
 describe('conversation unread state', () => {
   beforeEach(() => {

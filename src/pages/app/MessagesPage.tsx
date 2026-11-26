@@ -1035,6 +1035,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const navigate = useNavigate();
   const chatEntryRef = useRef(false);
   const chatParamPresent = new URLSearchParams(location.search).get('chat') === '1';
+  const shareLiveTokenId = location.state?.shareLiveTokenId;
 
   useEffect(() => {
     if (!isMessagesRouteActive) return;
@@ -1043,9 +1044,11 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     if (!isAuthenticated && !fullscreen) return;
     if (chatOpen && !chatEntryRef.current) {
       chatEntryRef.current = true;
-      navigate(`${routeBase}?chat=1`);
+      navigate(`${routeBase}?chat=1`, {
+        state: showPublicChat && shareLiveTokenId ? { shareLiveTokenId } : undefined,
+      });
     }
-  }, [chatOpen, isMessagesRouteActive, navigate, routeBase, isAuthenticated, fullscreen]);
+  }, [chatOpen, isMessagesRouteActive, navigate, routeBase, isAuthenticated, fullscreen, showPublicChat, shareLiveTokenId]);
 
   // Back was pressed: the param is gone, so close the chat rather than leave
   // the route. This also clears a selection that would otherwise survive —
