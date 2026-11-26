@@ -1,6 +1,5 @@
 import { useTranslation as _useCopy } from 'react-i18next';
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
-import { tokenLabel } from '@/lib/token-label';
 import { DIRECT_TIP_TOKENS } from '@/lib/direct-tip-tokens';
 import { useState, useEffect, useId, useMemo, type ReactNode } from 'react';
 import { DhbAmount, DhbCoin } from '@/components/app/DhbAmount';
@@ -1075,13 +1074,13 @@ export function PostAccessToggles({
                         : "bg-transparent text-zinc-400 border-white/10 hover:bg-white/5"
                     )}
                   >
-                    {cur}
+                    {cur === 'DHB' ? 'RIFT Tokens' : cur}
                   </button>
                 ))}
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-sm text-white/70">{t('drawers.price')} ({tokenLabel(tempPpvCurrency)})</label>
+              <label className="text-sm text-white/70">{t('drawers.price')} ({tempPpvCurrency === 'DHB' ? 'RIFT Tokens' : tempPpvCurrency})</label>
               <input
                 type="number"
                 value={tempPpvAmount}
