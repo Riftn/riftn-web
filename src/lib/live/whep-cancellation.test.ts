@@ -29,7 +29,9 @@ it('closes a pending peer immediately and deletes a late session without attachi
   await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
   controller.abort();
   expect(peer.close).toHaveBeenCalledTimes(1);
-  finishPost(new Response('answer', { status: 201, headers: { Location: resource } }));
+  const response = new Response('answer', { status: 201, headers: { Location: 'whep/old' } });
+  Object.defineProperty(response, 'url', { value: endpoint });
+  finishPost(response);
   await rejected;
   expect(fetchMock).toHaveBeenCalledTimes(2);
   expect(fetchMock).toHaveBeenLastCalledWith(resource, { method: 'DELETE', keepalive: true });
