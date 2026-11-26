@@ -1458,13 +1458,21 @@ export function usePostForm(
     if (user?.address) {
       if (replaceId) deleteDraftFromDb(replaceId, user.address);
       saveDraftToDb(user.address, newDraft).then((dbId) => {
-        if (dbId) {
-          // Update local draft with DB id for proper deletion later
-          setDrafts(prev => prev.map(d => d.id === newDraft.id ? { ...d, id: dbId } : d));
+        if (!dbId) return;
+        const useSavedId = (list: Draft[]) => list.some(draft => draft.id === dbId)
+          ? list.filter(draft => draft.id !== newDraft.id)
+          : list.map(draft => draft.id === newDraft.id ? { ...draft, id: dbId } : draft);
+
+        // The next composer merges this backup with the server list. Leaving
+        // the temporary id on disk makes one saved draft look like two.
+        const stored = loadDraftsLocal(draftsKey);
+        if (stored.some(draft => draft.id === newDraft.id)) {
+          saveDraftsLocal(draftsKey, useSavedId(stored));
         }
+        setDrafts(useSavedId);
       });
     }
-  }, [text, hasImage, hasVideo, hasAudio, drafts, user?.address,
+  }, [text, hasImage, hasVideo, hasAudio, drafts, draftsKey, user?.address,
     titleText, showTitle, selectedCategory, isMature, isForKids, isSubscribersOnly,
     isPPV, ppvAmount, ppvPreviewSeconds, ppvCurrency, isWatch2Earn, w2eViews, w2eComments, w2eTotal,
     w2eCurrency, isTokenGated, tokenContract, tokenSymbol, tokenAmount, poll,
