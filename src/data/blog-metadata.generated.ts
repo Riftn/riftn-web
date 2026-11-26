@@ -471,13 +471,13 @@ export const blogPostsMetadata: BlogPost[] = [
   {
     "id": "how-to-buy-dhb-token-uk",
     "slug": "how-to-buy-dhb-token-uk",
-    "title": "DHB Token Explained + How to Buy Riftn in the UK (Step-by-Step)",
-    "seoTitle": "How to Buy DHB Token in the UK: Step-by-Step | Riftn",
-    "seoDescription": "How to buy DHB token in the UK, explained clearly: what $DHB does, which chains it runs on, where it trades, and a careful step-by-step for UK buyers.",
-    "excerpt": "A plain-English UK guide to the DHB token: what it does, which chains it runs on, where it trades, and a careful, non-advisory step-by-step for buying it safely.",
+    "title": "Riftn $RIFT Launch Status and the Legacy DHB Token",
+    "seoTitle": "Can You Buy Riftn $RIFT in the UK? Launch Status",
+    "seoDescription": "Check the official Riftn $RIFT launch status, how to use it in the app, and how it relates to the legacy DHB token.",
+    "excerpt": "A guide to Riftn’s in-app $RIFT, its pending on-chain launch, and the legacy DHB token.",
     "content": "",
     "bannerImage": "/media/how-to-buy-dhb-token-uk-banner-r2.jpg",
-    "bannerImageAlt": "A guide to buying the DHB token in the UK on the Base network, with the Riftn logo",
+    "bannerImageAlt": "Riftn token guide with the Riftn logo",
     "author": {
       "name": "Mal Jan"
     },
@@ -501,7 +501,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "slug": "what-is-dehub",
     "title": "What is Riftn?",
     "seoTitle": "What is Riftn? The Open Source, User-Owned Social Platform Explained",
-    "seoDescription": "Riftn is the open source, user-owned and censorship-resistant social platform for Web3 creators and communities. Who we are, how it works, the DHB token, and how creators earn.",
+    "seoDescription": "Riftn is the open source, user-owned and censorship-resistant social platform for Web3 creators and communities. Who we are, how it works, the in-app $RIFT currency, and how creators earn.",
     "excerpt": "Riftn is the open source, user-owned and censorship-resistant social platform for Web3 creators and communities. Here is who we are, what that actually means, how it works, and why it exists.",
     "content": "",
     "bannerImage": "/media/what-is-dehub-banner-manrope.jpg",
@@ -510,12 +510,13 @@ export const blogPostsMetadata: BlogPost[] = [
       "name": "Mal Jan"
     },
     "publishedAt": "2026-06-23T10:30:00.000Z",
+    "updatedAt": "2026-11-25T00:00:00.000Z",
     "tags": [
       "Riftn",
       "Explainer",
       "Web3",
       "Social Media",
-      "DHB"
+      "$RIFT"
     ],
     "readingTime": 7,
     "featured": true,
@@ -526,7 +527,7 @@ export const blogPostsMetadata: BlogPost[] = [
     "slug": "what-is-watch-to-earn",
     "title": "What Is Watch-to-Earn? How Riftn Actually Pays You to Watch (2026)",
     "seoTitle": "What Is Watch-to-Earn? How It Works in 2026 | Riftn",
-    "seoDescription": "What is watch to earn? A plain-English guide to how watch-to-earn works, why it exists, honest earnings caveats, and how Riftn pays you to watch on-chain.",
+    "seoDescription": "What is watch to earn? A plain-English guide to how watch-to-earn works, why it exists, honest earnings caveats, and how Riftn rewards eligible viewing inside the app.",
     "excerpt": "Watch-to-earn pays viewers a share of the value their attention creates. Here is what watch to earn actually means, how it works, and how Riftn does it honestly.",
     "content": "",
     "bannerImage": "/media/what-is-watch-to-earn-banner-r2.jpg",

@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useLanguage } from '@/contexts/LanguageContext';
 
+const CURRENT_ANSWERS = new Set([2, 3, 4, 5, 6, 11, 28]);
+
 const FAQ = () => {
   const { t: _copy } = _useCopy();
   const { t } = useLanguage();
@@ -36,7 +38,7 @@ const FAQ = () => {
                     {t(`faq.q${i}`)}
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground pb-4 leading-relaxed">
-                    {t(i === 4 ? 'faq.a4Launch' : `faq.a${i}`)}
+                    {t(i === 4 ? 'faq.a4LaunchCurrent' : `faq.a${i}${CURRENT_ANSWERS.has(i) ? 'Current' : ''}`)}
                   </AccordionContent>
                 </AccordionItem>
               ))}

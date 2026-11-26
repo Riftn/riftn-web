@@ -21625,6 +21625,9 @@
   "tokenLaunch": {
     "eyebrow": "Coming soon",
     "title": "Token launching soon",
+    "riftTitle": "$RIFT on-chain launch",
+    "riftStatus": "$RIFT is Riftn’s in-app currency. You can already use it inside Riftn. The on-chain token has yet to launch and has no official contract address or exchange listing. Sign up for a launch email.",
+    "riftSeoDescription": "$RIFT is Riftn’s in-app currency. You can already use it inside Riftn. The on-chain token has yet to launch and has no official contract address or exchange listing.",
     "body": "Buying is closed while the new token gets ready. Get an email the moment it goes live.",
     "notifyMe": "Notify me",
     "sendTo": "We will email {{email}}",

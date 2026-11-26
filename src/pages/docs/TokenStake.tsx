@@ -24,6 +24,7 @@ const TokenStake = () => {
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
+        <p className="text-lg text-muted-foreground leading-relaxed mb-4">{t('faq.a6Current')}</p>
         <p className="text-lg text-muted-foreground leading-relaxed">{t('tokenStake.introDesc')}</p>
         <p className="text-lg text-muted-foreground leading-relaxed mt-4">{t('tokenStake.introDesc2')}</p>
       </div>

@@ -189,8 +189,8 @@ describe('edge-rendered pages', () => {
     expect(body).toContain(`By <a rel="author" href="https://riftn.com/docs/team">${post.author}</a>`);
     expect(trail['@type']).toBe('BreadcrumbList');
     const image = meta(body, 'og:image')!.replace(/&amp;/g, '&');
-    // The post's own banner, read straight from /media and made 1200x630.
-    expect(image).toBe(`https://dehub.io/cdn-cgi/image/fit=cover,width=1200,height=630,format=jpeg,quality=80/https://dehub.io${post.bannerImage}`);
+    // The post's own banner, served under the canonical site host.
+    expect(image).toBe('https://riftn.com/_og/blog-card/' + slug + '.jpg');
     expect(meta(body, 'og:image:width')).toBe('1200');
   });
 

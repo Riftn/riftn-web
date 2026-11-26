@@ -32,6 +32,7 @@ export default function TokenBridge() {
       <div className="space-y-8">
         <div>
           <h1 className="text-4xl font-bold mb-6">{t('tokenBridge.title')}</h1>
+          <p className="text-lg text-muted-foreground mb-4">{t('faq.a5Current')}</p>
           <p className="text-lg text-muted-foreground mb-8">{t('tokenBridge.subtitle')}</p>
         </div>
 

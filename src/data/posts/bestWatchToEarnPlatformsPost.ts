@@ -29,15 +29,15 @@ If you are new to the model itself, start with our explainer on [what watch-to-e
 
 We will be upfront that this is our platform, so weigh the section accordingly. What earns Riftn a place near the top is not marketing; it is that the earning mechanics are wired into a working, open-source social network rather than a standalone rewards gimmick.
 
-On [Riftn, the decentralised social network](/guides/what-is-dehub), watch-to-earn takes the form of on-chain **bounties**: creators and advertisers fund a reward pool, and viewers who watch qualifying content earn a share, settled on-chain in $DHB. There is no browser extension to install and no NFT to buy before you can start, you watch in the [Riftn app](https://riftn.com/app) and rewards accrue against your wallet.
+On [Riftn, the decentralised social network](/guides/what-is-dehub), watch-to-earn takes the form of **bounties**: creators and advertisers fund a reward pool, and viewers who watch qualifying content can earn a share in $RIFT for use inside the app. There is no browser extension to install and no NFT to buy before you can start, you watch in the [Riftn app](https://riftn.com/) and eligible rewards accrue to your account.
 
-Because the whole platform is on-chain, the reward events are transparent and verifiable rather than a number ticking up in a private database. Creators can mint content on-chain as they upload it or any time after, the feed is chronological rather than algorithm-gated, and up to 90% of ad revenue is shared back into the ecosystem. Alongside watch-to-earn there is a play-to-earn arcade, including the flagship MMA battle royale **Last Chad Standing**, plus on-chain live streaming on Livepeer that has scaled past 50,000 concurrent viewers, and end-to-end encrypted messaging.
+Creators can mint content on-chain as they upload it or any time after, the feed is chronological rather than algorithm-gated, and up to 90% of ad revenue is shared back into the ecosystem. Alongside watch-to-earn there is a play-to-earn arcade, including the flagship MMA battle royale **Last Chad Standing**, plus on-chain live streaming on Livepeer that has scaled past 50,000 concurrent viewers, and end-to-end encrypted messaging.
 
-The $DHB token runs primarily on Base (an Ethereum Layer 2), with contracts also on BNB Chain and Polygon, and is tradable on decentralised exchanges and on Coinbase, and listed on CoinGecko and CoinMarketCap.
+$RIFT is Riftn’s in-app currency. You can already use it inside Riftn. The on-chain token has yet to launch and has no official contract address or exchange listing. See the [official launch status](/docs/token/where-to-buy).
 
-**Honest limitations.** Riftn is a full social platform, so watch-to-earn is one mechanic among many rather than the single headline number, if you only want a slot-machine "watch, tap, claim" loop, that is not the design. Bounty pools are funded by creators and advertisers, so earnings scale with genuine engagement and available campaigns rather than a fixed guaranteed rate, and, as with any token, the value of $DHB moves with the market.
+**Honest limitations.** Riftn is a full social platform, so watch-to-earn is one mechanic among many rather than the single headline number, if you only want a slot-machine "watch, tap, claim" loop, that is not the design. Bounty pools are funded by creators and advertisers, so earnings scale with genuine engagement and available campaigns rather than a fixed guaranteed rate.
 
-**Best for:** viewers who want on-chain, no-paywall earning inside a censorship-resistant network they actually own a stake in. Try it at [the Riftn web app](https://riftn.com) or on [Google Play](https://play.google.com/store/apps/details?id=io.dehub.mobile).
+**Best for:** viewers who want in-app rewards with no paywall inside a censorship-resistant network they actually own a stake in. Try it at [the Riftn web app](https://riftn.com) or on [Google Play](https://play.google.com/store/apps/details?id=io.dehub.mobile).
 
 ### Theta.tv, established, but watch-to-earn is rate-limited
 
@@ -105,7 +105,7 @@ You can start free with [Riftn watch-to-earn](https://riftn.com/app), and read t
 
 ### What is the best watch-to-earn platform in 2026?
 
-There is no single winner for everyone, but the strongest picks are on-chain platforms with no paywall to start and transparent rewards. Riftn scores well because earning is built into a full open-source social network with no extension or NFT required; Theta and XCAD remain viable with caveats around reward caps and browser dependence. Avoid platforms that force an upfront NFT or hardware purchase.
+There is no single winner for everyone, but the strongest picks are on-chain platforms with no paywall to start and transparent rewards. Riftn offers in-app rewards with no extension or NFT required while its on-chain release is pending; Theta and XCAD remain viable with caveats around reward caps and browser dependence. Avoid platforms that force an upfront NFT or hardware purchase.
 
 ### Which watch-to-earn apps actually pay real money?
 
@@ -117,7 +117,7 @@ Cheelee is a functioning app rather than an outright fake, but it carries a heav
 
 ### Do I need to pay to start earning by watching videos?
 
-You should not have to. Genuine watch-to-earn rewards your attention, so a mandatory NFT, subscription, or hardware purchase before you can earn is a red flag. Riftn, for example, lets you watch and earn on-chain with no extension and no purchase to begin. Free-to-start is one of our core criteria for a trustworthy platform.
+You should not have to. Genuine watch-to-earn rewards your attention, so a mandatory NFT, subscription, or hardware purchase before you can earn is a red flag. Riftn, for example, offers in-app $RIFT rewards without an extension or purchase. Free-to-start is one of our core criteria for a trustworthy platform.
 
 ### Are watch-to-earn crypto rewards taxable in the UK?
 

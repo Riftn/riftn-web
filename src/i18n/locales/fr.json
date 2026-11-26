@@ -21653,6 +21653,9 @@
     "enter": "Entrer dans le donjon"
   },
   "tokenLaunch": {
+    "riftTitle": "Lancement de $RIFT sur chaîne",
+    "riftStatus": "$RIFT est la monnaie interne de Riftn. Vous pouvez déjà l’utiliser dans Riftn. Le jeton sur chaîne reste à lancer et ne dispose d’aucune adresse de contrat ni cotation officielle. Inscrivez-vous pour recevoir un e-mail au lancement.",
+    "riftSeoDescription": "$RIFT est la monnaie interne de Riftn. Vous pouvez déjà l’utiliser dans Riftn. Le jeton sur chaîne reste à lancer et ne dispose d’aucune adresse de contrat ni cotation officielle.",
     "eyebrow": "À venir bientôt",
     "title": "Le jeton arrive bientôt",
     "body": "Achat fermé en attendant le nouveau jeton. Recevez un email dès sa sortie.",

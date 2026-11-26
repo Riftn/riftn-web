@@ -1,6 +1,6 @@
 # Riftn
 
-> Riftn (riftn.com), formerly DeHub (dehub.io), is an open source, user-owned and censorship-resistant social media protocol, in development since 2021, with a web app and mobile apps. Posts can be minted on-chain, creators keep their audience and up to 99% of their revenue, and its token, $RIFT, replaces the old DHB token for tips, watch-to-earn rewards, staking and governance. $RIFT is not trading yet. Not to be confused with DePaul University's DeHUB portal or Rowan's DEHub.
+> Riftn (riftn.com), formerly DeHub (dehub.io), is an open source, user-owned and censorship-resistant social media protocol, in development since 2021, with a web app and mobile apps. Posts can be minted on-chain, creators keep their audience and up to 99% of their revenue, and its token, $RIFT, replaces the old DHB token for tips, watch-to-earn rewards, unlocks and Creator Studio. $RIFT is Riftn’s in-app currency. You can already use it inside Riftn. The on-chain token has yet to launch and has no official contract address or exchange listing. Governance voting is free. Not to be confused with DePaul University's DeHUB portal or Rowan's DEHub.
 
 Every link below is a public page that renders without an account. The app's signed-in screens (messages, wallet, notifications, settings) are private and not listed. Machine-readable API access for assistants is described in [skill.md](https://riftn.com/skill.md). The full text of the FAQ and every guide below is in [llms-full.txt](https://riftn.com/llms-full.txt).
 
@@ -9,7 +9,7 @@ Every link below is a public page that renders without an account. The app's sig
 - Name: Riftn. It was called DeHub until November 2026. The old address dehub.io forwards to riftn.com, and old links keep working.
 - What it is: a social media protocol. It is open source and user-owned, with video, shorts, live streaming, music, encrypted messaging, communities, browser games and a built-in wallet.
 - Cost: free to join and post. Creators keep up to 99% of what they earn, and tips arrive on-chain as they are sent.
-- Token: $RIFT is Riftn's token, used for tips, unlocks, rewards and governance votes. It replaces DHB, and DHB holders keep their balance and claim it by logging in once after listing.
+- Token: $RIFT is Riftn’s in-app currency. You can already use it inside Riftn. The on-chain token has yet to launch and has no official contract address or exchange listing. $RIFT is used for tips, unlocks and rewards. DHB is the legacy asset. See the rebrand guide for the announced migration plan.
 - Apps: web at riftn.com, Android on Google Play or direct APK, and iPhone on the App Store.
 - Is Riftn the same as DeHub? Yes. [What changed and what did not](https://riftn.com/guides/is-riftn-the-same-as-dehub).
 - Since: in development since 2021. The rename and what changed is explained in [DeHub is now Riftn](https://riftn.com/guides/dehub-next-chapter-riftn-bnb-recovery-relaunch).
@@ -49,11 +49,11 @@ Every link below is a public page that renders without an account. The app's sig
 
 ## Token, trading and governance
 
-- [Token overview](https://riftn.com/docs/token/overview): What Riftn tokens are and which chains it runs on.
+- [Token overview](https://riftn.com/docs/token/overview): How $RIFT works inside Riftn before its on-chain launch.
 - [Token economics](https://riftn.com/docs/token/economics): Supply, emissions and allocation.
-- [Where to buy tokens](https://riftn.com/docs/token/where-to-buy): Exchanges and on-ramps that list tokens.
+- [Where to buy tokens](https://riftn.com/docs/token/where-to-buy): Official on-chain launch status and the launch list.
 - [Staking tokens](https://riftn.com/docs/token/stake): How staking works and what badges it unlocks.
-- [Governance](https://riftn.com/docs/token/governance): How proposals and voting work.
+- [Governance](https://riftn.com/docs/token/governance): How proposals work and how to vote for free.
 - [DEX](https://riftn.com/dex): Trade tokens with limit orders on Base or BNB Chain.
 - [Bridge](https://riftn.com/bridge): Move tokens between Base and BNB Chain.
 

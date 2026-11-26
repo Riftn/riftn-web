@@ -24,9 +24,9 @@ const TokenWhereToBuy = () => {
             <Clock className="w-3.5 h-3.5" />
             {_t('tokenLaunch.eyebrow', 'Coming soon')}
           </span>
-          <h2 className="mt-4 text-2xl font-bold text-foreground">{_t('tokenLaunch.title', 'Token launching soon')}</h2>
+          <h2 className="mt-4 text-2xl font-bold text-foreground">{_t('tokenLaunch.riftTitle', '$RIFT on-chain launch')}</h2>
           <p className="mt-2 text-muted-foreground leading-relaxed max-w-md mx-auto">
-            {_t('dhbListing.body', "Riftn tokens aren't trading yet. Get an email when trading opens.")}
+            {t('faq.a4LaunchCurrent')}
           </p>
           <Link
             to="/buy"
@@ -42,7 +42,7 @@ const TokenWhereToBuy = () => {
           <CardTitle className="text-xl text-foreground">{t('tokenWhereToBuy.disclaimer')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground leading-relaxed text-sm">{t('tokenWhereToBuy.disclaimerText')}</p>
+          <p className="text-muted-foreground leading-relaxed text-sm">{t('faq.a20')}</p>
         </CardContent>
       </Card>
     </div>

@@ -34,15 +34,15 @@ export { EditorPresenceRoom } from './server/editor-presence.ts';
  *   - /app/communities/:slug
  *   - /:username (profile pages)
  *
- * Regular browsers always fall through to the React SPA.
- * Serving SSR HTML to browsers caused an infinite reload loop because the
- * embedded `window.location.href` redirect pointed back to the same URL.
+ * Browsers run the React SPA. Public documents can include the edge-rendered
+ * content in their initial HTML, which React replaces when it mounts.
  */
 
 // Shared with the app (src/lib/reserved-usernames.js is plain JS so wrangler's
 // esbuild can bundle it here and vite can bundle it there). SYSTEM_ROUTES below
 // is derived from it — see the comment there.
 import { ROUTE_SEGMENTS, WORKER_ASSET_ROUTES } from './src/lib/reserved-usernames.js';
+import { FEATURES, PLATFORMS, SOURCES, STATUS_LABELS, entryFor } from './src/data/platform-comparison.ts';
 import { edgeMaintenanceResponse } from './server/edge-maintenance.mjs';
 import { CONSOLIDATED_GUIDES, MILESTONE_REDIRECTS, RETIRED_GUIDES, cleanBlogSlug, localizedGuideRedirect } from './src/lib/blog-redirects.js';
 import { STREAM_LINKS, STREAM_PAGE, streamFaqLd } from './src/lib/streamer-page.js';
@@ -290,7 +290,7 @@ const ORG_SAME_AS = [
   // which says nothing about who Riftn is.
   'https://www.instagram.com/riftn_com/',
   'https://www.tiktok.com/@riftn_com',
-  'https://coinmarketcap.com/currencies/dehub/',
+  'https://apps.apple.com/app/id6770382811',
 ];
 // The old name and address, so search engines and assistants keep treating
 // Riftn as the same site that used to be DeHub at dehub.io.
@@ -675,7 +675,7 @@ function absolutizeImage(url) {
  * (ogSourceResponse), which still covers both.
  */
 const BLOG_CARD_PAD = 'fit=pad,width=1200,height=630,background=%230a0a0b,format=jpeg,quality=82';
-function buildBlogShareImage(post) {
+function blogCardTransformUrl(post) {
   const banner = absolutize(post.bannerImage);
   if (banner && banner.startsWith(`${APP_URL}/media/`)) {
     const w = Number(post.bannerWidth), h = Number(post.bannerHeight);
@@ -684,6 +684,10 @@ function buildBlogShareImage(post) {
     return `${IMAGE_TRANSFORM_BASE}${fit}/${TRANSFORM_SOURCE_ORIGIN}${banner.slice(APP_URL.length)}`;
   }
   return `${IMAGE_TRANSFORM_BASE}${CARD_COVER}/${TRANSFORM_SOURCE_ORIGIN}${OG_SOURCE_PREFIX}blog/${encodeURIComponent(post.slug)}`;
+}
+
+function buildBlogShareImage(post) {
+  return APP_URL + '/_og/blog-card/' + encodeURIComponent(post.slug) + '.jpg';
 }
 
 /**
@@ -1246,11 +1250,11 @@ const MARKETING_PAGES = {
 <p><a href="${APP_URL}/ads">Open Ads Manager</a> or <a href="${APP_URL}/docs/advertising">read how POVR works</a>.</p>`,
   },
   'buy': {
-    title: 'Buy: Purchase Crypto on Riftn',
-    description: 'Buy tokens and other cryptocurrencies directly on Riftn with your credit card. Fast checkout, multiple chains supported.',
-    heading: 'Buy Crypto on Riftn',
-    bodyHtml: `<p>Buy tokens and other cryptocurrencies directly on Riftn with a credit card, delivered straight to your wallet. Checkout supports multiple chains, so you can buy on the network you already use.</p>
-<p><a href="${APP_URL}/buy">Buy crypto</a>, <a href="${APP_URL}/dex">trade tokens at your price</a> or <a href="${APP_URL}/docs/token/where-to-buy">see where else to get tokens</a>.</p>`,
+    title: '$RIFT on-chain launch',
+    description: '$RIFT is Riftn’s in-app currency. You can already use it inside Riftn. The on-chain token has yet to launch and has no official contract address or exchange listing.',
+    heading: '$RIFT on-chain launch',
+    bodyHtml: `<p>$RIFT is Riftn’s in-app currency. You can already use it inside Riftn. The on-chain token has yet to launch and has no official contract address or exchange listing.</p>
+<p><a href="${APP_URL}/docs/token/where-to-buy">Check the official $RIFT launch status</a>.</p>`,
   },
   'builder': {
     title: 'Builder: Build Apps with AI on Riftn',
@@ -1991,6 +1995,27 @@ ${DEHUB_APP_PAGE.faq.map(({ q, a }) => `<h3>${q}</h3>\n<p>${a}</p>`).join('\n')}
     bodyHtml: `<p>Events are community meetups, AMAs and calls listed on Riftn. Browse what is coming up, RSVP to anything open, and host your own, each event gets its own page and share card.</p>`,
   },
 };
+
+const COMPARE_HIGHLIGHT_IDS = [
+  'text', 'video', 'shorts', 'articles', 'polls', 'live', 'screen-share', 'tip',
+  'subscriptions', 'ppv', 'e2ee', 'video-editor', 'export', 'communities', 'launchpad',
+];
+
+function comparisonHighlights() {
+  const rows = FEATURES.filter(feature => COMPARE_HIGHLIGHT_IDS.includes(feature.id));
+  return '<section aria-label="Comparison highlights"><h2>Comparison highlights</h2>' + rows.map(feature => {
+    const entries = [{ id: 'dehub', name: 'Riftn' }, ...PLATFORMS.filter(platform =>
+      feature.peers[platform.id]?.source &&
+      ['documented', 'limited', 'ecosystem'].includes(feature.peers[platform.id].status))];
+    return '<h3>' + escHtml(feature.name) + '</h3><ul>' + entries.map(platform => {
+      const entry = entryFor(feature, platform.id);
+      const source = SOURCES[entry.source];
+      return '<li><strong>' + escHtml(platform.name) + '</strong> (' + escHtml(STATUS_LABELS[entry.status]) +
+        '): ' + escHtml(entry.note) + (source ? ' <a href="' + escHtml(source.url) + '">' +
+        escHtml(source.title) + '</a>' : '') + '</li>';
+    }).join('') + '</ul>';
+  }).join('') + '</section>';
+}
 
 function buildMarketingHtml(key, meta) {
   // `path` for the pages that live only under /app: `/${key}` would name a URL
@@ -3668,6 +3693,22 @@ function entityLooksThin({ name, description, image }) {
   return d.length < ENTITY_MIN_DESCRIPTION && !image;
 }
 
+function storeIsIndexable(store) {
+  return !entityLooksThin({
+    name: store.name,
+    description: store.description,
+    image: absolutize(store.banner_url || store.avatar_url),
+  });
+}
+
+function listingIsIndexable(listing) {
+  return listing.status === 'active' && !entityLooksThin({
+    name: listing.title,
+    description: listing.description,
+    image: absolutize(Array.isArray(listing.images) ? listing.images[0] : null),
+  });
+}
+
 function buildStoreHtml(store) {
   const canonicalUrl = `${APP_URL}/stores/${store.id}`;
   const name = store.name || 'Store';
@@ -3683,7 +3724,7 @@ function buildStoreHtml(store) {
     description,
     image,
     ogType: 'profile',
-    noindex: entityLooksThin({ name: store.name, description: store.description, image }),
+    noindex: !storeIsIndexable(store),
     heading: name,
     breadcrumb: `<a href="${APP_URL}">Riftn</a> › <a href="${APP_URL}/stores">Stores</a>`,
     bodyHtml: `<p>${escHtml(description)}</p>`,
@@ -3726,7 +3767,7 @@ function buildListingHtml(listing) {
     ogType: 'product',
     // A sold or withdrawn item is not something to leave in the index; the
     // link still unfurls for anyone who shares it.
-    noindex: listing.status !== 'active' || entityLooksThin({ name: listing.title, description: listing.description, image }),
+    noindex: !listingIsIndexable(listing),
     heading: name,
     breadcrumb: `<a href="${APP_URL}">Riftn</a> › <a href="${APP_URL}/stores/${escHtml(storeId)}">${escHtml(storeName)}</a>`,
     bodyHtml: `<p>${escHtml(description)}</p>
@@ -4601,7 +4642,7 @@ function buildFeatureRequestHtml(feature) {
     ogType: 'article',
     // A declined report is a dead end, same treatment as a sold listing or a
     // finished bounty: shareable by whoever holds the link, not crawlable.
-    noindex: feature.status === 'declined',
+    noindex: !featureIsIndexable(feature),
     heading: name,
     breadcrumb: `<a href="${APP_URL}">Riftn</a> › <a href="${APP_URL}/build">Build</a>`,
     bodyHtml: `<p>${escHtml(description)}</p>
@@ -5227,10 +5268,10 @@ function articleSlugOf(pathname) {
  *  undefined when the lookup failed (rate limit, timeout, 5xx). A failed
  *  lookup is not a missing post: answering 404 for it told crawlers that
  *  real articles were gone whenever the API was busy. */
-async function resolveArticleSlugTokenId(slug) {
+async function resolveArticleSlugTokenId(slug, timeoutMs = 6000) {
   try {
     const res = await fetch(`https://api.dehub.io/api/article/${encodeURIComponent(slug)}`, {
-      signal: AbortSignal.timeout(6000),
+      signal: AbortSignal.timeout(timeoutMs),
     });
     if (res.status === 429 || res.status >= 500) return undefined;
     if (!res.ok) return null;
@@ -6454,6 +6495,15 @@ const ENTITY_SITEMAP_MIN_TEXT = 40;
 const FEATURE_SITEMAP_MIN_TEXT = 280;
 const FEATURE_SITEMAP_MIN_COMMENTS = 2;
 const FEATURE_SITEMAP_MIN_VOTES = 3;
+
+function featureIsIndexable(feature) {
+  if (feature.status === 'declined') return false;
+  const text = substantiveLength(feature.description);
+  const comments = Number(feature.comment_count) || 0;
+  const votes = Number(feature.vote_count) || 0;
+  return text >= FEATURE_SITEMAP_MIN_TEXT ||
+    (text >= ENTITY_SITEMAP_MIN_TEXT && comments >= FEATURE_SITEMAP_MIN_COMMENTS && votes >= FEATURE_SITEMAP_MIN_VOTES);
+}
 const ENTITY_SITEMAPS = {
   bounties: [{
     // Same rule as the page's own robots (status and deadline), so an open
@@ -6475,22 +6525,22 @@ const ENTITY_SITEMAPS = {
   }],
   stores: [
     {
-      query: () => 'stores?is_active=eq.true&select=id,name,banner_url,avatar_url,updated_at&order=created_at.asc&limit=5000',
-      entry: (s) => (s.name && String(s.name).trim()
+      query: () => 'stores?is_active=eq.true&select=id,name,description,banner_url,avatar_url,updated_at&order=created_at.asc&limit=5000',
+      entry: (s) => (storeIsIndexable(s)
         ? { loc: `${APP_URL}/stores/${s.id}`, lastmod: s.updated_at, changefreq: 'weekly', priority: '0.5', image: absolutize(s.banner_url || s.avatar_url) }
         : null),
     },
     {
       // Items of live stores only. A sold or withdrawn item is noindex on its
       // own page (buildListingHtml), and its store's page is gone with it.
-      query: () => 'store_listings?status=eq.active&select=id,store_id,images,updated_at,stores!inner(is_active)&stores.is_active=eq.true&order=created_at.asc&limit=5000',
-      entry: (l) => ({
+      query: () => 'store_listings?status=eq.active&select=id,store_id,title,description,status,images,updated_at,stores!inner(is_active)&stores.is_active=eq.true&order=created_at.asc&limit=5000',
+      entry: (l) => (listingIsIndexable(l) ? {
         loc: `${APP_URL}/stores/${l.store_id}?listing=${l.id}`,
         lastmod: l.updated_at,
         changefreq: 'weekly',
         priority: '0.5',
         image: absolutize(Array.isArray(l.images) ? l.images[0] : null),
-      }),
+      } : null),
     },
   ],
   events: [{
@@ -6529,11 +6579,7 @@ const ENTITY_SITEMAPS = {
     // the rest of the site is judged. The pages themselves still resolve.
     query: () => 'feature_requests?status=neq.declined&select=id,title,description,status,image_url,vote_count,comment_count,updated_at&order=created_at.asc&limit=5000',
     entry: (f) => {
-      if (f.status === 'declined') return null;
-      const text = substantiveLength(`${f.title || ''} ${f.description || ''}`);
-      if (text < ENTITY_SITEMAP_MIN_TEXT) return null;
-      const discussed = Number(f.comment_count) >= FEATURE_SITEMAP_MIN_COMMENTS || Number(f.vote_count) >= FEATURE_SITEMAP_MIN_VOTES;
-      if (text < FEATURE_SITEMAP_MIN_TEXT && !discussed) return null;
+      if (!featureIsIndexable(f)) return null;
       return { loc: `${APP_URL}/build?feature=${f.id}`, lastmod: f.updated_at, changefreq: 'weekly', priority: '0.4', image: absolutizeImage(f.image_url) };
     },
   }],
@@ -6735,6 +6781,42 @@ export function legacyStreamRedirect(request) {
   return new Response(null, { status: 301, headers: { Location: `${APP_URL}/app/post/${match[1]}` } });
 }
 
+const INITIAL_PUBLIC_ROUTES = new Set([
+  '/buy', '/compare', '/creators', '/dehub-app', '/docs', '/explore', '/shorts', '/stream', '/videos',
+]);
+
+const PAGE_META_TAGS = /<title>[^<]*<\/title>|<meta\b[^>]*(?:name|property)="(?:description|robots|og:[^"]+|twitter:[^"]+)"[^>]*>|<link\b[^>]*(?:rel="canonical"|hreflang="[^"]+")[^>]*>/gi;
+
+async function withInitialPublicContent(shell, page, pageStatus) {
+  if (!shell.ok || !shell.headers.get('Content-Type')?.includes('text/html')) return shell;
+  const html = await shell.text();
+  const root = '<div id="root">';
+  if (!html.includes(root)) return new Response(html, shell);
+  const head = page.match(/<head>([\s\S]*?)<\/head>/i)?.[1] || '';
+  const metadata = (head.match(PAGE_META_TAGS) || []).join('\n');
+  const graph = [...head.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/gi)]
+    .flatMap(([, source]) => {
+      try { const node = JSON.parse(source); return node['@graph'] || [node]; } catch { return []; }
+    });
+  const meta = metadata + (graph.length
+    ? '<script id="seo-jsonld" type="application/ld+json">' +
+      jsonLdScript({ '@context': 'https://schema.org', '@graph': graph }) + '</script>'
+    : '');
+  const body = page.match(/<body[^>]*>([\s\S]*?)<\/body>/i)?.[1] || '';
+  const language = page.match(/<html\b[^>]*\blang="([^"]+)"/i)?.[1];
+  const style = '<style>#root .edge-public-content{box-sizing:border-box;max-width:74ch;margin:0 auto;padding:2rem 1rem;color:var(--boot-fg,CanvasText);background:var(--boot-bg,Canvas);line-height:1.55;overflow-wrap:anywhere}#root .edge-public-content img{max-width:100%;height:auto}#root .edge-public-content .dh-cta{display:none}</style>';
+  const snapshot = '<div class="edge-public-content">' + body + '</div>';
+  const result = html.replace(PAGE_META_TAGS, '')
+    .replace('<head>', () => '<head>' + meta + style)
+    .replace(/<html\b[^>]*>/i, tag => language ? tag.replace(/\blang="[^"]*"/i, 'lang="' + language + '"') : tag)
+    .replace(root, () => root + snapshot);
+  const response = new Response(result, { status: pageStatus, headers: shell.headers });
+  for (const name of ['Content-Length', 'Content-Encoding', 'ETag']) response.headers.delete(name);
+  response.headers.append('Vary', 'User-Agent');
+  if (pageStatus === 404) response.headers.set('X-Robots-Tag', 'noindex');
+  return response;
+}
+
 async function handleRequest(request, env, ctx) {
   const acme = standbyAcmeChallenge(request);
   if (acme) return acme;
@@ -6774,6 +6856,11 @@ async function handleRequest(request, env, ctx) {
   // Mirror hosts (staging, previews, aliases) serve identical content and
   // must not index as duplicates of dehub.io.
   const isCanonicalHost = url.hostname === 'riftn.com';
+  const initialPath = canonicalizePath(pathname).replace(/\/+$/, '') || '/';
+  const browserPublicDocument = request.method === 'GET' && request.headers.get('Accept')?.includes('text/html') &&
+    !isCrawlerUa(request.headers.get('User-Agent') || '') && url.searchParams.get(APP_ESCAPE_PARAM) !== '1' &&
+    !url.searchParams.has('q') && (INITIAL_PUBLIC_ROUTES.has(initialPath) ||
+      /^\/(?:docs|guides)\//.test(initialPath));
   // Every prerendered response passes through here, which makes it the one
   // place that can put the site's own look on all of them — the pages built
   // in this file and the ones proxied from the ssr-seo function alike.
@@ -6798,6 +6885,12 @@ async function handleRequest(request, env, ctx) {
           html = localizePage(html, route, lang, { ...table, [route]: { ...table[route], [lang]: page } });
         } else html = localizePage(html, route, lang, table);
       }
+    }
+    if (route === '/compare' && !requestedLocale(url)) {
+      html = html.replace('</main>', comparisonHighlights() + '</main>');
+    }
+    if (browserPublicDocument && (resp.status === 200 || resp.status === 404)) {
+      return withInitialPublicContent(await guardNext(), html, resp.status);
     }
     return new Response(html, {
       status: resp.status,
@@ -7215,10 +7308,24 @@ async function handleRequest(request, env, ctx) {
   // keeping ?ref= and anything else the link carried.
   const requestAsPost = trimmedPath.match(/^\/(?:app\/)?posts?\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i);
   if (requestAsPost) {
+    const featureId = requestAsPost[1].toLowerCase();
+    const feature = await supabaseLookup('feature_requests?id=eq.' + featureId + '&select=id&limit=1');
+    if (feature === undefined) return new Response('Temporarily unavailable', {
+      status: 503, headers: { 'Retry-After': '120', 'Cache-Control': 'no-store' },
+    });
+    if (!feature) return new Response('Not found', { status: 404 });
     const q = new URLSearchParams(url.search);
     q.delete('feature');
     const rest = q.toString();
     return redirect301(`${APP_URL}/build?feature=${requestAsPost[1].toLowerCase()}${rest ? `&${rest}` : ''}`);
+  }
+
+  if (trimmedPath === '/guides/what-is-riftn') {
+    return redirect301(APP_URL + '/guides/what-is-dehub' + url.search);
+  }
+
+  if (/^\/(?:app\/)?search$/i.test(trimmedPath) && url.searchParams.has('q')) {
+    return redirect301(APP_URL + '/explore' + url.search);
   }
 
   // The NFT market moved into the Fractions page as its NFTs tab (App.tsx
@@ -7667,6 +7774,21 @@ async function handleRequest(request, env, ctx) {
     try { id = decodeURIComponent(id); } catch { /* keep raw; the query check rejects it */ }
     return handleEntityShareImage(request, env, ctx, entityCard[1], id, supabaseLookup);
   }
+  const blogCardMatch = pathname.match(/^\/_og\/blog-card\/([a-z0-9-]+)\.jpg$/);
+  if (blogCardMatch) {
+    const post = (await getBlogManifest(request, env)).get(blogCardMatch[1]);
+    if (!post) return new Response('Not found', { status: 404 });
+    const image = await fetch(blogCardTransformUrl(post), { signal: AbortSignal.timeout(5000) }).catch(() => null);
+    if (!image?.ok || !image.headers.get('Content-Type')?.startsWith('image/')) {
+      return new Response('Image temporarily unavailable', { status: 503, headers: { 'Retry-After': '60' } });
+    }
+    return new Response(request.method === 'HEAD' ? null : image.body, {
+      headers: {
+        'Content-Type': image.headers.get('Content-Type'),
+        'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
+      },
+    });
+  }
   if (pathname.startsWith(OG_SOURCE_PREFIX)) return ogSourceResponse(request, env, pathname);
 
   // Skip static assets immediately.
@@ -7792,7 +7914,19 @@ async function handleRequest(request, env, ctx) {
   // The SSR HTML contains `window.location.href = '<same-url>'` for non-bots,
   // which causes an infinite reload loop on every route (/, /app/communities/x,
   // /app/post/x, /username, etc.). The React SPA handles all routing itself.
-  if (!isBot) {
+  if (!isBot && !browserPublicDocument) {
+    if (!forceApp && request.method === 'GET' && request.headers.get('Accept')?.includes('text/html')) {
+      const slug = articleSlugOf(pathname);
+      if (slug && await resolveArticleSlugTokenId(slug, 1200) === null) return entityNotFound();
+      const segment = pathname.split('/').filter(Boolean);
+      if (segment.length === 1 && couldBeProfileSegment(segment[0], SYSTEM_ROUTES)) {
+        const handle = segment[0].replace(/^(?:@|%40)/i, '');
+        const result = await fetch(DEHUB_API + '/account_info/' + encodeURIComponent(handle), {
+          signal: AbortSignal.timeout(1500),
+        }).catch(() => null);
+        if (result?.status === 404) return entityNotFound();
+      }
+    }
     // These URLs serve different bodies per UA; without Vary a fronting CDN
     // (e.g. Cloudflare) could cache bot HTML by URL and serve it to browsers —
     // which triggers the infinite-reload loop documented above.
@@ -7943,10 +8077,7 @@ async function handleRequest(request, env, ctx) {
     // answered 200 with homepage meta — a soft-404 that let any typo'd URL mint
     // another homepage duplicate (Google indexed /docs/quick-start this way).
     // The SPA renders NotFound for these, so 404 is the honest, matching status.
-    return guard(new Response('Not found', {
-      status: 404,
-      headers: { 'Content-Type': 'text/plain; charset=utf-8', 'X-Robots-Tag': 'noindex' },
-    }));
+    return entityNotFound();
   }
 
   // Feed section pages (/explore, /videos, /shorts). Accept the /app-prefixed
@@ -8018,20 +8149,18 @@ async function handleRequest(request, env, ctx) {
     // Share buttons hand out ?feature=<id>; notifications and comment links ?request=<id>.
     const featureId = url.searchParams.get('feature') || url.searchParams.get('request');
     if (featureId && /^[0-9a-fA-F-]{8,}$/.test(featureId)) {
-      const feature = await supabaseRow(
+      const feature = await supabaseLookup(
         `feature_requests?id=eq.${encodeURIComponent(featureId)}&select=*&limit=1`,
       );
       if (feature) {
         return guard(new Response(buildFeatureRequestHtml(feature), {
           status: 200,
-          headers: feature.status === 'declined'
+          headers: !featureIsIndexable(feature)
             ? { ...blogHeaders, 'X-Robots-Tag': 'noindex, follow' }
             : blogHeaders,
         }));
       }
-      // Row missing or Supabase unreachable: fall through to the generic
-      // board card below rather than inventing a 404 for a real request we
-      // just couldn't read.
+      return entityMiss(feature);
     }
   }
 

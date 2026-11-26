@@ -510,9 +510,13 @@ describe('thin and test entities', () => {
   });
 
   it('is wired into the store, listing and event pages', () => {
-    for (const sig of ['function buildStoreHtml(store) {', 'function buildListingHtml(listing) {', 'function buildEventHtml(event) {']) {
-      const start = WORKER.indexOf(sig);
-      expect(WORKER.slice(start, WORKER.indexOf('\n}\n', start)), sig).toMatch(/noindex: [^\n]*entityLooksThin\(/);
+    for (const [signature, predicate] of [
+      ['function buildStoreHtml(store) {', 'noindex: !storeIsIndexable(store)'],
+      ['function buildListingHtml(listing) {', 'noindex: !listingIsIndexable(listing)'],
+      ['function buildEventHtml(event) {', 'entityLooksThin({'],
+    ]) {
+      const start = WORKER.indexOf(signature);
+      expect(WORKER.slice(start, WORKER.indexOf('\n}\n', start)), signature).toContain(predicate);
     }
   });
 });

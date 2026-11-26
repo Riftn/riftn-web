@@ -93,7 +93,7 @@ export function TokenLaunchNotify({ className, compact }: { className?: string; 
       <p data-kit-eyebrow className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
         {t('tokenLaunch.eyebrow')}
       </p>
-      <h2 className="mt-1 text-[19px] font-semibold text-white">{t('tokenLaunch.title')}</h2>
+      <h2 className="mt-1 text-[19px] font-semibold text-white">{t('tokenLaunch.riftTitle')}</h2>
 
       {joinedEmail ? (
         <div className="mt-4 flex flex-col items-center gap-2" role="status">
@@ -109,7 +109,7 @@ export function TokenLaunchNotify({ className, compact }: { className?: string; 
         </div>
       ) : (
         <>
-          <p className="mx-auto mt-2 max-w-xs text-[13px] leading-relaxed text-zinc-400">{t('tokenLaunch.body')}</p>
+          <p className="mx-auto mt-2 max-w-xs text-[13px] leading-relaxed text-zinc-400">{t('tokenLaunch.riftStatus')}</p>
           {loading ? (
             <Loader2 className="mx-auto mt-5 h-5 w-5 animate-spin text-zinc-500" />
           ) : accountEmail ? (

@@ -50,6 +50,11 @@ function makeEnv() {
             return new Response(readFileSync(file, 'utf8'), { status: 200, headers: { 'Content-Type': 'application/json' } });
           }
         }
+        if (u.pathname.startsWith('/guides/')) {
+          return new Response('<html lang="en"><head><title>Riftn</title><meta name="description" content="Riftn home"></head><body><div id="root"></div><script type="module" src="/assets/app.js"></script></body></html>', {
+            headers: { 'Content-Type': 'text/html' },
+          });
+        }
         return new Response('nope', { status: 404 });
       }),
     },
@@ -93,19 +98,19 @@ describe('blog share cards', () => {
     expect(res.status).toBe(200);
     const post = manifest.find((p) => p.slug === NEW_SLUG)!;
     const image = meta(res.body, 'og:image');
-    expect(image).toContain('/cdn-cgi/image/');
-    expect(image).toContain('width=1200,height=630');
-    expect(image.endsWith(`https://dehub.io${post.bannerImage}`)).toBe(true);
+    expect(image).toBe('https://riftn.com/_og/blog-card/' + NEW_SLUG + '.jpg');
     expect(meta(res.body, 'twitter:image')).toBe(image);
     expect(meta(res.body, 'og:image:alt')).toBe(post.bannerImageAlt);
     expect(meta(res.body, 'twitter:card')).toBe('summary_large_image');
   });
 
-  it('pads a banner far from 1.91:1 instead of cropping it', async () => {
+  it('advertises a 1200 by 630 first-party card for wide banners', async () => {
     const odd = manifest.find((p) => p.bannerWidth! / p.bannerHeight! > 2.2)!;
     expect(odd).toBeTruthy();
     const res = await get(`/guides/${odd.slug}`);
-    expect(meta(res.body, 'og:image')).toContain('fit=pad');
+    expect(meta(res.body, 'og:image')).toBe('https://riftn.com/_og/blog-card/' + odd.slug + '.jpg');
+    expect(meta(res.body, 'og:image:width')).toBe('1200');
+    expect(meta(res.body, 'og:image:height')).toBe('630');
   });
 });
 
@@ -140,6 +145,20 @@ describe('clean blog slugs', () => {
 });
 
 describe('blog post crawler markup', () => {
+  it('gives browser navigations the article and preserves the app entry', async () => {
+    const response = await worker.fetch(new Request('https://riftn.com/guides/' + NEW_SLUG, {
+      headers: { Accept: 'text/html', 'User-Agent': 'Mozilla/5.0 Chrome/149.0.0.0 Safari/537.36' },
+    }), makeEnv(), { waitUntil() {} });
+    expect(response.status).toBe(200);
+    expect(response.headers.get('Cache-Control')).toBe('no-store');
+    const html = await response.text();
+    expect(html).toContain('edge-public-content');
+    expect(html).toContain('<article>');
+    expect(html).toContain('href="https://riftn.com/guides/' + NEW_SLUG + '"');
+    expect(html).toContain('src="/assets/app.js"');
+    expect(html).not.toContain('content="Riftn home"');
+  });
+
   it('has a short description, canonical, robots and BlogPosting data', async () => {
     const res = await get(`/guides/${NEW_SLUG}`);
     const description = meta(res.body, 'description');
@@ -177,10 +196,9 @@ describe('article share tags for browser-shaped previewers', () => {
   }
 
   it("the app shell for an article carries the article's title and banner", async () => {
-    const post = manifest.find((p) => p.slug === NEW_SLUG)!;
     const html = await shell(`/guides/${NEW_SLUG}?ref=ABC`);
     expect(html).toContain('<div id="root"');
-    expect(meta(html, 'og:image')).toContain(post.bannerImage!);
+    expect(meta(html, 'og:image')).toBe('https://riftn.com/_og/blog-card/' + NEW_SLUG + '.jpg');
     expect(meta(html, 'twitter:image')).toBe(meta(html, 'og:image'));
     expect(meta(html, 'og:title')).not.toBe('Riftn');
     expect(html).toContain('<meta property="og:type" content="article"');

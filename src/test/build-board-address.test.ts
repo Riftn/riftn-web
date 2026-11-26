@@ -6,7 +6,7 @@
  */
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import worker from '../../CLOUDFLARE_WORKER_SEO.js';
 
 const ROOT = resolve(__dirname, '../..');
@@ -38,6 +38,23 @@ async function get(path: string, ua = 'Twitterbot/1.0') {
 const ID = '9cea24f0-1234-4abc-8def-0123456789ab';
 
 describe('Build board address', () => {
+  beforeEach(() => {
+    vi.stubGlobal('fetch', vi.fn(async (input: Request | URL | string) => {
+      const url = new URL(input instanceof Request ? input.url : String(input));
+      if (url.pathname.endsWith('/feature_requests')) {
+        const found = url.searchParams.get('id') === 'eq.' + ID;
+        return Response.json(found ? [{ id: ID }] : []);
+      }
+      return new Response('Not found', { status: 404 });
+    }));
+  });
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('returns a real 404 for an unknown request UUID', async () => {
+    const { status } = await get('/app/post/00000000-0000-0000-0000-000000000000');
+    expect(status).toBe(404);
+  });
+
   it.each([
     ['/features', 'https://riftn.com/build'],
     ['/app/features', 'https://riftn.com/build'],

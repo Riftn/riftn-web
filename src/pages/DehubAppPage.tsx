@@ -69,7 +69,7 @@ export default function DehubAppPage() {
       </Link>
 
       <main className="mx-auto flex max-w-2xl flex-col px-5 pb-20 pt-20 sm:pt-24">
-        <img src={riftnWordmark} alt="Riftn" className="h-7 w-auto self-start object-contain opacity-90" />
+        <img src={riftnWordmark} alt="Riftn" width={27} height={8} className="h-7 w-auto self-start object-contain opacity-90" />
 
         <h1 className="mt-8 text-4xl font-black italic leading-[0.95] tracking-tight sm:text-5xl">
           {t("dehubAppPage.heading")}
