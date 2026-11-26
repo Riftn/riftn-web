@@ -1,5 +1,6 @@
 ALTER TABLE public.audio_spaces
-  ADD COLUMN entry_locked boolean NOT NULL DEFAULT false;
+  ADD COLUMN entry_locked boolean NOT NULL DEFAULT false,
+  ADD COLUMN topic text CHECK (topic IN ('general', 'crypto', 'sports', 'gaming', 'technology'));
 
 CREATE TABLE public.stage_entry_requests (
   space_id uuid NOT NULL REFERENCES public.audio_spaces(id) ON DELETE CASCADE,

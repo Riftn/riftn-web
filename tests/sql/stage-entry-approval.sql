@@ -24,7 +24,7 @@ DECLARE
 BEGIN
   ASSERT public.request_stage_entry(room) = 'allowed', 'guests may enter open stages';
   PERFORM set_config('test.signed_stage_wallet', host, true);
-  UPDATE public.audio_spaces SET entry_locked = true WHERE id = room;
+  UPDATE public.audio_spaces SET entry_locked = true, topic = 'gaming' WHERE id = room;
   ASSERT FOUND, 'host can lock entry';
   ASSERT public.request_stage_entry(room) = 'allowed', 'host can re-enter';
 
@@ -35,8 +35,8 @@ BEGIN
   ASSERT public.request_stage_entry(room) = 'pending', 'new authenticated visitor requires approval';
   ASSERT public.request_stage_entry(room) = 'pending', 'retrying does not create another request';
   ASSERT (SELECT count(*) = 1 FROM public.stage_entry_requests WHERE space_id = room), 'request is unique';
-  UPDATE public.audio_spaces SET entry_locked = false WHERE id = room;
-  ASSERT NOT FOUND, 'visitor cannot unlock';
+  UPDATE public.audio_spaces SET entry_locked = false, topic = 'sports' WHERE id = room;
+  ASSERT NOT FOUND, 'visitor cannot unlock or change the topic';
   ASSERT NOT public.approve_stage_entry(room, visitor), 'visitor cannot self-approve';
   BEGIN
     INSERT INTO public.space_participants (space_id, wallet_address) VALUES (room, visitor);
