@@ -101,7 +101,16 @@ export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact
   useLayoutEffect(() => {
     if (!point) { setPos(null); return; }
     const el = wrapRef.current;
-    setPos(placeMessageMenu(point, el?.offsetWidth || width, el?.offsetHeight || 360, container));
+    const place = () => {
+      setPos(placeMessageMenu(point, el?.offsetWidth || width, el?.offsetHeight || 360, container));
+    };
+    place();
+    // The full emoji picker loads its data after opening and can grow.
+    if (!container || !el || typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(place);
+    observer.observe(el);
+    observer.observe(container);
+    return () => observer.disconnect();
   }, [point, view, actions.length, showReactors, width, container]);
 
   const close = useCallback(() => onClose(), [onClose]);
