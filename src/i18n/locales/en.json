@@ -57,7 +57,22 @@
     "cancel": "Cancel",
     "getKey": "Get a {{name}} key",
     "showLess": "Show only my keys",
-    "addAnother": "Add another provider"
+    "addAnother": "Add another provider",
+    "providerDescriptions": {
+      "openai": "Builder (GPT models)",
+      "fal": "Images, video, 3D and photo tools",
+      "kie": "Images and video",
+      "replicate": "Images and video",
+      "xai": "Grok chat and images",
+      "elevenlabs": "Voice, dubbing, music and sound effects",
+      "gemini": "Translate, writing help and summaries",
+      "venice": "Assistant chat",
+      "perplexity": "Assistant web search",
+      "deepgram": "Transcripts and live captions",
+      "openrouter": "Hundreds of chat and text models with one key",
+      "groq": "Fast chat and text",
+      "mistral": "Chat and text"
+    }
   },
   "resetWallet": {
     "mismatch": "Passwords don't match",
