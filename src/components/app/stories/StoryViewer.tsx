@@ -12,25 +12,25 @@
  * show who watched instead of a reply bar.
  */
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { type InfiniteData, type UseInfiniteQueryResult, useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { ArrowUpRight, ChevronLeft, ChevronRight, Eye, Heart, Link2, Loader2, Repeat2, Star, Users, Volume2, VolumeX } from 'lucide-react';
+import { ArrowUpRight, ChevronLeft, ChevronRight, Eye, Heart, Link2, Loader2, Repeat2, Star, Volume2, VolumeX } from 'lucide-react';
 import Close from '@/components/ui/cut-icons/close';
 import MoreVertical from '@/components/ui/cut-icons/morevertical';
 import Plus from '@/components/ui/cut-icons/add';
 import Send from '@/components/ui/cut-icons/send';
 import ShareIcon from '@/components/ui/cut-icons/feedshare';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import Music from '@/components/ui/cut-icons/music';
 import { useAuth } from '@/contexts/AuthContext';
 import { buildAvatarUrl, buildAvatarCdnFallbackUrl } from '@/lib/media-url';
 import { formatCount } from '@/lib/format-count';
 import { useStoriesStore } from '@/store/storiesStore';
 import {
-  addStoryComment,
   deleteStory,
   getStory,
   getStoryViewers,
@@ -39,7 +39,6 @@ import {
   reportStory,
   type ShelfEntry,
   type StoryItem,
-  type StoryViewer as StoryViewerRow,
 } from '@/lib/api/dehub/stories';
 import { useRefreshStoryShelf } from '@/hooks/use-story-shelf';
 import { ageLabel, coverOf, localAge, nameOf, startIndex } from './story-utils';
@@ -58,6 +57,7 @@ interface Props {
   entries: ShelfEntry[];
   startAuthor: number;
   startItem: number;
+  openComments?: boolean;
   onClose: () => void;
 }
 
@@ -121,7 +121,7 @@ const REPORT_REASONS = [
   ['other', 'Something else'],
 ] as const;
 
-export function StoryViewer({ entries: initial, startAuthor, startItem, onClose }: Props) {
+export function StoryViewer({ entries: initial, startAuthor, startItem, openComments = false, onClose }: Props) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { isAuthenticated, walletAddress, openLoginModal } = useAuth();
@@ -138,7 +138,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
   // also holds the Moment so there is time to press it.
   const [postPeekId, setPostPeekId] = useState<string | null>(null);
   const [typing, setTyping] = useState(false);
-  const [sheet, setSheet] = useState<null | 'viewers' | 'comments' | 'more' | 'report' | 'delete' | 'share' | 'share-dm'>(null);
+  const [sheet, setSheet] = useState<null | 'viewers' | 'comments' | 'more' | 'report' | 'delete' | 'share' | 'share-dm'>(openComments ? 'comments' : null);
   const [muted, setMuted] = useState(false);
   // Which moment has its picture in, by id: a cached image can report in before
   // the reset for a new moment runs, so a plain flag could stick at "loading".
@@ -147,7 +147,6 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
   const [sending, setSending] = useState(false);
   const [openingOriginal, setOpeningOriginal] = useState(false);
   const [drag, setDrag] = useState<{ x: number; y: number } | null>(null);
-  const [replyTo, setReplyTo] = useState<'everyone' | 'author'>('everyone');
   const [hearts, setHearts] = useState<{ id: number; x: number; d: number }[]>([]);
   const docked = useDocked();
   const [frameRef, frameSize] = useFrameSize();
@@ -178,8 +177,21 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
   const loaded = !!item && loadedId === item.id;
   const setLoaded = useCallback(() => setLoadedId(item?.id ?? null), [item?.id]);
   const own = !!entry && !!me && entry.author.address === me;
+  const audience = useInfiniteQuery({
+    queryKey: ['moment-viewers', item?.id, me],
+    queryFn: ({ pageParam }) => getStoryViewers(item!.id, pageParam),
+    enabled: !!item && own && isAuthenticated && sheet === 'viewers',
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: page => page.next ?? undefined,
+    refetchInterval: () => item && Date.parse(item.expiresAt) > Date.now() ? 10_000 : false,
+    refetchOnWindowFocus: true,
+    staleTime: 0,
+    gcTime: 0,
+  });
+  const viewCount = audience.data?.pages[0]?.viewCount ?? item?.viewCount ?? 0;
+  const viewsLabel = t('stories.viewsCount', { defaultValue: '{{formatted}} views', formatted: formatCount(viewCount) });
   const postPeek = item?.postTokenId != null && postPeekId === item.id;
-  const paused = held || postPeek || typing || sheet !== null || openingOriginal || !loaded;
+  const paused = held || postPeek || typing || sending || sheet !== null || openingOriginal || !loaded;
   const room = useMomentComments(item?.id, isAuthenticated, !!item && (item.commentCount ?? 1) > 0);
   const roomComments = room.data?.comments ?? [];
 
@@ -187,9 +199,14 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
   const audioRef = useRef<HTMLAudioElement>(null);
   const moreButtonRef = useRef<HTMLButtonElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
+  const commentsButtonRef = useRef<HTMLButtonElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const restoreCommentsFocus = useRef(false);
   const viewedRef = useRef(new Set<string>());
   const changedRef = useRef(false);
   const originalRequest = useRef<symbol | null>(null);
+  const replyInput = useRef<HTMLInputElement>(null);
+  const sendingReply = useRef(false);
 
   // ── Moving between moments ────────────────────────────────────────
   const close = useCallback(() => {
@@ -217,21 +234,32 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
   }, [entry, itemIdx, goAuthor]);
 
   const elapsedRef = useRef(0);
+  const previousPosition = useRef({ authorIdx, itemIdx });
   useEffect(() => {
     elapsedRef.current = 0;
     setProgress(0);
-    setSheet(s => (s === 'viewers' ? s : null));
+    if (previousPosition.current.authorIdx !== authorIdx || previousPosition.current.itemIdx !== itemIdx) {
+      previousPosition.current = { authorIdx, itemIdx };
+      setSheet(s => (s === 'viewers' ? s : null));
+    }
     setOpeningOriginal(false);
-    setReplyTo('everyone');
+    setReply('');
+    setTyping(false);
     return () => { originalRequest.current = null; };
-  }, [authorIdx, itemIdx]);
+  }, [snapshot?.id]);
 
   useEffect(() => {
-    if (!sheet) return;
-    sheetRef.current?.querySelector('button')?.focus({ preventScroll: true });
-  }, [sheet]);
+    if (sheet) {
+      sheetRef.current?.querySelector('button')?.focus({ preventScroll: true });
+    } else if (restoreCommentsFocus.current) {
+      restoreCommentsFocus.current = false;
+      // The comments control is hidden until the drawer has closed.
+      (commentsButtonRef.current ?? closeButtonRef.current)?.focus({ preventScroll: true });
+    }
+  }, [item?.id, sheet]);
 
   const dismissSheet = useCallback(() => {
+    restoreCommentsFocus.current = sheet === 'comments';
     setSheet(null);
     if (sheet === 'more') moreButtonRef.current?.focus({ preventScroll: true });
   }, [sheet]);
@@ -401,36 +429,25 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
 
   const submitReply = async () => {
     const text = reply.trim();
-    if (!item || !text || sending) return;
+    if (!item?.allowReplies || own || !isAuthenticated || !text || sendingReply.current) return;
+    sendingReply.current = true;
     setSending(true);
-    if (replyTo === 'everyone') {
-      try {
-        const row = await addStoryComment(item.id, text);
-        queryClient.setQueryData(['moment-room-comments', item.id, isAuthenticated], (old: { comments: (typeof row)[] } | undefined) =>
-          old ? { ...old, comments: [row, ...old.comments] } : { commentCount: 1, allowComments: true, comments: [row], next: null });
-        void queryClient.invalidateQueries({ queryKey: ['moment-room-comments', item.id] });
-        setEntries(list => list.map((e, i) => i !== authorIdx ? e : { ...e, items: e.items.map(it => it.id === item.id ? { ...it, commentCount: (it.commentCount ?? 0) + 1 } : it) }));
-        setReply('');
-        (document.activeElement as HTMLElement | null)?.blur();
-      } catch (e) {
-        toast.error((e as Error)?.message || t('stories.commentFailed', { defaultValue: "Your comment didn't go up. Try again." }));
-      } finally {
-        setSending(false);
-      }
-      return;
-    }
+    const input = replyInput.current;
     try {
       const outcome = await sendStoryReply(item, text, t('stories.repliedToYourMoment', { defaultValue: 'Replied to your moment' }));
       if (outcome === 'paid-chat') {
         toast(t('stories.paidChat', { defaultValue: 'This person charges for messages. Open the chat to send it.' }));
       } else {
         toast.success(t('stories.replySent', { defaultValue: 'Reply sent' }));
-        setReply('');
-        (document.activeElement as HTMLElement | null)?.blur();
+        if (replyInput.current === input) {
+          setReply('');
+          input?.blur();
+        }
       }
     } catch {
       toast.error(t('stories.replyFailed', { defaultValue: "Couldn't send your reply. Try again." }));
     } finally {
+      sendingReply.current = false;
       setSending(false);
     }
   };
@@ -598,7 +615,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
               src={item.mediaUrl ?? undefined}
               poster={item.posterUrl ?? undefined}
               playsInline
-              autoPlay
+              autoPlay={!sheet}
               muted={muted || item.muted}
               onLoadedData={() => setLoaded()}
               onTimeUpdate={e => {
@@ -701,7 +718,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
           <button ref={moreButtonRef} type="button" data-sv-icon onClick={() => setSheet('more')} aria-label={t('stories.moreActions', { defaultValue: 'Moment options' })} aria-expanded={sheet === 'more'}>
             <MoreVertical className="w-5 h-5" />
           </button>
-          <button type="button" data-sv-icon onClick={close} aria-label={t('common.close', { defaultValue: 'Close' })}>
+          <button ref={closeButtonRef} type="button" data-sv-icon onClick={close} aria-label={t('common.close', { defaultValue: 'Close' })}>
             <Close className="w-5 h-5" />
           </button>
         </div>
@@ -715,7 +732,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
           {own && (
             <button type="button" data-sv-pill data-sv-viewers-trigger onClick={() => setSheet('viewers')} aria-label={t('stories.whoWatched', { defaultValue: 'Who watched' })}>
               <Eye className="w-3.5 h-3.5" />
-              {t('stories.watchedCount', { n: formatCount(item.viewCount ?? 0), defaultValue: '{{n}} watched' })}
+              {viewsLabel}
               {(item.likeCount ?? 0) > 0 && (<><Heart className="w-3 h-3 ml-1 fill-current text-[rgb(255_45_122)]" />{formatCount(item.likeCount ?? 0)}</>)}
             </button>
           )}
@@ -761,25 +778,27 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
           {own ? (
             <button type="button" data-sv-field data-sv-viewers-trigger onClick={() => setSheet('viewers')} aria-label={t('stories.whoWatched', { defaultValue: 'Who watched' })}>
               <Eye className="w-[18px] h-[18px]" />
-              {t('stories.watchedCount', { n: formatCount(item.viewCount ?? 0), defaultValue: '{{n}} watched' })}
+              {viewsLabel}
               {(item.likeCount ?? 0) > 0 && (<><MomentHeart className="w-4 h-4 ml-1.5" filled />{formatCount(item.likeCount ?? 0)}</>)}
             </button>
           ) : !isAuthenticated ? (
             <button type="button" data-sv-field onClick={() => openLoginModal()}>
-              {t('stories.signInToSay', { defaultValue: 'Sign in to say something' })}
+              {t('stories.signInToReply', { defaultValue: 'Sign in to reply' })}
             </button>
           ) : item.allowReplies ? (
             <input
+              key={item.id}
+              ref={replyInput}
               data-sv-field
               value={reply}
-              maxLength={replyTo === 'everyone' ? 300 : 500}
+              maxLength={500}
+              readOnly={sending}
               onChange={e => setReply(e.target.value)}
               onFocus={() => setTyping(true)}
               onBlur={() => setTyping(false)}
-              onKeyDown={e => { if (e.key === 'Enter') submitReply(); }}
-              placeholder={replyTo === 'everyone'
-                ? t('stories.saySomething', { defaultValue: 'Say something…' })
-                : t('stories.replyTo', { name: nameOf(a), defaultValue: 'Reply to {{name}}' })}
+              onKeyDown={e => { if (e.key === 'Enter' && !e.nativeEvent.isComposing) void submitReply(); }}
+              placeholder={t('stories.privateReply', { defaultValue: 'Send a private reply…' })}
+              aria-label={t('stories.sendPrivateReply', { defaultValue: 'Send a private reply' })}
             />
           ) : (
             <span data-sv-field data-off>{t('stories.repliesOff', { defaultValue: 'Replies are off' })}</span>
@@ -789,16 +808,18 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
               <MomentHeart className="w-[22px] h-[22px]" filled={item.liked} />
             </button>
           )}
-          {!docked && (
-            <button type="button" data-sv-key onClick={() => setSheet('comments')} aria-label={t('stories.comments', { defaultValue: 'Comments' })}>
+          {(!docked || own) && (
+            <button ref={commentsButtonRef} type="button" data-sv-key onClick={() => setSheet('comments')} aria-label={t('stories.comments', { defaultValue: 'Comments' })}>
               <MomentComment className="w-[22px] h-[22px]" />
               {(item.commentCount ?? 0) > 0 && <span data-sv-count>{formatCount(item.commentCount ?? 0)}</span>}
             </button>
           )}
-          {!own && isAuthenticated && item.allowReplies && reply.trim() ? (
-            <button type="button" data-sv-key data-sv-send onPointerDown={e => e.preventDefault()} onClick={submitReply} disabled={sending} aria-label={t('common.send', { defaultValue: 'Send' })}>
-              {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
-            </button>
+          {!own && isAuthenticated && item.allowReplies && (typing || reply || sending) ? (
+            <Button type="button" size="icon" data-sv-key data-sv-send onPointerDown={e => e.preventDefault()}
+              onClick={submitReply} disabled={!reply.trim()} loading={sending}
+              aria-label={t('stories.sendPrivateReply', { defaultValue: 'Send a private reply' })}>
+              {!sending && <Send className="!size-5" />}
+            </Button>
           ) : shareable ? (
             <button type="button" data-sv-key onClick={() => setSheet('share')} aria-label={t('stories.share', { defaultValue: 'Share' })}>
               <MomentShare className="w-[22px] h-[22px]" />
@@ -815,9 +836,10 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
         {sheet && sheet !== 'share-dm' && (
           <div data-sv-sheet-backdrop onClick={dismissSheet}>
             <div ref={sheetRef} data-sv-sheet onClick={e => e.stopPropagation()}>
-              {sheet === 'viewers' && <ViewersList item={item} onOpen={openProfile} onClose={dismissSheet} />}
+              {sheet === 'viewers' && own && <ViewersList item={item} audience={audience} viewsLabel={viewsLabel} onOpen={openProfile} onClose={dismissSheet} />}
               {sheet === 'comments' && (
                 <StoryComments
+                  key={item.id}
                   item={item}
                   signedIn={isAuthenticated}
                   onOpen={openProfile}
@@ -890,12 +912,14 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
       {docked && (
         <aside data-sv-panel onPointerDown={e => e.stopPropagation()}>
           <header>
-            <MomentComment className="w-5 h-5" />
-            {t('stories.momentChat', { defaultValue: 'Moment chat' })}
+            <Button type="button" variant="ghost" size="lg" className="-ml-3 gap-2 px-3 text-base font-semibold" onClick={() => setSheet('comments')}>
+              <MomentComment className="!size-5" />
+              {t('stories.comments', { defaultValue: 'Comments' })}
+            </Button>
             {own ? (
               <button type="button" data-sv-chip onClick={() => setSheet('viewers')}>
                 <Eye className="w-4 h-4" />
-                {t('stories.watchedCount', { n: formatCount(item.viewCount ?? 0), defaultValue: '{{n}} watched' })}
+                {viewsLabel}
               </button>
             ) : (item.commentCount ?? 0) > 0 ? (
               <span data-sv-panel-count>{formatCount(item.commentCount ?? 0)}</span>
@@ -957,54 +981,39 @@ function SheetButton({ children, onClick, danger }: { children: React.ReactNode;
   );
 }
 
-function ViewersList({ item, onOpen, onClose }: { item: StoryItem; onOpen: (address: string) => void; onClose: () => void }) {
+function ViewersList({
+  item, audience, viewsLabel, onOpen, onClose,
+}: {
+  item: StoryItem;
+  audience: UseInfiniteQueryResult<InfiniteData<Awaited<ReturnType<typeof getStoryViewers>>>>;
+  viewsLabel: string;
+  onOpen: (address: string) => void;
+  onClose: () => void;
+}) {
   const { t } = useTranslation();
-  const [rows, setRows] = useState<StoryViewerRow[] | null>(null);
-  const [next, setNext] = useState<string | null>(null);
-  // Different people who watched, and every watch with repeats. Both come
-  // with the list, so the numbers always match the rows below them.
-  const [counts, setCounts] = useState({ viewers: item.viewCount ?? 0, views: item.viewCount ?? 0, likes: item.likeCount ?? 0 });
-
-  useEffect(() => {
-    let alive = true;
-    getStoryViewers(item.id).then(r => {
-      if (!alive) return;
-      setRows(r.viewers);
-      setNext(r.next);
-      setCounts({ viewers: r.viewCount, views: Math.max(r.playCount ?? 0, r.viewCount), likes: r.likeCount });
-    }).catch(() => alive && setRows([]));
-    return () => { alive = false; };
-  }, [item.id]);
-
-  const more = async () => {
-    if (!next) return;
-    const r = await getStoryViewers(item.id, next).catch(() => null);
-    if (!r) return;
-    setRows(list => [...(list ?? []), ...r.viewers]);
-    setNext(r.next);
-  };
+  const rows = audience.data?.pages.flatMap(page => page.viewers) ?? [];
+  const likes = audience.data?.pages[0]?.likeCount ?? item.likeCount ?? 0;
 
   return (
     <div>
       <div className="flex items-center gap-3 text-[14px] font-semibold">
-        <span className="inline-flex items-center gap-1.5" title={t('stories.viewersCount', { defaultValue: '{{formatted}} viewers', formatted: formatCount(counts.viewers) })}>
-          <Users className="w-4 h-4" aria-hidden />
-          <span className="sr-only">{t('stories.viewersCount', { defaultValue: '{{formatted}} viewers', formatted: formatCount(counts.viewers) })}</span>
-          <span aria-hidden>{formatCount(counts.viewers)}</span>
+        <span className="inline-flex items-center gap-1.5" aria-live="polite">
+          <Eye className="size-4" aria-hidden />
+          {viewsLabel}
         </span>
-        <span className="inline-flex items-center gap-1.5" title={t('stories.viewsCount', { defaultValue: '{{formatted}} views', formatted: formatCount(counts.views) })}>
-          <Eye className="w-4 h-4" aria-hidden />
-          <span className="sr-only">{t('stories.viewsCount', { defaultValue: '{{formatted}} views', formatted: formatCount(counts.views) })}</span>
-          <span aria-hidden>{formatCount(counts.views)}</span>
-        </span>
-        <span className="inline-flex items-center gap-1.5"><Heart data-sv-heart className="w-4 h-4 fill-current" />{formatCount(counts.likes)}</span>
-        <button type="button" className="ml-auto grid size-11 place-items-center rounded-full hover:bg-white/10" onClick={onClose} aria-label={t('common.close', { defaultValue: 'Close' })}>
+        <span className="inline-flex items-center gap-1.5"><Heart data-sv-heart className="size-4 fill-current" />{formatCount(likes)}</span>
+        <Button type="button" variant="ghost" size="icon" className="ml-auto size-11 shrink-0 focus-visible:ring-white focus-visible:ring-offset-0" onClick={onClose} aria-label={t('common.close', { defaultValue: 'Close' })}>
           <Close className="size-[18px]" />
-        </button>
+        </Button>
       </div>
-      {rows === null ? (
-        <div className="py-6 grid place-items-center"><Loader2 className="w-5 h-5 animate-spin opacity-70" /></div>
-      ) : rows.length === 0 ? (
+      {audience.isPending ? (
+        <div role="status" className="py-6 grid place-items-center">
+          <Loader2 className="size-5 animate-spin opacity-70" aria-hidden />
+          <span className="sr-only">{t('common.loading', { defaultValue: 'Loading' })}</span>
+        </div>
+      ) : !audience.data ? (
+        <Button type="button" variant="ghost" onClick={() => void audience.refetch()} loading={audience.isFetching}>{t('common.tryAgain', { defaultValue: 'Try again' })}</Button>
+      ) : rows.length === 0 && !audience.hasNextPage ? (
         <p className="py-4 text-[14px] opacity-70">{t('stories.noViewersYet', { defaultValue: 'No one has watched it yet.' })}</p>
       ) : (
         <div className="flex flex-col">
@@ -1012,27 +1021,24 @@ function ViewersList({ item, onOpen, onClose }: { item: StoryItem; onOpen: (addr
             const face = v.avatarImageUrl ? buildAvatarUrl(v.address, v.avatarImageUrl) : buildAvatarCdnFallbackUrl(v.address, undefined);
             const name = v.displayName || v.username || v.address.slice(0, 8);
             return (
-              <button key={v.address} type="button" className="grid w-full min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 py-2 text-start" onClick={() => onOpen(v.address)}>
+              <Button key={v.address} type="button" variant="ghost" className="grid h-auto min-h-11 w-full min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] justify-items-start gap-3 px-2 py-2 text-start focus-visible:ring-inset focus-visible:ring-white focus-visible:ring-offset-0" onClick={() => onOpen(v.address)}>
                 <Avatar className="size-9">
                   {face && <AvatarImage src={face} alt="" className="object-cover" />}
                   <AvatarFallback className="bg-white/15 text-[13px] text-white">{name.slice(0, 1).toUpperCase()}</AvatarFallback>
                 </Avatar>
-                <span className="min-w-0 overflow-hidden">
+                <span className="w-full min-w-0 overflow-hidden">
                   <span className="block text-[14px] font-medium truncate">{name}</span>
                   {v.username && <span className="block text-[12px] opacity-60 truncate">@{v.username}</span>}
                 </span>
-                <span className="inline-flex items-center gap-2">
-                  {(v.plays ?? 1) > 1 && (
-                    <span className="text-[13px] font-semibold opacity-70" title={t('stories.watchedTimes', { defaultValue: 'Watched {{formatted}} times', formatted: formatCount(v.plays ?? 1) })}>
-                      {t('stories.playsShort', { defaultValue: '{{formatted}}×', formatted: formatCount(v.plays ?? 1) })}
-                    </span>
-                  )}
-                  {v.liked && <Heart data-sv-heart className="w-4 h-4 fill-current" />}
-                </span>
-              </button>
+                {v.liked && <Heart data-sv-heart className="size-4 fill-current" />}
+              </Button>
             );
           })}
-          {next && <button type="button" className="py-3 text-[14px] font-semibold" onClick={more}>{t('common.showMore', { defaultValue: 'Show more' })}</button>}
+          {audience.hasNextPage && (
+            <Button type="button" variant="ghost" className="mt-2" disabled={audience.isFetching} loading={audience.isFetchingNextPage} onClick={() => void audience.fetchNextPage({ cancelRefetch: false })}>
+              {t('common.showMore', { defaultValue: 'Show more' })}
+            </Button>
+          )}
         </div>
       )}
     </div>

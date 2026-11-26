@@ -1,6 +1,11 @@
 name: Mobile swipe back production verification
 on:
   workflow_dispatch:
+    inputs:
+      scenario:
+        type: choice
+        options: [navigation, profile-photos]
+        default: navigation
 permissions:
   contents: read
 jobs:
@@ -19,7 +24,13 @@ jobs:
       - name: Verify real touch navigation on production
         env:
           SWIPE_BROWSER_ROOT: ${{ runner.temp }}/swipe-browser
-        run: node tests/swipe-back-production.mjs
+          SCENARIO: ${{ inputs.scenario }}
+        run: |
+          if [ "$SCENARIO" = profile-photos ]; then
+            node tests/profile-photo-swipe-production.mjs
+          else
+            node tests/swipe-back-production.mjs
+          fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:

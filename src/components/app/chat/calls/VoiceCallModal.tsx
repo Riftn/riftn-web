@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { CallDuration } from './CallDuration';
-import { Phone, PhoneOff, MessageCircle } from 'lucide-react';
+import { Phone, PhoneOff } from 'lucide-react';
+import ChatIcon from '@/components/ui/cut-icons/chat';
 import MicOff from '@/components/ui/cut-icons/mic-off';
 import Volume2 from '@/components/ui/cut-icons/volume';
 import Mic from '@/components/ui/cut-icons/mic';
 import { useTranslation } from 'react-i18next';
 import { useCall } from '@/contexts/CallContext';
-import { openDmDock } from '@/hooks/use-dm-dock';
+import { useMessageCallPeer } from './useMessageCallPeer';
 import {
   CallStage,
   CallIdentity,
@@ -37,9 +38,10 @@ const VoiceCallModal: React.FC = () => {
   } = useCall();
 
   const { t } = useTranslation();
+  const messageCallPeer = useMessageCallPeer();
   const [audioNeedsInteraction, setAudioNeedsInteraction] = useState(false);
 
-  const peer = usePeerIdentity(peerAddress);
+  const peer = usePeerIdentity(isIncoming ? currentCall?.caller_address || peerAddress : peerAddress);
 
   const handleUserInteraction = async () => {
     if (remoteAudioRef?.current && isCallActive) {
@@ -64,16 +66,23 @@ const VoiceCallModal: React.FC = () => {
       ? t('calls.calling')
       : isConnecting
         ? t('calls.connecting')
-        : <CallDuration fallback={t('calls.connected')} />;
+        : <CallDuration fallback="00:00" />;
 
-  const messageInstead = () => {
-    const username = peer.name.startsWith('@') ? peer.name.slice(1) : undefined;
-    endCall();
-    openDmDock({ address: peerAddress, username, avatarUrl: peer.avatarUrl ?? undefined });
+  const openMessages = () => {
+    if (isRinging) endCall();
+    else minimizeCall();
+    messageCallPeer(peerAddress, peer);
   };
 
   return (
-    <CallStage peer={peer} onMinimize={isIncoming ? undefined : minimizeCall} minimizeLabel={t('calls.minimize')}>
+    <CallStage
+      peer={peer}
+      direct
+      onMinimize={isIncoming ? undefined : minimizeCall}
+      minimizeLabel={t('calls.minimize')}
+      onMessage={isCallActive ? openMessages : undefined}
+      messageLabel={t('messages.message')}
+    >
       <audio
         ref={remoteAudioRef}
         autoPlay
@@ -90,6 +99,7 @@ const VoiceCallModal: React.FC = () => {
           peer={peer}
           status={statusText}
           ringing={isIncoming || isRinging}
+          announceStatus={!isCallActive}
         >
           {isCallActive ? <CallWave paused={isMuted} /> : null}
         </CallIdentity>
@@ -104,22 +114,22 @@ const VoiceCallModal: React.FC = () => {
           </button>
         )}
         {isIncoming ? (
-          <div className="call-row">
-            <CallPill icon={PhoneOff} label={t('calls.decline')} onClick={rejectCall} />
-            <CallPill
+          <div className="call-row call-row--ringing">
+            <CallControl icon={PhoneOff} label={t('calls.decline')} onClick={rejectCall} />
+            <CallControl
               icon={Phone}
               label={t('calls.accept')}
               onClick={() => {
                 acceptCall();
                 handleUserInteraction();
               }}
-              solid
+              primary
             />
           </div>
         ) : (
           <>
-            {isRinging ? <CallPill icon={MessageCircle} label={t('messages.message')} onClick={messageInstead} quiet /> : null}
-            <CallDock>
+            {isRinging ? <CallPill icon={ChatIcon} label={t('messages.message')} onClick={openMessages} quiet /> : null}
+            {isCallActive ? <CallDock>
               <CallControl
                 icon={isMuted ? MicOff : Mic}
                 label={isMuted ? t('calls.unmute') : t('calls.mute')}
@@ -128,11 +138,10 @@ const VoiceCallModal: React.FC = () => {
                   handleUserInteraction();
                 }}
                 active={isMuted}
-                disabled={!isCallActive}
               />
-              {isCallActive ? <CallCaptionsControl /> : null}
-              <CallControl icon={PhoneOff} label={isCallActive ? t('calls.end') : t('common.cancel', 'Cancel')} onClick={endCall} primary />
-            </CallDock>
+              <CallCaptionsControl />
+            </CallDock> : null}
+            <CallControl icon={PhoneOff} label={isCallActive ? t('calls.end') : t('common.cancel', 'Cancel')} onClick={endCall} primary />
           </>
         )}
       </div>

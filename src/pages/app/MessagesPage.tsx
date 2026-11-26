@@ -41,7 +41,8 @@ import { VerifiedBadge } from '@/components/app/VerifiedBadge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { collapseChat, cameFromPanel } from '@/lib/chat-expand';
-import { PublicChat, DirectMessageChat, NewConversationModal, NewMessageSelector } from '@/components/app/chat';
+import { PublicChat } from '@/components/app/chat/PublicChat';
+import { NewMessageSelector } from '@/components/app/chat/NewMessageSelector';
 import { NewMessageDrawer, type NewMessageDrawerHandle } from '@/components/app/chat/NewMessageDrawer';
 import { flushSync } from 'react-dom';
 import { OnlineDot } from '@/components/app/chat/OnlineDot';
@@ -96,6 +97,14 @@ import { localizeDmCallPreview } from '@/lib/dm-call-notice';
 
 import { formatCount } from '@/lib/format-count';
 import { stripBold } from '@/lib/bold-markup';
+import { lazyWithRetry } from '@/lib/lazy-with-retry';
+
+const DirectMessageChat = lazyWithRetry(() =>
+  import('@/components/app/chat/DirectMessageChat').then(({ DirectMessageChat }) => ({ default: DirectMessageChat })),
+);
+const NewConversationModal = lazyWithRetry(() =>
+  import('@/components/app/chat/NewConversationModal').then(({ NewConversationModal }) => ({ default: NewConversationModal })),
+);
 /**
  * The other person's name with their badge sitting on its baseline, the same
  * BadgedName system the feed uses. The badge rides straight after the name
@@ -237,12 +246,12 @@ export function ConversationItem({
           {checked && <span className="block h-[6px] w-[10px] -translate-y-px -rotate-45 border-b-2 border-l-2" style={{ borderColor: 'hsl(var(--background))' }} />}
         </span>
       )}
-      <span className="relative shrink-0">
-        <MomentFace address={selecting ? null : otherUser?.address} size={48} outline name={displayName || fallbackName} className="rounded-lg">
-          <LiveRipple ids={selecting ? [] : [otherUser?.address, otherUser?.username]} className="relative rounded-lg">
-            <Avatar className="w-12 h-12">
-              {avatarUrl && <AvatarImage src={avatarUrl} />}
-              <AvatarFallback className="bg-zinc-700 text-white font-medium">
+      <span data-chat-row-avatar className="relative shrink-0 rounded-lg">
+        <MomentFace address={selecting ? null : otherUser?.address} size={48} outline name={displayName || fallbackName} className="rounded-[inherit]">
+          <LiveRipple ids={selecting ? [] : [otherUser?.address, otherUser?.username]} className="relative rounded-[inherit]">
+            <Avatar className="w-12 h-12 rounded-[inherit]">
+              {avatarUrl && <AvatarImage src={avatarUrl} className="rounded-[inherit]" />}
+              <AvatarFallback className="bg-zinc-700 text-white font-medium rounded-[inherit]">
                 {(fallbackName.startsWith('0x') ? fallbackName.charAt(2) : fallbackName.charAt(0)).toUpperCase()}
               </AvatarFallback>
             </Avatar>
@@ -327,6 +336,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const { t } = useTranslation();
   const location = useLocation();
   const [selectedConversation, setSelectedConversation] = useState<DeHubConversation | null>(null);
+  // Resolve public links in the navigation effect below, after mount.
   const [showPublicChat, setShowPublicChat] = useState(false);
   // A group, channel or community chat open in place (same chat as the
   // community page's Chat tab).
@@ -357,7 +367,8 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
       : { height: `calc(${vvHeight}px - var(--app-top-bar))` }
     : undefined;
   const [showMessageSelector, setShowMessageSelector] = useState(false);
-  const [showNewConversation, setShowNewConversation] = useState(false);
+  // A closed dialog stays mounted after its first open so it can animate out.
+  const [showNewConversation, setShowNewConversation] = useState<boolean | null>(null);
   // Phones: the + opens the New message drawer directly, keyboard up.
   const [showNewMessageDrawer, setShowNewMessageDrawer] = useState(false);
   const newMessageDrawerRef = useRef<NewMessageDrawerHandle>(null);
@@ -423,6 +434,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
 
   const openNewMessage = useCallback(() => {
     if (guest) { openLoginModal({ path: '/chat?chat=public' }); return; }
+    void DirectMessageChat.preload().catch(() => undefined);
     const phone = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
     if (!phone) {
       setShowMessageSelector(true);
@@ -1035,6 +1047,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const navigate = useNavigate();
   const chatEntryRef = useRef(false);
   const chatParamPresent = new URLSearchParams(location.search).get('chat') === '1';
+  const shareLiveTokenId = location.state?.shareLiveTokenId;
 
   useEffect(() => {
     if (!isMessagesRouteActive) return;
@@ -1043,9 +1056,11 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     if (!isAuthenticated && !fullscreen) return;
     if (chatOpen && !chatEntryRef.current) {
       chatEntryRef.current = true;
-      navigate(`${routeBase}?chat=1`);
+      navigate(`${routeBase}?chat=1`, {
+        state: showPublicChat && shareLiveTokenId ? { shareLiveTokenId } : undefined,
+      });
     }
-  }, [chatOpen, isMessagesRouteActive, navigate, routeBase, isAuthenticated, fullscreen]);
+  }, [chatOpen, isMessagesRouteActive, navigate, routeBase, isAuthenticated, fullscreen, showPublicChat, shareLiveTokenId]);
 
   // Back was pressed: the param is gone, so close the chat rather than leave
   // the route. This also clears a selection that would otherwise survive —
@@ -1259,15 +1274,18 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   }
 
   const dmPane = fullscreen && selectedConversation && !showPublicChat ? (
+    <Suspense fallback={<ConversationsSkeleton />}>
     <DirectMessageChat
       key={conversationIdentity(selectedConversation)}
       conversation={selectedConversation}
+      fullscreen
       initialComposerText={composerPrefill?.convId === selectedConversation.id ? composerPrefill.text : undefined}
       focusComposer={composerFocusFor === conversationIdentity(selectedConversation)}
       onBack={closeChat}
       cozy
       options={richList ? (({ onBlock: _b, onDelete: _d, ...rest }) => rest)(chatOptionsFor(selectedConversation)) : undefined}
     />
+    </Suspense>
   ) : null;
 
   // If a DM conversation is selected, show it
@@ -1277,6 +1295,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     return (
       <>
       <div style={keyboardStyle} data-msg-phone-b={phonePill && !fullscreen ? '' : undefined} className={`${mobileChatHeight} lg:h-[calc(100dvh-32px)] pt-1 pb-0 sm:pt-1 sm:pb-3 lg:pt-2 overflow-hidden`}>
+        <Suspense fallback={<ConversationsSkeleton />}>
         <DirectMessageChat
           /*
            * Keyed on WHO, not on the conversation id. A thread you have never
@@ -1296,6 +1315,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
           cozy={phonePill && !fullscreen}
           phoneB={phonePill && !fullscreen}
         />
+        </Suspense>
       </div>
       {newMessageDrawer}
       </>
@@ -1969,14 +1989,18 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
         onOpenChange={(open) => { if (!open) setNewChatKind(null); }}
       />
 
-      <NewConversationModal
-        open={showNewConversation}
-        onOpenChange={setShowNewConversation}
-        onConversationCreated={(conversation) => {
-          setShowPublicChat(false);
-          setSelectedConversation(conversation);
-        }}
-      />
+      {showNewConversation !== null && (
+        <Suspense fallback={null}>
+          <NewConversationModal
+            open={showNewConversation}
+            onOpenChange={setShowNewConversation}
+            onConversationCreated={(conversation) => {
+              setShowPublicChat(false);
+              setSelectedConversation(conversation);
+            }}
+          />
+        </Suspense>
+      )}
       {newMessageDrawer}
     </>
   );

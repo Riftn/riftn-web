@@ -54,6 +54,7 @@ import { extractAvatarPath, buildAvatarUrl } from '@/lib/media-url';
 import { useOptimisticPosts } from '@/hooks/use-optimistic-posts';
 import { useAuth } from '@/contexts/AuthContext';
 import { buildStreamInfo } from '../lib/stream-info';
+import { parsePpvPreviewSeconds } from '../lib/ppv-preview';
 import { attachShopListings } from '@/lib/attach-shop-listings';
 import { crossPost } from '@/lib/multipost';
 import { useCrossPostStore } from '@/store/crossPostStore';
@@ -66,6 +67,7 @@ import type { PostChainId } from '@/components/app/ChainSelector';
 import { normalizeCategoryList } from '@/lib/category-names';
 import { trackFirstPost } from '@/lib/analytics';
 import { extractUrlsFromText } from '@/lib/api/link-preview';
+import { restoreFormattedEditor } from '@/lib/editor-text';
 import { translateDraft, rememberTranslateLang } from '@/features/post/post-translate';
 import { LANGUAGE_NAMES } from '@/hooks/use-user-language';
 
@@ -121,6 +123,7 @@ interface ActiveDraft {
   isSubscribersOnly?: boolean;
   isPPV: boolean;
   ppvAmount: string;
+  ppvPreviewSeconds?: string;
   ppvCurrency: Currency;
   isWatch2Earn: boolean;
   w2eViews: string;
@@ -369,6 +372,7 @@ export function usePostForm(
   const [media, setMedia] = useState<MediaFile[]>([]);
   const [isPPV, setIsPPV] = useState(d?.isPPV ?? false);
   const [ppvAmount, setPpvAmount] = useDraftState(draftScope + ":ppvAmount", d?.ppvAmount ?? '');
+  const [ppvPreviewSeconds, setPpvPreviewSeconds] = useDraftState(draftScope + ":ppvPreviewSeconds", d?.ppvPreviewSeconds ?? '');
   // DHB, not USD: a USD-priced PPV ships with no contract address, and both
   // clients' unlock flows refuse it — a paywall nobody can pay through.
   const [ppvCurrency, setPpvCurrency] = useState<Currency>(d?.ppvCurrency ?? 'DHB');
@@ -658,7 +662,7 @@ export function usePostForm(
   // hard navigation within the 500ms window can't lose it.
   const activeSnapshotJson = JSON.stringify({
     text, titleText, showTitle, isMature, isForKids, shopLinks, shopListingIds,
-    selectedCategory, isSubscribersOnly, isPPV, ppvAmount, ppvCurrency,
+    selectedCategory, isSubscribersOnly, isPPV, ppvAmount, ppvPreviewSeconds, ppvCurrency,
     isWatch2Earn, w2eViews, w2eComments, w2eTotal, w2eCurrency,
     isTokenGated, tokenContract, tokenSymbol, tokenAmount,
     poll, scheduledDate: scheduledDate ? scheduledDate.toISOString() : null,
@@ -670,7 +674,7 @@ export function usePostForm(
     const persistDraft = () => {
       const draft: ActiveDraft = {
         text, titleText, showTitle, isMature, isForKids, shopLinks, shopListingIds,
-        selectedCategory, isSubscribersOnly, isPPV, ppvAmount, ppvCurrency,
+        selectedCategory, isSubscribersOnly, isPPV, ppvAmount, ppvPreviewSeconds, ppvCurrency,
         isWatch2Earn, w2eViews, w2eComments, w2eTotal, w2eCurrency,
         isTokenGated, tokenContract, tokenSymbol, tokenAmount,
         poll,
@@ -693,7 +697,7 @@ export function usePostForm(
     // unmount-only flush lives in the effect below.
     return () => clearTimeout(timer);
   }, [text, titleText, showTitle, isMature, isForKids, shopLinks, shopListingIds,
-    selectedCategory, isSubscribersOnly, isPPV, ppvAmount, ppvCurrency,
+    selectedCategory, isSubscribersOnly, isPPV, ppvAmount, ppvPreviewSeconds, ppvCurrency,
     isWatch2Earn, w2eViews, w2eComments, w2eTotal, w2eCurrency,
     isTokenGated, tokenContract, tokenSymbol, tokenAmount, poll, scheduledDate]);
 
@@ -722,6 +726,9 @@ export function usePostForm(
   const isShort = hasVideo && media.some(m => m.type === 'video' && m.duration && m.duration < 90);
   const hasMusicVideo = media.some(m => m.type === 'video' && m.isMusicVideo);
   const isLive = liveMode !== null;
+  const canConfigurePpvPreview = hasVideo && !isLive && !isQuoting && visibility === 'public'
+    && !user?.isPrivate && !isMature && !isTokenGated && !isSubscribersOnly && !isWatch2Earn
+    && !contentWarning?.trim() && !media.some(item => item.type === 'video' && item.destructSeconds);
 
   const getPostDestinations = useCallback(() => {
     const destinations: string[] = ['Home'];
@@ -835,7 +842,7 @@ export function usePostForm(
       setTitleText(title);
       setText(description);
       if (editorRef.current) {
-        editorRef.current.innerText = description;
+        restoreFormattedEditor(editorRef.current, description);
       }
     }
     
@@ -965,7 +972,7 @@ export function usePostForm(
       setTitleText(title);
       setText(description);
       if (editorRef.current) {
-        editorRef.current.innerText = description;
+        restoreFormattedEditor(editorRef.current, description);
       }
     }
     
@@ -1202,7 +1209,7 @@ export function usePostForm(
         setText(data.enhancedText);
         // Update the editor content as well
         if (editorRef.current) {
-          editorRef.current.innerText = data.enhancedText;
+          restoreFormattedEditor(editorRef.current, data.enhancedText);
         }
         toast.success(mode === 'spellcheck' ? _copy("copy.7d61d28cb660", { defaultValue: "Spell checked!" }) : _copy("copy.e116b32c9c80", { defaultValue: "Style applied!" }));
       } else if (data?.error) {
@@ -1218,7 +1225,7 @@ export function usePostForm(
 
   const writeDraft = useCallback((next: string) => {
     setText(next);
-    if (editorRef.current) editorRef.current.innerText = next;
+    if (editorRef.current) restoreFormattedEditor(editorRef.current, next);
   }, [setText]);
 
   const handleTranslateDraft = useCallback(async (lang: string) => {
@@ -1343,6 +1350,7 @@ export function usePostForm(
     setIsSubscribersOnly(false);
     setIsPPV(false);
     setPpvAmount.complete(ppvAmount, '');
+    setPpvPreviewSeconds.complete(ppvPreviewSeconds, '');
     setPpvCurrency('USD');
     setIsWatch2Earn(false);
     setW2eViews.complete(w2eViews, '');
@@ -1392,7 +1400,7 @@ export function usePostForm(
     persistDraftRef.current = null;
     // Compare fresh disk state as another tab may have continued this draft.
     if (activeKey && readCurrentDraft(activeKey) === activeSnapshotJson) clearActiveDraft(activeKey);
-  }, [activeSnapshotJson, activeKey, setPoll, setPpvAmount, setSelectedCategory, setShopLinks, setText, setTitleText, setTokenAmount, setTokenContract, setTokenSymbol, setW2eComments, setW2eTotal, setW2eViews, poll, ppvAmount, selectedCategory, text, titleText, tokenAmount, tokenContract, w2eComments, w2eTotal, w2eViews, shopLinks, tokenSymbol]);
+  }, [activeSnapshotJson, activeKey, setPoll, setPpvAmount, setPpvPreviewSeconds, setSelectedCategory, setShopLinks, setText, setTitleText, setTokenAmount, setTokenContract, setTokenSymbol, setW2eComments, setW2eTotal, setW2eViews, poll, ppvAmount, ppvPreviewSeconds, selectedCategory, text, titleText, tokenAmount, tokenContract, w2eComments, w2eTotal, w2eViews, shopLinks, tokenSymbol]);
 
   // Load drafts from DB on mount
   useEffect(() => {
@@ -1429,7 +1437,7 @@ export function usePostForm(
       socialImageData: article?.socialData,
       payload: {
         titleText, showTitle, selectedCategory, isMature, isForKids, isSubscribersOnly,
-        isPPV, ppvAmount, ppvCurrency,
+        isPPV, ppvAmount, ppvPreviewSeconds, ppvCurrency,
         isWatch2Earn, w2eViews, w2eComments, w2eTotal, w2eCurrency,
         isTokenGated, tokenContract, tokenSymbol, tokenAmount,
         poll,
@@ -1458,7 +1466,7 @@ export function usePostForm(
     }
   }, [text, hasImage, hasVideo, hasAudio, drafts, user?.address,
     titleText, showTitle, selectedCategory, isMature, isForKids, isSubscribersOnly,
-    isPPV, ppvAmount, ppvCurrency, isWatch2Earn, w2eViews, w2eComments, w2eTotal,
+    isPPV, ppvAmount, ppvPreviewSeconds, ppvCurrency, isWatch2Earn, w2eViews, w2eComments, w2eTotal,
     w2eCurrency, isTokenGated, tokenContract, tokenSymbol, tokenAmount, poll,
     scheduledDate, chainId, shopLinks, shopListingIds,
     visibility, contentWarning, quotePolicy, replyPolicy]);
@@ -1466,7 +1474,7 @@ export function usePostForm(
   const loadDraft = useCallback((draft: Draft) => {
     setText(draft.text);
     if (editorRef.current) {
-      editorRef.current.innerText = draft.text;
+      restoreFormattedEditor(editorRef.current, draft.text);
     }
     // Everything else the draft carried. A missing key means the draft predates
     // that setting (or came from mobile), so the composer's default stands —
@@ -1482,6 +1490,7 @@ export function usePostForm(
     if (p.isSubscribersOnly !== undefined) setIsSubscribersOnly(p.isSubscribersOnly);
     if (p.isPPV !== undefined) setIsPPV(p.isPPV);
     if (p.ppvAmount !== undefined) setPpvAmount(p.ppvAmount);
+    setPpvPreviewSeconds(p.ppvPreviewSeconds ?? '');
     if (p.ppvCurrency !== undefined) setPpvCurrency(p.ppvCurrency);
     if (p.isWatch2Earn !== undefined) setIsWatch2Earn(p.isWatch2Earn);
     if (p.w2eViews !== undefined) setW2eViews(p.w2eViews);
@@ -1505,7 +1514,7 @@ export function usePostForm(
       const when = p.scheduledDate ? new Date(p.scheduledDate) : null;
       setScheduledDate(when && !Number.isNaN(when.getTime()) && when.getTime() > Date.now() ? when : null);
     }
-  }, [setPoll, setPpvAmount, setSelectedCategory, setShopLinks, setText, setTitleText, setTokenAmount, setTokenContract, setTokenSymbol, setW2eComments, setW2eTotal, setW2eViews]);
+  }, [setPoll, setPpvAmount, setPpvPreviewSeconds, setSelectedCategory, setShopLinks, setText, setTitleText, setTokenAmount, setTokenContract, setTokenSymbol, setW2eComments, setW2eTotal, setW2eViews]);
 
   const deleteDraft = useCallback((id: string) => {
     const updatedDrafts = drafts.filter(d => d.id !== id);
@@ -1809,6 +1818,10 @@ export function usePostForm(
       }
 
       const { streamInfo, subscriberPlanIds } = access;
+      const previewSeconds = parsePpvPreviewSeconds(ppvPreviewSeconds);
+      if (canConfigurePpvPreview && streamInfo.isPayPerView && previewSeconds) {
+        streamInfo.payPerViewPreviewSeconds = previewSeconds;
+      }
       const hasBounty = !!access.bounty;
 
       // The bounty is locked through the mint transaction, so the tokens have
@@ -3061,7 +3074,7 @@ export function usePostForm(
     // shop link added after the caption was typed reached the mint as
     // `undefined`: the post went up with an empty board and nothing said so.
     // Add the dependency when you read new state in here.
-    text, media, isSubscribersOnly, isPPV, ppvAmount, ppvCurrency,
+    text, media, isSubscribersOnly, isPPV, ppvAmount, ppvPreviewSeconds, ppvCurrency, canConfigurePpvPreview,
     isWatch2Earn, w2eViews, w2eComments, w2eTotal,
     isTokenGated, tokenContract, tokenSymbol, tokenAmount, liveMode, scheduledDate, dripGap,
     hasVideo, hasImage, hasAudio, isPosting, resetForm, onClose, navigate, addOptimisticPost, user,
@@ -3091,6 +3104,8 @@ export function usePostForm(
       isSubscribersOnly,
       isPPV,
       ppvAmount,
+      ppvPreviewSeconds,
+      canConfigurePpvPreview,
       ppvCurrency,
       isWatch2Earn,
       w2eViews,
@@ -3143,6 +3158,7 @@ export function usePostForm(
       setIsSubscribersOnly,
       setIsPPV,
       setPpvAmount,
+      setPpvPreviewSeconds,
       setPpvCurrency,
       setIsWatch2Earn,
       setW2eViews,

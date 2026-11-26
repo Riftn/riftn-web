@@ -101,9 +101,8 @@
   html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-list-row] :is(.w-12.h-12) {
     width: 52px !important;
     height: 52px !important;
-    border-radius: 10px !important;
   }
-  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-list-row] :is(.w-12.h-12) * { border-radius: 10px !important; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-list-row] [data-chat-row-avatar] { border-radius: 10px !important; }
   /* Text: name 16px, time 13px (theme colour when unread), preview up to two
      lines, softer once read. */
   [data-msg-phone-b] [data-chat-list-row] .font-semibold,

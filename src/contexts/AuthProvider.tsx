@@ -584,7 +584,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // go out while the wallet's connect popup is still closing — see the gap wait
   // in completeDeHubAuthWagmi.
   const lastWagmiConnectAtRef = useRef(0);
-  const wagmiSilentReconnectAttemptedRef = useRef(false);
   // The address whose login signature was just turned down. Rejecting is how
   // people back out to pick a different wallet, but the connector stays
   // attached — and the returning-user branch in handleWagmiConnect needs no tap
@@ -1416,8 +1415,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // ── Proactive Token Refresh Timer ──
   useEffect(() => {
     if (!user || !walletAddress) return;
+    let active = true;
 
     const tryProactiveRefresh = async () => {
+      if (!navigator.onLine) return;
       let timeUntilExpiry: number;
       const expiresAtStr = localStorage.getItem('dehub_token_expires_at');
       if (expiresAtStr) {
@@ -1430,7 +1431,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (timeUntilExpiry < 5 * 60 * 1000) {
+        const previousAccessToken = getAuthToken();
+        const previousRefreshToken = getRefreshToken();
         const outcome = await refreshAccessTokenDetailed();
+        if (!active) return;
         if (outcome.ok) {
           console.log('[Auth] ✓ Proactive token refresh succeeded');
         } else if (outcome.reason === 'transient' || outcome.reason === 'malformed') {
@@ -1446,6 +1450,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // the visible auth state, so a cross-tab refresh collision never
           // flashes the user through the logged-out UI.
           if (await recoverExistingSupabaseSession()) return;
+          const accessToken = getAuthToken();
+          const refreshToken = getRefreshToken();
+          if (!active || (accessToken && accessToken !== previousAccessToken) ||
+              (refreshToken && refreshToken !== previousRefreshToken)) return;
           // No second proof remains — the session really is over.
           console.warn('[Auth] Refresh token rejected — clearing session');
           clearAuthSession();
@@ -1461,9 +1469,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const handleVisibilityChange = () => {
       if (!document.hidden) tryProactiveRefresh();
     };
+    window.addEventListener('online', tryProactiveRefresh);
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => {
+      active = false;
       clearInterval(intervalId);
+      window.removeEventListener('online', tryProactiveRefresh);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [user, walletAddress]);
@@ -1772,6 +1783,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const wagmiSilentReconnectAttemptedRef = useRef(false);
   // Silent wagmi reconnect for wallet in-app browsers
   useEffect(() => {
     if (!isAuthenticated || connectionSource !== 'wagmi' || isLoading || isConnecting) return;
@@ -1781,23 +1793,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const isInWalletBrowser = isMobileDevice();
     if (!isInWalletBrowser || !eth) return;
 
-    if (wagmiSilentReconnectAttemptedRef.current) return;
-    wagmiSilentReconnectAttemptedRef.current = true;
-
     const injectedConnector = connectors.find(c => c.id === 'injected');
     if (!injectedConnector) return;
 
-    connectAsync({ connector: injectedConnector }).catch((err: any) => {
-      const isAlreadyConnected =
-        err?.name === 'ConnectorAlreadyConnectedError' ||
-        err?.message?.toLowerCase().includes('already connected');
-      if (isAlreadyConnected) {
-        return;
+    let connecting = false;
+    const reconnectWallet = async () => {
+      if (!navigator.onLine || connecting) return;
+      connecting = true;
+      try {
+        await connectAsync({ connector: injectedConnector });
+      } catch (error) {
+        // Wallet connectivity and the Riftn session have separate lifetimes.
+        console.warn('[Auth] Silent wallet reconnect did not complete:', error);
+      } finally {
+        connecting = false;
       }
-      console.warn('[Auth] Silent wagmi reconnect failed, logging out:', err);
-      toast.info(_copy("copy.ac8f060ebca0", { defaultValue: "Your wallet connection was lost. Please log in again." }));
-      disconnect();
-    });
+    };
+    if (!wagmiSilentReconnectAttemptedRef.current && navigator.onLine) {
+      wagmiSilentReconnectAttemptedRef.current = true;
+      void reconnectWallet();
+    }
+    window.addEventListener('online', reconnectWallet);
+    return () => window.removeEventListener('online', reconnectWallet);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, connectionSource, isWagmiConnected, isLoading, isConnecting]);
 
@@ -3589,11 +3606,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // waiting for the user to type their wallet password. Tearing down
           // there would cancel the very flow that recovers them.
           const credentialsGone = !getAuthToken() && !getRefreshToken();
-          if (credentialsGone) {
-            localStorage.removeItem('dehub_user');
-            setUser(null);
-            setWalletAddress(null);
-          }
+          if (!credentialsGone) return;
+          localStorage.removeItem('dehub_user');
+          setUser(null);
+          setWalletAddress(null);
           toast.error(_copy("copy.e5ee1e7e84aa", { defaultValue: "Session expired" }), {
             description: _copy("copy.6660f63e06ce", { defaultValue: "Please sign in again to continue" }),
             action: { label: _copy("copy.bfd402b2f6f3", { defaultValue: "Sign in" }), onClick: () => stableCallbacks.openLoginModal() },

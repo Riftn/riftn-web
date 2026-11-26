@@ -7,22 +7,18 @@ const TokenUtility = () => {
   const { t } = useLanguage();
 
   const benefits = [
-    t('tokenUtility.benefit1'),
-    t('tokenUtility.benefit2'),
-    t('tokenUtility.benefit3'),
-    t('tokenUtility.benefit4'),
-    t('tokenUtility.benefit5'),
-    t('tokenUtility.benefit6'),
-    t('tokenUtility.benefit7'),
-    t('tokenUtility.benefit8'),
-    t('tokenUtility.benefit9'),
+    t('tokenOverview.useTippingDesc'),
+    t('tokenOverview.useContentDesc'),
+    t('tokenOverview.useRewardsDesc'),
+    t('tokenOverview.useAiDesc'),
+    t('tokenGovernance.subtitleCurrent'),
   ];
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div>
         <h1 className="text-4xl font-bold text-foreground mb-4">{t('tokenUtility.title')}</h1>
-        <h2 className="text-2xl font-semibold text-muted-foreground mb-6">{t('tokenUtility.subtitle')}</h2>
+        <p className="text-muted-foreground leading-relaxed">{t('tokenOverview.introCurrent')}</p>
       </div>
 
       <Card>
@@ -46,7 +42,7 @@ const TokenUtility = () => {
           <CardTitle className="text-xl text-foreground">{t('tokenUtility.disclaimer')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground leading-relaxed text-sm">{t('tokenUtility.disclaimerText')}</p>
+          <p className="text-muted-foreground leading-relaxed text-sm">{t('faq.a20')}</p>
         </CardContent>
       </Card>
     </div>

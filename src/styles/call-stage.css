@@ -59,13 +59,96 @@
   backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
 }
 .call-stage__min:hover { background: var(--cs-glass-2); }
+.call-stage__message { left: auto; right: 16px; }
+.call-stage[data-direct="true"] .call-stage__min {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+}
+.call-stage[data-direct="true"] .call-stage__min svg { width: 20px; height: 20px; }
+.call-stage[data-direct="true"][data-live="true"] .call-stage__min {
+  border-color: rgb(255 255 255 / 0.25);
+  background: rgb(18 18 22 / 0.78);
+  color: #fff;
+}
+.call-stage[data-direct="true"][data-live="true"] .call-stage__min:hover { background: rgb(42 42 48 / 0.9); }
+.call-stage[data-direct="true"][data-live="true"] .call-stage__min:focus-visible { outline-color: #fff; }
+.call-stage[data-direct="true"][data-live="true"] .call-stage__top {
+  padding-top: calc(max(16px, env(safe-area-inset-top)) + 52px);
+  padding-inline: 16px;
+}
+.call-stage[data-direct="true"][data-live="true"] .call-stage__self {
+  bottom: calc(100% + 8px);
+  height: clamp(64px, 22dvh, 148px);
+}
+.call-stage[data-direct="true"][data-live="true"] .call-stage__foot {
+  --cs-fg: #fff;
+  --cs-on-fg: #0a0a0c;
+}
+.call-stage[data-direct="true"][data-live="true"] .call-stage__foot::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(transparent, rgb(0 0 0 / 0.9));
+}
+.call-stage[data-message="true"] .call-stage__fx {
+  right: 68px;
+}
+.call-stage[data-direct="true"] .call-stage__win { overflow-y: auto; }
+.call-stage[data-direct="true"] .call-stage__avatar {
+  margin-top: 24px;
+  width: clamp(108px, 23dvh, 180px);
+  height: auto;
+  aspect-ratio: 1;
+}
+.call-stage[data-direct="true"] .call-stage__portrait {
+  border: 1px solid color-mix(in srgb, var(--cs-fg) 36%, transparent);
+}
+.call-stage[data-direct="true"] .call-stage__kind,
+.call-stage[data-direct="true"] .call-stage__status,
+.call-stage[data-direct="true"] .call-ctl { color: var(--cs-fg); }
+.call-stage[data-direct="true"] .call-ctl {
+  min-width: 60px;
+  max-width: 92px;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+.call-stage[data-direct="true"] .call-dock { max-width: 100%; }
+.call-stage[data-direct="true"] .call-dock > .call-ctl { min-width: 0; }
+.call-stage[data-direct="true"] .call-btn:not([data-solid="true"]) { border: 1px solid var(--cs-line); }
+.call-stage[data-direct="true"] .call-stage__foot > .call-ctl { margin-top: 2px; }
+.call-row.call-row--ringing { gap: clamp(40px, 15vw, 96px); }
+.call-row--ringing .call-btn { width: 68px; height: 68px; }
+.call-stage[data-direct="true"] .call-stage__foot > .call-ctl > .call-btn {
+  width: 66px;
+  height: 66px;
+}
+@media (max-width: 767px) and (min-height: 680px) {
+  .call-stage[data-direct="true"] .call-stage__id {
+    padding-top: calc(max(16px, env(safe-area-inset-top)) + 12dvh);
+  }
+  .call-stage[data-direct="true"] .call-stage__foot:has(.call-row--ringing) {
+    padding-bottom: max(8dvh, env(safe-area-inset-bottom));
+  }
+}
+@media (max-height: 620px) {
+  .call-stage[data-direct="true"] .call-stage__id { padding-top: calc(max(12px, env(safe-area-inset-top)) + 48px); }
+  .call-stage[data-direct="true"] .call-stage__avatar { margin-top: 12px; }
+  .call-stage[data-direct="true"] .call-wave { margin-top: 8px; }
+}
 
 .call-stage__id { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: calc(max(16px, env(safe-area-inset-top)) + 56px) 24px 0; text-align: center; }
 .call-stage__kind { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--cs-mu); }
 .call-stage__name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 32px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; color: var(--cs-fg); }
 .call-stage__status { font-size: 15px; font-variant-numeric: tabular-nums; color: var(--cs-mu); }
 .call-stage__avatar { position: relative; isolation: isolate; margin-top: 44px; width: 148px; height: 148px; }
-.call-stage__avatar > img, .call-stage__avatar > span { position: relative; z-index: 1; display: grid; place-items: center; width: 100%; height: 100%; border-radius: 26%; object-fit: cover; background: var(--cs-glass-2); color: var(--cs-fg); font-size: 48px; font-weight: 800; box-shadow: 0 18px 50px rgb(0 0 0 / 0.35); }
+.call-stage__avatar > .call-stage__portrait { position: relative; z-index: 1; display: grid; place-items: center; width: 100%; height: 100%; border-radius: 26%; object-fit: cover; background: var(--cs-glass-2); color: var(--cs-fg); font-size: 48px; font-weight: 800; box-shadow: 0 18px 50px rgb(0 0 0 / 0.35); }
+.call-stage__portrait > img { border-radius: inherit; object-fit: cover; }
+.call-stage__portrait > [data-avatar-fallback] { border-radius: inherit; background: transparent; }
 @media (max-height: 640px) { .call-stage__avatar { margin-top: 24px; width: 108px; height: 108px; } }
 
 .call-stage__top { position: absolute; inset: 0 0 auto; z-index: 2; display: flex; justify-content: center; padding: max(18px, env(safe-area-inset-top)) 70px 0; pointer-events: none; }
@@ -86,7 +169,7 @@
 .call-ctl { display: flex; flex-direction: column; align-items: center; gap: 7px; min-width: 60px; font-size: 12px; font-weight: 600; color: var(--cs-mu); }
 .call-btn { display: grid; place-items: center; width: 60px; height: 60px; border-radius: 999px; border: 0; background: var(--cs-glass-2); color: var(--cs-fg); transition: transform 0.12s ease, background-color 0.15s ease; }
 .call-btn:hover { background: color-mix(in srgb, var(--cs-fg) 24%, transparent); }
-.call-btn:active { transform: scale(0.94); }
+.call-btn:not(:disabled):active { transform: scale(0.94); }
 .call-btn:disabled { opacity: 0.38; }
 .call-btn[data-solid="true"] { background: var(--cs-fg); color: var(--cs-on-fg); }
 .call-btn[data-dimmed="true"] { color: color-mix(in srgb, var(--cs-fg) 55%, transparent); }
@@ -172,7 +255,7 @@ html[data-theme="island"] .call-rings::after { animation-delay: 1.3s; border-col
 /* Hacker: a blinking terminal frame. */
 html[data-theme="hacker"] .call-rings::before { inset: -9px; border: 1.5px solid var(--cs-ring); border-radius: 2px; animation: call-blink 1s steps(2) infinite; }
 html[data-theme="hacker"] .call-rings::after { inset: -9px; border: 1px dashed color-mix(in srgb, var(--cs-ring) 60%, transparent); border-radius: 2px; animation: call-ring 1.6s steps(6) infinite; }
-html[data-theme="hacker"] .call-stage__avatar > img, html[data-theme="hacker"] .call-stage__avatar > span { border-radius: 4px; }
+html[data-theme="hacker"] .call-stage__avatar > .call-stage__portrait { border-radius: 4px; }
 
 /* Horror: a heartbeat in the dark. */
 html[data-theme="horror"] .call-rings::before { inset: -18%; border: 0; border-radius: 50%; background: radial-gradient(closest-side, color-mix(in srgb, var(--cs-ring) 75%, transparent), transparent); filter: blur(12px); animation: call-beat 1.5s ease-in-out infinite; }
@@ -205,6 +288,8 @@ html[data-theme="horror"] .call-stage { --cs-bg: #070203; --cs-tint-top: rgb(46 
   position: fixed; right: 16px; bottom: calc(84px + env(safe-area-inset-bottom)); z-index: 60;
   width: min(320px, calc(100vw - 32px)); color: var(--cs-fg); touch-action: none; user-select: none;
 }
+/* Keep minimized calls above the full-screen chat and below dialogs. */
+body[data-fullscreen-chat-up] .call-mini { z-index: 80; }
 @media (max-width: 767px) { .call-mini { left: 16px; right: 16px; width: auto; } }
 .call-mini__body { overflow: hidden; border-radius: 24px; border: 1px solid var(--cs-line); background: var(--cs-dock); box-shadow: 0 16px 40px rgb(0 0 0 / 0.4); backdrop-filter: blur(24px) saturate(1.5); -webkit-backdrop-filter: blur(24px) saturate(1.5); }
 .call-mini__video { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #0c0c0f; cursor: grab; }
@@ -287,6 +372,7 @@ html[data-theme="hacker"] .call-card__go { background: #39ff88; color: #001a0a; 
   .call-dock[data-crowded="true"] { gap: 8px; padding: 12px 12px; }
   .call-dock[data-crowded="true"] .call-ctl { min-width: 52px; font-size: 11px; }
   .call-dock[data-crowded="true"] .call-btn { width: 52px; height: 52px; }
+  .call-stage[data-direct="true"] .call-dock[data-crowded="true"] .call-ctl { min-width: 52px; font-size: 13px; }
 }
 
 /* Background effects on a video call: the corner button and the row of choices above the controls. */

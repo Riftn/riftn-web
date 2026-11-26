@@ -12,6 +12,7 @@ import { useTranslation as _useCopy } from 'react-i18next';
  * actually pick one of the browser capture options.
  */
 
+import { LiveDot } from '@/components/app/live/LiveDot';
 import { useState, useRef, useEffect, useCallback, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SwitchCamera, Cable, ScreenShare, ScreenShareOff, PictureInPicture2, Move, Wand2, Palette, Heart, Loader2, AlertTriangle, SignalLow, LayoutTemplate, Layers, SlidersHorizontal } from "lucide-react";
@@ -2358,34 +2359,14 @@ export function GoLiveBroadcaster({
              belongs on that edge is now h-8 and shares TOP_CHROME_Y, which also
              clears the notch — a phone's status bar was landing on the chip. */
           <div className={cn('absolute left-3 z-20 flex h-9 items-center gap-2', TOP_CHROME_Y)}>
-            {/* data-live-pulse marks this as a meaningful live indicator (the
-                themes map it to their live colour and exempt it from skeleton
-                rules); data-keep-dark exempts it from the portal palette
-                washes that would fade it to a translucent tint over the video
-                — this chip renders inside the vaul drawer portal, outside
-                #app-root, where the themes' restore rules can't reach. */}
             <span
-              data-live-pulse
               data-keep-dark
               className={cn(
                 'flex h-8 items-center gap-1.5 rounded-xl px-3 text-[11px] font-semibold tracking-wide',
-                // The one place hue is allowed on this screen: "on air" is a
-                // state, not decoration. Everything else here is glass.
-                phase === 'live'
-                  ? 'bg-red-500 text-white'
-                  : 'bg-amber-500/90 text-black'
+                phase === 'live' ? 'bg-black/80 text-white' : 'bg-amber-500/90 text-black',
               )}
             >
-              {/* data-live-pulse on the dot itself: the theme skeleton rules
-                  match .animate-pulse per-element, so the chip's attribute
-                  does not shield this span. */}
-              <span
-                data-live-pulse
-                className={cn(
-                  'h-1.5 w-1.5 rounded-full bg-current',
-                  phase === 'live' && 'animate-pulse'
-                )}
-              />
+              {phase === 'live' ? <LiveDot /> : <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />}
               {statusLabel}
             </span>
 
@@ -2427,7 +2408,7 @@ export function GoLiveBroadcaster({
                 </div>
               }
             >
-              <LivePostChat tokenId={tokenId} streamId={streamId ?? undefined} isHost />
+              <LivePostChat tokenId={tokenId} streamId={streamId ?? undefined} isHost menuInDrawer />
             </Suspense>
           </aside>
         )}

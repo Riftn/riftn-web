@@ -16,13 +16,11 @@ import { BadgeIcon } from '@/components/app/BadgeIcon';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTopBuilders } from '@/hooks/use-top-builders';
 import { buildAvatarUrl } from '@/lib/media-url';
-import { useProfileAvatar } from '@/hooks/use-profile-avatar-cache';
 import { cn } from '@/lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { COMMENT_CAP, COMMENT_POINTS, SHIPPED_POINTS, VOTE_POINTS, type BuilderPeriod, type TopBuilder } from '@/lib/top-builders';
 
 import { formatCount } from '@/lib/format-count';
-import { profilePath } from '@/lib/profile-path';
 const SHOWN = 8;
 /** Extra rows added per "Show more" tap once the full list is open. */
 const PAGE = 20;
@@ -35,8 +33,7 @@ function displayName(b: TopBuilder) {
 }
 
 function BuilderAvatar({ builder, size = 30 }: { builder: TopBuilder; size?: number }) {
-  const dbUrl = builder.avatar ? buildAvatarUrl(builder.wallet, builder.avatar) : undefined;
-  const url = useProfileAvatar(builder.wallet, dbUrl) ?? dbUrl ?? null;
+  const url = buildAvatarUrl(builder.wallet, builder.avatar);
   const letter = displayName(builder).slice(0, 1).toUpperCase();
   return url ? (
     <img src={url} alt="" loading="lazy" className="rounded-full object-cover shrink-0" style={{ width: size, height: size }} />
@@ -159,7 +156,7 @@ function BuilderRow({ b, rank, max, open, onToggle, mine }: { b: TopBuilder; ran
         <div className="flex justify-end px-1.5 pb-1.5">
           <button
             type="button"
-            onClick={() => navigate(b.username ? profilePath(b.username) : `/app/profile?id=${b.wallet}`)}
+            onClick={() => navigate(`/app/profile?id=${encodeURIComponent(b.wallet)}`)}
             className="rounded-lg px-2.5 py-1 text-xs text-zinc-300 hover:text-white bg-white/[0.06]"
           >
             {t('features.topBuilders.viewProfile', 'View profile')}

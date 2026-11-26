@@ -57,7 +57,22 @@
     "cancel": "Annuleren",
     "getKey": "Verkrijg een {{name}} sleutel",
     "showLess": "Toon alleen mijn sleutels",
-    "addAnother": "Voeg een andere provider toe"
+    "addAnother": "Voeg een andere provider toe",
+    "providerDescriptions": {
+      "openai": "Builder (GPT-modellen)",
+      "fal": "Tools voor afbeeldingen, video, 3D en foto’s",
+      "kie": "Afbeeldingen en video",
+      "replicate": "Afbeeldingen en video",
+      "xai": "Chatten en afbeeldingen maken met Grok",
+      "elevenlabs": "Stem, nasynchronisatie, muziek en geluidseffecten",
+      "gemini": "Vertalen, schrijfhulp en samenvattingen",
+      "venice": "Chatten met de assistent",
+      "perplexity": "Zoeken op internet met de assistent",
+      "deepgram": "Transcripties en live ondertiteling",
+      "openrouter": "Honderden chat- en tekstmodellen met één sleutel",
+      "groq": "Snelle chat en tekst",
+      "mistral": "Chat en tekst"
+    }
   },
   "resetWallet": {
     "mismatch": "Wachtwoorden komen niet overeen",
@@ -21727,6 +21742,11 @@
     "followFailed": "Volgen mislukt. Probeer het opnieuw."
   },
   "appTokens": {
+    "reviewTransfer": "Overdracht controleren",
+    "transferComplete": "Overdracht voltooid",
+    "balanceAfterSend": "Na verzenden: {{amount}} {{symbol}}",
+    "addNote": "Notitie toevoegen",
+    "minimumTransfer": "De minimale overdracht is 1 RIFT.",
     "kindStaked": "Gestaket",
     "kindUnstaked": "Opgenomen",
     "stakedBalance": "{{amount}} gestaket",
@@ -21912,6 +21932,12 @@
     "enter": "Betreed de kerker"
   },
   "tokenLaunch": {
+    "tickerInfo": "Info",
+    "tickerContract": "Contractadres",
+    "tickerBuy": "Kopen",
+    "referencePrice": "Referentieprijs in de app",
+    "contractPending": "Nog te bevestigen",
+    "earnOnly": "Voorlopig kun je alleen tokens verdienen door de app te gebruiken.",
     "riftTitle": "On-chain lancering van $RIFT",
     "riftStatus": "$RIFT is de munt binnen Riftn. Je kunt deze al in Riftn gebruiken. De on-chain token moet nog worden gelanceerd en heeft geen officieel contractadres of beursnotering. Meld je aan voor een e-mail bij de lancering.",
     "riftSeoDescription": "$RIFT is de munt binnen Riftn. Je kunt deze al in Riftn gebruiken. De on-chain token moet nog worden gelanceerd en heeft geen officieel contractadres of beursnotering.",

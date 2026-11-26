@@ -25,6 +25,9 @@ html[data-theme] [data-profile-tabs][data-joined='true']:not(#_):not(#_):not(#_)
   background: transparent !important;
 }
 .profile-collapse-bar[data-tabs-pinned='true'] { visibility: hidden; }
+:root:has([data-profile-photo-dialog][data-state='open']:not([inert])) [data-profile-pull-root] [data-swipe-back] {
+  visibility: hidden;
+}
 .profile-rail-follow button { max-width: 100%; }
 /* The pinned rail is a 4px-padded pill, so Follow fills its 44px row and keeps
    a corner 4px tighter than the rail's (12 -> 8). Square themes win on

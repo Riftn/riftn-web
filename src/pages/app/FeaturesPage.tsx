@@ -1085,7 +1085,7 @@ export default function FeaturesPage() {
 
   const { data: featuresData, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useFeatureRequests(sort, listCategory, search, authorWallet);
   const allFeatures = useMemo(() => featuresData?.pages.flat() ?? [], [featuresData]);
-  const { data: shippedFeatures, isLoading: isLoadingShipped, isError: isErrorShipped, refetch: refetchShipped } = useShippedFeatures(authorWallet);
+  const { data: shippedFeatures, isLoading: isLoadingShipped, isLoadingError: isShippedLoadError, refetch: refetchShipped } = useShippedFeatures(authorWallet);
   const { data: inProgressFeatures, isLoading: isLoadingInProgress, isError: isErrorInProgress, refetch: refetchInProgress } = useInProgressFeatures(authorWallet);
   const { data: notFeasibleFeatures, isLoading: isLoadingNotFeasible, isError: isErrorNotFeasible, refetch: refetchNotFeasible } = useNotFeasibleFeatures(authorWallet);
 
@@ -1161,15 +1161,9 @@ export default function FeaturesPage() {
   );
   // Shipped holds nearly the whole board. Mounting every card at once built
   // ~20k nodes and froze the tab switch, so it reveals a page at a time like the
-  // Prompts list does.
+  // Prompts list does. Linked requests are pinned separately above these rows.
   const [shippedLimit, setShippedLimit] = useState(SHIPPED_PAGE_SIZE);
   useEffect(() => setShippedLimit(SHIPPED_PAGE_SIZE), [category, search, authorWallet]);
-  const shippedDeepLink = searchParams.get('feature');
-  useEffect(() => {
-    if (!shippedDeepLink) return;
-    const index = visibleShipped.findIndex((feature) => feature.id === shippedDeepLink);
-    if (index >= 0) setShippedLimit((limit) => Math.max(limit, index + 1));
-  }, [shippedDeepLink, visibleShipped]);
   const renderedShipped = useMemo(() => visibleShipped.slice(0, shippedLimit), [visibleShipped, shippedLimit]);
   const showMoreShipped = useCallback(() => setShippedLimit((limit) => limit + SHIPPED_PAGE_SIZE), []);
 
@@ -1182,15 +1176,6 @@ export default function FeaturesPage() {
       document.getElementById(`feature-${focusedId}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   }, [focusedId, focusedCommentId]);
-
-  useEffect(() => {
-    const featureId = searchParams.get('feature');
-    if (activeTab !== 'shipped' || !featureId || !shippedFeatures?.some((feature) => feature.id === featureId)) return;
-
-    requestAnimationFrame(() => {
-      document.getElementById(`feature-${featureId}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-  }, [activeTab, searchParams, shippedFeatures]);
 
   const { data: userVotes } = useUserVotes();
   const voteMutation = useVoteFeatureRequest();
@@ -1560,7 +1545,7 @@ export default function FeaturesPage() {
         <>
           {isLoadingShipped ? (
             <FeatureSkeletons />
-          ) : isErrorShipped ? (
+          ) : isShippedLoadError ? (
             <RequestLoadError retry={() => refetchShipped()} />
           ) : visibleShipped.length > 0 ? (
             <div className="space-y-3">

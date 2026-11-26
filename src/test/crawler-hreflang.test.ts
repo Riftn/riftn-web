@@ -338,9 +338,9 @@ describe('wiring', () => {
 
   it('the app honours ?hl= on arrival without saving it as the preference', () => {
     expect(I18N_INDEX).toContain("get('hl')");
-    expect(I18N_INDEX).toContain('if (urlLang) defaultLang = urlLang;');
+    expect(I18N_INDEX).toContain('const defaultLang = urlLang || deviceLang;');
     expect(I18N_INDEX).not.toContain('localStorage.setItem(STORAGE_KEY, urlLang)');
-    expect(I18N_INDEX).toMatch(/let defaultLang = savedLang \|\| browserLang;/);
+    expect(I18N_INDEX).toContain('const deviceLang = savedLang || browserLang;');
   });
 });
 

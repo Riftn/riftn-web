@@ -451,6 +451,9 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
         setIsPPV={actions.setIsPPV}
         ppvAmount={state.ppvAmount}
         setPpvAmount={actions.setPpvAmount}
+        canConfigurePpvPreview={state.canConfigurePpvPreview}
+        ppvPreviewSeconds={state.ppvPreviewSeconds}
+        setPpvPreviewSeconds={actions.setPpvPreviewSeconds}
         ppvCurrency={state.ppvCurrency}
         setPpvCurrency={actions.setPpvCurrency}
         isWatch2Earn={state.isWatch2Earn}

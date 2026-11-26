@@ -6,7 +6,7 @@ const source = readFileSync(resolve(__dirname, '../components/app/cards/LiveStre
 
 describe('live post HLS startup', () => {
   it('starts the live element muted and requests playback when media arrives', () => {
-    const liveVideo = source.match(/<video\s+ref=\{videoRef\}[\s\S]*?\/>/)?.[0];
+    const liveVideo = source.match(/<video\s+ref=\{setLiveVideoRef\}[\s\S]*?\/>/)?.[0];
     expect(liveVideo).toBeDefined();
     expect(liveVideo).toMatch(/\bautoPlay\b/);
     expect(liveVideo).toContain('muted={isMuted}');
