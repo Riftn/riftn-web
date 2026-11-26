@@ -81,6 +81,7 @@ function mapNFTToVideoItem(nft: DeHubNFT): VideoItem {
     commentCount: nft.commentCount || nft.comment_count || 0,
     isPPV: nft.is_ppv || nft.streamInfo?.isPayPerView || false,
     ppvPrice: nft.ppv_price || nft.streamInfo?.payPerViewAmount,
+    ppvPreviewReady: nft.ppvPreview?.ready === true,
     ppvCurrency: nft.ppv_currency || nft.streamInfo?.payPerViewTokenSymbol || 'DHB',
     isW2E: nft.is_w2e || nft.streamInfo?.isAddBounty || false,
     bountyViews: nft.streamInfo?.addBountyFirstXViewers != null ? Number(nft.streamInfo.addBountyFirstXViewers) : undefined,
