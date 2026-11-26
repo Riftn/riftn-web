@@ -1525,6 +1525,8 @@ function NotificationSettings() {
   const completionPreference = useQuery({
     queryKey: ['liked-request-completion', completionWallet],
     enabled: !!completionWallet,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_liked_request_completion_preference')
         .setHeader('x-wallet-address', completionWallet!);
