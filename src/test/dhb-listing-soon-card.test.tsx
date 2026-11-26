@@ -12,7 +12,8 @@ vi.mock('@/contexts/AuthContext', async (importOriginal) => ({
   ...await importOriginal<typeof import('@/contexts/AuthContext')>(),
   useAuth: () => ({ isAuthenticated: true, walletAddress: '0xabc' }),
 }));
-vi.mock('react-i18next', () => ({
+vi.mock('react-i18next', async (importOriginal) => ({
+  ...await importOriginal<typeof import('react-i18next')>(),
   useTranslation: () => ({
     i18n: { language: 'en' },
     t: (key: string, fallback?: string | Record<string, string>) => {
