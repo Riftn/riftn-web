@@ -6,6 +6,7 @@ import { useSurfaceDraft } from '@/hooks/use-surface-draft';
 import { AppState } from '@/components/app/AppState';
 import { IslandAction, PageIsland, usePhonePill } from '@/components/app/page-kit/PageKit';
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { PULL_REFRESH_THRESHOLD } from '@/lib/pill-pull-motion';
 import { DhbCoin } from '@/components/app/DhbAmount';
 import { lazy, Suspense, useContext, useState, useEffect, useRef, useCallback, useMemo, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react';
@@ -382,6 +383,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const isPageActive = useContext(CachedPageActiveContext);
   const [searchQuery, setSearchQuery] = useSurfaceDraft("pages/app/MessagesPage.tsx:searchQuery", '');
   const phonePill = usePhonePill();
+  const isSingleColumn = useIsMobile();
   // Both search-backed queries key on the query string — passing the raw
   // input fired 2 network requests per KEYSTROKE (each prefix a fresh cache
   // key). Debounce to one request pair per pause in typing.
@@ -2018,7 +2020,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
         chat={settingsPane ?? publicChatPane ?? roomPane ?? dmPane}
         list={<>
           {chatSeo}
-          {!(guest && showPublicChat && phonePill) && listColumn}
+          {!(guest && showPublicChat && isSingleColumn) && listColumn}
           {dialogs}
           {phonePill && !chatOpen && !picking && <Suspense fallback={null}><MobileBottomNav /></Suspense>}
         </>}
