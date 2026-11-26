@@ -1088,6 +1088,7 @@
     "heading": "Riftn Kısa Videolar"
   },
   "settings": {
+    "notifyLikedRequestCompletion": "Beğendiğim bir istek tamamlandığında bana bildir.",
     "notificationShowCount": "Zil üzerinde sayıyı göster",
     "notificationShowCountDesc": "Sadece parıltı yerine kaç okunmamış bildirim olduğunu gör",
     "messagesShowCount": "Mesajlar üzerinde sayıyı göster",

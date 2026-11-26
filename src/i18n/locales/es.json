@@ -1088,6 +1088,7 @@
     "heading": "Cortos de Riftn"
   },
   "settings": {
+    "notifyLikedRequestCompletion": "Avísame cuando se complete una solicitud que me gustó.",
     "notificationShowCount": "Mostrar el número en la campana",
     "notificationShowCountDesc": "Ver cuántas notificaciones no se han leído en lugar de solo el brillo",
     "messagesShowCount": "Mostrar el número en Mensajes",

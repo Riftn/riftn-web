@@ -1088,6 +1088,7 @@
     "heading": "مقاطع Riftn القصيرة"
   },
   "settings": {
+    "notifyLikedRequestCompletion": "أعلمني عند اكتمال طلب أعجبني.",
     "notificationShowCount": "إظهار الرقم على الجرس",
     "notificationShowCountDesc": "رؤية عدد الإشعارات غير المقروءة بدلاً من مجرد التوهج",
     "messagesShowCount": "إظهار الرقم على الرسائل",

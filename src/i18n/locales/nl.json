@@ -1088,6 +1088,7 @@
     "heading": "Riftn-shorts"
   },
   "settings": {
+    "notifyLikedRequestCompletion": "Laat het me weten wanneer een verzoek dat ik leuk vond is afgerond.",
     "notificationShowCount": "Toon het aantal op de bel",
     "notificationShowCountDesc": "Zie hoeveel meldingen ongelezen zijn in plaats van alleen de gloed",
     "messagesShowCount": "Toon het aantal op Berichten",
