@@ -1103,7 +1103,7 @@ export function PostAccessToggles({
                   placeholder="0"
                   aria-describedby={`${previewInputId}-hint`}
                   aria-invalid={previewInvalid || undefined}
-                  className="min-h-12 rounded-xl px-4 focus-visible:ring-2 focus-visible:ring-ring"
+                  className="min-h-12 rounded-xl bg-[var(--control-fill,transparent)] px-4 text-[color:var(--ink,inherit)] focus-visible:ring-2 focus-visible:ring-ring"
                 />
                 <p id={`${previewInputId}-hint`} className="text-sm text-muted-foreground">
                   {t('ppvPreview.secondsHint', { defaultValue: 'Choose 1–30 seconds. Enter 0 to skip the preview.' })}

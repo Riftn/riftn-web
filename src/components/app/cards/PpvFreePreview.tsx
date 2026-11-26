@@ -51,7 +51,7 @@ function PreviewPlayer({ tokenId }: { tokenId: string }) {
   }, [tokenId, attempt]);
 
   return (
-    <div className="flex aspect-video items-center justify-center overflow-hidden rounded-xl bg-muted">
+    <div className="flex aspect-video items-center justify-center overflow-hidden rounded-xl bg-[var(--control-fill,transparent)]">
       {failed ? (
         <div className="space-y-3 p-3 text-center">
           <p role="status" className="text-sm text-foreground">{t('ppvPreview.unavailable', { defaultValue: 'Preview unavailable' })}</p>
