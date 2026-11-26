@@ -1,5 +1,7 @@
 /** Read-only public share cards. Keep in sync with mobile libs/rich-links.ts. */
 
+import { stripPostTextStyles } from './post-text-format';
+
 export type RichProvider = 'snapshot' | 'audius' | 'defillama' | 'github' | 'ens' | 'ipfs';
 export interface RichLink {
   provider: RichProvider;
@@ -114,7 +116,7 @@ export function parseRichLink(input: string): RichLink | null {
 /** Preserve text order and match whole tokens, never an email or a suffix of a spoofed URL. */
 export function extractShareUrls(text: string): string[] {
   const found: string[] = [];
-  for (const token of text.split(/[\s<>]+/)) {
+  for (const token of stripPostTextStyles(text).split(/[\s<>]+/)) {
     const value = token.replace(/^[("'\[]+/, '').replace(/[.,;:!?)}\]"']+$/, '');
     if (!value || value.includes('@')) continue;
     const rich = parseRichLink(value);
