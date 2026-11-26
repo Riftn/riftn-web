@@ -7,6 +7,7 @@
  * "Live now" and a tap opens a sheet listing every Stage and stream.
  */
 
+import { LiveDot } from '@/components/app/live/LiveDot';
 import { BrandIcon } from '@/components/app/war/WarHudIcon';
 import Video from "@/components/ui/cut-icons/video";
 
@@ -386,7 +387,10 @@ function LiveCount({ item }: { item: LiveNowItem }) {
   const { t } = useTranslation();
   return (
     <span className="flex items-center gap-1.5 shrink-0">
-      <span className="text-[10px] font-semibold text-red-400 uppercase tracking-wide">{t('stages.liveBadge', { defaultValue: 'LIVE' })}</span>
+      <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-foreground">
+        <LiveDot />
+        {t('stages.liveBadge', { defaultValue: 'LIVE' })}
+      </span>
       {item.count ? (
         <span className="text-[10px] text-white/50 whitespace-nowrap">
           {item.kind === 'stage'

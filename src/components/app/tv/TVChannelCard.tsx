@@ -10,6 +10,7 @@
  * @module components/app/tv/TVChannelCard
  */
 
+import { LiveDot } from '@/components/app/live/LiveDot';
 import { useTranslation } from 'react-i18next';
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -513,8 +514,8 @@ export function TVChannelCard({ channel }: TVChannelCardProps) {
         )}
         
         {/* Live Badge */}
-        <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2 py-1 rounded-md bg-red-600 text-white text-xs font-semibold">
-          <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+        <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2 py-1 rounded-md bg-black/80 text-white text-xs font-semibold">
+          <LiveDot />
           {t('tv.live')}
         </div>
         
