@@ -18,6 +18,53 @@ async function swipe(session, x, y, dx, dy) {
   await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
 }
 
+async function verifyGrid(page, width, adaptive) {
+  const grid = page.locator('[data-profile-image-grid]');
+  const tiles = grid.locator('[data-profile-photo]');
+  await tiles.first().waitFor({ timeout: 45_000 });
+  const geometry = await tiles.evaluateAll(elements => elements.slice(0, 4).map(tile => {
+    const { left, right, top } = tile.getBoundingClientRect();
+    return {
+      left, right, top,
+      radius: getComputedStyle(tile).borderTopLeftRadius,
+      fit: getComputedStyle(tile.querySelector('img')).objectFit,
+    };
+  }));
+  assert.equal(geometry.length, 4);
+  assert.ok(geometry.every(tile => tile.fit === 'contain' && tile.left >= 0 && tile.right <= width + 1));
+  assert.equal(geometry[0].top, geometry[1].top);
+  if (adaptive) {
+    assert.ok(geometry[2].top > geometry[1].top);
+    assert.equal(geometry[2].top, geometry[3].top);
+    assert.equal(geometry[0].radius, '12px');
+  } else {
+    assert.equal(geometry[2].top, geometry[0].top);
+    assert.ok(geometry[3].top > geometry[2].top);
+    assert.equal(geometry[0].radius, '0px');
+  }
+}
+
+async function verifyHazy() {
+  const width = 390;
+  const context = await browser.newContext({ viewport: { width, height: 852 }, isMobile: true, hasTouch: true });
+  try {
+    await context.addInitScript(() => {
+      if (location.origin === 'https://riftn.com') localStorage.setItem('dehub.theme', 'hazy');
+    });
+    const page = await context.newPage();
+    // Open the canonical URL directly so the legacy handoff doesn't transfer
+    // a different local theme into this isolated browser session.
+    await page.goto('https://riftn.com/araf', { waitUntil: 'domcontentloaded' });
+    await page.locator('[data-profile-tabs] button[title="Images"]').click({ timeout: 45_000 });
+    await page.locator('html[data-theme="hazy"]').waitFor({ timeout: 15_000 });
+    await verifyGrid(page, width, true);
+    await page.locator('[data-profile-photo]').first().scrollIntoViewIfNeeded();
+    await page.screenshot({ path: `${output}/hazy-${width}-grid.png`, animations: 'disabled' });
+  } finally {
+    await context.close();
+  }
+}
+
 async function verify(theme, width, phone) {
   const context = await browser.newContext({
     viewport: { width, height: phone ? 852 : 900 },
@@ -41,9 +88,22 @@ async function verify(theme, width, phone) {
       root.dataset.systemTone = value;
       root.style.colorScheme = value;
     }, tone);
+    await verifyGrid(page, width, false);
+    if (!phone) {
+      await images.focus();
+      for (let i = 0; i < 20 && !(await tile.evaluate(button => button === document.activeElement)); i++) {
+        await page.keyboard.press('Tab');
+      }
+      assert.ok(await tile.evaluate(button =>
+        button.matches(':focus-visible') && getComputedStyle(button, '::after').borderTopWidth === '2px',
+      ));
+      await tile.hover();
+      await page.mouse.down();
+      assert.equal(await tile.evaluate(button => getComputedStyle(button).opacity), '0.8');
+      await page.mouse.up();
+    }
     const tapTile = () => tile.tap({ position: { x: 24, y: 24 } });
     if (phone) await tapTile();
-    else await tile.click();
     const viewer = page.getByRole('dialog', { name: 'Images', exact: true });
     const close = viewer.getByRole('button', { name: /^Close(?: fullscreen)?$/ });
     await close.waitFor();
@@ -101,6 +161,13 @@ async function verify(theme, width, phone) {
 
 try {
   const failures = [];
+  try {
+    await verifyHazy();
+    console.log('Passed Hazy at 390px');
+  } catch (error) {
+    failures.push(error);
+    console.error('Failed Hazy at 390px', error);
+  }
   for (const theme of ['system', 'system-light']) {
     for (const width of [360, 390, 1280]) {
       try {
