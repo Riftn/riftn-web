@@ -20,9 +20,11 @@ import { ASSISTANT_AVATAR as assistantAvatar } from '@/lib/assistant';
 import { ASSISTANT_PROFILE_PATH } from '@/lib/profile-path';
 
 interface AssistantReplyCardProps {
+  rowId: string;
   content: string;
   timestamp: Date;
   replyToName?: string;
+  onReplyPress?: () => void;
 }
 
 
@@ -33,10 +35,11 @@ const formatDate = (date: Date) => {
   return `${dd}/${mm}/${yy}`;
 };
 
-export function AssistantReplyCard({ content, timestamp, replyToName }: AssistantReplyCardProps) {
+export function AssistantReplyCard({ rowId, content, timestamp, replyToName, onReplyPress }: AssistantReplyCardProps) {
   const { t: _copy } = _useCopy();
+  const ReplyTag = onReplyPress ? 'button' : 'div';
   return (
-    <div className="flex gap-3 py-2 px-4 hover:bg-zinc-800/30 transition-colors group">
+    <div id={rowId} className="flex gap-3 py-2 px-4 hover:bg-zinc-800/30 transition-colors group">
       <Link to={ASSISTANT_PROFILE_PATH} className="flex-shrink-0" aria-label={_copy("copy.a39a7ffad4a3", { defaultValue: "assistant" })}>
         <Avatar className="w-8 h-8">
           <AvatarImage src={assistantAvatar} alt={_copy("copy.a39a7ffad4a3", { defaultValue: "assistant" })} />
@@ -48,10 +51,14 @@ export function AssistantReplyCard({ content, timestamp, replyToName }: Assistan
 
       <div className="flex-1 min-w-0">
         {replyToName && (
-          <div className="flex items-center gap-1.5 text-[11px] text-zinc-500 mb-0.5">
+          <ReplyTag
+            type={onReplyPress ? 'button' : undefined}
+            onClick={onReplyPress}
+            className="flex items-center gap-1.5 text-[11px] text-zinc-500 mb-0.5"
+          >
             <CornerDownRight className="w-3 h-3" />
             <span className="font-medium">{replyToName}</span>
-          </div>
+          </ReplyTag>
         )}
 
         <div className="flex items-baseline gap-2">

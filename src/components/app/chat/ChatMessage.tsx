@@ -122,6 +122,7 @@ interface ChatMessageProps {
   onReact?: (messageId: string, emoji: string) => void;
   onRemoveReaction?: (messageId: string, emoji: string) => void;
   onReply?: (message: Message) => void;
+  onReplyPress?: (messageId: string) => void;
   /** Resend / drop one of your own lines that failed, by its client key. */
   onRetrySend?: (clientKey: string) => void;
   onDiscardSend?: (clientKey: string) => void;
@@ -240,6 +241,7 @@ export const ChatMessage = memo(function ChatMessage({
   onReact,
   onRemoveReaction,
   onReply,
+  onReplyPress,
   onRetrySend,
   onDiscardSend,
   onSeeMessages,
@@ -483,8 +485,14 @@ export const ChatMessage = memo(function ChatMessage({
         {/* Reply indicator */}
         {message.replyTo && (
           <button
+            type="button"
             onClick={() => {
-              const el = document.getElementById(`chat-msg-${message.replyTo!.id}`);
+              const id = message.replyTo!.id;
+              if (onReplyPress) {
+                onReplyPress(id);
+                return;
+              }
+              const el = document.getElementById(`chat-msg-${id}`);
               if (el) {
                 el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 el.classList.add('ring-1', 'ring-white/40');
