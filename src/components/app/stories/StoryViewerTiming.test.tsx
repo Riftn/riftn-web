@@ -84,7 +84,7 @@ it.each([false, true])('keeps private replies and comments separate (docked=%s)'
   expect(addStoryComment).not.toHaveBeenCalled();
 
   fireEvent.click(view.getByRole('button', { name: 'Comments' }));
-  const comment = await view.findByPlaceholderText('Add a comment for everyone');
+  const comment = await view.findByPlaceholderText(/^Add a comment/);
   fireEvent.change(comment, { target: { value: 'Public' } });
   fireEvent.keyDown(comment, { key: 'Enter' });
   await waitFor(() => expect(addStoryComment).toHaveBeenCalledWith('moment', 'Public', undefined));
