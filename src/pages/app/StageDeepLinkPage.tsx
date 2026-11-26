@@ -1,3 +1,4 @@
+import { stageRoomLabel } from '@/i18n/stage-room-copy';
 import { useTranslation as _useCopy } from 'react-i18next';
 /**
  * StageDeepLinkPage - Handles /stage/:id and /stages/:n invite links
@@ -188,7 +189,7 @@ export default function StageDeepLinkPage() {
           openModal('live');
         }
         // Navigate to home either way — mini player or modal will be visible
-        navigate('/app', { replace: true });
+        navigate(stage.entry_locked && !success ? '/stages' : '/app', { replace: true });
       })
       .catch(() => {
         // A rejected join (invalid stage, network error) previously left the
@@ -696,6 +697,7 @@ export default function StageDeepLinkPage() {
               <button
                 onClick={() => {
                   if (listening) void guestStopListening();
+                  else if (stage.entry_locked) openLoginModal();
                   else void guestListen(stage.id);
                 }}
                 disabled={stageActionBusy}
@@ -713,7 +715,7 @@ export default function StageDeepLinkPage() {
                 ) : (
                   <Headphones className="w-4 h-4" />
                 )}
-                {listening ? t('stages.stopListening') : t('stages.listenIn')}
+                {listening ? t('stages.stopListening') : stage.entry_locked ? stageRoomLabel(t, 'entrySignIn') : t('stages.listenIn')}
               </button>
               <button
                 onClick={() => setShareOpen(true)}

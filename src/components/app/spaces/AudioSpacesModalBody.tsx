@@ -91,6 +91,8 @@ import { formatDistanceToNow } from 'date-fns';
 import { viewerShareUrl } from '@/lib/share-url';
 import { trackShare } from '@/lib/analytics';
 
+import { StageEntryControls } from './StageEntryControls';
+
 type View = 'browse' | 'create' | 'live' | 'voice';
 
 export function AudioSpacesModalBody() {
@@ -862,6 +864,10 @@ export function AudioSpacesModalBody() {
                   <p className="text-sm text-white/60 ml-4">{currentSpace.description}</p>
                 )}
               </div>
+
+              {myRole === 'host' && walletAddress && (
+                <StageEntryControls key={currentSpace.id} spaceId={currentSpace.id} wallet={walletAddress} />
+              )}
 
               {/* Shared screen — only rendered while someone is actually
                   sharing, and it takes the room's headline slot when it is. */}

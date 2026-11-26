@@ -1,3 +1,4 @@
+import { stageRoomLabel, stageTopicLabel, stageHeadcount } from '@/i18n/stage-room-copy';
 import { fetchStageRecordings, hasStageRecording } from '@/lib/stage-recordings';
 import { countdownParts, useMinuteTick } from '@/lib/schedule/countdown';
 import { useTranslation as _useCopy } from 'react-i18next';
@@ -18,6 +19,7 @@ import { useTranslation as _useCopy } from 'react-i18next';
 import { BrandIcon } from '@/components/app/war/WarHudIcon';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { IslandAction, KitButton, PageBody, PageIsland, PageTabs } from '@/components/app/page-kit/PageKit';
 import { Clock, Loader2, BellRing } from "lucide-react";
@@ -36,8 +38,6 @@ import { cn } from '@/lib/utils';
 import { SEOHead } from '@/components/SEOHead';
 import { useStage } from '@/contexts/StageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useAppTheme } from '@/contexts/ThemeContext';
-import { LiveWaveform } from '@/components/app/audio/LiveWaveform';
 import { ShareEntityDrawer } from '@/components/app/ShareEntityDrawer';
 import { PastStagesList } from '@/components/app/stages/PastStagesList';
 import { PastStageCard } from '@/components/app/stages/PastStageCard';
@@ -51,9 +51,11 @@ import { useStageReminder } from '@/hooks/use-stage-reminders';
 import { useMyStages, myStagesKeys } from '@/hooks/use-my-stages';
 import { supabase } from '@/integrations/supabase/client';
 import stagesMicIcon from '@/assets/icons/stages-mic-icon.webp';
+import { matchesStageSearch, STAGE_TOPICS, type StageTopic } from '@/lib/stage-topics';
 import type { AudioSpace } from '@/types/audio-spaces.types';
 
 import { formatCount } from '@/lib/format-count';
+import { isRadioShow } from '@/lib/stage-radio-show';
 type StagesTab = 'live' | 'upcoming' | 'recorded' | 'hosting';
 
 type StagesTabDef = { icon: typeof Radio; labelKey: string; value: StagesTab };
@@ -224,7 +226,6 @@ function LiveStageCard({
   space,
   isCurrent,
   isLoading,
-  isPaper,
   onOpen,
   onShare,
   onEnd,
@@ -232,145 +233,100 @@ function LiveStageCard({
   space: AudioSpace;
   isCurrent: boolean;
   isLoading: boolean;
-  isPaper: boolean;
   onOpen: () => void;
   onShare: () => void;
-  /**
-   * Present only for the host of a room they are not currently in — the way
-   * out of a stage that says it is live and cannot be joined. Undefined for
-   * everyone else, and while the host is inside (End lives in the room then).
-   */
   onEnd?: () => void;
 }) {
   const { t } = useTranslation();
-  const totalListeners = Math.max(1, (space.speaker_count || 1) + (space.listener_count || 0));
-  const avatar =
-    buildAvatarUrl(space.host_wallet_address || '', space.host_avatar) ||
-    buildAvatarCdnFallbackUrl(space.host_wallet_address || '');
-  // A stage started from an announcement keeps its cover; one without gets
-  // its generated poster, so every live card has artwork.
+  const total = Math.max(1, (space.speaker_count || 1) + (space.listener_count || 0));
+  const isRadio = isRadioShow(space);
+  const host = space.host_username || space.host_wallet_address?.slice(0, 6);
+  const action = isCurrent ? stageRoomLabel(t, 'returnToStage') : t('stages.join');
+
+  const { data: participants = [] } = useQuery({
+    queryKey: ['stage-list-faces', space.id, space.speaker_count, space.listener_count],
+    enabled: total > 1,
+    placeholderData: (previous) => previous,
+    staleTime: 20_000,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('space_participants')
+        .select('id, wallet_address, username, avatar')
+        .eq('space_id', space.id)
+        .neq('role', 'host')
+        .is('left_at', null)
+        .order('joined_at', { ascending: false })
+        .limit(4);
+      if (error) throw error;
+      return data;
+    },
+  });
 
   return (
-    <button
-      onClick={onOpen}
-      disabled={isLoading}
+    <article
       data-page-bento
-      className={cn(
-        'group relative w-full overflow-hidden text-left rounded-2xl flex flex-col transition-colors disabled:opacity-60',
-        'border border-transparent hover:border-white/15 bg-zinc-900',
-      )}
+      className="grid grid-cols-[4rem_minmax(0,1fr)_auto] items-start gap-x-3 gap-y-2 overflow-hidden rounded-2xl border border-transparent bg-zinc-900 p-3 sm:grid-cols-[7rem_minmax(0,1fr)_auto] sm:items-center sm:gap-4"
     >
-      <StageCoverArt src={space.cover_image_url} title={space.title} stage={space} />
-
-      <div className="relative p-4 flex flex-col flex-1">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-red-500/20">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
-            </span>
-            <span className="text-red-400 text-xs font-medium">
-              {isCurrent ? t('stages.inThisStage') : t('stages.live')}
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="flex items-center gap-1 text-zinc-400 text-xs">
-              {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Users className="w-3.5 h-3.5" />}
-              <span>{formatCount(totalListeners)}</span>
-            </div>
-            {/* The whole card is a <button>, so the share chip is a <span> —
-                same constraint as StageHostLink — and stops propagation so
-                sharing never also joins the stage. */}
-            <span
-              role="button"
-              tabIndex={0}
-              title={t('stages.shareStage')}
-              aria-label={t('stages.shareStage')}
-              onClick={(e) => {
-                e.stopPropagation();
-                onShare();
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.stopPropagation();
-                  onShare();
-                }
-              }}
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-            >
-              <Share2 className="w-3.5 h-3.5" />
-            </span>
-            {onEnd && (
-              <span
-                role="button"
-                tabIndex={0}
-                title={t('stages.endThisStage')}
-                aria-label={t('stages.endThisStage')}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEnd();
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.stopPropagation();
-                    onEnd();
-                  }
-                }}
-                className="px-2 h-7 rounded-lg flex items-center text-[11px] font-medium text-red-400/70 hover:text-red-300 hover:bg-red-500/10 transition-colors cursor-pointer"
-              >
-                {t('stages.end')}
-              </span>
-            )}
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3 mb-3">
-          <StageHostLink
-            space={space}
-            avatarUrl={avatar || undefined}
-            nested
-            className="group/host flex items-center gap-3 min-w-0 flex-1"
-          >
-            <StageAvatar
-              address={space.host_wallet_address}
-              avatar={space.host_avatar}
-              name={space.host_username}
-              size={40}
-              className="w-10 h-10 rounded-lg ring-2 ring-white/20 text-sm"
-            />
-            <div className="min-w-0 flex-1">
-              <p className="text-zinc-500 text-[10px]">{t('stages.hostedBy')}</p>
-              <BadgedName
-                lookupId={space.host_username || space.host_wallet_address}
-                className="text-white text-xs font-medium group-hover/host:underline"
-              >
-                @{space.host_username || space.host_wallet_address?.slice(0, 6)}
-              </BadgedName>
-            </div>
-          </StageHostLink>
-        </div>
-
-        <h3 className="text-white font-semibold text-sm line-clamp-2">{space.title}</h3>
-        {space.description && (
-          <p className="text-zinc-500 text-xs mt-1 line-clamp-2">{space.description}</p>
-        )}
-
-        {/* Reminder rows outlive the scheduled -> live flip, so a room in its
-            first minute can still show the crowd on its way here rather
-            than a headcount of one. */}
-        <StageReminderFaces spaceId={space.id} state="live" className="mt-2.5" />
-
-        <div className="mt-3 h-10 rounded-lg overflow-hidden">
-          <LiveWaveform active barCount={60} barColor={isPaper ? '0, 0, 0' : undefined} />
+      <div aria-hidden="true" className="mt-0.5 self-start overflow-hidden rounded-lg sm:mt-0 sm:self-center">
+        <StageCoverArt src={space.cover_image_url} stage={space} />
+      </div>
+      <div className="min-w-0">
+        <h3 className="line-clamp-2 text-sm font-semibold text-foreground sm:text-base">{space.title}</h3>
+        <StageHostLink space={space} avatarUrl={buildAvatarUrl(space.host_wallet_address, space.host_avatar) || undefined} className="mt-1 flex w-fit max-w-full items-center gap-1.5 text-xs text-muted-foreground hover:underline">
+          <StageAvatar address={space.host_wallet_address} avatar={space.host_avatar} name={host} size={20}
+            className="h-5 w-5 shrink-0 rounded-full text-[9px]" />
+          <BadgedName lookupId={space.host_username || space.host_wallet_address} className="truncate">@{host}</BadgedName>
+        </StageHostLink>
+        {space.description && <p className="mt-1.5 line-clamp-1 text-xs text-muted-foreground">{space.description}</p>}
+      </div>
+      <div className="flex flex-col items-end gap-1.5">
+        <KitButton onClick={onOpen} disabled={isLoading} className="whitespace-nowrap">
+          {isLoading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
+          <span className={isLoading ? 'sr-only' : undefined}>{action}</span>
+        </KitButton>
+        <div className="flex items-center gap-1">
+          <button type="button" onClick={onShare} title={t('stages.shareStage')} aria-label={t('stages.shareStage')}
+            className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground hover:bg-foreground/10 hover:text-foreground">
+            <Share2 className="h-4 w-4" />
+          </button>
+          {onEnd && (
+            <button type="button" onClick={onEnd} aria-label={t('stages.endThisStage')}
+              className="h-8 rounded-lg px-2 text-xs font-medium text-destructive hover:bg-destructive/10">
+              {t('stages.end')}
+            </button>
+          )}
         </div>
       </div>
-    </button>
+      <div className="col-span-full flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-muted-foreground sm:col-start-2">
+        <span className={cn('inline-flex items-center gap-1.5 rounded-md px-1.5 py-0.5 font-semibold',
+          isRadio ? 'bg-sky-500/15 text-sky-400' : 'bg-rose-500/15 text-rose-400')}>
+          <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-current" />
+          {isRadio ? stageRoomLabel(t, 'liveRadio') : t('stages.live')}
+        </span>
+        {space.entry_locked && <span className="rounded-md bg-amber-500/15 px-1.5 py-0.5 font-semibold text-amber-400">{stageRoomLabel(t, 'entryLocked')}</span>}
+        {space.topic && <span className="rounded-md bg-foreground/10 px-1.5 py-0.5">{stageTopicLabel(t, space.topic)}</span>}
+        <span className="inline-flex items-center gap-1" aria-label={stageHeadcount(t, total)}>
+          <Users className="h-3.5 w-3.5" aria-hidden="true" />
+          {formatCount(total)}
+        </span>
+        {total > 1 && participants.length > 0 && (
+          <div className="flex -space-x-1.5" aria-hidden="true">
+            {participants.map((person) => (
+              <StageAvatar key={person.id} address={person.wallet_address} avatar={person.avatar}
+                name={person.username} size={22} className="h-[22px] w-[22px] rounded-full ring-1 ring-background text-[9px]" />
+            ))}
+          </div>
+        )}
+      </div>
+    </article>
   );
 }
 
 export default function StagesPage() {
   const { t: _copy } = _useCopy();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const [roomFilter, setRoomFilter] = useState<StageTopic | null>(null);
+  const [roomSearch, setRoomSearch] = useState('');
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<StagesTab>('live');
   const {
     liveSpaces,
@@ -378,21 +334,14 @@ export default function StagesPage() {
     currentSpace,
     joinSpace,
     openModal,
-    isLoading,
     startScheduledSpace,
     cancelScheduledSpace,
     endStageById,
   } = useStage();
   const { isAuthenticated, walletAddress } = useAuth();
   const queryClient = useQueryClient();
-  const { theme, themeChoice } = useAppTheme();
-  // Paper themes need inked waveform bars (white bars vanish on a light card).
-  const isPaper = (theme === 'light' || themeChoice === 'system-light') || theme === 'minimal';
   const [joiningId, setJoiningId] = useState<string | null>(null);
   const [busyScheduledId, setBusyScheduledId] = useState<string | null>(null);
-  // One share sheet for the whole page. It cannot live inside LiveStageCard:
-  // the card is a <button>, and React events from a portal bubble through the
-  // component tree, so taps inside the drawer would also join the stage.
   const [shareSpace, setShareSpace] = useState<AudioSpace | null>(null);
 
   // Feeds the Live tab's empty state — a few recent recordings to show in
@@ -439,6 +388,10 @@ export default function StagesPage() {
   }, [activeTab, isAStageHost]);
 
   const handleOpenLive = async (space: AudioSpace) => {
+    if (!isAuthenticated) {
+      navigate(new URL(dehubLinkFor.stage(space)).pathname);
+      return;
+    }
     if (currentSpace?.id === space.id) {
       openModal('live');
       return;
@@ -587,26 +540,45 @@ export default function StagesPage() {
       );
     }
 
+    const visible = liveSpaces.filter((space) =>
+      (!roomFilter || space.topic === roomFilter) &&
+      matchesStageSearch(space, roomSearch, i18n.language)
+    );
     return (
       <div className="space-y-2 sm:space-y-3">
+        <div className="space-y-2 px-1">
+          <input type="search" value={roomSearch} onChange={(event) => setRoomSearch(event.target.value)}
+            aria-label={stageRoomLabel(t, 'searchRooms')} placeholder={stageRoomLabel(t, 'searchRooms')}
+            className="w-full rounded-xl border border-foreground/15 bg-foreground/5 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground" />
+          <div className="flex flex-wrap gap-1.5" role="group" aria-label={stageRoomLabel(t, 'roomTopic')}>
+            {([null, ...STAGE_TOPICS] as const).map((topic) => (
+              <button type="button" key={topic ?? 'all'} aria-pressed={roomFilter === topic} onClick={() => setRoomFilter(topic)}
+                className={cn('rounded-lg border px-2.5 py-1.5 text-xs font-medium',
+                  roomFilter === topic ? 'border-primary/35 bg-primary/15 text-foreground' : 'border-foreground/10 text-muted-foreground hover:text-foreground')}>
+                {topic ? stageTopicLabel(t, topic) : stageRoomLabel(t, 'topicAll')}
+              </button>
+            ))}
+          </div>
+        </div>
+        {visible.length === 0 && !resume && (
+          <p className="py-4 text-center text-sm text-muted-foreground" role="status">{stageRoomLabel(t, 'noMatchingRooms')}</p>
+        )}
         {resume && (
           <LiveStageCard
             key={resume.id}
             space={resume}
             isCurrent
             isLoading={joiningId === resume.id}
-            isPaper={isPaper}
             onOpen={() => handleOpenLive(resume)}
             onShare={() => setShareSpace(resume)}
           />
         )}
-        {liveSpaces.map((space) => (
+        {visible.map((space) => (
           <LiveStageCard
             key={space.id}
             space={space}
             isCurrent={currentSpace?.id === space.id}
-            isLoading={joiningId === space.id || (isLoading && joiningId === space.id)}
-            isPaper={isPaper}
+            isLoading={joiningId === space.id}
             onOpen={() => handleOpenLive(space)}
             onShare={() => setShareSpace(space)}
             onEnd={canEndFromOutside(space) ? () => handleEndLive(space) : undefined}
@@ -655,7 +627,6 @@ export default function StagesPage() {
                 space={space}
                 isCurrent={currentSpace?.id === space.id}
                 isLoading={joiningId === space.id}
-                isPaper={isPaper}
                 onOpen={() => handleOpenLive(space)}
                 onShare={() => setShareSpace(space)}
                 onEnd={canEndFromOutside(space) ? () => handleEndLive(space) : undefined}
