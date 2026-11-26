@@ -29,7 +29,7 @@ import { useTranslation as _useCopy } from 'react-i18next';
  * the garbage — it uses hls.js where MSE exists and otherwise shows the poster.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useImperativeHandle, useMemo, useRef, useState, type Ref } from 'react';
 import { nativeLiveEdge, watchLiveProgress } from '@/lib/live/stall-watchdog';
 import { forgetWhepSilent, hasRealPicture, rememberWhepRouteBlocked, rememberWhepSilent, whepRecentlySilent, whepRouteBlocked } from '@/lib/live/whep-memory';
 import { dropWarmLiveHls, SLOW_KEYFRAME_SEC, takeWarmLiveHls, warmLiveHls } from '@/lib/live/hls-standby';
@@ -46,7 +46,9 @@ import {
   BIG_EVENT_HLS_CONFIG,
 } from '@/lib/live-ingest';
 import type { WhepSubscription } from '@/lib/livepeer/whep';
-import { stashLiveSession } from '@/lib/live-handoff';
+import { snapshot, stashLiveSession } from '@/lib/live-handoff';
+import { openLiveMini } from '@/lib/live-mini';
+import type { PreviewAudienceHandoff } from '../live/live-audience-profile';
 import { Minimize, PictureInPicture2 } from "lucide-react";
 import Volume2 from "@/components/ui/cut-icons/volume";
 import VolumeX from "@/components/ui/cut-icons/mute";
@@ -89,6 +91,7 @@ interface LiveFeedPreviewProps {
   muted?: boolean;
   controlsVisible?: boolean;
   onToggleMute?: (event: React.MouseEvent) => void;
+  audienceHandoff?: Ref<PreviewAudienceHandoff>;
 }
 
 /** A negotiated session that never delivers a frame is the worst case. */
@@ -120,7 +123,7 @@ function mayPlayNow(el: HTMLVideoElement, muted: boolean): boolean {
   return visualActivity.isFeedPlaybackAllowed() || isVideoInPictureInPicture(el) || (!muted && visualActivity.isLivePlaybackAllowed());
 }
 
-export function LiveFeedPreview({ eager = false, urls, thumbnail, className, fallbackLabel, muted = true, controlsVisible = false, onToggleMute, streamId, streamStatus, creatorId, isOwner, selfReaction, onViewerCount }: LiveFeedPreviewProps) {
+export function LiveFeedPreview({ eager = false, urls, thumbnail, className, fallbackLabel, muted = true, controlsVisible = false, onToggleMute, streamId, streamStatus, creatorId, isOwner, selfReaction, onViewerCount, audienceHandoff }: LiveFeedPreviewProps) {
   const { t: _copy } = _useCopy();
   const { pathname } = useLocation();
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -171,6 +174,25 @@ export function LiveFeedPreview({ eager = false, urls, thumbnail, className, fal
   // A big event is HLS everywhere, the feed included — a WebRTC session per
   // card is the per-viewer cost that mode exists to avoid.
   const bigEvent = isBigEventPlayback(src);
+  const takeWhepSession = useRef<(() => WhepSubscription | null) | null>(null);
+  useImperativeHandle(audienceHandoff, () => async (live) => {
+    const video = videoRef.current;
+    if (!video || video.paused || !streamId || !src || broadcastPaused || broadcastEnded) return;
+    const location = window.location.href;
+    const presence = ownStream ? null : await import('@/lib/api/dehub/stream-presence').catch(() => null);
+    if (videoRef.current !== video || video.paused || window.location.href !== location) return;
+    const ladder = [...new Set(urls.filter((url): url is string => !!url && url.includes('.m3u8')))];
+    openLiveMini({
+      ...live,
+      streamId,
+      playbackId: source?.playbackId ?? null,
+      urls: ladder,
+      session: takeWhepSession.current?.() ?? null,
+      poster: snapshot(video),
+      seat: presence?.joinStreamPresence(streamId) ?? null,
+    });
+    if (isFullscreen) toggleFullscreen();
+  }, [streamId, src, source, urls, ownStream, broadcastPaused, broadcastEnded, isFullscreen, toggleFullscreen]);
 
   // One WebRTC attempt per card: the transport only ever moves whep → hls, so
   // a failure cannot trade the element back and forth with the ladder.
@@ -206,6 +228,13 @@ export function LiveFeedPreview({ eager = false, urls, thumbnail, className, fal
     let cancelled = false;
     const controller = new AbortController();
     let session: WhepSubscription | null = null;
+    let handedOffSession: WhepSubscription | null = null;
+    const takeSession = () => {
+      if (!session || handedOffSession || el.srcObject !== session.stream) return null;
+      handedOffSession = session;
+      return session;
+    };
+    takeWhepSession.current = takeSession;
     setLoading(true);
     whepSessionsOpen += 1;
 
@@ -280,7 +309,7 @@ export function LiveFeedPreview({ eager = false, urls, thumbnail, className, fal
         }
         el.srcObject = session.stream;
         await el.play().catch(() => { if (!cancelled) setLoading(false); });
-        if (el.srcObject === session.stream && (cancelled || !mayPlayNow(el, mutedRef.current))) el.pause();
+        if (!handedOffSession && el.srcObject === session.stream && (cancelled || !mayPlayNow(el, mutedRef.current))) el.pause();
       } catch (e) {
         if (cancelled) return;
         // The server said no (a stream WebRTC cannot carry): HLS from now on.
@@ -297,12 +326,17 @@ export function LiveFeedPreview({ eager = false, urls, thumbnail, className, fal
     return () => {
       cancelled = true;
       controller.abort();
+      if (takeWhepSession.current === takeSession) takeWhepSession.current = null;
       clearTimeout(timer);
       clearTimeout(connectTimer);
       stopWatch();
       el.removeEventListener('resize', onPicture);
       el.removeEventListener('loadeddata', onPicture);
       whepSessionsOpen = Math.max(0, whepSessionsOpen - 1);
+      if (handedOffSession) {
+        if (el.srcObject === handedOffSession.stream) el.srcObject = null;
+        return;
+      }
       // Leaving for the post page while the picture is up: hand the running
       // session over instead of hanging up, so the post page carries on from
       // this frame rather than reconnecting from black.
