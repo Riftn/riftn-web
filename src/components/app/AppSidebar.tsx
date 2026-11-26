@@ -230,27 +230,27 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
             ) : user.username && <p className="truncate text-[13px] text-zinc-400">@{user.username}</p>}
           </div>
           {Number.isFinite(walletBalance) && (walletBalance > 0 || legacyBalance > 0) && (
-            <div data-menu-chip className="flex h-9 flex-shrink-0 items-center rounded-xl border border-white/15 bg-white/[0.06] text-[13px] font-semibold text-white tabular-nums">
-              <button
-                type="button"
-                onClick={() => { closeMenu(); navigate('/app/wallet'); }}
-                aria-label={balanceHidden ? t('nav.wallet') : `${t('nav.wallet')} ${walletBalance.toLocaleString()}`}
-                className="flex h-full items-center gap-1.5 pl-3 pr-1.5"
-              >
-                <DhbCoin className="h-4 w-4 align-middle" />
-                {/* Compact from 10k up, so the chip never pushes into the
-                    Followers / Following line beside it (Requests eaf824e2). */}
-                {balanceHidden ? HIDDEN_BALANCE : walletBalance >= 10_000 ? compactCount(walletBalance) : walletBalance.toLocaleString()}
-              </button>
-              {/* Eye: hide or show the number on this device (Requests 4c8cc200). */}
+            <div data-vaul-no-drag className="flex shrink-0 items-center gap-1">
               <button
                 type="button"
                 onClick={() => setBalanceHidden(!balanceHidden)}
                 aria-label={balanceHidden ? t('wallet.showBalance', 'Show balance') : t('wallet.hideBalance', 'Hide balance')}
                 aria-pressed={balanceHidden}
-                className="flex h-full items-center pl-1 pr-2.5 text-zinc-400 hover:text-white"
+                className="grid h-11 w-10 place-items-center rounded-xl text-foreground hover:bg-foreground/10"
               >
-                {balanceHidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                {balanceHidden ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              </button>
+              <button
+                type="button"
+                data-menu-chip
+                onClick={() => { closeMenu(); navigate('/app/wallet'); }}
+                aria-label={balanceHidden ? t('nav.wallet') : `${t('nav.wallet')} ${walletBalance.toLocaleString()}`}
+                className="flex h-9 items-center gap-1.5 rounded-xl border border-white/15 bg-white/[0.06] px-3 text-[13px] font-semibold text-white tabular-nums"
+              >
+                <DhbCoin className="h-4 w-4 align-middle" />
+                {/* Compact from 10k up, so the chip never pushes into the
+                    Followers / Following line beside it (Requests eaf824e2). */}
+                {balanceHidden ? HIDDEN_BALANCE : walletBalance >= 10_000 ? compactCount(walletBalance) : walletBalance.toLocaleString()}
               </button>
             </div>
           )}
