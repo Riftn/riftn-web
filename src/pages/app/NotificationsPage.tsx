@@ -2034,6 +2034,19 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
   const { isAuthenticated, walletAddress: pageWalletAddress } = useAuth();
   const navigate = useNavigate();
   const [selection, setSelection] = useState<Set<string> | null>(null);
+  const selecting = selection !== null;
+  const selectButton = useRef<HTMLButtonElement>(null);
+  const cancelSelectionButton = useRef<HTMLButtonElement>(null);
+  const restoreSelectionFocus = useRef(false);
+  useLayoutEffect(() => {
+    if (!restoreSelectionFocus.current) return;
+    if (selecting) {
+      cancelSelectionButton.current?.focus({ preventScroll: true });
+    } else {
+      selectButton.current?.focus({ preventScroll: true });
+      restoreSelectionFocus.current = false;
+    }
+  }, [selecting]);
   const [isDeleting, setIsDeleting] = useState(false);
   const deleting = useRef(false);
   const currentWallet = useRef(pageWalletAddress);
@@ -2830,7 +2843,7 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
           ) : undefined}
           tabs={selection ? (
             <div className="flex flex-wrap items-center justify-end gap-2 px-3 py-2" data-notification-selection-actions>
-              <Button type="button" variant="ghost" className="min-h-11 px-2" disabled={isDeleting}
+              <Button type="button" variant="ghost" ref={cancelSelectionButton} className="min-h-11 px-2" disabled={isDeleting}
                 onClick={() => setSelection(null)}>
                 {t('common.cancel', { defaultValue: 'Cancel' })}
               </Button>
@@ -2853,8 +2866,12 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
               beforeTabs={
                 <div className="flex shrink-0 items-center gap-1.5">
                   {settingsControl}
-                  <Button type="button" variant="ghost" className="min-h-11 px-2"
-                    disabled={!selectableIds.length} onClick={() => setSelection(new Set())}>
+                  <Button type="button" variant="ghost" ref={selectButton} className="min-h-11 px-2"
+                    disabled={!selectableIds.length}
+                    onClick={(event) => {
+                      restoreSelectionFocus.current = event.detail === 0;
+                      setSelection(new Set());
+                    }}>
                     {t('notifications.select', { defaultValue: 'Select' })}
                   </Button>
                   {phonePill && (
@@ -2965,7 +2982,7 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
                       isMarkingAsRead={bundle.allIds.includes(markingNotificationId || '')}
                       enrichedAvatars={enrichedAvatars}
                       onSelect={toggleSelection}
-                      selecting={selection !== null}
+                      selecting={selecting}
                       selected={bundle.allIds.some(id => selection?.has(id))}
                       selectionDisabled={isDeleting}
                     />
