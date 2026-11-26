@@ -43,6 +43,7 @@ import Send from "@/components/ui/cut-icons/send";
 import Gift from "@/components/ui/cut-icons/gifts";
 
 import { useAuth } from '@/contexts/AuthContext';
+import { APP_TOKENS_QUERY_KEY } from '@/hooks/use-app-tokens';
 import { AuthGate } from '@/components/app/AuthGate';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -1450,6 +1451,9 @@ export const NotificationItem = memo(function NotificationItem({
       if (announcement.kind === 'external') {
         window.open(announcement.url, '_blank', 'noopener,noreferrer');
       } else {
+        if (announcement.path === '/app/wallet') {
+          void queryClient.invalidateQueries({ queryKey: [APP_TOKENS_QUERY_KEY] });
+        }
         navigate(announcement.path);
       }
       return;
@@ -2745,6 +2749,9 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
                 return;
               }
               const path = announcement?.path ?? getNavigationLink(notification);
+              if (announcement?.path === '/app/wallet') {
+                void queryClient.invalidateQueries({ queryKey: [APP_TOKENS_QUERY_KEY] });
+              }
               if (path) navigate(path);
             }} />
         )}
