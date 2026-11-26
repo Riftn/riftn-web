@@ -115,6 +115,7 @@ export const ProfileImageGrid = memo(function ProfileImageGrid({ images }: Profi
                   variant="outline"
                   size="icon"
                   className="size-11"
+                  data-on-media
                   data-swipe-back
                   data-swipe-back-protect-sideways
                   aria-label={_copy('copy.3eddd92e8c28', { defaultValue: 'Close fullscreen' })}

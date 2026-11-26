@@ -51,6 +51,7 @@ async function verify(theme, width, phone) {
     if (await viewer.getAttribute('data-profile-photo-dialog') !== null) {
       const profileBack = page.locator('[data-profile-pull-root] [data-swipe-back]').filter({ visible: true });
       await profileBack.first().waitFor({ state: 'hidden' });
+      assert.equal(await close.locator('svg').evaluate(icon => getComputedStyle(icon).color), 'rgb(255, 255, 255)');
     }
     const size = await close.evaluate(button => {
       const { width, height } = button.getBoundingClientRect();
