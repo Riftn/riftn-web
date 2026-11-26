@@ -40,6 +40,7 @@ export type NotificationType =
   | 'new_message'
   | 'livestream_start'
   | 'signal_flare'
+  | 'game_turn'
   | 'badge_delegated'
   | 'badge_delegation_ended'
   | 'badge_delegation_changed'
@@ -141,6 +142,7 @@ export interface NotificationComment {
 
 /** Only the keys the client reads; the server sends more. */
 export interface NotificationMetadata {
+  game?: string;
   conversationId?: string;
   deepLink?: string;
   articleUrl?: string;

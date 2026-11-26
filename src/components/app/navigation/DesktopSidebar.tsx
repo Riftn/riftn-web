@@ -453,7 +453,7 @@ export function DesktopSidebar({ onPostClick, onSignOut }: DesktopSidebarProps) 
     }
     if (e.key === 'Escape') {
       e.preventDefault();
-      if (navQuery) setNavQuery.complete(navQuery, '');
+      if (navQuery) setNavQuery.clear();
       else (e.currentTarget as HTMLInputElement).blur();
     }
   };
@@ -642,7 +642,7 @@ export function DesktopSidebar({ onPostClick, onSignOut }: DesktopSidebarProps) 
                     {navQuery && (
                       <button
                         type="button"
-                        onClick={() => { setNavQuery.complete(navQuery, ''); searchInputRef.current?.focus(); }}
+                          onClick={() => { setNavQuery.clear(); searchInputRef.current?.focus(); }}
                         aria-label={t('sidebar.clearSearch')}
                         className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-md flex items-center justify-center text-zinc-500 hover:text-zinc-300 transition-colors"
                       >
@@ -913,7 +913,7 @@ export function DesktopSidebar({ onPostClick, onSignOut }: DesktopSidebarProps) 
                     {navQuery && (
                       <button
                         type="button"
-                        onClick={() => { setNavQuery.complete(navQuery, ''); bottomSearchInputRef.current?.focus(); }}
+                          onClick={() => { setNavQuery.clear(); bottomSearchInputRef.current?.focus(); }}
                         aria-label={t('sidebar.clearSearch')}
                         className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-md flex items-center justify-center text-zinc-500 hover:text-zinc-300 transition-colors"
                       >

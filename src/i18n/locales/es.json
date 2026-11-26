@@ -23330,6 +23330,7 @@
       "sendButton": "Enviar",
       "sendMissing": "Elige a quién enviar y cuántas.",
       "sent": "Enviaste {{coins}} SillyCoins a {{name}}",
+      "transferNotifications": "Notificaciones de transferencias",
       "sendNote": "Reciben las monedas al instante. Las SillyCoins se quedan en el juego: sin billetera, sin token.",
       "fromLine": "De {{name}}",
       "toLine": "Para {{name}}",

@@ -297,6 +297,7 @@ export interface SillyBoardRow {
 }
 
 export interface SillyState {
+  transferNotificationsEnabled?: boolean;
   rules: { maxTapsPerSecond: number; offlineCapHours: number; maxLevel: number };
   me: SillyMe | null;
   transfers: SillyTransfer[];
@@ -304,6 +305,8 @@ export interface SillyState {
 }
 
 export const sillyState = (signedIn: boolean) => apiCall<SillyState>('/api/games/sillycoin', { requiresAuth: signedIn });
+export const sillySetTransferNotifications = (enabled: boolean) =>
+  apiCall<{ enabled: boolean }>('/api/games/sillycoin/transfer-notifications', { method: 'POST', body: { enabled }, requiresAuth: true });
 export const sillyMine = (taps: number) =>
   apiCall<{ me: SillyMe; accepted: number }>('/api/games/sillycoin/mine', { method: 'POST', body: { taps }, requiresAuth: true });
 export const sillyUpgrade = (kind: SillyUpgradeKind, taps: number) =>

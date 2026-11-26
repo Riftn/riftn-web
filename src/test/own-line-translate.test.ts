@@ -14,7 +14,7 @@ describe('Translate on your own sent line', () => {
   it('goes into your language, privately', async () => {
     invoke.mockResolvedValue({ data: { translatedText: 'See you tomorrow' }, error: null });
     await expect(translateOwnLine('Yarın görüşürüz', 'en', 'en')).resolves.toEqual({ text: 'See you tomorrow', lang: 'en' });
-    expect(invoke).toHaveBeenCalledWith('translate-text', { body: { text: 'Yarın görüşürüz', targetLang: 'en' } });
+    expect(invoke).toHaveBeenCalledWith('translate-text', { body: { text: 'Yarın görüşürüz', targetLang: 'en', purpose: 'chat' } });
   });
 
   it('uses your composer language when the line is already in yours', async () => {
@@ -22,7 +22,7 @@ describe('Translate on your own sent line', () => {
       .mockResolvedValueOnce({ data: { translatedText: 'see you tomorrow', sameLanguage: true }, error: null })
       .mockResolvedValueOnce({ data: { translatedText: 'Yarın görüşürüz' }, error: null });
     await expect(translateOwnLine('see you tomorrow', 'en', 'tr')).resolves.toEqual({ text: 'Yarın görüşürüz', lang: 'tr' });
-    expect(invoke).toHaveBeenLastCalledWith('translate-text', { body: { text: 'see you tomorrow', targetLang: 'tr' } });
+    expect(invoke).toHaveBeenLastCalledWith('translate-text', { body: { text: 'see you tomorrow', targetLang: 'tr', purpose: 'chat' } });
   });
 
   it('says so when both languages already match, and fails quietly on errors', async () => {

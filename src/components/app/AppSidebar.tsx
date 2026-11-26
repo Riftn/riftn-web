@@ -1,4 +1,3 @@
-import { useSessionText } from '@/hooks/use-session-text';
 import React, { Suspense, lazy, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { flushSync } from 'react-dom';
@@ -88,10 +87,7 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
   const isDesktop = useIsDesktopViewport();
 
   const { t } = useTranslation();
-  // Menu search. Unlike the desktop rail this field is always shown: the sheet
-  // is opened deliberately and closed again straight away, so there is no
-  // resting state to keep uncluttered.
-  const [menuQuery, setMenuQuery] = useSessionText("menu-search");
+  const [menuQuery, setMenuQuery] = useState('');
   const { addToHistory } = useSearchHistory();
   // `isKidsMode` is in the deps because `filterNavItems` reads the lock
   // directly rather than taking it as an argument — without it here the sheet
@@ -117,9 +113,10 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const showSearchField = !tabsHeader || searchOpen || !!menuQuery;
   const closeSearch = useCallback(() => {
-    setMenuQuery.complete(menuQuery, '');
+    searchInputRef.current?.blur();
+    setMenuQuery('');
     setSearchOpen(false);
-  }, [menuQuery, setMenuQuery]);
+  }, []);
   // Fetch the menu's tiles once the page is idle, so the first open is instant.
   useEffect(() => {
     const idle = (window as any).requestIdleCallback as ((cb: () => void) => number) | undefined;
@@ -133,20 +130,20 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
   // always reopens on the first group.
   useEffect(() => {
     if (!isOpen) {
-      setMenuQuery.initialize('');
+      setMenuQuery('');
       setSearchOpen(false);
       setMenuTab(0);
     }
-  }, [isOpen, setMenuQuery]);
+  }, [isOpen]);
 
   const runFullSearch = useCallback(() => {
     const query = menuQuery.trim();
     if (!query) return;
     addToHistory(query);
     navigate(exploreSearchHref(query));
-    setMenuQuery.complete(menuQuery, '');
+    closeSearch();
     closeMenu();
-  }, [menuQuery, addToHistory, navigate, closeMenu, setMenuQuery]);
+  }, [menuQuery, addToHistory, navigate, closeSearch, closeMenu]);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [postLiveMode, setPostLiveMode] = useState<'video' | undefined>();
   // From the Live feed, the post button opens the composer on Livestream.
@@ -285,7 +282,7 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
           </Suspense>
         </div>
       ) : (
-      <div className="relative mb-3 px-1">
+      <div data-vaul-no-drag className="relative mb-3 px-1">
         <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
         <input
           ref={searchInputRef}
@@ -294,20 +291,20 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
           onChange={(e) => setMenuQuery(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') { e.preventDefault(); runFullSearch(); }
-            if (e.key === 'Escape') { e.preventDefault(); closeSearch(); }
+            if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeSearch(); }
           }}
           placeholder={t('sidebar.searchMenu')}
           aria-label={t('sidebar.searchMenu')}
           data-menu-search
           data-search-surface
-          className="w-full h-[42px] pl-10 pr-9 rounded-xl bg-white/5 border border-white/10 text-[16px] text-white placeholder:text-zinc-500 outline-none focus:border-white/30 transition-colors"
+          className="w-full h-[42px] pl-10 pr-11 rounded-xl bg-white/5 border border-white/10 text-[16px] text-white caret-current placeholder:text-zinc-500 outline-none focus:border-white/30 transition-colors"
         />
         {(menuQuery || (tabsHeader && searchOpen)) && (
           <button
             type="button"
             onClick={closeSearch}
             aria-label={t('sidebar.clearSearch')}
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-md flex items-center justify-center text-zinc-500 hover:text-white transition-colors"
+            className="absolute inset-y-0 right-1 w-[42px] rounded-xl flex items-center justify-center text-zinc-500 hover:text-white transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
