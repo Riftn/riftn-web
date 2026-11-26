@@ -239,6 +239,7 @@ const preferAndroidHls = () =>
 
 interface LiveStreamCardProps {
   stream: LiveStream;
+  postPage?: boolean;
   /**
    * The stream's own chat, dropped down by the message button in the action
    * bar. When it is given, that button opens the chat rather than the post's
@@ -269,7 +270,7 @@ interface LiveStreamCardProps {
 /** What a gift of `dhb` costs in a dollar stablecoin, at the DHB sale peg. */
 const giftCostIn = (dhb: number) => Math.round(dhb * DHB_PRELISTING_USD * 1e6) / 1e6;
 
-export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false, swipeFeed }: LiveStreamCardProps) {
+export function LiveStreamCard({ stream: streamProp, postPage, chatSlot, immersive = false, swipeFeed }: LiveStreamCardProps) {
   const { t: _copy } = _useCopy();
   // A replay is saved a minute or so after the End button. A card loaded in
   // that gap (the creator's own profile, straight after ending) used to sit on
@@ -1953,6 +1954,7 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
           over the picture — see ImmersiveLiveChrome below. */}
       <div className={cn('flex items-center justify-between', immersive && 'hidden')}>
         <CardHeader
+          postPage={postPage}
           username={stream.streamer}
           handle={stream.creatorUsername}
           avatarSeed={stream.avatar}
