@@ -282,12 +282,12 @@ describe('removeSavedProfile', () => {
     seedAccountA();
     adoptCurrentProfile();
     const account = getProfile('uid-a');
-    localStorage.setItem(PROFILES_STORAGE_KEY, JSON.stringify([
-      account,
-      { ...account, id: `addr:${ADDR_A}`, addedAt: 0 },
-    ]));
     seedAccountB();
     adoptCurrentProfile();
+    localStorage.setItem(PROFILES_STORAGE_KEY, JSON.stringify([
+      ...listProfiles(),
+      { ...account, id: `addr:${ADDR_A}`, addedAt: 0 },
+    ]));
 
     expect(() => removeSavedProfile(ADDR_B)).toThrow();
     removeSavedProfile(ADDR_A.toUpperCase());
