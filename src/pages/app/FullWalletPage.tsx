@@ -67,6 +67,7 @@ import { CopyAddressRows } from '@/components/app/wallet/CopyAddressRows';
 import { TradeSheet } from '@/components/app/wallet/TradeSheet';
 import { SubscriptionTokensRow } from '@/components/app/wallet/SubscriptionTokensRow';
 import { AppTokensRow, AppTokenSendDialog } from '@/components/app/wallet/AppTokens';
+import { AppTokenPreview } from '@/components/app/wallet/AppTokenPreview';
 import { useAppTokens, useAppTokensEnabled } from '@/hooks/use-app-tokens';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
@@ -466,6 +467,8 @@ export default function FullWalletPage() {
           <span className="max-w-full truncate text-xs">{t('wallet.trade')}</span>
         </Button>
       </div>
+
+      {appTokensOn && <AppTokenPreview key={walletAddress} />}
 
       {/* Search */}
       <div className="relative">

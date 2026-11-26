@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AuthContext } from '@/contexts/AuthContext';
-import { getAppTokensConfig, getMyAppTokens } from '@/lib/api/dehub/app-tokens';
+import { getAppTokenPreview, getAppTokensConfig, getMyAppTokens } from '@/lib/api/dehub/app-tokens';
 
 export const APP_TOKENS_QUERY_KEY = 'app-tokens-me';
 
@@ -30,6 +30,18 @@ export function useAppTokens(enabled = true) {
     queryKey: [APP_TOKENS_QUERY_KEY, walletAddress?.toLowerCase()],
     queryFn: getMyAppTokens,
     enabled: enabled && isAuthenticated,
+    staleTime: 15_000,
+    retry: false,
+  });
+}
+
+export function useAppTokenPreview(open: boolean) {
+  const auth = useContext(AuthContext);
+  const address = auth?.walletAddress?.toLowerCase();
+  return useQuery({
+    queryKey: ['app-token-preview', address],
+    queryFn: getAppTokenPreview,
+    enabled: open && !!auth?.isAuthenticated && !!address,
     staleTime: 15_000,
     retry: false,
   });
