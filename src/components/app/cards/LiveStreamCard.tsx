@@ -474,7 +474,7 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
   const [fundingGift, setFundingGift] = useState(false);
   const [dhbBalance, setDhbBalance] = useState<string | null>(null);
   const [balanceLoading, setBalanceLoading] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const [portraitLive, setPortraitLive] = useState(false);
   const updatePortrait = useCallback(() => {
     const video = videoRef.current;
