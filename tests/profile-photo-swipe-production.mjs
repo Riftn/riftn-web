@@ -36,7 +36,8 @@ async function verify(theme, width, phone) {
     const images = page.locator('[data-profile-tabs] button[title="Images"]');
     await images.click({ timeout: 45_000 });
     const tile = page.locator('[data-profile-image-grid] button').first();
-    await tile.click({ timeout: 45_000 });
+    if (phone) await tile.tap({ timeout: 45_000 });
+    else await tile.click({ timeout: 45_000 });
     const viewer = page.getByRole('dialog', { name: 'Images', exact: true });
     const close = viewer.getByRole('button', { name: /^Close(?: fullscreen)?$/ });
     await close.waitFor();
@@ -54,6 +55,7 @@ async function verify(theme, width, phone) {
       await swipe(session, 48, 30, 135, 3);
       await viewer.waitFor({ state: 'hidden' });
       assert.equal(page.url(), profileUrl, 'The photo swipe skipped the profile grid');
+      await page.waitForFunction(() => !history.state?.__dehubOverlay && !document.querySelector('[data-overlay-ghost]'));
       await tile.tap();
       await viewer.waitFor();
       await page.goBack();
