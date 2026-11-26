@@ -282,6 +282,7 @@ function preloadWalletChunkPlugin() {
  */
 function postLinkCodePlugin() {
   const MARKER = '"__POST_LINK_CODE__"';
+  const CHAT_MARKER = '"__CHAT_LINK_CODE__"';
   return {
     name: 'post-link-code',
     apply: 'build' as const,
@@ -341,6 +342,9 @@ function postLinkCodePlugin() {
         const postPage = chunkOf('pages/app/SinglePostPage.tsx');
         const player = chunkOf('components/app/cards/LiveStreamCard.tsx');
         const chat = chunkOf('components/app/cards/LivePostChat.tsx');
+        const fullScreenChat = chunkOf('pages/app/FullScreenChatPage.tsx');
+        const chatRoute = closure([fullScreenChat], linked);
+        html = html.replace(CHAT_MARKER, () => JSON.stringify(chatRoute));
         if (!postPage || !player || !chat) {
           console.warn(
             `[post-link-code] chunk not found (post page ${postPage}, player ${player}, chat ${chat}): ` +
@@ -536,7 +540,7 @@ function startEntryAfterFirstPaintPlugin() {
           'function mark(n){try{performance.mark(n);}catch(x){}}',
           'mark("boot-vis:"+d.visibilityState);',
           'function add(q){var t=d.getElementById("boot-preloads");if(!t||!t.content)return;var l=t.content.querySelectorAll(q);for(var i=0;i<l.length;i++)d.head.appendChild(l[i].cloneNode(true));}',
-          'function go(r){if(s)return;s=1;mark("entry-start:"+r);add("link:not([data-prefetch-only])");',
+          'function go(r){if(s)return;s=1;mark("entry-start:"+r);add("link:not([data-prefetch-only])");if(window.__preloadChatCode)window.__preloadChatCode();',
           'var c=window.__mainCss;function run(){import(e).then(function(){setTimeout(function(){add("link[data-prefetch-only]");},1500);},function(){});}',
           'if(c)c().then(run);else run();}',
           'function afterPaint(){var p=0,sup=0;function f(r){if(p)return;p=1;setTimeout(function(){go(r);},0);}',

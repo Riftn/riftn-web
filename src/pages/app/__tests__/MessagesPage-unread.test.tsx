@@ -36,10 +36,12 @@ vi.mock('@/lib/api/dehub/dm-socket', () => ({ emitSendMessage: vi.fn(), onConver
 vi.mock('@/lib/api/dehub/blocks', () => ({ blockUser: vi.fn() }));
 vi.mock('@/lib/dm-e2ee/keys', () => ({ prepareOutgoing: vi.fn() }));
 vi.mock('@/lib/media-url', () => ({ buildAvatarUrl: () => '', extractAvatarPath: () => '', storageImage: () => '' }));
-vi.mock('@/components/app/chat', () => ({
+vi.mock('@/components/app/chat/DirectMessageChat', () => ({
   DirectMessageChat: ({ onBack }: { onBack: () => void }) => <button onClick={onBack}>Back to messages</button>,
-  PublicChat: () => null, NewConversationModal: () => null, NewMessageSelector: () => null,
 }));
+vi.mock('@/components/app/chat/PublicChat', () => ({ PublicChat: () => null }));
+vi.mock('@/components/app/chat/NewConversationModal', () => ({ NewConversationModal: () => null }));
+vi.mock('@/components/app/chat/NewMessageSelector', () => ({ NewMessageSelector: () => null }));
 vi.mock('@/components/app/chat/NewMessageDrawer', () => ({ NewMessageDrawer: () => null }));
 vi.mock('@/components/app/page-kit/PageKit', () => ({
   PageIsland: ({ children }: { children: ReactNode }) => <div>{children}</div>,

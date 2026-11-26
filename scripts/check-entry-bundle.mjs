@@ -264,6 +264,13 @@ if (html.includes('"__POST_LINK_CODE__"') || !postLinkCode) {
   }
 }
 
+const chatLinkCode = html.match(/var chatCode = (\[[^;]*\]);/);
+const chatFiles = chatLinkCode ? JSON.parse(chatLinkCode[1]) : [];
+if (!chatFiles.length || chatFiles.some((file) => !existsSync(join(DIST, file)))) {
+  console.error('[check-entry-bundle] FAIL: the chat startup file list is missing or references an unbuilt file.');
+  failed = true;
+}
+
 if (failed) {
   process.exit(1);
 }

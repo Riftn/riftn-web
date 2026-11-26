@@ -32,6 +32,7 @@ import { useLiveChatRooms, useLiveChatMessages, useLiveChatRoomDetails, useLiveC
 import { getMediaUrl, banLiveChatUser, unbanLiveChatUser, uploadChatImage, uploadLiveChatVoice, pinLiveChatMessage, unpinLiveChatMessage, type LiveChatRoom } from '@/lib/api/dehub';
 import { getNFTInfo } from '@/lib/api/dehub/feed';
 import { canDraftPublicLivePost } from '@/lib/live-public-chat-share';
+import { PUBLIC_CHAT_PAGE_SIZE } from '@/lib/api/dehub/livechat';
 import { Pin, X as XIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { buildAvatarUrl } from '@/lib/media-url';
@@ -152,7 +153,6 @@ const ROOM_MANAGEMENT_ENABLED = false;
  * as the reader scrolls up, until the start of the room. Signed out, one page
  * past the opening one, then the sign-in wall.
  */
-const CHAT_PAGE_SIZE = 20;
 /** How close to the top (px) the next older page is fetched. */
 const LOAD_OLDER_AT = 240;
 
@@ -251,7 +251,7 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
     send, retrySend, discardSend, addReaction, removeReaction, editMessage, deleteMessage, refetch,
     hasOlder, loadingOlder, loadOlder, signInWall,
     hasNewer, jumpTo, loadNewer, backToLatest,
-  } = useLiveChatMessages(selectedRoomId, { pageSize: CHAT_PAGE_SIZE });
+  } = useLiveChatMessages(selectedRoomId, { pageSize: PUBLIC_CHAT_PAGE_SIZE });
   const search = useChatSearch(selectedRoomId, isSearchOpen && isAuthenticated, searchText, searchPerson?.address ?? null);
 
   // Fetch full room details

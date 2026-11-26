@@ -36,7 +36,6 @@ import { ChatLinkCatcher } from "@/components/app/chat/ChatLinkCatcher";
 import { prefetchUnifiedFeed } from "@/hooks/use-unified-feed";
 import { restoreQueryCache, startQueryPersist } from "@/lib/query-persist";
 import { setBackgroundPaused, scheduleBackgroundResume } from "@/lib/background-gate";
-import { AppLayout } from "./components/app/AppLayout";
 import { QuickActionsHost } from "./components/app/QuickActionsHost";
 import { PostMenuGate } from "./components/app/post-menu/PostMenuGate";
 import { LoginModal, scheduleLoginPrefetch } from "@/components/app/LoginModal";
@@ -64,6 +63,11 @@ const DexPoolPage = React.lazy(() => import("@/pages/app/DexPoolPage"));
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { loadPostPage } from "@/lib/preload-post-page";
 import { SurfaceTransition } from "@/components/transitions/SurfaceTransition";
+
+const AppLayout = lazyWithRetry(() =>
+  import("./components/app/AppLayout").then(({ AppLayout }) => ({ default: AppLayout })),
+);
+export const preloadAppLayout = () => AppLayout.preload();
 
 // Update notices can load after the app paints; their watcher starts on mount.
 const NewVersionToast = lazyWithRetry(() =>
@@ -277,7 +281,8 @@ const ConnectPage = React.lazy(() => import("./pages/ConnectPage"));
 const ConnectChatGPTPage = React.lazy(() => import("./pages/ConnectChatGPTPage"));
 const ConnectClaudePage = React.lazy(() => import("./pages/ConnectClaudePage"));
 const ApkPage = React.lazy(() => import("./pages/ApkPage"));
-const FullScreenChatPage = React.lazy(() => import("./pages/app/FullScreenChatPage"));
+const FullScreenChatPage = lazyWithRetry(() => import("./pages/app/FullScreenChatPage"));
+export const preloadFullScreenChat = () => FullScreenChatPage.preload();
 const StreamPage = React.lazy(() => import("./pages/StreamPage"));
 const DehubAppPage = React.lazy(() => import("./pages/DehubAppPage"));
 const AdminManualPage = React.lazy(() => import("./pages/AdminManualPage"));
@@ -795,7 +800,7 @@ function AppContent() {
 
 
           {/* Single shared AppLayout — header/sidebar mount ONCE and persist across all app routes */}
-          <Route element={<AppLayout />}>
+          <Route element={<Suspense fallback={<PageLoader />}><AppLayout /></Suspense>}>
             <Route path="/jobs" element={null} />
             <Route path="/stats" element={null} />
             {/* Revenue & costs was parked here before it joined /stats. */}

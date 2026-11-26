@@ -24,7 +24,8 @@
       (function () {
         try {
           var m = location.pathname.match(/^\/(?:app\/)?(?:post|video|posts)\/(\d+)(?:\/b(?:\/[^/]+)?)?\/?$/);
-          if (!m) return;
+          var chat = /^\/chat\/?$/i.test(location.pathname);
+          if (!m && !chat) return;
           var code = "__POST_LINK_CODE__";
           var conn = navigator.connection;
           if (typeof code !== 'object' || (conn && conn.saveData)) code = null;
@@ -43,6 +44,31 @@
               document.head.appendChild(l);
             }
           };
+          if (chat) {
+            // The starter runs this after the HTML chat skeleton has painted.
+            var chatCode = "__CHAT_LINK_CODE__";
+            if (Array.isArray(chatCode) && !(conn && conn.saveData)) {
+              window.__preloadChatCode = function () { want(chatCode); };
+            }
+            var params = new URLSearchParams(location.search);
+            var room = params.get('room');
+            var opensPublic = params.get('chat') === 'public' ||
+              (!params.has('chat') && !params.has('with') && !window.matchMedia('(max-width: 1023px)').matches);
+            if (!opensPublic || (room && room !== 'global') || !window.fetch ||
+              (conn && conn.saveData) || localStorage.getItem('dehub_token') ||
+              localStorage.getItem('dehub_refresh_token') || localStorage.getItem('dhb_kids_mode') === '1') return;
+            var controller = new AbortController();
+            var timer = setTimeout(function () { controller.abort(); }, 6000);
+            window.__publicChatHistory = {
+              at: Date.now(),
+              promise: fetch('https://api.dehub.io/api/livechat/messages?limit=20&roomId=global', {
+                headers: { Accept: 'application/json' }, cache: 'no-store', signal: controller.signal
+              }).then(function (r) { return r.ok ? r.json() : null; })
+                .catch(function () { return null; })
+                .finally(function () { clearTimeout(timer); })
+            };
+            return;
+          }
           if (code) want(code.r);
           if (!window.fetch) return;
           var ls = window.localStorage, h = { Accept: 'application/json' };
