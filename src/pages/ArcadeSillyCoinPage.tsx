@@ -17,17 +17,18 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowDownLeft, ArrowLeft, ArrowUpRight, Bot, Drill, Loader2, Pickaxe, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { SEOHead } from '@/components/SEOHead';
 import { ArcadeShareMenu } from '@/components/app/arcade/ArcadeShareMenu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Switch } from '@/components/ui/switch';
 import { ThemedIcon } from '@/components/app/war/WarHudIcon';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatCount } from '@/lib/format-count';
 import {
-  SILLY_UPGRADES, sillyMine, sillySend, sillyState, sillyUpgrade,
+  SILLY_UPGRADES, sillyMine, sillySend, sillySetTransferNotifications, sillyState, sillyUpgrade,
   type GamePlayer, type SillyMe, type SillyState, type SillyUpgradeKind,
 } from '@/lib/api/dehub/games';
 
@@ -107,6 +108,17 @@ function SillyGame({ wallet, data, onSignIn }: { wallet: string | null; data: Si
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const signedIn = !!wallet;
+  const transferNotifications = useMutation({
+    mutationFn: sillySetTransferNotifications,
+    onSuccess: async ({ enabled }) => {
+      const queryKey = ['sillycoin', wallet];
+      await queryClient.cancelQueries({ queryKey, exact: true });
+      queryClient.setQueryData<SillyState>(queryKey, (current) =>
+        current ? { ...current, transferNotificationsEnabled: enabled } : current,
+      );
+    },
+    onError: (error) => toast.error(errorText(error)),
+  });
 
   // Server truth plus when it arrived; the screen adds miners and pending taps.
   const [base, setBase] = useState<{ me: SillyMe; at: number } | null>(null);
@@ -390,6 +402,20 @@ function SillyGame({ wallet, data, onSignIn }: { wallet: string | null; data: Si
             </button>
           </div>
           <p className="mt-3 text-xs text-zinc-500">{t('games.sillycoin.sendNote', { defaultValue: 'They get the coins straight away. SillyCoins stay in the game: no wallet, no token.' })}</p>
+          {signedIn && typeof data?.transferNotificationsEnabled === 'boolean' ? (
+            <div className="mt-3 flex items-center justify-between gap-3">
+              <label htmlFor="sillycoin-transfer-notifications" className="text-sm text-zinc-300">
+                {t('games.sillycoin.transferNotifications', { defaultValue: 'Transfer notifications' })}
+              </label>
+              <Switch
+                id="sillycoin-transfer-notifications"
+                checked={data.transferNotificationsEnabled}
+                onCheckedChange={(enabled) => transferNotifications.mutate(enabled)}
+                disabled={transferNotifications.isPending}
+                aria-busy={transferNotifications.isPending}
+              />
+            </div>
+          ) : null}
           {transfers.length ? (
             <ul className="mt-3 flex flex-col gap-1.5">
               {transfers.slice(0, 6).map((tr) => (

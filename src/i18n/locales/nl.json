@@ -23578,6 +23578,7 @@
       "sendButton": "Versturen",
       "sendMissing": "Kies naar wie en hoeveel.",
       "sent": "{{coins}} SillyCoins gestuurd naar {{name}}",
+      "transferNotifications": "Overdrachtsmeldingen",
       "sendNote": "Ze krijgen de munten meteen. SillyCoins blijven in het spel: geen wallet, geen token.",
       "fromLine": "Van {{name}}",
       "toLine": "Aan {{name}}",

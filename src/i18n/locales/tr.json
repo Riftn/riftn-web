@@ -23333,6 +23333,7 @@
       "sendButton": "Gönder",
       "sendMissing": "Kime ve kaç tane göndereceğini seç.",
       "sent": "{{name}} kişisine {{coins}} SillyCoin gönderildi",
+      "transferNotifications": "Transfer bildirimleri",
       "sendNote": "Coin’ler hemen ulaşır. SillyCoin’ler oyunda kalır: cüzdan yok, token yok.",
       "fromLine": "{{name}} gönderdi",
       "toLine": "{{name}} kişisine",

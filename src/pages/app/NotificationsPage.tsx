@@ -953,6 +953,10 @@ function customReferenceId(notification: DeHubNotification): string | undefined 
 const COMMENT_NOTIFICATION_TYPES = new Set(['comment', 'comment_reply', 'creator_comment_reply', 'comment_like']);
 
 function getNavigationLink(notification: DeHubNotification): string | null {
+  if (notification.type === 'game_turn' && notification.metadata?.game === 'sillycoin') {
+    return '/arcade/sillycoin';
+  }
+
   // A mini app's notification opens the app, at the page it named when it
   // named one (miniapp-notify only accepts pages on the app's own domain).
   if ((notification.type as string) === 'miniapp') {
