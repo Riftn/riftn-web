@@ -43,7 +43,7 @@ import {
   type StoryItem,
 } from '@/lib/api/dehub/stories';
 import { useRefreshStoryShelf } from '@/hooks/use-story-shelf';
-import { ageLabel, coverOf, localAge, nameOf, startIndex } from './story-utils';
+import { ageLabel, localAge, nameOf, startIndex } from './story-utils';
 import { sendStoryReply } from './story-reply';
 import { muteUser } from '@/lib/api/dehub/mutes';
 import { unfollowUser } from '@/lib/api/dehub/social';
@@ -951,14 +951,12 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, openComm
       {docked && entries.length > authorIdx + 1 && (
         <nav data-sv-next aria-label={t('stories.upNext', { defaultValue: 'Up next' })}>
           {entries.slice(authorIdx + 1, authorIdx + 4).map((e, k) => {
-            const cover = coverOf(e);
             const nextFace = e.author.avatarImageUrl ? buildAvatarUrl(e.author.address, e.author.avatarImageUrl) : buildAvatarCdnFallbackUrl(e.author.address, undefined);
             return (
               <button
                 key={e.author.address}
                 type="button"
                 data-seen={e.seen ? 'true' : undefined}
-                style={cover ? { backgroundImage: `url("${cover}")` } : undefined}
                 onClick={() => { setAuthorIdx(authorIdx + 1 + k); setItemIdx(startIndex(e)); }}
                 aria-label={nameOf(e.author)}
               >

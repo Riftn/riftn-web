@@ -168,7 +168,6 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-story-tile] {
 @media (min-width: 1024px) { [data-story-shelf][data-up='2'] [data-st-stack] { display: flex; } }
 [data-st-stack] img { width: 24px; height: 24px; border-radius: 8px; object-fit: cover; background: rgb(127 127 135 / 0.3); box-shadow: 0 0 0 2px var(--st-ring-gap); }
 [data-st-stack] img + img { margin-left: -7px; }
-[data-st-stack][data-covers] img { width: 22px; height: 30px; border-radius: 7px; }
 [data-st-stack] b { margin-left: 6px; color: var(--st-pill-sub); font-size: 11px; font-weight: 700; }
 
 /* The visible key matches the profile ring inside a full-height tap target. */
@@ -790,18 +789,19 @@ button[data-sv-field] { font-weight: 600; color: #fff; }
     z-index: 4;
   }
   [data-sv-next] button {
-    position: relative;
+    display: grid;
+    place-items: center;
     width: 76px;
     height: 112px;
     border-radius: 12px;
-    background: rgb(255 255 255 / 0.08) center / cover no-repeat;
+    background: rgb(255 255 255 / 0.08);
     border: 1px solid rgb(255 255 255 / 0.16);
     overflow: hidden;
     transition: transform 160ms ease;
   }
   [data-sv-next] button:hover { transform: translateY(-2px); }
   [data-sv-next] button[data-seen='true'] { opacity: 0.6; }
-  [data-sv-next] img { position: absolute; left: 6px; bottom: 6px; width: 22px; height: 22px; border-radius: 6px; object-fit: cover; box-shadow: 0 0 0 2px #fff; }
+  [data-sv-next] img { width: 34px; height: 34px; border-radius: 6px; object-fit: cover; box-shadow: 0 0 0 2px #fff; }
   [data-sv-next] span { font-size: 13px; font-weight: 600; color: rgb(255 255 255 / 0.7); text-align: center; }
 }
 
