@@ -57,7 +57,22 @@
     "cancel": "Annuler",
     "getKey": "Obtenir une clé {{name}}",
     "showLess": "Afficher uniquement mes clés",
-    "addAnother": "Ajouter un autre fournisseur"
+    "addAnother": "Ajouter un autre fournisseur",
+    "providerDescriptions": {
+      "openai": "Builder (modèles GPT)",
+      "fal": "Outils d’image, de vidéo, de 3D et de photo",
+      "kie": "Images et vidéos",
+      "replicate": "Images et vidéos",
+      "xai": "Chat et images avec Grok",
+      "elevenlabs": "Voix, doublage, musique et effets sonores",
+      "gemini": "Traduction, aide à la rédaction et résumés",
+      "venice": "Discussion avec l’assistant",
+      "perplexity": "Recherche web avec l’assistant",
+      "deepgram": "Transcriptions et sous-titres en direct",
+      "openrouter": "Des centaines de modèles de chat et de texte avec une seule clé",
+      "groq": "Chat et texte rapides",
+      "mistral": "Chat et texte"
+    }
   },
   "resetWallet": {
     "mismatch": "Les mots de passe ne correspondent pas",
@@ -4158,6 +4173,18 @@
     "max_available_on_chain": "Max disponible : {{amount}} jetons sur {{chain}}"
   },
   "staking": {
+    "appStake": "Staker",
+    "appUnstake": "Retirer",
+    "availableTokens": "Jetons disponibles",
+    "stakedTokens": "Jetons stakés",
+    "legacyDhb": "Ancien staking DHB",
+    "inAppDescription": "Stakez depuis votre portefeuille Riftn. Vous pouvez retirer vos jetons à tout moment pour les rendre à nouveau disponibles.",
+    "pendingAppStake": "Réessayez cette demande pour confirmer le résultat.",
+    "retryAction": "Réessayer : {{action}}",
+    "retryBalance": "Recharger les soldes",
+    "retryConfig": "Recharger le staking",
+    "configError": "Impossible de charger le staking.",
+    "signInToStake": "Connectez-vous pour staker",
     "title": "Staking",
     "subtitle": "Déposez pour débloquer le partage des bénéfices, des frais réduits, des superpouvoirs et plus encore !",
     "stakeDhb": "Déposer",
@@ -21471,6 +21498,9 @@
     "followFailed": "Impossible de suivre. Réessaie."
   },
   "appTokens": {
+    "kindStaked": "Staké",
+    "kindUnstaked": "Retiré",
+    "stakedBalance": "{{amount}} stakés",
     "title": "jetons dans Riftn",
     "rowHint": "Solde dans l’app",
     "explainer": "Vos jetons vivent désormais dans Riftn. Vous êtes parti de ce que vous déteniez et aviez en staking onchain au lancement. Envoyer, donner un pourboire et dépenser les déplace instantanément, sans frais et sans rien onchain. Les soldes passeront au nouveau token lors de l’airdrop.",
@@ -21653,6 +21683,12 @@
     "enter": "Entrer dans le donjon"
   },
   "tokenLaunch": {
+    "tickerInfo": "Infos",
+    "tickerContract": "Adresse du contrat",
+    "tickerBuy": "Acheter",
+    "referencePrice": "Prix de référence dans l’app",
+    "contractPending": "À confirmer",
+    "earnOnly": "Pour l’instant, vous pouvez uniquement gagner des jetons en utilisant l’application.",
     "riftTitle": "Lancement de $RIFT sur chaîne",
     "riftStatus": "$RIFT est la monnaie interne de Riftn. Vous pouvez déjà l’utiliser dans Riftn. Le jeton sur chaîne reste à lancer et ne dispose d’aucune adresse de contrat ni cotation officielle. Inscrivez-vous pour recevoir un e-mail au lancement.",
     "riftSeoDescription": "$RIFT est la monnaie interne de Riftn. Vous pouvez déjà l’utiliser dans Riftn. Le jeton sur chaîne reste à lancer et ne dispose d’aucune adresse de contrat ni cotation officielle.",

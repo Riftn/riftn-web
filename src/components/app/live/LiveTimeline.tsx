@@ -1,3 +1,4 @@
+import { LiveDot } from '@/components/app/live/LiveDot';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Play from '@/components/ui/cut-icons/play';
@@ -108,7 +109,8 @@ export function LiveTag({ snap, onGoLive, className }: { snap: TimeshiftSnap | n
   const label = t('stages.live', 'LIVE');
   if (!behind || !onGoLive) {
     return (
-      <span data-live-badge className={cn('rounded-[5px] bg-red-500 px-1.5 py-px text-[9.5px] font-black tracking-wider text-white transition-colors duration-300', className)}>
+      <span data-live-badge className={cn('inline-flex items-center gap-1 rounded-[5px] bg-black/80 px-1.5 py-px text-[9.5px] font-black tracking-wider text-white transition-colors duration-300', className)}>
+        {!behind && <LiveDot />}
         {label}
       </span>
     );
@@ -128,7 +130,7 @@ export function LiveTag({ snap, onGoLive, className }: { snap: TimeshiftSnap | n
         className
       )}
     >
-      <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-red-500" />
+      <LiveDot />
       {label}
       <span className="font-bold tabular-nums text-black/60">{formatBehind(snap!.behind)}</span>
     </button>

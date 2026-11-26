@@ -27,7 +27,7 @@ export function ChatTextSizeButton({ className }: { className?: string }) {
             className,
           )}
         >
-          <span aria-hidden="true" className="font-semibold leading-none tracking-tight">
+          <span data-chat-text-size-glyph aria-hidden="true" className="font-semibold leading-none tracking-tight">
             <span className="text-[11px]">A</span><span className="text-[15px]">a</span>
           </span>
         </button>

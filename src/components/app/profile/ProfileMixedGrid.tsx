@@ -15,6 +15,7 @@
  * @module components/app/profile/ProfileMixedGrid
  */
 
+import { LiveDot } from '@/components/app/live/LiveDot';
 import { memo, useCallback, useEffect, useMemo, useRef, useState, type ComponentPropsWithRef, type MouseEvent as ReactMouseEvent, type ReactNode } from 'react';
 import { useDragReorder } from '@/hooks/use-drag-reorder';
 import { warmPostPage } from '@/lib/preload-post-page';
@@ -362,7 +363,7 @@ export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries, onMove
                 {video.thumbnail ? <img src={tileImage(video.thumbnail)} alt="" loading={eager ? 'eager' : 'lazy'} decoding="async" className={locked ? 'pmg-img pmg-img--locked' : 'pmg-img'} /> : <span className="pmg-img pmg-img--empty" />}
                 <span className="pmg-shade" />
                 {isLive ? (
-                  <span className="pmg-chip pmg-chip--live"><i />{t('live.liveBadge', 'LIVE')}</span>
+                  <span data-on-media className="pmg-chip pmg-chip--live"><LiveDot className="size-[0.5em]" />{t('live.liveBadge', 'LIVE')}</span>
                 ) : (
                   <>
                     <FormatMark kind={mediaKind ?? (video.isLivePost ? 'replay' : 'video')} />

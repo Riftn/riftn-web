@@ -57,7 +57,22 @@
     "cancel": "Cancel",
     "getKey": "Get a {{name}} key",
     "showLess": "Show only my keys",
-    "addAnother": "Add another provider"
+    "addAnother": "Add another provider",
+    "providerDescriptions": {
+      "openai": "Builder (GPT models)",
+      "fal": "Images, video, 3D and photo tools",
+      "kie": "Images and video",
+      "replicate": "Images and video",
+      "xai": "Grok chat and images",
+      "elevenlabs": "Voice, dubbing, music and sound effects",
+      "gemini": "Translate, writing help and summaries",
+      "venice": "Assistant chat",
+      "perplexity": "Assistant web search",
+      "deepgram": "Transcripts and live captions",
+      "openrouter": "Hundreds of chat and text models with one key",
+      "groq": "Fast chat and text",
+      "mistral": "Chat and text"
+    }
   },
   "resetWallet": {
     "mismatch": "Passwords don't match",
@@ -4154,6 +4169,18 @@
     "max_available_on_chain": "Max available: {{amount}} tokens on {{chain}}"
   },
   "staking": {
+    "appStake": "Stake",
+    "appUnstake": "Unstake",
+    "availableTokens": "Available tokens",
+    "stakedTokens": "Staked tokens",
+    "legacyDhb": "Legacy DHB staking",
+    "inAppDescription": "Stake from your Riftn wallet. Unstake at any time to make your tokens available again.",
+    "pendingAppStake": "Confirm the result by retrying this request.",
+    "retryAction": "Retry {{action}}",
+    "retryBalance": "Retry loading balances",
+    "retryConfig": "Retry loading staking",
+    "configError": "Could not load staking.",
+    "signInToStake": "Sign in to stake",
     "title": "Staking",
     "subtitle": "Deposit to unlock profit share, lower fees, superpowers and more!",
     "stakeDhb": "Deposit",
@@ -21441,6 +21468,9 @@
     "followFailed": "Could not follow. Try again."
   },
   "appTokens": {
+    "kindStaked": "Staked",
+    "kindUnstaked": "Unstaked",
+    "stakedBalance": "{{amount}} staked",
     "title": "Your tokens",
     "rowHint": "In-app balance",
     "explainer": "Your tokens now live inside Riftn. You started with what you held and staked onchain at launch. Sending, tipping and spending move them instantly, with no fees and nothing onchain. Balances carry over to the new token at the airdrop.",
@@ -21623,6 +21653,12 @@
     "enter": "Enter the dungeon"
   },
   "tokenLaunch": {
+    "tickerInfo": "Info",
+    "tickerContract": "Contract address",
+    "tickerBuy": "Buy",
+    "referencePrice": "In-app reference price",
+    "contractPending": "To be confirmed",
+    "earnOnly": "For now, you can only earn tokens by using the app.",
     "eyebrow": "Coming soon",
     "title": "Token launching soon",
     "riftTitle": "$RIFT on-chain launch",

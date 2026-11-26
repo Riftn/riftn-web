@@ -57,7 +57,22 @@
     "cancel": "Annuleren",
     "getKey": "Verkrijg een {{name}} sleutel",
     "showLess": "Toon alleen mijn sleutels",
-    "addAnother": "Voeg een andere provider toe"
+    "addAnother": "Voeg een andere provider toe",
+    "providerDescriptions": {
+      "openai": "Builder (GPT-modellen)",
+      "fal": "Tools voor afbeeldingen, video, 3D en foto’s",
+      "kie": "Afbeeldingen en video",
+      "replicate": "Afbeeldingen en video",
+      "xai": "Chatten en afbeeldingen maken met Grok",
+      "elevenlabs": "Stem, nasynchronisatie, muziek en geluidseffecten",
+      "gemini": "Vertalen, schrijfhulp en samenvattingen",
+      "venice": "Chatten met de assistent",
+      "perplexity": "Zoeken op internet met de assistent",
+      "deepgram": "Transcripties en live ondertiteling",
+      "openrouter": "Honderden chat- en tekstmodellen met één sleutel",
+      "groq": "Snelle chat en tekst",
+      "mistral": "Chat en tekst"
+    }
   },
   "resetWallet": {
     "mismatch": "Wachtwoorden komen niet overeen",
@@ -4343,6 +4358,18 @@
     "max_available_on_chain": "Maximaal beschikbaar: {{amount}} tokens op {{chain}}"
   },
   "staking": {
+    "appStake": "Staken",
+    "appUnstake": "Opnemen",
+    "availableTokens": "Beschikbare tokens",
+    "stakedTokens": "Gestakete tokens",
+    "legacyDhb": "Oude DHB-staking",
+    "inAppDescription": "Stake vanuit je Riftn-wallet. Je kunt je tokens op elk moment opnemen om ze weer beschikbaar te maken.",
+    "pendingAppStake": "Probeer dit verzoek opnieuw om het resultaat te bevestigen.",
+    "retryAction": "Opnieuw: {{action}}",
+    "retryBalance": "Saldi opnieuw laden",
+    "retryConfig": "Staking opnieuw laden",
+    "configError": "Staking kon niet worden geladen.",
+    "signInToStake": "Log in om te staken",
     "title": "Uitzetten",
     "subtitle": "Leg in om winstdeling, lagere kosten, superkrachten en meer te ontgrendelen!",
     "stakeDhb": "Inleggen",
@@ -21715,6 +21742,9 @@
     "followFailed": "Volgen mislukt. Probeer het opnieuw."
   },
   "appTokens": {
+    "kindStaked": "Gestaket",
+    "kindUnstaked": "Opgenomen",
+    "stakedBalance": "{{amount}} gestaket",
     "title": "tokens in Riftn",
     "rowHint": "Saldo in de app",
     "explainer": "Je tokens staat nu in Riftn. Je begon met wat je bij de lancering onchain had en gestaked had. Versturen, fooien en uitgeven gaat direct, zonder kosten en zonder iets onchain. Saldo’s gaan bij de airdrop over naar de nieuwe token.",
@@ -21897,6 +21927,12 @@
     "enter": "Betreed de kerker"
   },
   "tokenLaunch": {
+    "tickerInfo": "Info",
+    "tickerContract": "Contractadres",
+    "tickerBuy": "Kopen",
+    "referencePrice": "Referentieprijs in de app",
+    "contractPending": "Nog te bevestigen",
+    "earnOnly": "Voorlopig kun je alleen tokens verdienen door de app te gebruiken.",
     "riftTitle": "On-chain lancering van $RIFT",
     "riftStatus": "$RIFT is de munt binnen Riftn. Je kunt deze al in Riftn gebruiken. De on-chain token moet nog worden gelanceerd en heeft geen officieel contractadres of beursnotering. Meld je aan voor een e-mail bij de lancering.",
     "riftSeoDescription": "$RIFT is de munt binnen Riftn. Je kunt deze al in Riftn gebruiken. De on-chain token moet nog worden gelanceerd en heeft geen officieel contractadres of beursnotering.",

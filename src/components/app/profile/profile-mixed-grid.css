@@ -128,16 +128,7 @@ html[data-theme='hazy'] [data-profile-mixed-grid] {
 [data-profile-mixed-grid] .pmg-chip--pin .pmg-chip-icon { fill: currentColor; }
 [data-profile-mixed-grid] .pmg-chip--soft { background: rgba(0, 0, 0, 0.45); color: #fff; }
 [data-profile-mixed-grid] .pmg-poster .pmg-chip--soft { background: var(--pmg-glass); color: var(--pmg-ink); }
-/* Live: the only colour on the grid that isn't the post itself. Always solid. */
-[data-profile-mixed-grid] .pmg-chip--live { background: var(--pmg-live); color: #fff; letter-spacing: 0.05em; }
-[data-profile-mixed-grid] .pmg-chip--live i {
-  width: 0.5em;
-  height: 0.5em;
-  border-radius: 50%;
-  background: #fff;
-  animation: pmg-pulse 1.4s ease-in-out infinite;
-}
-@keyframes pmg-pulse { 50% { opacity: 0.3; } }
+[data-profile-mixed-grid] .pmg-chip--live { background: rgb(0 0 0 / 0.8); color: #fff; letter-spacing: 0.05em; }
 [data-profile-mixed-grid] .pmg-live { box-shadow: inset 0 0 0 1.5px var(--pmg-live); }
 
 [data-profile-mixed-grid] .pmg-dur,
@@ -384,7 +375,6 @@ html[data-theme='osaka'] [data-profile-mixed-grid] .pmg-adrop-cap { color: #ff6f
 .atp-option[aria-checked='true'] .atp-label { opacity: 1; }
 .atp-option:focus-visible { outline: 2px solid #8b7cff; outline-offset: 4px; border-radius: 12px; }
 @media (prefers-reduced-motion: reduce) {
-  [data-profile-mixed-grid] .pmg-chip--live i { animation: none; }
   [data-profile-mixed-grid] .pmg-tile { transition: none; }
 }
 

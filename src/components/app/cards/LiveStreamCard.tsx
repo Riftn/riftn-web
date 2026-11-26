@@ -29,7 +29,7 @@ import {
   releaseMediaSession,
   setMediaSessionPlaying,
 } from '@/lib/media-session';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import MoreVertical from "@/components/ui/cut-icons/morevertical";
 import { Heart, StopCircle, Activity, Loader2, ChevronDown, Headphones } from "lucide-react";
 import AssistantNavIcon from "@/components/ui/AssistantNavIcon";
@@ -64,6 +64,7 @@ import { CommentsWrapper } from './CommentsWrapper';
 import { LiveEndedMedia } from './LiveEndedMedia';
 import { StreamShopPinnedCard } from '../live/StreamShop';
 import { ImmersiveLiveChrome } from '../live/ImmersiveLiveChrome';
+import { LiveAudienceProfileContext } from '../live/live-audience-profile';
 import { PASS_THROUGH_STYLE, VERTICAL_FRAME_STYLE, VERTICAL_WINDOW_STYLE, verticalCropStyle, type VerticalCrop } from '@/lib/live-overlay/vertical-crop';
 import { LiveClearedLayer } from '../live/LiveClearedLayer';
 import { LiveViewerActionsProvider } from '../live/live-viewer-actions';
@@ -108,6 +109,8 @@ import { peekLiveSession, snapshot as snapshotLiveFrame, takeLiveSession } from 
 import { claimLiveMini, getLiveMiniVideo, openLiveMini, type LiveMiniMode } from '@/lib/live-mini';
 import { useStreamActions, useStreamActivities } from '@/hooks/use-livestream';
 import { useBlockAuthor } from '@/hooks/use-block-author';
+import { useLiveRoomSwipe } from '@/hooks/use-live-room-swipe';
+import { liveSwipeDirection } from '@/lib/live/room-swipe';
 import { useNotifyWhenLive } from '@/hooks/use-notify-when-live';
 import { GatedMedia } from './GatedMedia';
 import { useFeedViewTracking } from '@/hooks/use-view-tracking';
@@ -162,6 +165,7 @@ import { dhbText } from '@/lib/dhb-toast';
 import { createLogger } from '@/lib/logger';
 import { EndStreamConfirmDialog } from '@/components/app/modals/EndStreamConfirmDialog';
 import type { LiveStream } from '@/types/feed.types';
+import { publicChatShareTokenId } from '@/lib/live-public-chat-share';
 import '@/styles/live-frame-ios.css';
 
 import { formatCount } from '@/lib/format-count';
@@ -238,6 +242,7 @@ const preferAndroidHls = () =>
 
 interface LiveStreamCardProps {
   stream: LiveStream;
+  postPage?: boolean;
   /**
    * The stream's own chat, dropped down by the message button in the action
    * bar. When it is given, that button opens the chat rather than the post's
@@ -268,7 +273,7 @@ interface LiveStreamCardProps {
 /** What a gift of `dhb` costs in a dollar stablecoin, at the DHB sale peg. */
 const giftCostIn = (dhb: number) => Math.round(dhb * DHB_PRELISTING_USD * 1e6) / 1e6;
 
-export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false, swipeFeed }: LiveStreamCardProps) {
+export function LiveStreamCard({ stream: streamProp, postPage, chatSlot, immersive = false, swipeFeed }: LiveStreamCardProps) {
   const { t: _copy } = _useCopy();
   // A replay is saved a minute or so after the End button. A card loaded in
   // that gap (the creator's own profile, straight after ending) used to sit on
@@ -304,6 +309,10 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
   const [showComments, setShowComments] = useState(!!chatSlot);
   const { t } = useI18n();
   const navigate = useNavigate();
+  const shareTokenId = publicChatShareTokenId(stream);
+  const shareToPublicChat = shareTokenId
+    ? () => navigate('/app/messages?chat=public', { state: { shareLiveTokenId: shareTokenId } })
+    : undefined;
   // Bookmark state for the three-dot menu. The same action is an icon in the
   // ActionBar's left-anchored utility cluster on desktop; both read this one
   // shared query, so they cannot disagree.
@@ -420,6 +429,8 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
   // If stream.isLive is false, treat as ended immediately — don't try to play a dead HLS URL
   const [streamEnded, setStreamEnded] = useState(!liveNow);
   const { broadcastPaused, broadcastEnded, waitingTooLong } = useLivePlaybackFeedback(stream.streamId, isBuffering, liveNow && !streamEnded, stream.liveStatus);
+  const broadcastPausedRef = useRef(broadcastPaused);
+  broadcastPausedRef.current = broadcastPaused;
   // The room says it is over: show the ended state now, not on the next refetch.
   useEffect(() => { if (broadcastEnded) setStreamEnded(true); }, [broadcastEnded]);
   const replayTokenId = stream.tokenId;
@@ -472,7 +483,17 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
   const [fundingGift, setFundingGift] = useState(false);
   const [dhbBalance, setDhbBalance] = useState<string | null>(null);
   const [balanceLoading, setBalanceLoading] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [portraitLive, setPortraitLive] = useState(false);
+  const updatePortrait = useCallback(() => {
+    const video = videoRef.current;
+    setPortraitLive(!!video && video.videoWidth > 0 && video.videoHeight > video.videoWidth);
+  }, []);
+  const setLiveVideoRef = useCallback((video: HTMLVideoElement | null) => {
+    videoRef.current?.removeEventListener('resize', updatePortrait);
+    videoRef.current = video;
+    if (immersive && !swipeFeed) video?.addEventListener('resize', updatePortrait);
+  }, [immersive, swipeFeed, updatePortrait]);
   const playbackAllowed = useFeedPlaybackAllowed();
   // The live itself keeps playing with the tab in the background or the
   // window unfocused (see lib/live-background); only a call or leaving the
@@ -481,12 +502,11 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
   useEffect(() => {
     if (!livePlaybackAllowed && (!isVideoInPictureInPicture(videoRef.current) || visualActivity.isCallBusy())) videoRef.current?.pause();
   }, [livePlaybackAllowed]);
-  // Full-bleed only. A live can't be paused, so the picture itself is the
-  // clear button: a tap on it, or a swipe down over the lower half as the
-  // shorts viewer does, clears the chrome. Only a small rotate button stays,
-  // to flip between portrait and landscape. A tap or a swipe up brings it all
-  // back, in portrait.
-  const [chromeHidden, setChromeHidden] = useState(false);
+  // Keep the open picture clear across room switches, if the viewer cleared it.
+  const { state: routeState } = useLocation();
+  const [chromeHidden, setChromeHidden] = useState(() =>
+    immersive && !swipeFeed && routeState?.liveControlsHidden === true,
+  );
   // The click that follows the touch which cleared the chrome would land on
   // the restore layer and bring it straight back.
   const chromeToggledAt = useRef(0);
@@ -495,21 +515,14 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
     chromeToggledAt.current = Date.now();
     setChromeHidden(hidden);
   }, []);
-  const swipeStart = useRef<{ x: number; y: number } | null>(null);
+  const swipeStart = useRef<{ id: number; x: number; y: number } | null>(null);
   const onSwipeStart = useCallback((e: React.TouchEvent) => {
-    if (e.touches.length !== 1) { swipeStart.current = null; return; }
-    swipeStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    const touch = e.touches.length === 1 ? e.touches[0] : null;
+    swipeStart.current = touch ? { id: touch.identifier, x: touch.clientX, y: touch.clientY } : null;
   }, []);
-  const onSwipeEnd = useCallback((e: React.TouchEvent, direction: 'down' | 'up') => {
-    const start = swipeStart.current;
+  const onSwipeCancel = useCallback(() => {
     swipeStart.current = null;
-    const touch = e.changedTouches[0];
-    if (!start || !touch) return;
-    const dy = touch.clientY - start.y;
-    const dx = Math.abs(touch.clientX - start.x);
-    if (direction === 'down' && dy > 40 && dy > dx) setHidden(true);
-    if (direction === 'up' && -dy > 40 && -dy > dx) setHidden(false);
-  }, [setHidden]);
+  }, []);
   // Landscape: the real screen lock where the browser has one (Android
   // Chrome, in fullscreen), else the picture is turned a quarter in CSS
   // (iPhone Safari has no orientation lock).
@@ -517,6 +530,7 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
   // In the Shorts swipe a landscape stream fills the phone, cropped to the box
   // the creator chose. Turned to landscape it is the whole picture again.
   const cropToVertical = immersive && rotation === 'none' && swipeFeed?.verticalCrop?.enabled ? swipeFeed.verticalCrop : null;
+  const coverPortrait = immersive && !swipeFeed && rotation === 'none' && portraitLive;
   const unrotate = useCallback(() => {
     setRotation((current) => {
       if (current === 'native') {
@@ -624,6 +638,24 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
       stream.creatorId &&
       walletAddress.toLowerCase() === stream.creatorId.toLowerCase()
   );
+  const { canSwitchRoom, switchRoom } = useLiveRoomSwipe(
+    immersive && !swipeFeed && !!stream.isLive && !streamEnded && !isOwnStream,
+    stream.streamId,
+    isAuthenticated,
+  );
+  const onSwipeEnd = useCallback((e: React.TouchEvent) => {
+    const start = swipeStart.current;
+    swipeStart.current = null;
+    const touch = e.changedTouches[0];
+    if (!start || !touch || start.id !== touch.identifier || e.touches.length !== 0 || keyboardOpen) return;
+    const direction = liveSwipeDirection(touch.clientX - start.x, touch.clientY - start.y);
+    if (!direction) return;
+    if (canSwitchRoom && rotation === 'none') {
+      switchRoom(direction, chromeHidden);
+    } else if (direction === (chromeHidden ? 1 : -1)) {
+      setHidden(!chromeHidden);
+    }
+  }, [canSwitchRoom, chromeHidden, keyboardOpen, rotation, setHidden, switchRoom]);
   // Ask to join sits in the live's own controls (not on the picture); it
   // hides itself unless the host takes requests.
   const canAskToJoin = !!stream.streamId && !!stream.isLive && !streamEnded && !isOwnStream;
@@ -773,7 +805,9 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
     if (!video) return;
 
     let cancelled = false;
+    let pendingWhep: AbortController | null = null;
     let session: WhepSubscription | null = null;
+    let stopWatch: (() => void) | undefined;
 
     const fallBack = (reason: string) => {
       if (cancelled) return;
@@ -813,8 +847,11 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
     // to the ladder as before.
     const failOver = async (reason: string) => {
       if (cancelled) return;
+      stopWatch?.();
       // Whatever this attempt still has on the way is no longer wanted.
-      attempts += 1;
+      const failedAttempt = ++attempts;
+      clearTimeout(timer);
+      pendingWhep?.abort();
       // Answered, and still no way through for the media: that is this
       // network, not this stream. The next live opens on the route after.
       const blocked = reason === 'no media route' || (route === 'relay' && (reason === 'no answer' || reason === NO_RELAY_CANDIDATE));
@@ -830,6 +867,7 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
       if (relayNext) {
         triedRelay = true;
         const relay = await fetchTurnServers();
+        if (cancelled || failedAttempt !== attempts) return;
         if (relay.length) {
           logger.info('WHEP direct failed; retrying via the signaling edge', {
             reason,
@@ -878,15 +916,22 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
         } else {
           const { subscribeToWhep } = await import('@/lib/livepeer/whep');
           if (cancelled || attempt !== attempts) return;
-          opened = await subscribeToWhep({
-            playbackId: whepPlaybackId,
-            endpoint: (which === 'relay' ? edgeWhepEndpointFor : whepEndpointFor)({
-              provider: whepSource?.provider,
+          const controller = new AbortController();
+          pendingWhep = controller;
+          try {
+            opened = await subscribeToWhep({
               playbackId: whepPlaybackId,
-            }),
-            iceServers,
-            onStateChange,
-          });
+              endpoint: (which === 'relay' ? edgeWhepEndpointFor : whepEndpointFor)({
+                provider: whepSource?.provider,
+                playbackId: whepPlaybackId,
+              }),
+              iceServers,
+              signal: controller.signal,
+              onStateChange,
+            });
+          } finally {
+            if (pendingWhep === controller) pendingWhep = null;
+          }
         }
         // Given up on while its answer was on the way: hang it up, or it
         // would take the element back from whatever replaced it.
@@ -897,20 +942,29 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
         session = opened;
         whepSessionRef.current = opened;
         video.srcObject = opened.stream;
+        stopWatch = watchLiveProgress(video, {
+          stallMs: 6000,
+          preferVideoFrames: () => true,
+          shouldWatch: () => playbackRequestedRef.current && !broadcastPausedRef.current && video.videoWidth > 0,
+          onStall: () => void failOver('frozen picture'),
+        });
         if (!hasRealPicture(video)) {
           if (connected) arm(WHEP_FRAME_TIMEOUT_MS, 'no frames');
           else arm(WHEP_CONNECT_TIMEOUT_MS, 'no media route');
         }
         if (playbackRequestedRef.current && visualActivity.isLivePlaybackAllowed()) {
-          await video.play().catch(() => setIsBuffering(false));
+          await video.play().catch(() => {
+            if (!cancelled && attempt === attempts) setIsBuffering(false);
+          });
         }
+        if (cancelled || attempt !== attempts) return;
         videoPlaybackManager.register(videoId, () => {
           setPlaybackWanted(false);
           video.pause();
           setIsPlaying(false);
         }, undefined, undefined, () => video, true);
       } catch (e) {
-        if (attempt !== attempts) return;
+        if (cancelled || attempt !== attempts) return;
         // Answered with a refusal: no other route changes that. A 404 is a
         // stream between two broadcasts, which says nothing about the next
         // one, so only the other refusals are remembered.
@@ -952,33 +1006,25 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
 
     void open();
 
-    // A session can stay "connected" while the picture stops (common on
-    // iPhones switching networks). Once frames have flowed, a still picture
-    // for a few seconds is a failure like any other.
-    const stopWatch = watchLiveProgress(video, {
-      stallMs: 6000,
-      shouldWatch: () => playbackRequestedRef.current && video.videoWidth > 0,
-      onStall: () => void failOver('frozen picture'),
-    });
-
     return () => {
       cancelled = true;
+      pendingWhep?.abort();
       clearTimeout(timer);
-      stopWatch();
+      stopWatch?.();
       video.removeEventListener('resize', onPicture);
       video.removeEventListener('loadeddata', onPicture);
       videoPlaybackManager.unregister(videoId);
       if (whepSessionRef.current === session) whepSessionRef.current = null;
       // Minimised: the corner window owns the session now.
       if (session && handedToMiniRef.current === session) {
-        if (video.srcObject) video.srcObject = null;
+        if (video.srcObject === session.stream) video.srcObject = null;
         return;
       }
       releaseAfterPictureInPicture(video, () => {
         void session?.stop();
         // Leaving a dead srcObject attached stops the HLS path from ever
         // getting a picture onto this element.
-        if (video.srcObject) video.srcObject = null;
+        if (session && video.srcObject === session.stream) video.srcObject = null;
       });
     };
     // urlsToTry is read for the standby only; a new list for the same stream
@@ -1458,20 +1504,48 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
    * seat go with it, so the picture never drops and the creator never sees
    * a leave and a join.
    */
-  const canMinimise = !swipeFeed && !!stream.streamId && !!stream.isLive && !streamEnded && hasPlaybackUrl;
-  const minimiseLive = useCallback(async (mode: LiveMiniMode = 'video') => {
+  const canHandOffLive = !!stream.streamId && !!stream.isLive && !streamEnded && hasPlaybackUrl;
+  const canMinimise = !swipeFeed && canHandOffLive;
+  const closeSwipeFeed = swipeFeed?.onClose;
+  const minimisingRef = useRef(false);
+  const navigateToAudienceProfile = useCallback((path: string) => {
+    closeSwipeFeed?.();
+    navigate(path);
+  }, [closeSwipeFeed, navigate]);
+
+  const minimiseLive = useCallback(async (mode: LiveMiniMode = 'video', profile?: string) => {
+    if (minimisingRef.current) return;
     const streamId = stream.streamId;
-    if (!streamId) return;
-    const path = `${window.location.pathname}${window.location.search}`;
+    const video = videoRef.current;
+    // GatedMedia only mounts the video after the viewer has access. The
+    // audience sheet can still open a profile when no video can be handed off.
+    if (!(profile ? canHandOffLive : canMinimise) || !streamId || !video) {
+      if (profile) navigateToAudienceProfile(profile);
+      return;
+    }
+    minimisingRef.current = true;
+    const currentPath = `${window.location.pathname}${window.location.search}`;
+    const path = closeSwipeFeed ? `/app/post/${stream.tokenId ?? stream.id}` : currentPath;
     let seat: { leave: () => void } | null = null;
     if (!isOwnStream) {
-      const { joinStreamPresence } = await import('@/lib/api/dehub/stream-presence');
-      if (path !== `${window.location.pathname}${window.location.search}`) return;
-      seat = joinStreamPresence(streamId);
+      const presence = await import('@/lib/api/dehub/stream-presence').catch(() => null);
+      if (currentPath !== `${window.location.pathname}${window.location.search}` || !containerRef.current) {
+        minimisingRef.current = false;
+        return;
+      }
+      if (videoRef.current !== video) {
+        minimisingRef.current = false;
+        if (profile) navigateToAudienceProfile(profile);
+        return;
+      }
+      try {
+        seat = presence?.joinStreamPresence(streamId) ?? null;
+      } catch {
+        // A temporary presence failure does not stop the media handoff.
+      }
     }
-    const video = videoRef.current;
-    const session = transport === 'whep' ? whepSessionRef.current : null;
-    const playingUrl = hlsRef.current?.url ?? video?.currentSrc;
+    const session = transportRef.current === 'whep' ? whepSessionRef.current : null;
+    const playingUrl = hlsRef.current?.url ?? video.currentSrc;
     const urls = playingUrl && urlsToTry.includes(playingUrl)
       ? [playingUrl, ...urlsToTry.filter((url) => url !== playingUrl)]
       : urlsToTry;
@@ -1485,14 +1559,19 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
       avatar: stream.avatar,
       path,
       session,
-      poster: video ? snapshotLiveFrame(video) : undefined,
+      poster: snapshotLiveFrame(video),
       seat,
       mode,
     });
     if (isFullscreen) toggleFullscreen();
-    if (window.history.state?.idx > 0) navigate(-1);
+    if (profile) navigateToAudienceProfile(profile);
+    else if (window.history.state?.idx > 0) navigate(-1);
     else navigate('/app');
-  }, [stream.streamId, stream.title, stream.creatorUsername, stream.streamer, stream.avatar, isOwnStream, transport, whepPlaybackId, urlsToTry, isFullscreen, toggleFullscreen, navigate]);
+  }, [canHandOffLive, canMinimise, stream.streamId, stream.tokenId, stream.id, stream.title, stream.creatorUsername, stream.streamer, stream.avatar, isOwnStream, whepPlaybackId, urlsToTry, isFullscreen, toggleFullscreen, navigate, closeSwipeFeed, navigateToAudienceProfile]);
+
+  const openAudienceProfile = useCallback((path: string) => {
+    void minimiseLive('video', path);
+  }, [minimiseLive]);
 
   /**
    * Hold the OS media session while this stream is audible, keyed on the
@@ -1902,7 +1981,7 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
           </DropdownMenu>
   );
 
-  return (
+  const card = (
     <div
       style={keyboardFit}
       data-live-frame={immersive ? '' : undefined}
@@ -1921,6 +2000,7 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
           over the picture — see ImmersiveLiveChrome below. */}
       <div className={cn('flex items-center justify-between', immersive && 'hidden')}>
         <CardHeader
+          postPage={postPage}
           username={stream.streamer}
           handle={stream.creatorUsername}
           avatarSeed={stream.avatar}
@@ -2133,9 +2213,10 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
             <div style={cropToVertical ? VERTICAL_FRAME_STYLE : PASS_THROUGH_STYLE}>
             <div style={cropToVertical ? VERTICAL_WINDOW_STYLE : PASS_THROUGH_STYLE}>
             <video
-              ref={videoRef}
-              className={cropToVertical ? 'object-cover' : 'w-full h-full object-contain'}
+              ref={setLiveVideoRef}
+              className={cropToVertical ? 'object-cover' : cn('w-full h-full', coverPortrait ? 'object-cover' : 'object-contain')}
               style={cropToVertical ? verticalCropStyle(cropToVertical) : chatBeside ? CHAT_BESIDE_STYLE : undefined}
+              onLoadedMetadata={immersive && !swipeFeed ? updatePortrait : undefined}
               autoPlay
               playsInline
               {...{"webkit-playsinline": ""}}
@@ -2223,6 +2304,8 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
                   >
                     <ActionBar
                       compact
+                      liveShare
+                      visibility={stream.visibility}
                       quickRepost={isFullscreen}
                       onLiveReaction={sendLiveReaction}
                       postId={stream.id}
@@ -2391,11 +2474,8 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
         {/* Full-bleed chrome. Inside the media container so it travels with
             the picture, and after the overlays so nothing is drawn on top
             of the close button. */}
-        {/* Clear the chrome: a tap anywhere on the open picture, or a swipe
-            down over its lower half. Under the chrome, so the chat and
-            buttons keep their own touches. Once cleared, the whole frame
-            takes a tap or a swipe up to bring it all back, and only the
-            rotate button is drawn. */}
+        {/* The open picture handles room swipes and the tap to clear or
+            restore controls. Chat and playback controls sit above it. */}
         {immersive && !chromeHidden && (
           <div
             aria-hidden
@@ -2403,7 +2483,8 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
             data-live-swipe-zone
             className="absolute inset-0 z-[15] touch-pan-x"
             onTouchStart={swipeFeed ? undefined : onSwipeStart}
-            onTouchEnd={swipeFeed ? undefined : (e) => onSwipeEnd(e, 'down')}
+            onTouchEnd={swipeFeed ? undefined : onSwipeEnd}
+            onTouchCancel={swipeFeed ? undefined : onSwipeCancel}
             onClick={(e) => { e.stopPropagation(); setHidden(true); }}
           />
         )}
@@ -2414,7 +2495,9 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
             onRestore={() => setHidden(false)}
             onRotate={() => void toggleRotation()}
             onTouchStart={swipeFeed ? undefined : onSwipeStart}
-            onTouchEnd={swipeFeed ? undefined : (e) => onSwipeEnd(e, 'up')}
+            onTouchEnd={swipeFeed ? undefined : onSwipeEnd}
+            onTouchCancel={swipeFeed ? undefined : onSwipeCancel}
+            swipeRooms={canSwitchRoom && rotation === 'none'}
           />
         )}
         {immersive && (
@@ -2480,6 +2563,9 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
               <div className="flex items-center gap-2">
               <ActionBar
                 compact
+                onShareToPublicChat={shareToPublicChat}
+                liveShare
+                visibility={stream.visibility}
                 onLiveReaction={sendLiveReaction}
                 postId={stream.id}
                 tokenId={parseInt(stream.id, 10) || undefined}
@@ -2509,7 +2595,10 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
       ) : (
         <div className="pt-3">
           <ActionBar
+            liveShare
+            visibility={stream.visibility}
             onLiveReaction={sendLiveReaction}
+            onShareToPublicChat={shareToPublicChat}
             postId={stream.id}
             tokenId={parseInt(stream.id, 10) || undefined}
             isLiked={stream.isLiked}
@@ -2830,4 +2919,5 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
       />
     </div>
   );
+  return <LiveAudienceProfileContext.Provider value={openAudienceProfile}>{card}</LiveAudienceProfileContext.Provider>;
 }

@@ -62,6 +62,7 @@ export function videoMenuTarget(video: VideoItem): PostMenuTarget {
     myReaction: video.myReaction,
     isReposted: video.isReposted,
     noTip: !!video.creatorPaymentsDisabled,
+    isLivePost: video.isLivePost,
     videoUrl: video.isAudio || video.isLivePost || videoNeedsAccess(video) ? null : video.videoUrl,
   };
 }
