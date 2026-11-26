@@ -4,7 +4,7 @@
  */
 export type SearchRequestSource = 'menu' | 'settings';
 
-type Translate = (key: string, fallback: string, options?: Record<string, unknown>) => string;
+type Translate = (key: string, fallback: string, options: Record<string, unknown>) => string;
 
 /** Ready-to-send wording, in the reader's language. */
 export function searchRequestDraft(query: string, source: SearchRequestSource, t: Translate): string {

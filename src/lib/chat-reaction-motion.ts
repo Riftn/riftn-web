@@ -74,7 +74,7 @@ export interface EmojiClip {
 const chunkId = (b: Uint8Array, at: number) => String.fromCharCode(b[at], b[at + 1], b[at + 2], b[at + 3]);
 
 /** Reads an animated WebP: its length, and a copy that plays a single time. */
-export function readEmojiClip(buf: ArrayBuffer): { ms: number; once: Uint8Array } | null {
+export function readEmojiClip(buf: ArrayBuffer): { ms: number; once: Uint8Array<ArrayBuffer> } | null {
   const once = new Uint8Array(buf.slice(0));
   if (once.length < 20 || chunkId(once, 0) !== 'RIFF' || chunkId(once, 8) !== 'WEBP') return null;
   const view = new DataView(once.buffer);
