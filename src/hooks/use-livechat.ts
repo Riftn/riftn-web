@@ -552,8 +552,10 @@ export function useLiveChatMessages(roomId: string | null, options: LiveChatPagi
   const jumpTo = useCallback(async (messageId: string, onSignInRequired?: () => void): Promise<boolean> => {
     if (!roomId || !pageSize) return false;
     if (messagesRef.current.some((m) => m.id === messageId)) return true;
+    const scope = historyScope.current;
     try {
       const page = await getLiveChatMessagePage(roomId, { limit: AROUND_WINDOW, around: messageId, signedIn: authRef.current });
+      if (scope !== historyScope.current) return false;
       if (page.signInRequired) {
         setSignInWall(true);
         onSignInRequired?.();
