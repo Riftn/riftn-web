@@ -41,7 +41,8 @@ import { VerifiedBadge } from '@/components/app/VerifiedBadge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { collapseChat, cameFromPanel } from '@/lib/chat-expand';
-import { PublicChat, DirectMessageChat, NewConversationModal, NewMessageSelector } from '@/components/app/chat';
+import { PublicChat } from '@/components/app/chat/PublicChat';
+import { NewMessageSelector } from '@/components/app/chat/NewMessageSelector';
 import { NewMessageDrawer, type NewMessageDrawerHandle } from '@/components/app/chat/NewMessageDrawer';
 import { flushSync } from 'react-dom';
 import { OnlineDot } from '@/components/app/chat/OnlineDot';
@@ -96,6 +97,14 @@ import { localizeDmCallPreview } from '@/lib/dm-call-notice';
 
 import { formatCount } from '@/lib/format-count';
 import { stripBold } from '@/lib/bold-markup';
+import { lazyWithRetry } from '@/lib/lazy-with-retry';
+
+const DirectMessageChat = lazyWithRetry(() =>
+  import('@/components/app/chat/DirectMessageChat').then(({ DirectMessageChat }) => ({ default: DirectMessageChat })),
+);
+const NewConversationModal = lazyWithRetry(() =>
+  import('@/components/app/chat/NewConversationModal').then(({ NewConversationModal }) => ({ default: NewConversationModal })),
+);
 /**
  * The other person's name with their badge sitting on its baseline, the same
  * BadgedName system the feed uses. The badge rides straight after the name
@@ -327,7 +336,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const { t } = useTranslation();
   const location = useLocation();
   const [selectedConversation, setSelectedConversation] = useState<DeHubConversation | null>(null);
-  const [showPublicChat, setShowPublicChat] = useState(false);
+  const [showPublicChat, setShowPublicChat] = useState(() => new URLSearchParams(location.search).get('chat') === 'public');
   // A group, channel or community chat open in place (same chat as the
   // community page's Chat tab).
   const [selectedRoom, setSelectedRoom] = useState<Community | null>(null);
@@ -357,7 +366,8 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
       : { height: `calc(${vvHeight}px - var(--app-top-bar))` }
     : undefined;
   const [showMessageSelector, setShowMessageSelector] = useState(false);
-  const [showNewConversation, setShowNewConversation] = useState(false);
+  // A closed dialog stays mounted after its first open so it can animate out.
+  const [showNewConversation, setShowNewConversation] = useState<boolean | null>(null);
   // Phones: the + opens the New message drawer directly, keyboard up.
   const [showNewMessageDrawer, setShowNewMessageDrawer] = useState(false);
   const newMessageDrawerRef = useRef<NewMessageDrawerHandle>(null);
@@ -423,6 +433,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
 
   const openNewMessage = useCallback(() => {
     if (guest) { openLoginModal({ path: '/chat?chat=public' }); return; }
+    void DirectMessageChat.preload().catch(() => undefined);
     const phone = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
     if (!phone) {
       setShowMessageSelector(true);
@@ -1262,6 +1273,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   }
 
   const dmPane = fullscreen && selectedConversation && !showPublicChat ? (
+    <Suspense fallback={<ConversationsSkeleton />}>
     <DirectMessageChat
       key={conversationIdentity(selectedConversation)}
       conversation={selectedConversation}
@@ -1272,6 +1284,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
       cozy
       options={richList ? (({ onBlock: _b, onDelete: _d, ...rest }) => rest)(chatOptionsFor(selectedConversation)) : undefined}
     />
+    </Suspense>
   ) : null;
 
   // If a DM conversation is selected, show it
@@ -1281,6 +1294,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     return (
       <>
       <div style={keyboardStyle} data-msg-phone-b={phonePill && !fullscreen ? '' : undefined} className={`${mobileChatHeight} lg:h-[calc(100dvh-32px)] pt-1 pb-0 sm:pt-1 sm:pb-3 lg:pt-2 overflow-hidden`}>
+        <Suspense fallback={<ConversationsSkeleton />}>
         <DirectMessageChat
           /*
            * Keyed on WHO, not on the conversation id. A thread you have never
@@ -1300,6 +1314,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
           cozy={phonePill && !fullscreen}
           phoneB={phonePill && !fullscreen}
         />
+        </Suspense>
       </div>
       {newMessageDrawer}
       </>
@@ -1973,14 +1988,18 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
         onOpenChange={(open) => { if (!open) setNewChatKind(null); }}
       />
 
-      <NewConversationModal
-        open={showNewConversation}
-        onOpenChange={setShowNewConversation}
-        onConversationCreated={(conversation) => {
-          setShowPublicChat(false);
-          setSelectedConversation(conversation);
-        }}
-      />
+      {showNewConversation !== null && (
+        <Suspense fallback={null}>
+          <NewConversationModal
+            open={showNewConversation}
+            onOpenChange={setShowNewConversation}
+            onConversationCreated={(conversation) => {
+              setShowPublicChat(false);
+              setSelectedConversation(conversation);
+            }}
+          />
+        </Suspense>
+      )}
       {newMessageDrawer}
     </>
   );
