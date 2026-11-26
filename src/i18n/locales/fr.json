@@ -23394,6 +23394,26 @@
       "intro": "Dites à tour de rôle ce pour quoi vous êtes reconnaissant. Pas de répétition. Ratez votre tour et l'autre gagne.",
       "cardBlurb": "Dites à tour de rôle ce pour quoi vous êtes reconnaissant. Pas de répétition. Ratez votre tour et l'autre gagne."
     },
+    "splurge": {
+      "title": "Splurge",
+      "cardBlurb": "Reçois un budget au hasard et imagine quoi acheter en mode moderne ou CRT.",
+      "arcade": "Arcade",
+      "intro": "Un budget au hasard. Comment le dépenserais-tu ? Tous les montants sont fictifs.",
+      "modern": "Moderne",
+      "crt": "CRT",
+      "budget": "Ton budget",
+      "prompt": "Qu’achèterais-tu ?",
+      "placeholder": "Un voyage en train à travers l’Europe",
+      "spend": "Dépenser",
+      "retry": "Réessayer",
+      "saveError": "Impossible d’enregistrer ce tour. Réessaie pour le conserver dans ton journal.",
+      "history": "Journal des dépenses",
+      "loading": "Chargement de ton journal…",
+      "historyError": "Impossible de charger ton journal.",
+      "empty": "Tes achats apparaîtront ici.",
+      "more": "Charger les entrées précédentes",
+      "guest": "Les tours en mode invité durent le temps de cette visite. Connecte-toi pour enregistrer les prochains tours dans ton compte."
+    },
     "chestard": {
       "title": "Chestard",
       "cardBlurb": "Lance le dé, lâche le jeton, vide la rangée du bas. Arcade rétro avec un top 10.",

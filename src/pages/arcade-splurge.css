@@ -1,0 +1,106 @@
+.splurge-play {
+  --splurge-line: hsl(var(--border));
+  --splurge-quiet: hsl(var(--muted-foreground));
+  --splurge-field: hsl(var(--background));
+  display: grid;
+  gap: 24px;
+  padding-block: 20px;
+  border-block: 1px solid var(--splurge-line);
+}
+
+.splurge-caption {
+  color: var(--splurge-quiet);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.splurge-round,
+.splurge-history {
+  min-width: 0;
+}
+
+.splurge-amount {
+  font-size: clamp(2.5rem, 9vw, 5.5rem);
+  font-weight: 650;
+  line-height: 1.05;
+  letter-spacing: -0.055em;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+  margin-top: 0.35em;
+}
+
+.splurge-field {
+  background: var(--splurge-field);
+  color: inherit;
+}
+
+.splurge-history {
+  border-block-start: 1px solid var(--splurge-line);
+  padding-block-start: 20px;
+}
+
+.splurge-log li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  padding-block: 9px;
+  border-block-end: 1px solid var(--splurge-line);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.splurge-log bdi {
+  overflow-wrap: anywhere;
+}
+
+.splurge-log span {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.splurge-play[data-mode="crt"] {
+  --splurge-line: #5f4424;
+  --splurge-quiet: #e7ba86;
+  --splurge-field: #1a120c;
+  color: #ffca82;
+  color-scheme: dark;
+  background: repeating-linear-gradient(180deg, transparent 0 3px, #0002 3px 4px),
+    radial-gradient(ellipse at 25% 5%, #302012, #18110c 70%);
+  border: 1px solid #785632;
+  border-radius: 22px;
+  padding: clamp(14px, 4vw, 32px);
+  box-shadow: inset 0 0 24px #0009;
+  font-family: ui-monospace, monospace;
+}
+
+.splurge-play[data-mode="crt"] .splurge-amount {
+  letter-spacing: -0.045em;
+  text-shadow: 0 0 12px #f584322d;
+}
+
+.splurge-play[data-mode="crt"] .splurge-field {
+  border-color: #916239;
+}
+
+.splurge-play[data-mode="crt"] .splurge-field::placeholder {
+  color: #cfaa85;
+}
+
+.splurge-play[data-mode="crt"] :is(input, button):focus-visible {
+  outline: 2px solid #ffce90;
+  outline-offset: 2px;
+}
+
+@media (min-width: 768px) {
+  .splurge-play {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    gap: 28px;
+  }
+
+  .splurge-history {
+    border-block-start: 0;
+    border-inline-start: 1px solid var(--splurge-line);
+    padding-block-start: 0;
+    padding-inline-start: 24px;
+  }
+}
