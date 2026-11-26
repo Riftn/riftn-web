@@ -1062,10 +1062,11 @@ function getNavigationLink(notification: DeHubNotification): string | null {
     }
   }
 
-  // A moment opens on its own page, which plays it.
+  // A comment alert opens the thread directly, with playback paused.
   if (['story_like', 'story_mention', 'story_comment'].includes(notification.type as string)) {
     const storyId = notification.metadata?.storyId;
-    return typeof storyId === 'string' && /^[a-f0-9]{24}$/i.test(storyId) ? `/moment/${storyId}` : null;
+    if (typeof storyId !== 'string' || !/^[a-f0-9]{24}$/i.test(storyId)) return null;
+    return `/moment/${storyId}${notification.type === 'story_comment' ? '?comments=1' : ''}`;
   }
 
   switch (notification.type) {
