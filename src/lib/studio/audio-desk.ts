@@ -17,6 +17,7 @@
  * share and the clip running.
  */
 import { createLogger } from '@/lib/logger';
+import { tuneDisplayAudio } from '@/lib/livepeer/display-capture';
 
 const logger = createLogger('AudioDesk');
 
@@ -60,7 +61,7 @@ export function clampVolume(volume: number): number {
  * rather than switching it, so words are not clipped at the edges and the
  * room tone between them fades instead of chopping.
  */
-const GATE_SOURCE = `
+const WORKLET_SOURCE = `
 class DehubGate extends AudioWorkletProcessor {
   static get parameterDescriptors() {
     return [{ name: 'threshold', defaultValue: -100, minValue: -100, maxValue: 0 }];
@@ -92,6 +93,28 @@ class DehubGate extends AudioWorkletProcessor {
   }
 }
 registerProcessor('dehub-gate', DehubGate);
+
+class LivePeakLimiter extends AudioWorkletProcessor {
+  constructor() {
+    super();
+    this.gain = 1;
+    this.recovery = 1 / (sampleRate * 0.015);
+  }
+  process(inputs, outputs) {
+    const left = inputs[0]?.[0];
+    const right = inputs[0]?.[1] ?? left;
+    const [outLeft, outRight] = outputs[0];
+    if (!left) return true;
+    for (let i = 0; i < left.length; i++) {
+      const peak = Math.max(Math.abs(left[i]), Math.abs(right[i]));
+      this.gain = Math.min(1, this.gain + this.recovery, peak > 1 ? 1 / peak : 1);
+      outLeft[i] = left[i] * this.gain;
+      outRight[i] = right[i] * this.gain;
+    }
+    return true;
+  }
+}
+registerProcessor('riftn-live-peak-limiter', LivePeakLimiter);
 `;
 
 interface Strip {
@@ -113,32 +136,36 @@ export async function createAudioDesk(): Promise<AudioDesk> {
   const ctx = new Ctor();
   const destination = ctx.createMediaStreamDestination();
 
-  // A limiter on the master: fast, high ratio, just under full scale.
-  const limiter = ctx.createDynamicsCompressor();
-  limiter.threshold.value = -3;
-  limiter.knee.value = 0;
-  limiter.ratio.value = 20;
-  limiter.attack.value = 0.003;
-  limiter.release.value = 0.15;
-  limiter.connect(destination);
-
   // The gate sits on the mic strip only: game audio and clips are music, and
   // gating music is how it ends up stuttering.
   let gate: AudioWorkletNode | null = null;
+  let limiter: AudioNode | null = null;
   try {
     if (ctx.audioWorklet) {
-      const url = URL.createObjectURL(new Blob([GATE_SOURCE], { type: 'text/javascript' }));
+      const url = URL.createObjectURL(new Blob([WORKLET_SOURCE], { type: 'text/javascript' }));
       try {
         await ctx.audioWorklet.addModule(url);
       } finally {
         URL.revokeObjectURL(url);
       }
       gate = new AudioWorkletNode(ctx, 'dehub-gate', { channelCountMode: 'max' });
+      // Apply one gain to both channels, and only when the sum would clip.
+      // A normalised music track at unity gain passes through unchanged.
+      limiter = new AudioWorkletNode(ctx, 'riftn-live-peak-limiter', { outputChannelCount: [2] });
     }
   } catch (error) {
-    logger.warn('Noise gate unavailable; the mic goes out ungated', error);
-    gate = null;
+    logger.warn('Audio desk worklets unavailable', error);
   }
+  if (!limiter) {
+    const compressor = ctx.createDynamicsCompressor();
+    compressor.threshold.value = 0;
+    compressor.knee.value = 0;
+    compressor.ratio.value = 20;
+    compressor.attack.value = 0.003;
+    compressor.release.value = 0.015;
+    limiter = compressor;
+  }
+  limiter.connect(destination);
 
   const strips = {} as Record<DeskChannel, Strip>;
   for (const channel of DESK_CHANNELS) {
@@ -190,6 +217,7 @@ export async function createAudioDesk(): Promise<AudioDesk> {
     void ctx.close().catch(() => undefined);
     throw new Error('The audio desk produced no track');
   }
+  tuneDisplayAudio(track);
 
   return {
     track,

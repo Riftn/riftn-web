@@ -47,11 +47,29 @@ vi.mock('@/lib/live-handoff', () => ({
   peekLiveSession: (id?: string | null) => (id && handedOver.has(id) ? {} : null),
 }));
 
-const { dropWarmLiveHls, takeWarmLiveHls, warmLiveHls, warmLiveStandbyFor } = await import('./hls-standby');
+const { dropWarmLiveHls, takeWarmLiveHls, warmLiveHls, warmLiveStandbyFor, warmNativeLiveHls } = await import('./hls-standby');
 
 const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
 let n = 0;
 const nextUrl = () => `https://live.example/${++n}/index.m3u8`;
+
+it('starts only the on-demand AAC copy for native playback and can cancel the request', () => {
+  const request = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('#EXTM3U'));
+  const aac = 'https://live.example/stream-aac/index.m3u8';
+  try {
+    expect(warmNativeLiveHls(undefined)).toBeUndefined();
+    expect(warmNativeLiveHls(nextUrl())).toBeUndefined();
+    const stop = warmNativeLiveHls(aac);
+    expect(request).toHaveBeenCalledTimes(1);
+    expect(request).toHaveBeenCalledWith(aac, { signal: expect.any(AbortSignal) });
+    const signal = request.mock.calls[0][1]?.signal;
+    expect(signal?.aborted).toBe(false);
+    stop?.();
+    expect(signal?.aborted).toBe(true);
+  } finally {
+    request.mockRestore();
+  }
+});
 
 describe('HLS made ready while WebRTC tries', () => {
   beforeEach(() => {

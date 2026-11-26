@@ -1088,6 +1088,7 @@
     "heading": "Cortos de Riftn"
   },
   "settings": {
+    "notifyLikedRequestCompletion": "Avísame cuando se complete una solicitud que me gustó.",
     "notificationShowCount": "Mostrar el número en la campana",
     "notificationShowCountDesc": "Ver cuántas notificaciones no se han leído en lugar de solo el brillo",
     "messagesShowCount": "Mostrar el número en Mensajes",
@@ -1207,6 +1208,10 @@
     "addProfile": "Añadir perfil",
     "profileActive": "Activo",
     "profileSignedOut": "inicia sesión para cambiar",
+    "profileRemoveNamed": "Quitar a {{name}}",
+    "profileRemoveDescription": "Se quitará el acceso guardado de este dispositivo. Puedes volver a añadir la cuenta iniciando sesión.",
+    "profileRemoveAction": "Quitar",
+    "profileRemoveFailed": "No se pudo quitar la cuenta guardada. Inténtalo de nuevo.",
     "profileRemove": "Eliminar perfil",
     "profilesUsed": "{{used}} de {{max}} usados",
     "profilesNextTier": "El nivel {{tier}} conserva {{count}}",
@@ -21512,6 +21517,18 @@
     "followFailed": "No se pudo seguir. Inténtalo de nuevo."
   },
   "appTokens": {
+    "previewTitle": "Vista previa de $RIFT fuera de la cadena",
+    "previewReadOnly": "Solo lectura",
+    "previewExplanation": "Los importes abonados corresponden a operaciones anteriores y ya están incluidos en tu saldo de la aplicación.",
+    "previewUnavailable": "Vista previa de RIFT no disponible.",
+    "previewBalance": "Saldo disponible en la aplicación",
+    "previewFanSiteCredit": "Abono por la fusión con Fan.site",
+    "previewNoFanSiteCredit": "No hay ningún abono registrado",
+    "previewCredits": "Transferencias recibidas y abonos recientes",
+    "previewAccountCredit": "Abono en cuenta",
+    "previewReceivedFrom": "Recibido de {{name}}",
+    "previewReceived": "Transferencia recibida",
+    "previewNoCredits": "No hay transferencias recibidas ni abonos recientes.",
     "reviewTransfer": "Revisar transferencia",
     "transferComplete": "Transferencia completada",
     "balanceAfterSend": "Después del envío: {{amount}} {{symbol}}",

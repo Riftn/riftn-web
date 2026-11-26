@@ -1088,6 +1088,7 @@
     "heading": "مقاطع Riftn القصيرة"
   },
   "settings": {
+    "notifyLikedRequestCompletion": "أعلمني عند اكتمال طلب أعجبني.",
     "notificationShowCount": "إظهار الرقم على الجرس",
     "notificationShowCountDesc": "رؤية عدد الإشعارات غير المقروءة بدلاً من مجرد التوهج",
     "messagesShowCount": "إظهار الرقم على الرسائل",
@@ -1207,6 +1208,10 @@
     "addProfile": "إضافة ملف شخصي",
     "profileActive": "نشط",
     "profileSignedOut": "سجّل الدخول للتبديل",
+    "profileRemoveNamed": "إزالة {{name}}",
+    "profileRemoveDescription": "سيُزال تسجيل الدخول المحفوظ من هذا الجهاز. يمكنك إضافة الحساب مرة أخرى بتسجيل الدخول.",
+    "profileRemoveAction": "إزالة",
+    "profileRemoveFailed": "تعذّرت إزالة الحساب المحفوظ. حاول مرة أخرى.",
     "profileRemove": "إزالة الملف الشخصي",
     "profilesUsed": "{{used}} من {{max}} مستخدمة",
     "profilesNextTier": "مستوى {{tier}} يحتفظ بـ {{count}}",
@@ -21551,6 +21556,18 @@
     "followFailed": "تعذرت المتابعة. حاول مرة أخرى."
   },
   "appTokens": {
+    "previewTitle": "معاينة $RIFT خارج السلسلة",
+    "previewReadOnly": "للقراءة فقط",
+    "previewExplanation": "تعرض المبالغ المضافة النشاط السابق وقد احتُسبت بالفعل ضمن رصيدك في التطبيق.",
+    "previewUnavailable": "معاينة RIFT غير متاحة.",
+    "previewBalance": "الرصيد المتاح في التطبيق",
+    "previewFanSiteCredit": "رصيد اندماج Fan.site",
+    "previewNoFanSiteCredit": "لا يوجد رصيد مضاف مسجّل",
+    "previewCredits": "التحويلات الواردة والمبالغ المضافة إلى الحساب مؤخرًا",
+    "previewAccountCredit": "مبلغ مضاف إلى الحساب",
+    "previewReceivedFrom": "تحويل وارد من {{name}}",
+    "previewReceived": "تحويل وارد",
+    "previewNoCredits": "لا توجد تحويلات واردة أو مبالغ مضافة إلى الحساب مؤخرًا.",
     "reviewTransfer": "مراجعة التحويل",
     "transferComplete": "اكتمل التحويل",
     "balanceAfterSend": "بعد الإرسال: {{amount}} {{symbol}}",

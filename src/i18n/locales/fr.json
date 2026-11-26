@@ -1088,6 +1088,7 @@
     "heading": "Courts Riftn"
   },
   "settings": {
+    "notifyLikedRequestCompletion": "Me prévenir lorsqu’une demande que j’ai aimée est terminée.",
     "notificationShowCount": "Afficher le nombre sur la cloche",
     "notificationShowCountDesc": "Voir le nombre de notifications non lues au lieu d'un simple point lumineux",
     "messagesShowCount": "Afficher le nombre sur les Messages",
@@ -1207,6 +1208,10 @@
     "addProfile": "Ajouter un profil",
     "profileActive": "Actif",
     "profileSignedOut": "connectez-vous pour changer",
+    "profileRemoveNamed": "Retirer {{name}}",
+    "profileRemoveDescription": "La connexion enregistrée sera retirée de cet appareil. Vous pourrez rajouter le compte en vous connectant.",
+    "profileRemoveAction": "Retirer",
+    "profileRemoveFailed": "Impossible de retirer le compte enregistré. Réessayez.",
     "profileRemove": "Supprimer le profil",
     "profilesUsed": "{{used}} sur {{max}} utilisés",
     "profilesNextTier": "Le palier {{tier}} en garde {{count}}",
@@ -21516,6 +21521,18 @@
     "followFailed": "Impossible de suivre. Réessaie."
   },
   "appTokens": {
+    "previewTitle": "Aperçu de $RIFT hors chaîne",
+    "previewReadOnly": "Lecture seule",
+    "previewExplanation": "Les montants crédités correspondent à des opérations passées et sont déjà inclus dans votre solde dans l’application.",
+    "previewUnavailable": "Aperçu de RIFT indisponible.",
+    "previewBalance": "Solde disponible dans l’application",
+    "previewFanSiteCredit": "Crédit lié à la fusion avec Fan.site",
+    "previewNoFanSiteCredit": "Aucun crédit enregistré",
+    "previewCredits": "Virements reçus et crédits récents",
+    "previewAccountCredit": "Crédit sur le compte",
+    "previewReceivedFrom": "Reçu de {{name}}",
+    "previewReceived": "Virement reçu",
+    "previewNoCredits": "Aucun virement reçu ni crédit récent.",
     "reviewTransfer": "Vérifier le transfert",
     "transferComplete": "Transfert terminé",
     "balanceAfterSend": "Après l’envoi : {{amount}} {{symbol}}",

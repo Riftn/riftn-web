@@ -84,16 +84,6 @@ const LINK_GAMES = [
     blurb: 'Get a random budget and dream up what to buy in Modern or CRT.',
   },
   {
-    href: '/music/binary-metal',
-    listingSlug: 'binary-metal',
-    creator: COCHRANIZ3R,
-    art: '/og/music-binary-metal.jpg',
-    titleKey: 'binaryMetal.title',
-    title: 'Binary Metal',
-    blurbKey: 'binaryMetal.cardBlurb',
-    blurb: 'Type anything and hear it as a metal riff. Download WAV or MP3.',
-  },
-  {
     href: '/arcade/gratitude',
     listingSlug: 'gratitude',
     creator: COCHRANIZ3R,

@@ -9468,6 +9468,7 @@ export type Database = {
           used_bytes: number
         }[]
       }
+      get_liked_request_completion_preference: { Args: never; Returns: boolean }
       get_my_agents: {
         Args: never
         Returns: {
@@ -9661,6 +9662,10 @@ export type Database = {
       set_dex_pool_image: {
         Args: { p_image_url: string; p_pool_id: string }
         Returns: undefined
+      }
+      set_liked_request_completion_preference: {
+        Args: { p_enabled: boolean }
+        Returns: boolean
       }
       social_credit_add: {
         Args: {

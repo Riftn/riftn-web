@@ -98,6 +98,7 @@ import Share2 from "@/components/ui/cut-icons/feedshare";
 
 import { useBuyBotHidden } from '@/hooks/use-buy-bot-hidden';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { updateProfile, getAccountInfo, type UpdateProfileData, type DeHubUser } from '@/lib/api/dehub';
 import type { ProfileData } from '@/hooks/use-dehub-profile';
 import { useProfileImageMenu } from '@/components/app/profile/useProfileImageMenu';
@@ -1520,6 +1521,34 @@ function NotificationSettings() {
 
   const queryClient = useQueryClient();
 
+  const completionWallet = isAuthenticated ? walletAddress?.toLowerCase() : undefined;
+  const completionPreference = useQuery({
+    queryKey: ['liked-request-completion', completionWallet],
+    enabled: !!completionWallet,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_liked_request_completion_preference')
+        .setHeader('x-wallet-address', completionWallet!);
+      if (error) throw error;
+      return data;
+    },
+  });
+  const updateCompletionPreference = useMutation({
+    mutationFn: async ({ wallet, enabled }: { wallet: string; enabled: boolean }) => {
+      const { data, error } = await supabase.rpc('set_liked_request_completion_preference', { p_enabled: enabled })
+        .setHeader('x-wallet-address', wallet);
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: async (enabled, { wallet }) => {
+      const queryKey = ['liked-request-completion', wallet];
+      await queryClient.cancelQueries({ queryKey });
+      queryClient.setQueryData(queryKey, enabled);
+    },
+    onError: () => toast.error(t('settings.failedUpdateProfile')),
+  });
+
   const updatePrefMutation = useMutation({
     mutationFn: ({ key, value }: { key: NotificationKey; value: boolean }) =>
       import('@/lib/api/dehub').then(m => m.updateInAppNotificationPref(key, value)),
@@ -1607,6 +1636,16 @@ function NotificationSettings() {
             defaultChecked={getInAppPref(notifPrefs, 'likes')}
             onCheckedChange={handleToggle('likes')}
             disabled={isDisabled}
+          />
+          <SettingToggle
+            icon={Check}
+            anchor="notify-liked-request-completion"
+            title={t('settings.notifyLikedRequestCompletion')}
+            defaultChecked={completionPreference.data === true}
+            onCheckedChange={enabled => {
+              if (completionWallet) updateCompletionPreference.mutate({ wallet: completionWallet, enabled });
+            }}
+            disabled={typeof completionPreference.data !== 'boolean' || updateCompletionPreference.isPending}
           />
           <SettingToggle
             icon={MessageSquare}
@@ -3207,7 +3246,7 @@ function SettingToggle({
 }: { 
   icon: any; 
   title: string; 
-  description: string; 
+  description?: string;
   defaultChecked?: boolean;
   onCheckedChange?: (checked: boolean) => void;
   disabled?: boolean;

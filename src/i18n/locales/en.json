@@ -1088,6 +1088,7 @@
     "heading": "Riftn Shorts"
   },
   "settings": {
+    "notifyLikedRequestCompletion": "Notify me when a liked request is completed.",
     "notificationShowCount": "Show the number on the bell",
     "notificationShowCountDesc": "See how many notifications are unread instead of just the glow",
     "messagesShowCount": "Show the number on Messages",
@@ -1208,6 +1209,10 @@
     "profileActive": "Active",
     "profileSignedOut": "sign in to switch",
     "profileRemove": "Remove profile",
+    "profileRemoveNamed": "Remove {{name}}",
+    "profileRemoveDescription": "This removes the saved sign-in from this device. You can add the account again by signing in.",
+    "profileRemoveAction": "Remove",
+    "profileRemoveFailed": "Could not remove the saved account. Try again.",
     "profilesUsed": "{{used}} of {{max}} used",
     "profilesNextTier": "{{tier}} tier keeps {{count}}",
     "profilesFullTier": "Stake for a {{tier}} badge to keep {{count}} profiles",
@@ -21486,6 +21491,18 @@
     "followFailed": "Could not follow. Try again."
   },
   "appTokens": {
+    "previewTitle": "$RIFT off-chain preview",
+    "previewReadOnly": "Read only",
+    "previewExplanation": "Credit amounts show past activity and are already reflected in your in-app balance.",
+    "previewUnavailable": "RIFT preview unavailable.",
+    "previewBalance": "Available in-app balance",
+    "previewFanSiteCredit": "Fan.site merger credit",
+    "previewNoFanSiteCredit": "No recorded credit",
+    "previewCredits": "Recent transfers received and account credits",
+    "previewAccountCredit": "Account credit",
+    "previewReceivedFrom": "Received from {{name}}",
+    "previewReceived": "Transfer received",
+    "previewNoCredits": "No recent transfers or account credits.",
     "reviewTransfer": "Review transfer",
     "transferComplete": "Transfer complete",
     "balanceAfterSend": "After sending: {{amount}} {{symbol}}",

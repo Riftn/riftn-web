@@ -1088,6 +1088,7 @@
     "heading": "Riftn-shorts"
   },
   "settings": {
+    "notifyLikedRequestCompletion": "Laat het me weten wanneer een verzoek dat ik leuk vond is afgerond.",
     "notificationShowCount": "Toon het aantal op de bel",
     "notificationShowCountDesc": "Zie hoeveel meldingen ongelezen zijn in plaats van alleen de gloed",
     "messagesShowCount": "Toon het aantal op Berichten",
@@ -1207,6 +1208,10 @@
     "addProfile": "Profiel toevoegen",
     "profileActive": "Actief",
     "profileSignedOut": "log in om te wisselen",
+    "profileRemoveNamed": "{{name}} verwijderen",
+    "profileRemoveDescription": "Hiermee verwijder je de opgeslagen aanmelding van dit apparaat. Je kunt het account opnieuw toevoegen door in te loggen.",
+    "profileRemoveAction": "Verwijderen",
+    "profileRemoveFailed": "Kan het opgeslagen account niet verwijderen. Probeer het opnieuw.",
     "profileRemove": "Profiel verwijderen",
     "profilesUsed": "{{used}} van {{max}} gebruikt",
     "profilesNextTier": "Niveau {{tier}} houdt er {{count}}",
@@ -21760,6 +21765,18 @@
     "followFailed": "Volgen mislukt. Probeer het opnieuw."
   },
   "appTokens": {
+    "previewTitle": "Off-chain voorbeeld van $RIFT",
+    "previewReadOnly": "Alleen-lezen",
+    "previewExplanation": "Bijgeschreven bedragen zijn eerdere transacties en zijn al verwerkt in je saldo in de app.",
+    "previewUnavailable": "RIFT-voorbeeld niet beschikbaar.",
+    "previewBalance": "Beschikbaar saldo in de app",
+    "previewFanSiteCredit": "Bijschrijving voor de fusie met Fan.site",
+    "previewNoFanSiteCredit": "Geen bijschrijving geregistreerd",
+    "previewCredits": "Recent ontvangen overdrachten en bijschrijvingen",
+    "previewAccountCredit": "Bijschrijving op je account",
+    "previewReceivedFrom": "Ontvangen van {{name}}",
+    "previewReceived": "Overdracht ontvangen",
+    "previewNoCredits": "Geen recent ontvangen overdrachten of bijschrijvingen.",
     "reviewTransfer": "Overdracht controleren",
     "transferComplete": "Overdracht voltooid",
     "balanceAfterSend": "Na verzenden: {{amount}} {{symbol}}",

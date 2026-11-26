@@ -24,6 +24,7 @@ import {
   getProfile,
   currentProfileId,
   removeProfile,
+  removeSavedProfile,
   snapshotCurrentSession,
   beginProfileSwitch,
   abortProfileSwitch,
@@ -273,6 +274,28 @@ describe('removeProfile', () => {
 
     const ids = listProfiles().map((p) => p.id);
     expect(ids).toEqual([`addr:${ADDR_B}`]);
+  });
+});
+
+describe('removeSavedProfile', () => {
+  it('removes legacy rows for the same saved account and keeps the live sign-in', () => {
+    seedAccountA();
+    adoptCurrentProfile();
+    const account = getProfile('uid-a');
+    seedAccountB();
+    adoptCurrentProfile();
+    localStorage.setItem(PROFILES_STORAGE_KEY, JSON.stringify([
+      ...listProfiles(),
+      { ...account, id: `addr:${ADDR_A}`, addedAt: 0 },
+    ]));
+
+    expect(() => removeSavedProfile(ADDR_B)).toThrow();
+    removeSavedProfile(ADDR_A.toUpperCase());
+
+    expect(getProfile('uid-a')).toBeNull();
+    expect(getProfile(`addr:${ADDR_A}`)).toBeNull();
+    expect(listProfiles().map((profile) => profile.address)).toEqual([ADDR_B]);
+    expect(localStorage.getItem('dehub_token')).toBe('tok-b');
   });
 });
 

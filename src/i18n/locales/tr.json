@@ -1088,6 +1088,7 @@
     "heading": "Riftn Kısa Videolar"
   },
   "settings": {
+    "notifyLikedRequestCompletion": "Beğendiğim bir istek tamamlandığında bana bildir.",
     "notificationShowCount": "Zil üzerinde sayıyı göster",
     "notificationShowCountDesc": "Sadece parıltı yerine kaç okunmamış bildirim olduğunu gör",
     "messagesShowCount": "Mesajlar üzerinde sayıyı göster",
@@ -1207,6 +1208,10 @@
     "addProfile": "Profil ekle",
     "profileActive": "Etkin",
     "profileSignedOut": "değiştirmek için giriş yapın",
+    "profileRemoveNamed": "{{name}} hesabını kaldır",
+    "profileRemoveDescription": "Bu cihazda kayıtlı oturum bilgileri kaldırılır. Tekrar giriş yaparak hesabı yeniden ekleyebilirsin.",
+    "profileRemoveAction": "Kaldır",
+    "profileRemoveFailed": "Kayıtlı hesap kaldırılamadı. Tekrar dene.",
     "profileRemove": "Profili kaldır",
     "profilesUsed": "{{max}} üzerinden {{used}} kullanıldı",
     "profilesNextTier": "{{tier}} kademesi {{count}} tutar",
@@ -21515,6 +21520,18 @@
     "followFailed": "Takip edilemedi. Tekrar dene."
   },
   "appTokens": {
+    "previewTitle": "$RIFT zincir dışı önizlemesi",
+    "previewReadOnly": "Salt okunur",
+    "previewExplanation": "Hesabına eklenen tutarlar geçmiş işlemleri gösterir ve uygulama içi bakiyene zaten yansıtılmıştır.",
+    "previewUnavailable": "RIFT önizlemesi kullanılamıyor.",
+    "previewBalance": "Kullanılabilir uygulama içi bakiye",
+    "previewFanSiteCredit": "Fan.site birleşmesi kredisi",
+    "previewNoFanSiteCredit": "Kayıtlı kredi yok",
+    "previewCredits": "Son alınan transferler ve hesaba eklenen tutarlar",
+    "previewAccountCredit": "Hesaba eklenen tutar",
+    "previewReceivedFrom": "{{name}} tarafından gönderildi",
+    "previewReceived": "Transfer alındı",
+    "previewNoCredits": "Yakın zamanda alınan transfer veya hesaba eklenen tutar yok.",
     "reviewTransfer": "Transferi incele",
     "transferComplete": "Transfer tamamlandı",
     "balanceAfterSend": "Gönderimden sonra: {{amount}} {{symbol}}",

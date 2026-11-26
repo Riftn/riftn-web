@@ -49,6 +49,8 @@ jobs:
           cp supabase/migrations/20261121120000_event_chat_and_receipts.sql "$fixture/supabase/migrations/"
           supabase db push --workdir "$fixture" --db-url "postgres://postgres:event-test@localhost:5432/postgres" --yes
           psql -X -v ON_ERROR_STOP=1 -f tests/sql/event-audit.sql
+      - name: Verify liked request completion preferences and delivery
+        run: psql -X -v ON_ERROR_STOP=1 -f tests/sql/liked-request-completion.sql
 
   account-mcp:
     name: Account MCP permissions and Creator jobs
