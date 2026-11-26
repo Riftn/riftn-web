@@ -33,7 +33,7 @@ import { useNotificationRealtime } from "@/hooks/use-notification-realtime";
 import { useLiveListRealtime } from "@/hooks/use-live-list-realtime";
 import { usePageViewAddress, PageViewTracker } from "@/hooks/use-page-view-tracking";
 import { ChatLinkCatcher } from "@/components/app/chat/ChatLinkCatcher";
-import { prefetchUnifiedFeed } from "@/hooks/use-unified-feed";
+import { getFeedViewer, HOME_FEED_PAGE_SIZE, prefetchUnifiedFeed } from "@/hooks/use-unified-feed";
 import { restoreQueryCache, startQueryPersist } from "@/lib/query-persist";
 import { setBackgroundPaused, scheduleBackgroundResume } from "@/lib/background-gate";
 import { QuickActionsHost } from "./components/app/QuickActionsHost";
@@ -479,13 +479,13 @@ startQueryPersist(queryClient);
 // the wallet chunk is still downloading, so content is ready when HomeFeed
 // mounts. Cold loads always use the default filters (they persist in
 // sessionStorage, which is empty on a fresh visit), so this key matches the
-// one HomeFeed computes. A mismatch (user landed mid-session with custom
-// filters) is harmless — the entry just idles in cache until gcTime.
+// one HomeFeed computes. Signed-in viewers adopt the HTML request in the feed
+// hook itself, where cached block and mute lists can be applied.
 if (typeof window !== "undefined") {
   const bootPath = window.location.pathname;
-  if (bootPath === "/" || bootPath === "/app" || bootPath === "/app/") {
+  if ((bootPath === "/" || bootPath === "/app" || bootPath === "/app/") && !getFeedViewer()) {
     prefetchUnifiedFeed(queryClient, {
-      limit: 20,
+      limit: HOME_FEED_PAGE_SIZE,
       sortBy: "createdAt",
       sortOrder: "desc",
       status: "all",
