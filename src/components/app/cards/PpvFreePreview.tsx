@@ -19,7 +19,7 @@ export function PpvFreePreview({ tokenId }: { tokenId: string }) {
           size="sm"
           data-on-media
           data-keep-dark
-          className="absolute bottom-3 right-3 z-10 min-h-11"
+          className="absolute bottom-3 left-3 z-10 min-h-11"
           onClick={event => event.stopPropagation()}
         >
           <Play aria-hidden="true" />

@@ -2820,7 +2820,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
               </p>
               
             </div>
-            {video.ppvPreviewReady && videoTokenId && (
+            {video.ppvPreviewReady && videoTokenId && !isSubGated && !video.isW2E && (
               <PpvFreePreview key={video.id} tokenId={video.id} />
             )}
           </>

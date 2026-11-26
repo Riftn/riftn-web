@@ -726,7 +726,7 @@ export function usePostForm(
   const hasMusicVideo = media.some(m => m.type === 'video' && m.isMusicVideo);
   const isLive = liveMode !== null;
   const canConfigurePpvPreview = hasVideo && !isLive && !isQuoting && visibility === 'public'
-    && !isMature && !isTokenGated && !isSubscribersOnly && !isWatch2Earn
+    && !user?.isPrivate && !isMature && !isTokenGated && !isSubscribersOnly && !isWatch2Earn
     && !contentWarning?.trim() && !media.some(item => item.type === 'video' && item.destructSeconds);
 
   const getPostDestinations = useCallback(() => {
