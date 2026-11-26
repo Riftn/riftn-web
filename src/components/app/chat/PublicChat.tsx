@@ -903,7 +903,7 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
           </DropdownMenu>
         </div>
         ) : (
-        <div data-live-chat-toolbar data-public-chat-wide-tools className="flex shrink-0 items-center gap-3">
+        <div data-live-chat-toolbar data-public-chat-wide-tools className="flex shrink-0 items-center gap-1">
           {/* Online count first, so the call buttons sit with the other
               buttons instead of being split from them by the number. */}
           {selectedRoomId && <LiveChatOnlineCount count={onlineCount} />}
