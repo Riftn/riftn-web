@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo, memo } from 'react';
+import { useState, useRef, useMemo, memo, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Ticket } from "lucide-react";
 import X from "@/components/ui/cut-icons/close";
@@ -12,7 +12,6 @@ import type { ImagePost } from '@/types/feed.types';
 import { ImageCard } from '@/components/app/cards/ImageCard';
 import { ProfileFormatFeed } from '@/components/app/feeds/ProfileFormatFeed';
 import { useProfileFeedContext } from '@/lib/profile-feed-origin';
-import { useAppTheme } from '@/contexts/ThemeContext';
 import { hintedImageRatio } from '@/lib/image-size-hints';
 import { profilePhotoRows } from '@/lib/profile-photo-rows';
 
@@ -26,22 +25,18 @@ export const ProfileImageGrid = memo(function ProfileImageGrid({ images }: Profi
   const [selectedImage, setSelectedImage] = useState<ImagePost | null>(null);
   const selectedTile = useRef<HTMLButtonElement | null>(null);
   const feedOrigin = useProfileFeedContext()?.current ?? null;
-  const { theme } = useAppTheme();
-  const adaptive = theme !== 'system' && theme !== 'minimal';
-  const gap = theme === 'minimal' ? 'gap-px' : adaptive ? 'gap-2' : 'gap-0.5';
   const rows = useMemo(
-    () => profilePhotoRows(images.map(post => hintedImageRatio(post.image)), adaptive),
-    [images, adaptive],
+    () => profilePhotoRows(images.map(post => hintedImageRatio(post.image)), true),
+    [images],
   );
-
 
   return (
     <>
-      <div data-profile-image-grid className={cn('grid', gap)}>
+      <div data-profile-image-grid>
         {rows.map(({ start, count, tracks }) => (
           <div
             key={start}
-            className={cn('grid', gap)}
+            data-profile-photo-row
             style={{ gridTemplateColumns: tracks.map(ratio => `minmax(0, ${ratio}fr)`).join(' ') }}
           >
             {images.slice(start, start + count).map((post, column) => (
@@ -58,9 +53,8 @@ export const ProfileImageGrid = memo(function ProfileImageGrid({ images }: Profi
                   'group relative block min-w-0 overflow-hidden bg-card p-0 text-card-foreground active:opacity-80',
                   'focus-visible:outline-none focus-visible:after:pointer-events-none focus-visible:after:absolute focus-visible:after:inset-0',
                   'focus-visible:after:rounded-[inherit] focus-visible:after:border-2 focus-visible:after:border-white focus-visible:after:shadow-[inset_0_0_0_2px_black]',
-                  adaptive && 'rounded-xl',
                 )}
-                style={{ aspectRatio: tracks[column] }}
+                style={{ '--profile-photo-aspect': tracks[column] } as CSSProperties}
               >
                 <img
                   src={post.image}

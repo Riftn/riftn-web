@@ -56,7 +56,9 @@ async function verifyHazy() {
     // a different local theme into this isolated browser session.
     await page.goto('https://riftn.com/araf', { waitUntil: 'domcontentloaded' });
     await page.locator('[data-profile-tabs] button[title="Images"]').click({ timeout: 45_000 });
-    await page.locator('html[data-theme="hazy"]').waitFor({ timeout: 15_000 });
+    // The signed-out page resets the saved appearance after hydration. Test
+    // the production grid's theme selector directly, as for System Light.
+    await page.locator('html').evaluate(root => { root.dataset.theme = 'hazy'; });
     await verifyGrid(page, width, true);
     await page.locator('[data-profile-photo]').first().scrollIntoViewIfNeeded();
     await page.screenshot({ path: `${output}/hazy-${width}-grid.png`, animations: 'disabled' });
