@@ -15,6 +15,7 @@ vi.mock('@/lib/api/dehub/dm-socket', () => ({
   emitSendMessage: mocks.send,
   waitForDmSocket: async () => {},
   onDmSendMessage: () => () => {},
+  onDmPhotoUpload: () => () => {},
   onDmReconnect: () => () => {},
   onEditMessage: () => () => {},
   onDmDeleteMessage: () => () => {},
