@@ -476,6 +476,15 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
   const [balanceLoading, setBalanceLoading] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [portraitLive, setPortraitLive] = useState(false);
+  const updatePortrait = useCallback(() => {
+    const video = videoRef.current;
+    setPortraitLive(!!video && video.videoWidth > 0 && video.videoHeight > video.videoWidth);
+  }, []);
+  const setLiveVideoRef = useCallback((video: HTMLVideoElement | null) => {
+    videoRef.current?.removeEventListener('resize', updatePortrait);
+    videoRef.current = video;
+    if (immersive && !swipeFeed) video?.addEventListener('resize', updatePortrait);
+  }, [immersive, swipeFeed, updatePortrait]);
   const playbackAllowed = useFeedPlaybackAllowed();
   // The live itself keeps playing with the tab in the background or the
   // window unfocused (see lib/live-background); only a call or leaving the
@@ -2147,11 +2156,10 @@ export function LiveStreamCard({ stream: streamProp, chatSlot, immersive = false
             <div style={cropToVertical ? VERTICAL_FRAME_STYLE : PASS_THROUGH_STYLE}>
             <div style={cropToVertical ? VERTICAL_WINDOW_STYLE : PASS_THROUGH_STYLE}>
             <video
-              ref={videoRef}
+              ref={setLiveVideoRef}
               className={cropToVertical ? 'object-cover' : cn('w-full h-full', coverPortrait ? 'object-cover' : 'object-contain')}
               style={cropToVertical ? verticalCropStyle(cropToVertical) : chatBeside ? CHAT_BESIDE_STYLE : undefined}
-              onResize={immersive && !swipeFeed ? ({ currentTarget: video }) =>
-                setPortraitLive(video.videoWidth > 0 && video.videoHeight > video.videoWidth) : undefined}
+              onLoadedMetadata={immersive && !swipeFeed ? updatePortrait : undefined}
               autoPlay
               playsInline
               {...{"webkit-playsinline": ""}}
