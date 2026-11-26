@@ -47,6 +47,7 @@ export interface PostMenuTarget {
   /** A title for the boost sheet. */
   title?: string | null;
   isOwn?: boolean;
+  isLivePost?: boolean;
   visibility?: PostVisibility | null;
   quotePolicy?: QuotePolicy | null;
   myReaction?: PostReaction | null;

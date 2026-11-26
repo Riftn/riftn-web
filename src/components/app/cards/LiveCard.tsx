@@ -238,6 +238,8 @@ export function LiveCard({ stream }: LiveCardProps) {
       {/* Info & Actions */}
       <div className="pt-3">
         <ActionBar
+          liveShare
+          visibility={stream.visibility}
           onLiveReaction={sendLiveReaction}
           onShareToPublicChat={shareTokenId ? () => navigate('/app/messages?chat=public', { state: { shareLiveTokenId: shareTokenId } }) : undefined}
           postId={stream.id}

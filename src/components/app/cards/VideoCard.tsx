@@ -225,7 +225,7 @@ import { isLadderPlayback, setVideoSource, syncVideoLoad, videoSourceOf } from '
 import { usePlaybackRecovery } from '@/hooks/use-playback-recovery';
 import { usePostStage } from '@/components/app/post-stage/post-stage-context';
 import { StageCreatorRow } from '@/components/app/post-stage/StageCreatorRow';
-import { viewerShareUrl } from '@/lib/share-url';
+import { viewerLiveShareUrl, viewerShareUrl } from '@/lib/share-url';
 import { KeywordFilterGate } from './KeywordFilterGate';
 import { useTabletPortraitFeed } from '@/hooks/use-tablet-portrait-feed';
 import { tabletPortraitTitleSize } from '@/lib/tablet-portrait-feed';
@@ -3639,6 +3639,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
                 the overlay, where not leaving the stream is the point. */}
             <ShopBoardLazy tokenId={video.id} links={video.shopLinks} listingCount={video.shopListingCount} variant="inline" />
             <ActionBar
+              liveShare={video.isLivePost}
               onLiveReaction={video.isLivePost && video.isLiveNow ? sendLiveReaction : undefined}
               postId={video.id}
               articleSlug={video.articleSlug}
@@ -3857,7 +3858,8 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
             )}
             <button 
               onClick={() => {
-                const url = viewerShareUrl(`${window.location.origin}/app/post/${video.articleSlug || video.id}`);
+                const link = `${window.location.origin}/app/post/${video.articleSlug || video.id}`;
+                const url = video.isLivePost ? viewerLiveShareUrl(link, !video.visibility || video.visibility === 'public') : viewerShareUrl(link);
                 navigator.clipboard.writeText(url);
                 toast.success(t('postOptions.linkCopied'));
                 trackLinkCopy(video.id, walletAddress, linkCopyCount);
