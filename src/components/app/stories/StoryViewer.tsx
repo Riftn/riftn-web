@@ -58,6 +58,7 @@ interface Props {
   entries: ShelfEntry[];
   startAuthor: number;
   startItem: number;
+  openComments?: boolean;
   onClose: () => void;
 }
 
@@ -121,7 +122,7 @@ const REPORT_REASONS = [
   ['other', 'Something else'],
 ] as const;
 
-export function StoryViewer({ entries: initial, startAuthor, startItem, onClose }: Props) {
+export function StoryViewer({ entries: initial, startAuthor, startItem, openComments = false, onClose }: Props) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { isAuthenticated, walletAddress, openLoginModal } = useAuth();
@@ -138,7 +139,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
   // also holds the Moment so there is time to press it.
   const [postPeekId, setPostPeekId] = useState<string | null>(null);
   const [typing, setTyping] = useState(false);
-  const [sheet, setSheet] = useState<null | 'viewers' | 'comments' | 'more' | 'report' | 'delete' | 'share' | 'share-dm'>(null);
+  const [sheet, setSheet] = useState<null | 'viewers' | 'comments' | 'more' | 'report' | 'delete' | 'share' | 'share-dm'>(openComments ? 'comments' : null);
   const [muted, setMuted] = useState(false);
   // Which moment has its picture in, by id: a cached image can report in before
   // the reset for a new moment runs, so a plain flag could stick at "loading".
@@ -187,6 +188,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
   const audioRef = useRef<HTMLAudioElement>(null);
   const moreButtonRef = useRef<HTMLButtonElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
+  const commentsButtonRef = useRef<HTMLButtonElement>(null);
   const viewedRef = useRef(new Set<string>());
   const changedRef = useRef(false);
   const originalRequest = useRef<symbol | null>(null);
@@ -217,10 +219,14 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
   }, [entry, itemIdx, goAuthor]);
 
   const elapsedRef = useRef(0);
+  const previousPosition = useRef({ authorIdx, itemIdx });
   useEffect(() => {
     elapsedRef.current = 0;
     setProgress(0);
-    setSheet(s => (s === 'viewers' ? s : null));
+    if (previousPosition.current.authorIdx !== authorIdx || previousPosition.current.itemIdx !== itemIdx) {
+      previousPosition.current = { authorIdx, itemIdx };
+      setSheet(s => (s === 'viewers' ? s : null));
+    }
     setOpeningOriginal(false);
     setReplyTo('everyone');
     return () => { originalRequest.current = null; };
@@ -229,11 +235,12 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
   useEffect(() => {
     if (!sheet) return;
     sheetRef.current?.querySelector('button')?.focus({ preventScroll: true });
-  }, [sheet]);
+  }, [item?.id, sheet]);
 
   const dismissSheet = useCallback(() => {
     setSheet(null);
     if (sheet === 'more') moreButtonRef.current?.focus({ preventScroll: true });
+    if (sheet === 'comments') commentsButtonRef.current?.focus({ preventScroll: true });
   }, [sheet]);
 
   // ── Counting the view ─────────────────────────────────────────────
@@ -789,8 +796,8 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
               <MomentHeart className="w-[22px] h-[22px]" filled={item.liked} />
             </button>
           )}
-          {!docked && (
-            <button type="button" data-sv-key onClick={() => setSheet('comments')} aria-label={t('stories.comments', { defaultValue: 'Comments' })}>
+          {(!docked || own) && (
+            <button ref={commentsButtonRef} type="button" data-sv-key onClick={() => setSheet('comments')} aria-label={t('stories.comments', { defaultValue: 'Comments' })}>
               <MomentComment className="w-[22px] h-[22px]" />
               {(item.commentCount ?? 0) > 0 && <span data-sv-count>{formatCount(item.commentCount ?? 0)}</span>}
             </button>

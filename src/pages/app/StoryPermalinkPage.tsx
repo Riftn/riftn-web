@@ -17,19 +17,27 @@ import { useMatureContent } from '@/hooks/use-mature-content';
 
 export default function StoryPermalinkPage() {
   const { id = '' } = useParams();
-  const { walletAddress, isAuthenticated } = useAuth();
+  const { walletAddress, isAuthenticated, isLoading } = useAuth();
+  const [params] = useSearchParams();
+  const location = useLocation();
+  const openComments = params.get('comments') === '1';
+  const liveOnly = params.get('reply') === '1';
   const { showMatureContent } = useMatureContent();
   const kidsMode = useKidsModeLock();
   const canSeeMature = isAuthenticated && showMatureContent && !kidsMode;
   const scope = `${isAuthenticated ? walletAddress?.toLowerCase() : 'guest'}:${canSeeMature}`;
-  return <StoryPermalink key={`${id}:${scope}`} {...{ id, scope, isAuthenticated, canSeeMature }} />;
+  const viewerKey = openComments ? location.key : liveOnly;
+  return <StoryPermalink key={`${id}:${scope}:${openComments}:${viewerKey}`} {...{ id, scope, isAuthenticated, canSeeMature, openComments, liveOnly, authLoading: openComments && isLoading }} />;
 }
 
-function StoryPermalink({ id, scope, isAuthenticated, canSeeMature }: {
+function StoryPermalink({ id, scope, isAuthenticated, canSeeMature, openComments, liveOnly, authLoading }: {
   id: string;
   scope: string;
   isAuthenticated: boolean;
   canSeeMature: boolean;
+  openComments: boolean;
+  liveOnly: boolean;
+  authLoading: boolean;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -43,17 +51,17 @@ function StoryPermalink({ id, scope, isAuthenticated, canSeeMature }: {
     queryFn: () => getStory(id, isAuthenticated),
     gcTime: 0,
     retry: false,
+    enabled: !authLoading,
   });
-  const [params] = useSearchParams();
   const item = result.isSuccess ? result.data.item : null;
   const active = item && item.status === 'ready' && !item.expired && Date.parse(item.expiresAt) > Date.now();
-  const data = item && (params.get('reply') !== '1' || active) && (!item.isMature || canSeeMature) ? result.data : undefined;
+  const data = !authLoading && item && (!liveOnly || active) && (!item.isMature || canSeeMature) ? result.data : undefined;
 
   useEffect(() => {
     if (!data?.author || opened) return;
-    openViewer([{ author: data.author, own: false, following: false, seen: false, latestAt: data.item.createdAt, items: [data.item] }], 0, { item: 0 });
+    openViewer([{ author: data.author, own: false, following: false, seen: false, latestAt: data.item.createdAt, items: [data.item] }], 0, { item: 0, openComments });
     setOpened(true);
-  }, [data, opened, openViewer]);
+  }, [data, opened, openViewer, openComments]);
 
   useEffect(() => () => closeViewer(), [closeViewer]);
 
@@ -73,7 +81,7 @@ function StoryPermalink({ id, scope, isAuthenticated, canSeeMature }: {
         image={data?.item.posterUrl ?? undefined}
         noindex
       />
-      {!result.isLoading && !data && (
+      {!authLoading && !result.isLoading && !data && (
         <div>
           <p className="text-[17px] font-semibold mb-2">{t('stories.ended', { defaultValue: 'This moment has ended' })}</p>
           <p className="text-[14px] opacity-70 mb-5">{t('stories.endedBody', { defaultValue: 'Moments stay up for 24 hours.' })}</p>
