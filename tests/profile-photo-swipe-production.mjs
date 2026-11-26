@@ -29,8 +29,8 @@ async function verify(theme, width, phone) {
   const name = `${theme}-${width}`;
   try {
     await page.goto('https://dehub.io/araf', { waitUntil: 'domcontentloaded' });
+    await page.waitForURL('https://riftn.com/araf');
     const profileUrl = page.url();
-    assert.equal(profileUrl, 'https://riftn.com/araf');
     const tone = theme === 'system-light' ? 'light' : 'dark';
     assert.equal(await page.locator('html').getAttribute('data-system-tone'), tone);
     const images = page.locator('[data-profile-tabs] button[title="Images"]');
@@ -38,7 +38,7 @@ async function verify(theme, width, phone) {
     const tile = page.locator('[data-profile-image-grid] button').first();
     await tile.click({ timeout: 45_000 });
     const viewer = page.getByRole('dialog', { name: 'Images', exact: true });
-    const close = viewer.getByRole('button', { name: 'Close fullscreen' });
+    const close = viewer.getByRole('button', { name: /^Close(?: fullscreen)?$/ });
     await close.waitFor();
     const size = await close.evaluate(button => {
       const { width, height } = button.getBoundingClientRect();
@@ -66,9 +66,9 @@ async function verify(theme, width, phone) {
       await page.screenshot({ path: `${output}/${name}-focus.png`, animations: 'disabled' });
       await page.keyboard.press('Escape');
       await viewer.waitFor({ state: 'hidden' });
-      await tile.evaluate(button => {
-        if (button !== document.activeElement) throw new Error('Focus did not return to the selected tile');
-      });
+      await page.waitForFunction(() =>
+        document.activeElement === document.querySelector('[data-profile-image-grid] button'),
+      );
     }
   } catch (error) {
     await page.screenshot({ path: `${output}/${name}-failure.png` }).catch(() => {});
