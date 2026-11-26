@@ -22,15 +22,19 @@ it('bundles a title for every language in the selector', () => {
   expect(Object.values(titles).every(title => title.trim().length > 0)).toBe(true);
 });
 
-it('uses the saved language when the page starts offline', () => {
-  vi.mocked(resolveLanguage).mockReturnValue('tr');
+it.each([
+  ['tr', 'İnternet Bağlantısı Yok', 'ltr'],
+  ['ar', 'لا يوجد اتصال بالإنترنت', 'rtl'],
+])('uses the saved %s language and direction when the page starts offline', (code, title, direction) => {
+  vi.mocked(resolveLanguage).mockReturnValue(code);
   vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
   render(<MemoryRouter><OfflineConnectionToast /></MemoryRouter>);
   expect(toast.message).toHaveBeenCalledTimes(1);
-  const renderTitle = vi.mocked(toast.message).mock.calls[0][0];
+  const [renderTitle, options] = vi.mocked(toast.message).mock.calls[0];
   if (typeof renderTitle !== 'function') throw new Error('The notice must use the shared toast title layout');
   render(<>{renderTitle()}</>);
-  expect(screen.getByText('İnternet Bağlantısı Yok').getAttribute('lang')).toBe('tr');
+  expect(screen.getByText(title).getAttribute('lang')).toBe(code);
+  expect(options?.style?.direction).toBe(direction);
 });
 
 it('skips a brief disconnect and clears the notice on reconnection', () => {
