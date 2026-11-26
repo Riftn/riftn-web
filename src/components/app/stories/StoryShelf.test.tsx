@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import { expect, it, vi } from 'vitest';
+import { beforeAll, expect, it, vi } from 'vitest';
 import { StoryShelf } from './StoryShelf';
 import { setActivityBarHidden, setActivityItemsHidden } from '@/lib/activity-shelf-preferences';
 
@@ -39,6 +39,11 @@ vi.mock('@/hooks/use-story-shelf', () => ({
     ],
   }] } }),
 }));
+
+beforeAll(async () => {
+  // Keep the interaction checks independent of the lazy module load time.
+  await import('./ActivityShelfMenu');
+});
 
 it('uses the author portrait and keeps mature content out of the viewer queue', () => {
   prefs.storiesEnabled = true;

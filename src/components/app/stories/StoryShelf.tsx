@@ -221,7 +221,7 @@ function ShelfAvatar({ src, initial }: { src?: string | null; initial?: string }
   );
 }
 
-function PortraitPhoto({ src, name, retry }: { src: string; name: string; retry?: boolean }) {
+function PortraitPhoto({ src, name, retry }: { src?: string | null; name: string; retry?: boolean }) {
   return (
     <span data-st-portrait-media aria-hidden="true">
       <span data-st-photo>
