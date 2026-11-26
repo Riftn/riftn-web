@@ -2427,7 +2427,7 @@ export function GoLiveBroadcaster({
                 </div>
               }
             >
-              <LivePostChat tokenId={tokenId} streamId={streamId ?? undefined} isHost />
+              <LivePostChat tokenId={tokenId} streamId={streamId ?? undefined} isHost menuInDrawer />
             </Suspense>
           </aside>
         )}

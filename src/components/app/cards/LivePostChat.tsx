@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 import { BadgeIcon } from '@/components/app/BadgeIcon';
 import { Loader2, RotateCcw, Pin, CornerDownRight, ArrowUp } from "lucide-react";
 import { MessageMenu, type MessageMenuAction } from '@/components/app/chat/MessageMenu';
+import { placeMessageMenu } from '@/components/app/chat/message-menu-position';
 import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreButton, copyMediaWithToast } from '@/components/app/chat/message-menu-kit';
 import { ReactionGlyph, RollingCount, useReactionHost } from '@/components/app/chat/ReactionArrival';
 import { copyableMediaUrl } from '@/lib/copy-media';
@@ -217,6 +218,8 @@ interface LivePostChatProps {
   isOffline?: boolean;
   /** Whether the current user is the stream host (can pin messages) */
   isHost?: boolean;
+  /** The desktop broadcaster owns the menu and its pointer/focus handling. */
+  menuInDrawer?: boolean;
   /**
    * Render over the video instead of inside a card.
    *
@@ -237,7 +240,7 @@ const TIMEOUTS = [
   { seconds: 3600, key: 'timeout1h' },
 ] as const;
 
-export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = false, isHost = false, overlay = false }: LivePostChatProps) {
+export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = false, isHost = false, overlay = false, menuInDrawer = false }: LivePostChatProps) {
   // A mention notification names the line that tagged the reader.
   useFocusChatMessage();
   const { t: _copy } = _useCopy();
@@ -479,24 +482,16 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
     }
   }, [messages.length]);
 
-  // The right-click menu opens at the pointer, flipped left or up when it
-  // would run past the window's edge.
+  // The broadcaster's modal makes everything outside it inert. Keep the
+  // desktop menus inside that layer, outside the scrolling chat and preview.
+  const menuContainer = menuInDrawer ? rootRef.current?.closest<HTMLElement>('[data-vaul-drawer]') ?? undefined : undefined;
   const contextMenuRef = useRef<HTMLDivElement>(null);
   const [contextMenuPlace, setContextMenuPlace] = useState<{ left: number; top: number } | null>(null);
   useLayoutEffect(() => {
     const el = contextMenuRef.current;
     if (!contextMenuMsg || !el) { setContextMenuPlace(null); return; }
-    const EDGE = 10;
-    const w = el.offsetWidth;
-    const h = el.offsetHeight;
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    let left = contextMenuPos.x + w + EDGE > vw ? contextMenuPos.x - w : contextMenuPos.x;
-    let top = contextMenuPos.y + h + EDGE > vh && contextMenuPos.y - h - EDGE > 0 ? contextMenuPos.y - h : contextMenuPos.y;
-    left = Math.max(EDGE, Math.min(left, vw - w - EDGE));
-    top = Math.max(EDGE, Math.min(top, vh - h - EDGE));
-    setContextMenuPlace({ left, top });
-  }, [contextMenuMsg, contextMenuPos]);
+    setContextMenuPlace(placeMessageMenu(contextMenuPos, el.offsetWidth, el.offsetHeight, menuContainer));
+  }, [contextMenuMsg, contextMenuPos, menuContainer]);
 
   // Close context menu on outside click
   useEffect(() => {
@@ -799,6 +794,7 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
   const lineMenu = menuPoint.mounted && menuMsg ? (
     <MessageMenu
       point={menuPoint.point}
+      container={menuContainer}
       onClose={menuPoint.close}
       quickReactions={isAuthenticated ? QUICK_CHAT_REACTIONS : null}
       mine={reactedBy(menuMsg)}
@@ -1071,14 +1067,16 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
       {lineMenu}
 
       {/* Moderate: timeouts, ban and make moderator, opened from the message
-          menu or the hold sheet. Portalled: the chat often sits inside a
-          blurred or transformed panel, which turns `fixed` into "fixed to
-          that panel" and threw the menu off screen. */}
+          menu or the hold sheet. Portal outside the chat's clipped area. */}
       {contextMenuMsg && canModerateSender(contextMenuMsg.sender_address) && !isMine(contextMenuMsg) && contextMenuMsg.message_type !== 'system' && contextMenuMsg.sender_address && createPortal(
         <div
           ref={contextMenuRef}
           data-glass-menu
-          className="fixed z-50 bg-zinc-800 border border-white/10 rounded-xl shadow-2xl py-1 min-w-[140px]"
+          data-vaul-no-drag={menuContainer ? true : undefined}
+          className={cn(
+            "z-50 bg-zinc-800 border border-white/10 rounded-xl shadow-2xl py-1 min-w-[140px]",
+            menuContainer ? "absolute max-h-[calc(100%_-_20px)] overflow-y-auto" : "fixed",
+          )}
           style={{ top: contextMenuPlace?.top ?? contextMenuPos.y, left: contextMenuPlace?.left ?? contextMenuPos.x, visibility: contextMenuPlace ? undefined : 'hidden' }}
           onClick={(e) => e.stopPropagation()}
         >
@@ -1108,7 +1106,7 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
               )}
           </>
         </div>,
-        document.body,
+        menuContainer ?? document.body,
       )}
 
       {reactorsFor && (
