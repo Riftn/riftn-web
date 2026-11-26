@@ -10,7 +10,7 @@
  * hairlines (src/styles/live-audience.css). The app's LiveWhosHereSheet is the
  * twin of this.
  */
-import { useCallback } from 'react';
+import { useCallback, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { formatDistanceToNow } from 'date-fns';
@@ -23,10 +23,12 @@ import dehubCoin from '@/assets/dehub-coin.png';
 import { useDrawerPullDismiss } from '@/hooks/use-drawer-pull-dismiss';
 import { Drawer, DrawerContent, DrawerTitle } from '@/components/ui/drawer';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import { BadgeIcon } from '@/components/app/BadgeIcon';
 import { buildAvatarUrl } from '@/lib/media-url';
 import type { LiveAudience, LiveAudienceAccount } from '@/lib/api/dehub/livestream';
 import { profilePath } from '@/lib/profile-path';
+import { LiveAudienceProfileContext } from './live-audience-profile';
 
 const compact = (n: number) => {
   try {
@@ -41,6 +43,13 @@ export const audienceName = (a: LiveAudienceAccount) =>
 
 export const audienceAvatar = (a: LiveAudienceAccount) => buildAvatarUrl(a.address, a.avatarImageUrl);
 
+function audienceProfilePath(account: LiveAudienceAccount): string | null {
+  const handle = account.username?.trim().replace(/^@+/, '');
+  const address = account.address?.trim();
+  if (handle) return profilePath(encodeURIComponent(handle));
+  return address ? `/app/profile?id=${encodeURIComponent(address)}` : null;
+}
+
 const ago = (iso?: string | null) => {
   if (!iso) return null;
   const d = new Date(iso);
@@ -52,13 +61,24 @@ interface RowProps {
   meta: React.ReactNode;
   right?: React.ReactNode;
   large?: boolean;
-  onOpen: (a: LiveAudienceAccount) => void;
+  onOpen: (path: string) => void;
 }
 
 function Row({ account, meta, right, large, onOpen }: RowProps) {
   const name = audienceName(account);
+  const path = audienceProfilePath(account);
   return (
-    <button type="button" data-live-audience-row onClick={() => onOpen(account)} className="flex w-full items-center gap-2.5 py-1.5 text-left">
+    <Button
+      type="button"
+      variant="ghost"
+      data-live-audience-row
+      disabled={!path}
+      onClick={(event) => {
+        event.stopPropagation();
+        if (path) onOpen(path);
+      }}
+      className="flex h-auto min-h-11 w-full justify-start gap-2.5 px-0 py-1.5 text-left backdrop-blur-none focus-visible:ring-inset"
+    >
       <Avatar className={large ? 'h-9 w-9' : 'h-8 w-8'}>
         <AvatarImage src={audienceAvatar(account)} alt={name} />
         <AvatarFallback className="bg-zinc-700 text-xs font-semibold text-white">{name[0]?.toUpperCase()}</AvatarFallback>
@@ -73,7 +93,7 @@ function Row({ account, meta, right, large, onOpen }: RowProps) {
         <span className="flex items-center gap-1 text-[12px]" data-live-audience-muted>{meta}</span>
       </span>
       {right}
-    </button>
+    </Button>
   );
 }
 
@@ -87,14 +107,15 @@ interface Props {
 export function LiveAudienceSheet({ open, onOpenChange, audience, loading }: Props) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const openLiveAudienceProfile = useContext(LiveAudienceProfileContext);
 
   const openProfile = useCallback(
-    (a: LiveAudienceAccount) => {
+    (path: string) => {
       onOpenChange(false);
-      if (a.username) navigate(profilePath(a.username.replace('@', '')));
-      else if (a.address) navigate(`/app/profile?id=${a.address}`);
+      if (openLiveAudienceProfile) openLiveAudienceProfile(path);
+      else navigate(path);
     },
-    [navigate, onOpenChange],
+    [navigate, onOpenChange, openLiveAudienceProfile],
   );
 
   // The whole sheet drags shut; the list hands over once it is at the top.
