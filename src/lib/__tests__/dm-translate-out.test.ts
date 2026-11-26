@@ -23,7 +23,7 @@ describe('translateOutgoing', () => {
   it('sends the line in their language and keeps what was typed', async () => {
     invoke.mockResolvedValue({ data: { translatedText: 'How are you?' }, error: null });
     await expect(translateOutgoing('c1', ' Nasılsın? ')).resolves.toEqual({ content: 'How are you?', original: 'Nasılsın?', lang: 'en' });
-    expect(invoke).toHaveBeenCalledWith('translate-text', { body: { text: 'Nasılsın?', targetLang: 'en' } });
+    expect(invoke).toHaveBeenCalledWith('translate-text', { body: { text: 'Nasılsın?', targetLang: 'en', purpose: 'chat' } });
   });
 
   it('does nothing while the switch is off for the chat', async () => {

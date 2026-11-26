@@ -25,7 +25,7 @@ function sameWords(a: string, b: string): boolean {
 
 async function ask(text: string, lang: string): Promise<Answer> {
   // Private: a direct message never goes to a provider that keeps its input.
-  const call = supabase.functions.invoke('translate-text', { body: { text, targetLang: lang } });
+  const call = supabase.functions.invoke('translate-text', { body: { text, targetLang: lang, purpose: 'chat' } });
   const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), TIMEOUT_MS));
   const res = await Promise.race([call, timeout]);
   if (!res || res.error) return null;

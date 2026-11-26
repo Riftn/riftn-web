@@ -84,7 +84,7 @@ export async function translateOutgoing(conversationId: string, text: string): P
   try {
     const lang = await peerLanguage(conversationId);
     if (!lang) return null;
-    const call = supabase.functions.invoke('translate-text', { body: { text: typed, targetLang: lang } });
+    const call = supabase.functions.invoke('translate-text', { body: { text: typed, targetLang: lang, purpose: 'chat' } });
     const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), TIMEOUT_MS));
     const res = await Promise.race([call, timeout]);
     if (!res || res.error) return null;
