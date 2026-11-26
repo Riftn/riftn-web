@@ -83,8 +83,20 @@ async function verify(theme, width, phone) {
       await close.focus();
       await page.keyboard.press('Tab');
       await page.keyboard.press('Shift+Tab');
-      assert.ok(await close.evaluate(button => button.matches(':focus-visible')));
+      const focus = await close.evaluate(button => ({
+        visible: button.matches(':focus-visible'),
+        outline: getComputedStyle(button).outlineStyle,
+        width: getComputedStyle(button).outlineWidth,
+      }));
+      assert.deepEqual(focus, { visible: true, outline: 'solid', width: '2px' });
       await page.screenshot({ path: `${output}/${name}-focus.png`, animations: 'disabled' });
+      await close.hover();
+      await page.mouse.down();
+      assert.ok(await close.evaluate(button => button.matches(':active')));
+      assert.equal(await close.locator('svg').evaluate(icon => getComputedStyle(icon).color), 'rgb(255, 255, 255)');
+      await page.screenshot({ path: `${output}/${name}-pressed.png`, animations: 'disabled' });
+      await page.mouse.move(96, 30);
+      await page.mouse.up();
       await page.keyboard.press('Escape');
       await viewer.waitFor({ state: 'hidden' });
       await page.waitForFunction(() =>
