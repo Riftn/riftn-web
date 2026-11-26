@@ -61,7 +61,9 @@ export async function runCatchUp(opts: {
   }
 }
 
-export function CatchUpMenu({ communityId, walletAddress }: { communityId: string; walletAddress: string }) {
+type CatchUpMenuProps = { communityId: string; walletAddress: string };
+
+function CatchUpPeriods({ communityId, walletAddress }: CatchUpMenuProps) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const pick = useCallback(
@@ -71,6 +73,26 @@ export function CatchUpMenu({ communityId, walletAddress }: { communityId: strin
     [communityId, walletAddress, t, i18n.language, navigate],
   );
 
+  return (
+    <>
+      <div className="px-2.5 pb-1.5 pt-1 text-[12px] leading-snug text-zinc-400">
+        {t('communities.catchUp.menuHint', 'A private recap, sent to your DMs')}
+      </div>
+      <Drop.DropdownMenuItem className={ROW} onSelect={() => pick('24h')} data-catch-up="24h">
+        {t('communities.catchUp.last24h', 'Last 24 hours')}
+      </Drop.DropdownMenuItem>
+      <Drop.DropdownMenuItem className={ROW} onSelect={() => pick('3d')} data-catch-up="3d">
+        {t('communities.catchUp.last3d', 'Last 3 days')}
+      </Drop.DropdownMenuItem>
+      <Drop.DropdownMenuItem className={ROW} onSelect={() => pick('unread')} data-catch-up="unread">
+        {t('communities.catchUp.sinceRead', 'Since I last read')}
+      </Drop.DropdownMenuItem>
+    </>
+  );
+}
+
+export function CatchUpMenu(props: CatchUpMenuProps) {
+  const { t } = useTranslation();
   return (
     <Drop.DropdownMenu>
       <Drop.DropdownMenuTrigger asChild>
@@ -84,19 +106,24 @@ export function CatchUpMenu({ communityId, walletAddress }: { communityId: strin
         </button>
       </Drop.DropdownMenuTrigger>
       <Drop.DropdownMenuContent align="end" data-chat-options-menu data-catch-up-menu className={CHAT_MENU_CONTENT}>
-        <div className="px-2.5 pb-1.5 pt-1 text-[12px] leading-snug text-zinc-400">
-          {t('communities.catchUp.menuHint', 'A private recap, sent to your DMs')}
-        </div>
-        <Drop.DropdownMenuItem className={ROW} onSelect={() => pick('24h')} data-catch-up="24h">
-          {t('communities.catchUp.last24h', 'Last 24 hours')}
-        </Drop.DropdownMenuItem>
-        <Drop.DropdownMenuItem className={ROW} onSelect={() => pick('3d')} data-catch-up="3d">
-          {t('communities.catchUp.last3d', 'Last 3 days')}
-        </Drop.DropdownMenuItem>
-        <Drop.DropdownMenuItem className={ROW} onSelect={() => pick('unread')} data-catch-up="unread">
-          {t('communities.catchUp.sinceRead', 'Since I last read')}
-        </Drop.DropdownMenuItem>
+        <CatchUpPeriods {...props} />
       </Drop.DropdownMenuContent>
     </Drop.DropdownMenu>
+  );
+}
+
+export function CatchUpSubmenu({ className, ...props }: CatchUpMenuProps & { className: string }) {
+  const { t } = useTranslation();
+  return (
+    <Drop.DropdownMenuSub>
+      <Drop.DropdownMenuSubTrigger className={className}>
+        <History />{t('communities.catchUp.button', 'Catch me up')}
+      </Drop.DropdownMenuSubTrigger>
+      <Drop.DropdownMenuPortal>
+        <Drop.DropdownMenuSubContent sideOffset={4} data-chat-options-menu data-catch-up-menu className={CHAT_MENU_CONTENT}>
+          <CatchUpPeriods {...props} />
+        </Drop.DropdownMenuSubContent>
+      </Drop.DropdownMenuPortal>
+    </Drop.DropdownMenuSub>
   );
 }
