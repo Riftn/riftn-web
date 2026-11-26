@@ -5434,6 +5434,10 @@
     "shopAllowanceUsed": "{{allowance}} / {{allowance}} kullanıldı. Daha yüksek bir rozet ve başka bir yuva için daha fazla Riftn jetonu stake edin."
   },
   "stages": {
+    "returnToStage": "Dön",
+    "liveRadio": "Canlı radyo",
+    "stageHeadcount_one": "{{count}} katılımcı",
+    "stageHeadcount_other": "{{count}} katılımcı",
     "showChat": "Sohbeti göster",
     "hideChat": "Sohbeti gizle",
     "radioShow": {
