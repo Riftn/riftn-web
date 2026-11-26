@@ -10,8 +10,6 @@
  * their profile; while it is off the profile shows nothing museum-related to
  * anyone, the owner included (`customs.badgeMuseumVisibility`, server-side).
  *
- * - `MilestoneChips` sits in the chip row beside the name: the three rarest
- *   earned badges. Tapping one opens the museum.
  * - `BadgeMuseumPanel` sits under the follower counts: the three rarest
  *   earned medals on a small podium, and a "See all" that opens the museum.
  * - `BadgeMuseumSheet` is the museum: the podium, then every other badge as
@@ -199,68 +197,6 @@ export function MedalPodium({
         );
       })}
     </div>
-  );
-}
-
-const CHIP = cn(
-  'inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md',
-  'bg-white/[0.12] text-white/75 border border-white/[0.12] text-[10px] font-semibold leading-none whitespace-nowrap flex-shrink-0',
-  'transition-colors duration-200 hover:bg-white/[0.18] hover:text-white',
-);
-
-interface MilestoneChipsProps {
-  /** Wallet of the person whose profile is on screen. */
-  address?: string | null;
-  /** True on your own profile: shows the museum chip before anything is earned. */
-  own?: boolean;
-  className?: string;
-}
-
-export function MilestoneChips({ address, own, className }: MilestoneChipsProps) {
-  const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
-  const { data } = useMilestones(address);
-
-  // Off (the default): nothing by the name, for anyone.
-  if (!data || data.hidden) return null;
-  const top = data.top
-    .map((id) => data.milestones.find((m) => m.id === id))
-    .filter((m): m is Milestone => !!m);
-  if (!top.length && !own) return null;
-
-  const openLabel = t('badgeMuseum.open', 'Open Badge Museum');
-
-  return (
-    <>
-      <span data-milestone-chips className={cn('contents', className)}>
-        {top.length ? (
-          top.map((m) => {
-            const name = milestoneName(t, m);
-            const Icon = iconFor(m.id);
-            return (
-              <button
-                key={m.id}
-                type="button"
-                data-milestone-chip={m.id}
-                onClick={() => setOpen(true)}
-                title={`${name} · ${openLabel}`}
-                aria-label={`${name}. ${openLabel}`}
-                className={CHIP}
-              >
-                <Icon aria-hidden className="h-3 w-3" strokeWidth={2.25} />
-                {name}
-              </button>
-            );
-          })
-        ) : (
-          <button type="button" data-milestone-chip="museum" onClick={() => setOpen(true)} title={openLabel} className={CHIP}>
-            <Landmark aria-hidden className="h-3 w-3" strokeWidth={2.25} />
-            {t('badgeMuseum.title', 'Badge Museum')}
-          </button>
-        )}
-      </span>
-      <BadgeMuseumSheet address={address} open={open} onOpenChange={setOpen} />
-    </>
   );
 }
 

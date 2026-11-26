@@ -2,7 +2,7 @@ import { render } from '@testing-library/react';
 import { expect, it, vi } from 'vitest';
 import type { Milestones } from '@/hooks/use-milestones';
 import { badgeMuseumIsShown } from '@/hooks/use-milestones';
-import { BadgeMuseumPanel, MilestoneChips } from './BadgeMuseum';
+import { BadgeMuseumPanel } from './BadgeMuseum';
 
 const state = vi.hoisted(() => ({ data: null as unknown }));
 vi.mock('@/hooks/use-milestones', async (importOriginal) => ({
@@ -54,22 +54,16 @@ it('renders nothing until a badge is earned', () => {
 
 it('shows nothing on the profile while off, the owner included', () => {
   state.data = museum({ hidden: true });
-  const { container } = render(
-    <>
-      <BadgeMuseumPanel address="0xabc" />
-      <MilestoneChips address="0xabc" own />
-    </>,
-  );
+  const { container } = render(<BadgeMuseumPanel address="0xabc" />);
   expect(container.innerHTML).toBe('');
 });
 
-it('draws icons, not emoji, on the name chips', () => {
+it('draws icons on the profile podium', () => {
   state.data = museum();
-  const { container } = render(<MilestoneChips address="0xabc" />);
-  const chips = container.querySelectorAll('[data-milestone-chip]');
-  expect(chips).toHaveLength(3);
-  for (const chip of chips) {
-    expect(chip.querySelector('svg')).not.toBeNull();
-    expect(chip.textContent).not.toMatch(/\p{Extended_Pictographic}/u);
+  const { container } = render(<BadgeMuseumPanel address="0xabc" />);
+  const medals = container.querySelectorAll('[data-medal-podium] [data-medal]');
+  expect(medals).toHaveLength(3);
+  for (const medal of medals) {
+    expect(medal.querySelector('svg')).not.toBeNull();
   }
 });
