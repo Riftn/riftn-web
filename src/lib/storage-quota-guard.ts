@@ -15,6 +15,7 @@
  * Only regenerable caches are evicted. Auth, wallet, drafts and preferences
  * are never touched.
  */
+import { LANGUAGE_STORAGE_KEY } from './user-language-store';
 
 /** Keys that are pure caches and can be refetched or recomputed. */
 const EVICTABLE_PREFIXES = [
@@ -71,8 +72,12 @@ export function pruneStaleLocalePacks(currentVersion: string, storage: Storage =
 export function evictCaches(storage: Storage = localStorage, keep?: string): number {
   let removed = 0;
   try {
+    const language = storage.getItem(LANGUAGE_STORAGE_KEY);
     for (const key of listKeys(storage)) {
       if (key === keep) continue;
+      // The selected language needs its core copy to start without a network
+      // request. This can be an older version until its replacement downloads.
+      if (language && key.startsWith('locale-pack:') && key.endsWith(`:${language}:core`)) continue;
       if (EVICTABLE_PREFIXES.some((prefix) => key.startsWith(prefix))) {
         storage.removeItem(key);
         removed++;

@@ -29,6 +29,15 @@ describe('storage quota guard', () => {
     expect(localStorage.getItem('post_drafts')).toBe('keep');
   });
 
+  it('keeps the saved language’s offline core pack even after an update', () => {
+    localStorage.setItem('user-preferred-language', 'tr');
+    localStorage.setItem('locale-pack:old:tr:core', 'keep');
+    localStorage.setItem('locale-pack:new:fr:core', 'evict');
+    expect(evictCaches()).toBe(1);
+    expect(localStorage.getItem('locale-pack:old:tr:core')).toBe('keep');
+    expect(localStorage.getItem('user-preferred-language')).toBe('tr');
+  });
+
   it('frees space and retries when a write hits the quota', () => {
     localStorage.setItem('locale-pack:a:en:core', 'x');
     const original = Storage.prototype.setItem;
