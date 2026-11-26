@@ -1,3 +1,5 @@
+import { translateFinanceStats } from './finance-stats-tr.js';
+
 const UPSTREAM = 'https://aigxuutjaqsywioxjefr.supabase.co/functions/v1/finance-stats';
 const WALLET = '0x2226ab7ff45d9a241e8986163ffb0176fabf5613';
 export const LIVE_COSTS_SINCE = '2026-04-01';
@@ -109,6 +111,11 @@ function clientResponse(response, method) {
   return new Response(method === 'HEAD' ? null : response.body, { status: response.status, headers });
 }
 
+function turkishResponse(body, method) {
+  const headers = { ...HEADERS, 'Content-Language': 'tr' };
+  return method === 'HEAD' ? new Response(null, { headers }) : Response.json(translateFinanceStats(body), { headers });
+}
+
 /** Read missing core sources directly while the managed endpoint is unavailable. */
 export async function restoreCoreSources(upstream, view, fetcher) {
   const missing = new Map(upstream.sources.filter(source => source.status === 'unavailable' && (source.origin === 'api' || ['dhb_card', 'dhb_crypto', 'post_quota', 'youtube_imports', 'sms_credits', 'creator_sub_fees', 'stripe_fees'].includes(source.id))).map(source => [source.id, source]));
@@ -208,11 +215,15 @@ export async function handleFinanceRequest(request, env, fetcher = fetch, cache 
   if (!['GET', 'HEAD'].includes(request.method)) return Response.json({ ok: false, error: 'Method not allowed' }, { status: 405, headers: { ...HEADERS, Allow: 'GET, HEAD, OPTIONS' } });
   const url = new URL(request.url);
   const view = url.searchParams.get('view');
+  const turkish = url.searchParams.get('lang') === 'tr';
   if (view && !['ledger', 'tax'].includes(view)) return Response.json({ ok: false, error: 'Unknown finance view' }, { status: 400, headers: HEADERS });
   const key = new Request(`${url.origin}/api/finance-stats?accounting=live-april-v2${view ? `&view=${view}` : ''}`);
   const cached = await cache?.match(key);
-  if (cached) return clientResponse(cached, request.method);
   try {
+    if (cached) {
+      if (!turkish) return clientResponse(cached, request.method);
+      return turkishResponse(request.method === 'HEAD' ? null : await cached.json(), request.method);
+    }
     const response = await fetcher(`${UPSTREAM}${view ? `?view=${view}` : ''}`, { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(30_000) });
     if (!response.ok) throw new Error('Upstream finance response failed');
     let upstream = await response.json();
@@ -241,7 +252,7 @@ export async function handleFinanceRequest(request, env, fetcher = fetch, cache 
       stored.headers.delete('CDN-Cache-Control');
       await cache.put(key, stored);
     }
-    return request.method === 'HEAD' ? new Response(null, result) : result;
+    return turkish ? turkishResponse(body, request.method) : clientResponse(result, request.method);
   } catch {
     return Response.json({ ok: false, error: 'Finance sources could not be read' }, { status: 502, headers: { ...HEADERS, 'Cache-Control': 'no-store' } });
   }
