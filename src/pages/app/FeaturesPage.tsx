@@ -1247,7 +1247,7 @@ export default function FeaturesPage() {
               placeholder={searchLabel}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="block rounded-xl py-0 pl-10 text-foreground"
+              className="block rounded-xl py-0 pl-10 text-white"
             />
           </div>
           {wallet && (
