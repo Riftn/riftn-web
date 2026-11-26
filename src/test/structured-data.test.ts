@@ -418,7 +418,7 @@ describe('proxied pages', () => {
     expect(meta(body, 'og:locale')).toBe('en_US');
   });
 
-  it('rewrites a video post into a SocialMediaPosting and drops the raw-MP4 player card', async () => {
+  it('attributes a video post from the post record when its upstream markup omits the author', async () => {
     const poster = `${CDN}/images/6126.jpg`;
     network({
       [FN]: html(`<!DOCTYPE html><html><head><title>Another Monopoly Video</title>
@@ -433,7 +433,7 @@ describe('proxied pages', () => {
 <meta name="twitter:player:width" content="1280">
 <meta name="twitter:player:height" content="720">
 <meta name="twitter:player:stream" content="${CDN}/videos/6126.mp4">
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@context":"https://schema.org","@type":"Article","headline":"Another Monopoly Video","description":"Monopoly night","url":"https://riftn.com/app/post/6126","datePublished":"2026-09-29T00:24:28.953Z","author":{"@type":"Person","name":"Jesse Cochran"},"image":"${poster}"},{"@type":"VideoObject","name":"Another Monopoly Video","thumbnailUrl":"${poster}","contentUrl":"${CDN}/videos/6126.mp4","uploadDate":"2026-09-29T00:24:28.953Z"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@context":"https://schema.org","@type":"Article","headline":"Another Monopoly Video","description":"Monopoly night","url":"https://riftn.com/app/post/6126","datePublished":"2026-09-29T00:24:28.953Z","image":"${poster}"},{"@type":"VideoObject","name":"Another Monopoly Video","thumbnailUrl":"${poster}","contentUrl":"${CDN}/videos/6126.mp4","uploadDate":"2026-09-29T00:24:28.953Z"}]}</script>
 </head><body><h1>Another Monopoly Video</h1></body></html>`),
       'https://api.dehub.io/api/nft_info/6126': json({
         result: { tokenId: 6126, username: 'jesse', displayName: 'Jesse Cochran', description: 'Monopoly night with the crew', commentCount: 2, reactionCounts: { like: 5 }, postType: 'video' },

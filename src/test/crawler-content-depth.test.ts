@@ -306,11 +306,14 @@ describe('video post', () => {
     return crawl(URL_).then((r) => r.text());
   };
 
-  it('puts a real <video> where the thumbnail was, poster and all', async () => {
+  it('puts the video ahead of the post details and keeps the thumbnail fallback', async () => {
     const html = await serve();
     const video = html.match(/<video[\s\S]*?<\/video>/)![0];
     expect(video).toContain('controls');
+    expect(video).toContain('class="dh-watch-player"');
+    expect(video).toContain('playsinline');
     expect(video).toContain('preload="none"');
+    expect(html).toMatch(/<\/h1>\s*(?:<p class="dh-byline">[^\n]*<\/p>\s*)?<video\b/);
     expect(video).toMatch(/poster="[^"]*images\/6126\.jpg"/);
     expect(video).toContain(`<source src="${CDN}/videos/6126.mp4" type="video/mp4">`);
     // The thumbnail stays as the fallback inside it.

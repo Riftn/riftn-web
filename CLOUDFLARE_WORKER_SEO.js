@@ -3186,10 +3186,11 @@ function enrichVideoPost(html, record) {
   if (!media) return html;
   const poster = (html.match(/<meta property="og:image" content="([^"]*)">/) || [])[1] || '';
   const type = /\.webm(?:$|\?)/i.test(media) ? 'video/webm' : 'video/mp4';
-  const player = (fallback) =>
-    `<video controls preload="none"${poster ? ` poster="${poster}"` : ''}><source src="${escFnAttr(media)}" type="${type}">${fallback}</video>`;
-  let out = html.replace(/(<\/h1>[\s\S]*?)(<img\b[^>]*>)/i, (m, before, img) => `${before}${player(img)}`);
-  if (out === html) out = html.replace(/<\/h1>/i, `</h1>\n    ${player('')}`);
+  const out = html.replace(/<\/h1>([\s\S]*)/i, (_, content) => {
+    const thumbnail = content.match(/<img\b[^>]*>/i)?.[0] || '';
+    const player = `<video class="dh-watch-player" controls playsinline preload="none"${poster ? ` poster="${poster}"` : ''}><source src="${escFnAttr(media)}" type="${type}">${thumbnail}</video>`;
+    return `</h1>\n    ${player}${thumbnail ? content.replace(thumbnail, '') : content}`;
+  });
 
   return rewriteJsonLd(out, (data) => {
     const nodes = Array.isArray(data['@graph']) ? data['@graph'] : [data];
@@ -3432,13 +3433,20 @@ function socialPostingLd(value, record) {
   const videoNode = nodes.find((n) => n && n['@type'] === 'VideoObject');
   const { '@context': _context, '@type': _type, author, ...fields } = article;
   // nft_info calls the author's handle `mintername`; `username` never arrives.
-  const username = String((record && (record.mintername || record.username)) || '').trim();
+  const username = String((record && (record.mintername || record.username)) || '').trim().replace(/^@+/, '');
+  const name = [author?.name, record?.minterDisplayName, record?.displayName, username]
+    .map((value) => String(value || '').replace(/\s+/g, ' ').trim())
+    .find(Boolean);
+  if (!name) return null;
+  const authorUrl = couldBeProfileSegment(username.toLowerCase(), SYSTEM_ROUTES)
+    ? `${APP_URL}/${encodeURIComponent(username)}`
+    : '';
   const text = String((record && record.description) || '').trim();
   const posting = {
     '@context': 'https://schema.org',
     '@type': 'SocialMediaPosting',
     ...fields,
-    ...(author ? { author: { ...author, ...(username ? { url: `${APP_URL}/${encodeURIComponent(username)}` } : {}) } } : {}),
+    author: { '@type': 'Person', ...author, name, ...(authorUrl ? { url: authorUrl } : {}) },
     ...(text ? { text } : {}),
   };
   if (record) {
@@ -5054,6 +5062,7 @@ strong{color:#fff}
 a{color:#fff;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.28)}
 a:hover{border-bottom-color:#fff}
 img{max-width:100%;height:auto;display:block;border-radius:16px;border:1px solid var(--dh-line);margin:22px 0}
+.dh-watch-player{display:block;width:100%;max-height:70vh;aspect-ratio:16/9;object-fit:contain;margin:16px 0 22px;background:#000;border-radius:16px}
 .dh-cta{display:inline-block;margin:12px 0 6px;padding:11px 24px;border-radius:10px;background:#fff;color:#000;font-weight:700;border:0}
 .dh-cta:hover{background:#e4e4e7;border:0}
 nav{margin:34px 0 0;display:flex;flex-wrap:wrap;gap:8px}
