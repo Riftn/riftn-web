@@ -72,6 +72,7 @@ function mapNFTToVideoItem(nft: DeHubNFT): VideoItem {
     commentCount: nft.commentCount || nft.comment_count || 0,
     isPPV: nft.is_ppv ?? false,
     ppvPrice: nft.ppv_price,
+    ppvPreviewReady: nft.ppvPreview?.ready === true,
     ppvCurrency: nft.ppv_currency || nft.streamInfo?.payPerViewTokenSymbol || 'DHB',
     isW2E: nft.is_w2e ?? false,
     isLocked: nft.is_locked ?? false,

@@ -191,6 +191,7 @@ import { WideAmbientFill } from '@/components/app/video/WideAmbientFill';
 import { WideVideoPanel } from '@/components/app/video/WideVideoRails';
 import { useResolvedThumbnail } from '@/lib/thumbnail-fallback';
 import { GatePreview } from './GatePreview';
+import { PpvFreePreview } from './PpvFreePreview';
 import { deviceWidth, isMdUp } from '@/lib/media-url';
 import {
   claimMediaSession,
@@ -2819,6 +2820,9 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
               </p>
               
             </div>
+            {video.ppvPreviewReady && videoTokenId && (
+              <PpvFreePreview key={video.id} tokenId={video.id} />
+            )}
           </>
         ) : isSubGated ? (
           <>

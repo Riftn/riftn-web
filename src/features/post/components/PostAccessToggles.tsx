@@ -2,7 +2,7 @@ import { useTranslation as _useCopy } from 'react-i18next';
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
 import { tokenLabel } from '@/lib/token-label';
 import { DIRECT_TIP_TOKENS } from '@/lib/direct-tip-tokens';
-import { useState, useEffect, useMemo, type ReactNode } from 'react';
+import { useState, useEffect, useId, useMemo, type ReactNode } from 'react';
 import { DhbAmount, DhbCoin } from '@/components/app/DhbAmount';
 import { useTranslation as useI18n } from 'react-i18next';
 import { Ticket, Shield, Hash, Save, Type, ShoppingBag, Baby, Quote, MessageSquareReply, Scissors } from "lucide-react";
@@ -24,6 +24,8 @@ import Plus from "@/components/ui/cut-icons/add";
 import { Switch } from '@/components/ui/switch';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { parsePpvPreviewSeconds } from '../lib/ppv-preview';
 import { cn } from '@/lib/utils';
 import { getCategories, type DeHubCategory, type ShopLink } from '@/lib/api/dehub';
 import { ShopSheetLazy, type ShopBoardDraft } from './ShopSheetLazy';
@@ -57,6 +59,9 @@ interface PostAccessTogglesProps {
   setIsPPV: (value: boolean) => void;
   ppvAmount: string;
   setPpvAmount: (value: string) => void;
+  canConfigurePpvPreview?: boolean;
+  ppvPreviewSeconds?: string;
+  setPpvPreviewSeconds?: (value: string) => void;
   ppvCurrency: Currency;
   setPpvCurrency: (value: Currency) => void;
   isWatch2Earn: boolean;
@@ -148,6 +153,9 @@ export function PostAccessToggles({
   setIsPPV,
   ppvAmount,
   setPpvAmount,
+  canConfigurePpvPreview,
+  ppvPreviewSeconds = '',
+  setPpvPreviewSeconds,
   ppvCurrency,
   setPpvCurrency,
   isWatch2Earn,
@@ -232,6 +240,9 @@ export function PostAccessToggles({
 
   // Temp states for drawer inputs
   const [tempPpvAmount, setTempPpvAmount] = useSurfaceDraft("src/features/post/components/PostAccessToggles.tsx:tempPpvAmount", ppvAmount, draftScope);
+  const previewInputId = useId();
+  const [tempPpvPreview, setTempPpvPreview] = useSurfaceDraft("post:ppv-preview", ppvPreviewSeconds, draftScope);
+  const previewInvalid = canConfigurePpvPreview && parsePpvPreviewSeconds(tempPpvPreview) === null;
   const [tempPpvCurrency, setTempPpvCurrency] = useState<Currency>(ppvCurrency);
   const [tempW2eViews, setTempW2eViews] = useSurfaceDraft("src/features/post/components/PostAccessToggles.tsx:tempW2eViews", w2eViews, draftScope);
   const [tempW2eComments, setTempW2eComments] = useSurfaceDraft("src/features/post/components/PostAccessToggles.tsx:tempW2eComments", w2eComments, draftScope);
@@ -329,6 +340,7 @@ export function PostAccessToggles({
   const handlePpvToggle = (checked: boolean) => {
     if (checked) {
       setTempPpvAmount.initialize(ppvAmount);
+      setTempPpvPreview.initialize(ppvPreviewSeconds);
       // Carrying DHB/USD over to a Solana post would leave the selector with
       // nothing highlighted, so fall back to the chain's first token.
       setTempPpvCurrency(
@@ -364,7 +376,9 @@ export function PostAccessToggles({
   };
 
   const confirmPpv = () => {
+    if (previewInvalid) return;
     setPpvAmount(tempPpvAmount);
+    if (canConfigurePpvPreview) setPpvPreviewSeconds?.(tempPpvPreview);
     setPpvCurrency(tempPpvCurrency);
     setIsPPV(true);
     setPpvDrawerOpen(false);
@@ -1076,6 +1090,26 @@ export function PostAccessToggles({
                 className={cn(inputClass, "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none")}
               />
             </div>
+            {canConfigurePpvPreview && (
+              <div className="space-y-2">
+                <label htmlFor={previewInputId} className="text-sm text-foreground">
+                  {t('ppvPreview.seconds', { defaultValue: 'Free preview (seconds)' })}
+                </label>
+                <Input
+                  id={previewInputId}
+                  inputMode="numeric"
+                  value={tempPpvPreview}
+                  onChange={event => setTempPpvPreview(event.target.value)}
+                  placeholder="0"
+                  aria-describedby={`${previewInputId}-hint`}
+                  aria-invalid={previewInvalid || undefined}
+                  className="min-h-12 rounded-xl px-4 focus-visible:ring-2 focus-visible:ring-ring"
+                />
+                <p id={`${previewInputId}-hint`} className="text-sm text-muted-foreground">
+                  {t('ppvPreview.secondsHint', { defaultValue: 'Choose 1–30 seconds. Enter 0 to skip the preview.' })}
+                </p>
+              </div>
+            )}
             <div className="flex items-center gap-2 p-3 rounded-lg bg-zinc-800/30 border border-white/10">
               <Info className="w-4 h-4 text-white/50 shrink-0" />
               <span className="text-xs text-white/50">
@@ -1089,7 +1123,7 @@ export function PostAccessToggles({
             </Button>
             <Button 
               onClick={confirmPpv} 
-              disabled={!tempPpvAmount.trim()}
+              disabled={!tempPpvAmount.trim() || previewInvalid}
               variant="glass"
               className="flex-1 rounded-xl min-h-[48px] touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
             >

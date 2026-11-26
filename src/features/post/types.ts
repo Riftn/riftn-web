@@ -248,6 +248,7 @@ export interface DraftPayload {
   isSubscribersOnly?: boolean;
   isPPV?: boolean;
   ppvAmount?: string;
+  ppvPreviewSeconds?: string;
   ppvCurrency?: Currency;
   isWatch2Earn?: boolean;
   w2eViews?: string;
