@@ -131,6 +131,44 @@ test('public route handles CORS and HEAD, rejects unavailable data without inven
   assert.equal((await failed.json()).ok, false);
 });
 
+test('Turkish finance copy shares accounting and the cache with the default response', async () => {
+  const upstream = {
+    ...summary,
+    sources: [{ id: 'dhb_card', label: 'DHB bought by card', status: 'ok', note: 'Card purchases of DHB through Riftn Pay that settled and were not refunded, at the amount charged.' }],
+    notes: ['1234 text requests lack complete token usage; reported costs are incomplete.', 'A new disclosure from the provider.'],
+  };
+  const env = { ASSETS: { fetch: async request => Response.json(request.url.endsWith('bnb-sharing.json') ? sharing : history) } };
+  let reads = 0;
+  const fetcher = async () => { reads++; return Response.json(upstream); };
+  const stored = new Map();
+  const cache = {
+    match: async key => stored.get(key.url)?.clone(),
+    put: async (key, response) => stored.set(key.url, response),
+  };
+  const endpoint = 'https://riftn.com/api/finance-stats';
+  const tr = await handleFinanceRequest(new Request(endpoint + '?lang=tr'), env, fetcher, cache);
+  const en = await handleFinanceRequest(new Request(endpoint), env, fetcher, cache);
+  const cachedTr = await handleFinanceRequest(new Request(endpoint + '?lang=tr'), env, fetcher, cache);
+  assert.equal(reads, 1);
+  assert.equal(tr.headers.get('Content-Language'), 'tr');
+  assert.equal(tr.headers.get('Cache-Control'), 'no-store');
+  assert.equal(en.headers.get('Content-Language'), null);
+  const localized = await tr.json();
+  const english = await en.json();
+  assert.deepEqual(await cachedTr.json(), localized);
+  assert.deepEqual(localized.days, english.days);
+  assert.deepEqual(localized.taxSplit, english.taxSplit);
+  assert.equal(english.sources[0].label, 'DHB bought by card');
+  assert.equal(localized.sources[0].label, 'Kartla alınan DHB');
+  assert.match(localized.sources[0].note, /iade edilmeyen DHB alımları/);
+  assert.equal(localized.sources[0].status, english.sources[0].status);
+  assert.match(localized.notes[0], /^1\.234 metin isteğinin/);
+  assert.equal(localized.notes[1], upstream.notes[1]);
+  const head = await handleFinanceRequest(new Request(endpoint + '?lang=tr', { method: 'HEAD' }), env, fetcher, cache);
+  assert.equal(head.headers.get('Content-Language'), 'tr');
+  assert.equal(await head.text(), '');
+});
+
 test('five-minute internal caching never turns into a four-hour browser cache', async () => {
   const env = { ASSETS: { fetch: async request => Response.json(request.url.endsWith('bnb-sharing.json') ? sharing : history) } };
   let stored;

@@ -24,24 +24,26 @@ export function ShareRow({
   value,
   max,
   formatted,
+  wrapLabel = false,
 }: {
   leading?: string;
   label: string;
   value: number;
   max: number;
   formatted: string;
+  wrapLabel?: boolean;
 }) {
   const pct = max > 0 && value > 0 ? Math.max(2, Math.round((value / max) * 100)) : 0;
   return (
     <div className="flex items-center gap-3 py-1.5">
       {leading && <span className="text-base leading-none w-5 shrink-0">{leading}</span>}
-      <span className="text-sm text-white truncate flex-1 min-w-0">{label}</span>
+      <span className={`text-sm text-white flex-1 min-w-0 ${wrapLabel ? 'break-words' : 'truncate'}`}>{label}</span>
       {/* The middle panel is narrow even on desktop, and the bar is decoration
           while the label is the content — so the bar yields space first. */}
       <div className="w-10 sm:w-20 lg:w-24 h-1.5 rounded-full bg-zinc-800/50 overflow-hidden shrink-0">
         <div className="h-full rounded-full bg-current opacity-50" style={{ width: `${pct}%` }} />
       </div>
-      <span className="text-xs text-zinc-400 tabular-nums w-12 text-right shrink-0">{formatted}</span>
+      <span className={`text-xs text-zinc-400 tabular-nums text-right shrink-0 ${wrapLabel ? 'min-w-12' : 'w-12'}`}>{formatted}</span>
     </div>
   );
 }
