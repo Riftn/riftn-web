@@ -115,7 +115,7 @@ function VisibleStoryShelf({ dismissed }: { dismissed: string[] }) {
     if (lastSeat === 'ask') return null;
     return (
       <>
-        <div data-stories data-story-shelf data-no-swipe data-no-pull role="group" aria-label={t('stories.activity.label', { defaultValue: 'Moments and live' })} aria-busy="true" {...menuEvents(openMenu)}>
+        <div data-stories data-story-shelf data-no-swipe data-no-pull role="group" aria-label={t('settings.activity')} aria-busy="true" {...menuEvents(openMenu)}>
           {isAuthenticated && <CreateTile onAdd={openCreator} />}
           {[0, 1, 2].map(index => <LoadingTile key={index} />)}
         </div>
@@ -144,7 +144,7 @@ function VisibleStoryShelf({ dismissed }: { dismissed: string[] }) {
 
   return (
     <>
-      <div data-stories data-story-shelf data-no-swipe data-no-pull role="group" aria-label={t('stories.activity.label', { defaultValue: 'Moments and live' })} data-live-only={liveOnly || undefined} {...menuEvents(openMenu)}>
+      <div data-stories data-story-shelf data-no-swipe data-no-pull role="group" aria-label={t('settings.activity')} data-live-only={liveOnly || undefined} {...menuEvents(openMenu)}>
         {storiesEnabled && isAuthenticated && <CreateTile onAdd={openCreator} />}
         {showMe && (
           <MeTile
@@ -330,7 +330,7 @@ function PersonTile({ entry, onOpen, onMenu }: { entry: ShelfEntry; onOpen: (el:
       onClick={e => onOpen(e.currentTarget)}
       {...menuEvents(onMenu)}
       aria-label={name}
-      aria-description={entry.seen ? t('stories.watchedLabel', { defaultValue: 'Watched' }) : undefined}
+      aria-description={entry.seen ? t('stories.watchedCount', { n: formatCount(entry.items.length) }) : undefined}
     >
       <PortraitPhoto src={face} name={name} />
       <span data-st-caption>

@@ -130,7 +130,7 @@ it('keeps the same portrait when its watched state changes', () => {
     view.rerender(<StoryShelf />);
     expect(screen.getByRole('button', { name: 'River Song' })).toBe(tile);
     expect(tile).toHaveAttribute('data-seen', 'true');
-    expect(tile).toHaveAccessibleDescription('Watched');
+    expect(tile).toHaveAccessibleDescription('2 watched');
   } finally {
     prefs.seen = false;
   }
