@@ -2270,7 +2270,7 @@ export function DirectMessageChat({ conversation, onBack, fullscreen = false, in
   }, [isChatActive, resolvedConversationId]);
 
   // Emit markAsRead (socket) + scroll on initial load
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (isChatActive && isInitialMount.current && messages.length > 0 && readSpot.ready) {
       const ownAddress = walletAddress?.toLowerCase();
       const ownId = user?._id;

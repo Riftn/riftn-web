@@ -247,7 +247,7 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
   }, [rooms, selectedRoomId, pendingShareId]);
 
   const {
-    messages: apiMessages, isLoading: messagesLoading, isBanned,
+    messages: apiMessages, isLoading: messagesLoading, historyError, isBanned,
     send, retrySend, discardSend, addReaction, removeReaction, editMessage, deleteMessage, refetch,
     hasOlder, loadingOlder, loadOlder, signInWall,
     hasNewer, jumpTo, loadNewer, backToLatest,
@@ -496,7 +496,7 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
   const followLatest = useRef(true);
   // Position initial history immediately, and follow new rows only while the
   // reader is at the tail. Scroll this list without moving its ancestors.
-  useEffect(() => {
+  useLayoutEffect(() => {
     const container = scrollContainerRef.current;
     if (container && filteredMessages.length > 0) {
       if (followedRoom.current !== selectedRoomId) followLatest.current = true;
@@ -510,7 +510,7 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
 
   // Decide once per room where it opens: on the "Unread messages" line, or at
   // the newest line as before.
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!selectedRoomId || readDecidedRoom.current === selectedRoomId) return;
     if (messagesLoading || !messages.length || !readSpot.ready) return;
     const decide = (anchor: UnreadAnchor | null) => {
@@ -769,7 +769,7 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
 
   // Merge list-level room data with the richer single-room details
   const enrichedRoom = roomDetails || selectedRoom;
-  const isLoading = roomsLoading || (messagesLoading && apiMessages.length === 0);
+  const isLoading = (!selectedRoomId || messagesLoading) && apiMessages.length === 0;
   const roomName = t('publicChat.title');
   const roomDescription = t('publicChat.allThingsDeHub');
 
@@ -1059,7 +1059,7 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
           onPointerDown={dismissKeyboard}
           className={`absolute inset-0 chat-text-zone overflow-y-auto py-2 ${showSearchList ? 'invisible' : ''}`}
         >
-          {roomsError ? (
+          {roomsError && rooms.length === 0 ? (
             <AppState
               icon="messages"
               title={_copy("copy.a802859daeb1", { defaultValue: "Chat could not load" })}
@@ -1083,6 +1083,15 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
                 </div>
               ))}
             </>
+          ) : historyError && apiMessages.length === 0 ? (
+            <AppState
+              icon="messages"
+              title={_copy("copy.a802859daeb1", { defaultValue: "Chat could not load" })}
+              kind="error"
+              size="section"
+              className="h-full"
+              primaryAction={{ label: _copy("copy.d8b8392e2c54", { defaultValue: "Try again" }), onClick: () => void refetch(), icon: <RefreshCw /> }}
+            />
           ) : messages.length === 0 ? (
             <AppState icon="messages" title={_copy("copy.f42e0f66017d", { defaultValue: "No messages yet" })} description={_copy("copy.39e31bf6b245", { defaultValue: "Be the first to say something." })} size="section" className="h-full" />
           ) : (

@@ -339,7 +339,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const [selectedConversation, setSelectedConversation] = useState<DeHubConversation | null>(null);
   // A direct public link can mount its room in the first render.
   const [showPublicChat, setShowPublicChat] = useState(() =>
-    fullscreen && new URLSearchParams(location.search).get('chat') === 'public',
+    new URLSearchParams(location.search).get('chat') === 'public',
   );
   // A group, channel or community chat open in place (same chat as the
   // community page's Chat tab).
@@ -378,7 +378,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // The chat opened from that drawer, whose composer takes the caret on arrival.
   const [composerFocusFor, setComposerFocusFor] = useState<string | null>(null);
   const [newChatKind, setNewChatKind] = useState<NewChatKind | null>(null);
-  const { data: myMemberships } = useUserCommunities();
+  const { data: myMemberships, isPending: membershipsPending, isLoadingError: membershipsFailed, isRefetching: membershipsRefreshing, refetch: refetchMemberships } = useUserCommunities();
   
   const isPageActive = useContext(CachedPageActiveContext);
   const [searchQuery, setSearchQuery] = useSurfaceDraft("pages/app/MessagesPage.tsx:searchQuery", '');
@@ -408,6 +408,10 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     isRefetching,
   } = useConversations(debouncedSearchQuery, isPageActive || !debouncedSearchQuery);
 
+  const loadingMemberships = !!walletAddress && membershipsPending;
+  const inboxLoading = isLoading || loadingMemberships;
+  const inboxError = isError || membershipsFailed;
+
   // Phones: pull the chat list down from its top to refresh it.
   const chatListRef = useRef<HTMLDivElement>(null);
   const chatPullRef = useRef<HTMLDivElement>(null);
@@ -421,8 +425,11 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const chatPull = usePullToRefresh({
     enabled: phonePill,
     pullThreshold: PULL_REFRESH_THRESHOLD,
-    onRefresh: () => { void refetch(); },
-    isRefreshing: isRefetching,
+    onRefresh: () => {
+      void refetch();
+      if (walletAddress) void refetchMemberships();
+    },
+    isRefreshing: isRefetching || membershipsRefreshing,
     containerRef: chatListRef,
     motionRef: chatPullRef,
     onMotion: showChatPull,
@@ -1050,7 +1057,8 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
    */
   const navigate = useNavigate();
   const chatEntryRef = useRef(false);
-  const chatParamPresent = new URLSearchParams(location.search).get('chat') === '1';
+  const chatParam = new URLSearchParams(location.search).get('chat');
+  const chatParamPresent = chatParam === '1' || chatParam === 'public';
   const chatParamWasPresent = useRef(chatParamPresent);
   const shareLiveTokenId = location.state?.shareLiveTokenId;
 
@@ -1059,13 +1067,16 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     // Signed out, /app/messages is only a gate (or a hop to /chat for a
     // Public Chat link): pushing ?chat=1 here would pull them back from /chat.
     if (!isAuthenticated && !fullscreen) return;
-    if (chatOpen && !chatEntryRef.current) {
-      chatEntryRef.current = true;
-      navigate(`${routeBase}?chat=1`, {
-        state: showPublicChat && shareLiveTokenId ? { shareLiveTokenId } : undefined,
-      });
-    }
-  }, [chatOpen, isMessagesRouteActive, navigate, routeBase, isAuthenticated, fullscreen, showPublicChat, shareLiveTokenId]);
+    if (!chatOpen || (chatParamWasPresent.current && !chatParamPresent)) return;
+    const nextChatParam = showPublicChat ? 'public' : '1';
+    if (chatParam === nextChatParam) return;
+    const replace = chatParam === '1' || chatParam === 'public';
+    if (!replace) chatEntryRef.current = true;
+    navigate(`${routeBase}?chat=${nextChatParam}`, {
+      replace,
+      state: showPublicChat && shareLiveTokenId ? { shareLiveTokenId } : undefined,
+    });
+  }, [chatOpen, chatParam, chatParamPresent, isMessagesRouteActive, navigate, routeBase, isAuthenticated, fullscreen, showPublicChat, shareLiveTokenId]);
 
   // Back was pressed: the param is gone, so close the chat rather than leave
   // the route. This also clears a selection that would otherwise survive —
@@ -1075,10 +1086,11 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     if (!isMessagesRouteActive) return;
     const poppedChatEntry = chatParamWasPresent.current && !chatParamPresent;
     chatParamWasPresent.current = chatParamPresent;
-    if (poppedChatEntry && chatEntryRef.current) {
+    if (poppedChatEntry) {
       chatEntryRef.current = false;
       setSelectedConversation(null);
       setShowPublicChat(false);
+      setSelectedRoom(null);
     }
   }, [chatParamPresent, isMessagesRouteActive]);
 
@@ -1110,7 +1122,8 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     setSelectedConversation(null);
     setShowPublicChat(false);
     setSelectedRoom(null);
-  }, [navigate]);
+    if (chatParamPresent) navigate(routeBase, { replace: true });
+  }, [chatParamPresent, navigate, routeBase]);
   // Opening a DM or the public chat puts an open group chat away.
   useEffect(() => {
     if (selectedConversation || showPublicChat) setSelectedRoom(null);
@@ -1268,13 +1281,13 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
 
   const roomPane = fullscreen && selectedRoom ? (
     <div className="h-full overflow-hidden pt-1">
-      <Suspense fallback={null}><RoomChatPane key={selectedRoom.id} community={selectedRoom} onBack={closeChat} /></Suspense>
+      <Suspense fallback={<ConversationsSkeleton />}><RoomChatPane key={selectedRoom.id} community={selectedRoom} onBack={closeChat} /></Suspense>
     </div>
   ) : null;
   if (selectedRoom && !fullscreen) {
     return (
       <div style={keyboardStyle} className={`${mobileChatHeight} lg:h-[calc(100dvh-32px)] pt-1 pb-0 sm:pt-1 sm:pb-3 lg:pt-2 overflow-hidden`}>
-        <Suspense fallback={null}><RoomChatPane key={selectedRoom.id} community={selectedRoom} onBack={closeChat} /></Suspense>
+        <Suspense fallback={<ConversationsSkeleton />}><RoomChatPane key={selectedRoom.id} community={selectedRoom} onBack={closeChat} /></Suspense>
         {notesSheetHost}
       </div>
     );
@@ -1768,24 +1781,27 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
             </>)}
 
             {/* Loading State */}
-            {isLoading && <ConversationsSkeleton />}
+            {inboxLoading && <ConversationsSkeleton />}
 
             {/* Error State */}
-            {isError && (
+            {inboxError && (
               <AppState
                 icon="messages"
                 title={t('messages.failedToLoad')}
                 description={_copy("copy.be26771e6ef9", { defaultValue: "Your conversations are still safe. Try loading them again." })}
                 kind="error"
                 size="drawer"
-                primaryAction={{ label: t('messages.tryAgain'), onClick: () => refetch() }}
+                primaryAction={{ label: t('messages.tryAgain'), onClick: () => {
+                  if (isError) void refetch();
+                  if (membershipsFailed) void refetchMemberships();
+                } }}
               />
             )}
 
 
 
             {/* Empty state */}
-            {!guest && !isLoading && !isError && !searchQuery.trim() && liveConversations.length === 0 && (
+            {!guest && !inboxLoading && !inboxError && !searchQuery.trim() && liveConversations.length === 0 && groupChats.length === 0 && (
               <AppState
                 icon="messages"
                 title={t('messages.noConversationsYet', 'No conversations yet')}

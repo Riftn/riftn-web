@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
@@ -39,7 +39,9 @@ vi.mock('@/lib/media-url', () => ({ buildAvatarUrl: () => '', extractAvatarPath:
 vi.mock('@/components/app/chat/DirectMessageChat', () => ({
   DirectMessageChat: ({ onBack }: { onBack: () => void }) => <button onClick={onBack}>Back to messages</button>,
 }));
-vi.mock('@/components/app/chat/PublicChat', () => ({ PublicChat: () => <p>Public room is open</p> }));
+vi.mock('@/components/app/chat/PublicChat', () => ({
+  PublicChat: ({ onBack }: { onBack: () => void }) => <button onClick={onBack}>Public room is open</button>,
+}));
 vi.mock('@/components/app/chat/NewConversationModal', () => ({ NewConversationModal: () => null }));
 vi.mock('@/components/app/chat/NewMessageSelector', () => ({ NewMessageSelector: () => null }));
 vi.mock('@/components/app/chat/NewMessageDrawer', () => ({ NewMessageDrawer: () => null }));
@@ -95,7 +97,7 @@ describe('opening a chat from a notification link', () => {
     expect(screen.getByRole('button', { name: /Aaron/ })).toBeInTheDocument();
   });
 
-  it('keeps the public room open on a signed-out phone after adding its back entry', async () => {
+  it('keeps a Public Chat deep link reloadable and can close it to the inbox', async () => {
     source.isAuthenticated = false;
     source.phone = true;
     render(
@@ -105,7 +107,9 @@ describe('opening a chat from a notification link', () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByText('?chat=1')).toBeInTheDocument();
-    expect(screen.getByText('Public room is open')).toBeInTheDocument();
+    expect(await screen.findByText('?chat=public')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Public room is open' }));
+    expect(screen.queryByRole('button', { name: 'Public room is open' })).toBeNull();
+    expect(screen.queryByText('?chat=public')).toBeNull();
   });
 });

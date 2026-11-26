@@ -68,7 +68,7 @@ export function useCommunityChatHistory<T extends CommunityMessagePosition>(opti
   }, [anchor, queryClient, makeOptions, scope]);
   return {
     rawMessages, referenceMessages, pinned, messagesKey,
-    isLoading: query.isLoading,
+    isLoading: enabled && !!communityId && query.isPending,
     refreshHistory: query.refetch,
     error: query.error,
     hasOlderMessages: !!query.hasNextPage && !accessDenied,
