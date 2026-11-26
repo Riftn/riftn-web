@@ -1044,6 +1044,8 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
       <div className="relative flex-1">
         <div
           ref={scrollContainerRef}
+          data-public-chat-ready={isAuthenticated || roomsError || (!roomsLoading && (!rooms.length || apiMessages.length > 0))
+            ? '' : undefined}
           onScroll={(event) => {
             const el = event.currentTarget;
             const fromEnd = el.scrollHeight - el.clientHeight - el.scrollTop;
