@@ -175,6 +175,7 @@ export async function uploadDmPhotos(
       throw new Error('Could not encrypt the photo batch.');
     }
     const wire = await d.seal(peerAddress, caption);
+    if (wire.encrypted) throw new Error('Could not encrypt the photo batch.');
     const sent = await d.upload(files, conversationId, senderId, { ...upload, content: wire.content });
     return { message: { ...sent, content: caption, encrypted: wire.encrypted }, plaintext: [] };
   }

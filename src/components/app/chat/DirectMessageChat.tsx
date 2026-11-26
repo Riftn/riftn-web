@@ -334,7 +334,7 @@ function EncryptedMediaPlaceholder({
 function DmPhotoButton({ label, src, onClick }: { label: string; src: string; onClick?: () => void }) {
   return (
     <Button type="button" variant="ghost" aria-label={label} onClick={onClick}
-      className="relative h-auto aspect-square min-w-0 overflow-hidden bg-muted p-0 cursor-zoom-in focus-visible:ring-inset">
+      className="relative h-auto aspect-square min-w-0 overflow-hidden bg-muted p-0 cursor-zoom-in focus-visible:ring-0 after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-ring">
       <SettledImg src={src} alt="" className="absolute inset-0 size-full object-cover" />
     </Button>
   );
