@@ -1,3 +1,5 @@
+import { deleteNotificationIds } from '@/lib/delete-notifications';
+import { formatCount } from '@/lib/format-count';
 import { useTranslation as _useCopy } from 'react-i18next';
 import { localizedNotificationContent } from "@/lib/notification-content";
 import appI18n from '@/i18n';
@@ -49,7 +51,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { NotificationSettleAction } from '@/components/app/fractions/NotificationSettleAction';
 import { 
-  useNotifications, 
+  useNotifications,
+  notificationKeys,
   useUnreadNotificationCount, 
   useMarkAllNotificationsAsRead, 
   useMarkNotificationAsRead,
@@ -57,7 +60,7 @@ import {
   type DeHubNotification,
   type NotificationCategory,
 } from '@/hooks/use-notifications';
-import { useCustomNotifications, useCustomUnreadCount, useMarkCustomNotificationAsRead, useMarkAllCustomNotificationsAsRead } from '@/hooks/use-custom-notifications';
+import { customNotificationKeys, useCustomNotifications, useCustomUnreadCount, useMarkCustomNotificationAsRead, useMarkAllCustomNotificationsAsRead } from '@/hooks/use-custom-notifications';
 import {
   communityNotificationIcon,
   communityNotificationPath,
@@ -70,7 +73,7 @@ import { formatTimeAgo } from '@/lib/feed-utils';
 import { BadgeIcon } from '@/components/app/BadgeIcon';
 import { Link, useNavigate } from 'react-router-dom';
 import dehubMarkWhite from '@/assets/dehub-mark-white.png';
-import { useQueries, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQueries, useQuery, useMutation, useQueryClient, type InfiniteData } from '@tanstack/react-query';
 
 import { buildAvatarUrl, extractAvatarPath } from '@/lib/media-url';
 import { stageLiveSentence, stageReminderSentence, stageNotificationPath } from '@/lib/stage-notifications';
@@ -1193,12 +1196,20 @@ export const NotificationItem = memo(function NotificationItem({
   onMarkAsRead,
   isMarkingAsRead,
   enrichedAvatars,
+  onSelect,
+  selecting = false,
+  selected = false,
+  selectionDisabled = false,
 }: {
   notification: DeHubNotification;
   bundle: BundledNotification;
   onMarkAsRead: (id: string) => void;
   isMarkingAsRead: boolean;
   enrichedAvatars: Map<string, EnrichedAvatar>;
+  onSelect?: (ids: string[]) => void;
+  selecting?: boolean;
+  selected?: boolean;
+  selectionDisabled?: boolean;
 }) {
   const { t: _copy } = _useCopy();
   const navigate = useNavigate();
@@ -1490,15 +1501,76 @@ export const NotificationItem = memo(function NotificationItem({
     });
   };
 
+  const hold = useRef<{ timer: number; x: number; y: number } | null>(null);
+  const held = useRef(false);
+  const cancelHold = useCallback(() => {
+    if (!hold.current) return;
+    window.clearTimeout(hold.current.timer);
+    hold.current = null;
+  }, []);
+  useEffect(() => cancelHold, [cancelHold]);
+  const rowContent = useCallback((node: HTMLDivElement | null) => {
+    if (node) node.inert = selecting;
+  }, [selecting]);
+
   return (
     <div
-      onClick={handleClick}
-      onPointerDown={warmTarget}
+      onClick={selecting ? undefined : handleClick}
+      onClickCapture={(event) => {
+        if (!held.current || event.detail === 0) return;
+        held.current = false;
+        event.preventDefault();
+        event.stopPropagation();
+      }}
+      onPointerDown={(event) => {
+        held.current = false;
+        if (selecting) return;
+        warmTarget();
+        if (!onSelect || !event.isPrimary || event.button !== 0) return;
+        cancelHold();
+        hold.current = {
+          x: event.clientX,
+          y: event.clientY,
+          timer: window.setTimeout(() => {
+            hold.current = null;
+            held.current = true;
+            onSelect(bundle.allIds);
+          }, 450),
+        };
+      }}
+      onPointerMove={(event) => {
+        const start = hold.current;
+        if (start && Math.hypot(event.clientX - start.x, event.clientY - start.y) > 8) cancelHold();
+      }}
+      onPointerUp={cancelHold}
+      onPointerLeave={cancelHold}
+      onPointerCancel={cancelHold}
+      onContextMenu={(event) => {
+        if (onSelect && (held.current || hold.current)) event.preventDefault();
+      }}
       data-notification-row
+      data-notification-selectable={onSelect ? '' : undefined}
+      data-notification-selected={selected ? '' : undefined}
       data-feed-row
       data-unread={isUnreadRow ? '' : undefined}
-      className="relative flex items-start gap-3 rounded-2xl py-3 pl-[18px] pr-4 transition-colors duration-300 cursor-pointer"
+      className="relative flex items-start gap-3 rounded-2xl py-3 pl-[18px] transition-colors duration-300 cursor-pointer"
+      style={{ paddingRight: selecting ? 44 : 16 }}
     >
+      {selecting && (
+        <button
+          type="button"
+          className="absolute inset-0 z-10 flex items-center justify-end rounded-2xl pr-3 focus-visible:outline focus-visible:-outline-offset-2 focus-visible:outline-2 focus-visible:outline-ring"
+          aria-pressed={selected}
+          aria-label={notification.content || t('notifications.title')}
+          disabled={selectionDisabled}
+          onClick={() => onSelect?.(bundle.allIds)}
+        >
+          <span data-notification-selection-check aria-hidden="true">
+            {selected && <Check className="size-3.5" />}
+          </span>
+        </button>
+      )}
+      <div ref={rowContent} className="contents">
       {/* Unread is a solid dot, not a filled block. It doubles as the
           per-row "mark as read" control the old round button gave. */}
       {isUnreadRow && (
@@ -1876,6 +1948,7 @@ export const NotificationItem = memo(function NotificationItem({
           </div>
         </DrawerContent>
       </Drawer>
+      </div>
     </div>
   );
 });
@@ -1960,11 +2033,31 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
   const isNotificationListActive = inDrawer || isPageActive;
   const { isAuthenticated, walletAddress: pageWalletAddress } = useAuth();
   const navigate = useNavigate();
+  const [selection, setSelection] = useState<Set<string> | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const deleting = useRef(false);
+  const currentWallet = useRef(pageWalletAddress);
+  currentWallet.current = pageWalletAddress;
   // Phones: the search button turns the whole pill into a search box that
   // filters the rows already loaded, as Home's pill does.
   const phonePill = usePhonePill();
   const [search, setSearch] = useState<{ query: string; from: MeltFrom } | null>(null);
   const searchQuery = search?.query.trim().toLowerCase() ?? '';
+  useEffect(() => {
+    setSelection(null);
+  }, [activeTab, searchQuery, isNotificationListActive, pageWalletAddress]);
+  const toggleSelection = useCallback((ids: string[]) => {
+    if (deleting.current) return;
+    setSelection(previous => {
+      const next = new Set(previous);
+      const remove = ids.some(id => next.has(id));
+      for (const id of ids) {
+        if (remove) next.delete(id);
+        else next.add(id);
+      }
+      return next;
+    });
+  }, []);
   const isDesktopViewport = useIsDesktopViewport();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const settingsSheetRef = useRef<HTMLDivElement>(null);
@@ -2353,6 +2446,51 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
     [notifications, enrichedAvatars, listedUnread]
   );
 
+  const selectableIds = bundledNotifications.flatMap(bundle => bundle.allIds);
+  const selectedIds = selection ? selectableIds.filter(id => selection.has(id)) : [];
+  const selectedCount = selection
+    ? bundledNotifications.filter(bundle => bundle.allIds.some(id => selection.has(id))).length
+    : 0;
+  const allShownSelected = selectableIds.length > 0 && selectedIds.length === selectableIds.length;
+
+  const deleteSelected = async () => {
+    const wallet = pageWalletAddress;
+    if (!wallet || !selectedIds.length || deleting.current) return;
+    deleting.current = true;
+    setIsDeleting(true);
+    try {
+      const deleted = new Set(await deleteNotificationIds(selectedIds, wallet));
+      if (currentWallet.current !== wallet) return;
+      if (deleted.size) {
+        await Promise.all([
+          queryClient.cancelQueries({ queryKey: notificationKeys.all }),
+          queryClient.cancelQueries({ queryKey: customNotificationKeys.all }),
+        ]);
+        if (currentWallet.current !== wallet) return;
+        queryClient.setQueriesData<InfiniteData<{ items: DeHubNotification[] }>>(
+          { queryKey: [...notificationKeys.all, 'list'] },
+          old => old && {
+            ...old,
+            pages: old.pages.map(page => ({ ...page, items: page.items.filter(row => !deleted.has(row.id)) })),
+          },
+        );
+        queryClient.setQueryData<DeHubNotification[]>(customNotificationKeys.list(wallet),
+          old => old?.filter(row => !deleted.has(row.id)));
+      }
+      void queryClient.invalidateQueries({ queryKey: notificationKeys.all });
+      void queryClient.invalidateQueries({ queryKey: customNotificationKeys.all });
+      if (deleted.size === selectedIds.length) {
+        setSelection(null);
+      } else {
+        setSelection(new Set(selectedIds.filter(id => !deleted.has(id))));
+        toast.error(t('notifications.deleteSelectedError', { defaultValue: 'Some notifications could not be deleted. Try again.' }));
+      }
+    } finally {
+      deleting.current = false;
+      setIsDeleting(false);
+    }
+  };
+
   // Hooks must run unconditionally on every render. This page stays mounted in
   // the background even while signed out (PersistentPageCache never unmounts
   // it), so an early return before this point used to skip the two hooks above
@@ -2680,7 +2818,7 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
           className={inDrawer ? 'top-0 lg:top-0 pt-2' : undefined}
           icon="notifications"
           title={<span aria-live="polite">{activeTabLabel}</span>}
-          pillLine={phonePill && search ? (
+          pillLine={phonePill && search && !selection ? (
             <NotificationSearchLine
               value={search.query}
               from={search.from}
@@ -2690,11 +2828,35 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
               onClose={() => setSearch(null)}
             />
           ) : undefined}
-          tabs={
+          tabs={selection ? (
+            <div className="flex flex-wrap items-center justify-end gap-2 px-3 py-2" data-notification-selection-actions>
+              <Button type="button" variant="ghost" className="min-h-11 px-2" disabled={isDeleting}
+                onClick={() => setSelection(null)}>
+                {t('common.cancel', { defaultValue: 'Cancel' })}
+              </Button>
+              <Button type="button" variant="secondary" className="min-h-11 px-2"
+                disabled={isDeleting || !selectableIds.length}
+                onClick={() => setSelection(new Set(allShownSelected ? [] : selectableIds))}>
+                {allShownSelected
+                  ? t('notifications.deselectAll', { defaultValue: 'Deselect all' })
+                  : t('notifications.selectAllShown', { defaultValue: 'Select all shown' })}
+              </Button>
+              <Button type="button" variant="destructive" className="min-h-11 min-w-[104px] px-2"
+                loading={isDeleting} disabled={!selectedIds.length} onClick={() => void deleteSelected()}>
+                {selectedCount
+                  ? t('notifications.deleteSelection', { selected: formatCount(selectedCount), defaultValue: 'Delete ({{selected}})' })
+                  : t('common.delete', { defaultValue: 'Delete' })}
+              </Button>
+            </div>
+          ) : (
             <PageTabs
               beforeTabs={
                 <div className="flex shrink-0 items-center gap-1.5">
                   {settingsControl}
+                  <Button type="button" variant="ghost" className="min-h-11 px-2"
+                    disabled={!selectableIds.length} onClick={() => setSelection(new Set())}>
+                    {t('notifications.select', { defaultValue: 'Select' })}
+                  </Button>
                   {phonePill && (
                     <IslandAction
                       label={t('notifications.searchPlaceholder', { defaultValue: 'Search notifications' })}
@@ -2734,13 +2896,13 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
                 };
               })}
             />
-          }
+          )}
         />
       </div>
 
       {/* Notifications List */}
       <PageBody frameClip={inDrawer} className={inDrawer ? 'pt-0' : undefined}>
-        {isAuthenticated && pageWalletAddress && (
+        {!selection && isAuthenticated && pageWalletAddress && (
           <NotificationCatchUp key={pageWalletAddress} wallet={pageWalletAddress} isVisible={isVisibleNotification}
             onOpenNotification={notification => {
               const announcement = announcementTarget(notification);
@@ -2802,6 +2964,10 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
                       onMarkAsRead={handleMarkAsRead}
                       isMarkingAsRead={bundle.allIds.includes(markingNotificationId || '')}
                       enrichedAvatars={enrichedAvatars}
+                      onSelect={toggleSelection}
+                      selecting={selection !== null}
+                      selected={bundle.allIds.some(id => selection?.has(id))}
+                      selectionDisabled={isDeleting}
                     />
                   </div>
                 );

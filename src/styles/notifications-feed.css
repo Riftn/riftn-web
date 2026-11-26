@@ -166,3 +166,30 @@ html [data-feed-reply] [data-feed-pill]:not(#_):not(#_),
 html [data-feed-actions] > button:not(#_):not(#_) {
   border-radius: 9999px !important;
 }
+
+[data-notification-selectable] {
+  -webkit-touch-callout: none;
+}
+
+html [data-notification-row][data-feed-row][data-notification-selected]:not(#_):not(#_) {
+  background-color: color-mix(in srgb, var(--nf-accent) 12%, transparent) !important;
+}
+
+[data-notification-selection-actions] {
+  color: var(--nf-ink);
+}
+
+[data-notification-selection-check] {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--nf-mute);
+  border-radius: 6px;
+}
+
+[data-notification-selected] [data-notification-selection-check] {
+  background: var(--nf-accent);
+  border-color: var(--nf-accent);
+  color: var(--nf-accent-ink);
+}
