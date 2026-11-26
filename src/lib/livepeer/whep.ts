@@ -73,6 +73,7 @@ export interface SubscribeOptions {
    * address directly. The browser still prefers a direct route when one works.
    */
   iceServers?: RTCIceServer[];
+  signal?: AbortSignal;
   onStateChange?: (state: WhepState, detail?: string) => void;
 }
 
@@ -98,9 +99,11 @@ export async function subscribeToWhep({
   playbackId,
   endpoint: endpointOverride,
   iceServers: extraIceServers,
+  signal,
   onStateChange,
 }: SubscribeOptions): Promise<WhepSubscription> {
   if (!playbackId) throw new Error('A playback id is required to subscribe.');
+  if (signal?.aborted) throw new Error('WHEP subscription cancelled');
 
   const pc = new RTCPeerConnection({
     iceServers: extraIceServers?.length ? [...ICE_SERVERS, ...extraIceServers] : ICE_SERVERS,
@@ -116,27 +119,34 @@ export async function subscribeToWhep({
     listener?.(state, detail);
   };
 
+  const deleteResource = async () => {
+    const url = resourceUrl;
+    resourceUrl = null;
+    if (!url) return;
+    try {
+      await fetch(whepHangUpUrl(url), { method: 'DELETE', keepalive: true });
+    } catch {
+      // The server times the session out on its own.
+    }
+  };
+  const abort = () => { void stop(); };
   const stop = async (): Promise<void> => {
     if (stopped) return;
     stopped = true;
-    try {
-      pc.close();
-    } catch {
-      /* already closed */
-    }
-    if (resourceUrl) {
-      try {
-        await fetch(whepHangUpUrl(resourceUrl), { method: 'DELETE', keepalive: true });
-      } catch {
-        // The server times the session out on its own; this is tidiness.
-      }
-    }
+    signal?.removeEventListener('abort', abort);
+    try { pc.close(); } catch { /* already closed */ }
     listener?.('closed');
+    await deleteResource();
+  };
+  const checkOpen = () => {
+    if (stopped) throw new Error('WHEP subscription cancelled');
   };
 
+  signal?.addEventListener('abort', abort);
   emit('connecting');
 
   try {
+    checkOpen();
     // recvonly: this is playback, we never send anything back up.
     pc.addTransceiver('video', { direction: 'recvonly' });
     pc.addTransceiver('audio', { direction: 'recvonly' });
@@ -144,7 +154,7 @@ export async function subscribeToWhep({
     pc.addEventListener('track', (event) => {
       // One MediaStream for both tracks: handing a <video> element two
       // separate streams plays whichever arrived last and drops the other.
-      stream.addTrack(event.track);
+      if (!stopped) stream.addTrack(event.track);
     });
 
     pc.addEventListener('connectionstatechange', () => {
@@ -164,15 +174,19 @@ export async function subscribeToWhep({
     });
 
     const offer = await pc.createOffer();
+    checkOpen();
     await pc.setLocalDescription(offer);
+    checkOpen();
     // A relayed run is only worth anything with its TURN candidate in the offer.
     const relayed = !!extraIceServers?.length;
     // Our own ingest gets the offer as soon as there is any candidate at all.
-    await waitForIceGathering(pc, relayed ? 'relay' : endpointOverride ? 'any' : 'srflx', relayed ? RELAY_GATHER_CAP_MS : DIRECT_GATHER_CAP_MS);
+    await waitForIceGathering(pc, relayed ? 'relay' : endpointOverride ? 'any' : 'srflx', relayed ? RELAY_GATHER_CAP_MS : DIRECT_GATHER_CAP_MS, signal);
+    checkOpen();
     if (relayed && !/ typ relay/.test(pc.localDescription?.sdp ?? '')) throw new Error(NO_RELAY_CANDIDATE);
 
     const endpoint =
       endpointOverride || `${WHEP_BASE_URL.replace(/\/$/, '')}/${playbackId}`;
+    // Let an in-flight POST return its Location so we can delete a late session.
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/sdp' },
@@ -181,12 +195,17 @@ export async function subscribeToWhep({
 
     if (!response.ok) throw new WhepRefusedError(response.status);
 
+    resourceUrl = resolveSessionResource(response);
+    if (stopped) await deleteResource();
+    checkOpen();
     const answer = await response.text();
+    checkOpen();
     if (!answer.trim()) throw new Error('The playback server returned an empty answer.');
 
-    resourceUrl = resolveSessionResource(response);
     await pc.setRemoteDescription({ type: 'answer', sdp: answer });
+    checkOpen();
 
+    signal?.removeEventListener('abort', abort);
     logger.info('WHEP session opened', { playbackId });
     return {
       stream,
