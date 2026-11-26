@@ -38,6 +38,8 @@ import Download from "@/components/ui/cut-icons/download";
 import { TipGemIcon } from '@/components/app/cards/TipGemIcon';
 import { useTranslation as useI18n } from 'react-i18next';
 import { useDmEncryption } from '@/hooks/use-dm-encryption';
+import { useDmTyping } from '@/hooks/use-dm-typing';
+import { dmTypingLabel } from '@/i18n/dm-typing-copy';
 import { prepareOutgoing } from '@/lib/dm-e2ee/keys';
 import { languageName, peerLanguage, translateOutgoing } from '@/lib/dm-translate-out';
 import { encodeMediaDescriptor, photoMediaKey, type MediaDescriptor } from '@/lib/dm-e2ee/media';
@@ -2262,6 +2264,15 @@ export function DirectMessageChat({ conversation, onBack, fullscreen = false, in
   // Where you left off (server-saved, same on every device). Real chats only:
   // a chat that is still being created has nothing to come back to.
   const readChatId = /^[0-9a-f]{24}$/i.test(resolvedConversationId || '') ? resolvedConversationId : null;
+  const typingUserId = user?._id || user?.id;
+  const typingChatId = isChatActive && typingUserId && !isGroupChat && otherUser?.address
+    && !isAssistantAddress(otherUser.address) ? readChatId : null;
+  const { remoteTyping, onTypingActivity } = useDmTyping(typingChatId, typingUserId);
+  const typingStatus = remoteTyping && (
+    <span role="status" className="block truncate text-xs text-zinc-400">
+      {dmTypingLabel(i18n.languages)}
+    </span>
+  );
   const readSpot = useChatReadPosition(readChatId);
   // History pages pulled in at open to reach the spot (30 lines a page).
   const readSpotPagesRef = useRef(0);
@@ -3637,7 +3648,7 @@ export function DirectMessageChat({ conversation, onBack, fullscreen = false, in
               </span>
               <OnlineDot address={otherUser?.address} />
             </span>
-            {!isGroupChat && <span className="max-w-full truncate text-[11px] [&_p]:truncate [&_p]:text-[11px]"><LastSeenLine address={otherUser?.address} customs={peerProfile?.customs} /></span>}
+            {!isGroupChat && (typingStatus || <span className="max-w-full truncate text-[11px] [&_p]:truncate [&_p]:text-[11px]"><LastSeenLine address={otherUser?.address} customs={peerProfile?.customs} /></span>)}
           </Link>
           <div className="flex w-[108px] shrink-0 items-center justify-end gap-0.5 pt-1 [&_button]:h-8 [&_button]:w-8">
             {!isGroupChat && isAssistantAddress(otherUser?.address) && (
@@ -3694,7 +3705,7 @@ export function DirectMessageChat({ conversation, onBack, fullscreen = false, in
               {otherUser?.username && (
                 <p className="text-xs text-zinc-500">@{otherUser.username}</p>
               )}
-              {!isGroupChat && <LastSeenLine address={otherUser?.address} customs={peerProfile?.customs} />}
+              {!isGroupChat && (typingStatus || <LastSeenLine address={otherUser?.address} customs={peerProfile?.customs} />)}
               {peerLocalTime && (
                 <p className="truncate text-xs text-zinc-400" title={String(peerProfile?.customs?.publicTimeZone)}>
                   {localTimeLine(_copy as never, peerLocalTime, peerProfile?.customs?.publicTimeZone)}
@@ -3975,6 +3986,7 @@ export function DirectMessageChat({ conversation, onBack, fullscreen = false, in
         peerName={displayName}
         onSendMessage={handleSendMessage}
         groupPhotos={!feeRequired}
+        onTypingActivity={onTypingActivity}
         allowLock
         replyTo={composerReplyTo}
         incomingFile={cameraFile}

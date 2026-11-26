@@ -84,6 +84,7 @@ interface ChatInputProps {
   autoFocus?: boolean;
   groupPhotos?: boolean;
   onSendMessage: (args: ChatInputSendArgs) => Promise<boolean>;
+  onTypingActivity?: (hasText: boolean) => void;
   onTipClick?: () => void;
   /**
    * The clock beside the tip gem: send this message later. Handed what is
@@ -163,7 +164,7 @@ interface ChatInputProps {
   allowLock?: boolean;
 }
 
-export function ChatInput({ onSendMessage, groupPhotos = false, onTipClick, onScheduleClick, scheduledCount = 0, onPollClick, onNoteClick, sendDisabled, sendDisabledReason, isSendingFee, feeAmount, confirmBeforeSend, canSend, replyTo, onCancelReply, incomingFile, initialText, incomingLink, onIncomingLinkApplied, thread, peerName, draftKey, allowDocuments = true, voiceMaxDuration = 59, allowLock = false, autoFocus = false, phoneB = false }: ChatInputProps) {
+export function ChatInput({ onSendMessage, onTypingActivity, groupPhotos = false, onTipClick, onScheduleClick, scheduledCount = 0, onPollClick, onNoteClick, sendDisabled, sendDisabledReason, isSendingFee, feeAmount, confirmBeforeSend, canSend, replyTo, onCancelReply, incomingFile, initialText, incomingLink, onIncomingLinkApplied, thread, peerName, draftKey, allowDocuments = true, voiceMaxDuration = 59, allowLock = false, autoFocus = false, phoneB = false }: ChatInputProps) {
   const { t: _copy } = _useCopy();
   const { t } = useTranslation();
   const [message, setMessage] = useDraft(draftKey, initialText ?? '');
@@ -353,6 +354,7 @@ export function ChatInput({ onSendMessage, groupPhotos = false, onTipClick, onSc
     if (pendingType === 'msg' && !message.trim()) return;
     if (canSend && !canSend({ type: pendingType, mediaFile: audioPreview ? audioPreview.file : pendingFile })) return;
     if (confirmBeforeSend && !(await confirmBeforeSend())) return;
+    onTypingActivity?.(false);
     // Whatever is on the rail was drafted against a thread that no longer ends
     // where it did, so it goes down with the send and comes back up on the
     // next tail — as follow-ups, since the user now holds the last word.
@@ -488,6 +490,7 @@ export function ChatInput({ onSendMessage, groupPhotos = false, onTipClick, onSc
 
   const handleGifSelect = (gifUrl: string) => {
     if (canSend && !canSend({ type: 'gif' })) return;
+    onTypingActivity?.(false);
     onSendMessage({ content: '', type: 'gif', gifUrl });
   };
 
@@ -1036,6 +1039,7 @@ export function ChatInput({ onSendMessage, groupPhotos = false, onTipClick, onSc
                 onChange={(e) => {
                   const val = e.target.value;
                   setMessage(val);
+                  onTypingActivity?.(!sendDisabled && !!val.trim());
                   mention.handleInput(val, e.target.selectionStart);
                   const ta = e.target;
                   requestAnimationFrame(() => {
@@ -1046,7 +1050,10 @@ export function ChatInput({ onSendMessage, groupPhotos = false, onTipClick, onSc
                 onKeyDown={handleKeyDown}
                 onPaste={handlePaste}
                 onFocus={() => { setComposerFocused(true); setTrayOpen(false); }}
-                onBlur={() => setComposerFocused(false)}
+                onBlur={() => {
+                  setComposerFocused(false);
+                  onTypingActivity?.(false);
+                }}
                 className="chat-text-input min-h-[36px] max-h-32 flex-1 resize-none border-none bg-transparent px-0 py-[7px] text-base leading-[22px] text-white placeholder:text-zinc-500 focus-visible:ring-0 focus-visible:ring-offset-0"
                 rows={1}
               />
@@ -1160,6 +1167,7 @@ export function ChatInput({ onSendMessage, groupPhotos = false, onTipClick, onSc
           onChange={(e) => {
             const val = e.target.value;
             setMessage(val);
+            onTypingActivity?.(!sendDisabled && !!val.trim());
             mention.handleInput(val, e.target.selectionStart);
             // Auto-resize — deferred to avoid forced synchronous reflow
             const ta = e.target;
@@ -1171,7 +1179,10 @@ export function ChatInput({ onSendMessage, groupPhotos = false, onTipClick, onSc
           onKeyDown={handleKeyDown}
           onPaste={handlePaste}
           onFocus={() => setComposerFocused(true)}
-          onBlur={() => setComposerFocused(false)}
+          onBlur={() => {
+            setComposerFocused(false);
+            onTypingActivity?.(false);
+          }}
           className="chat-text-input min-h-[52px] max-h-32 resize-none bg-transparent border-none text-base md:text-sm text-white placeholder:text-zinc-500 p-0 pt-1 pr-1 focus-visible:ring-0 focus-visible:ring-offset-0"
           rows={1}
         />
