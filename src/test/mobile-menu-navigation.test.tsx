@@ -77,6 +77,25 @@ describe('mobile menu dismissal', () => {
     expect(screen.getByTestId('path').textContent).toBe('/app/wallet');
   });
 
+  it('toggles the wallet amount from a separate eye button and remembers the choice', async () => {
+    wallet.signedInProfile = true;
+    wallet.balance = '530';
+    await mount();
+
+    const eye = screen.getByRole('button', { name: 'wallet.hideBalance' });
+    expect(eye.nextElementSibling).toBe(screen.getByRole('button', { name: 'nav.wallet 530' }));
+    expect(eye.closest('[data-menu-chip]')).toBeNull();
+    fireEvent.click(eye);
+    expect(screen.getByTestId('path').textContent).toBe('/app');
+    expect(screen.getByRole('button', { name: 'nav.wallet', exact: true }).textContent).toContain('••••');
+    expect(screen.queryByRole('button', { name: 'nav.wallet 530' })).toBeNull();
+    expect(localStorage.getItem('riftn.hideBalance')).toBe('1');
+
+    fireEvent.click(screen.getByRole('button', { name: 'wallet.showBalance' }));
+    expect(screen.getByRole('button', { name: 'nav.wallet 530' })).toBeTruthy();
+    expect(localStorage.getItem('riftn.hideBalance')).toBe('0');
+  });
+
   it('shows the combined direct and public chat unread count on Messages', async () => {
     counts.dm = 2;
     counts.publicChat = 3;
