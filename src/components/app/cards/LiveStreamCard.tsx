@@ -64,6 +64,7 @@ import { CommentsWrapper } from './CommentsWrapper';
 import { LiveEndedMedia } from './LiveEndedMedia';
 import { StreamShopPinnedCard } from '../live/StreamShop';
 import { ImmersiveLiveChrome } from '../live/ImmersiveLiveChrome';
+import { LiveAudienceProfileContext } from '../live/live-audience-profile';
 import { PASS_THROUGH_STYLE, VERTICAL_FRAME_STYLE, VERTICAL_WINDOW_STYLE, verticalCropStyle, type VerticalCrop } from '@/lib/live-overlay/vertical-crop';
 import { LiveClearedLayer } from '../live/LiveClearedLayer';
 import { LiveViewerActionsProvider } from '../live/live-viewer-actions';
@@ -1480,29 +1481,46 @@ export function LiveStreamCard({ stream: streamProp, postPage, chatSlot, immersi
    * seat go with it, so the picture never drops and the creator never sees
    * a leave and a join.
    */
-  const canMinimise = !swipeFeed && !!stream.streamId && !!stream.isLive && !streamEnded && hasPlaybackUrl;
+  const canHandOffLive = !!stream.streamId && !!stream.isLive && !streamEnded && hasPlaybackUrl;
+  const canMinimise = !swipeFeed && canHandOffLive;
+  const closeSwipeFeed = swipeFeed?.onClose;
   const minimisingRef = useRef(false);
-  const minimiseLive = useCallback(async (mode: LiveMiniMode = 'video') => {
+  const navigateToAudienceProfile = useCallback((path: string) => {
+    closeSwipeFeed?.();
+    navigate(path);
+  }, [closeSwipeFeed, navigate]);
+
+  const minimiseLive = useCallback(async (mode: LiveMiniMode = 'video', profile?: string) => {
+    if (minimisingRef.current) return;
     const streamId = stream.streamId;
     const video = videoRef.current;
-    // Only the mounted, unlocked viewer can hand off playback.
-    if (!canMinimise || !streamId || !video || minimisingRef.current) return;
+    // GatedMedia only mounts the video after the viewer has access. The
+    // audience sheet can still open a profile when no video can be handed off.
+    if (!(profile ? canHandOffLive : canMinimise) || !streamId || !video) {
+      if (profile) navigateToAudienceProfile(profile);
+      return;
+    }
     minimisingRef.current = true;
-    const path = `${window.location.pathname}${window.location.search}`;
+    const currentPath = `${window.location.pathname}${window.location.search}`;
+    const path = closeSwipeFeed ? `/app/post/${stream.tokenId ?? stream.id}` : currentPath;
     let seat: { leave: () => void } | null = null;
     if (!isOwnStream) {
+      const presence = await import('@/lib/api/dehub/stream-presence').catch(() => null);
+      if (currentPath !== `${window.location.pathname}${window.location.search}` || !containerRef.current) {
+        minimisingRef.current = false;
+        return;
+      }
+      if (videoRef.current !== video) {
+        minimisingRef.current = false;
+        if (profile) navigateToAudienceProfile(profile);
+        return;
+      }
       try {
-        const { joinStreamPresence } = await import('@/lib/api/dehub/stream-presence');
-        if (videoRef.current !== video || path !== `${window.location.pathname}${window.location.search}`) {
-          minimisingRef.current = false;
-          return;
-        }
-        seat = joinStreamPresence(streamId);
+        seat = presence?.joinStreamPresence(streamId) ?? null;
       } catch {
-        // Presence may be temporarily unavailable while the media still plays.
+        // A temporary presence failure does not stop the media handoff.
       }
     }
-    if (videoRef.current !== video) { minimisingRef.current = false; return; }
     const session = transportRef.current === 'whep' ? whepSessionRef.current : null;
     const playingUrl = hlsRef.current?.url ?? video.currentSrc;
     const urls = playingUrl && urlsToTry.includes(playingUrl)
@@ -1523,9 +1541,14 @@ export function LiveStreamCard({ stream: streamProp, postPage, chatSlot, immersi
       mode,
     });
     if (isFullscreen) toggleFullscreen();
-    if (window.history.state?.idx > 0) navigate(-1);
+    if (profile) navigateToAudienceProfile(profile);
+    else if (window.history.state?.idx > 0) navigate(-1);
     else navigate('/app');
-  }, [canMinimise, stream.streamId, stream.title, stream.creatorUsername, stream.streamer, stream.avatar, isOwnStream, whepPlaybackId, urlsToTry, isFullscreen, toggleFullscreen, navigate]);
+  }, [canHandOffLive, canMinimise, stream.streamId, stream.tokenId, stream.id, stream.title, stream.creatorUsername, stream.streamer, stream.avatar, isOwnStream, whepPlaybackId, urlsToTry, isFullscreen, toggleFullscreen, navigate, closeSwipeFeed, navigateToAudienceProfile]);
+
+  const openAudienceProfile = useCallback((path: string) => {
+    void minimiseLive('video', path);
+  }, [minimiseLive]);
 
   /**
    * Hold the OS media session while this stream is audible, keyed on the
@@ -1935,7 +1958,7 @@ export function LiveStreamCard({ stream: streamProp, postPage, chatSlot, immersi
           </DropdownMenu>
   );
 
-  return (
+  const card = (
     <div
       style={keyboardFit}
       data-live-frame={immersive ? '' : undefined}
@@ -2866,4 +2889,5 @@ export function LiveStreamCard({ stream: streamProp, postPage, chatSlot, immersi
       />
     </div>
   );
+  return <LiveAudienceProfileContext.Provider value={openAudienceProfile}>{card}</LiveAudienceProfileContext.Provider>;
 }
