@@ -41,6 +41,10 @@ async function verify(theme, width, phone) {
     const viewer = page.getByRole('dialog', { name: 'Images', exact: true });
     const close = viewer.getByRole('button', { name: /^Close(?: fullscreen)?$/ });
     await close.waitFor();
+    if (await viewer.getAttribute('data-profile-photo-dialog') !== null) {
+      const profileBack = page.locator('[data-profile-pull-root] [data-swipe-back]').filter({ visible: true });
+      await profileBack.first().waitFor({ state: 'hidden' });
+    }
     const size = await close.evaluate(button => {
       const { width, height } = button.getBoundingClientRect();
       return { width, height, radius: getComputedStyle(button).borderTopLeftRadius };
@@ -61,8 +65,12 @@ async function verify(theme, width, phone) {
       await page.goBack();
       await viewer.waitFor({ state: 'hidden' });
       assert.equal(page.url(), profileUrl, 'Browser Back skipped the profile grid');
-      await swipe(session, 12, 180, 130, 2);
-      await page.waitForURL('https://riftn.com/app');
+      await page.waitForFunction(() => !history.state?.__dehubOverlay && !document.querySelector('[data-overlay-ghost]'));
+      await tile.scrollIntoViewIfNeeded();
+      const gridPhoto = await tile.boundingBox();
+      assert.ok(gridPhoto, 'The photo grid did not settle after Browser Back');
+      await swipe(session, gridPhoto.x + 12, gridPhoto.y + Math.min(48, gridPhoto.height / 3), 130, 2);
+      await page.waitForURL(url => url.origin === 'https://riftn.com' && ['/', '/app'].includes(url.pathname));
     } else {
       await close.focus();
       await page.screenshot({ path: `${output}/${name}-focus.png`, animations: 'disabled' });
@@ -81,10 +89,19 @@ async function verify(theme, width, phone) {
 }
 
 try {
+  const failures = [];
   for (const theme of ['system', 'system-light']) {
-    for (const width of [360, 390, 1280]) await verify(theme, width, width < 768);
+    for (const width of [360, 390, 1280]) {
+      try {
+        await verify(theme, width, width < 768);
+        console.log(`Passed ${theme} at ${width}px`);
+      } catch (error) {
+        failures.push(error);
+        console.error(`Failed ${theme} at ${width}px`, error);
+      }
+    }
   }
-  console.log('Profile photos passed at 360, 390 and 1280 px in System and System Light.');
+  if (failures.length) throw new AggregateError(failures, 'Profile photo checks failed');
 } finally {
   await browser.close();
 }

@@ -103,6 +103,7 @@ export const ProfileImageGrid = memo(function ProfileImageGrid({ images }: Profi
               if (document.querySelector('[data-fullscreen-image-viewer]')) event.preventDefault();
             }}
             data-keep-dark
+            data-profile-photo-dialog
             overlayClassName="bg-transparent backdrop-blur-none"
             className="inset-0 flex max-h-none flex-col gap-0 rounded-none border-0 bg-black/90 p-0 backdrop-blur-sm sm:inset-0 sm:max-w-none sm:translate-x-0 sm:translate-y-0 sm:rounded-none data-[state=open]:slide-in-from-bottom-0 sm:data-[state=open]:slide-in-from-left-0 sm:data-[state=open]:slide-in-from-top-0 motion-reduce:animate-none"
           >
