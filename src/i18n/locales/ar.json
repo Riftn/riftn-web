@@ -21533,6 +21533,11 @@
     "followFailed": "تعذرت المتابعة. حاول مرة أخرى."
   },
   "appTokens": {
+    "reviewTransfer": "مراجعة التحويل",
+    "transferComplete": "اكتمل التحويل",
+    "balanceAfterSend": "بعد الإرسال: {{amount}} {{symbol}}",
+    "addNote": "إضافة ملاحظة",
+    "minimumTransfer": "الحد الأدنى للتحويل هو 1 RIFT.",
     "kindStaked": "تم الإيداع",
     "kindUnstaked": "تم السحب",
     "stakedBalance": "{{amount}} مخزنة",

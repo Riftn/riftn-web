@@ -21468,6 +21468,11 @@
     "followFailed": "Could not follow. Try again."
   },
   "appTokens": {
+    "reviewTransfer": "Review transfer",
+    "transferComplete": "Transfer complete",
+    "balanceAfterSend": "After sending: {{amount}} {{symbol}}",
+    "addNote": "Add a note",
+    "minimumTransfer": "Minimum transfer is 1 RIFT.",
     "kindStaked": "Staked",
     "kindUnstaked": "Unstaked",
     "stakedBalance": "{{amount}} staked",

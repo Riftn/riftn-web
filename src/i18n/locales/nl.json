@@ -21742,6 +21742,11 @@
     "followFailed": "Volgen mislukt. Probeer het opnieuw."
   },
   "appTokens": {
+    "reviewTransfer": "Overdracht controleren",
+    "transferComplete": "Overdracht voltooid",
+    "balanceAfterSend": "Na verzenden: {{amount}} {{symbol}}",
+    "addNote": "Notitie toevoegen",
+    "minimumTransfer": "De minimale overdracht is 1 RIFT.",
     "kindStaked": "Gestaket",
     "kindUnstaked": "Opgenomen",
     "stakedBalance": "{{amount}} gestaket",
