@@ -22,6 +22,7 @@
  */
 
 import { createLogger } from '@/lib/logger';
+import { paceDisplayFrames, type DisplayFramePacer } from './display-frame-pacer';
 import { ICE_SERVERS, waitForIceGathering, resolveSessionResource } from './ice';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
 
@@ -83,6 +84,8 @@ export interface WhipSession {
    * silence) rather than dropping the track from the session.
    */
   replaceTrack: (kind: 'video' | 'audio', track: MediaStreamTrack | null) => Promise<void>;
+  /** Updates the paced screen track after the capture's enabled state changes. */
+  syncVideoEnabled: () => void;
 }
 
 /**
@@ -241,6 +244,32 @@ export async function publishToWhip({
   let resourceUrl: string | null = null;
   let stopped = false;
   const transceivers: Partial<Record<'video' | 'audio', RTCRtpTransceiver>> = {};
+  let displayPacer: DisplayFramePacer | undefined;
+  let videoUpdate = Promise.resolve();
+
+  const updateVideo = (change: () => Promise<void>) => {
+    // A worker failure must not restore an old source over a newer user switch.
+    const pending = videoUpdate.then(change);
+    videoUpdate = pending.catch(() => undefined);
+    return pending;
+  };
+
+  const prepareDisplayVideo = (source: MediaStreamTrack) => {
+    const pacer = paceDisplayFrames(source, () => {
+      void updateVideo(async () => {
+        if (stopped || !pacer || displayPacer !== pacer) return;
+        try {
+          await transceivers.video?.sender.replaceTrack(source);
+          if (displayPacer === pacer) displayPacer = undefined;
+          pacer.stop();
+          logger.warn('Screen frame worker stopped; using the display capture directly');
+        } catch (error) {
+          logger.warn('Could not restore direct display capture', error);
+        }
+      });
+    });
+    return pacer;
+  };
 
   const replaceTrack = async (
     kind: 'video' | 'audio',
@@ -249,8 +278,31 @@ export async function publishToWhip({
     if (stopped) return;
     const sender = transceivers[kind]?.sender;
     if (!sender) return;
-    await sender.replaceTrack(track);
+    if (kind === 'audio') {
+      await sender.replaceTrack(track);
+      return;
+    }
+    await updateVideo(async () => {
+      if (stopped) return;
+      let nextPacer = track ? prepareDisplayVideo(track) : undefined;
+      try {
+        await sender.replaceTrack(nextPacer?.track ?? track);
+      } catch (error) {
+        if (!nextPacer) throw error;
+        nextPacer.stop();
+        nextPacer = undefined;
+        await sender.replaceTrack(track);
+      }
+      if (stopped) {
+        nextPacer?.stop();
+        return;
+      }
+      displayPacer?.stop();
+      displayPacer = nextPacer;
+    });
   };
+
+  const syncVideoEnabled = () => displayPacer?.syncEnabled();
 
   const emit = (state: WhipState, detail?: string) => {
     if (stopped && state !== 'closed') return;
@@ -332,6 +384,8 @@ export async function publishToWhip({
     if (stopped) return;
     stopped = true;
     clearInterval(healthTimer);
+    displayPacer?.stop();
+    displayPacer = undefined;
 
     // Close the peer connection first: it stops media immediately even if the
     // DELETE is slow or the network has already gone away.
@@ -363,7 +417,8 @@ export async function publishToWhip({
     const audioTrack = stream.getAudioTracks()[0];
 
     if (videoTrack) {
-      transceivers.video = pc.addTransceiver(videoTrack, {
+      displayPacer = prepareDisplayVideo(videoTrack);
+      transceivers.video = pc.addTransceiver(displayPacer?.track ?? videoTrack, {
         direction: 'sendonly',
         streams: [stream],
         // Set at creation: changing the encoding list after negotiation is
@@ -474,7 +529,7 @@ export async function publishToWhip({
     await pc.setRemoteDescription({ type: 'answer', sdp: withOpusFec(answer) });
     logger.info('WHIP negotiation complete', { hasResource: !!resourceUrl });
 
-    return { stop, replaceTrack };
+    return { stop, replaceTrack, syncVideoEnabled };
   } catch (error) {
     // Never leak a half-open peer connection or a live server-side session.
     await stop();
