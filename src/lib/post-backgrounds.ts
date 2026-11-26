@@ -92,6 +92,7 @@ const DEFS: readonly Def[] = [
 const HEX = /^#[0-9a-f]{6}$/i;
 /** Our own upload keys only: postbgs/<wallet>-<hash>.<jpg|webp|mp4>. */
 const IMAGE_KEY = /^postbgs\/0x[0-9a-f]{40}-[0-9a-f]{8,64}\.(?:jpg|webp|mp4)$/;
+const STORED_PHOTO_KEY = /^postbgs\/[a-z0-9-]+\.(jpg|webp|mp4)$/i;
 const CDN_BASE = 'https://dehubcdn.ams3.cdn.digitaloceanspaces.com/';
 
 function luminance(hex: string): number {
@@ -215,9 +216,16 @@ export function postBgFromStored(raw: unknown, cdnBase = CDN_BASE): PostBg | nul
   const bg = postBgById(id);
   if (!bg) return null;
   if (bg.kind === 'photo') {
-    return key && /^postbgs\/[a-z0-9-]+\.(jpg|webp|mp4)$/i.test(key) ? { ...bg, image: cdnBase + key } : null;
+    return key && STORED_PHOTO_KEY.test(key) ? { ...bg, image: cdnBase + key } : null;
   }
   return withPostBgColors(bg, parsePostBgColors(colors));
+}
+
+/** Reuse the exact stored photo shown in the picker without uploading it again. */
+export function postBgPhotoStored(url: string | null | undefined): string | null {
+  if (!url?.startsWith(CDN_BASE)) return null;
+  const key = url.slice(CDN_BASE.length);
+  return STORED_PHOTO_KEY.test(key) ? `photo||${key}` : null;
 }
 
 /** The stored string for a backdrop with colours (no picture): what /post_background takes. */
