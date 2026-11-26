@@ -66,6 +66,15 @@ const LINK_GAMES = [
     blurb: 'Roll the die, drop the checker, clear the bottom row. Retro arcade with a top 10.',
   },
   {
+    href: '/arcade/splurge',
+    creator: COCHRANIZ3R,
+    art: '/arcade/splurge.webp',
+    titleKey: 'games.splurge.title',
+    title: 'Splurge',
+    blurbKey: 'games.splurge.cardBlurb',
+    blurb: 'Get a random budget and dream up what to buy in Modern or CRT.',
+  },
+  {
     href: '/music/binary-metal',
     creator: COCHRANIZ3R,
     art: '/og/music-binary-metal.jpg',

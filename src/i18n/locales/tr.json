@@ -23416,6 +23416,26 @@
       "intro": "Sırayla neye minnettar olduğunu söyle. Tekrar yok. Sıranı kaçırırsan o kazanır.",
       "cardBlurb": "Sırayla neye minnettar olduğunu söyle. Tekrar yok. Sıranı kaçırırsan o kazanır."
     },
+    "splurge": {
+      "title": "Splurge",
+      "cardBlurb": "Rastgele bir bütçeyle modern veya CRT görünümünde ne alacağını hayal et.",
+      "arcade": "Oyun salonu",
+      "intro": "Rastgele bir bütçe. Neye harcardın? Tüm tutarlar hayal ürünüdür.",
+      "modern": "Modern",
+      "crt": "CRT",
+      "budget": "Bütçen",
+      "prompt": "Ne alırdın?",
+      "placeholder": "Avrupa’da bir tren yolculuğu",
+      "spend": "Harca",
+      "retry": "Tekrar dene",
+      "saveError": "Bu tur kaydedilemedi. Harcama günlüğüne eklemek için tekrar dene.",
+      "history": "Harcama günlüğü",
+      "loading": "Günlüğün yükleniyor…",
+      "historyError": "Günlüğün yüklenemedi.",
+      "empty": "Alışverişlerin burada görünecek.",
+      "more": "Eski kayıtları yükle",
+      "guest": "Misafir turları yalnızca bu ziyaret boyunca saklanır. Sonraki turları hesabına kaydetmek için giriş yap."
+    },
     "chestard": {
       "title": "Chestard",
       "cardBlurb": "Zarı at, pulu bırak, alt sırayı temizle. Top 10'lu retro arcade.",

@@ -425,3 +425,20 @@ export const chestardState = (signedIn: boolean) => apiCall<ChestardState>('/api
 export const chestardStart = () => apiCall<{ run: ChestardRun }>('/api/games/chestard/start', { method: 'POST', requiresAuth: true });
 export const chestardRoll = (id: string) =>
   apiCall<{ roll: ChestardRoll }>(`/api/games/chestard/${encodeURIComponent(id)}/roll`, { method: 'POST', requiresAuth: true });
+
+export interface SplurgeEntry {
+  turnId: string;
+  amount: number;
+  currency: string;
+  item: string;
+}
+
+export interface SplurgeHistory {
+  entries: SplurgeEntry[];
+  nextCursor: string | null;
+}
+
+export const getSplurgeHistory = (owner: string, before: string | null) =>
+  apiCall<SplurgeHistory>('/api/games/splurge', { params: { owner, before: before ?? undefined }, requiresAuth: true });
+export const saveSplurgeEntry = (owner: string, entry: SplurgeEntry) =>
+  apiCall<{ entry: SplurgeEntry }>('/api/games/splurge', { method: 'POST', params: { owner }, body: { ...entry }, requiresAuth: true });
