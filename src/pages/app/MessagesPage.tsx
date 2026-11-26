@@ -336,8 +336,10 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const { t } = useTranslation();
   const location = useLocation();
   const [selectedConversation, setSelectedConversation] = useState<DeHubConversation | null>(null);
-  // Resolve public links in the navigation effect below, after mount.
-  const [showPublicChat, setShowPublicChat] = useState(false);
+  // A direct public link can mount its room in the first render.
+  const [showPublicChat, setShowPublicChat] = useState(() =>
+    fullscreen && new URLSearchParams(location.search).get('chat') === 'public',
+  );
   // A group, channel or community chat open in place (same chat as the
   // community page's Chat tab).
   const [selectedRoom, setSelectedRoom] = useState<Community | null>(null);
@@ -1047,6 +1049,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const navigate = useNavigate();
   const chatEntryRef = useRef(false);
   const chatParamPresent = new URLSearchParams(location.search).get('chat') === '1';
+  const chatParamWasPresent = useRef(chatParamPresent);
   const shareLiveTokenId = location.state?.shareLiveTokenId;
 
   useEffect(() => {
@@ -1068,7 +1071,9 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // thread instead of the list.
   useEffect(() => {
     if (!isMessagesRouteActive) return;
-    if (!chatParamPresent && chatEntryRef.current) {
+    const poppedChatEntry = chatParamWasPresent.current && !chatParamPresent;
+    chatParamWasPresent.current = chatParamPresent;
+    if (poppedChatEntry && chatEntryRef.current) {
       chatEntryRef.current = false;
       setSelectedConversation(null);
       setShowPublicChat(false);
@@ -2011,7 +2016,12 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
         style={shellKeyboardStyle}
         chatOpen={chatOpen}
         chat={settingsPane ?? publicChatPane ?? roomPane ?? dmPane}
-        list={<>{chatSeo}{listColumn}{dialogs}{phonePill && !chatOpen && !picking && <Suspense fallback={null}><MobileBottomNav /></Suspense>}</>}
+        list={<>
+          {chatSeo}
+          {!(guest && showPublicChat && phonePill) && listColumn}
+          {dialogs}
+          {phonePill && !chatOpen && !picking && <Suspense fallback={null}><MobileBottomNav /></Suspense>}
+        </>}
       />
     );
   }

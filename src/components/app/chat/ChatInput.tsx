@@ -46,13 +46,16 @@ import {
 import { dragHasFiles } from '@/lib/comment-attachments';
 import { cleanVideoOptions, type DmVideoOptions } from '@/lib/dm-video-options';
 import { withReplay, type DmDestructChoice } from '@/lib/dm-destruct';
-import { DmMediaStudio, type DmStudioItem } from './DmVideoStudio';
+import type { DmStudioItem } from './DmVideoStudio';
 import type { StudioResult } from '@/features/post/components/PhotoStudio';
 import { LockPriceControl } from './LockPriceControl';
 import { lazyWithRetry } from '@/lib/lazy-with-retry';
 
 const PhotoStudio = lazyWithRetry(() =>
   import('@/features/post/components/PhotoStudio').then(({ PhotoStudio }) => ({ default: PhotoStudio })),
+);
+const DmMediaStudio = lazyWithRetry(() =>
+  import('./DmVideoStudio').then(({ DmMediaStudio }) => ({ default: DmMediaStudio })),
 );
 
 /** Per-kind caps, matching the backend's DM limits. */
@@ -850,21 +853,25 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
 
       {/* Photo / video / audio preview */}
       {/* Photos and videos open straight into the edit screen. */}
-      <DmMediaStudio
-        items={studioItems}
-        active={studioActive}
-        onActiveChange={setStudioActive}
-        onItemChange={(i, patch) => setStudioItems((prev) => prev.map((it, j) => (j === i ? { ...it, ...patch } : it)))}
-        onRemoveItem={removeStudioItem}
-        onAddMore={() => fileInputRef.current?.click()}
-        onClose={cancelStudio}
-        open={studioOpen}
-        onConfirm={() => { setStudioOpen(false); requestAnimationFrame(() => textareaRef.current?.focus()); }}
-        allowLock={allowLock}
-        allowTimer={allowDocuments}
-        onDropFiles={attachFiles}
-        onEditPhoto={(i) => { setStudioOpen(false); setPhotoEditAt(i); }}
-      />
+      {studioItems.length > 0 && (
+        <Suspense fallback={null}>
+          <DmMediaStudio
+            items={studioItems}
+            active={studioActive}
+            onActiveChange={setStudioActive}
+            onItemChange={(i, patch) => setStudioItems((prev) => prev.map((it, j) => (j === i ? { ...it, ...patch } : it)))}
+            onRemoveItem={removeStudioItem}
+            onAddMore={() => fileInputRef.current?.click()}
+            onClose={cancelStudio}
+            open={studioOpen}
+            onConfirm={() => { setStudioOpen(false); requestAnimationFrame(() => textareaRef.current?.focus()); }}
+            allowLock={allowLock}
+            allowTimer={allowDocuments}
+            onDropFiles={attachFiles}
+            onEditPhoto={(i) => { setStudioOpen(false); setPhotoEditAt(i); }}
+          />
+        </Suspense>
+      )}
       {photoEditAt != null && studioItems[photoEditAt] && (() => {
         const it = studioItems[photoEditAt];
         const back = () => { setPhotoEditAt(null); setStudioOpen(true); };
