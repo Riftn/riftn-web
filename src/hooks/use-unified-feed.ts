@@ -330,7 +330,7 @@ function mapVideoItem(item: UnifiedFeedItem, index: number): VideoItem {
     title: displayPostTitle(item.name, stripSoundtrackTag(item.description)),
     description: stripSoundtrackTag(item.description),
     ...(isAudioPost ? {} : videoSoundtrack(item.description)),
-    channel: item.minterDisplayName || item.minterUsername || item.mintername || _translateCopy("copy.056823642989", { defaultValue: "Unknown Creator" }),
+    channel: item.minterUser?.displayName || item.minterDisplayName || item.minterUsername || item.mintername || _translateCopy("copy.056823642989", { defaultValue: "Unknown Creator" }),
     channelAvatar,
     verified: false,
     views: formatViews(resolveViewCount(item)),
@@ -436,7 +436,7 @@ function mapImagePost(item: UnifiedFeedItem, index: number): ImagePost {
   return {
     id,
     type: 'image',
-    username: item.minterUsername || item.mintername || item.minterDisplayName || 'unknown',
+    username: item.minterUser?.displayName || item.minterDisplayName || item.minterUsername || item.mintername || 'unknown',
     verified: false,
     avatar,
     image,
@@ -531,7 +531,7 @@ function mapTextPost(item: UnifiedFeedItem, index: number): TextPost {
     type: 'post',
     author: {
       id: item.minter,
-      name: item.minterDisplayName || item.minterUsername || item.mintername || _translateCopy("copy.b764cdc0eab7", { defaultValue: "Unknown" }),
+      name: item.minterUser?.displayName || item.minterDisplayName || item.minterUsername || item.mintername || _translateCopy("copy.b764cdc0eab7", { defaultValue: "Unknown" }),
       handle: item.minterUsername || item.mintername || item.minter,
       avatarSeed: avatarUrl,
       verified: false,
@@ -1091,7 +1091,7 @@ export function useNewPostsSignal(options: UseNewPostsSignalOptions = {}) {
       const avatarPath = extractAvatarPath(item);
       newPostAuthors.push({
         address,
-        name: item.minterDisplayName || item.minterUsername || item.mintername || '',
+        name: item.minterUser?.displayName || item.minterDisplayName || item.minterUsername || item.mintername || '',
         avatarUrl: avatarPath ? buildAvatarUrl(item.minter, avatarPath) : undefined,
       });
       if (newPostAuthors.length === 3) break;

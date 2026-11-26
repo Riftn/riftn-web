@@ -115,7 +115,7 @@ function mapNFTToImagePost(nft: DeHubNFT): ImagePost {
     replyPolicy: nft.replyPolicy,
     shopLinks: (nft as any).shopLinks,
     shopListingCount: (nft as any).shopListingCount,
-    username: nft.minterUsername || nft.mintername || nft.minterDisplayName || 'unknown',
+    username: nft.minterDisplayName || nft.minterUsername || nft.mintername || 'unknown',
     verified: false,
     avatar,
     image,

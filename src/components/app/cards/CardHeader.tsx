@@ -185,9 +185,8 @@ export function CardHeader({
           className={`flex shrink-0 ${isClickable ? 'cursor-pointer' : 'cursor-default'}`}
         >
           <LiveRipple ids={[creatorId, creatorUsername, handle]} orbit className="rounded-md">
-            {/* A Moment up: its small corner peek sits on the face and a tap
-                opens it (co-authored posts keep their own corner badge). */}
-            <MomentFace address={coAuthors.length ? null : creatorId} size={36} name={username} className="rounded-md">
+            {/* The avatar ring opens Moments; co-authored posts keep their corner badge. */}
+            <MomentFace address={coAuthors.length ? null : creatorId} size={36} outline name={username} className="rounded-md">
               <span className="relative flex">
                 <Avatar className="w-9 h-9 rounded-md">
                   {avatarSrc && <AvatarImage src={avatarSrc} onError={() => setImageError(true)} className="rounded-md" />}
