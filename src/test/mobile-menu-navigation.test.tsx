@@ -87,7 +87,7 @@ describe('mobile menu dismissal', () => {
     expect(eye.closest('[data-menu-chip]')).toBeNull();
     fireEvent.click(eye);
     expect(screen.getByTestId('path').textContent).toBe('/app');
-    expect(screen.getByRole('button', { name: 'nav.wallet', exact: true }).textContent).toContain('••••');
+    expect(screen.getByRole('button', { name: 'nav.wallet' }).textContent).toContain('••••');
     expect(screen.queryByRole('button', { name: 'nav.wallet 530' })).toBeNull();
     expect(localStorage.getItem('riftn.hideBalance')).toBe('1');
 
