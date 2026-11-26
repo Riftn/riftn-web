@@ -68,6 +68,8 @@ import Plus from '@/components/ui/cut-icons/add';
 import { CHAT_MENU_CONTENT } from './ChatOptionsMenu';
 import { cn } from '@/lib/utils';
 import { formatCount } from '@/lib/format-count';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { dehubLinkFor } from '@/lib/dehub-links';
 
 /** A row in the phone + menu, same as the Messages list menu's rows. */
 const PC_ROW = 'flex cursor-pointer items-center gap-3 rounded-xl px-2.5 py-2 text-[14px] text-zinc-100 outline-none focus:bg-white/10 data-[highlighted]:bg-white/10 data-[disabled]:opacity-40 [&>svg]:h-[17px] [&>svg]:w-[17px] [&>svg]:text-zinc-400';
@@ -164,6 +166,15 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
   const bottomRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { isAuthenticated, walletAddress, openLoginModal } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const shareTokenId = location.state?.shareLiveTokenId;
+  const sharedLiveUrl = !embedded && isAuthenticated && typeof shareTokenId === 'string' && /^[1-9]\d*$/.test(shareTokenId)
+    ? dehubLinkFor.post(shareTokenId)
+    : undefined;
+  const clearSharedLive = useCallback(() => {
+    navigate({ pathname: location.pathname, search: location.search }, { replace: true, preventScrollReset: true, state: null });
+  }, [location.pathname, location.search, navigate]);
 
   // Signed out, the room reads but does not write. Anything that would write
   // opens the sign-in sheet, and signing in lands back here in this room.
@@ -206,11 +217,15 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
   // link names.
   useEffect(() => {
     if (!rooms.length) return;
+    if (sharedLiveUrl) {
+      setSelectedRoomId(rooms[0].id);
+      return;
+    }
     const linked = peekPendingChatLink('public')?.target;
     const linkedRoom = linked?.kind === 'public' && linked.roomId && rooms.some((r) => r.id === linked.roomId) ? linked.roomId : null;
     if (linkedRoom && linkedRoom !== selectedRoomId) setSelectedRoomId(linkedRoom);
     else if (!selectedRoomId) setSelectedRoomId(rooms[0].id);
-  }, [rooms, selectedRoomId]);
+  }, [rooms, selectedRoomId, sharedLiveUrl]);
 
   const {
     messages: apiMessages, isLoading: messagesLoading, isBanned,
@@ -1145,6 +1160,8 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
           replyTo={replyTo}
           onCancelReply={handleCancelReply}
           draftKey={selectedRoomId ? `room:${selectedRoomId}` : null}
+          incomingLink={selectedRoomId && selectedRoomId === rooms[0]?.id ? sharedLiveUrl : undefined}
+          onIncomingLinkApplied={clearSharedLive}
         />
       </div>
 
