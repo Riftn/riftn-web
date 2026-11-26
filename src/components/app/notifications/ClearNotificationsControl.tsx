@@ -19,6 +19,7 @@ import { notificationKeys } from '@/hooks/use-notifications';
 import { clearAllNotifications } from '@/lib/api/dehub/notifications';
 
 type Confirmation = { wallet: string; through: number };
+const focusRing = 'focus-visible:ring-[color:var(--nf-ink)] focus-visible:ring-offset-[color:var(--nf-surface)]';
 
 export function ClearNotificationsControl({ wallet, disabled }: { wallet: string; disabled: boolean }) {
   const { t } = useTranslation();
@@ -58,29 +59,33 @@ export function ClearNotificationsControl({ wallet, disabled }: { wallet: string
         <Button
           type="button"
           variant="secondary"
-          className="h-auto min-h-11 w-full justify-start whitespace-normal px-4 py-3"
+          className={`h-auto min-h-11 w-full justify-start whitespace-normal px-4 py-3 disabled:opacity-70 ${focusRing}`}
           disabled={disabled || pending}
         >
           <Trash aria-hidden="true" />
           <span className="text-left">
-            <span className="block text-foreground">{t('notifications.clearAll')}</span>
-            <span className="block text-muted-foreground">{t('notifications.removeHistory')}</span>
+            <span className="block text-[color:var(--nf-ink)]">{t('notifications.clearAll')}</span>
+            <span className="block text-[color:var(--nf-mute)]">{t('notifications.removeHistory')}</span>
           </span>
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent
         overlayClassName="z-[110]"
-        className="z-[111] w-[calc(100%-2rem)] max-w-sm border-border bg-popover text-popover-foreground"
+        data-notifications-page
+        data-notification-surface
+        className="z-[111] w-[calc(100%-2rem)] max-w-sm border-[color:var(--nf-line)]"
         onEscapeKeyDown={(event) => { if (submitting.current) event.preventDefault(); }}
       >
         <AlertDialogHeader className="text-start">
           <AlertDialogTitle>{t('notifications.clearAllTitle')}</AlertDialogTitle>
-          <AlertDialogDescription>{t('notifications.clearAllDescription')}</AlertDialogDescription>
+          <AlertDialogDescription className="text-[color:var(--nf-mute)]">
+            {t('notifications.clearAllDescription')}
+          </AlertDialogDescription>
         </AlertDialogHeader>
-        {mutation.isError && <p role="alert" className="text-sm text-popover-foreground">{t('notifications.clearAllError')}</p>}
+        {mutation.isError && <p role="alert" className="text-sm">{t('notifications.clearAllError')}</p>}
         <AlertDialogFooter className="flex-row flex-wrap justify-end gap-2 sm:space-x-0">
           <AlertDialogCancel asChild className="mt-0">
-            <Button type="button" variant="outline" size="lg" className="px-4" disabled={pending}>
+            <Button type="button" variant="outline" size="lg" className={`px-4 disabled:opacity-70 ${focusRing}`} disabled={pending}>
               {t('common.cancel')}
             </Button>
           </AlertDialogCancel>
@@ -88,7 +93,7 @@ export function ClearNotificationsControl({ wallet, disabled }: { wallet: string
             type="button"
             variant="destructive"
             size="lg"
-            className="px-4"
+            className={`px-4 aria-busy:opacity-100 ${focusRing}`}
             loading={pending}
             onClick={() => {
               if (submitting.current || !confirmation || confirmation.wallet !== wallet) return;

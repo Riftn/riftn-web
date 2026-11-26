@@ -2050,7 +2050,7 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
   // Unfiltered feed. Drives the per-tab unread badges and the browser
   // notification hand-off, both of which need to see every type. On the All tab
   // this is the same query key as the list below, so it costs no extra request.
-  const { notifications: unfilteredNotifications } = useNotifications();
+  const { notifications: unfilteredNotifications, hasNextPage: hasMoreUnfiltered } = useNotifications();
 
   // The list itself. Ask the API for just this tab's types; the client-side
   // filter below still runs, because it also covers the Supabase-backed types
@@ -2438,7 +2438,7 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
           <ClearNotificationsControl
             key={pageWalletAddress}
             wallet={pageWalletAddress}
-            disabled={markAllAsRead.isPending || (allNotifications.length === 0 && countableNotifications.length === 0 && totalUnread === 0)}
+            disabled={markAllAsRead.isPending || (!hasMoreUnfiltered && allNotifications.length === 0 && countableNotifications.length === 0 && totalUnread === 0)}
           />
         )}
       </div>
