@@ -70,23 +70,24 @@ export function FreeImagesSheet({ open, onOpenChange, initialQuery, onPick }: Fr
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent column glass className="max-h-[85dvh] border-border text-foreground">
-        <DrawerHeader className="shrink-0 border-b border-border">
+      <DrawerContent column glass className="max-h-[85dvh] text-white">
+        <DrawerHeader className="shrink-0 border-b border-white/10">
           <DrawerTitle className="text-start">{t('freeImages.title', { defaultValue: 'Free images' })}</DrawerTitle>
         </DrawerHeader>
         <form
           className="shrink-0 space-y-2 px-4 pt-3"
           onSubmit={(e) => { e.preventDefault(); if (query.trim()) setSubmitted(query.trim()); }}
         >
-          <div className="relative">
-            <Search aria-hidden="true" className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <div className="relative rounded-xl focus-within:ring-2 focus-within:ring-current">
+            <Search aria-hidden="true" className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/70" />
             <Input
+              data-search-surface
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t('freeImages.search', { defaultValue: 'Search free photos' })}
               aria-label={t('freeImages.search', { defaultValue: 'Search free photos' })}
               enterKeyHint="search"
-              className="h-11 rounded-xl border-0 pl-9 ring-1 ring-inset ring-input rtl:pl-3 rtl:pr-9 focus-visible:ring-2 focus-visible:ring-ring"
+              className="h-11 rounded-xl border-0 bg-transparent pl-9 text-white placeholder:text-white/60 rtl:pl-3 rtl:pr-9"
             />
           </div>
           <DrawerDescription className="ps-9 text-[13px] leading-[18px]">
@@ -107,7 +108,7 @@ export function FreeImagesSheet({ open, onOpenChange, initialQuery, onPick }: Fr
                   onClick={() => pick(asset)}
                   disabled={!!picking}
                   aria-label={asset.title}
-                  className={cn('relative aspect-square overflow-hidden rounded-xl bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2', picking && picking !== asset.id && 'opacity-50')}
+                  className={cn('relative aspect-square overflow-hidden rounded-xl bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current focus-visible:ring-offset-2 focus-visible:ring-offset-transparent', picking && picking !== asset.id && 'opacity-50')}
                 >
                   <img src={asset.thumbnailUrl} alt={asset.title} loading="lazy" className="h-full w-full object-cover" />
                   {picking === asset.id && (
