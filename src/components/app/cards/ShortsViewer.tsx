@@ -432,7 +432,9 @@ export function ShortsViewer({ shorts: entries, initialIndex, onClose, onLoadMor
       .flatMap((page) => pauseMediaIn(page));
     return () => resumeMedia(paused);
   }, []);
-  const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const [selection, setSelection] = useState(() => ({ id: shorts[initialIndex]?.id, index: initialIndex }));
+  const selectedIndex = shorts.findIndex(short => short.id === selection.id);
+  const currentIndex = selectedIndex >= 0 ? selectedIndex : Math.min(selection.index, Math.max(0, shorts.length - 1));
   const prefMuted = useMediaMuted();
   // The browser refused sound on a short (iPhone, fast swiping), so it plays
   // silent until the viewer taps the speaker. Not saved as their choice.
@@ -1124,9 +1126,10 @@ export function ShortsViewer({ shorts: entries, initialIndex, onClose, onLoadMor
     if (currentIndex < shorts.length - 1) {
       transitioningRef.current = true;
       setIsTransitioning(true);
-      setCurrentIndex(prev => prev + 1);
+      const index = currentIndex + 1;
+      setSelection({ id: shorts[index].id, index });
     }
-  }, [currentIndex, shorts.length, isTransitioning, isMobile, showComments]);
+  }, [currentIndex, shorts, isTransitioning, isMobile, showComments]);
 
   // Load more when within 3 items of the end, however the viewer got there —
   // opened near the end, a swipe, a key, a wheel. It used to run only inside
@@ -1151,9 +1154,10 @@ export function ShortsViewer({ shorts: entries, initialIndex, onClose, onLoadMor
     if (currentIndex > 0) {
       transitioningRef.current = true;
       setIsTransitioning(true);
-      setCurrentIndex(prev => prev - 1);
+      const index = currentIndex - 1;
+      setSelection({ id: shorts[index].id, index });
     }
-  }, [currentIndex, isTransitioning, isMobile, showComments]);
+  }, [currentIndex, shorts, isTransitioning, isMobile, showComments]);
 
   // Keep the wheel effect mounted once (below) while always calling the latest
   // navigation handlers. Re-subscribing whenever goToNext/goToPrev changed
