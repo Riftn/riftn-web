@@ -264,11 +264,15 @@ if (html.includes('"__POST_LINK_CODE__"') || !postLinkCode) {
   }
 }
 
-const chatLinkCode = html.match(/var chatCode = (\[[^;]*\]);/);
-const chatFiles = chatLinkCode ? JSON.parse(chatLinkCode[1]) : [];
-if (!chatFiles.length || chatFiles.some((file) => !existsSync(join(DIST, file)))) {
-  console.error('[check-entry-bundle] FAIL: the chat startup file list is missing or references an unbuilt file.');
-  failed = true;
+for (const [name, match] of [
+  ['chat', html.match(/var chatCode = (\[[^;]*\]);/)],
+  ['app layout', html.match(/var appLayoutCode = (\[[^;]*\]);/)],
+]) {
+  const files = match ? JSON.parse(match[1]) : [];
+  if (!files.length || files.some((file) => !existsSync(join(DIST, file)))) {
+    console.error(`[check-entry-bundle] FAIL: the ${name} startup list is missing or references an unbuilt file.`);
+    failed = true;
+  }
 }
 
 if (failed) {
