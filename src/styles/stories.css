@@ -408,6 +408,10 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-st-glass] {
   caret-color: #fff;
   outline: none;
 }
+[data-sv-reply] input:focus-visible {
+  outline: 2px solid rgb(255 255 255 / 0.9);
+  outline-offset: 2px;
+}
 [data-sv-reply] input::placeholder { color: rgb(255 255 255 / 0.7); }
 [data-sv-round] {
   width: 44px;
@@ -709,31 +713,8 @@ button[data-sv-field] { font-weight: 600; color: #fff; }
   background: var(--tint-accent, #fff);
 }
 
-/* Who a reply goes to, above the keyboard while typing. */
-[data-sv-to] {
-  position: absolute;
-  left: 12px;
-  bottom: calc(80px + env(safe-area-inset-bottom));
-  display: flex;
-  gap: 4px;
-  padding: 3px;
-  border-radius: 10px;
-  background: rgb(20 20 24 / 0.5);
-  border: 1px solid rgb(255 255 255 / 0.14);
-  backdrop-filter: blur(18px);
-  z-index: 4;
-  animation: sv-rise 200ms cubic-bezier(0.25, 0.8, 0.25, 1) both;
-}
-[data-sv-to] button {
-  height: 30px;
-  padding: 0 12px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  color: rgb(255 255 255 / 0.75);
-  transition: background-color 160ms ease, color 160ms ease;
-}
-[data-sv-to] button[data-on='true'] { background: #fff; color: #0b0b0c; }
+[data-sv-send]:disabled:not([aria-busy='true']) { opacity: 0.45; }
+[data-sv-send][aria-busy='true'] { opacity: 0.85; }
 
 /* Comments over the picture, like live chat: newest at the bottom, older
    ones fading out at the top, new ones rising in. */
@@ -800,7 +781,7 @@ button[data-sv-field] { font-weight: 600; color: #fff; }
 }
 @media (prefers-reduced-motion: reduce) {
   [data-sv-flow] { display: none; }
-  [data-sv-room-row][data-enter='true'], [data-sv-to] { animation-duration: 1ms; }
+  [data-sv-room-row][data-enter='true'] { animation-duration: 1ms; }
 }
 
 /* ── Wide screens: the moment beside a chat panel, like the live page ── */
@@ -1084,13 +1065,9 @@ html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-sv-reply] > button {
   color: rgb(255 255 255 / 0.85) !important;
   -webkit-text-fill-color: rgb(255 255 255 / 0.85) !important;
 }
-html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) :is([data-sv-reply] > button[data-sv-send], [data-sv-to] button[data-on='true'], [data-sv-reply] [data-sv-count], [data-sv-tag]) {
+html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) :is([data-sv-reply] > button[data-sv-send], [data-sv-reply] [data-sv-count], [data-sv-tag]) {
   color: #0b0b0c !important;
   -webkit-text-fill-color: #0b0b0c !important;
-}
-html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-sv-to] button:not([data-on='true']) {
-  color: rgb(255 255 255 / 0.75) !important;
-  -webkit-text-fill-color: rgb(255 255 255 / 0.75) !important;
 }
 html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) :is([data-story-viewer], [data-story-creator]) .text-white { color: #fff !important; }
 html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) :is([data-story-viewer], [data-story-creator]) .text-white\/40 { color: rgb(255 255 255 / 0.4) !important; }
