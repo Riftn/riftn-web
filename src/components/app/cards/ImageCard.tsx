@@ -1250,6 +1250,7 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
         />
       ) : (
       <CardHeader
+        postPage={postPage}
         tokenId={postTokenId}
         username={post.username}
         visibility={post.visibility}

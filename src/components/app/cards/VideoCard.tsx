@@ -2553,6 +2553,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
       {!isImmersive && !hideActions && !stage && (
         <div data-card-head={headerAboveMedia ? 'plain' : ''} className="flex items-start justify-between">
           <CardHeader
+            postPage={postPage}
             tokenId={videoTokenId}
             username={video.channel}
             visibility={video.visibility}
