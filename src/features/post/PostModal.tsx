@@ -80,20 +80,25 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
   const [liveStream, setLiveStream] = useState<LiveStreamHandoff | null>(null);
   const [articleMode, setArticleMode] = useDraftState(draftScope + ':articleMode', false);
   const [articleBody, setArticleBody] = useDraftState(draftScope + ':articleBody', '');
-  const finishPost = () => { setArticleBody.complete(articleBody, ''); setArticleBody.clear(); setArticleMode(false); setArticleMode.clear(); onClose(); };
+  const [articleImage, setArticleImage] = useState<File | null>(null);
+  const articleCoverEdited = useRef(false);
+  const finishPost = () => { setArticleBody.complete(articleBody, ''); setArticleBody.clear(); setArticleMode(false); setArticleMode.clear(); setArticleImage(null); onClose(); };
   const { user: authUser } = useAuth();
   const { state, actions, computed, refs } = usePostForm(finishPost, setLiveStream, draftScope, quotedPost, onPosted, isOpen);
   const { attachedSound, selectSound, clearSound } = usePostSound();
   const [categoryDrawerOpen, setCategoryDrawerOpen] = useState(false);
   const [taggerOpen, setTaggerOpen] = useState(false);
   const [paintingOpen, setPaintingOpen] = useState(false);
-  const [freeImagesOpen, setFreeImagesOpen] = useState(false);
+  const [freeImagesTarget, setFreeImagesTarget] = useState<'post' | 'article-cover' | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [soundPickerOpen, setSoundPickerOpen] = useState(false);
   const [planDrawerOpen, setPlanDrawerOpen] = useState(false);
   const [mediaFullscreenOpen, setMediaFullscreenOpen] = useState(false);
-  const [articleImage, setArticleImage] = useState<File | null>(null);
   const [articleImagePreview, setArticleImagePreview] = useState('');
+  const changeArticleCover = (file: File | null) => {
+    articleCoverEdited.current = true;
+    setArticleImage(file);
+  };
   const saveArticleDraft = (replaceId?: string) => {
     const done = () => { actions.resetForm(); finishPost(); };
     draftImageData(articleImage)
@@ -200,6 +205,7 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
     // composer is opened.
     setLiveStream(null);
     setPlanDrawerOpen(false);
+    setFreeImagesTarget(null);
     onClose();
   };
 
@@ -218,7 +224,8 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
       handleClose();
       return;
     }
-    const unchanged = opened && opened.text === state.text && opened.body === (articleMode ? articleBody : '');
+    const unchanged = opened && opened.text === state.text && opened.body === (articleMode ? articleBody : '')
+      && (!articleMode || !articleCoverEdited.current);
     if (!unchanged) {
       if (articleMode) saveArticleDraft(opened?.id);
       else actions.saveDraft(undefined, opened?.id);
@@ -304,7 +311,8 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
           body={articleBody}
           setBody={setArticleBody}
           coverPreview={articleImagePreview}
-          onCoverChange={setArticleImage}
+          onCoverChange={changeArticleCover}
+          onOpenFreeImages={() => setFreeImagesTarget('article-cover')}
           onSaveDraft={() => saveArticleDraft()}
           onPublish={() => actions.handlePost({ articleBody: articleBody.trim(), articleImage: articleImage || undefined, socialImage: articleImage || undefined })}
           formReady={computed.canPost && !computed.hasVideo && !computed.hasImage && !computed.hasAudio}
@@ -381,14 +389,18 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
           handleClose();
         }}
         onLoadDraft={draft => {
-          openedDraftRef.current = { id: draft.id, text: draft.text, body: draft.articleBody || '' };
+          const opened = { id: draft.id, text: draft.text, body: draft.articleBody || '' };
+          openedDraftRef.current = opened;
+          articleCoverEdited.current = false;
           actions.loadDraft(draft);
           if (draft.articleBody) {
             setArticleMode(true);
             setArticleBody(draft.articleBody);
             actions.setTitleText(draft.articleTitle || '');
             actions.setShowTitle(true);
-            void restoreDraftImage(draft.socialImageData || draft.articleImageData, 'article-share-image.jpg', setArticleImage);
+            void restoreDraftImage(draft.socialImageData || draft.articleImageData, 'article-share-image.jpg', (file) => {
+              if (openedDraftRef.current === opened && !articleCoverEdited.current) setArticleImage(file);
+            });
           } else {
             // Loading a plain draft while the article editor is open used to
             // leave the article's body and cover sitting under the new text.
@@ -559,7 +571,7 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
         onToggleComic={isQuoting ? undefined : () => (comicMode ? exitComicMode() : selectComicMode())}
         isComic={comicMode}
         onOpenPainting={isQuoting ? undefined : () => setPaintingOpen(true)}
-        onOpenFreeImages={() => setFreeImagesOpen(true)}
+        onOpenFreeImages={() => setFreeImagesTarget('post')}
         onToggleContentWarning={() => actions.setContentWarning(state.contentWarning === null ? '' : null)}
         hasContentWarning={state.contentWarning !== null}
       />
@@ -574,13 +586,18 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
           />
         </Suspense>
       )}
-      {freeImagesOpen && (
+      {isOpen && freeImagesTarget && (
         <Suspense fallback={null}>
           <FreeImagesSheet
-            open={freeImagesOpen}
-            onOpenChange={setFreeImagesOpen}
-            initialQuery={state.text}
+            open
+            onOpenChange={open => { if (!open) setFreeImagesTarget(null); }}
+            initialQuery={freeImagesTarget === 'post' ? state.text : undefined}
+            forArticleCover={freeImagesTarget === 'article-cover'}
             onPick={(file, credit) => {
+              if (freeImagesTarget === 'article-cover') {
+                changeArticleCover(file);
+                return;
+              }
               actions.addImageFiles([file]);
               if (credit && !state.text.includes(credit)) actions.setText(state.text ? `${state.text}\n\n${credit}` : credit);
             }}
