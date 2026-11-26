@@ -19,12 +19,16 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Hourglass, Swords } from "lucide-react";
 import Upload from "@/components/ui/cut-icons/upload";
+import Hidden from '@/components/ui/cut-icons/hidden';
+import Visibility from '@/components/ui/cut-icons/visibility';
 
 import Play from "@/components/ui/cut-icons/play";
 
 import { useReducedMotion } from 'framer-motion';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import { IslandAction, PageBody, PageIsland } from '@/components/app/page-kit/PageKit';
 import { SEOHead } from '@/components/SEOHead';
 import { ArcadeLeaderboard } from '@/components/app/arcade/ArcadeLeaderboard';
@@ -33,6 +37,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { ARCADE_GAMES, type ArcadeGame } from '@/config/arcade-games';
 import { COCHRANIZ3R, groupArcadeGames } from '@/config/arcade-creators';
 import { getAccountSummariesByUsernames } from '@/lib/api/dehub/users';
+import { getArcadeListings, setArcadeListing, type ArcadeListingState } from '@/lib/api/dehub/games';
 import { buildAvatarUrl } from '@/lib/media-url';
 import { profilePath } from '@/lib/profile-path';
 
@@ -40,6 +45,7 @@ import { profilePath } from '@/lib/profile-path';
 const LINK_GAMES = [
   {
     href: '/arcade/okey',
+    listingSlug: 'okey',
     creator: { username: 'galatasaray' },
     art: '/og/arcade-okey.jpg',
     titleKey: 'games.okey.title',
@@ -49,6 +55,7 @@ const LINK_GAMES = [
   },
   {
     href: '/arcade/sillycoin',
+    listingSlug: 'sillycoin',
     creator: COCHRANIZ3R,
     art: '/og/arcade-sillycoin.jpg',
     titleKey: 'games.sillycoin.title',
@@ -58,6 +65,7 @@ const LINK_GAMES = [
   },
   {
     href: '/arcade/chestard',
+    listingSlug: 'chestard',
     creator: COCHRANIZ3R,
     art: '/og/arcade-chestard.jpg',
     titleKey: 'games.chestard.title',
@@ -67,6 +75,7 @@ const LINK_GAMES = [
   },
   {
     href: '/arcade/splurge',
+    listingSlug: 'splurge',
     creator: COCHRANIZ3R,
     art: '/arcade/splurge.webp',
     titleKey: 'games.splurge.title',
@@ -76,6 +85,7 @@ const LINK_GAMES = [
   },
   {
     href: '/music/binary-metal',
+    listingSlug: 'binary-metal',
     creator: COCHRANIZ3R,
     art: '/og/music-binary-metal.jpg',
     titleKey: 'binaryMetal.title',
@@ -85,12 +95,22 @@ const LINK_GAMES = [
   },
   {
     href: '/arcade/gratitude',
+    listingSlug: 'gratitude',
     creator: COCHRANIZ3R,
     art: '/og/arcade-gratitude.jpg',
     titleKey: 'games.gratitude.title',
     title: 'Gratitude pen pals',
     blurbKey: 'games.gratitude.cardBlurb',
     blurb: 'Take turns saying what you are grateful for. No repeats. Miss your turn and they win.',
+  },
+  {
+    href: '/arcade/spend',
+    creator: COCHRANIZ3R,
+    art: '/og/arcade-spend.jpg',
+    titleKey: 'games.spend.title',
+    title: 'SPEND!',
+    blurbKey: 'games.spend.cardBlurb',
+    blurb: 'Roll the die and dream up a purchase. Play by correspondence, at a live table, or against the computer.',
   },
 ] as const;
 
@@ -198,8 +218,28 @@ function LinkGameCard({ game }: { game: typeof LINK_GAMES[number] }) {
   );
 }
 
-function CreatorShelves() {
+function CreatorShelves({ wallet }: { wallet: string | null }) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const listingQueryKey = ['arcade-listings'];
+  const listings = useQuery({
+    queryKey: [...listingQueryKey, wallet],
+    queryFn: () => getArcadeListings(Boolean(wallet)),
+    staleTime: 0,
+    refetchOnWindowFocus: true,
+  });
+  const changeListing = useMutation({
+    mutationFn: ({ slug, hidden }: { slug: string; hidden: boolean }) => setArcadeListing(slug, hidden),
+    onSuccess: async ({ slug, hidden }) => {
+      await queryClient.cancelQueries({ queryKey: listingQueryKey });
+      queryClient.setQueriesData<ArcadeListingState>({ queryKey: listingQueryKey }, (current) => current && ({
+        ...current,
+        hidden: hidden ? [...new Set([...current.hidden, slug])] : current.hidden.filter((id) => id !== slug),
+      }));
+      await queryClient.invalidateQueries({ queryKey: listingQueryKey });
+    },
+    onError: () => toast.error(t('arcade.listingUpdateError')),
+  });
   const { data: profiles = [] } = useQuery({
     queryKey: ['arcade-creator-profiles', CREATOR_USERNAMES],
     queryFn: () => getAccountSummariesByUsernames(CREATOR_USERNAMES),
@@ -209,7 +249,15 @@ function CreatorShelves() {
 
   return (
     <div className="space-y-3">
+      {listings.isError && !listings.data && (
+        <p role="status" className="text-sm text-muted-foreground">{t('arcade.listingsLoadError')}</p>
+      )}
       {CREATOR_GROUPS.map((group) => {
+        const games = group.games.filter((game) => !('listingSlug' in game) || (
+          listings.data && (!listings.data.hidden.includes(game.listingSlug) || listings.data.editable.includes(game.listingSlug))
+        ));
+        if (!games.length) return null;
+        const editable = games.some((game) => 'listingSlug' in game && listings.data?.editable.includes(game.listingSlug));
         const profile = group.username ? profiles.find((entry) => entry.username?.toLowerCase() === group.username) : undefined;
         const name = profile?.displayName?.trim() || group.name || (
           group.id === 'riftn' ? t('arcade.riftnOriginals') : t('arcade.otherGames')
@@ -243,18 +291,40 @@ function CreatorShelves() {
                 )}
               </h2>
               <span className="shrink-0 text-xs tabular-nums text-zinc-400">
-                {t('arcade.gameCount', { count: group.games.length })}
+                {t('arcade.gameCount', { count: games.length })}
               </span>
             </header>
+            {editable && <p className="mb-2 text-sm text-muted-foreground">{t('arcade.listingHint')}</p>}
             <ul className="-mx-1 flex min-w-0 snap-x snap-proximity gap-3 overflow-x-auto overscroll-x-contain p-1">
-              {group.games.map((game) => (
-                <li
-                  key={'slug' in game ? game.slug : game.href}
-                  className="flex min-w-0 shrink-0 basis-[84%] snap-start sm:basis-[calc(50%_-_0.375rem)] lg:basis-[calc(33.333%_-_0.5rem)]"
-                >
-                  {'slug' in game ? <GameCard game={game} /> : <LinkGameCard game={game} />}
-                </li>
-              ))}
+              {games.map((game) => {
+                const slug = 'listingSlug' in game ? game.listingSlug : null;
+                const canEdit = slug !== null && listings.data?.editable.includes(slug);
+                const hidden = slug !== null && Boolean(listings.data?.hidden.includes(slug));
+                const loading = changeListing.isPending && changeListing.variables?.slug === slug;
+                const action = t(hidden ? 'arcade.showListing' : 'arcade.hideListing');
+                return (
+                  <li
+                    key={'slug' in game ? game.slug : game.href}
+                    className="flex min-w-0 shrink-0 basis-[84%] flex-col items-stretch gap-2 snap-start sm:basis-[calc(50%_-_0.375rem)] lg:basis-[calc(33.333%_-_0.5rem)]"
+                  >
+                    {'slug' in game ? <GameCard game={game} /> : <LinkGameCard game={game} />}
+                    {canEdit && (
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        className="min-h-11 max-w-full self-start whitespace-normal focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                        aria-label={t('arcade.listingActionLabel', { action, game: 'titleKey' in game ? t(game.titleKey) : game.title })}
+                        disabled={changeListing.isPending && !loading}
+                        loading={loading}
+                        onClick={() => changeListing.mutate({ slug, hidden: !hidden })}
+                      >
+                        {!loading && (hidden ? <Visibility aria-hidden /> : <Hidden aria-hidden />)}
+                        {action}
+                      </Button>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </section>
         );
@@ -318,7 +388,7 @@ export default function ArcadePage() {
       </PageIsland>
 
       <PageBody className="mx-auto max-w-4xl">
-        <CreatorShelves />
+        <CreatorShelves wallet={wallet} />
 
         {RANKED_GAMES.length > 0 ? (
           <section data-feed-item data-kit-section className="bg-zinc-900/60 p-4 ring-1 ring-white/[0.06]">

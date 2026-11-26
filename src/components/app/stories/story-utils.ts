@@ -26,12 +26,6 @@ export function startIndex(entry: ShelfEntry): number {
   return i < 0 ? 0 : i;
 }
 
-/** Use the opening item's still image, including when the viewer replays a watched day. */
-export function coverOf(entry: ShelfEntry): string | null {
-  const item = entry.items[startIndex(entry)];
-  return item?.posterUrl || (item?.type === 'photo' ? item.mediaUrl : null);
-}
-
 export function playable(items: StoryItem[]): StoryItem[] {
   return items.filter(it => it.status === 'ready' && (it.mediaUrl || it.posterUrl));
 }

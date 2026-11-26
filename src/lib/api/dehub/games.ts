@@ -9,6 +9,34 @@
  * @module lib/api/dehub/games
  */
 import { apiCall } from './core';
+import type { SpendAction, SpendCreate, SpendGame, SpendLobby } from '@/lib/spend';
+
+const SPEND_API = '/api/games/spend';
+const spendApiPath = (id: string) => SPEND_API + '/' + encodeURIComponent(id);
+export const spendList = () => apiCall<SpendLobby>(SPEND_API, { requiresAuth: true });
+export const spendGet = (id: string, signedIn: boolean) =>
+  apiCall<{ game: SpendGame }>(spendApiPath(id), { requiresAuth: signedIn });
+export const spendCreate = (body: SpendCreate) =>
+  apiCall<{ game: SpendGame }>(SPEND_API, { method: 'POST', body, requiresAuth: true });
+export const spendAction = (id: string, action: SpendAction) =>
+  apiCall<{ game: SpendGame }>(spendApiPath(id) + '/' + action.name, {
+    method: 'POST', body: 'body' in action ? action.body : {}, requiresAuth: true,
+  });
+
+export interface ArcadeListingState {
+  hidden: string[];
+  editable: string[];
+}
+
+export const getArcadeListings = (signedIn: boolean) =>
+  apiCall<ArcadeListingState>('/api/games/arcade-listings', { requiresAuth: signedIn });
+
+export const setArcadeListing = (slug: string, hidden: boolean) =>
+  apiCall<{ slug: string; hidden: boolean }>(`/api/games/arcade-listings/${encodeURIComponent(slug)}`, {
+    method: 'POST',
+    requiresAuth: true,
+    body: { hidden },
+  });
 
 export interface GamePlayer {
   address: string;

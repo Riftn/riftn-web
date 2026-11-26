@@ -1,3 +1,4 @@
+import { stageRoomLabel } from '@/i18n/stage-room-copy';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
 import { newStageChannelName } from '@/lib/stage-radio-show';
 import { useTranslation as _useCopy } from 'react-i18next';
@@ -285,7 +286,7 @@ export function useStageVolumeLevel(): number {
  * out rather than shipped on every refresh.
  */
 const SPACE_LIST_COLUMNS =
-  'id, short_id, channel_name, title, description, host_wallet_address, host_username, host_avatar, status, listener_count, speaker_count, started_at, created_at, total_listens, scheduled_at, cover_image_url';
+  'id, short_id, channel_name, title, description, host_wallet_address, host_username, host_avatar, status, listener_count, speaker_count, started_at, created_at, total_listens, scheduled_at, cover_image_url, entry_locked, topic';
 
 // ─── Live spaces store ──────────────────────────────────────────────────────
 // StageProvider already keeps the live-spaces list fresh (one fetch at boot +
@@ -1078,14 +1079,10 @@ export function StageProvider({ children }: { children: ReactNode }) {
   const getAgoraToken = async (
     channelName: string,
     role: 'publisher' | 'subscriber',
+    anonymous = false,
   ): Promise<AgoraTokenResponse> => {
     const requestToken = async (withIdentity: boolean): Promise<AgoraTokenResponse> => {
-      // A subscriber token stays anonymous — that is what lets a signed-out
-      // visitor on an invite link hear the room. A publisher token is gated on
-      // the caller actually holding a host/speaker seat, so identify ourselves
-      // whenever we are asking to speak. The wallet header is only a
-      // cross-check; the function takes the address off the verified token.
-      const authToken = withIdentity && role === 'publisher' ? getAuthToken() : null;
+      const authToken = withIdentity && !anonymous ? getAuthToken() : null;
       const headers =
         authToken && walletAddress
           ? { 'x-dehub-token': authToken, 'x-wallet-address': walletAddress.toLowerCase() }
@@ -1618,17 +1615,14 @@ export function StageProvider({ children }: { children: ReactNode }) {
       if (!walletAddress) { toast.error(_copy("copy.f6101c84c1c8", { defaultValue: "Please log in first" })); return false; }
       // Two taps, or two cards, must not race two joins.
       if (roomSwitchInFlightRef.current) return false;
-      const vacated = await vacateCurrentRoom(spaceId);
-      if (vacated === 'same') return true;
-      if (!vacated) return false;
       roomSwitchInFlightRef.current = true;
       // A visitor who was guest-listening and then logged in joins properly —
       // drop the listen-only session before taking the real one.
-      if (guestSpaceRef.current) await guestStopListeningRef.current();
       setIsLoading(true);
       // Read by the failure handler below, which needs to know whether the
       // person who could not get in owns the room.
       let hostWallet: string | null = null;
+      let tookNewSeat = false;
       try {
         const { data: space, error: spaceError } = await supabase
           .from('audio_spaces')
@@ -1650,6 +1644,22 @@ export function StageProvider({ children }: { children: ReactNode }) {
           );
           return false;
         }
+
+        if (space.entry_locked) {
+          const { data: entry, error: entryError } = await signed(
+            supabase.rpc('request_stage_entry', { p_space_id: spaceId }),
+          );
+          if (entryError) throw new Error(entryError.message);
+          if (entry !== 'allowed') {
+            toast.info(entry === 'pending' ? stageRoomLabel(_copy, 'entryPending') : stageRoomLabel(_copy, 'entryUnavailable'));
+            return false;
+          }
+        }
+
+        const vacated = await vacateCurrentRoom(spaceId);
+        if (vacated === 'same') return true;
+        if (!vacated) return false;
+        if (guestSpaceRef.current) await guestStopListeningRef.current();
 
         // Determine role: if this user is the host, preserve host/speaker role on rejoin
         const isHost = sameWallet(space.host_wallet_address, walletAddress);
@@ -1689,6 +1699,7 @@ export function StageProvider({ children }: { children: ReactNode }) {
           ),
         );
         if (seatError) throw new Error(seatError.message);
+        tookNewSeat = !existingParticipant && !isHost;
 
         // Recount from the participant rows so a rejoin cannot drift the
         // figures. Through the RPC rather than three statements here: once
@@ -1716,6 +1727,11 @@ export function StageProvider({ children }: { children: ReactNode }) {
         toast.success(isHost ? _translateCopy("copy.0b3315d1d765", { defaultValue: "Rejoined as host!" }) : _translateCopy("copy.7c84d6dad54b", { defaultValue: "Joined the stage!" }));
         return true;
       } catch (err) {
+        if (tookNewSeat) {
+          await signed(supabase.from('space_participants').update({ left_at: new Date().toISOString() })
+            .eq('space_id', spaceId).eq('wallet_address', walletAddress));
+          await recountSpace(spaceId);
+        }
         stageLogger.error('Stage join failed', { spaceId }, err);
         toast.error(describeStageFailure(err), {
           // A host who cannot get back into their own room is otherwise stuck
@@ -1730,7 +1746,7 @@ export function StageProvider({ children }: { children: ReactNode }) {
         setIsLoading(false);
       }
     },
-    [walletAddress, user, startRecording, vacateCurrentRoom, _copy],
+    [walletAddress, user, startRecording, vacateCurrentRoom, signed, _copy],
   );
 
   // ─── Guest listening ─────────────────────────────────────────────────────
@@ -1774,7 +1790,11 @@ export function StageProvider({ children }: { children: ReactNode }) {
           );
           return false;
         }
-        const tokenData = await getAgoraToken(space.channel_name, 'subscriber');
+        if (space.entry_locked) {
+          toast.info(stageRoomLabel(_copy, 'entrySignIn'));
+          return false;
+        }
+        const tokenData = await getAgoraToken(space.channel_name, 'subscriber', true);
         await initializeAgora(tokenData, 'listener');
         setGuestSpace(space as AudioSpace);
         return true;

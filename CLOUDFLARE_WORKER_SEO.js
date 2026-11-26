@@ -185,7 +185,7 @@ const OG_CARD_ROUTES = new Set([
   'arcade', 'arcade/kings-gambit', 'arcade/claude-of-duty', 'arcade/jungle-trail',
   'arcade/street-slayer',
   'arcade/trenchstar', 'arcade/love-lock-bridge',
-  'arcade/correspondence-chess', 'arcade/okey', 'arcade/sillycoin', 'arcade/gratitude', 'arcade/chestard', 'arcade/splurge',
+  'arcade/correspondence-chess', 'arcade/okey', 'arcade/sillycoin', 'arcade/gratitude', 'arcade/chestard', 'arcade/splurge', 'arcade/spend',
   'music/binary-metal',
   'apps', 'apps/dev',
   // App surfaces that had no card of their own and unfurled as the homepage.
@@ -1531,6 +1531,13 @@ const MARKETING_PAGES = {
     ...arcadeGameLd('/og/arcade-splurge.jpg'),
     bodyHtml: `<p>What would you buy with a random budget? Type your answer and press Enter to get a new amount. Switch between Modern and an amber CRT display, and sign in to save your private spending log across web and app.</p>
 <p><a href="${APP_URL}/arcade/splurge">Play Splurge</a> or <a href="${APP_URL}/arcade">see the whole arcade</a>.</p>`,
+  },
+  'arcade/spend': {
+    title: 'SPEND! | Riftn Arcade',
+    description: 'Roll the die and dream up a purchase. Play by correspondence, at a live table, or against the computer.',
+    heading: 'SPEND!',
+    ...arcadeGameLd('/og/arcade-spend.jpg'),
+    bodyHtml: '<p>Play Jesse Cochran’s board game. Roll the die, move around the board and think of a different purchase each turn. All purchases use imaginary money.</p>',
   },
   'arcade/street-slayer': {
     title: 'Street Slayer | Riftn Arcade',

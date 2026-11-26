@@ -8,6 +8,8 @@ import { useChatReadPosition } from '@/hooks/use-chat-read-position';
 import { glideToBottom } from '@/lib/chat-lines-below';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { MoreVertical, Loader2, ShieldBan, MessageSquarePlus, AlertCircle, RotateCcw, ChevronsDown } from "lucide-react";
+import { CatchUpMenu, CatchUpSubmenu, runCatchUp } from '@/components/app/communities/CatchUpMenu';
+import { isCatchUpCommand } from '@/lib/community-recap';
 import ShieldCheck from "@/components/ui/cut-icons/security";
 import RefreshCw from "@/components/ui/cut-icons/refresh";
 import Languages from "@/components/ui/cut-icons/language";
@@ -163,7 +165,7 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
   // A mention notification names the line that tagged the reader.
   useFocusChatMessage();
   const { t: _copy } = _useCopy();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -252,6 +254,9 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
     hasOlder, loadingOlder, loadOlder, signInWall,
     hasNewer, jumpTo, loadNewer, backToLatest,
   } = useLiveChatMessages(selectedRoomId, { pageSize: PUBLIC_CHAT_PAGE_SIZE });
+  const recapWalletAddress = isAuthenticated && !embedded && !isBanned && selectedRoomId === 'global'
+    ? walletAddress
+    : null;
   const search = useChatSearch(selectedRoomId, isSearchOpen && isAuthenticated, searchText, searchPerson?.address ?? null);
 
   // Fetch full room details
@@ -665,10 +670,14 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
     return true;
   }, []);
 
-  const handleSendMessage = async (args: { content: string; type: string; gifUrl?: string; mediaFile?: File; duration?: number }) => {
+  const handleSendMessage = async (args: ChatInputSendArgs) => {
     // Signed out: the typed line stays in the box while they sign in.
     if (!isAuthenticated) { promptSignIn(); return false; }
     if (!selectedRoomId) return false;
+    if (recapWalletAddress && !replyTo && args.type === 'msg' && isCatchUpCommand(args.content)) {
+      void runCatchUp({ communityId: 'global', walletAddress: recapWalletAddress, text: args.content, t, lang: i18n.language, navigate });
+      return true;
+    }
     // Reading old history: a new line belongs at the end, so go there first.
     if (hasNewer) await goToLatest();
     const replyToId = replyTo?.id;
@@ -925,6 +934,9 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" sideOffset={6} data-chat-options-menu className={cn(CHAT_MENU_CONTENT, 'text-white')}>
+              {recapWalletAddress && (
+                <CatchUpSubmenu communityId="global" walletAddress={recapWalletAddress} className={PC_ROW} />
+              )}
               {call && walletAddress && !isBanned && (
                 <>
                   <DropdownMenuItem className={PC_ROW} disabled={!!call.currentCall}
@@ -961,6 +973,9 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
               buttons instead of being split from them by the number. */}
           {selectedRoomId && <LiveChatOnlineCount count={onlineCount} />}
           <ChatTextSizeButton />
+          {recapWalletAddress && (
+            <CatchUpMenu communityId="global" walletAddress={recapWalletAddress} />
+          )}
           {/* Translate all toggle */}
           <Tooltip>
             <TooltipTrigger asChild>

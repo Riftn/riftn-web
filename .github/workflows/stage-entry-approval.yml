@@ -1,0 +1,35 @@
+name: Stage entry approval
+on:
+  pull_request:
+    paths:
+      - 'supabase/functions/agora-token/**'
+      - 'supabase/migrations/20261126164000_stage_entry_approval.sql'
+      - 'tests/sql/stage-entry-*.sql'
+      - '.github/workflows/stage-entry-approval.yml'
+  workflow_dispatch:
+jobs:
+  database:
+    name: Stage entry permissions
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: stage-test
+          POSTGRES_DB: stage_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: localhost
+      PGUSER: postgres
+      PGPASSWORD: stage-test
+      PGDATABASE: stage_test
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          psql -v ON_ERROR_STOP=1 -f tests/sql/stage-entry-bootstrap.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261126164000_stage_entry_approval.sql
+          psql -v ON_ERROR_STOP=1 -f tests/sql/stage-entry-approval.sql

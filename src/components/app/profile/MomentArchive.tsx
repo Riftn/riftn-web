@@ -48,12 +48,11 @@ function ArchiveItems({ address }: { address: string }) {
   return (
     <div className="flex items-center gap-2 overflow-x-auto py-2">
       {items.map(item => {
-        const cover = item.posterUrl || (item.type === 'photo' ? item.mediaUrl : null);
         const date = new Date(item.createdAt).toLocaleDateString(i18n.language);
         return (
-          <Link key={item.id} to={`/app/moment/${item.id}`} state={{ fromMomentArchive: true }} aria-label={item.caption ? `${date} · ${item.caption}` : date}
+          <Link key={item.id} to={`/app/moment/${item.id}`} state={{ fromMomentArchive: true }} aria-label={date}
             className="relative grid h-28 w-20 shrink-0 place-items-center overflow-hidden rounded-xl bg-zinc-800 text-white">
-            {cover ? <img src={cover} alt="" loading="lazy" className="size-full object-cover" /> : <Film aria-hidden />}
+            <Film aria-hidden />
             <span className="absolute inset-x-0 bottom-0 bg-black/70 px-1 py-1 text-center text-xs">{date}</span>
           </Link>
         );

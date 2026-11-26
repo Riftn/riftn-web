@@ -523,6 +523,20 @@ export function onDmSendMessage(cb: (msg: DmMessage) => void): () => void {
   return addPersistentListener('sendMessage', cb as AnyFn);
 }
 
+export function emitDmTyping(dmId: string, typing: boolean): void {
+  const socket = getDmSocket();
+  if (socket.connected) socket.emit(typing ? 'typing' : 'stopTyping', { dmId });
+}
+
+export function onDmTyping(cb: (data: { dmId: string; userId: string }, typing: boolean) => void): () => void {
+  const start = addPersistentListener('typing', (data) => cb(data, true));
+  const stop = addPersistentListener('stopTyping', (data) => cb(data, false));
+  return () => {
+    start();
+    stop();
+  };
+}
+
 /** Fires for the DM transport, including reconnection after a missed event. */
 export function onDmReconnect(cb: () => void): () => void {
   return addPersistentListener('connect', cb as AnyFn);

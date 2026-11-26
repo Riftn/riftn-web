@@ -10,13 +10,13 @@ vi.mock('@/hooks/use-mature-content', () => ({ useMatureContent: () => ({ showMa
 vi.mock('@/lib/api/dehub/stories', () => ({ getStory: vi.fn() }));
 vi.mock('@tanstack/react-query', () => ({ useQuery: () => ({ data: { item: fixture.item, author: { displayName: 'River Song' } }, isSuccess: true }) }));
 afterEach(() => { vi.useRealTimers(); });
-it('removes the thumbnail and author at expiry while keeping the permalink', () => {
+it('keeps Moment art hidden and removes the author at expiry while keeping the permalink', () => {
   vi.useFakeTimers();
   fixture.item.expiresAt = new Date(Date.now() + 2000).toISOString();
   fixture.item.isMature = false;
   const { container } = render(<MemoryRouter><MomentReplyPreview id="story" /></MemoryRouter>);
   expect(screen.getByText('River Song')).toBeTruthy();
-  expect(container.querySelector('img')).toHaveAttribute('src', '/still.jpg');
+  expect(container.querySelector('img')).toBeNull();
   act(() => vi.advanceTimersByTime(2005));
   expect(container.querySelector('img')).toBeNull();
   expect(screen.queryByText('River Song')).toBeNull();
