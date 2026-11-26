@@ -8,6 +8,7 @@
       window.process = process
     </script>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
     <!-- A post link asks for its post now, while the app code is still on its
          way, instead of after it has arrived and drawn the page (that wait was
          ~4 s on desktop, ~6 s on a mid phone). src/lib/post-prefetch.ts picks
@@ -111,7 +112,6 @@
         } catch (e) {}
       })();
     </script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
     <!-- Apply the saved theme (+ dim settings) to <html> synchronously, during
          head parse — before the render-blocking stylesheet is matched and long
          before React mounts. ThemeContext also sets data-theme, but only in a

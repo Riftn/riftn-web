@@ -1,4 +1,6 @@
 import { waitFor } from '@testing-library/react';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { publicPreviewRows, showPublicChatPreview } from '../../public/chat-startup-preview.js';
 
@@ -28,6 +30,14 @@ afterEach(() => {
 });
 
 describe('public chat startup preview', () => {
+  it('sets the mobile viewport before evaluating the preview breakpoint', () => {
+    const html = readFileSync(resolve(__dirname, '../../index.html'), 'utf8');
+    const viewport = html.indexOf('<meta name="viewport"');
+    const breakpoint = html.indexOf("window.matchMedia('(max-width: 767px)').matches");
+    expect(viewport).toBeGreaterThanOrEqual(0);
+    expect(breakpoint).toBeGreaterThan(viewport);
+  });
+
   it('keeps only guest-readable text from the global room, in reading order', () => {
     expect(publicPreviewRows({ result: { messages: [
       { ...text, content: 'Newest' },
