@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 // Same RTC token format as `scripts/test-agora-credentials.mjs` (official builder, 006 prefix).
 // The previous hand-written "007" token did not match Agora’s wire format → CAN_NOT_GET_GATEWAY_SERVER / invalid vendor key.
 import agora from "agora-access-token";
-import { requireDeHubAuth } from "../_shared/auth.ts";
+import { requireDeHubAuth, serviceClient } from "../_shared/auth.ts";
 
 const { RtcTokenBuilder, RtcRole } = agora as {
   RtcTokenBuilder: {
@@ -197,7 +197,7 @@ serve(async (req) => {
 
     const { channelName, uid, role: requestedRole } = await req.json();
 
-    if (!channelName) {
+    if (typeof channelName !== "string" || !channelName) {
       return new Response(JSON.stringify({ error: "channelName is required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -208,7 +208,42 @@ serve(async (req) => {
     const wantsPublisher = requestedRole === "publisher";
     const rtcRole = wantsPublisher ? RtcRole.PUBLISHER : RtcRole.SUBSCRIBER;
 
-    // Subscriber tokens stay open — that is the whole guest-listening path.
+    let verified: ReturnType<typeof requireDeHubAuth> | undefined;
+    const verify = () => verified ??= requireDeHubAuth(req);
+
+    if (/^(stage_|radio_)/.test(channelName)) {
+      const db = serviceClient();
+      const { data: stage, error } = await db
+        .from("audio_spaces")
+        .select("id, entry_locked")
+        .eq("channel_name", channelName)
+        .abortSignal(AbortSignal.timeout(5000))
+        .maybeSingle();
+      if (error) throw error;
+
+      if (!stage) {
+        return new Response(JSON.stringify({ error: "Stage not found." }), {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      if (stage.entry_locked) {
+        const auth = await verify();
+        if (!auth.ok) return auth.response;
+        const { data: allowed, error: accessError } = await db
+          .rpc("stage_entry_allowed", { p_space_id: stage.id, p_wallet: auth.wallet })
+          .abortSignal(AbortSignal.timeout(5000));
+        if (accessError) throw accessError;
+        if (allowed !== true) {
+          return new Response(JSON.stringify({ error: "The host must approve entry to this stage.", code: "STAGE_ENTRY_REQUIRED" }), {
+            status: 403,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      }
+    }
+
     if (wantsPublisher) {
       const mode = gateMode();
       let refusal: string | null = null;
@@ -223,7 +258,7 @@ serve(async (req) => {
       const GATE_DEADLINE_MS = 5000;
       try {
         const gateCheck = (async (): Promise<string | null> => {
-          const auth = await requireDeHubAuth(req);
+          const auth = await verify();
           if (!auth.ok) return "no valid Riftn token";
           if (!(await mayPublish(channelName, auth.wallet, Number(userUid)))) {
             return `wallet ${auth.wallet} is not a party to this channel`;
