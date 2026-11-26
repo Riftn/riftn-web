@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { ArrowDownRight, ArrowUpRight, ChevronDown, ListChecks } from "lucide-react";
 import Wallet from "@/components/ui/cut-icons/wallet";
+import { Button } from '@/components/ui/button';
 
 
 import {
@@ -225,18 +226,20 @@ function SourceList({
                       value={totals.get(s.id) ?? 0}
                       max={max}
                       formatted={s.status !== 'unavailable' ? (s.status === 'partial' ? '~' : '') + formatUsd(totals.get(s.id) ?? 0) : t('stats.money.sourceUnavailable', 'Unavailable')}
+                      wrapLabel
                     />
                   );
                   return onSelect ? (
-                    <button
+                    <Button
                       key={s.id}
                       type="button"
+                      variant="ghost"
                       onClick={() => onSelect(s.id)}
                       aria-label={selectLabel?.(s.label)}
-                      className="block w-full text-left rounded-lg -mx-1 px-1 hover:bg-zinc-800/50 transition-colors"
+                      className="block h-auto w-full whitespace-normal text-left font-normal -mx-1 px-1 py-0"
                     >
                       {row}
-                    </button>
+                    </Button>
                   ) : (
                     row
                   );
@@ -262,11 +265,12 @@ function FinanceDefinitions({ stats }: { stats: FinanceStats }) {
 
   return (
     <div data-page-bento data-kit-section className="bg-zinc-900 border border-zinc-800">
-      <button
+      <Button
         type="button"
+        variant="ghost"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="w-full flex items-center gap-3 px-4 py-3 text-left"
+        className="h-auto w-full justify-start gap-3 whitespace-normal px-4 py-3 text-left font-normal"
       >
         <ListChecks className="w-4 h-4 text-zinc-400 shrink-0" />
         <div className="flex-1 min-w-0">
@@ -278,10 +282,10 @@ function FinanceDefinitions({ stats }: { stats: FinanceStats }) {
           </div>
         </div>
         <ChevronDown className={cn('w-4 h-4 text-zinc-500 transition-transform shrink-0', open && 'rotate-180')} />
-      </button>
+      </Button>
 
       {open && (
-        <ul className="px-4 pb-4 pt-3 space-y-2 text-xs text-zinc-400 leading-relaxed border-t border-zinc-800">
+        <ul className="px-4 pb-4 pt-3 space-y-2 text-[13px] text-zinc-400 leading-relaxed border-t border-zinc-800">
           {stats.sources.map((s) => (
             <li key={s.id}>
               <span className="text-zinc-300">{s.label}</span> — {s.note}
@@ -408,7 +412,7 @@ export function FinanceSection({ range }: { range: Range }) {
   if (!stats || !view) return null;
 
   const revenueSources = stats.sources.filter((s) => s.kind === 'revenue');
-  const costSources: FinanceSource[] = stats.sources.filter((s) => s.kind === 'cost' && (s.id !== 'operations_reinvestment' || view.costs.has(s.id))).map(source => source.id === 'operations_reinvestment' ? {
+  const costSources: FinanceSource[] = stats.sources.filter((s) => s.kind === 'cost' && (s.id !== 'operations_reinvestment' || view.costs.has(s.id))).map(source => source.id === 'operations_reinvestment' && source.label === 'Estimated operations' ? {
       ...source,
       label: t("copy.f9b6484cf356", { defaultValue: "Estimated operations" }),
       note: source.note,

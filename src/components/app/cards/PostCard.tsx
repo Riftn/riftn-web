@@ -149,6 +149,7 @@ function useIsTabletOrMobile() {
 
 interface PostCardProps {
   post: TextPost;
+  postPage?: boolean;
   /** Dedicated pages own one shared comments window below the post card. */
   onOpenComments?: (tab?: 'replies' | 'quotes' | 'reposts' | 'search') => void;
   /**
@@ -171,7 +172,7 @@ function postOwnPath(post: { id: string; articleSlug?: string; newPostId?: numbe
   return `/app/post/${post.id}`;
 }
 
-const PostCardBody = memo(function PostCard({ post, threadSlot, onOpenComments }: PostCardProps) {
+const PostCardBody = memo(function PostCard({ post, postPage, threadSlot, onOpenComments }: PostCardProps) {
   const { t: _copy } = _useCopy();
   const [showComments, setShowComments] = useState(false);
   const [commentsInitialTab, setCommentsInitialTab] = useState<'replies' | 'quotes' | 'reposts' | 'search' | undefined>(undefined);
@@ -531,6 +532,7 @@ const PostCardBody = memo(function PostCard({ post, threadSlot, onOpenComments }
         </>
       ) : (
       <CardHeader
+        postPage={postPage}
         tokenId={postTokenId}
         username={post.author.name}
         visibility={post.visibility}

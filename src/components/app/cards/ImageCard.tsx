@@ -1,3 +1,4 @@
+import { ppvTokenLabel } from '@/lib/token-label';
 import { canShareToMoment } from '@/lib/moment-share';
 import { useTranslation as _useCopy } from 'react-i18next';
 import { useSurfaceDraft, draftIdentity } from '@/hooks/use-surface-draft';
@@ -1250,6 +1251,7 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
         />
       ) : (
       <CardHeader
+        postPage={postPage}
         tokenId={postTokenId}
         username={post.username}
         visibility={post.visibility}
@@ -1549,7 +1551,7 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
                   <Ticket className="h-7 w-7 text-white" />
                 </div>
                 <p className="text-white font-semibold text-sm mb-1">{_copy("copy.48e072480fc5", { defaultValue: "Pay-Per-View Content" })}</p>
-                <p className="text-white/70 text-xs">{_copy("copy.f298ff07e69b", { defaultValue: "Unlock for {{value1}} {{value2}}", value1: formatCompact(Number(post.ppvPrice)), value2: post.ppvCurrency || 'USDC' })}
+                <p className="text-white/70 text-xs">{_copy("copy.f298ff07e69b", { defaultValue: "Unlock for {{value1}} {{value2}}", value1: formatCompact(Number(post.ppvPrice)), value2: ppvTokenLabel(post.ppvCurrency || 'DHB') })}
                 </p>
                 
               </div>

@@ -1,4 +1,3 @@
-import { useSessionText } from '@/hooks/use-session-text';
 import React, { Suspense, lazy, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { flushSync } from 'react-dom';
@@ -21,6 +20,7 @@ import { useMenuLayout } from '@/lib/menu-layout';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { buildAvatarUrl } from '@/lib/media-url';
 import { useSelfBadge } from '@/hooks/use-self-badge-balance';
+import { useAppTokens, useAppTokensConfig } from '@/hooks/use-app-tokens';
 import { HIDDEN_BALANCE, setBalanceHidden, useBalanceHidden } from '@/lib/balance-privacy';
 import { BadgedName } from '@/components/app/BadgedName';
 import { useUnreadNotificationCount } from '@/hooks/use-notifications';
@@ -75,8 +75,10 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated, user, walletAddress } = useAuth();
-  // Read-only: SelfBadgeSync and the header already own these fetches.
-  const dhbBalance = useSelfBadge().balance ?? 0;
+  const legacyBalance = useSelfBadge().balance ?? 0;
+  const { data: appTokensConfig } = useAppTokensConfig(isOpen);
+  const { data: appTokens } = useAppTokens(isOpen && appTokensConfig?.enabled === true);
+  const walletBalance = appTokensConfig?.enabled ? Number(appTokens?.balance) : appTokensConfig ? legacyBalance : NaN;
   const balanceHidden = useBalanceHidden();
   const { data: unreadCount } = useUnreadNotificationCount();
   const { data: customUnread } = useCustomUnreadCount();
@@ -85,10 +87,7 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
   const isDesktop = useIsDesktopViewport();
 
   const { t } = useTranslation();
-  // Menu search. Unlike the desktop rail this field is always shown: the sheet
-  // is opened deliberately and closed again straight away, so there is no
-  // resting state to keep uncluttered.
-  const [menuQuery, setMenuQuery] = useSessionText("menu-search");
+  const [menuQuery, setMenuQuery] = useState('');
   const { addToHistory } = useSearchHistory();
   // `isKidsMode` is in the deps because `filterNavItems` reads the lock
   // directly rather than taking it as an argument — without it here the sheet
@@ -114,9 +113,10 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const showSearchField = !tabsHeader || searchOpen || !!menuQuery;
   const closeSearch = useCallback(() => {
-    setMenuQuery.complete(menuQuery, '');
+    searchInputRef.current?.blur();
+    setMenuQuery('');
     setSearchOpen(false);
-  }, [menuQuery, setMenuQuery]);
+  }, []);
   // Fetch the menu's tiles once the page is idle, so the first open is instant.
   useEffect(() => {
     const idle = (window as any).requestIdleCallback as ((cb: () => void) => number) | undefined;
@@ -130,20 +130,20 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
   // always reopens on the first group.
   useEffect(() => {
     if (!isOpen) {
-      setMenuQuery.initialize('');
+      setMenuQuery('');
       setSearchOpen(false);
       setMenuTab(0);
     }
-  }, [isOpen, setMenuQuery]);
+  }, [isOpen]);
 
   const runFullSearch = useCallback(() => {
     const query = menuQuery.trim();
     if (!query) return;
     addToHistory(query);
     navigate(exploreSearchHref(query));
-    setMenuQuery.complete(menuQuery, '');
+    closeSearch();
     closeMenu();
-  }, [menuQuery, addToHistory, navigate, closeMenu, setMenuQuery]);
+  }, [menuQuery, addToHistory, navigate, closeSearch, closeMenu]);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [postLiveMode, setPostLiveMode] = useState<'video' | undefined>();
   // From the Live feed, the post button opens the composer on Livestream.
@@ -229,18 +229,18 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
               </p>
             ) : user.username && <p className="truncate text-[13px] text-zinc-400">@{user.username}</p>}
           </div>
-          {Math.floor(dhbBalance) > 0 && (
+          {Number.isFinite(walletBalance) && (walletBalance > 0 || legacyBalance > 0) && (
             <div data-menu-chip className="flex h-9 flex-shrink-0 items-center rounded-xl border border-white/15 bg-white/[0.06] text-[13px] font-semibold text-white tabular-nums">
               <button
                 type="button"
                 onClick={() => { closeMenu(); navigate('/app/wallet'); }}
-                aria-label={balanceHidden ? t('nav.wallet') : `${t('nav.wallet')} ${Math.floor(dhbBalance).toLocaleString()}`}
+                aria-label={balanceHidden ? t('nav.wallet') : `${t('nav.wallet')} ${walletBalance.toLocaleString()}`}
                 className="flex h-full items-center gap-1.5 pl-3 pr-1.5"
               >
                 <DhbCoin className="h-4 w-4 align-middle" />
                 {/* Compact from 10k up, so the chip never pushes into the
                     Followers / Following line beside it (Requests eaf824e2). */}
-                {balanceHidden ? HIDDEN_BALANCE : Math.floor(dhbBalance) >= 10_000 ? compactCount(Math.floor(dhbBalance)) : Math.floor(dhbBalance).toLocaleString()}
+                {balanceHidden ? HIDDEN_BALANCE : walletBalance >= 10_000 ? compactCount(walletBalance) : walletBalance.toLocaleString()}
               </button>
               {/* Eye: hide or show the number on this device (Requests 4c8cc200). */}
               <button
@@ -282,7 +282,7 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
           </Suspense>
         </div>
       ) : (
-      <div className="relative mb-3 px-1">
+      <div data-vaul-no-drag className="relative mb-3 px-1">
         <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
         <input
           ref={searchInputRef}
@@ -291,20 +291,20 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
           onChange={(e) => setMenuQuery(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') { e.preventDefault(); runFullSearch(); }
-            if (e.key === 'Escape') { e.preventDefault(); closeSearch(); }
+            if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeSearch(); }
           }}
           placeholder={t('sidebar.searchMenu')}
           aria-label={t('sidebar.searchMenu')}
           data-menu-search
           data-search-surface
-          className="w-full h-[42px] pl-10 pr-9 rounded-xl bg-white/5 border border-white/10 text-[16px] text-white placeholder:text-zinc-500 outline-none focus:border-white/30 transition-colors"
+          className="w-full h-[42px] pl-10 pr-11 rounded-xl bg-white/5 border border-white/10 text-[16px] text-white caret-current placeholder:text-zinc-500 outline-none focus:border-white/30 transition-colors"
         />
         {(menuQuery || (tabsHeader && searchOpen)) && (
           <button
             type="button"
             onClick={closeSearch}
             aria-label={t('sidebar.clearSearch')}
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-md flex items-center justify-center text-zinc-500 hover:text-white transition-colors"
+            className="absolute inset-y-0 right-1 w-[42px] rounded-xl flex items-center justify-center text-zinc-500 hover:text-white transition-colors"
           >
             <X className="w-4 h-4" />
           </button>

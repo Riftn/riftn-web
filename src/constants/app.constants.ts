@@ -47,6 +47,7 @@ import MessageEnvelope from "@/components/ui/cut-icons/message-envelope";
 import Bookmark from "@/components/ui/cut-icons/save";
 import Settings from "@/components/ui/cut-icons/settings-cog";
 import Creator from "@/components/ui/cut-icons/creator";
+import Packs from "@/components/ui/cut-icons/packs";
 import User from "@/components/ui/cut-icons/profile";
 import Play from "@/components/ui/cut-icons/play";
 import Mic from "@/components/ui/cut-icons/mic";
@@ -97,6 +98,7 @@ export const NAV_ITEMS: NavItem[] = [
   { icon: ArrowDownToLine, label: 'Converter', path: '/converter' },
   // The converter's batch twin: one link there, a whole channel here.
   { icon: FolderInput, label: 'Migrate', path: '/migrate-youtube' },
+  { icon: Packs, label: 'Packs', path: '/packs' },
   { icon: Scroll, label: 'Glossary', path: '/app/glossary' },
   { icon: BarChart3, label: 'Compare Riftn', path: '/compare' },
   { icon: Map, label: 'Guide', path: '/guide' },

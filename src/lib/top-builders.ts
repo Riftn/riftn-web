@@ -13,20 +13,26 @@
  * posted this month, and comments written this month.
  */
 
+import { ASSISTANT_ADDRESS } from './assistant';
+
 export const SHIPPED_POINTS = 10;
 export const VOTE_POINTS = 1;
 export const COMMENT_POINTS = 2;
 export const COMMENT_CAP = 20;
 
 /** Team accounts that never appear on the board. */
-export const TEAM_USERNAMES = new Set(['maldoteth', 'assistant']);
-export const TEAM_WALLETS = new Set(['0x9324840523a5d17dd12a2f11a9472e5a199c1937']);
+const TEAM_ACCOUNTS = new Set([
+  ASSISTANT_ADDRESS,
+  '0xec4e2c7417f781b35d830671f013b3b91f29ba64',
+  // Historical team activity also uses these identifiers.
+  '0x9324840523a5d17dd12a2f11a9472e5a199c1937',
+  '0x18b2a58c33ba8fc924c1e6baaba8b22ad788727b',
+  'maldoteth',
+]);
 
 export interface BuilderRequestRow {
   id: string;
   author_wallet_address: string;
-  author_username: string | null;
-  author_avatar: string | null;
   status: string;
   vote_count: number | null;
   created_at: string;
@@ -35,9 +41,14 @@ export interface BuilderRequestRow {
 
 export interface BuilderCommentRow {
   wallet_address: string;
-  username: string | null;
   feature_request_id: string;
   created_at: string;
+}
+
+export interface BuilderProfile {
+  address: string;
+  username?: string | null;
+  avatarImageUrl?: string | null;
 }
 
 export interface TopBuilder {
@@ -57,11 +68,22 @@ export interface TopBuilder {
 export type BuilderPeriod = 'month' | 'all';
 
 const SHIPPED = new Set(['shipped', 'completed']);
+const BUILDER_PAGE_SIZE = 1000;
 
-export function isTeamAccount(wallet: string | null | undefined, username: string | null | undefined): boolean {
-  if (wallet && TEAM_WALLETS.has(wallet.toLowerCase())) return true;
-  if (username && TEAM_USERNAMES.has(username.toLowerCase())) return true;
-  return false;
+/** Read past the API row limit in primary-key order. */
+export async function fetchBuilderRows<T extends { id: string }>(
+  fetchPage: (limit: number, afterId: string | null) => PromiseLike<{ data: T[] | null; error: unknown }>,
+): Promise<T[]> {
+  const rows: T[] = [];
+  let afterId: string | null = null;
+  while (true) {
+    const { data, error } = await fetchPage(BUILDER_PAGE_SIZE, afterId);
+    if (error) throw error;
+    const page = data ?? [];
+    rows.push(...page);
+    if (page.length < BUILDER_PAGE_SIZE) return rows;
+    afterId = page[page.length - 1].id;
+  }
 }
 
 export function periodStart(period: BuilderPeriod, now: Date = new Date()): number {
@@ -73,31 +95,36 @@ export function rankBuilders(
   requests: BuilderRequestRow[],
   comments: BuilderCommentRow[],
   since: number,
+  profiles: BuilderProfile[],
 ): TopBuilder[] {
+  // Historical activity determines points. Only the profile owned by the
+  // same wallet can supply a handle and avatar.
+  const profilesByWallet = new Map(profiles.map(profile => [profile.address.toLowerCase(), profile]));
   const map = new Map<string, TopBuilder>();
-  const get = (wallet: string, username: string | null, avatar: string | null) => {
-    const key = wallet.toLowerCase();
-    let b = map.get(key);
+  const get = (wallet: string) => {
+    let b = map.get(wallet);
     if (!b) {
+      const profile = profilesByWallet.get(wallet);
       b = {
-        wallet: key, username, avatar,
+        wallet,
+        username: profile?.username || null,
+        avatar: profile?.avatarImageUrl || null,
         shipped: 0, votes: 0, comments: 0,
         shippedPoints: 0, votePoints: 0, commentPoints: 0, points: 0,
         lastShippedAt: null,
       };
-      map.set(key, b);
+      map.set(wallet, b);
     }
-    if (!b.username && username) b.username = username;
-    if (!b.avatar && avatar) b.avatar = avatar;
     return b;
   };
 
   const authorOf = new Map<string, string>();
   for (const r of requests) {
     if (!r.author_wallet_address) continue;
-    authorOf.set(r.id, r.author_wallet_address.toLowerCase());
-    if (isTeamAccount(r.author_wallet_address, r.author_username)) continue;
-    const b = get(r.author_wallet_address, r.author_username, r.author_avatar);
+    const wallet = r.author_wallet_address.toLowerCase();
+    authorOf.set(r.id, wallet);
+    if (TEAM_ACCOUNTS.has(wallet)) continue;
+    const b = get(wallet);
     if (SHIPPED.has(r.status) && Date.parse(r.updated_at) >= since) {
       b.shipped += 1;
       if (!b.lastShippedAt || r.updated_at > b.lastShippedAt) b.lastShippedAt = r.updated_at;
@@ -106,10 +133,12 @@ export function rankBuilders(
   }
 
   for (const c of comments) {
-    if (!c.wallet_address || isTeamAccount(c.wallet_address, c.username)) continue;
+    if (!c.wallet_address) continue;
+    const wallet = c.wallet_address.toLowerCase();
+    if (TEAM_ACCOUNTS.has(wallet)) continue;
     const author = authorOf.get(c.feature_request_id);
-    if (!author || author === c.wallet_address.toLowerCase()) continue;
-    const b = get(c.wallet_address, c.username, null);
+    if (!author || author === wallet) continue;
+    const b = get(wallet);
     if (Date.parse(c.created_at) >= since) b.comments += 1;
   }
 

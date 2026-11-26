@@ -1,5 +1,5 @@
 {
-  "version": "ce4e3b9b7501951b",
+  "version": "414e62a8e9b04736",
   "routes": {
     "/": [
       "ar",
@@ -128,6 +128,13 @@
       "tr"
     ],
     "/arcade/sillycoin": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/arcade/splurge": [
       "ar",
       "es",
       "fr",

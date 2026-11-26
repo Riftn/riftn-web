@@ -1,11 +1,10 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Heart, ShoppingBag, ArrowRightLeft } from "lucide-react";
+import { Heart, ShoppingBag } from "lucide-react";
 import Coins from "@/components/ui/cut-icons/coins";
 import Lock from "@/components/ui/cut-icons/privacy";
 import Sparkles from "@/components/ui/cut-icons/assistant";
 import Trophy from "@/components/ui/cut-icons/leaderboard";
-import PieChart from "@/components/ui/cut-icons/fractions";
 
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -18,7 +17,7 @@ const TokenOverview = () => {
     { icon: Trophy, title: t('tokenOverview.useRewardsTitle'), desc: t('tokenOverview.useRewardsDesc') },
     { icon: Sparkles, title: t('tokenOverview.useAiTitle'), desc: t('tokenOverview.useAiDesc') },
     { icon: ShoppingBag, title: t('tokenOverview.useCommerceTitle'), desc: t('tokenOverview.useCommerceDesc') },
-    { icon: Coins, title: t('tokenOverview.useFeesTitle'), desc: t('tokenOverview.useFeesDesc') },
+    { icon: Coins, title: t('tokenGovernance.title'), desc: t('tokenGovernance.subtitleCurrent') },
   ];
 
   return (
@@ -58,38 +57,11 @@ const TokenOverview = () => {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl flex items-center gap-2">
-            <PieChart className="w-5 h-5 flex-shrink-0" />
-            {t('tokenOverview.profitShareTitle')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-muted-foreground leading-relaxed">{t('tokenOverview.profitShareDesc1')}</p>
-          <p className="text-muted-foreground leading-relaxed">{t('tokenOverview.profitShareDesc2')}</p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl flex items-center gap-2">
-            <ArrowRightLeft className="w-5 h-5 flex-shrink-0" />
-            {t('tokenOverview.pegTitle')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-muted-foreground leading-relaxed">{t('tokenOverview.pegDesc1')}</p>
-          <p className="text-muted-foreground leading-relaxed">{t('tokenOverview.pegDesc2')}</p>
-        </CardContent>
-      </Card>
-
       <Card className="docs-glass">
         <CardHeader>
           <CardTitle className="text-xl text-foreground">{t('tokenOverview.disclaimer')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-muted-foreground leading-relaxed text-sm">{t('tokenOverview.disclaimerNoApy')}</p>
           <p className="text-muted-foreground leading-relaxed text-sm">{t('faq.a20')}</p>
         </CardContent>
       </Card>

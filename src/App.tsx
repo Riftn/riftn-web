@@ -2,6 +2,7 @@ import { LanguageRouteSync } from '@/components/LanguageRouteSync';
 import MaintenanceGate from '@/components/MaintenanceGate';
 import { useTranslation as _useCopy } from 'react-i18next';
 import { Toaster as Sonner } from "@/components/ui/sonner";
+import { OfflineConnectionToast } from "@/components/OfflineConnectionToast";
 import { NotificationsPromptToast } from "@/components/app/NotificationsPromptToast";
 import { AvatarPrompt } from "@/components/app/AvatarPrompt";
 import { NonFollowerOffer } from "@/components/app/NonFollowerOffer";
@@ -32,10 +33,9 @@ import { useNotificationRealtime } from "@/hooks/use-notification-realtime";
 import { useLiveListRealtime } from "@/hooks/use-live-list-realtime";
 import { usePageViewAddress, PageViewTracker } from "@/hooks/use-page-view-tracking";
 import { ChatLinkCatcher } from "@/components/app/chat/ChatLinkCatcher";
-import { prefetchUnifiedFeed } from "@/hooks/use-unified-feed";
+import { getFeedViewer, HOME_FEED_PAGE_SIZE, prefetchUnifiedFeed } from "@/hooks/use-unified-feed";
 import { restoreQueryCache, startQueryPersist } from "@/lib/query-persist";
 import { setBackgroundPaused, scheduleBackgroundResume } from "@/lib/background-gate";
-import { AppLayout } from "./components/app/AppLayout";
 import { QuickActionsHost } from "./components/app/QuickActionsHost";
 import { PostMenuGate } from "./components/app/post-menu/PostMenuGate";
 import { LoginModal, scheduleLoginPrefetch } from "@/components/app/LoginModal";
@@ -63,6 +63,11 @@ const DexPoolPage = React.lazy(() => import("@/pages/app/DexPoolPage"));
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { loadPostPage } from "@/lib/preload-post-page";
 import { SurfaceTransition } from "@/components/transitions/SurfaceTransition";
+
+const AppLayout = lazyWithRetry(() =>
+  import("./components/app/AppLayout").then(({ AppLayout }) => ({ default: AppLayout })),
+);
+export const preloadAppLayout = () => AppLayout.preload();
 
 // Update notices can load after the app paints; their watcher starts on mount.
 const NewVersionToast = lazyWithRetry(() =>
@@ -276,7 +281,8 @@ const ConnectPage = React.lazy(() => import("./pages/ConnectPage"));
 const ConnectChatGPTPage = React.lazy(() => import("./pages/ConnectChatGPTPage"));
 const ConnectClaudePage = React.lazy(() => import("./pages/ConnectClaudePage"));
 const ApkPage = React.lazy(() => import("./pages/ApkPage"));
-const FullScreenChatPage = React.lazy(() => import("./pages/app/FullScreenChatPage"));
+const FullScreenChatPage = lazyWithRetry(() => import("./pages/app/FullScreenChatPage"));
+export const preloadFullScreenChat = () => FullScreenChatPage.preload();
 const StreamPage = React.lazy(() => import("./pages/StreamPage"));
 const DehubAppPage = React.lazy(() => import("./pages/DehubAppPage"));
 const AdminManualPage = React.lazy(() => import("./pages/AdminManualPage"));
@@ -295,6 +301,7 @@ const ArcadeSillyCoinPage = React.lazy(() => import("./pages/ArcadeSillyCoinPage
 const ArcadeGratitudePage = React.lazy(() => import("./pages/ArcadeGratitudePage"));
 // Chestard: dice-drop arcade game, server-rolled dice and a top 10 (riftn-backend src/games).
 const ArcadeChestardPage = React.lazy(() => import("./pages/ArcadeChestardPage"));
+const ArcadeSplurgePage = React.lazy(() => import("./pages/ArcadeSplurgePage"));
 // Mini app player: standalone like the arcade player, because the app owns the
 // viewport and dehub draws only its own header above it.
 const MiniAppPage = React.lazy(() => import("./pages/MiniAppPage"));
@@ -472,13 +479,13 @@ startQueryPersist(queryClient);
 // the wallet chunk is still downloading, so content is ready when HomeFeed
 // mounts. Cold loads always use the default filters (they persist in
 // sessionStorage, which is empty on a fresh visit), so this key matches the
-// one HomeFeed computes. A mismatch (user landed mid-session with custom
-// filters) is harmless — the entry just idles in cache until gcTime.
+// one HomeFeed computes. Signed-in viewers adopt the HTML request in the feed
+// hook itself, where cached block and mute lists can be applied.
 if (typeof window !== "undefined") {
   const bootPath = window.location.pathname;
-  if (bootPath === "/" || bootPath === "/app" || bootPath === "/app/") {
+  if ((bootPath === "/" || bootPath === "/app" || bootPath === "/app/") && !getFeedViewer()) {
     prefetchUnifiedFeed(queryClient, {
-      limit: 20,
+      limit: HOME_FEED_PAGE_SIZE,
       sortBy: "createdAt",
       sortOrder: "desc",
       status: "all",
@@ -563,18 +570,24 @@ function AppContent() {
   useLiveListRealtime();
 
   const wallet = walletAddress ?? (user as { walletAddress?: string | null; address?: string | null } | null)?.walletAddress ?? (user as { address?: string | null } | null)?.address ?? null;
+  const referralAccountCreatedAt = user?.username ? user.createdAt : undefined;
+  const { search } = useLocation();
 
   // Capture ?ref=CODE / ?aff=CODE on first load (first-touch wins, 90-day cookie).
   // Passing the signed-in wallet lets the shared RPC remove an owner's own
   // test visit from their affiliate analytics.
   useEffect(() => {
-    import("@/lib/affiliateRef").then(m => m.captureAffiliateRefFromUrl(wallet));
-  }, [wallet]);
+    import("@/lib/affiliateRef").then(m => m.captureAffiliateRefFromUrl(wallet, search));
+  }, [wallet, search]);
 
   // When a wallet signs in, self-attribute any pending cookie referral.
   useEffect(() => {
     if (!wallet || !isAuthenticated || requiresUsername || isConnecting || isProcessingRedirect) return;
-    import("@/lib/affiliate").then(m => m.attributeReferralIfPending(wallet)).catch(() => undefined);
+    import("@/lib/affiliate").then(m => m.attributeReferralIfPending(wallet, referralAccountCreatedAt)).catch(() => undefined);
+  }, [wallet, isAuthenticated, requiresUsername, isConnecting, isProcessingRedirect, referralAccountCreatedAt]);
+
+  useEffect(() => {
+    if (!wallet || !isAuthenticated || requiresUsername || isConnecting || isProcessingRedirect) return;
     import("@/lib/growth-session").then(m => m.syncGrowthSession(wallet)).catch(() => undefined);
   }, [wallet, isAuthenticated, requiresUsername, isConnecting, isProcessingRedirect]);
 
@@ -771,6 +784,7 @@ function AppContent() {
           <Route path="/arcade/sillycoin" element={<Suspense fallback={<PageLoader />}><ArcadeSillyCoinPage /></Suspense>} />
           <Route path="/arcade/gratitude" element={<Suspense fallback={<PageLoader />}><ArcadeGratitudePage /></Suspense>} />
           <Route path="/arcade/chestard" element={<Suspense fallback={<PageLoader />}><ArcadeChestardPage /></Suspense>} />
+          <Route path="/arcade/splurge" element={<Suspense fallback={<PageLoader />}><ArcadeSplurgePage /></Suspense>} />
           <Route path="/arcade/:slug" element={<Suspense fallback={<PageLoader />}><ArcadeGamePage /></Suspense>} />
 
           {/* Online chess: the King's Gambit lobby and live board. Standalone
@@ -788,7 +802,7 @@ function AppContent() {
 
 
           {/* Single shared AppLayout — header/sidebar mount ONCE and persist across all app routes */}
-          <Route element={<AppLayout />}>
+          <Route element={<Suspense fallback={<PageLoader />}><AppLayout /></Suspense>}>
             <Route path="/jobs" element={null} />
             <Route path="/stats" element={null} />
             {/* Revenue & costs was parked here before it joined /stats. */}
@@ -1122,6 +1136,7 @@ const App = () => (
           <LanguageRouteSync />
           <SEOHead />
           <Sonner />
+          <OfflineConnectionToast />
           {/* Watches /version.json for a newer deploy; renders nothing itself. */}
           <Suspense fallback={null}><NewVersionToast /></Suspense>
           {/*

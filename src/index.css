@@ -6266,11 +6266,7 @@ html[data-system-tone="light"] [data-creator-page] .text-white {
 
   html[data-theme="immersive"] [data-profile-image-grid] {
     margin-inline: -0.5rem;
-    border-radius: 0;
-  }
-
-  html[data-theme="immersive"] [data-profile-image-grid] img {
-    border-radius: 0;
+    --profile-photo-radius: 0px;
   }
 
   html[data-theme="immersive"] [data-feed-root] [data-profile-reply] {
@@ -6621,6 +6617,42 @@ html[data-system-tone="light"] [data-creator-page] .text-white {
   html[data-theme="immersive"] [data-cinematic] [data-card-info] > .mb-3 {
     margin-bottom: 0.5rem;
   }
+}
+
+[data-profile-image-grid] {
+  --profile-photo-gap: 8px;
+  --profile-photo-radius: 12px;
+  display: grid;
+  gap: var(--profile-photo-gap);
+}
+
+[data-profile-photo-row] {
+  display: grid;
+  gap: var(--profile-photo-gap);
+}
+
+[data-profile-photo] {
+  aspect-ratio: var(--profile-photo-aspect, 1);
+  border-radius: var(--profile-photo-radius);
+}
+
+/* Both System palettes use the same flat grid and keep the original DOM order. */
+html:is([data-theme="system"], [data-theme="minimal"]) [data-profile-image-grid] {
+  --profile-photo-gap: 2px;
+  --profile-photo-radius: 0px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+html[data-theme="minimal"] [data-profile-image-grid] {
+  --profile-photo-gap: 1px;
+}
+
+html:is([data-theme="system"], [data-theme="minimal"]) [data-profile-photo-row] {
+  display: contents;
+}
+
+html:is([data-theme="system"], [data-theme="minimal"]) [data-profile-photo] {
+  aspect-ratio: 1;
 }
 
 /* Feed player: outlined glyphs instead of glass buttons

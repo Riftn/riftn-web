@@ -1,7 +1,7 @@
 import { useTranslation as _useCopy } from 'react-i18next';
 import BarChart3 from "@/components/ui/cut-icons/stats";
 import Quote from "@/components/ui/cut-icons/quote";
-import { useEffect, useState, useRef, type ReactNode } from 'react';
+import { Suspense, useEffect, useState, useRef, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useIsMobile } from '@/hooks/use-mobile';
 import '@/styles/chat-hold.css';
@@ -46,9 +46,17 @@ import {
 import { dragHasFiles } from '@/lib/comment-attachments';
 import { cleanVideoOptions, type DmVideoOptions } from '@/lib/dm-video-options';
 import { withReplay, type DmDestructChoice } from '@/lib/dm-destruct';
-import { DmMediaStudio, type DmStudioItem } from './DmVideoStudio';
-import { PhotoStudio, type StudioResult } from '@/features/post/components/PhotoStudio';
+import type { DmStudioItem } from './DmVideoStudio';
+import type { StudioResult } from '@/features/post/components/PhotoStudio';
 import { LockPriceControl } from './LockPriceControl';
+import { lazyWithRetry } from '@/lib/lazy-with-retry';
+
+const PhotoStudio = lazyWithRetry(() =>
+  import('@/features/post/components/PhotoStudio').then(({ PhotoStudio }) => ({ default: PhotoStudio })),
+);
+const DmMediaStudio = lazyWithRetry(() =>
+  import('./DmVideoStudio').then(({ DmMediaStudio }) => ({ default: DmMediaStudio })),
+);
 
 /** Per-kind caps, matching the backend's DM limits. */
 const DM_MEDIA_LIMITS = { image: 10 * 1024 * 1024, video: 50 * 1024 * 1024, audio: 20 * 1024 * 1024 } as const;
@@ -123,6 +131,9 @@ interface ChatInputProps {
    * the user reviews the fee and sends with one tap instead of retyping).
    */
   initialText?: string;
+  /** A link the user explicitly shared to this composer. */
+  incomingLink?: string;
+  onIncomingLinkApplied?: () => void;
   /**
    * Recent turns, oldest first. Supplying this turns on the reply orb; leave it
    * off and the composer is exactly what it was (Public Chat passes nothing).
@@ -149,7 +160,7 @@ interface ChatInputProps {
   allowLock?: boolean;
 }
 
-export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, scheduledCount = 0, onPollClick, onNoteClick, sendDisabled, sendDisabledReason, isSendingFee, feeAmount, confirmBeforeSend, canSend, replyTo, onCancelReply, incomingFile, initialText, thread, peerName, draftKey, allowDocuments = true, voiceMaxDuration = 59, allowLock = false, autoFocus = false, phoneB = false }: ChatInputProps) {
+export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, scheduledCount = 0, onPollClick, onNoteClick, sendDisabled, sendDisabledReason, isSendingFee, feeAmount, confirmBeforeSend, canSend, replyTo, onCancelReply, incomingFile, initialText, incomingLink, onIncomingLinkApplied, thread, peerName, draftKey, allowDocuments = true, voiceMaxDuration = 59, allowLock = false, autoFocus = false, phoneB = false }: ChatInputProps) {
   const { t: _copy } = _useCopy();
   const { t } = useTranslation();
   const [message, setMessage] = useDraft(draftKey, initialText ?? '');
@@ -160,6 +171,13 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
   useEffect(() => {
     if (initialText) setMessage(prev => (prev ? prev : initialText));
   }, [initialText, setMessage]);
+  useEffect(() => {
+    if (!incomingLink) return;
+    setMessage(previous => previous.split(/\s+/).includes(incomingLink)
+      ? previous
+      : previous.trim() ? `${previous.trimEnd()}\n${incomingLink}` : incomingLink);
+    onIncomingLinkApplied?.();
+  }, [incomingLink, onIncomingLinkApplied, setMessage]);
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [translateTo, setTranslateTo] = useState<string>(() => {
     try { return localStorage.getItem(TRANSLATE_TO_KEY) || 'en'; } catch { return 'en'; }
@@ -639,7 +657,7 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
     setIsTranslating(true);
     try {
       const { data, error } = await supabase.functions.invoke('translate-text', {
-        body: { text: draft, targetLang: code },
+        body: { text: draft, targetLang: code, purpose: 'chat' },
       });
       const out: string | undefined = data?.translatedText;
       if (error || !out) {
@@ -835,26 +853,30 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
 
       {/* Photo / video / audio preview */}
       {/* Photos and videos open straight into the edit screen. */}
-      <DmMediaStudio
-        items={studioItems}
-        active={studioActive}
-        onActiveChange={setStudioActive}
-        onItemChange={(i, patch) => setStudioItems((prev) => prev.map((it, j) => (j === i ? { ...it, ...patch } : it)))}
-        onRemoveItem={removeStudioItem}
-        onAddMore={() => fileInputRef.current?.click()}
-        onClose={cancelStudio}
-        open={studioOpen}
-        onConfirm={() => { setStudioOpen(false); requestAnimationFrame(() => textareaRef.current?.focus()); }}
-        allowLock={allowLock}
-        allowTimer={allowDocuments}
-        onDropFiles={attachFiles}
-        onEditPhoto={(i) => { setStudioOpen(false); setPhotoEditAt(i); }}
-      />
+      {studioItems.length > 0 && (
+        <Suspense fallback={null}>
+          <DmMediaStudio
+            items={studioItems}
+            active={studioActive}
+            onActiveChange={setStudioActive}
+            onItemChange={(i, patch) => setStudioItems((prev) => prev.map((it, j) => (j === i ? { ...it, ...patch } : it)))}
+            onRemoveItem={removeStudioItem}
+            onAddMore={() => fileInputRef.current?.click()}
+            onClose={cancelStudio}
+            open={studioOpen}
+            onConfirm={() => { setStudioOpen(false); requestAnimationFrame(() => textareaRef.current?.focus()); }}
+            allowLock={allowLock}
+            allowTimer={allowDocuments}
+            onDropFiles={attachFiles}
+            onEditPhoto={(i) => { setStudioOpen(false); setPhotoEditAt(i); }}
+          />
+        </Suspense>
+      )}
       {photoEditAt != null && studioItems[photoEditAt] && (() => {
         const it = studioItems[photoEditAt];
         const back = () => { setPhotoEditAt(null); setStudioOpen(true); };
         return (
-          <PhotoStudio
+          <Suspense fallback={null}><PhotoStudio
             photos={[{ original: it.studioOriginal ?? it.file, edits: it.studioEdits }]}
             startIndex={0}
             startTab="crop"
@@ -870,7 +892,7 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
               }
               back();
             }}
-          />
+          /></Suspense>
         );
       })()}
       {studioItems.length > 0 && (

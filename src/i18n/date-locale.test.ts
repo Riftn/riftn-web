@@ -48,11 +48,31 @@ describe('post timestamps', () => {
   it('formats compact ages in the chosen language', () => {
     const posted = parsePostTimestamp('2026-01-02T04:30:00+03:00');
     const now = Date.parse('2026-01-02T02:30:00Z');
-    expect(formatPostAge(posted, 'en', t, now)).toBe('1h');
-    expect(formatPostAge(posted, 'tr', t, now)).toMatch(/^1\s*sa/);
-    expect(formatPostAge(posted, 'ja', t, now)).toMatch(/^1\s*時間$/);
+    expect(formatPostAge(posted, 'en', t, now)).toBe('1h ago');
+    expect(formatPostAge(posted, 'tr', t, now + 2 * 3600000)).toMatch(/^3\s*sa(?:at)?\.?\s+önce$/);
+    expect(formatPostAge(posted, 'ja', t, now)).toMatch(/^1\s*時間前$/);
     expect(formatPostAge(posted, 'tr', t, now - 3600000)).toBe('şimdi');
     expect(formatPostAge(parsePostTimestamp('invalid'), 'tr', t, now)).toBe('');
+  });
+
+  it.each([
+    [1, '1m ago'],
+    [5, '5m ago'],
+    [59, '59m ago'],
+    [60, '1h ago'],
+    [120, '2h ago'],
+    [1440, '1d ago'],
+    [4320, '3d ago'],
+    [10080, '1w ago'],
+    [20160, '2w ago'],
+  ])('formats a post that is %i minutes old as %s', (minutes, label) => {
+    const posted = new Date('2026-01-02T01:30:00Z');
+    expect(formatPostAge(posted, 'en', t, posted.getTime() + minutes * 60000)).toBe(label);
+  });
+
+  it('shows now during the first minute', () => {
+    const posted = new Date('2026-01-02T01:30:00Z');
+    expect(formatPostAge(posted, 'en', t, posted.getTime() + 59000)).toBe('now');
   });
 
   it('uses the same instant across publisher offsets and rolls the local date across midnight', () => {

@@ -294,6 +294,7 @@ export function createGuestMixer(): GuestMixer {
       if (active) void send(session).catch((error) => logger.warn('Could not put the mix on a new session', error));
       const wrapped: WhipSession = {
         stop: () => session.stop(),
+        syncVideoEnabled: () => session.syncVideoEnabled(),
         replaceTrack: async (kind, track) => {
           if (kind === 'video') hostVideo = track;
           else hostAudio = track;

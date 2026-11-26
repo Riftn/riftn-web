@@ -57,7 +57,22 @@
     "cancel": "Cancel",
     "getKey": "Get a {{name}} key",
     "showLess": "Show only my keys",
-    "addAnother": "Add another provider"
+    "addAnother": "Add another provider",
+    "providerDescriptions": {
+      "openai": "Builder (GPT models)",
+      "fal": "Images, video, 3D and photo tools",
+      "kie": "Images and video",
+      "replicate": "Images and video",
+      "xai": "Grok chat and images",
+      "elevenlabs": "Voice, dubbing, music and sound effects",
+      "gemini": "Translate, writing help and summaries",
+      "venice": "Assistant chat",
+      "perplexity": "Assistant web search",
+      "deepgram": "Transcripts and live captions",
+      "openrouter": "Hundreds of chat and text models with one key",
+      "groq": "Fast chat and text",
+      "mistral": "Chat and text"
+    }
   },
   "resetWallet": {
     "mismatch": "Passwords don't match",
@@ -21458,6 +21473,11 @@
     "followFailed": "Could not follow. Try again."
   },
   "appTokens": {
+    "reviewTransfer": "Review transfer",
+    "transferComplete": "Transfer complete",
+    "balanceAfterSend": "After sending: {{amount}} {{symbol}}",
+    "addNote": "Add a note",
+    "minimumTransfer": "Minimum transfer is 1 RIFT.",
     "kindStaked": "Staked",
     "kindUnstaked": "Unstaked",
     "stakedBalance": "{{amount}} staked",
@@ -21643,6 +21663,12 @@
     "enter": "Enter the dungeon"
   },
   "tokenLaunch": {
+    "tickerInfo": "Info",
+    "tickerContract": "Contract address",
+    "tickerBuy": "Buy",
+    "referencePrice": "In-app reference price",
+    "contractPending": "To be confirmed",
+    "earnOnly": "For now, you can only earn tokens by using the app.",
     "eyebrow": "Coming soon",
     "title": "Token launching soon",
     "riftTitle": "$RIFT on-chain launch",
@@ -23283,6 +23309,7 @@
       "sendButton": "Send",
       "sendMissing": "Pick who to send to and how many.",
       "sent": "Sent {{coins}} SillyCoins to {{name}}",
+      "transferNotifications": "Transfer notifications",
       "sendNote": "They get the coins straight away. SillyCoins stay in the game: no wallet, no token.",
       "fromLine": "From {{name}}",
       "toLine": "To {{name}}",
@@ -23368,6 +23395,26 @@
       "seoDescription": "Take turns with a friend saying what you are grateful for. No repeats, and whoever runs out of ideas before their turn time is up loses. Free on Riftn.",
       "intro": "Take turns saying what you are grateful for. No repeats. Miss your turn and they win.",
       "cardBlurb": "Take turns saying what you are grateful for. No repeats. Miss your turn and they win."
+    },
+    "splurge": {
+      "title": "Splurge",
+      "cardBlurb": "Get a random budget and dream up what to buy in Modern or CRT.",
+      "arcade": "Arcade",
+      "intro": "A random budget. What would you spend it on? All amounts are fictional.",
+      "modern": "Modern",
+      "crt": "CRT",
+      "budget": "Your budget",
+      "prompt": "What would you buy?",
+      "placeholder": "A train trip across Europe",
+      "spend": "Spend",
+      "retry": "Retry",
+      "saveError": "Couldn’t save this turn. Try again to keep it in your log.",
+      "history": "Spending log",
+      "loading": "Loading your log…",
+      "historyError": "Couldn’t load your log.",
+      "empty": "Your purchases will appear here.",
+      "more": "Load older entries",
+      "guest": "Guest turns last for this visit. Sign in to save future turns to your account."
     },
     "chestard": {
       "title": "Chestard",

@@ -18,6 +18,8 @@ import { useTranslation as _useCopy } from 'react-i18next';
 
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useBadgeTierLabel } from '@/i18n/badge-tier-label';
+import { localizeSuperPower } from '@/i18n/superpower-copy';
 import { Link } from 'react-router-dom';
 import { Loader2, Clock } from "lucide-react";
 import Lock from "@/components/ui/cut-icons/privacy";
@@ -31,6 +33,7 @@ import { toast } from 'sonner';
 import { SEOHead } from '@/components/SEOHead';
 import { PageBody, PageIsland } from '@/components/app/page-kit/PageKit';
 import { BadgeProgress } from '@/components/app/BadgeProgress';
+import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { cn } from '@/lib/utils';
 import { useCleanPhone } from '@/components/app/clean/CleanKit';
@@ -48,8 +51,17 @@ import { TeamUpDrawer } from '@/components/app/TeamUpDrawer';
 import { LiveGiftBuyDrawer } from '@/components/app/live/LiveGiftBuyDrawer';
 
 /** Chrome type, the brand's one accent. */
-const CHROME_TEXT =
-  'bg-[linear-gradient(180deg,#fff_0%,#cfd3d8_38%,#7d838b_52%,#e9ecef_70%,#9aa0a7_100%)] bg-clip-text text-transparent';
+const CHROME_TEXT = cn(
+  'bg-[linear-gradient(180deg,#fff_0%,#cfd3d8_38%,#7d838b_52%,#e9ecef_70%,#9aa0a7_100%)] bg-clip-text text-transparent',
+  '[html:is([data-theme=light],[data-system-tone=light])_&]:bg-none',
+  '[html:is([data-theme=light],[data-system-tone=light])_&]:text-foreground',
+);
+
+const POWER_ACTION_FOCUS = cn(
+  'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current',
+  '[html:is([data-theme=light],[data-system-tone=light])_&]:focus-visible:outline-ring',
+);
+const POWER_ACTION = `min-w-0 flex-1 whitespace-normal px-4 text-center sm:flex-none ${POWER_ACTION_FOCUS}`;
 
 /** Total slot minutes a tier holds per cycle — the number worth comparing. */
 function cycleMinutes(boosts: number, minutes: number): number {
@@ -65,7 +77,8 @@ function formatMinutes(total: number): string {
 
 export default function SuperPowersPage() {
   const { t: _copy } = _useCopy();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const badgeLabel = useBadgeTierLabel();
   const { data: status, isLoading: loadingStatus, isError, refetch: refetchStatus } = useSuperpowers();
   const { data: ladder, isLoading: loadingLadder } = useSuperpowerLadder();
   const cancelBoost = useCancelBoost();
@@ -74,7 +87,8 @@ export default function SuperPowersPage() {
   // Prefer the personal copy so the page lights up without a second render.
   const powers = [...(status?.powers ?? ladder?.powers ?? [])]
     .filter(power => String(power.key) !== 'golden_hour')
-    .sort((a, b) => Number(b.key === 'team_up') - Number(a.key === 'team_up'));
+    .sort((a, b) => Number(b.key === 'team_up') - Number(a.key === 'team_up'))
+    .map(power => localizeSuperPower(power, i18n?.language));
 
   const refillsOn = useMemo(() => {
     const iso = status?.cycleEndsAt ?? ladder?.cycleEndsAt;
@@ -169,7 +183,7 @@ export default function SuperPowersPage() {
                       className="w-[40%] max-w-[120px] object-contain drop-shadow-[0_0_28px_rgba(255,255,255,0.18)]"
                     />
                   )}
-                  <span className="mt-1 text-base sm:text-2xl font-extrabold text-white leading-tight">{status.tier}</span>
+                  <span className="mt-1 text-base sm:text-2xl font-extrabold text-white leading-tight">{badgeLabel(status.tier)}</span>
                   <span className={cn(CHROME_TEXT, 'mt-1 sm:mt-2 text-3xl sm:text-5xl font-extrabold tracking-tight leading-none tabular-nums')}>
                     {t('superpowers.orbit.boostsLeft', {
                       count: status.boostsLeft,
@@ -204,6 +218,7 @@ export default function SuperPowersPage() {
             const isTeamUp = power.key === 'team_up';
             const usable = unlocked && power.available;
             const unlockBadge = badgeImage(power.tier);
+            const unlockTier = power.tier ? badgeLabel(power.tier) : '';
             const allowance =
               power.key === 'signal_flare' || power.key === 'harpoon'
                 ? (status?.signalsLeft ?? status?.boostsLeft)
@@ -227,8 +242,8 @@ export default function SuperPowersPage() {
                         <>
                           {!unlocked && <Lock className="h-3 w-3" />}
                           {unlocked
-                            ? t('superpowers.orbit.unlockedAt', { tier: power.tier, defaultValue: 'Unlocked at {{tier}}' })
-                            : t('superpowers.orbit.unlocksAt', { tier: power.tier, defaultValue: 'Unlocks at {{tier}}' })}
+                            ? t('superpowers.orbit.unlockedAt', { tier: unlockTier, defaultValue: 'Unlocked at {{tier}}' })
+                            : t('superpowers.orbit.unlocksAt', { tier: unlockTier, defaultValue: 'Unlocks at {{tier}}' })}
                           {unlockBadge && <img src={unlockBadge} alt="" aria-hidden="true" className="h-5 w-5 object-contain" />}
                         </>
                       )}
@@ -243,40 +258,42 @@ export default function SuperPowersPage() {
                 </div>
                 <div className="flex w-full sm:w-auto shrink-0 items-center gap-2">
                   {!isTeamUp && status?.tier && (
-                    <button
+                    <Button size="lg"
                       type="button"
                       onClick={() => {
                         setHistoryPower(power);
                         void refetchStatus();
                       }}
-                      className="group inline-flex h-11 flex-1 sm:flex-none items-center justify-center gap-1 rounded-full border border-white/15 px-4 text-[13px] font-semibold text-zinc-300 hover:text-white hover:border-white/30 transition-colors"
+                      variant="secondary"
+                      className={cn("group", POWER_ACTION)}
                     >{_copy("copy.504282c0611d", { defaultValue: "Past usage" })}<ChevronRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
-                    </button>
+                    </Button>
                   )}
                   {isTeamUp ? (
-                    <button
+                    <Button size="lg"
                       type="button"
                       onClick={() => setTeamUpOpen(true)}
-                      className="inline-flex h-11 flex-1 sm:flex-none items-center justify-center rounded-full bg-white px-6 text-sm font-extrabold text-black hover:bg-zinc-200 transition-colors"
+                      className={POWER_ACTION}
                     >
                       {t('superpowers.orbit.openTeamUp', { defaultValue: 'Open Team up' })}
-                    </button>
+                    </Button>
                   ) : usable ? (
-                    <button
+                    <Button size="lg"
                       type="button"
                       onClick={() => setSpending(power)}
-                      className="inline-flex h-11 flex-1 sm:flex-none items-center justify-center rounded-full bg-white px-6 text-sm font-extrabold text-black hover:bg-zinc-200 transition-colors"
+                      className={POWER_ACTION}
                     >
                       {t('superpowers.orbit.use', { defaultValue: 'Use' })}
-                    </button>
+                    </Button>
                   ) : !status?.tier && !loadingStatus && !isError ? (
-                    <button
+                    <Button size="lg"
                       type="button"
                       onClick={() => setBuyOpen(true)}
-                      className="inline-flex h-11 flex-1 sm:flex-none items-center justify-center rounded-full border border-white/20 px-6 text-sm font-semibold text-white hover:border-white/40 transition-colors"
+                      variant="secondary"
+                      className={POWER_ACTION}
                     >
                       {t('nav.buyDhb')}
-                    </button>
+                    </Button>
                   ) : null}
                 </div>
               </div>
@@ -314,10 +331,11 @@ export default function SuperPowersPage() {
                 const isMine = index === myTierIndex;
                 const above = myTierIndex >= 0 && index > myTierIndex;
                 const badge = badgeImage(tier.name);
+                const label = badgeLabel(tier.name);
                 return (
                   <div
                     key={tier.name}
-                    title={`${tier.name}: ${tier.boostsPerCycle} × ${tier.minutesPerBoost}m`}
+                    title={`${label}: ${tier.boostsPerCycle} × ${tier.minutesPerBoost}m`}
                     className={cn(
                       'flex min-w-[76px] flex-1 flex-col items-center gap-1 rounded-xl border px-1.5 py-2.5 text-center',
                       isMine ? 'border-white bg-white/[0.06] text-white' : 'border-white/10 text-zinc-400',
@@ -326,7 +344,7 @@ export default function SuperPowersPage() {
                     {badge && (
                       <img src={badge} alt="" aria-hidden="true" className={cn('h-8 w-8 object-contain', above && 'grayscale brightness-50')} />
                     )}
-                    <span className="w-full truncate text-[10px] font-semibold">{tier.name}</span>
+                    <span className="w-full text-pretty text-[10px] font-semibold">{label}</span>
                     <span className="font-mono text-[11px] tabular-nums">
                       {formatMinutes(cycleMinutes(tier.boostsPerCycle, tier.minutesPerBoost))}
                     </span>
@@ -430,7 +448,7 @@ export default function SuperPowersPage() {
                       )}
                     </div>
                     {booking.status === 'active' && !notificationPower && (
-                      <button
+                      <Button variant="ghost" size="sm"
                         type="button"
                         onClick={() =>
                           cancelBoost.mutate(booking.id, {
@@ -447,10 +465,11 @@ export default function SuperPowersPage() {
                           })
                         }
                         disabled={cancelBoost.isPending}
-                        className="text-[12px] text-zinc-400 hover:text-white transition-colors disabled:opacity-40 shrink-0"
+                        loading={cancelBoost.isPending && cancelBoost.variables === booking.id}
+                        className={cn("relative shrink-0 pl-9 [&>[data-dehub-loader]]:absolute [&>[data-dehub-loader]]:left-3", POWER_ACTION_FOCUS)}
                       >
                         {t('common.cancel')}
-                      </button>
+                      </Button>
                     )}
                   </div>
                 );

@@ -2,7 +2,7 @@ import { useTranslation as _useCopy } from 'react-i18next';
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
 import { tokenLabel } from '@/lib/token-label';
 import { fitIconInk } from '@/lib/optical-icon';
-import { useState, useMemo, useRef, useCallback, useEffect, lazy, Suspense } from 'react';
+import { useState, useMemo, useRef, useCallback, useEffect, useLayoutEffect, lazy, Suspense } from 'react';
 import { SEOHead } from '@/components/SEOHead';
 import { getAiScrapingPreference } from '@/lib/ai-scraping';
 import { profileFeedUrl } from '@/lib/profile-feed-url';
@@ -65,7 +65,7 @@ import { BadgeIcon } from '@/components/app/BadgeIcon';
 import { StreamerBadge } from '@/components/app/live/StreamerBadge';
 import { POST_LOOK_EVENT, type PostLook } from '@/lib/post-menu';
 import { ProfilePostBgContext, ProfilePostBgArtContext, ProfilePostBgMapContext, PostBgPicker, usePostBgHold, type PostBgSave } from '@/components/app/profile/PostBackground';
-import { POST_BG_IMAGE_KEY, POST_BG_PHOTO_ID, POST_BG_VIDEO_HINT, mergePostBg, parsePostBg, postBgById, postBgFromStored, postBgStored, postBgImageUrl, withPostBgColors, type PostBg } from '@/lib/post-backgrounds';
+import { POST_BG_IMAGE_KEY, POST_BG_PHOTO_ID, POST_BG_VIDEO_HINT, mergePostBg, parsePostBg, postBgById, postBgFromStored, postBgPhotoStored, postBgStored, postBgImageUrl, withPostBgColors, type PostBg } from '@/lib/post-backgrounds';
 import { ArticleTilePicker, ProfileArticleTileContext } from '@/components/app/profile/ArticleTile';
 import { articleReadMinutes, mergeArticleTile, parseArticleTile, type ArticleTileLook } from '@/lib/article-tile';
 import { buildFeedImageUrls as articleTileCover } from '@/lib/media-url';
@@ -81,13 +81,6 @@ const ProfileArrangeSheet = lazy(() => import('@/components/app/profile/ProfileA
 /** Tabs served by the creator's own /api/feed content query. */
 const CONTENT_BACKED_TABS: TabValue[] = ['home', 'posts', 'images', 'videos', 'articles'];
 
-/**
- * Wraps tab content and remembers the max height ever rendered.
- * When switching to a shorter tab, the container keeps its previous
- * height so the page never shrinks and the scroll position stays put.
- * The locked height is released after a brief delay so the container
- * can grow naturally if new content loads.
- */
 /**
  * The profile tabs' selected mark: a short glowing line under the active tab
  * ("Beam"), in place of the glass box other tab rows use. It takes the tab's
@@ -117,35 +110,6 @@ function ProfileTabBeam({ rect, enableTransition }: {
           : 'none',
       }}
     />
-  );
-}
-
-function StableHeightContainer({ activeTab, children }: { activeTab: string; children: React.ReactNode }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const maxHeight = useRef(0);
-  const [minH, setMinH] = useState(0);
-
-  // On every tab switch, lock to the tallest height we've seen
-  useEffect(() => {
-    if (ref.current) {
-      const h = ref.current.scrollHeight;
-      if (h > maxHeight.current) maxHeight.current = h;
-      setMinH(maxHeight.current);
-    }
-    // After content settles, update to actual height (allows shrinking after data changes)
-    const timer = setTimeout(() => {
-      if (ref.current) {
-        maxHeight.current = ref.current.scrollHeight;
-        setMinH(ref.current.scrollHeight);
-      }
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [activeTab]);
-
-  return (
-    <div ref={ref} data-feed-root style={{ minHeight: minH > 0 ? `${minH}px` : undefined }}>
-      {children}
-    </div>
   );
 }
 
@@ -249,6 +213,7 @@ function PinnedPostSection({ profileAddress }: { profileAddress: string }) {
 
 /** Longest the profile skeleton waits for tab counts and pins after the profile itself. */
 const PROFILE_REVEAL_CAP_MS = 900;
+const PROFILE_TABS_STICKY_TOP = 4;
 
 export default function ProfilePage() {
   const { t: _copy } = _useCopy();
@@ -256,6 +221,9 @@ export default function ProfilePage() {
   const { theme } = useAppTheme();
   // UI-only state managed in orchestrator
   const [activeTab, setActiveTab] = useState<TabValue>('home');
+  const tabContentRef = useRef<HTMLDivElement>(null);
+  const [tabContentMinHeight, setTabContentMinHeight] = useState(0);
+  const nextTabScroll = useRef<number | null>(null);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
   const [arrangeOpen, setArrangeOpen] = useState(false);
   const [createPlanModalOpen, setCreatePlanModalOpen] = useState(false);
@@ -276,24 +244,24 @@ export default function ProfilePage() {
   // panel's post-type row only applies on the All tab.
   const data = useProfilePage({ activeTab });
 
-  // One reveal, not four. A fresh profile used to land in steps: header with
-  // "0" tab counts, then counts (re-sorting the tabs), then the pinned
-  // community row pushing everything down. Hold the skeleton until the counts
-  // and pins answer too, capped so a slow side request never holds the page.
-  // A profile painted from cache shows at once, as before.
+  // Keep one profile shell until the first tab can paint. Once shown, the
+  // page stays mounted while its cached queries revalidate.
   const revealAddress = data.apiProfile?.walletAddress;
   const { isFetched: pinsFetched } = usePinnedCommunities(revealAddress);
-  const [revealCapPassed, setRevealCapPassed] = useState(false);
+  const [revealCapAddress, setRevealCapAddress] = useState<string>();
+  const [revealedAddress, setRevealedAddress] = useState<string>();
   useEffect(() => {
-    setRevealCapPassed(false);
     if (!revealAddress) return;
-    const timer = setTimeout(() => setRevealCapPassed(true), PROFILE_REVEAL_CAP_MS);
+    const timer = setTimeout(() => setRevealCapAddress(revealAddress), PROFILE_REVEAL_CAP_MS);
     return () => clearTimeout(timer);
   }, [revealAddress]);
-  const holdForReveal = !!data.profile && !!revealAddress && !data.isProfileFromCache
-    && !revealCapPassed && !(data.isCountsSettled && pinsFetched);
-  // A pull refresh keeps what is on screen; only a first load shows skeletons.
-  const headerFetching = data.isFetchingProfile && !data.isRefreshing;
+  const holdForDetails = !data.isProfileFromCache && revealCapAddress !== revealAddress
+    && !(data.isCountsSettled && pinsFetched);
+  const holdForReveal = !!data.profile && !!revealAddress && revealedAddress !== revealAddress
+    && (data.isAuthLoading || data.isLoadingContent || holdForDetails);
+  useEffect(() => {
+    if (data.profile && revealAddress && !holdForReveal) setRevealedAddress(revealAddress);
+  }, [data.profile, revealAddress, holdForReveal]);
   // One short "done" beat after a pull refresh: the avatar ring closes and the photo pops.
   const [justRefreshed, setJustRefreshed] = useState(false);
   const wasRefreshing = useRef(false);
@@ -333,9 +301,8 @@ export default function ProfilePage() {
   const [postBgOpen, setPostBgOpen] = useState(false);
   const [postBgSaving, setPostBgSaving] = useState(false);
   const [postBgOverride, setPostBgOverride] = useState<{ owner: string; bg: PostBg | null } | null>(null);
-  const postBg = postBgOverride && postBgOverride.owner === profileKey
-    ? postBgOverride.bg
-    : parsePostBg(data.apiProfile?.customs);
+  const storedProfileBg = useMemo(() => parsePostBg(data.apiProfile?.customs), [data.apiProfile?.customs]);
+  const postBg = postBgOverride && postBgOverride.owner === profileKey ? postBgOverride.bg : storedProfileBg;
   // The owner's own picture stays on the account even while another backdrop is on.
   const postBgPhoto = postBg?.kind === 'photo' ? postBg.image ?? null : postBgImageUrl(data.apiProfile?.customs?.[POST_BG_IMAGE_KEY]);
   // Which post the picker was opened from (null: the header / menu, so "all").
@@ -362,17 +329,25 @@ export default function ProfilePage() {
       || data.PROFILE_POSTS.find((p) => !p.articleBody && p.content?.trim())?.content,
     [data.PROFILE_POSTS, postBgTarget],
   );
-  const savePostBg = useCallback(async ({ id, colors, file, scope }: PostBgSave) => {
+  const savePostBg = useCallback(async ({ id, colors, file, photoUrl, scope }: PostBgSave) => {
     if (!profileKey) return;
     // Just this post: saved on the post, the profile's backdrop is left alone.
     if (scope === 'post' && postBgTarget) {
+      const current = postBgMap.get(postBgTarget);
+      const unchanged = !file && (current?.id ?? null) === id &&
+        (current?.colors ?? []).join() === (colors ?? []).join() &&
+        (current?.image ?? null) === (photoUrl ?? null);
+      if (unchanged) { setPostBgOpen(false); return; }
       setPostBgSaving(true);
       try {
-        const def = postBgById(id);
-        const keepPhoto = def?.kind === 'photo' && !file;
-        const photoKey = keepPhoto ? (data.apiProfile?.customs?.[POST_BG_IMAGE_KEY] as string | undefined) : undefined;
-        const stored = def?.kind === 'photo' ? (photoKey ? `photo||${photoKey}` : '') : postBgStored(id, colors);
-        const res = await setPostBackground(postBgTarget, stored, def?.kind === 'photo' ? file : null);
+        const stored = id === POST_BG_PHOTO_ID
+          ? (file ? POST_BG_PHOTO_ID : postBgPhotoStored(photoUrl))
+          : postBgStored(id, colors);
+        if (stored === null) {
+          toast.error(t('postBg.saveFailed', "Couldn't save your background. Try again."));
+          return;
+        }
+        const res = await setPostBackground(postBgTarget, stored, id === POST_BG_PHOTO_ID ? file : null);
         const next = res.postBg ? postBgFromStored(res.postBg) : null;
         setPostBgSaved((cur) => {
           const map = new Map(cur && cur.owner === profileKey ? cur.map : []);
@@ -404,7 +379,7 @@ export default function ProfilePage() {
       // "All posts" (from a held post) means all of them, so posts with their
       // own go back too. Holding the header only sets the profile's backdrop.
       if (fromPost) {
-        await setPostBackground('all', '').catch(() => undefined);
+        await setPostBackground('all', '');
         setPostBgSaved({ owner: profileKey, map: new Map([...postBgMap.keys()].map((k) => [k, null])) });
       }
       setPostBgOpen(false);
@@ -467,6 +442,7 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!profileKey || appliedDefaultTabFor.current === profileKey) return;
     appliedDefaultTabFor.current = profileKey;
+    setTabContentMinHeight(0);
     // ?tab= wins over the saved default: it is only ever set by something that
     // sent the user here to do one specific thing (the composer's Subscribers
     // row pointing at plan creation), and landing them on Home instead makes
@@ -506,10 +482,9 @@ export default function ProfilePage() {
     let observer: IntersectionObserver;
     const observe = () => {
       observer?.disconnect();
-      const top = 4;
       observer = new IntersectionObserver(
-        ([entry]) => setIsTabsStuck(entry.boundingClientRect.top <= (entry.rootBounds?.top ?? top)),
-        { rootMargin: `-${top}px 0px 0px 0px`, threshold: 0 },
+        ([entry]) => setIsTabsStuck(entry.boundingClientRect.top <= (entry.rootBounds?.top ?? PROFILE_TABS_STICKY_TOP)),
+        { rootMargin: `-${PROFILE_TABS_STICKY_TOP}px 0px 0px 0px`, threshold: 0 },
       );
       observer.observe(el);
     };
@@ -520,6 +495,42 @@ export default function ProfilePage() {
       observer?.disconnect();
     };
   }, [!!data.profile, holdForReveal]);
+
+  const selectTab = useCallback((tab: TabValue) => {
+    if (tab === activeTab) return;
+    const content = tabContentRef.current;
+    const sentinel = stuckSentinelRef.current;
+    const rail = profileTabsRef.current;
+    const current = window.scrollY;
+    let target = current;
+    // Once pinned, start the next panel just under the rail. Otherwise keep
+    // the expanded header at exactly the same position.
+    if (isTabsStuck && sentinel && rail) {
+      const sentinelTop = current + sentinel.getBoundingClientRect().bottom;
+      const railMargin = parseFloat(getComputedStyle(rail).marginTop) || 0;
+      const railTop = rail.getBoundingClientRect().top;
+      const pinnedAt = Math.ceil(sentinelTop + Math.max(1 - PROFILE_TABS_STICKY_TOP, railMargin - railTop));
+      target = Math.max(0, Math.min(current, pinnedAt));
+    }
+    // A loading or empty panel still needs enough height to reach the target.
+    // Set the floor with the tab change so the browser never clamps first.
+    let minHeight = 0;
+    if (content && target > 0) {
+      const contentTop = content.getBoundingClientRect().top + current;
+      minHeight = Math.max(0, Math.ceil(document.documentElement.clientHeight + target - contentTop));
+    }
+    setTabContentMinHeight(minHeight);
+    nextTabScroll.current = target;
+    setActiveTab(tab);
+  }, [activeTab, isTabsStuck]);
+
+  useLayoutEffect(() => {
+    const target = nextTabScroll.current;
+    nextTabScroll.current = null;
+    if (target !== null && target !== window.scrollY) {
+      window.scrollTo({ top: target, behavior: 'instant' });
+    }
+  }, [activeTab]);
 
   const { layerRef: tabsIndicatorLayerRef, setRef: setTabRef, rect: tabIndicator, onScroll: handleTabsScroll } = useTabIndicator(activeTab, isTabsStuck);
   const { ref: tabsFadeRef, style: tabsFadeStyle } = useScrollFadeMask<HTMLDivElement>();
@@ -601,10 +612,10 @@ return () => rail.removeEventListener('wheel', onWheel);
     const nearest = findNearestProfileTab(currentCenterX);
     if (nearest !== activeTab) {
       setTabTransition(true);
-      setActiveTab(nearest);
+      selectTab(nearest);
       setTimeout(() => setTabTransition(false), 450);
     }
-  }, [activeTab, findNearestProfileTab]);
+  }, [activeTab, findNearestProfileTab, selectTab]);
 
   const handleProfileDragEnd = useCallback(() => {
     if (!profileDragState.current) return;
@@ -837,7 +848,7 @@ return () => rail.removeEventListener('wheel', onWheel);
           isSubscribed={data.isSubscribed}
           hasPlans={data.hasPinnedPlans}
           setFullscreenImage={setFullscreenImage}
-          setActiveTab={setActiveTab}
+          setActiveTab={selectTab}
           shareSheetOpen={shareSheetOpen}
           setShareSheetOpen={setShareSheetOpen}
           setLoginModalOpen={setLoginModalOpen}
@@ -851,7 +862,6 @@ return () => rail.removeEventListener('wheel', onWheel);
           translatedBio={data.translatedBio}
           setTranslatedBio={data.setTranslatedBio}
           isBlocked={data.isBlocked}
-          isFetchingProfile={headerFetching}
         />
         </div>
 
@@ -920,7 +930,7 @@ return () => rail.removeEventListener('wheel', onWheel);
                       setTabRef(tab.value)(el);
                       profileTabButtonPositions.current[tab.value] = el;
                     }}
-                    onClick={() => setActiveTab(tab.value)}
+                    onClick={() => selectTab(tab.value)}
                     aria-pressed={isActive}
                     title={t(`profile.tabs.${tab.value}`, tab.label)}
                     data-feed-tab-btn data-active={isActive}
@@ -940,14 +950,14 @@ return () => rail.removeEventListener('wheel', onWheel);
           </div>
           </div>
           {isTabsStuck && <div className="profile-rail-follow shrink-0 max-w-[36%]">
-            <ProfileFollowButton profile={data.profile} apiProfile={data.apiProfile} isViewingOwnProfile={data.isViewingOwnProfile} isBlocked={data.isBlocked} isFetchingProfile={headerFetching} isFollowing={data.isFollowing} isPending={data.isPending} isTargetPrivate={data.isTargetPrivate} isFollowLoading={isFollowLoading} handleFollow={handleFollow} handleUnfollow={handleUnfollow} />
+            <ProfileFollowButton profile={data.profile} apiProfile={data.apiProfile} isViewingOwnProfile={data.isViewingOwnProfile} isBlocked={data.isBlocked} isFetchingProfile={false} isFollowing={data.isFollowing} isPending={data.isPending} isTargetPrivate={data.isTargetPrivate} isFollowLoading={isFollowLoading} handleFollow={handleFollow} handleUnfollow={handleUnfollow} />
           </div>}
         </div>
         </div>
 
-        {/* Tab Content - all panels rendered, inactive hidden via CSS */}
+        {/* Keep the active panel tall enough to hold the scroll position as it loads. */}
         <ProfileViewModeContext.Provider value={profileView}>
-        <div data-feed-swallow-bounds>
+        <div ref={tabContentRef} data-feed-swallow-bounds style={{ minHeight: tabContentMinHeight || undefined, overflowAnchor: 'none' }}>
         <div ref={profileContentRef} data-profile-content>
         <FeedSwallowMotion>
         {/* Sort + search, on the four tabs actually backed by this creator's
@@ -998,7 +1008,7 @@ return () => rail.removeEventListener('wheel', onWheel);
         {postBgPostHold.ringEl}
         <div ref={articleTileHold.hostRef} className="relative" {...articleTileHold.handlers}>
         {articleTileHold.ringEl}
-        <StableHeightContainer activeTab={activeTab}>
+        <div data-feed-root>
             <ProfileTabContent
               activeTab={activeTab}
               profileAddress={data.apiProfile?.walletAddress || ''}
@@ -1030,7 +1040,7 @@ return () => rail.removeEventListener('wheel', onWheel);
               setEditingPlan={setEditingPlan}
             />
 
-        </StableHeightContainer>
+        </div>
         </div>
         </div>
         </ProfileArticleTileContext.Provider>
@@ -1043,9 +1053,10 @@ return () => rail.removeEventListener('wheel', onWheel);
         </ProfileViewModeContext.Provider>
       </div>
 
-      {data.isViewingOwnProfile && (
+      {data.isViewingOwnProfile && postBgOpen && (
         <PostBgPicker
-          open={postBgOpen}
+          key={postBgTarget ?? 'profile'}
+          open
           current={postBg}
           name={data.profile.name}
           handle={data.profile.handle}
@@ -1054,7 +1065,7 @@ return () => rail.removeEventListener('wheel', onWheel);
           photoUrl={postBgPhoto}
           saving={postBgSaving}
           postId={postBgTarget}
-          postCurrent={postBgTarget ? postBgMap.get(postBgTarget) ?? postBg : undefined}
+          postCurrent={postBgTarget ? postBgMap.get(postBgTarget) ?? null : undefined}
           onCancel={() => setPostBgOpen(false)}
           onSave={savePostBg}
         />

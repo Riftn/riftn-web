@@ -275,8 +275,8 @@ export function useConversations(searchQuery: string = '', enabled = true) {
     // saying loading and let the caller hold its skeleton. Once auth settles
     // with no address this goes false, and a genuinely signed-out consumer
     // gets its empty state exactly as before.
-    isLoading: query.isLoading || (!hasQueryInput && isAuthResolving),
-    isError: query.isError,
+    isLoading: (enabled && hasQueryInput && query.isPending) || (!hasQueryInput && isAuthResolving),
+    isError: query.isLoadingError,
     error: query.error,
     refetch: query.refetch,
     isRefetching: query.isRefetching,

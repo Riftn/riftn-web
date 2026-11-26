@@ -46,7 +46,11 @@ describe('layoutTiles', () => {
 
 describe('createGuestMixer', () => {
   const session = () => {
-    const s: WhipSession = { stop: vi.fn(async () => undefined), replaceTrack: vi.fn(async () => undefined) };
+    const s: WhipSession = {
+      stop: vi.fn(async () => undefined),
+      replaceTrack: vi.fn(async () => undefined),
+      syncVideoEnabled: vi.fn(),
+    };
     return s;
   };
 

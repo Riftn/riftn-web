@@ -1,3 +1,5 @@
+import { translateFinanceStats } from './finance-stats-tr.js';
+
 const UPSTREAM = 'https://aigxuutjaqsywioxjefr.supabase.co/functions/v1/finance-stats';
 const WALLET = '0x2226ab7ff45d9a241e8986163ffb0176fabf5613';
 export const LIVE_COSTS_SINCE = '2026-04-01';
@@ -26,8 +28,16 @@ const ZERO_FEES = [
   ['tips_fees', 'Tip platform fees'], ['ppv_fees', 'Pay-per-view platform fees'], ['paid_dm_fees', 'Paid message platform fees'],
 ].map(([id, label]) => ({ id, label, kind: 'revenue', group: 'fees', origin: 'config', status: 'ok', note: 'The current payment policy passes this payment to the creator with no platform cut. The platform fee is zero.' }));
 
-function sourceLabel(source) {
-  return source.id === 'bsc_token_tax' ? { ...source, label: 'Historical operating revenue' } : source;
+const RIFT_PURCHASE_SOURCES = new Set(['dhb_card', 'dhb_crypto', 'stripe_fees']);
+
+function presentSource(source) {
+  if (source.id === 'bsc_token_tax') return { ...source, label: 'Historical operating revenue' };
+  if (!RIFT_PURCHASE_SOURCES.has(source.id)) return source;
+  return {
+    ...source,
+    label: source.label.replace(/\bDHB\b/g, 'RIFT'),
+    note: source.note?.replace(/\bDHB\b/g, 'RIFT'),
+  };
 }
 
 const monthIndex = month => Number(month.slice(0, 4)) * 12 + Number(month.slice(5, 7));
@@ -73,7 +83,7 @@ export function mergeFinanceSummary(upstream, history, sharing = { days: [] }) {
     if (day.revenue[BNB_SHARING.id] == null) day.revenue[BNB_SHARING.id] = entry.usd;
     days.set(entry.date, day);
   }
-  const sources = [...upstream.sources.map(sourceLabel), ...history.sources.filter(source => !supplied.has(source.id)), ...ZERO_FEES.filter(source => !supplied.has(source.id))];
+  const sources = [...upstream.sources.map(presentSource), ...history.sources.filter(source => !supplied.has(source.id)), ...ZERO_FEES.filter(source => !supplied.has(source.id))];
   if (!sources.some(source => source.id === BNB_SHARING.id)) sources.push(BNB_SHARING);
   if (!sources.some(source => source.id === REINVESTMENT.id)) sources.push(REINVESTMENT);
   return {
@@ -90,7 +100,7 @@ export function mergeFinanceLedger(upstream, history) {
   const key = item => item.entryId ?? `${item.source}:${item.ref?.tx ?? item.date}:${item.direction ?? ''}:${item.amount ?? ''}:${item.unit ?? ''}`;
   const items = new Map(upstream.items.map(item => [key(item), item]));
   for (const item of [...history.entries, ...history.transfers]) if (!items.has(key(item))) items.set(key(item), item);
-  const sources = new Map(upstream.sources.map(source => [source.id, sourceLabel(source)]));
+  const sources = new Map(upstream.sources.map(source => [source.id, presentSource(source)]));
   for (const source of [...history.sources, ...history.transferSources]) if (!sources.has(source.id)) sources.set(source.id, source);
   return {
     ...upstream,
@@ -107,6 +117,11 @@ function clientResponse(response, method) {
   const headers = new Headers(response.headers);
   for (const [key, value] of Object.entries(HEADERS)) headers.set(key, value);
   return new Response(method === 'HEAD' ? null : response.body, { status: response.status, headers });
+}
+
+function turkishResponse(body, method) {
+  const headers = { ...HEADERS, 'Content-Language': 'tr' };
+  return method === 'HEAD' ? new Response(null, { headers }) : Response.json(translateFinanceStats(body), { headers });
 }
 
 /** Read missing core sources directly while the managed endpoint is unavailable. */
@@ -208,11 +223,15 @@ export async function handleFinanceRequest(request, env, fetcher = fetch, cache 
   if (!['GET', 'HEAD'].includes(request.method)) return Response.json({ ok: false, error: 'Method not allowed' }, { status: 405, headers: { ...HEADERS, Allow: 'GET, HEAD, OPTIONS' } });
   const url = new URL(request.url);
   const view = url.searchParams.get('view');
+  const turkish = url.searchParams.get('lang') === 'tr';
   if (view && !['ledger', 'tax'].includes(view)) return Response.json({ ok: false, error: 'Unknown finance view' }, { status: 400, headers: HEADERS });
-  const key = new Request(`${url.origin}/api/finance-stats?accounting=live-april-v2${view ? `&view=${view}` : ''}`);
+  const key = new Request(`${url.origin}/api/finance-stats?accounting=live-april-v3${view ? `&view=${view}` : ''}`);
   const cached = await cache?.match(key);
-  if (cached) return clientResponse(cached, request.method);
   try {
+    if (cached) {
+      if (!turkish) return clientResponse(cached, request.method);
+      return turkishResponse(request.method === 'HEAD' ? null : await cached.json(), request.method);
+    }
     const response = await fetcher(`${UPSTREAM}${view ? `?view=${view}` : ''}`, { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(30_000) });
     if (!response.ok) throw new Error('Upstream finance response failed');
     let upstream = await response.json();
@@ -241,7 +260,7 @@ export async function handleFinanceRequest(request, env, fetcher = fetch, cache 
       stored.headers.delete('CDN-Cache-Control');
       await cache.put(key, stored);
     }
-    return request.method === 'HEAD' ? new Response(null, result) : result;
+    return turkish ? turkishResponse(body, request.method) : clientResponse(result, request.method);
   } catch {
     return Response.json({ ok: false, error: 'Finance sources could not be read' }, { status: 502, headers: { ...HEADERS, 'Cache-Control': 'no-store' } });
   }

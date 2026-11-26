@@ -256,7 +256,7 @@ self.addEventListener('push', (event) => {
     badge: '/icon-192.png',
     // Same tag replaces rather than stacks, so ten likes on one post are one
     // line in the tray instead of ten.
-    tag: payload.tag || 'dehub',
+    ...(payload.tag ? { tag: payload.tag } : {}),
     data: { url: payload.url || '/app/notifications' },
   };
 

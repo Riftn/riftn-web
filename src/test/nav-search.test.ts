@@ -150,9 +150,13 @@ describe('menu search — every destination answers to more than its name', () =
     expect(search('faq')).toContain('Guide');
   });
 
-  it('reveals the newer pages that have no menu row', () => {
+  it('shows Packs in the menu and finds it by emoji and stickers', () => {
+    expect(search('')).toContain('Packs');
     expect(search('emoji')).toContain('Packs');
     expect(search('stickers')).toContain('Packs');
+  });
+
+  it('reveals the newer pages that have no menu row', () => {
     expect(search('global chat')).toContain('Public Chat');
     expect(search('scheduled')).toContain('Planned');
     expect(search('obs')).toContain('Live Studio');

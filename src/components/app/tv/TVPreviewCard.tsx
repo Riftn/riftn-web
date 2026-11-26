@@ -7,6 +7,7 @@
  * @module components/app/tv/TVPreviewCard
  */
 
+import { LiveDot } from '@/components/app/live/LiveDot';
 import { useTranslation } from 'react-i18next';
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -372,8 +373,8 @@ export function TVPreviewCard({ channel }: TVPreviewCardProps) {
         )}
 
         {/* LIVE badge */}
-        <div className="absolute top-2 left-2 flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-red-600 text-white text-[10px] font-semibold">
-          <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+        <div className="absolute top-2 left-2 flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-black/80 text-white text-[10px] font-semibold">
+          <LiveDot />
           {t('tv.live')}
         </div>
 

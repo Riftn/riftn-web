@@ -77,8 +77,12 @@ export interface UnifiedFeedParams {
   earned?: 'tips' | 'ppv';
 }
 
+// Keep the Home query and index.html's early feed request on the same page.
+export const HOME_FEED_PAGE_SIZE = 10;
+
 export interface UnifiedFeedItem {
   tokenId: number;
+  ppvPreview?: { ready?: boolean };
   name: string;
   description?: string;
   articleBody?: string;
@@ -356,6 +360,7 @@ function mapVideoItem(item: UnifiedFeedItem, index: number): VideoItem {
     ppvBuyerCount: item.ppvBuyerCount || 0,
     isPPV,
     ppvPrice: item.streamInfo?.payPerViewAmount,
+    ppvPreviewReady: item.ppvPreview?.ready === true,
     ppvCurrency: item.streamInfo?.payPerViewTokenSymbol || 'DHB',
     isW2E,
     isLocked,
@@ -614,7 +619,7 @@ function isUnairedLivePost(item: { postType?: string; stream?: { startedAt?: str
 function isBootDefaultFeedParams(params: UnifiedFeedParams): boolean {
   return (
     params.page === 1 &&
-    params.limit === 10 &&
+    params.limit === HOME_FEED_PAGE_SIZE &&
     params.sortBy === 'createdAt' &&
     params.sortOrder === 'desc' &&
     params.status === 'all' &&
@@ -624,7 +629,7 @@ function isBootDefaultFeedParams(params: UnifiedFeedParams): boolean {
     params.hasBounty === undefined && params.hasPlans === undefined &&
     !params.range && !params.from && !params.to &&
     !params.shuffleSeed && params.maxPerCreator === undefined &&
-    !params.followingOnly
+    !params.followingOnly && !params.earned
   );
 }
 
@@ -863,7 +868,11 @@ export function prefetchUnifiedFeed(queryClient: QueryClient, options: UseUnifie
   const viewer = getFeedViewer();
   return queryClient.prefetchInfiniteQuery({
     queryKey: ['unified-feed', params, limit, viewer],
-    queryFn: ({ pageParam = 1 }) => loadUnifiedFeedPage({ params, limit, pageParam, viewer }),
+    queryFn: async ({ pageParam = 1 }) => {
+      const page = await loadUnifiedFeedPage({ params, limit, pageParam, viewer });
+      mergeLiveCounts(queryClient, page.items);
+      return page;
+    },
     initialPageParam: 1,
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 30,

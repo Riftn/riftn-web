@@ -1,5 +1,8 @@
-import { apiCall, authedUpload } from './core';
+import { apiCall, authedUpload, getAuthToken, getRefreshToken } from './core';
 import { voiceRecordingFilename } from '@/lib/voice-recording';
+import { isKidsModeLocked } from '@/lib/kids-mode-lock';
+import { noteImageSizes } from '@/lib/image-size-hints';
+import { noteCoAuthors } from '@/lib/co-author-store';
 
 export interface LiveChatRoom {
   id: string;
@@ -212,6 +215,30 @@ export interface LiveChatMessagePage {
   signInRequired: boolean;
 }
 
+// These identify the public opening request started by the chat document.
+const PUBLIC_STARTUP_ROOM = 'global';
+export const PUBLIC_CHAT_PAGE_SIZE = 20;
+const PUBLIC_STARTUP_MAX_AGE_MS = 45_000;
+
+async function takePublicStartupHistory() {
+  if (typeof window === 'undefined') return null;
+  const state = window as Window & {
+    __publicChatHistory?: { at: number; promise: Promise<Record<string, unknown> | null> };
+  };
+  const boot = state.__publicChatHistory;
+  if (!boot) return null;
+  delete state.__publicChatHistory;
+  if (Date.now() - boot.at > PUBLIC_STARTUP_MAX_AGE_MS || getAuthToken() || getRefreshToken() || isKidsModeLocked()) return null;
+  const data = await boot.promise;
+  // The viewer or device lock can change while the request is in flight.
+  if (!data || getAuthToken() || getRefreshToken() || isKidsModeLocked()) return null;
+  const body = data.result ?? data;
+  if (typeof body !== 'object' || !body || !('messages' in body) || !Array.isArray(body.messages)) return null;
+  noteImageSizes(data);
+  noteCoAuthors(data);
+  return data;
+}
+
 /**
  * One page of a room's history, newest first from the server, with whether
  * older lines exist and whether a signed-out reader has hit the wall.
@@ -230,7 +257,10 @@ export async function getLiveChatMessagePage(
   if (params.before) queryParams.before = params.before;
   if (params.after) queryParams.after = params.after;
   if (params.around) queryParams.around = params.around;
-  const r = await apiCall<Record<string, unknown>>('/api/livechat/messages', {
+  const isPublicOpeningPage = roomId === PUBLIC_STARTUP_ROOM && params.limit === PUBLIC_CHAT_PAGE_SIZE
+    && !params.signedIn && !params.before && !params.after && !params.around;
+  const prefetched = isPublicOpeningPage ? await takePublicStartupHistory() : null;
+  const r = prefetched ?? await apiCall<Record<string, unknown>>('/api/livechat/messages', {
     params: queryParams,
     requiresAuth: !!params.signedIn,
   });

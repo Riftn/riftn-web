@@ -6,15 +6,23 @@ import { AppSidebar } from '@/components/app/AppSidebar';
 import { NAV_ITEMS } from '@/constants/app.constants';
 import { NAV_LABEL_KEYS } from '@/components/app/navigation/SidebarNavItem';
 
-const { openStage, disconnect, counts } = vi.hoisted(() => ({
+const { openStage, disconnect, counts, wallet } = vi.hoisted(() => ({
   openStage: vi.fn(), disconnect: vi.fn(), counts: { dm: 0, publicChat: 0 },
+  wallet: { signedInProfile: false, legacy: 0, balance: '0' },
 }));
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string, options?: { defaultValue?: string }) => options?.defaultValue ?? key }) }));
 vi.mock('@/contexts/AuthContext', async (importOriginal) => ({
-  ...await importOriginal<typeof import('@/contexts/AuthContext')>(), useAuth: () => ({ isAuthenticated: true, disconnect }) }));
+  ...await importOriginal<typeof import('@/contexts/AuthContext')>(), useAuth: () => ({
+    isAuthenticated: true, disconnect,
+    user: wallet.signedInProfile ? { username: 'member', address: '0xmember' } : undefined,
+  }) }));
 vi.mock('@/contexts/StageContext', () => ({ openStageModal: openStage }));
 vi.mock('@/contexts/ThemeContext', () => ({ useAppTheme: () => ({ theme: 'dark' }) }));
-vi.mock('@/hooks/use-self-badge-balance', () => ({ useSelfBadge: () => ({ balance: 0 }) }));
+vi.mock('@/hooks/use-self-badge-balance', () => ({ useSelfBadge: () => ({ balance: wallet.legacy }) }));
+vi.mock('@/hooks/use-app-tokens', () => ({
+  useAppTokensConfig: () => ({ data: { enabled: true } }),
+  useAppTokens: () => ({ data: { balance: wallet.balance } }),
+}));
 vi.mock('@/hooks/use-notifications', () => ({ useUnreadNotificationCount: () => ({ data: undefined }) }));
 vi.mock('@/hooks/use-custom-notifications', () => ({ useCustomUnreadCount: () => ({ data: undefined }) }));
 vi.mock('@/lib/dm-unread-store', () => ({ useDmUnreadCount: () => counts.dm }));
@@ -26,6 +34,7 @@ vi.mock('@/lib/document-scroll', () => ({ scrollDocumentToSmooth: vi.fn() }));
 vi.mock('@/components/app/war/WarHudIcon', () => ({ ThemedIcon: () => null }));
 vi.mock('@/contexts/UserPreferencesContext', () => ({ useUserPreferences: () => null }));
 vi.mock('@/components/app/navigation/DesktopSidebar', () => ({ DesktopSidebar: () => null }));
+vi.mock('@/components/app/BadgedName', () => ({ BadgedName: ({ children }: { children: React.ReactNode }) => children }));
 vi.mock('@/components/app/navigation/MenuAccountSwitcher', () => ({ MenuAccountSwitcher: () => null }));
 vi.mock('@/components/ui/liquid-glass-bubble', () => ({ LiquidGlassBubble: ({ children, onClick }: any) => <button onClick={onClick}>{children}</button> }));
 vi.mock('@/features/post/PostModal', () => ({ PostModal: ({ isOpen }: any) => isOpen ? <div>Composer open</div> : null }));
@@ -46,6 +55,9 @@ beforeEach(() => {
   vi.clearAllMocks();
   counts.dm = 0;
   counts.publicChat = 0;
+  wallet.signedInProfile = false;
+  wallet.legacy = 0;
+  wallet.balance = '0';
   // Every page on one screen; the tabs layout has its own test below.
   localStorage.setItem('menu-layout', 'sections');
 });
@@ -57,6 +69,14 @@ const mount = async () => {
 };
 
 describe('mobile menu dismissal', () => {
+  it('uses spendable RIFT for the wallet chip when legacy holdings are larger', async () => {
+    wallet.signedInProfile = true;
+    wallet.legacy = 3_550_000;
+    await mount();
+    fireEvent.click(screen.getByRole('button', { name: 'nav.wallet 0' }));
+    expect(screen.getByTestId('path').textContent).toBe('/app/wallet');
+  });
+
   it('shows the combined direct and public chat unread count on Messages', async () => {
     counts.dm = 2;
     counts.publicChat = 3;
@@ -77,7 +97,7 @@ describe('mobile menu dismissal', () => {
     await mount();
     expect(screen.getByText('nav.profile')).toBeTruthy();
     expect(screen.queryByText('nav.dao')).toBeNull();
-    fireEvent.click(screen.getByText('nav.groups.riftn'));
+    fireEvent.click(await screen.findByRole('tab', { name: 'nav.groups.riftn' }));
     expect(screen.getByText('nav.dao')).toBeTruthy();
     expect(screen.queryByText('nav.profile')).toBeNull();
   });
@@ -104,6 +124,23 @@ describe('mobile menu dismissal', () => {
     fireEvent.click(screen.getByRole('button', { name: 'sidebar.clearSearch' }));
     expect(screen.queryByRole('textbox', { name: 'sidebar.searchMenu' })).toBeNull();
     expect(screen.getByText('nav.groups.main')).toBeTruthy();
+  });
+
+  it('clears the query and focus in sections, then reopens with an empty search', async () => {
+    await mount();
+    const field = screen.getByRole('textbox', { name: 'sidebar.searchMenu' }) as HTMLInputElement;
+    field.focus();
+    fireEvent.change(field, { target: { value: 'dao' } });
+    fireEvent.click(screen.getByRole('button', { name: 'sidebar.clearSearch' }));
+    expect(field.value).toBe('');
+    expect(document.activeElement).not.toBe(field);
+    expect(screen.getByTestId('menu')).toBeTruthy();
+
+    fireEvent.change(field, { target: { value: 'wallet' } });
+    fireEvent.click(screen.getByText('Dismiss twice'));
+    fireEvent.click(screen.getByRole('button', { name: 'Open menu' }));
+    const reopened = screen.getByRole('textbox', { name: 'sidebar.searchMenu' }) as HTMLInputElement;
+    expect(reopened.value).toBe('');
   });
 
   it('keeps repeated close requests closed', async () => {

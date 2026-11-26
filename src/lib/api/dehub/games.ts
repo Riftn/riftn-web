@@ -297,6 +297,7 @@ export interface SillyBoardRow {
 }
 
 export interface SillyState {
+  transferNotificationsEnabled?: boolean;
   rules: { maxTapsPerSecond: number; offlineCapHours: number; maxLevel: number };
   me: SillyMe | null;
   transfers: SillyTransfer[];
@@ -304,6 +305,8 @@ export interface SillyState {
 }
 
 export const sillyState = (signedIn: boolean) => apiCall<SillyState>('/api/games/sillycoin', { requiresAuth: signedIn });
+export const sillySetTransferNotifications = (enabled: boolean) =>
+  apiCall<{ enabled: boolean }>('/api/games/sillycoin/transfer-notifications', { method: 'POST', body: { enabled }, requiresAuth: true });
 export const sillyMine = (taps: number) =>
   apiCall<{ me: SillyMe; accepted: number }>('/api/games/sillycoin/mine', { method: 'POST', body: { taps }, requiresAuth: true });
 export const sillyUpgrade = (kind: SillyUpgradeKind, taps: number) =>
@@ -425,3 +428,20 @@ export const chestardState = (signedIn: boolean) => apiCall<ChestardState>('/api
 export const chestardStart = () => apiCall<{ run: ChestardRun }>('/api/games/chestard/start', { method: 'POST', requiresAuth: true });
 export const chestardRoll = (id: string) =>
   apiCall<{ roll: ChestardRoll }>(`/api/games/chestard/${encodeURIComponent(id)}/roll`, { method: 'POST', requiresAuth: true });
+
+export interface SplurgeEntry {
+  turnId: string;
+  amount: number;
+  currency: string;
+  item: string;
+}
+
+export interface SplurgeHistory {
+  entries: SplurgeEntry[];
+  nextCursor: string | null;
+}
+
+export const getSplurgeHistory = (owner: string, before: string | null) =>
+  apiCall<SplurgeHistory>('/api/games/splurge', { params: { owner, before: before ?? undefined }, requiresAuth: true });
+export const saveSplurgeEntry = (owner: string, entry: SplurgeEntry) =>
+  apiCall<{ entry: SplurgeEntry }>('/api/games/splurge', { method: 'POST', params: { owner }, body: { ...entry }, requiresAuth: true });

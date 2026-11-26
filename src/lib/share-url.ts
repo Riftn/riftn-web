@@ -2,12 +2,17 @@
 // useAffiliateShareUrl.ts), so handlers read it synchronously, inside the tap.
 
 /** Append `ref=CODE`, keeping path, query and hash. Root-relative stays relative. */
-export const withAffiliateRef = (url: string, code: string | null | undefined): string => {
+export const withAffiliateRef = (url: string, code: string | null | undefined, parameter = 'ref'): string => {
   if (!code) return url;
   try {
     const relative = url.startsWith('/') && !url.startsWith('//');
     const u = relative ? new URL(url, 'https://riftn.com') : new URL(url);
-    u.searchParams.set('ref', code);
+    if (parameter === 'live_ref') {
+      u.searchParams.delete('ref');
+      u.searchParams.delete('aff');
+      u.searchParams.delete('sub');
+    }
+    u.searchParams.set(parameter, code);
     return relative ? u.pathname + u.search + u.hash : u.toString();
   } catch {
     return url;
@@ -39,3 +44,7 @@ const isDehub = (url: string) => {
 /** `url` with the viewer's `?ref=CODE`; unchanged without one or off Riftn. */
 export const viewerShareUrl = (url: string): string =>
   viewerCode && isDehub(url) ? withAffiliateRef(url, viewerCode) : url;
+
+/** Public live shares use the viewer's code, and credit only a later signup. */
+export const viewerLiveShareUrl = (url: string, isPublic: boolean): string =>
+  isPublic && viewerCode && isDehub(url) ? withAffiliateRef(url, viewerCode, 'live_ref') : url;

@@ -2,6 +2,7 @@ import { useTranslation as _useCopy } from 'react-i18next';
 import type { StudioEdits } from '../lib/studioPaint';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import { BASE_POST_TEXT_CHARS } from '@/lib/post-text-limit';
 import { abbreviateUrl } from '@/lib/link-display';
 import { createLinkScanRegex, splitLeadingUrlBoundary } from '@/components/app/TranslatableText';
@@ -38,7 +39,9 @@ import { useAssetPicker } from '@/hooks/use-asset-picker';
 import { useAssetSearch } from '@/hooks/use-asset-ref';
 import { useAuth } from '@/contexts/AuthContext';
 import { buildAvatarUrl } from '@/lib/media-url';
-import { getEditorCaret, setEditorCaret, serializeEditor, editorTextNodes } from '@/lib/editor-text';
+import { getEditorCaret, setEditorCaret, serializeEditor, editorTextNodes, replaceEditorSuggestion, restoreFormattedEditor, serializeFormattedEditor } from '@/lib/editor-text';
+import { PostFormatButtons, postStyleShortcut } from './PostFormatButtons';
+import type { PostTextStyle } from '@/lib/post-text-format';
 import { paintCashtags, clearCashtags } from '@/lib/cashtag-highlight';
 
 interface PostContentAreaProps {
@@ -248,32 +251,25 @@ export function PostContentArea({
   // written into the editor; one that matches is our own typing echoing back,
   // and rewriting the DOM for it is what used to move the caret.
   const lastEmittedText = useRef<string | null>(null);
+  const replaceSuggestion = (next: string) => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    replaceEditorSuggestion(editor, next);
+    handleInput();
+    processLinks(true);
+  };
 
   // Mention hook - handles @mention detection and dropdown
   const mention = useMention({
     inputRef: editorRef,
-    onMentionInsert: (user, newText) => {
-      lastEmittedText.current = newText;
-      setText(newText);
-      if (editorRef.current) {
-        editorRef.current.textContent = newText;
-        processLinks(true);
-      }
-    },
+    onMentionInsert: (_user, newText) => replaceSuggestion(newText),
   });
 
   // Ticker picker — same contract as the mention hook. The query lives here
   // rather than in the dropdown because the arrow keys need the results too.
   const assetPicker = useAssetPicker({
     inputRef: editorRef,
-    onInsert: (_asset, newText) => {
-      lastEmittedText.current = newText;
-      setText(newText);
-      if (editorRef.current) {
-        editorRef.current.textContent = newText;
-        processLinks(true);
-      }
-    },
+    onInsert: (_asset, newText) => replaceSuggestion(newText),
   });
   const { data: assetResults = [], isFetching: assetsLoading } = useAssetSearch(
     assetPicker.query,
@@ -352,20 +348,21 @@ export function PostContentArea({
     const editor = e?.currentTarget || editorRef.current;
     if (!editor) return;
 
-    // Plain text with links as full addresses and line breaks kept.
     let plainText = serializeEditor(editor);
+    let next = serializeFormattedEditor(editor);
 
     // Enforce the tier's character limit on the post text, as the API counts it.
-    if (plainText.length > maxChars) {
+    if (next.length > maxChars) {
       const caret = getEditorCaret(editor);
-      plainText = plainText.slice(0, maxChars);
-      editor.textContent = plainText;
+      next = next === plainText ? plainText.slice(0, maxChars) : lastEmittedText.current ?? '';
+      restoreFormattedEditor(editor, next);
+      plainText = serializeEditor(editor);
       processLinks(true);
-      setEditorCaret(editor, Math.min(caret ?? maxChars, maxChars));
+      setEditorCaret(editor, Math.min(caret ?? plainText.length, plainText.length));
     }
 
-    lastEmittedText.current = plainText;
-    setText(plainText);
+    lastEmittedText.current = next;
+    setText(next);
     repaintCashtags();
 
     // Trigger mention detection
@@ -377,6 +374,17 @@ export function PostContentArea({
     if (linkDebounceRef.current) clearTimeout(linkDebounceRef.current);
     linkDebounceRef.current = setTimeout(() => processLinks(), 400);
   }, [editorRef, setText, processLinks, repaintCashtags, mention, assetPicker, maxChars]);
+
+  const formatSelection = (style: PostTextStyle) => {
+    const editor = editorRef.current;
+    const selection = window.getSelection();
+    if (!editor || !selection?.anchorNode || !selection.focusNode ||
+        !editor.contains(selection.anchorNode) || !editor.contains(selection.focusNode)) return;
+    editor.focus();
+    const command = { b: 'bold', i: 'italic', u: 'underline' }[style];
+    document.execCommand(command);
+    handleInput();
+  };
 
   // Handle paste - process links immediately
   const handlePaste = useCallback((e: React.ClipboardEvent) => {
@@ -448,11 +456,10 @@ export function PostContentArea({
     if (!editor) return;
     if (text === lastEmittedText.current) return;
     lastEmittedText.current = text;
-    if (serializeEditor(editor) === text) return;
     const focused = document.activeElement === editor;
-    editor.textContent = text;
+    if (serializeFormattedEditor(editor) !== text) restoreFormattedEditor(editor, text);
     processLinks(true);
-    if (focused) setEditorCaret(editor, text.length);
+    if (focused) setEditorCaret(editor, serializeEditor(editor).length);
   }, [text, editorRef, processLinks]);
 
   useEffect(() => () => {
@@ -541,27 +548,25 @@ export function PostContentArea({
           {/* Drafts button */}
           <Tooltip>
             <TooltipTrigger asChild>
-              <motion.button
-                onClick={() => setShowDrafts(true)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className={cn(
-                  "w-9 h-9 rounded-xl flex items-center justify-center transition-all relative",
-                  "bg-white/10 backdrop-blur-xl border border-white/20",
-                  "hover:bg-white/20 hover:border-white/40"
-                )}
-              >
-                <Save className="w-4 h-4 text-white" />
-                {drafts.length > 0 && (
-                  // Forced black: the theme turns everything inside a button to the
-                  // button's light ink, which left the number white on its white dot.
-                  <span className="absolute -top-1 -right-1 min-w-4 h-4 px-[3px] rounded-full bg-white !text-black text-[10px] font-bold flex items-center justify-center">
-                    {drafts.length > 9 ? '9+' : drafts.length}
-                  </span>
-                )}
-              </motion.button>
+              <Button asChild variant="ghost" size="icon" className="relative h-9 w-9 border border-white/20 bg-white/10 backdrop-blur-xl hover:border-white/40 hover:bg-white/20">
+                <motion.button
+                  type="button"
+                  aria-label={_copy('drafts.title')}
+                  onClick={() => setShowDrafts(true)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Save className="w-4 h-4" />
+                  {drafts.length > 0 && (
+                    // Keep the number readable when the button's ink changes with the theme.
+                    <span className="absolute -top-1 -right-1 min-w-4 h-4 px-[3px] rounded-full bg-white !text-black text-[10px] font-bold flex items-center justify-center">
+                      {drafts.length > 9 ? '9+' : drafts.length}
+                    </span>
+                  )}
+                </motion.button>
+              </Button>
             </TooltipTrigger>
-            <TooltipContent>{_copy("copy.f592e6a4db3c", { defaultValue: "Drafts" })}</TooltipContent>
+            <TooltipContent>{_copy('drafts.title')}</TooltipContent>
           </Tooltip>
           </div>
           )}
@@ -664,6 +669,12 @@ export function PostContentArea({
                 }
               }}
               onKeyDown={(e) => {
+                const style = postStyleShortcut(e);
+                if (style) {
+                  e.preventDefault();
+                  formatSelection(style);
+                  return;
+                }
                 // Backspace right after a link chip: 🔗 turns into the link's
                 // text; a text link is removed. One keypress each, like
                 // deleting a character.
@@ -715,6 +726,7 @@ export function PostContentArea({
               className="w-full bg-transparent text-white text-base sm:text-lg resize-none outline-none min-h-[72px] sm:min-h-[72px] empty:before:content-[attr(data-placeholder)] empty:before:text-white/50 sm:empty:before:text-white/70 empty:before:pointer-events-none empty:before:cursor-text focus:empty:before:content-['\200b'] caret-white block"
               style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', caretColor: 'white' }}
             />
+            <PostFormatButtons onFormat={formatSelection} />
         </div>
 
         {/* Media preview follows the same full-width column as the editor. */}

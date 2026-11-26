@@ -1,13 +1,13 @@
-import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
 import type { DeHubConversation } from '@/lib/api/dehub';
 
-const source = vi.hoisted(() => ({ conversations: [] as DeHubConversation[] }));
+const source = vi.hoisted(() => ({ conversations: [] as DeHubConversation[], isAuthenticated: true, phone: false }));
 
 vi.mock('@/contexts/AuthContext', async (importOriginal) => ({
-  ...await importOriginal<typeof import('@/contexts/AuthContext')>(), useAuth: () => ({ isAuthenticated: true, walletAddress: 'me' }) }));
+  ...await importOriginal<typeof import('@/contexts/AuthContext')>(), useAuth: () => ({ isAuthenticated: source.isAuthenticated, walletAddress: source.isAuthenticated ? 'me' : null }) }));
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
 // Notes translate through the i18n stack this file mocks away; not under test here.
 vi.mock('@/components/app/chat/note-translate', () => ({
@@ -36,15 +36,20 @@ vi.mock('@/lib/api/dehub/dm-socket', () => ({ emitSendMessage: vi.fn(), onConver
 vi.mock('@/lib/api/dehub/blocks', () => ({ blockUser: vi.fn() }));
 vi.mock('@/lib/dm-e2ee/keys', () => ({ prepareOutgoing: vi.fn() }));
 vi.mock('@/lib/media-url', () => ({ buildAvatarUrl: () => '', extractAvatarPath: () => '', storageImage: () => '' }));
-vi.mock('@/components/app/chat', () => ({
+vi.mock('@/components/app/chat/DirectMessageChat', () => ({
   DirectMessageChat: ({ onBack }: { onBack: () => void }) => <button onClick={onBack}>Back to messages</button>,
-  PublicChat: () => null, NewConversationModal: () => null, NewMessageSelector: () => null,
 }));
+vi.mock('@/components/app/chat/PublicChat', () => ({
+  PublicChat: ({ onBack }: { onBack: () => void }) => <button onClick={onBack}>Public room is open</button>,
+}));
+vi.mock('@/components/app/chat/NewConversationModal', () => ({ NewConversationModal: () => null }));
+vi.mock('@/components/app/chat/NewMessageSelector', () => ({ NewMessageSelector: () => null }));
 vi.mock('@/components/app/chat/NewMessageDrawer', () => ({ NewMessageDrawer: () => null }));
+vi.mock('@/components/app/MobileBottomNav', () => ({ MobileBottomNav: () => null }));
 vi.mock('@/components/app/page-kit/PageKit', () => ({
   PageIsland: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   IslandAction: () => null,
-  usePhonePill: () => false,
+  usePhonePill: () => source.phone,
 }));
 vi.mock('@/components/app/war/WarHudIcon', () => ({ BrandIcon: () => null }));
 vi.mock('@/components/app/AppState', () => ({ AppState: () => null }));
@@ -65,8 +70,14 @@ import MessagesPage from '../MessagesPage';
 
 const at = (url: string) => <MemoryRouter initialEntries={[url]}><MessagesPage /></MemoryRouter>;
 
+function CurrentSearch() {
+  return <output>{useLocation().search}</output>;
+}
+
 describe('opening a chat from a notification link', () => {
   beforeEach(() => {
+    source.isAuthenticated = true;
+    source.phone = false;
     source.conversations = [{
       id: 'conversation-1', participants: [], unreadCount: 1,
       createdAt: '2026-10-08T10:00:00Z', updatedAt: '2026-10-08T10:00:00Z',
@@ -84,5 +95,21 @@ describe('opening a chat from a notification link', () => {
     render(at('/app/messages?conversation=someone-else'));
     expect(screen.queryByRole('button', { name: 'Back to messages' })).toBeNull();
     expect(screen.getByRole('button', { name: /Aaron/ })).toBeInTheDocument();
+  });
+
+  it('keeps a Public Chat deep link reloadable and can close it to the inbox', async () => {
+    source.isAuthenticated = false;
+    source.phone = true;
+    render(
+      <MemoryRouter initialEntries={['/chat?chat=public']}>
+        <MessagesPage fullscreen />
+        <CurrentSearch />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText('?chat=public')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Public room is open' }));
+    expect(screen.queryByRole('button', { name: 'Public room is open' })).toBeNull();
+    expect(screen.queryByText('?chat=public')).toBeNull();
   });
 });

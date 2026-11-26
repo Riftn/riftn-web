@@ -1037,6 +1037,7 @@ export default function FeaturesPage() {
     onFeaturesSortScroll();
   }, [onFeaturesCatScroll, onFeaturesSortScroll]);
   const [searchInput, setSearchInput] = useSurfaceDraft("src/pages/app/FeaturesPage.tsx:searchInput", '');
+  const searchLabel = t('features.promptSearch', 'Search prompts…');
   const search = useDebouncedValue(searchInput, 300);
   const [composerFocus, setComposerFocus] = useState(0);
   const [initialCategory, setInitialCategory] = useState<FeatureCategory | undefined>(undefined);
@@ -1085,7 +1086,7 @@ export default function FeaturesPage() {
 
   const { data: featuresData, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useFeatureRequests(sort, listCategory, search, authorWallet);
   const allFeatures = useMemo(() => featuresData?.pages.flat() ?? [], [featuresData]);
-  const { data: shippedFeatures, isLoading: isLoadingShipped, isError: isErrorShipped, refetch: refetchShipped } = useShippedFeatures(authorWallet);
+  const { data: shippedFeatures, isLoading: isLoadingShipped, isLoadingError: isShippedLoadError, refetch: refetchShipped } = useShippedFeatures(authorWallet);
   const { data: inProgressFeatures, isLoading: isLoadingInProgress, isError: isErrorInProgress, refetch: refetchInProgress } = useInProgressFeatures(authorWallet);
   const { data: notFeasibleFeatures, isLoading: isLoadingNotFeasible, isError: isErrorNotFeasible, refetch: refetchNotFeasible } = useNotFeasibleFeatures(authorWallet);
 
@@ -1161,15 +1162,9 @@ export default function FeaturesPage() {
   );
   // Shipped holds nearly the whole board. Mounting every card at once built
   // ~20k nodes and froze the tab switch, so it reveals a page at a time like the
-  // Prompts list does.
+  // Prompts list does. Linked requests are pinned separately above these rows.
   const [shippedLimit, setShippedLimit] = useState(SHIPPED_PAGE_SIZE);
   useEffect(() => setShippedLimit(SHIPPED_PAGE_SIZE), [category, search, authorWallet]);
-  const shippedDeepLink = searchParams.get('feature');
-  useEffect(() => {
-    if (!shippedDeepLink) return;
-    const index = visibleShipped.findIndex((feature) => feature.id === shippedDeepLink);
-    if (index >= 0) setShippedLimit((limit) => Math.max(limit, index + 1));
-  }, [shippedDeepLink, visibleShipped]);
   const renderedShipped = useMemo(() => visibleShipped.slice(0, shippedLimit), [visibleShipped, shippedLimit]);
   const showMoreShipped = useCallback(() => setShippedLimit((limit) => limit + SHIPPED_PAGE_SIZE), []);
 
@@ -1182,15 +1177,6 @@ export default function FeaturesPage() {
       document.getElementById(`feature-${focusedId}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   }, [focusedId, focusedCommentId]);
-
-  useEffect(() => {
-    const featureId = searchParams.get('feature');
-    if (activeTab !== 'shipped' || !featureId || !shippedFeatures?.some((feature) => feature.id === featureId)) return;
-
-    requestAnimationFrame(() => {
-      document.getElementById(`feature-${featureId}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-  }, [activeTab, searchParams, shippedFeatures]);
 
   const { data: userVotes } = useUserVotes();
   const voteMutation = useVoteFeatureRequest();
@@ -1254,12 +1240,14 @@ export default function FeaturesPage() {
         {/* Search */}
         <div className="mb-3 flex items-center gap-2">
           <div className="relative min-w-0 flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+            <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder={t('features.promptSearch', 'Search prompts…')}
+              data-search-surface
+              aria-label={searchLabel}
+              placeholder={searchLabel}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="pl-10 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 rounded-xl"
+              className="block rounded-xl py-0 pl-10 text-white"
             />
           </div>
           {wallet && (
@@ -1560,7 +1548,7 @@ export default function FeaturesPage() {
         <>
           {isLoadingShipped ? (
             <FeatureSkeletons />
-          ) : isErrorShipped ? (
+          ) : isShippedLoadError ? (
             <RequestLoadError retry={() => refetchShipped()} />
           ) : visibleShipped.length > 0 ? (
             <div className="space-y-3">

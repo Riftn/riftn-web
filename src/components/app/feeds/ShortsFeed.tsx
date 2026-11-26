@@ -310,8 +310,7 @@ export function ShortsFeed({ showFilters = false, isRefreshing = false, refreshK
   const [selectedCategory, setSelectedCategory] = usePersistedFeedFilter<string | null>('shorts', 'category', null);
   // Phones mix tall and wide videos in brick rows.
   const isPhone = useIsMobile();
-  const [viewerOpen, setViewerOpen] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [viewerSelection, setViewerSelection] = useState<{ id: string; live: ShortVideo[] } | null>(null);
   const loaderRef = useRef<HTMLDivElement>(null);
 
   // Filter chips arm a loader on click so a sort switch never leaves the old
@@ -472,9 +471,6 @@ export function ShortsFeed({ showFilters = false, isRefreshing = false, refreshK
     () => liveCandidates.filter((s) => !s.streamId || !verticalOff.has(s.streamId)).slice(0, 6),
     [liveCandidates, verticalOff],
   );
-  // The live slides the open viewer swipes through. Taken when it opens and
-  // held, so a refresh of who is live cannot shift the slides under the viewer.
-  const [viewerLive, setViewerLive] = useState<ShortVideo[]>([]);
   // Apply date filter on raw NFTs, then sort and map to ShortVideo array
   const allShorts = useMemo(() => {
     const dateFiltered = isFollowingMode ? allRawNFTs : filterByDate(allRawNFTs, selectedUploadDate.value);
@@ -524,18 +520,17 @@ export function ShortsFeed({ showFilters = false, isRefreshing = false, refreshK
     [isPhone, shorts, hasNextPage],
   );
 
-  // What the swipe viewer goes through: the shorts, with a live stream every
-  // few slides while someone is on air (none while filters narrow the grid).
-  const viewerShorts = useMemo(() => interleaveLive(shorts, viewerLive), [shorts, viewerLive]);
+  // Keep the live slides from the moment the viewer opens. The shorts can
+  // still update as more pages load or the feed refreshes.
+  const viewerShorts = useMemo(() => viewerSelection ? interleaveLive(shorts, viewerSelection.live) : shorts, [shorts, viewerSelection]);
+  const selectedIndex = viewerSelection ? viewerShorts.findIndex(item => String(item.id) === viewerSelection.id) : -1;
+  const viewerOpen = selectedIndex >= 0;
 
   /** Open the viewer on a slide by id: a short's id, or `live-<streamId>`. */
   const openViewerAt = useCallback((id: string): boolean => {
     const live = hasActiveFilters ? [] : liveShorts.map(liveToShort);
-    const index = interleaveLive(shorts, live).findIndex(item => String(item.id) === id);
-    if (index < 0) return false;
-    setViewerLive(live);
-    setSelectedIndex(index);
-    setViewerOpen(true);
+    if (!shorts.some(item => String(item.id) === id) && !live.some(item => String(item.id) === id)) return false;
+    setViewerSelection({ id, live });
     return true;
   }, [hasActiveFilters, liveShorts, shorts]);
 
@@ -569,10 +564,6 @@ export function ShortsFeed({ showFilters = false, isRefreshing = false, refreshK
     observer.observe(loaderRef.current);
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  const handleShortClick = (index: number) => {
-    openViewerAt(String(shorts[index].id));
-  };
 
   const isLoading = isApiLoading || isRefreshing;
 
@@ -687,8 +678,8 @@ export function ShortsFeed({ showFilters = false, isRefreshing = false, refreshK
                   onOpen={() => openViewerAt(`live-${stream.id}`)}
                 />
               ))}
-              {gridShorts.map((short, index) => (
-                <ShortTile key={short.id} short={short} viewerOpen={viewerOpen} onOpen={() => handleShortClick(index)} />
+              {gridShorts.map((short) => (
+                <ShortTile key={short.id} short={short} viewerOpen={viewerOpen} onOpen={() => openViewerAt(String(short.id))} />
               ))}
             </div>
             )}
@@ -714,11 +705,12 @@ export function ShortsFeed({ showFilters = false, isRefreshing = false, refreshK
           animation. */}
       <Suspense fallback={null}>
         <AnimatePresence>
-          {viewerOpen && (
+          {viewerSelection && viewerOpen && (
             <ShortsViewer
+              key={viewerSelection.id}
               shorts={viewerShorts}
               initialIndex={selectedIndex}
-              onClose={() => setViewerOpen(false)}
+              onClose={() => setViewerSelection(null)}
               onLoadMore={() => fetchNextPage()}
               hasMore={hasNextPage ?? false}
               isLoadingMore={isFetchingNextPage}

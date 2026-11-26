@@ -35,6 +35,12 @@ interface OffDocumentPlayer {
 }
 
 const offDocument = new Map<HTMLMediaElement, OffDocumentPlayer>();
+let foregroundPlaybackRoot: HTMLElement | null = null;
+
+function pauseOutsideForeground(media: HTMLMediaElement, anchor: Node | null = media): void {
+  if (!foregroundPlaybackRoot || (anchor && foregroundPlaybackRoot.contains(anchor)) || media.paused) return;
+  media.pause();
+}
 
 /**
  * Advertise `el` as belonging to whichever page contains `anchor`. Returns the
@@ -47,8 +53,26 @@ export function registerOffDocumentMedia(
   key?: string,
 ): () => void {
   offDocument.set(el, { anchor, key });
+  const onPlay = () => pauseOutsideForeground(el, anchor());
+  el.addEventListener('play', onPlay);
   return () => {
+    el.removeEventListener('play', onPlay);
     offDocument.delete(el);
+  };
+}
+
+/** Pause media behind a foreground viewer, including delayed autoplay. */
+export function pauseMediaOutside(root: HTMLElement): () => void {
+  foregroundPlaybackRoot = root;
+  const onPlay = (event: Event) => {
+    if (event.target instanceof HTMLMediaElement) pauseOutsideForeground(event.target);
+  };
+  document.addEventListener('play', onPlay, true);
+  document.querySelectorAll<HTMLMediaElement>('audio, video').forEach(el => pauseOutsideForeground(el));
+  offDocument.forEach(({ anchor }, el) => pauseOutsideForeground(el, anchor()));
+  return () => {
+    document.removeEventListener('play', onPlay, true);
+    if (foregroundPlaybackRoot === root) foregroundPlaybackRoot = null;
   };
 }
 

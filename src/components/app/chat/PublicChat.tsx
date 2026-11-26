@@ -30,6 +30,9 @@ import { useHiddenLines } from '@/lib/public-chat-hidden';
 import { RoomSettingsModal } from './RoomSettingsModal';
 import { useLiveChatRooms, useLiveChatMessages, useLiveChatRoomDetails, useLiveChatPresence, type SupabaseLiveChatMessage } from '@/hooks/use-livechat';
 import { getMediaUrl, banLiveChatUser, unbanLiveChatUser, uploadChatImage, uploadLiveChatVoice, pinLiveChatMessage, unpinLiveChatMessage, type LiveChatRoom } from '@/lib/api/dehub';
+import { getNFTInfo } from '@/lib/api/dehub/feed';
+import { canDraftPublicLivePost } from '@/lib/live-public-chat-share';
+import { PUBLIC_CHAT_PAGE_SIZE } from '@/lib/api/dehub/livechat';
 import { Pin, X as XIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { buildAvatarUrl } from '@/lib/media-url';
@@ -68,6 +71,8 @@ import Plus from '@/components/ui/cut-icons/add';
 import { CHAT_MENU_CONTENT } from './ChatOptionsMenu';
 import { cn } from '@/lib/utils';
 import { formatCount } from '@/lib/format-count';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { dehubLinkFor } from '@/lib/dehub-links';
 
 /** A row in the phone + menu, same as the Messages list menu's rows. */
 const PC_ROW = 'flex cursor-pointer items-center gap-3 rounded-xl px-2.5 py-2 text-[14px] text-zinc-100 outline-none focus:bg-white/10 data-[highlighted]:bg-white/10 data-[disabled]:opacity-40 [&>svg]:h-[17px] [&>svg]:w-[17px] [&>svg]:text-zinc-400';
@@ -148,7 +153,6 @@ const ROOM_MANAGEMENT_ENABLED = false;
  * as the reader scrolls up, until the start of the room. Signed out, one page
  * past the opening one, then the sign-in wall.
  */
-const CHAT_PAGE_SIZE = 20;
 /** How close to the top (px) the next older page is fetched. */
 const LOAD_OLDER_AT = 240;
 
@@ -164,6 +168,32 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
   const bottomRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { isAuthenticated, walletAddress, openLoginModal } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const shareTokenId = location.state?.shareLiveTokenId;
+  const pendingShareId = !embedded && isAuthenticated && typeof shareTokenId === 'string' && /^[1-9]\d*$/.test(shareTokenId)
+    ? shareTokenId : undefined;
+  const [confirmedShare, setConfirmedShare] = useState<{ key: string; account: string | null | undefined; url: string } | null>(null);
+  const sharedLiveUrl = pendingShareId && confirmedShare?.key === location.key && confirmedShare.account === walletAddress
+    ? confirmedShare.url : undefined;
+  const clearSharedLive = useCallback(() => {
+    navigate({ pathname: location.pathname, search: location.search }, { replace: true, preventScrollReset: true, state: null });
+  }, [location.pathname, location.search, navigate]);
+  useEffect(() => {
+    if (!pendingShareId) return;
+    let cancelled = false;
+    const unavailable = () => {
+      if (cancelled) return;
+      toast.error(t('profile.replyThread.postUnavailable'));
+      clearSharedLive();
+    };
+    void getNFTInfo(pendingShareId).then(post => {
+      if (cancelled) return;
+      if (!canDraftPublicLivePost(post, pendingShareId)) { unavailable(); return; }
+      setConfirmedShare({ key: location.key, account: walletAddress, url: dehubLinkFor.post(pendingShareId) });
+    }, unavailable);
+    return () => { cancelled = true; };
+  }, [pendingShareId, location.key, walletAddress, clearSharedLive, t]);
 
   // Signed out, the room reads but does not write. Anything that would write
   // opens the sign-in sheet, and signing in lands back here in this room.
@@ -206,18 +236,22 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
   // link names.
   useEffect(() => {
     if (!rooms.length) return;
+    if (pendingShareId) {
+      setSelectedRoomId(rooms[0].id);
+      return;
+    }
     const linked = peekPendingChatLink('public')?.target;
     const linkedRoom = linked?.kind === 'public' && linked.roomId && rooms.some((r) => r.id === linked.roomId) ? linked.roomId : null;
     if (linkedRoom && linkedRoom !== selectedRoomId) setSelectedRoomId(linkedRoom);
     else if (!selectedRoomId) setSelectedRoomId(rooms[0].id);
-  }, [rooms, selectedRoomId]);
+  }, [rooms, selectedRoomId, pendingShareId]);
 
   const {
-    messages: apiMessages, isLoading: messagesLoading, isBanned,
+    messages: apiMessages, isLoading: messagesLoading, historyError, isBanned,
     send, retrySend, discardSend, addReaction, removeReaction, editMessage, deleteMessage, refetch,
     hasOlder, loadingOlder, loadOlder, signInWall,
     hasNewer, jumpTo, loadNewer, backToLatest,
-  } = useLiveChatMessages(selectedRoomId, { pageSize: CHAT_PAGE_SIZE });
+  } = useLiveChatMessages(selectedRoomId, { pageSize: PUBLIC_CHAT_PAGE_SIZE });
   const search = useChatSearch(selectedRoomId, isSearchOpen && isAuthenticated, searchText, searchPerson?.address ?? null);
 
   // Fetch full room details
@@ -462,7 +496,7 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
   const followLatest = useRef(true);
   // Position initial history immediately, and follow new rows only while the
   // reader is at the tail. Scroll this list without moving its ancestors.
-  useEffect(() => {
+  useLayoutEffect(() => {
     const container = scrollContainerRef.current;
     if (container && filteredMessages.length > 0) {
       if (followedRoom.current !== selectedRoomId) followLatest.current = true;
@@ -476,7 +510,7 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
 
   // Decide once per room where it opens: on the "Unread messages" line, or at
   // the newest line as before.
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!selectedRoomId || readDecidedRoom.current === selectedRoomId) return;
     if (messagesLoading || !messages.length || !readSpot.ready) return;
     const decide = (anchor: UnreadAnchor | null) => {
@@ -735,7 +769,7 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
 
   // Merge list-level room data with the richer single-room details
   const enrichedRoom = roomDetails || selectedRoom;
-  const isLoading = roomsLoading || (messagesLoading && apiMessages.length === 0);
+  const isLoading = (!selectedRoomId || messagesLoading) && apiMessages.length === 0;
   const roomName = t('publicChat.title');
   const roomDescription = t('publicChat.allThingsDeHub');
 
@@ -1010,6 +1044,8 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
       <div className="relative flex-1">
         <div
           ref={scrollContainerRef}
+          data-public-chat-ready={isAuthenticated || roomsError || (!roomsLoading && (!rooms.length || apiMessages.length > 0))
+            ? '' : undefined}
           onScroll={(event) => {
             const el = event.currentTarget;
             const fromEnd = el.scrollHeight - el.clientHeight - el.scrollTop;
@@ -1023,7 +1059,7 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
           onPointerDown={dismissKeyboard}
           className={`absolute inset-0 chat-text-zone overflow-y-auto py-2 ${showSearchList ? 'invisible' : ''}`}
         >
-          {roomsError ? (
+          {roomsError && rooms.length === 0 ? (
             <AppState
               icon="messages"
               title={_copy("copy.a802859daeb1", { defaultValue: "Chat could not load" })}
@@ -1047,6 +1083,15 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
                 </div>
               ))}
             </>
+          ) : historyError && apiMessages.length === 0 ? (
+            <AppState
+              icon="messages"
+              title={_copy("copy.a802859daeb1", { defaultValue: "Chat could not load" })}
+              kind="error"
+              size="section"
+              className="h-full"
+              primaryAction={{ label: _copy("copy.d8b8392e2c54", { defaultValue: "Try again" }), onClick: () => void refetch(), icon: <RefreshCw /> }}
+            />
           ) : messages.length === 0 ? (
             <AppState icon="messages" title={_copy("copy.f42e0f66017d", { defaultValue: "No messages yet" })} description={_copy("copy.39e31bf6b245", { defaultValue: "Be the first to say something." })} size="section" className="h-full" />
           ) : (
@@ -1137,6 +1182,9 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
       
       {/* Input Area */}
       <div className={isSearchOpen ? 'hidden' : 'relative'}>
+        {pendingShareId && (!sharedLiveUrl || !selectedRoomId) && (
+          <p role="status" className="px-4 py-2 text-sm text-zinc-400">{t('common.loading')}</p>
+        )}
         <ChatInput
         voiceMaxDuration={29}
           onSendMessage={handleSendMessage}
@@ -1145,6 +1193,8 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
           replyTo={replyTo}
           onCancelReply={handleCancelReply}
           draftKey={selectedRoomId ? `room:${selectedRoomId}` : null}
+          incomingLink={selectedRoomId && selectedRoomId === rooms[0]?.id ? sharedLiveUrl : undefined}
+          onIncomingLinkApplied={clearSharedLive}
         />
       </div>
 

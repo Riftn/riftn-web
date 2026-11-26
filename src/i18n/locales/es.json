@@ -57,7 +57,22 @@
     "cancel": "Cancelar",
     "getKey": "Obtener una clave de {{name}}",
     "showLess": "Mostrar solo mis claves",
-    "addAnother": "Agregar otro proveedor"
+    "addAnother": "Agregar otro proveedor",
+    "providerDescriptions": {
+      "openai": "Builder (modelos GPT)",
+      "fal": "Herramientas de imagen, vídeo, 3D y fotografía",
+      "kie": "Imágenes y vídeo",
+      "replicate": "Imágenes y vídeo",
+      "xai": "Chat e imágenes con Grok",
+      "elevenlabs": "Voz, doblaje, música y efectos de sonido",
+      "gemini": "Traducción, ayuda con la escritura y resúmenes",
+      "venice": "Chat con el asistente",
+      "perplexity": "Búsqueda web con el asistente",
+      "deepgram": "Transcripciones y subtítulos en directo",
+      "openrouter": "Cientos de modelos de chat y texto con una sola clave",
+      "groq": "Chat y texto rápidos",
+      "mistral": "Chat y texto"
+    }
   },
   "resetWallet": {
     "mismatch": "Las contraseñas no coinciden",
@@ -21479,6 +21494,11 @@
     "followFailed": "No se pudo seguir. Inténtalo de nuevo."
   },
   "appTokens": {
+    "reviewTransfer": "Revisar transferencia",
+    "transferComplete": "Transferencia completada",
+    "balanceAfterSend": "Después del envío: {{amount}} {{symbol}}",
+    "addNote": "Añadir una nota",
+    "minimumTransfer": "La transferencia mínima es de 1 RIFT.",
     "kindStaked": "Depositado",
     "kindUnstaked": "Retirado",
     "stakedBalance": "{{amount}} depositados",
@@ -21664,6 +21684,12 @@
     "enter": "Entra a la mazmorra"
   },
   "tokenLaunch": {
+    "tickerInfo": "Información",
+    "tickerContract": "Dirección del contrato",
+    "tickerBuy": "Comprar",
+    "referencePrice": "Precio de referencia en la app",
+    "contractPending": "Por confirmar",
+    "earnOnly": "Por ahora, solo puedes ganar tokens usando la app.",
     "riftTitle": "Lanzamiento de $RIFT en cadena",
     "riftStatus": "$RIFT es la moneda interna de Riftn. Ya se puede usar en Riftn. El token en cadena aún no se ha lanzado y no tiene dirección de contrato ni cotización oficial. Inscríbete para recibir un correo cuando se lance.",
     "riftSeoDescription": "$RIFT es la moneda interna de Riftn. Ya se puede usar en Riftn. El token en cadena aún no se ha lanzado y no tiene dirección de contrato ni cotización oficial.",
@@ -23304,6 +23330,7 @@
       "sendButton": "Enviar",
       "sendMissing": "Elige a quién enviar y cuántas.",
       "sent": "Enviaste {{coins}} SillyCoins a {{name}}",
+      "transferNotifications": "Notificaciones de transferencias",
       "sendNote": "Reciben las monedas al instante. Las SillyCoins se quedan en el juego: sin billetera, sin token.",
       "fromLine": "De {{name}}",
       "toLine": "Para {{name}}",
@@ -23389,6 +23416,26 @@
       "seoDescription": "Por turnos con un amigo, decid por qué estáis agradecidos. Sin repeticiones, y quien se quede sin ideas antes de que acabe su turno pierde. Gratis en Riftn.",
       "intro": "Por turnos, di por qué estás agradecido. Sin repeticiones. Si pierdes tu turno, gana la otra persona.",
       "cardBlurb": "Por turnos, di por qué estás agradecido. Sin repeticiones. Si pierdes tu turno, gana la otra persona."
+    },
+    "splurge": {
+      "title": "Splurge",
+      "cardBlurb": "Recibe un presupuesto al azar e imagina qué comprar en modo moderno o CRT.",
+      "arcade": "Arcade",
+      "intro": "Un presupuesto al azar. ¿En qué lo gastarías? Todos los importes son ficticios.",
+      "modern": "Moderno",
+      "crt": "CRT",
+      "budget": "Tu presupuesto",
+      "prompt": "¿Qué comprarías?",
+      "placeholder": "Un viaje en tren por Europa",
+      "spend": "Gastar",
+      "retry": "Reintentar",
+      "saveError": "No se pudo guardar este turno. Reintenta para conservarlo en tu registro.",
+      "history": "Registro de gastos",
+      "loading": "Cargando tu registro…",
+      "historyError": "No se pudo cargar tu registro.",
+      "empty": "Tus compras aparecerán aquí.",
+      "more": "Cargar entradas anteriores",
+      "guest": "Los turnos de invitado duran esta visita. Inicia sesión para guardar los próximos en tu cuenta."
     },
     "chestard": {
       "title": "Chestard",

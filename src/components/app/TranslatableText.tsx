@@ -33,6 +33,7 @@ import { setFilterValue } from '@/hooks/use-persisted-feed-filter';
 import { parseDehubLink, ownSitePath } from '@/lib/dehub-links';
 import { expandEmojiTokens } from '@/components/app/emoji/EmojiText';
 import { applyBold } from '@/lib/bold-markup';
+import { postTextRuns } from '@/lib/post-text-format';
 
 export { LANGUAGE_NAMES };
 import { cn } from '@/lib/utils';
@@ -173,6 +174,20 @@ const PROFILE_HANDLE_SOURCE = '[a-zA-Z0-9_](?:[a-zA-Z0-9_.-]*[a-zA-Z0-9_])?';
  * Renders text with URLs replaced by clickable link emojis and @mentions as profile links
  */
 export function renderTextWithLinks(text: string, opts?: { flagged?: boolean }): ReactNode[] {
+  const runs = postTextRuns(text);
+  if (runs.length === 1 && !runs[0].styles.length) return renderTextRunWithLinks(text, opts);
+  return runs.map((run, index) => (
+    <span key={index} style={{
+      fontWeight: run.styles.includes('b') ? 'bolder' : undefined,
+      fontStyle: run.styles.includes('i') ? 'italic' : undefined,
+      textDecoration: run.styles.includes('u') ? 'underline' : undefined,
+    }}>
+      {renderTextRunWithLinks(run.text, opts)}
+    </span>
+  ));
+}
+
+function renderTextRunWithLinks(text: string, opts?: { flagged?: boolean }): ReactNode[] {
   const flaggedLinkProps = opts?.flagged
     ? {
         className:
@@ -755,15 +770,15 @@ const translationCooldown = new TranslationCooldown();
  * `isPublic` marks text anyone can read — a feed post, a bio. Only that may go
  * to a free model tier that trains on what it is sent; a DM never does.
  */
-function requestTranslation(text: string, targetLang: string, isPublic = false): Promise<TranslateResult> {
-  const key = `${text}-${targetLang}-${isPublic ? 'p' : 'x'}`;
+function requestTranslation(text: string, targetLang: string, isPublic: boolean, isChat: boolean): Promise<TranslateResult> {
+  const key = `${text}-${targetLang}-${isPublic ? 'p' : 'x'}${isChat ? '-chat' : ''}`;
   const existing = inFlightRequests.get(key);
   if (existing) return existing;
 
   const request = (async () => {
     translationCooldown.assertReady(key);
     const { data, error } = await supabase.functions.invoke('translate-text', {
-      body: isPublic ? { text, targetLang, public: true } : { text, targetLang },
+      body: { text, targetLang, ...(isPublic && { public: true }), ...(isChat && { purpose: 'chat' }) },
     });
     if (error) {
       await translationCooldown.observe(key, error);
@@ -1013,7 +1028,7 @@ export function useTranslation(
     const generation = generationRef.current;
     const current = () => generation === generationRef.current;
     const targetLang = userLang;
-    const cacheKey = `${text}-${targetLang}`;
+    const cacheKey = `${text}-${targetLang}${isChat ? (publicContent ? '-chat-public' : '-chat-private') : ''}`;
     const languageCode = (lang: string) => {
       const code = lang.toLowerCase().replace(/_/g, '-');
       return /^zh-(hant|tw|hk|mo)(-|$)/.test(code) ? 'zh-tw' : code.split('-')[0];
@@ -1063,7 +1078,7 @@ export function useTranslation(
     setError(null);
 
     try {
-      const data = await requestTranslation(text, targetLang, publicContent);
+      const data = await requestTranslation(text, targetLang, publicContent, isChat);
 
       if (!data.translatedText) {
         if (!current()) return;
