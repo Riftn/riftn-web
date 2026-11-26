@@ -23334,6 +23334,7 @@
       "sendButton": "Envoyer",
       "sendMissing": "Choisissez à qui envoyer et combien.",
       "sent": "{{coins}} SillyCoins envoyées à {{name}}",
+      "transferNotifications": "Notifications de transfert",
       "sendNote": "Les pièces arrivent tout de suite. Les SillyCoins restent dans le jeu : pas de portefeuille, pas de jeton.",
       "fromLine": "De {{name}}",
       "toLine": "À {{name}}",

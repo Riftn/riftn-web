@@ -23377,6 +23377,7 @@
       "sendButton": "إرسال",
       "sendMissing": "اختر لمن ترسل وكم عملة.",
       "sent": "تم إرسال {{coins}} من SillyCoins إلى {{name}}",
+      "transferNotifications": "إشعارات التحويل",
       "sendNote": "تصلهم العملات فورًا. تبقى SillyCoins داخل اللعبة: بلا محفظة وبلا رمز مميز.",
       "fromLine": "من {{name}}",
       "toLine": "إلى {{name}}",
