@@ -21668,6 +21668,12 @@
     "enter": "Entrer dans le donjon"
   },
   "tokenLaunch": {
+    "tickerInfo": "Infos",
+    "tickerContract": "Adresse du contrat",
+    "tickerBuy": "Acheter",
+    "referencePrice": "Prix de référence dans l’app",
+    "contractPending": "À confirmer",
+    "earnOnly": "Pour l’instant, vous pouvez uniquement gagner des jetons en utilisant l’application.",
     "riftTitle": "Lancement de $RIFT sur chaîne",
     "riftStatus": "$RIFT est la monnaie interne de Riftn. Vous pouvez déjà l’utiliser dans Riftn. Le jeton sur chaîne reste à lancer et ne dispose d’aucune adresse de contrat ni cotation officielle. Inscrivez-vous pour recevoir un e-mail au lancement.",
     "riftSeoDescription": "$RIFT est la monnaie interne de Riftn. Vous pouvez déjà l’utiliser dans Riftn. Le jeton sur chaîne reste à lancer et ne dispose d’aucune adresse de contrat ni cotation officielle.",
