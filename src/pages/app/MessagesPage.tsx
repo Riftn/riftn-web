@@ -6,6 +6,7 @@ import { useSurfaceDraft } from '@/hooks/use-surface-draft';
 import { AppState } from '@/components/app/AppState';
 import { IslandAction, PageIsland, usePhonePill } from '@/components/app/page-kit/PageKit';
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { PULL_REFRESH_THRESHOLD } from '@/lib/pill-pull-motion';
 import { DhbCoin } from '@/components/app/DhbAmount';
 import { lazy, Suspense, useContext, useState, useEffect, useRef, useCallback, useMemo, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react';
@@ -336,8 +337,10 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const { t } = useTranslation();
   const location = useLocation();
   const [selectedConversation, setSelectedConversation] = useState<DeHubConversation | null>(null);
-  // Resolve public links in the navigation effect below, after mount.
-  const [showPublicChat, setShowPublicChat] = useState(false);
+  // A direct public link can mount its room in the first render.
+  const [showPublicChat, setShowPublicChat] = useState(() =>
+    fullscreen && new URLSearchParams(location.search).get('chat') === 'public',
+  );
   // A group, channel or community chat open in place (same chat as the
   // community page's Chat tab).
   const [selectedRoom, setSelectedRoom] = useState<Community | null>(null);
@@ -380,6 +383,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const isPageActive = useContext(CachedPageActiveContext);
   const [searchQuery, setSearchQuery] = useSurfaceDraft("pages/app/MessagesPage.tsx:searchQuery", '');
   const phonePill = usePhonePill();
+  const isSingleColumn = useIsMobile();
   // Both search-backed queries key on the query string — passing the raw
   // input fired 2 network requests per KEYSTROKE (each prefix a fresh cache
   // key). Debounce to one request pair per pause in typing.
@@ -1047,6 +1051,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const navigate = useNavigate();
   const chatEntryRef = useRef(false);
   const chatParamPresent = new URLSearchParams(location.search).get('chat') === '1';
+  const chatParamWasPresent = useRef(chatParamPresent);
   const shareLiveTokenId = location.state?.shareLiveTokenId;
 
   useEffect(() => {
@@ -1068,7 +1073,9 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // thread instead of the list.
   useEffect(() => {
     if (!isMessagesRouteActive) return;
-    if (!chatParamPresent && chatEntryRef.current) {
+    const poppedChatEntry = chatParamWasPresent.current && !chatParamPresent;
+    chatParamWasPresent.current = chatParamPresent;
+    if (poppedChatEntry && chatEntryRef.current) {
       chatEntryRef.current = false;
       setSelectedConversation(null);
       setShowPublicChat(false);
@@ -2011,7 +2018,12 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
         style={shellKeyboardStyle}
         chatOpen={chatOpen}
         chat={settingsPane ?? publicChatPane ?? roomPane ?? dmPane}
-        list={<>{chatSeo}{listColumn}{dialogs}{phonePill && !chatOpen && !picking && <Suspense fallback={null}><MobileBottomNav /></Suspense>}</>}
+        list={<>
+          {chatSeo}
+          {!(guest && showPublicChat && isSingleColumn) && listColumn}
+          {dialogs}
+          {phonePill && !chatOpen && !picking && <Suspense fallback={null}><MobileBottomNav /></Suspense>}
+        </>}
       />
     );
   }

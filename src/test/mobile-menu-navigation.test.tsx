@@ -97,7 +97,7 @@ describe('mobile menu dismissal', () => {
     await mount();
     expect(screen.getByText('nav.profile')).toBeTruthy();
     expect(screen.queryByText('nav.dao')).toBeNull();
-    fireEvent.click(screen.getByText('nav.groups.riftn'));
+    fireEvent.click(await screen.findByRole('tab', { name: 'nav.groups.riftn' }));
     expect(screen.getByText('nav.dao')).toBeTruthy();
     expect(screen.queryByText('nav.profile')).toBeNull();
   });

@@ -10,7 +10,6 @@
  */
 
 import { translateCopy as _translateCopy } from '@/i18n/copy';
-import { payDhb } from '@/lib/dhb-payment';
 import { callRpc } from '@/hooks/use-community-admin';
 import type { Community } from '@/hooks/use-communities';
 
@@ -85,6 +84,8 @@ export async function payCommunityEntry(community: Community & KindColumns, wall
   if (before?.status === 'paid' || before?.status === 'free') return before;
   const owner = community.creator_wallet_address;
   if (!owner) throw new Error(_translateCopy('communities.entry.noOwner', { defaultValue: 'This channel has no owner wallet to pay.' }));
+  // Only a paid join needs the wallet and chain clients. Listing chats is a read.
+  const { payDhb } = await import('@/lib/dhb-payment');
   const payment = await payDhb(price, owner, {
     context: _translateCopy('communities.entry.context', { defaultValue: 'Entry to {{name}}', name: community.name }),
     expectedSigner: null,
