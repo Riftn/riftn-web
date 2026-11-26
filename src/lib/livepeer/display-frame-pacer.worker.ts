@@ -1,4 +1,6 @@
 const FRAME_GAP_MS = 200;
+// Leave room for delivery jitter so a repeat stays behind live capture.
+const REPEAT_HEADROOM_MS = 50;
 
 type FrameMessage =
   | {
@@ -22,6 +24,8 @@ async function forwardFrames(readable: ReadableStream<VideoFrame>, writable: Wri
   const writer = writable.getWriter();
   let lastSentAt = 0;
   let lastTimestamp = -Infinity;
+  let lastCaptureAt = 0;
+  let lastCaptureTimestamp = 0;
   let writing = false;
   let failed = false;
 
@@ -40,8 +44,9 @@ async function forwardFrames(readable: ReadableStream<VideoFrame>, writable: Wri
 
   const repeat = setInterval(() => {
     const now = performance.now();
-    if (!lastFrame || writing || failed || now - lastSentAt < FRAME_GAP_MS) return;
-    send(new VideoFrame(lastFrame, { timestamp: lastTimestamp + Math.round((now - lastSentAt) * 1000) }));
+    if (!lastFrame || writing || failed || now - Math.max(lastSentAt, lastCaptureAt) < FRAME_GAP_MS) return;
+    const timestamp = lastCaptureTimestamp + Math.round((now - lastCaptureAt - REPEAT_HEADROOM_MS) * 1000);
+    if (timestamp > lastTimestamp) send(new VideoFrame(lastFrame, { timestamp }));
   }, FRAME_GAP_MS);
 
   try {
@@ -54,14 +59,15 @@ async function forwardFrames(readable: ReadableStream<VideoFrame>, writable: Wri
       }
       clearFrame();
       lastFrame = frame.clone();
-      if (frame.timestamp > lastTimestamp) {
-        send(frame);
-      } else {
-        // A frame from the resumed capture can predate the last repeat.
-        const retimed = new VideoFrame(frame, { timestamp: lastTimestamp + 1 });
+      lastCaptureAt = performance.now();
+      lastCaptureTimestamp = frame.timestamp;
+      if (frame.timestamp <= lastTimestamp) {
+        // A repeat can cover a late frame. Stop repeating while capture is
+        // active again and let the next frames keep their original timing.
         frame.close();
-        send(retimed);
+        continue;
       }
+      send(frame);
     }
   } finally {
     clearInterval(repeat);
