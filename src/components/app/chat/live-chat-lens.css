@@ -40,6 +40,40 @@
   .live-chat-lens, .live-chat-lens::before { animation: none; }
 }
 
+/* A shared visual scale for the full group chat header toolbar. */
+[data-public-chat-wide-tools] {
+  --chat-header-action-size: 2.25rem;
+  --chat-header-icon-size: 1.5rem;
+}
+[data-public-chat-wide-tools] > :is(button, [data-live-chat-online]),
+[data-public-chat-wide-tools] > [data-group-call-buttons] > button {
+  height: var(--chat-header-action-size);
+  min-width: var(--chat-header-action-size);
+  flex-shrink: 0;
+}
+[data-public-chat-wide-tools] > button:not([data-group-call-join]),
+[data-public-chat-wide-tools] > [data-group-call-buttons] > button {
+  width: var(--chat-header-action-size);
+  padding-inline: 0;
+}
+[data-public-chat-wide-tools] > [data-group-call-buttons] {
+  gap: 0.25rem;
+}
+[data-public-chat-wide-tools] button > svg {
+  width: var(--chat-header-icon-size);
+  height: var(--chat-header-icon-size);
+}
+[data-public-chat-wide-tools] > [data-live-chat-online] {
+  justify-content: center;
+  padding-inline: 0.25rem;
+}
+[data-public-chat-wide-tools] > [data-live-chat-online],
+[data-public-chat-wide-tools] [data-chat-text-size-glyph] > span {
+  font-size: var(--chat-header-icon-size);
+  font-weight: 600;
+  line-height: 1;
+}
+
 /* Live chat toolbar icons: no hover box, just a brighter white glow and a tiny lift. */
 [data-live-chat-toolbar] button {
   transition: color .15s ease, transform .15s ease, filter .15s ease;
