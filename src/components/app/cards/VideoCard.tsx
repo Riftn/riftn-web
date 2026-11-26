@@ -1,4 +1,4 @@
-import { canShareToMoment } from '@/lib/moment-share';
+import { canShareToMoment, getStreamMomentTokenId } from '@/lib/moment-share';
 import Minimize from "@/components/ui/cut-icons/exit-fullscreen";
 import FastForward from "@/components/ui/cut-icons/fast-forward";
 import Rewind from "@/components/ui/cut-icons/rewind";
@@ -3660,6 +3660,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
               articleSlug={video.articleSlug}
               newPostSlug={video.status === 'signed' ? video.newPostId ?? null : null}
               tokenId={parseInt(video.id, 10) || undefined}
+              streamMomentTokenId={video.isLivePost ? getStreamMomentTokenId({ ...video, isLive: !!video.isLiveNow }) : undefined}
               isOwnPost={!!isOwnPost}
               quotePolicy={video.quotePolicy}
               visibility={video.visibility}
