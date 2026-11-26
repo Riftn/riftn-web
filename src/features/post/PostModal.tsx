@@ -90,6 +90,7 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
   const [taggerOpen, setTaggerOpen] = useState(false);
   const [paintingOpen, setPaintingOpen] = useState(false);
   const [freeImagesTarget, setFreeImagesTarget] = useState<'post' | 'article-cover' | null>(null);
+  const articleFreeImagesButton = useRef<HTMLButtonElement | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [soundPickerOpen, setSoundPickerOpen] = useState(false);
   const [planDrawerOpen, setPlanDrawerOpen] = useState(false);
@@ -312,7 +313,10 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
           setBody={setArticleBody}
           coverPreview={articleImagePreview}
           onCoverChange={changeArticleCover}
-          onOpenFreeImages={() => setFreeImagesTarget('article-cover')}
+          onOpenFreeImages={event => {
+            articleFreeImagesButton.current = event.currentTarget;
+            setFreeImagesTarget('article-cover');
+          }}
           onSaveDraft={() => saveArticleDraft()}
           onPublish={() => actions.handlePost({ articleBody: articleBody.trim(), articleImage: articleImage || undefined, socialImage: articleImage || undefined })}
           formReady={computed.canPost && !computed.hasVideo && !computed.hasImage && !computed.hasAudio}
@@ -612,7 +616,11 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
         <Suspense fallback={null}>
           <FreeImagesSheet
             open
-            onOpenChange={open => { if (!open) setFreeImagesTarget(null); }}
+            onOpenChange={open => {
+              if (open) return;
+              setFreeImagesTarget(null);
+              if (freeImagesTarget === 'article-cover') afterNextFrame(() => articleFreeImagesButton.current?.focus());
+            }}
             initialQuery={freeImagesTarget === 'post' ? state.text : undefined}
             forArticleCover={freeImagesTarget === 'article-cover'}
             onPick={(file, credit) => {

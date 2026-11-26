@@ -33,7 +33,7 @@ interface ArticleComposerProps {
   setBody: (v: string) => void;
   coverPreview: string;
   onCoverChange: (file: File | null) => void;
-  onOpenFreeImages: () => void;
+  onOpenFreeImages: React.MouseEventHandler<HTMLButtonElement>;
   onSaveDraft: () => void;
   onPublish: () => void;
   /** Everything else the form needs to post (wallet, quota, media) is ready. */
