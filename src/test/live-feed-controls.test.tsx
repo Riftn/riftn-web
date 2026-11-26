@@ -1,7 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { useState } from 'react';
+import { createRef, useState } from 'react';
 import { LiveFeedPreview } from '@/components/app/cards/LiveFeedPreview';
+import type { PreviewAudienceHandoff } from '@/components/app/live/live-audience-profile';
+import { closeLiveMini, getLiveMini } from '@/lib/live-mini';
 
 vi.mock('react-router-dom', () => ({ useLocation: () => ({ pathname: '/app' }) }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ isAuthenticated: true, walletAddress: 'viewer' }) }));
@@ -15,11 +17,23 @@ beforeEach(() => {
     disconnect() {}
   });
 });
-afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
+afterEach(() => { closeLiveMini(); cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 const urls = ['https://live.dehub.io/example/index.m3u8'];
 
 describe('live feed controls', () => {
+  it('hands off a playing preview when opening a profile and leaves a paused preview alone', async () => {
+    const handoff = createRef<PreviewAudienceHandoff>();
+    const live = { path: '/app/post/123', title: 'Live set', host: 'Host' };
+    const { container } = render(<LiveFeedPreview urls={urls} streamId="stream-123" isOwner audienceHandoff={handoff} />);
+    await handoff.current?.(live);
+    expect(getLiveMini()).toBeNull();
+
+    Object.defineProperty(container.querySelector('video'), 'paused', { configurable: true, value: false });
+    await handoff.current?.(live);
+    expect(getLiveMini()).toMatchObject({ ...live, streamId: 'stream-123', urls, mode: 'video' });
+  });
+
   it('controls the actual live video and reflects playback events without a scrubber', async () => {
     const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue();
     const pause = vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {});

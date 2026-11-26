@@ -10,6 +10,9 @@ import { useSurfaceDraft } from '@/hooks/use-surface-draft';
  */
 
 import { useState, useEffect, useMemo, useRef } from 'react';
+import { PostFormatButtons, postStyleShortcut } from '@/features/post/components/PostFormatButtons';
+import { postTextRuns, togglePostTextStyle, type PostTextStyle } from '@/lib/post-text-format';
+import { renderTextWithLinks } from '@/components/app/TranslatableText';
 import { Loader2, ShoppingBag } from "lucide-react";
 import Pencil from "@/components/ui/cut-icons/edit";
 import Upload from "@/components/ui/cut-icons/upload";
@@ -133,6 +136,18 @@ export function EditPostModal({
     return () => { cancelled = true; };
   }, [open, currentArticleBody]);
   const descriptionMax = currentArticleBody !== undefined ? ARTICLE_SUMMARY_MAX : tierTextMax;
+  const descriptionRef = useRef<HTMLTextAreaElement>(null);
+  const formatDescription = (style: PostTextStyle) => {
+    const field = descriptionRef.current;
+    if (!field) return;
+    const next = togglePostTextStyle(description, { start: field.selectionStart, end: field.selectionEnd }, style, descriptionMax);
+    if (!next) return;
+    setDescription(next.text);
+    requestAnimationFrame(() => {
+      field.focus();
+      field.setSelectionRange(next.selection.start, next.selection.end);
+    });
+  };
   const [categoryInput, setCategoryInput] = useSurfaceDraft("components/app/modals/EditPostModal.tsx:categoryInput", '', tokenId);
   const [categories, setCategories] = useDraftState<string[]>(`post:edit:${tokenId}` + ":categories", currentCategories);
   const [commentsDisabled, setCommentsDisabled] = useState(currentCommentsDisabled);
@@ -436,13 +451,24 @@ export function EditPostModal({
           <div className="space-y-2">
             <Label htmlFor="edit-description" className="text-sm font-medium text-zinc-300">{_copy("copy.526e0087cc3f", { defaultValue: "Description" })}</Label>
             <Textarea
+              ref={descriptionRef}
               id="edit-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              onKeyDown={event => {
+                const style = postStyleShortcut(event);
+                if (!style) return;
+                event.preventDefault();
+                formatDescription(style);
+              }}
               className="bg-white/5 border-white/10 text-white min-h-[100px] rounded-xl resize-none"
               maxLength={descriptionMax}
               placeholder={_copy("copy.7881e4a3da46", { defaultValue: "Post description" })}
             />
+            <PostFormatButtons onFormat={formatDescription} />
+            {postTextRuns(description).some(run => run.styles.length > 0) && (
+              <div className="whitespace-pre-wrap break-words text-sm text-white">{renderTextWithLinks(description)}</div>
+            )}
             <p className="text-xs text-zinc-500 text-right">{description.length.toLocaleString('en-US')}/{descriptionMax.toLocaleString('en-US')}</p>
           </div>
 

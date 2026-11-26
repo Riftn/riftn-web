@@ -30,6 +30,8 @@ import MessageSquare from "@/components/ui/cut-icons/messages";
 import Share2 from "@/components/ui/cut-icons/postshare";
 import Repeat2 from "@/components/ui/cut-icons/repost";
 import Send from "@/components/ui/cut-icons/send";
+import PublicChatIcon from "@/components/ui/cut-icons/chat";
+import { Button } from '@/components/ui/button';
 
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -93,7 +95,7 @@ import {
 } from '@/components/ui/drawer';
 import type { PostStageValue } from '@/components/app/post-stage/post-stage-context';
 const RepostShareSheet = lazy(() => import('@/components/app/post-stage/RepostShareSheet').then(m => ({ default: m.RepostShareSheet })));
-import { viewerShareUrl } from '@/lib/share-url';
+import { viewerLiveShareUrl, viewerShareUrl } from '@/lib/share-url';
 import { trackShare } from '@/lib/analytics';
 import { POST_MENU_EVENT, type PostMenuBridgeDetail } from '@/lib/post-menu';
 
@@ -114,6 +116,8 @@ interface ActionBarProps {
    * /app/post/<id>). Omitted → the post's own link.
    */
   shareUrl?: string;
+  /** Opens the Public Chat composer with a public stream's link. */
+  onShareToPublicChat?: () => void;
   /** Handler for comment action */
   onComment?: () => void;
   /** Handler for share action */
@@ -181,6 +185,7 @@ interface ActionBarProps {
   voteWeight?: number;
   /** Live applause is repeatable; the persisted post vote still toggles normally. */
   onLiveReaction?: (reaction: PostReaction) => void;
+  liveShare?: boolean;
   /** Tip count to display next to repost */
   tipCount?: number;
   /** Handler for tip action */
@@ -379,6 +384,7 @@ export function ActionBar({
   newPostSlug,
   articleSlug,
   shareUrl,
+  onShareToPublicChat,
   onComment,
   onShare,
   onRepost,
@@ -403,6 +409,7 @@ export function ActionBar({
   isOptimistic = false,
   voteWeight: voteWeightProp,
   onLiveReaction,
+  liveShare,
   tipCount,
   onTip,
   onSeeEngagements,
@@ -882,8 +889,12 @@ export function ActionBar({
         ? dehubLinkFor.post(postId)
         : window.location.href;
 
+  const getShareUrl = () => liveShare
+    ? viewerLiveShareUrl(shareUrlForPost(), !visibility || visibility === 'public')
+    : viewerShareUrl(shareUrlForPost());
+
   const handleCopyLink = () => {
-    const url = viewerShareUrl(shareUrlForPost());
+    const url = getShareUrl();
     navigator.clipboard.writeText(url);
     toast.success(_copy("copy.e91de547a0b8", { defaultValue: "Post URL copied to clipboard" }));
     // A copy is a share: it counts once per actor per post, next to reposts.
@@ -893,7 +904,7 @@ export function ActionBar({
 
   const canNativeShare = !!nativeShare && typeof navigator !== 'undefined' && typeof navigator.share === 'function';
   const handleNativeShare = () => {
-    const url = viewerShareUrl(shareUrlForPost());
+    const url = getShareUrl();
     setSheetOpen(false);
     navigator
       .share({ title: nativeShare?.title || undefined, url })
@@ -1060,6 +1071,22 @@ export function ActionBar({
           <Send className="w-5 h-5" />
           <span className="font-medium"><TranslationText name="copy.20e392c29da3" fallback={"Send in a message"} /></span>
         </button>
+      )}
+      {isPublicPost && onShareToPublicChat && (
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={(e) => {
+            e.stopPropagation();
+            setSheetOpen(false);
+            if (isAuthenticated) onShareToPublicChat();
+            else openLoginModal();
+          }}
+          className="h-auto min-h-14 w-full justify-start gap-3 whitespace-normal p-4 text-left text-base text-zinc-200 hover:bg-white/10 hover:text-white focus-visible:ring-current focus-visible:ring-offset-0 [&_svg]:size-5"
+        >
+          <PublicChatIcon />
+          {_copy('publicChat.title')}
+        </Button>
       )}
       <button
         onClick={(e) => { e.stopPropagation(); handleCopyLink(); }}
@@ -1296,7 +1323,7 @@ export function ActionBar({
           onQuote={handleQuote}
           canQuote={canQuote}
           canRepost={isPublicPost}
-          shareUrl={viewerShareUrl(shareUrlForPost())}
+          shareUrl={getShareUrl()}
           onCopyLink={handleCopyLink}
           quoteCount={stage.quoteCount}
           repostCount={Math.max(0, stage.repostCount + repostDelta)}

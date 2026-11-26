@@ -20,12 +20,15 @@ const setCookie = (value: string) => {
   } catch { /* ignore */ }
 };
 
-const readCookie = (): string | null => {
+const readTouch = (): { code: string; liveArrival: number | null } | null => {
   try {
     const match = document.cookie.split("; ").find((row) => row.startsWith(`${COOKIE_NAME}=`));
     if (!match) return null;
-    const val = decodeURIComponent(match.slice(COOKIE_NAME.length + 1));
-    return VALID.test(val) ? val : null;
+    const [code, timestamp, extra] = decodeURIComponent(match.slice(COOKIE_NAME.length + 1)).split(':');
+    if (!VALID.test(code) || extra !== undefined) return null;
+    if (timestamp === undefined) return { code, liveArrival: null };
+    const liveArrival = Number(timestamp);
+    return Number.isSafeInteger(liveArrival) && liveArrival > 0 ? { code, liveArrival } : null;
   } catch { return null; }
 };
 
@@ -115,33 +118,47 @@ export const recordAffiliateCtaClick = (code: string, destination: string, viewe
   } catch { /* analytics must never block navigation */ }
 };
 
-export const getAffiliateRef = (): string | null => readCookie();
+export const getAffiliateRef = (): string | null => {
+  const touch = readTouch();
+  return touch?.liveArrival === null ? touch.code : null;
+};
+
+/** A live visitor only becomes a referral if their account was created after arrival. */
+export const getEligibleAffiliateRef = (accountCreatedAt?: string | null): string | null => {
+  const touch = readTouch();
+  if (!touch) return null;
+  if (touch.liveArrival !== null && !(Date.parse(accountCreatedAt ?? '') > touch.liveArrival)) return null;
+  return touch.code;
+};
 
 export const getAffiliateSubRef = (): string | null => {
   try {
     const row = document.cookie.split('; ').find(value => value.startsWith(`${SUB_COOKIE_NAME}=`));
     if (!row) return null;
     const [code, sub] = decodeURIComponent(row.slice(SUB_COOKIE_NAME.length + 1)).split(':');
-    return code === readCookie() ? normalizeSubReferral(sub) : null;
+    return code === getAffiliateRef() ? normalizeSubReferral(sub) : null;
   } catch { return null; }
 };
 
-export const captureAffiliateRefFromUrl = (viewerAddress?: string | null) => {
+export const captureAffiliateRefFromUrl = (viewerAddress?: string | null, search = window.location.search) => {
   try {
-    const existingRef = readCookie();
+    const existingRef = readTouch();
     // A page can arrive before the wallet session restores. Once it does, send
     // the existing first-touch referral again so the RPC can remove a self-view.
     if (existingRef) {
-      if (viewerAddress) recordAffiliateClick(existingRef, viewerAddress);
+      if (viewerAddress && existingRef.liveArrival === null) recordAffiliateClick(existingRef.code, viewerAddress);
       return;
     }
 
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(search);
     const raw = params.get("ref") || params.get("aff");
-    if (!raw) return;
+    if (!raw) {
+      const liveCode = params.get('live_ref')?.trim().toUpperCase();
+      if (liveCode && VALID.test(liveCode)) setCookie(`${liveCode}:${Date.now()}`);
+      return;
+    }
     const code = raw.trim().toUpperCase();
     if (!VALID.test(code)) return;
-    if (readCookie()) return; // first-touch wins
     setAffiliateRef(code, params.get('sub'));
     // Count the arrival only on first touch. /r/CODE records its own view and
     // then sends people on to /app?ref=CODE, so recording unconditionally here
@@ -153,7 +170,7 @@ export const captureAffiliateRefFromUrl = (viewerAddress?: string | null) => {
 export const setAffiliateRef = (code: string, subId?: string | null) => {
   const upper = code.trim().toUpperCase();
   if (!VALID.test(upper)) return;
-  if (readCookie()) return;
+  if (readTouch()) return;
   setCookie(upper);
   try {
     const sub = normalizeSubReferral(subId);

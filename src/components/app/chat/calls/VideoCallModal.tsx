@@ -1,6 +1,7 @@
 import React from 'react';
 import { CallDuration } from './CallDuration';
-import { PhoneOff, RotateCcw, MessageCircle } from 'lucide-react';
+import { PhoneOff, RotateCcw } from 'lucide-react';
+import ChatIcon from '@/components/ui/cut-icons/chat';
 import MicOff from '@/components/ui/cut-icons/mic-off';
 import Video from '@/components/ui/cut-icons/video';
 import VideoOff from '@/components/ui/cut-icons/video-off';
@@ -52,7 +53,7 @@ const VideoCallModal: React.FC = () => {
   const fxAvailable = useCallBackgroundAvailable();
   const [fxOpen, setFxOpen] = React.useState(false);
 
-  const peer = usePeerIdentity(peerAddress);
+  const peer = usePeerIdentity(isIncoming ? currentCall?.caller_address || peerAddress : peerAddress);
 
   if (!walletAddress) return null;
 
@@ -68,18 +69,29 @@ const VideoCallModal: React.FC = () => {
       ? t('calls.calling')
       : isConnecting
         ? t('calls.connecting')
-        : <CallDuration fallback={t('calls.connected')} />;
+        : <CallDuration fallback="00:00" />;
 
-  const messageInstead = () => {
+  const openMessages = () => {
     const username = peer.name.startsWith('@') ? peer.name.slice(1) : undefined;
-    endCall();
+    if (isRinging) endCall();
+    else minimizeCall();
     openDmDock({ address: peerAddress, username, avatarUrl: peer.avatarUrl ?? undefined });
   };
+
+  const selfPreview = !isIncoming ? (
+    <div className="call-stage__self">
+      <div ref={attachLocalVideo} className={isCameraOff ? 'hidden' : undefined} />
+      {isCameraOff ? <div className="call-stage__self-off"><VideoOff className="h-5 w-5" /></div> : null}
+    </div>
+  ) : null;
 
   return (
     <CallStage
       peer={peer}
       video
+      direct
+      onMessage={isCallActive ? openMessages : undefined}
+      messageLabel={t('messages.message')}
       live={isCallActive}
       remote={<div ref={attachRemoteVideo} />}
       onMinimize={isIncoming ? undefined : minimizeCall}
@@ -100,6 +112,7 @@ const VideoCallModal: React.FC = () => {
           peer={peer}
           status={statusText}
           ringing={isIncoming || isRinging}
+          announceStatus={!isCallActive}
         />
       )}
 
@@ -107,32 +120,22 @@ const VideoCallModal: React.FC = () => {
         <CallFxButton open={fxOpen} onToggle={() => setFxOpen(open => !open)} active={callBackground !== 'none' || callFaceFilter !== 'none'} />
       ) : null}
 
-      {/* Your own camera. Hidden on an incoming call until you accept: there is no track yet. */}
-      {!isIncoming && (
-        <div className="call-stage__self">
-          <div ref={attachLocalVideo} className={isCameraOff ? 'hidden' : undefined} />
-          {isCameraOff && (
-            <div className="call-stage__self-off">
-              <VideoOff className="h-5 w-5" />
-            </div>
-          )}
-        </div>
-      )}
-
+      {!isCallActive ? selfPreview : null}
       <div className="call-stage__foot">
+        {isCallActive ? selfPreview : null}
         {isCallActive ? <CallCaptionsOverlay /> : null}
         {fxOpen && !isIncoming && fxAvailable ? (
           <CallBackgroundPanel value={callBackground} busy={callBackgroundBusy} onPick={setCallBackground} onClose={() => setFxOpen(false)} faceFilter={callFaceFilter} onPickFace={setCallFaceFilter} />
         ) : null}
         {isIncoming ? (
-          <div className="call-row">
-            <CallPill icon={PhoneOff} label={t('calls.decline')} onClick={rejectCall} />
-            <CallPill icon={Video} label={t('calls.accept')} onClick={acceptCall} solid />
+          <div className="call-row call-row--ringing">
+            <CallControl icon={PhoneOff} label={t('calls.decline')} onClick={rejectCall} />
+            <CallControl icon={Video} label={t('calls.accept')} onClick={acceptCall} primary />
           </div>
         ) : (
           <>
-            {isRinging ? <CallPill icon={MessageCircle} label={t('messages.message')} onClick={messageInstead} quiet /> : null}
-            <CallDock crowded={isCallActive}>
+            {isRinging ? <CallPill icon={ChatIcon} label={t('messages.message')} onClick={openMessages} quiet /> : null}
+            <CallDock crowded>
               <CallControl
                 icon={isMuted ? MicOff : Mic}
                 label={isMuted ? t('calls.unmute') : t('calls.mute')}
@@ -147,8 +150,8 @@ const VideoCallModal: React.FC = () => {
               />
               <CallControl icon={RotateCcw} label={t('calls.flip')} onClick={switchCamera} />
               {isCallActive ? <CallCaptionsControl /> : null}
-              <CallControl icon={PhoneOff} label={isCallActive ? t('calls.end') : t('common.cancel', 'Cancel')} onClick={endCall} primary />
             </CallDock>
+            <CallControl icon={PhoneOff} label={isCallActive ? t('calls.end') : t('common.cancel', 'Cancel')} onClick={endCall} primary />
           </>
         )}
       </div>
