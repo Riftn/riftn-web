@@ -65,7 +65,7 @@ import { BadgeIcon } from '@/components/app/BadgeIcon';
 import { StreamerBadge } from '@/components/app/live/StreamerBadge';
 import { POST_LOOK_EVENT, type PostLook } from '@/lib/post-menu';
 import { ProfilePostBgContext, ProfilePostBgArtContext, ProfilePostBgMapContext, PostBgPicker, usePostBgHold, type PostBgSave } from '@/components/app/profile/PostBackground';
-import { POST_BG_IMAGE_KEY, POST_BG_PHOTO_ID, POST_BG_VIDEO_HINT, mergePostBg, parsePostBg, postBgById, postBgFromStored, postBgStored, postBgImageUrl, withPostBgColors, type PostBg } from '@/lib/post-backgrounds';
+import { POST_BG_IMAGE_KEY, POST_BG_PHOTO_ID, POST_BG_VIDEO_HINT, mergePostBg, parsePostBg, postBgById, postBgFromStored, postBgPhotoStored, postBgStored, postBgImageUrl, withPostBgColors, type PostBg } from '@/lib/post-backgrounds';
 import { ArticleTilePicker, ProfileArticleTileContext } from '@/components/app/profile/ArticleTile';
 import { articleReadMinutes, mergeArticleTile, parseArticleTile, type ArticleTileLook } from '@/lib/article-tile';
 import { buildFeedImageUrls as articleTileCover } from '@/lib/media-url';
@@ -333,9 +333,8 @@ export default function ProfilePage() {
   const [postBgOpen, setPostBgOpen] = useState(false);
   const [postBgSaving, setPostBgSaving] = useState(false);
   const [postBgOverride, setPostBgOverride] = useState<{ owner: string; bg: PostBg | null } | null>(null);
-  const postBg = postBgOverride && postBgOverride.owner === profileKey
-    ? postBgOverride.bg
-    : parsePostBg(data.apiProfile?.customs);
+  const storedProfileBg = useMemo(() => parsePostBg(data.apiProfile?.customs), [data.apiProfile?.customs]);
+  const postBg = postBgOverride && postBgOverride.owner === profileKey ? postBgOverride.bg : storedProfileBg;
   // The owner's own picture stays on the account even while another backdrop is on.
   const postBgPhoto = postBg?.kind === 'photo' ? postBg.image ?? null : postBgImageUrl(data.apiProfile?.customs?.[POST_BG_IMAGE_KEY]);
   // Which post the picker was opened from (null: the header / menu, so "all").
@@ -362,17 +361,25 @@ export default function ProfilePage() {
       || data.PROFILE_POSTS.find((p) => !p.articleBody && p.content?.trim())?.content,
     [data.PROFILE_POSTS, postBgTarget],
   );
-  const savePostBg = useCallback(async ({ id, colors, file, scope }: PostBgSave) => {
+  const savePostBg = useCallback(async ({ id, colors, file, photoUrl, scope }: PostBgSave) => {
     if (!profileKey) return;
     // Just this post: saved on the post, the profile's backdrop is left alone.
     if (scope === 'post' && postBgTarget) {
+      const current = postBgMap.get(postBgTarget);
+      const unchanged = !file && (current?.id ?? null) === id &&
+        (current?.colors ?? []).join() === (colors ?? []).join() &&
+        (current?.image ?? null) === (photoUrl ?? null);
+      if (unchanged) { setPostBgOpen(false); return; }
       setPostBgSaving(true);
       try {
-        const def = postBgById(id);
-        const keepPhoto = def?.kind === 'photo' && !file;
-        const photoKey = keepPhoto ? (data.apiProfile?.customs?.[POST_BG_IMAGE_KEY] as string | undefined) : undefined;
-        const stored = def?.kind === 'photo' ? (photoKey ? `photo||${photoKey}` : '') : postBgStored(id, colors);
-        const res = await setPostBackground(postBgTarget, stored, def?.kind === 'photo' ? file : null);
+        const stored = id === POST_BG_PHOTO_ID
+          ? (file ? POST_BG_PHOTO_ID : postBgPhotoStored(photoUrl))
+          : postBgStored(id, colors);
+        if (stored === null) {
+          toast.error(t('postBg.saveFailed', "Couldn't save your background. Try again."));
+          return;
+        }
+        const res = await setPostBackground(postBgTarget, stored, id === POST_BG_PHOTO_ID ? file : null);
         const next = res.postBg ? postBgFromStored(res.postBg) : null;
         setPostBgSaved((cur) => {
           const map = new Map(cur && cur.owner === profileKey ? cur.map : []);
@@ -404,7 +411,7 @@ export default function ProfilePage() {
       // "All posts" (from a held post) means all of them, so posts with their
       // own go back too. Holding the header only sets the profile's backdrop.
       if (fromPost) {
-        await setPostBackground('all', '').catch(() => undefined);
+        await setPostBackground('all', '');
         setPostBgSaved({ owner: profileKey, map: new Map([...postBgMap.keys()].map((k) => [k, null])) });
       }
       setPostBgOpen(false);
@@ -1042,9 +1049,10 @@ return () => rail.removeEventListener('wheel', onWheel);
         </ProfileViewModeContext.Provider>
       </div>
 
-      {data.isViewingOwnProfile && (
+      {data.isViewingOwnProfile && postBgOpen && (
         <PostBgPicker
-          open={postBgOpen}
+          key={postBgTarget ?? 'profile'}
+          open
           current={postBg}
           name={data.profile.name}
           handle={data.profile.handle}
@@ -1053,7 +1061,7 @@ return () => rail.removeEventListener('wheel', onWheel);
           photoUrl={postBgPhoto}
           saving={postBgSaving}
           postId={postBgTarget}
-          postCurrent={postBgTarget ? postBgMap.get(postBgTarget) ?? postBg : undefined}
+          postCurrent={postBgTarget ? postBgMap.get(postBgTarget) ?? null : undefined}
           onCancel={() => setPostBgOpen(false)}
           onSave={savePostBg}
         />
