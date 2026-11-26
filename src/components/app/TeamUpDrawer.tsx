@@ -1,6 +1,7 @@
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
 import { useDeferredValue, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useBadgeTierLabel } from '@/i18n/badge-tier-label';
 import { Loader2 } from "lucide-react";
 import Lock from "@/components/ui/cut-icons/privacy";
 import Users from "@/components/ui/cut-icons/communities";
@@ -89,6 +90,7 @@ function PrivacyToggle({
 
 export function TeamUpDrawer({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const { t } = useTranslation();
+  const badgeLabel = useBadgeTierLabel();
   const { walletAddress, isAuthenticated, openLoginModal } = useAuth();
   const [name, setName] = useSurfaceDraft("components/app/TeamUpDrawer.tsx:name", '');
   const [description, setDescription] = useSurfaceDraft("components/app/TeamUpDrawer.tsx:description", '');
@@ -116,7 +118,7 @@ export function TeamUpDrawer({ open, onOpenChange }: { open: boolean; onOpenChan
   const team = mine.data;
   const [editDescription, setEditDescription] = useSurfaceDraft("components/app/TeamUpDrawer.tsx:editDescription", '', team?.id ?? null);
   const isOwner = !!team && team.ownerAddress.toLowerCase() === myAddress;
-  const tierLabel = (tier: string | null) => tier || t('superpowers.teamUp.noBadgeYet');
+  const tierLabel = (tier: string | null) => tier ? badgeLabel(tier) : t('superpowers.teamUp.noBadgeYet');
 
   const startEditing = () => {
     setEditDescription.initialize(team?.description ?? '');
