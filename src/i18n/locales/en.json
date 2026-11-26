@@ -5428,6 +5428,23 @@
     "shopAllowanceUsed": "{{allowance}} of {{allowance}} used. Stake more Riftn tokens for a higher badge and another slot."
   },
   "stages": {
+    "entrySettings": "Room settings",
+    "entryPending": "Request sent. Try joining again once the host approves you.",
+    "entrySignIn": "Sign in to request entry",
+    "entryUnavailable": "Room settings are unavailable. Try again.",
+    "entryHelp": "Locking requires host approval for new listeners. People already connected can stay. Recordings are still public.",
+    "lockEntry": "Lock entry",
+    "unlockEntry": "Unlock entry",
+    "noEntryRequests": "No pending requests",
+    "approveEntry": "Approve",
+    "editRoomTitle": "Room title",
+    "roomTopic": "Topic",
+    "topicNone": "No topic",
+    "topicAll": "All topics",
+    "searchRooms": "Search live rooms",
+    "noMatchingRooms": "No live rooms match your filters.",
+    "entryLocked": "Locked",
+    "topics": {"general": "General", "crypto": "Crypto", "sports": "Sports", "gaming": "Gaming", "technology": "Technology"},
     "showChat": "Show chat",
     "hideChat": "Hide chat",
     "radioShow": {

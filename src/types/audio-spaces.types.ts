@@ -8,6 +8,8 @@ export type SpaceStatus = 'scheduled' | 'live' | 'ended';
 export type HandRequestStatus = 'pending' | 'approved' | 'rejected';
 
 export interface AudioSpace {
+  entry_locked?: boolean;
+  topic?: string | null;
   id: string;
   /** Dense sequential number backing the short share link (/stages/7). */
   short_id?: number | null;

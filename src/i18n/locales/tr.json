@@ -5432,6 +5432,23 @@
     "shopAllowanceUsed": "{{allowance}} / {{allowance}} kullanıldı. Daha yüksek bir rozet ve başka bir yuva için daha fazla Riftn jetonu stake edin."
   },
   "stages": {
+    "entrySettings": "Oda ayarları",
+    "entryPending": "İstek gönderildi. Oda sahibi onayladığında tekrar katılmayı dene.",
+    "entrySignIn": "Giriş isteği göndermek için oturum aç",
+    "entryUnavailable": "Oda ayarlarına erişilemiyor. Tekrar dene.",
+    "entryHelp": "Kilitli odaya yeni dinleyiciler ancak oda sahibinin onayıyla katılabilir. Bağlı olanlar kalabilir. Kayıtlar herkese açık kalır.",
+    "lockEntry": "Girişi kilitle",
+    "unlockEntry": "Giriş kilidini aç",
+    "noEntryRequests": "Bekleyen istek yok",
+    "approveEntry": "Onayla",
+    "editRoomTitle": "Oda başlığı",
+    "roomTopic": "Konu",
+    "topicNone": "Konu yok",
+    "topicAll": "Tüm konular",
+    "searchRooms": "Canlı odaları ara",
+    "noMatchingRooms": "Filtrelerine uyan canlı oda yok.",
+    "entryLocked": "Kilitli",
+    "topics": {"general": "Genel", "crypto": "Kripto", "sports": "Spor", "gaming": "Oyun", "technology": "Teknoloji"},
     "showChat": "Sohbeti göster",
     "hideChat": "Sohbeti gizle",
     "radioShow": {

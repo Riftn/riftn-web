@@ -5429,6 +5429,23 @@
     "shopAllowanceUsed": "{{allowance}} de {{allowance}} usados. Haz más staking de tokens Riftn para obtener una insignia superior y otra ranura."
   },
   "stages": {
+    "entrySettings": "Ajustes de la sala",
+    "entryPending": "Solicitud enviada. Intenta unirte de nuevo cuando el anfitrión la apruebe.",
+    "entrySignIn": "Inicia sesión para solicitar el acceso",
+    "entryUnavailable": "Los ajustes de la sala no están disponibles. Inténtalo de nuevo.",
+    "entryHelp": "Al bloquear la entrada, el anfitrión debe aprobar a los nuevos oyentes. Quienes ya están conectados pueden quedarse. Las grabaciones siguen siendo públicas.",
+    "lockEntry": "Bloquear entrada",
+    "unlockEntry": "Desbloquear entrada",
+    "noEntryRequests": "No hay solicitudes pendientes",
+    "approveEntry": "Aprobar",
+    "editRoomTitle": "Título de la sala",
+    "roomTopic": "Tema",
+    "topicNone": "Sin tema",
+    "topicAll": "Todos los temas",
+    "searchRooms": "Buscar salas en directo",
+    "noMatchingRooms": "No hay salas en directo que coincidan con tus filtros.",
+    "entryLocked": "Bloqueada",
+    "topics": {"general": "General", "crypto": "Cripto", "sports": "Deportes", "gaming": "Videojuegos", "technology": "Tecnología"},
     "showChat": "Mostrar chat",
     "hideChat": "Ocultar chat",
     "radioShow": {

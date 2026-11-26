@@ -5618,6 +5618,23 @@
     "shopAllowanceUsed": "{{allowance}} van {{allowance}} gebruikt. Stake meer Riftn tokens voor een hogere badge en een extra slot."
   },
   "stages": {
+    "entrySettings": "Kamerinstellingen",
+    "entryPending": "Verzoek verstuurd. Probeer opnieuw deel te nemen zodra de host je heeft goedgekeurd.",
+    "entrySignIn": "Log in om toegang aan te vragen",
+    "entryUnavailable": "De kamerinstellingen zijn niet beschikbaar. Probeer het opnieuw.",
+    "entryHelp": "Als de toegang is vergrendeld, moet de host nieuwe luisteraars goedkeuren. Wie al verbonden is, kan blijven. Opnamen blijven openbaar.",
+    "lockEntry": "Toegang vergrendelen",
+    "unlockEntry": "Toegang ontgrendelen",
+    "noEntryRequests": "Geen openstaande verzoeken",
+    "approveEntry": "Goedkeuren",
+    "editRoomTitle": "Kamertitel",
+    "roomTopic": "Onderwerp",
+    "topicNone": "Geen onderwerp",
+    "topicAll": "Alle onderwerpen",
+    "searchRooms": "Livekamers zoeken",
+    "noMatchingRooms": "Er zijn geen livekamers die aan je filters voldoen.",
+    "entryLocked": "Vergrendeld",
+    "topics": {"general": "Algemeen", "crypto": "Crypto", "sports": "Sport", "gaming": "Gaming", "technology": "Technologie"},
     "showChat": "Chat tonen",
     "hideChat": "Chat verbergen",
     "radioShow": {

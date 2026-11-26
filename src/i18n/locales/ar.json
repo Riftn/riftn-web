@@ -5456,6 +5456,23 @@
     "shopAllowanceUsed": "تم استخدام {{allowance}} من {{allowance}}. قم بتخزين المزيد من رموز Riftn للحصول على شارة أعلى وفتحة أخرى."
   },
   "stages": {
+    "entrySettings": "إعدادات الغرفة",
+    "entryPending": "أُرسل طلبك. حاول الانضمام بعد موافقة المضيف.",
+    "entrySignIn": "سجّل الدخول لطلب الانضمام",
+    "entryUnavailable": "إعدادات الغرفة غير متاحة. حاول مجددًا.",
+    "entryHelp": "يتطلب القفل موافقة المضيف على المستمعين الجدد. يمكن للمتصلين حاليًا البقاء. تظل التسجيلات عامة.",
+    "lockEntry": "قفل الانضمام",
+    "unlockEntry": "إلغاء قفل الانضمام",
+    "noEntryRequests": "لا توجد طلبات معلّقة",
+    "approveEntry": "موافقة",
+    "editRoomTitle": "عنوان الغرفة",
+    "roomTopic": "الموضوع",
+    "topicNone": "بلا موضوع",
+    "topicAll": "جميع المواضيع",
+    "searchRooms": "ابحث في الغرف المباشرة",
+    "noMatchingRooms": "لا توجد غرف مباشرة تطابق عوامل التصفية.",
+    "entryLocked": "مغلقة",
+    "topics": {"general": "عام", "crypto": "العملات الرقمية", "sports": "الرياضة", "gaming": "الألعاب", "technology": "التقنية"},
     "showChat": "إظهار الدردشة",
     "hideChat": "إخفاء الدردشة",
     "radioShow": {

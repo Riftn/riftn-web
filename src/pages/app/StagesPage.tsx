@@ -51,6 +51,7 @@ import { useStageReminder } from '@/hooks/use-stage-reminders';
 import { useMyStages, myStagesKeys } from '@/hooks/use-my-stages';
 import { supabase } from '@/integrations/supabase/client';
 import stagesMicIcon from '@/assets/icons/stages-mic-icon.webp';
+import { matchesStageSearch, STAGE_TOPICS, type StageTopic } from '@/lib/stage-topics';
 import type { AudioSpace } from '@/types/audio-spaces.types';
 
 import { formatCount } from '@/lib/format-count';
@@ -351,6 +352,12 @@ function LiveStageCard({
         </div>
 
         <h3 className="text-white font-semibold text-sm line-clamp-2">{space.title}</h3>
+        {(space.entry_locked || space.topic) && (
+          <div className="mt-1.5 flex flex-wrap gap-1.5 text-xs font-medium text-muted-foreground">
+            {space.entry_locked && <span className="rounded-md bg-amber-500/15 px-1.5 py-0.5 text-amber-400">{t('stages.entryLocked')}</span>}
+            {space.topic && <span className="rounded-md bg-foreground/10 px-1.5 py-0.5">{t(`stages.topics.${space.topic}`)}</span>}
+          </div>
+        )}
         {space.description && (
           <p className="text-zinc-500 text-xs mt-1 line-clamp-2">{space.description}</p>
         )}
@@ -370,7 +377,9 @@ function LiveStageCard({
 
 export default function StagesPage() {
   const { t: _copy } = _useCopy();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const [roomFilter, setRoomFilter] = useState<StageTopic | null>(null);
+  const [roomSearch, setRoomSearch] = useState('');
   const [activeTab, setActiveTab] = useState<StagesTab>('live');
   const {
     liveSpaces,
@@ -587,8 +596,29 @@ export default function StagesPage() {
       );
     }
 
+    const visible = liveSpaces.filter((space) =>
+      (!roomFilter || space.topic === roomFilter) &&
+      matchesStageSearch(space, roomSearch, i18n.language)
+    );
     return (
       <div className="space-y-2 sm:space-y-3">
+        <div className="space-y-2 px-1">
+          <input type="search" value={roomSearch} onChange={(event) => setRoomSearch(event.target.value)}
+            aria-label={t('stages.searchRooms')} placeholder={t('stages.searchRooms')}
+            className="w-full rounded-xl border border-foreground/15 bg-foreground/5 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground" />
+          <div className="flex flex-wrap gap-1.5" role="group" aria-label={t('stages.roomTopic')}>
+            {([null, ...STAGE_TOPICS] as const).map((topic) => (
+              <button type="button" key={topic ?? 'all'} aria-pressed={roomFilter === topic} onClick={() => setRoomFilter(topic)}
+                className={cn('rounded-lg border px-2.5 py-1.5 text-xs font-medium',
+                  roomFilter === topic ? 'border-primary/35 bg-primary/15 text-foreground' : 'border-foreground/10 text-muted-foreground hover:text-foreground')}>
+                {topic ? t(`stages.topics.${topic}`) : t('stages.topicAll')}
+              </button>
+            ))}
+          </div>
+        </div>
+        {visible.length === 0 && !resume && (
+          <p className="py-4 text-center text-sm text-muted-foreground" role="status">{t('stages.noMatchingRooms')}</p>
+        )}
         {resume && (
           <LiveStageCard
             key={resume.id}
@@ -600,7 +630,7 @@ export default function StagesPage() {
             onShare={() => setShareSpace(resume)}
           />
         )}
-        {liveSpaces.map((space) => (
+        {visible.map((space) => (
           <LiveStageCard
             key={space.id}
             space={space}
