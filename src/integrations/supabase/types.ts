@@ -1596,6 +1596,7 @@ export type Database = {
           created_at: string
           description: string | null
           ended_at: string | null
+          entry_locked: boolean
           host_avatar: string | null
           host_username: string | null
           host_wallet_address: string
@@ -1609,6 +1610,7 @@ export type Database = {
           started_at: string
           status: string
           title: string
+          topic: string | null
           total_listens: number
         }
         Insert: {
@@ -1617,6 +1619,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           ended_at?: string | null
+          entry_locked?: boolean
           host_avatar?: string | null
           host_username?: string | null
           host_wallet_address: string
@@ -1630,6 +1633,7 @@ export type Database = {
           started_at?: string
           status?: string
           title: string
+          topic?: string | null
           total_listens?: number
         }
         Update: {
@@ -1638,6 +1642,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           ended_at?: string | null
+          entry_locked?: boolean
           host_avatar?: string | null
           host_username?: string | null
           host_wallet_address?: string
@@ -1651,6 +1656,7 @@ export type Database = {
           started_at?: string
           status?: string
           title?: string
+          topic?: string | null
           total_listens?: number
         }
         Relationships: []
@@ -6188,6 +6194,18 @@ export type Database = {
           },
         ]
       }
+      stage_entry_requests: {
+        Row: { space_id: string; wallet_address: string; requested_at: string; approved_at: string | null }
+        Insert: { space_id: string; wallet_address: string; requested_at?: string; approved_at?: string | null }
+        Update: { space_id?: string; wallet_address?: string; requested_at?: string; approved_at?: string | null }
+        Relationships: [{
+          foreignKeyName: "stage_entry_requests_space_id_fkey"
+          columns: ["space_id"]
+          isOneToOne: false
+          referencedRelation: "audio_spaces"
+          referencedColumns: ["id"]
+        }]
+      }
       stage_reminders: {
         Row: {
           created_at: string
@@ -9584,6 +9602,8 @@ export type Database = {
         Args: { p_address?: string; p_events: Json; p_viewer_id: string }
         Returns: number
       }
+      approve_stage_entry: { Args: { p_space_id: string; p_wallet: string }; Returns: boolean }
+      request_stage_entry: { Args: { p_space_id: string }; Returns: string }
       recount_space: { Args: { p_space_id: string }; Returns: undefined }
       release_fraction_listing: {
         Args: { p_listing_id: string; p_quantity: number }

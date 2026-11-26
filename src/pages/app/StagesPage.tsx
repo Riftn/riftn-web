@@ -1,3 +1,4 @@
+import { stageRoomLabel, stageTopicLabel, stageHeadcount } from '@/i18n/stage-room-copy';
 import { fetchStageRecordings, hasStageRecording } from '@/lib/stage-recordings';
 import { countdownParts, useMinuteTick } from '@/lib/schedule/countdown';
 import { useTranslation as _useCopy } from 'react-i18next';
@@ -50,6 +51,7 @@ import { useStageReminder } from '@/hooks/use-stage-reminders';
 import { useMyStages, myStagesKeys } from '@/hooks/use-my-stages';
 import { supabase } from '@/integrations/supabase/client';
 import stagesMicIcon from '@/assets/icons/stages-mic-icon.webp';
+import { matchesStageSearch, STAGE_TOPICS, type StageTopic } from '@/lib/stage-topics';
 import type { AudioSpace } from '@/types/audio-spaces.types';
 
 import { formatCount } from '@/lib/format-count';
@@ -239,7 +241,7 @@ function LiveStageCard({
   const total = Math.max(1, (space.speaker_count || 1) + (space.listener_count || 0));
   const isRadio = isRadioShow(space);
   const host = space.host_username || space.host_wallet_address?.slice(0, 6);
-  const action = isCurrent ? t('stages.returnToStage') : t('stages.join');
+  const action = isCurrent ? stageRoomLabel(t, 'returnToStage') : t('stages.join');
 
   const { data: participants = [] } = useQuery({
     queryKey: ['stage-list-faces', space.id, space.speaker_count, space.listener_count],
@@ -298,9 +300,11 @@ function LiveStageCard({
         <span className={cn('inline-flex items-center gap-1.5 rounded-md px-1.5 py-0.5 font-semibold',
           isRadio ? 'bg-sky-500/15 text-sky-400' : 'bg-rose-500/15 text-rose-400')}>
           <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-current" />
-          {isRadio ? t('stages.liveRadio') : t('stages.live')}
+          {isRadio ? stageRoomLabel(t, 'liveRadio') : t('stages.live')}
         </span>
-        <span className="inline-flex items-center gap-1" aria-label={t('stages.stageHeadcount', { count: total })}>
+        {space.entry_locked && <span className="rounded-md bg-amber-500/15 px-1.5 py-0.5 font-semibold text-amber-400">{stageRoomLabel(t, 'entryLocked')}</span>}
+        {space.topic && <span className="rounded-md bg-foreground/10 px-1.5 py-0.5">{stageTopicLabel(t, space.topic)}</span>}
+        <span className="inline-flex items-center gap-1" aria-label={stageHeadcount(t, total)}>
           <Users className="h-3.5 w-3.5" aria-hidden="true" />
           {formatCount(total)}
         </span>
@@ -319,7 +323,9 @@ function LiveStageCard({
 
 export default function StagesPage() {
   const { t: _copy } = _useCopy();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const [roomFilter, setRoomFilter] = useState<StageTopic | null>(null);
+  const [roomSearch, setRoomSearch] = useState('');
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<StagesTab>('live');
   const {
@@ -534,8 +540,29 @@ export default function StagesPage() {
       );
     }
 
+    const visible = liveSpaces.filter((space) =>
+      (!roomFilter || space.topic === roomFilter) &&
+      matchesStageSearch(space, roomSearch, i18n.language)
+    );
     return (
       <div className="space-y-2 sm:space-y-3">
+        <div className="space-y-2 px-1">
+          <input type="search" value={roomSearch} onChange={(event) => setRoomSearch(event.target.value)}
+            aria-label={stageRoomLabel(t, 'searchRooms')} placeholder={stageRoomLabel(t, 'searchRooms')}
+            className="w-full rounded-xl border border-foreground/15 bg-foreground/5 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground" />
+          <div className="flex flex-wrap gap-1.5" role="group" aria-label={stageRoomLabel(t, 'roomTopic')}>
+            {([null, ...STAGE_TOPICS] as const).map((topic) => (
+              <button type="button" key={topic ?? 'all'} aria-pressed={roomFilter === topic} onClick={() => setRoomFilter(topic)}
+                className={cn('rounded-lg border px-2.5 py-1.5 text-xs font-medium',
+                  roomFilter === topic ? 'border-primary/35 bg-primary/15 text-foreground' : 'border-foreground/10 text-muted-foreground hover:text-foreground')}>
+                {topic ? stageTopicLabel(t, topic) : stageRoomLabel(t, 'topicAll')}
+              </button>
+            ))}
+          </div>
+        </div>
+        {visible.length === 0 && !resume && (
+          <p className="py-4 text-center text-sm text-muted-foreground" role="status">{stageRoomLabel(t, 'noMatchingRooms')}</p>
+        )}
         {resume && (
           <LiveStageCard
             key={resume.id}
@@ -546,7 +573,7 @@ export default function StagesPage() {
             onShare={() => setShareSpace(resume)}
           />
         )}
-        {liveSpaces.map((space) => (
+        {visible.map((space) => (
           <LiveStageCard
             key={space.id}
             space={space}

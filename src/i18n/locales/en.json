@@ -5430,10 +5430,6 @@
     "shopAllowanceUsed": "{{allowance}} of {{allowance}} used. Stake more Riftn tokens for a higher badge and another slot."
   },
   "stages": {
-    "returnToStage": "Return",
-    "liveRadio": "Live radio",
-    "stageHeadcount_one": "{{count}} participant",
-    "stageHeadcount_other": "{{count}} participants",
     "showChat": "Show chat",
     "hideChat": "Hide chat",
     "radioShow": {

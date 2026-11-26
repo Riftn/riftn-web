@@ -5620,10 +5620,6 @@
     "shopAllowanceUsed": "{{allowance}} van {{allowance}} gebruikt. Stake meer Riftn tokens voor een hogere badge en een extra slot."
   },
   "stages": {
-    "returnToStage": "Terug",
-    "liveRadio": "Live radio",
-    "stageHeadcount_one": "{{count}} deelnemer",
-    "stageHeadcount_other": "{{count}} deelnemers",
     "showChat": "Chat tonen",
     "hideChat": "Chat verbergen",
     "radioShow": {
