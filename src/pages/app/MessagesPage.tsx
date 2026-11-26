@@ -336,7 +336,8 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const { t } = useTranslation();
   const location = useLocation();
   const [selectedConversation, setSelectedConversation] = useState<DeHubConversation | null>(null);
-  const [showPublicChat, setShowPublicChat] = useState(() => new URLSearchParams(location.search).get('chat') === 'public');
+  // Resolve public links in the navigation effect below, after mount.
+  const [showPublicChat, setShowPublicChat] = useState(false);
   // A group, channel or community chat open in place (same chat as the
   // community page's Chat tab).
   const [selectedRoom, setSelectedRoom] = useState<Community | null>(null);
