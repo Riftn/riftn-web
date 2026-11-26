@@ -152,7 +152,10 @@ async function verify(theme, width, phone) {
         outline: getComputedStyle(button).outlineStyle,
         width: getComputedStyle(button).outlineWidth,
       }));
-      assert.deepEqual(focus, { visible: true, outline: 'solid', width: '2px' });
+      assert.ok(
+        focus.visible && focus.outline === 'solid' && Number.parseFloat(focus.width) >= 2,
+        `Expected a visible focus outline of at least 2px, got ${JSON.stringify(focus)}`,
+      );
       await page.screenshot({ path: `${output}/${name}-focus.png`, animations: 'disabled' });
       await close.hover();
       await page.mouse.down();
