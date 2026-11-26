@@ -41,7 +41,17 @@ it('fills a quiet interval, clears the hold when muted, and resumes with fresh v
   await vi.advanceTimersByTimeAsync(800);
   expect(sent.length).toBeGreaterThanOrEqual(3);
   expect(sent.every((frame) => frame.label === 'first track')).toBe(true);
-  expect(sent[1].timestamp).toBeGreaterThan(sent[0].timestamp);
+  expect(sent[1].timestamp).toBe(151_000);
+  expect(sent[sent.length - 1].timestamp).toBe(751_000);
+
+  source.enqueue(new TestFrame({ label: 'late frame' }, { timestamp: 730_000 }));
+  await vi.advanceTimersByTimeAsync(0);
+  expect(sent[sent.length - 1].label).toBe('first track');
+  source.enqueue(new TestFrame({ label: 'live frame' }, { timestamp: 763_000 }));
+  await vi.advanceTimersByTimeAsync(0);
+  source.enqueue(new TestFrame({ label: 'live frame' }, { timestamp: 796_000 }));
+  await vi.advanceTimersByTimeAsync(0);
+  expect(sent.slice(-2).map((frame) => frame.timestamp)).toEqual([763_000, 796_000]);
 
   const beforeMute = sent.length;
   worker.onmessage({ data: { type: 'enabled', enabled: false } });
@@ -52,11 +62,11 @@ it('fills a quiet interval, clears the hold when muted, and resumes with fresh v
   worker.onmessage({ data: { type: 'enabled', enabled: true } });
   await vi.advanceTimersByTimeAsync(800);
   expect(sent).toHaveLength(beforeMute);
-  source.enqueue(new TestFrame({ label: 'next track' }, { timestamp: 1000 }));
+  source.enqueue(new TestFrame({ label: 'resumed' }, { timestamp: 2_401_000 }));
   await vi.advanceTimersByTimeAsync(0);
   const resumed = sent[sent.length - 1];
-  expect(resumed.label).toBe('next track');
-  expect(resumed.timestamp).toBeGreaterThan(sent[beforeMute - 1].timestamp);
+  expect(resumed.label).toBe('resumed');
+  expect(resumed.timestamp).toBe(2_401_000);
 
   source.close();
   await vi.advanceTimersByTimeAsync(0);
