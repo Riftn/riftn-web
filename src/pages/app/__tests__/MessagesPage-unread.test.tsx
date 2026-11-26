@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
 import type { DeHubConversation } from '@/lib/api/dehub';
@@ -36,10 +36,12 @@ vi.mock('@/lib/api/dehub/dm-socket', () => ({ emitSendMessage: vi.fn(), onConver
 vi.mock('@/lib/api/dehub/blocks', () => ({ blockUser: vi.fn() }));
 vi.mock('@/lib/dm-e2ee/keys', () => ({ prepareOutgoing: vi.fn() }));
 vi.mock('@/lib/media-url', () => ({ buildAvatarUrl: () => '', extractAvatarPath: () => '', storageImage: () => '' }));
-vi.mock('@/components/app/chat', () => ({
+vi.mock('@/components/app/chat/DirectMessageChat', () => ({
   DirectMessageChat: ({ onBack }: { onBack: () => void }) => <button onClick={onBack}>Back to messages</button>,
-  PublicChat: () => null, NewConversationModal: () => null, NewMessageSelector: () => null,
 }));
+vi.mock('@/components/app/chat/PublicChat', () => ({ PublicChat: () => null }));
+vi.mock('@/components/app/chat/NewConversationModal', () => ({ NewConversationModal: () => null }));
+vi.mock('@/components/app/chat/NewMessageSelector', () => ({ NewMessageSelector: () => null }));
 vi.mock('@/components/app/chat/NewMessageDrawer', () => ({ NewMessageDrawer: () => null }));
 vi.mock('@/components/app/page-kit/PageKit', () => ({
   PageIsland: ({ children }: { children: ReactNode }) => <div>{children}</div>,
@@ -64,6 +66,22 @@ vi.mock('@/components/ui/swipeable-row', () => ({ SwipeableRow: ({ children }: {
 import MessagesPage from '../MessagesPage';
 
 const inbox = () => <MemoryRouter initialEntries={['/app/messages']}><MessagesPage /></MemoryRouter>;
+
+function ChatLocation() {
+  const { search, state } = useLocation();
+  return <output>{search} share {state?.shareLiveTokenId ?? 'none'}</output>;
+}
+
+it('keeps the stream share when Public Chat adds its back entry', async () => {
+  render(
+    <MemoryRouter initialEntries={[{ pathname: '/app/messages', search: '?chat=public', state: { shareLiveTokenId: '42' } }]}>
+      <MessagesPage />
+      <ChatLocation />
+    </MemoryRouter>,
+  );
+
+  expect(await screen.findByText('?chat=1 share 42')).toBeInTheDocument();
+});
 
 describe('conversation unread state', () => {
   beforeEach(() => {

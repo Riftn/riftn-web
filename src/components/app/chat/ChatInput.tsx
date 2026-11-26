@@ -1,7 +1,7 @@
 import { useTranslation as _useCopy } from 'react-i18next';
 import BarChart3 from "@/components/ui/cut-icons/stats";
 import Quote from "@/components/ui/cut-icons/quote";
-import { useEffect, useState, useRef, type ReactNode } from 'react';
+import { Suspense, useEffect, useState, useRef, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useIsMobile } from '@/hooks/use-mobile';
 import '@/styles/chat-hold.css';
@@ -47,8 +47,13 @@ import { dragHasFiles } from '@/lib/comment-attachments';
 import { cleanVideoOptions, type DmVideoOptions } from '@/lib/dm-video-options';
 import { withReplay, type DmDestructChoice } from '@/lib/dm-destruct';
 import { DmMediaStudio, type DmStudioItem } from './DmVideoStudio';
-import { PhotoStudio, type StudioResult } from '@/features/post/components/PhotoStudio';
+import type { StudioResult } from '@/features/post/components/PhotoStudio';
 import { LockPriceControl } from './LockPriceControl';
+import { lazyWithRetry } from '@/lib/lazy-with-retry';
+
+const PhotoStudio = lazyWithRetry(() =>
+  import('@/features/post/components/PhotoStudio').then(({ PhotoStudio }) => ({ default: PhotoStudio })),
+);
 
 /** Per-kind caps, matching the backend's DM limits. */
 const DM_MEDIA_LIMITS = { image: 10 * 1024 * 1024, video: 50 * 1024 * 1024, audio: 20 * 1024 * 1024 } as const;
@@ -864,7 +869,7 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
         const it = studioItems[photoEditAt];
         const back = () => { setPhotoEditAt(null); setStudioOpen(true); };
         return (
-          <PhotoStudio
+          <Suspense fallback={null}><PhotoStudio
             photos={[{ original: it.studioOriginal ?? it.file, edits: it.studioEdits }]}
             startIndex={0}
             startTab="crop"
@@ -880,7 +885,7 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
               }
               back();
             }}
-          />
+          /></Suspense>
         );
       })()}
       {studioItems.length > 0 && (

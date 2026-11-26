@@ -688,6 +688,7 @@ export function useProfilePage({ activeTab = 'home' }: UseProfilePageOptions = {
     const work = Promise.allSettled([
       refetchProfile(),
       refetchContent(),
+      queryClient.invalidateQueries({ queryKey: ['profile-content-counts', contentUserId?.toLowerCase()] }),
       queryClient.invalidateQueries({ queryKey: ['user-reposts'] }),
       queryClient.invalidateQueries({ queryKey: ['user-proposal-reposts'] }),
       queryClient.invalidateQueries({ queryKey: ['user-comments-count'] }),
@@ -696,7 +697,7 @@ export function useProfilePage({ activeTab = 'home' }: UseProfilePageOptions = {
     // Keep the ring visible long enough to read as "refreshed".
     const wait = Math.max(0, PULL_REFRESH_MIN_MS - (Date.now() - began));
     setTimeout(() => setIsRefreshing(false), wait);
-  }, [isRefreshing, isViewingOwnProfile, clearOptimisticPosts, refetchProfile, refetchContent, queryClient]);
+  }, [isRefreshing, isViewingOwnProfile, clearOptimisticPosts, refetchProfile, refetchContent, queryClient, contentUserId]);
 
   const coverHeight = useRef(130);
   const onPullMotion = useCallback((distance: number, pulling: boolean) => {

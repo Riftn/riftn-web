@@ -331,6 +331,7 @@ function toVideoItem(nft: DeHubNFT): VideoItem {
     commentCount: nft.commentCount || nft.comment_count || 0,
     isPPV: nft.is_ppv || streamInfo?.isPayPerView || false,
     ppvPrice: nft.ppv_price || streamInfo?.payPerViewAmount,
+    ppvPreviewReady: nft.ppvPreview?.ready === true,
     ppvCurrency: nft.ppv_currency || nft.streamInfo?.payPerViewTokenSymbol || 'DHB',
     isW2E,
     isLocked: nft.is_locked || streamInfo?.isLockContent || false,

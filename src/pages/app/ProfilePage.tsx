@@ -276,24 +276,24 @@ export default function ProfilePage() {
   // panel's post-type row only applies on the All tab.
   const data = useProfilePage({ activeTab });
 
-  // One reveal, not four. A fresh profile used to land in steps: header with
-  // "0" tab counts, then counts (re-sorting the tabs), then the pinned
-  // community row pushing everything down. Hold the skeleton until the counts
-  // and pins answer too, capped so a slow side request never holds the page.
-  // A profile painted from cache shows at once, as before.
+  // Keep one profile shell until the first tab can paint. Once shown, the
+  // page stays mounted while its cached queries revalidate.
   const revealAddress = data.apiProfile?.walletAddress;
   const { isFetched: pinsFetched } = usePinnedCommunities(revealAddress);
-  const [revealCapPassed, setRevealCapPassed] = useState(false);
+  const [revealCapAddress, setRevealCapAddress] = useState<string>();
+  const [revealedAddress, setRevealedAddress] = useState<string>();
   useEffect(() => {
-    setRevealCapPassed(false);
     if (!revealAddress) return;
-    const timer = setTimeout(() => setRevealCapPassed(true), PROFILE_REVEAL_CAP_MS);
+    const timer = setTimeout(() => setRevealCapAddress(revealAddress), PROFILE_REVEAL_CAP_MS);
     return () => clearTimeout(timer);
   }, [revealAddress]);
-  const holdForReveal = !!data.profile && !!revealAddress && !data.isProfileFromCache
-    && !revealCapPassed && !(data.isCountsSettled && pinsFetched);
-  // A pull refresh keeps what is on screen; only a first load shows skeletons.
-  const headerFetching = data.isFetchingProfile && !data.isRefreshing;
+  const holdForDetails = !data.isProfileFromCache && revealCapAddress !== revealAddress
+    && !(data.isCountsSettled && pinsFetched);
+  const holdForReveal = !!data.profile && !!revealAddress && revealedAddress !== revealAddress
+    && (data.isAuthLoading || data.isLoadingContent || holdForDetails);
+  useEffect(() => {
+    if (data.profile && revealAddress && !holdForReveal) setRevealedAddress(revealAddress);
+  }, [data.profile, revealAddress, holdForReveal]);
   // One short "done" beat after a pull refresh: the avatar ring closes and the photo pops.
   const [justRefreshed, setJustRefreshed] = useState(false);
   const wasRefreshing = useRef(false);
@@ -851,7 +851,6 @@ return () => rail.removeEventListener('wheel', onWheel);
           translatedBio={data.translatedBio}
           setTranslatedBio={data.setTranslatedBio}
           isBlocked={data.isBlocked}
-          isFetchingProfile={headerFetching}
         />
         </div>
 
@@ -940,7 +939,7 @@ return () => rail.removeEventListener('wheel', onWheel);
           </div>
           </div>
           {isTabsStuck && <div className="profile-rail-follow shrink-0 max-w-[36%]">
-            <ProfileFollowButton profile={data.profile} apiProfile={data.apiProfile} isViewingOwnProfile={data.isViewingOwnProfile} isBlocked={data.isBlocked} isFetchingProfile={headerFetching} isFollowing={data.isFollowing} isPending={data.isPending} isTargetPrivate={data.isTargetPrivate} isFollowLoading={isFollowLoading} handleFollow={handleFollow} handleUnfollow={handleUnfollow} />
+            <ProfileFollowButton profile={data.profile} apiProfile={data.apiProfile} isViewingOwnProfile={data.isViewingOwnProfile} isBlocked={data.isBlocked} isFetchingProfile={false} isFollowing={data.isFollowing} isPending={data.isPending} isTargetPrivate={data.isTargetPrivate} isFollowLoading={isFollowLoading} handleFollow={handleFollow} handleUnfollow={handleUnfollow} />
           </div>}
         </div>
         </div>
