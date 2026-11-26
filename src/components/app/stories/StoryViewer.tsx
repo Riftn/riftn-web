@@ -12,18 +12,19 @@
  * show who watched instead of a reply bar.
  */
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { type InfiniteData, type UseInfiniteQueryResult, useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { ArrowUpRight, ChevronLeft, ChevronRight, Eye, Heart, Link2, Loader2, Repeat2, Star, Users, Volume2, VolumeX } from 'lucide-react';
+import { ArrowUpRight, ChevronLeft, ChevronRight, Eye, Heart, Link2, Loader2, Repeat2, Star, Volume2, VolumeX } from 'lucide-react';
 import Close from '@/components/ui/cut-icons/close';
 import MoreVertical from '@/components/ui/cut-icons/morevertical';
 import Plus from '@/components/ui/cut-icons/add';
 import Send from '@/components/ui/cut-icons/send';
 import ShareIcon from '@/components/ui/cut-icons/feedshare';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import Music from '@/components/ui/cut-icons/music';
 import { useAuth } from '@/contexts/AuthContext';
 import { buildAvatarUrl, buildAvatarCdnFallbackUrl } from '@/lib/media-url';
@@ -39,7 +40,6 @@ import {
   reportStory,
   type ShelfEntry,
   type StoryItem,
-  type StoryViewer as StoryViewerRow,
 } from '@/lib/api/dehub/stories';
 import { useRefreshStoryShelf } from '@/hooks/use-story-shelf';
 import { ageLabel, coverOf, localAge, nameOf, startIndex } from './story-utils';
@@ -178,6 +178,19 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
   const loaded = !!item && loadedId === item.id;
   const setLoaded = useCallback(() => setLoadedId(item?.id ?? null), [item?.id]);
   const own = !!entry && !!me && entry.author.address === me;
+  const audience = useInfiniteQuery({
+    queryKey: ['moment-viewers', item?.id, me],
+    queryFn: ({ pageParam }) => getStoryViewers(item!.id, pageParam),
+    enabled: !!item && own && isAuthenticated && sheet === 'viewers',
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: page => page.next ?? undefined,
+    refetchInterval: () => item && Date.parse(item.expiresAt) > Date.now() ? 10_000 : false,
+    refetchOnWindowFocus: true,
+    staleTime: 0,
+    gcTime: 0,
+  });
+  const viewCount = audience.data?.pages[0]?.viewCount ?? item?.viewCount ?? 0;
+  const viewsLabel = t('stories.viewsCount', { defaultValue: '{{formatted}} views', formatted: formatCount(viewCount) });
   const postPeek = item?.postTokenId != null && postPeekId === item.id;
   const paused = held || postPeek || typing || sheet !== null || openingOriginal || !loaded;
   const room = useMomentComments(item?.id, isAuthenticated, !!item && (item.commentCount ?? 1) > 0);
@@ -715,7 +728,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
           {own && (
             <button type="button" data-sv-pill data-sv-viewers-trigger onClick={() => setSheet('viewers')} aria-label={t('stories.whoWatched', { defaultValue: 'Who watched' })}>
               <Eye className="w-3.5 h-3.5" />
-              {t('stories.watchedCount', { n: formatCount(item.viewCount ?? 0), defaultValue: '{{n}} watched' })}
+              {viewsLabel}
               {(item.likeCount ?? 0) > 0 && (<><Heart className="w-3 h-3 ml-1 fill-current text-[rgb(255_45_122)]" />{formatCount(item.likeCount ?? 0)}</>)}
             </button>
           )}
@@ -761,7 +774,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
           {own ? (
             <button type="button" data-sv-field data-sv-viewers-trigger onClick={() => setSheet('viewers')} aria-label={t('stories.whoWatched', { defaultValue: 'Who watched' })}>
               <Eye className="w-[18px] h-[18px]" />
-              {t('stories.watchedCount', { n: formatCount(item.viewCount ?? 0), defaultValue: '{{n}} watched' })}
+              {viewsLabel}
               {(item.likeCount ?? 0) > 0 && (<><MomentHeart className="w-4 h-4 ml-1.5" filled />{formatCount(item.likeCount ?? 0)}</>)}
             </button>
           ) : !isAuthenticated ? (
@@ -815,7 +828,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
         {sheet && sheet !== 'share-dm' && (
           <div data-sv-sheet-backdrop onClick={dismissSheet}>
             <div ref={sheetRef} data-sv-sheet onClick={e => e.stopPropagation()}>
-              {sheet === 'viewers' && <ViewersList item={item} onOpen={openProfile} onClose={dismissSheet} />}
+              {sheet === 'viewers' && own && <ViewersList item={item} audience={audience} viewsLabel={viewsLabel} onOpen={openProfile} onClose={dismissSheet} />}
               {sheet === 'comments' && (
                 <StoryComments
                   item={item}
@@ -895,7 +908,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
             {own ? (
               <button type="button" data-sv-chip onClick={() => setSheet('viewers')}>
                 <Eye className="w-4 h-4" />
-                {t('stories.watchedCount', { n: formatCount(item.viewCount ?? 0), defaultValue: '{{n}} watched' })}
+                {viewsLabel}
               </button>
             ) : (item.commentCount ?? 0) > 0 ? (
               <span data-sv-panel-count>{formatCount(item.commentCount ?? 0)}</span>
@@ -957,54 +970,39 @@ function SheetButton({ children, onClick, danger }: { children: React.ReactNode;
   );
 }
 
-function ViewersList({ item, onOpen, onClose }: { item: StoryItem; onOpen: (address: string) => void; onClose: () => void }) {
+function ViewersList({
+  item, audience, viewsLabel, onOpen, onClose,
+}: {
+  item: StoryItem;
+  audience: UseInfiniteQueryResult<InfiniteData<Awaited<ReturnType<typeof getStoryViewers>>>>;
+  viewsLabel: string;
+  onOpen: (address: string) => void;
+  onClose: () => void;
+}) {
   const { t } = useTranslation();
-  const [rows, setRows] = useState<StoryViewerRow[] | null>(null);
-  const [next, setNext] = useState<string | null>(null);
-  // Different people who watched, and every watch with repeats. Both come
-  // with the list, so the numbers always match the rows below them.
-  const [counts, setCounts] = useState({ viewers: item.viewCount ?? 0, views: item.viewCount ?? 0, likes: item.likeCount ?? 0 });
-
-  useEffect(() => {
-    let alive = true;
-    getStoryViewers(item.id).then(r => {
-      if (!alive) return;
-      setRows(r.viewers);
-      setNext(r.next);
-      setCounts({ viewers: r.viewCount, views: Math.max(r.playCount ?? 0, r.viewCount), likes: r.likeCount });
-    }).catch(() => alive && setRows([]));
-    return () => { alive = false; };
-  }, [item.id]);
-
-  const more = async () => {
-    if (!next) return;
-    const r = await getStoryViewers(item.id, next).catch(() => null);
-    if (!r) return;
-    setRows(list => [...(list ?? []), ...r.viewers]);
-    setNext(r.next);
-  };
+  const rows = audience.data?.pages.flatMap(page => page.viewers) ?? [];
+  const likes = audience.data?.pages[0]?.likeCount ?? item.likeCount ?? 0;
 
   return (
     <div>
       <div className="flex items-center gap-3 text-[14px] font-semibold">
-        <span className="inline-flex items-center gap-1.5" title={t('stories.viewersCount', { defaultValue: '{{formatted}} viewers', formatted: formatCount(counts.viewers) })}>
-          <Users className="w-4 h-4" aria-hidden />
-          <span className="sr-only">{t('stories.viewersCount', { defaultValue: '{{formatted}} viewers', formatted: formatCount(counts.viewers) })}</span>
-          <span aria-hidden>{formatCount(counts.viewers)}</span>
+        <span className="inline-flex items-center gap-1.5" aria-live="polite">
+          <Eye className="size-4" aria-hidden />
+          {viewsLabel}
         </span>
-        <span className="inline-flex items-center gap-1.5" title={t('stories.viewsCount', { defaultValue: '{{formatted}} views', formatted: formatCount(counts.views) })}>
-          <Eye className="w-4 h-4" aria-hidden />
-          <span className="sr-only">{t('stories.viewsCount', { defaultValue: '{{formatted}} views', formatted: formatCount(counts.views) })}</span>
-          <span aria-hidden>{formatCount(counts.views)}</span>
-        </span>
-        <span className="inline-flex items-center gap-1.5"><Heart data-sv-heart className="w-4 h-4 fill-current" />{formatCount(counts.likes)}</span>
-        <button type="button" className="ml-auto grid size-11 place-items-center rounded-full hover:bg-white/10" onClick={onClose} aria-label={t('common.close', { defaultValue: 'Close' })}>
+        <span className="inline-flex items-center gap-1.5"><Heart data-sv-heart className="size-4 fill-current" />{formatCount(likes)}</span>
+        <Button type="button" variant="ghost" size="icon" className="ml-auto size-11 shrink-0 focus-visible:ring-white focus-visible:ring-offset-0" onClick={onClose} aria-label={t('common.close', { defaultValue: 'Close' })}>
           <Close className="size-[18px]" />
-        </button>
+        </Button>
       </div>
-      {rows === null ? (
-        <div className="py-6 grid place-items-center"><Loader2 className="w-5 h-5 animate-spin opacity-70" /></div>
-      ) : rows.length === 0 ? (
+      {audience.isPending ? (
+        <div role="status" className="py-6 grid place-items-center">
+          <Loader2 className="size-5 animate-spin opacity-70" aria-hidden />
+          <span className="sr-only">{t('common.loading', { defaultValue: 'Loading' })}</span>
+        </div>
+      ) : !audience.data ? (
+        <Button type="button" variant="ghost" onClick={() => void audience.refetch()} loading={audience.isFetching}>{t('common.tryAgain', { defaultValue: 'Try again' })}</Button>
+      ) : rows.length === 0 && !audience.hasNextPage ? (
         <p className="py-4 text-[14px] opacity-70">{t('stories.noViewersYet', { defaultValue: 'No one has watched it yet.' })}</p>
       ) : (
         <div className="flex flex-col">
@@ -1012,27 +1010,24 @@ function ViewersList({ item, onOpen, onClose }: { item: StoryItem; onOpen: (addr
             const face = v.avatarImageUrl ? buildAvatarUrl(v.address, v.avatarImageUrl) : buildAvatarCdnFallbackUrl(v.address, undefined);
             const name = v.displayName || v.username || v.address.slice(0, 8);
             return (
-              <button key={v.address} type="button" className="grid w-full min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 py-2 text-start" onClick={() => onOpen(v.address)}>
+              <Button key={v.address} type="button" variant="ghost" className="grid h-auto min-h-11 w-full min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] justify-items-start gap-3 px-2 py-2 text-start focus-visible:ring-inset focus-visible:ring-white focus-visible:ring-offset-0" onClick={() => onOpen(v.address)}>
                 <Avatar className="size-9">
                   {face && <AvatarImage src={face} alt="" className="object-cover" />}
                   <AvatarFallback className="bg-white/15 text-[13px] text-white">{name.slice(0, 1).toUpperCase()}</AvatarFallback>
                 </Avatar>
-                <span className="min-w-0 overflow-hidden">
+                <span className="w-full min-w-0 overflow-hidden">
                   <span className="block text-[14px] font-medium truncate">{name}</span>
                   {v.username && <span className="block text-[12px] opacity-60 truncate">@{v.username}</span>}
                 </span>
-                <span className="inline-flex items-center gap-2">
-                  {(v.plays ?? 1) > 1 && (
-                    <span className="text-[13px] font-semibold opacity-70" title={t('stories.watchedTimes', { defaultValue: 'Watched {{formatted}} times', formatted: formatCount(v.plays ?? 1) })}>
-                      {t('stories.playsShort', { defaultValue: '{{formatted}}×', formatted: formatCount(v.plays ?? 1) })}
-                    </span>
-                  )}
-                  {v.liked && <Heart data-sv-heart className="w-4 h-4 fill-current" />}
-                </span>
-              </button>
+                {v.liked && <Heart data-sv-heart className="size-4 fill-current" />}
+              </Button>
             );
           })}
-          {next && <button type="button" className="py-3 text-[14px] font-semibold" onClick={more}>{t('common.showMore', { defaultValue: 'Show more' })}</button>}
+          {audience.hasNextPage && (
+            <Button type="button" variant="ghost" className="mt-2" disabled={audience.isFetching} loading={audience.isFetchingNextPage} onClick={() => void audience.fetchNextPage({ cancelRefetch: false })}>
+              {t('common.showMore', { defaultValue: 'Show more' })}
+            </Button>
+          )}
         </div>
       )}
     </div>
