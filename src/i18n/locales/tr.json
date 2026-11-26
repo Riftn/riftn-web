@@ -4650,6 +4650,12 @@
   "arcade": {
     "riftnOriginals": "Riftn orijinalleri",
     "otherGames": "Diğer oyunlar",
+    "hideListing": "Arcade’de gizle",
+    "showListing": "Arcade’de göster",
+    "listingActionLabel": "{{action}} · {{game}}",
+    "listingHint": "Gizlenen oyunlar doğrudan bağlantıyla oynanabilir.",
+    "listingUpdateError": "Arcade görünürlüğü güncellenemedi. Tekrar dene.",
+    "listingsLoadError": "Bazı Arcade oyunları yüklenemedi.",
     "gameCount_one": "{{count}} oyun",
     "gameCount_other": "{{count}} oyun",
     "title": "Oyun Salonu",

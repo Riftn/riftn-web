@@ -4650,6 +4650,12 @@
   "arcade": {
     "riftnOriginals": "Riftn originals",
     "otherGames": "Other games",
+    "hideListing": "Hide from Arcade",
+    "showListing": "Show in Arcade",
+    "listingActionLabel": "{{action}} · {{game}}",
+    "listingHint": "Hidden games can still be played by direct link.",
+    "listingUpdateError": "Couldn’t update Arcade visibility. Try again.",
+    "listingsLoadError": "Some Arcade listings couldn’t load.",
     "gameCount_one": "{{count}} game",
     "gameCount_other": "{{count}} games",
     "title": "Arcade",

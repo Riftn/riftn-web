@@ -4654,6 +4654,12 @@
   "arcade": {
     "riftnOriginals": "Jeux originaux de Riftn",
     "otherGames": "Autres jeux",
+    "hideListing": "Masquer dans l’Arcade",
+    "showListing": "Afficher dans l’Arcade",
+    "listingActionLabel": "{{action}} · {{game}}",
+    "listingHint": "Les jeux masqués restent jouables via un lien direct.",
+    "listingUpdateError": "Impossible de modifier la visibilité dans l’Arcade. Réessayez.",
+    "listingsLoadError": "Certains jeux de l’Arcade n’ont pas pu être chargés.",
     "gameCount_one": "{{count}} jeu",
     "gameCount_other": "{{count}} jeux",
     "title": "Arcade",
