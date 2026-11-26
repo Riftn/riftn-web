@@ -1,12 +1,14 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { useQueryClient } from '@tanstack/react-query';
-import { ChevronRight, Landmark } from 'lucide-react';
+import { useIsMutating, useMutation, useQueryClient } from '@tanstack/react-query';
+import { ChevronRight } from 'lucide-react';
 import { AuthContext } from '@/contexts/AuthContext';
-import { getAccountInfo, updateProfile } from '@/lib/api/dehub';
+import { updateProfile } from '@/lib/api/dehub';
 import { Switch } from '@/components/ui/switch';
-import { badgeMuseumIsShown, earnedByRarity, useMilestones } from '@/hooks/use-milestones';
+import { Button } from '@/components/ui/button';
+import { ThemedIcon } from '@/components/app/war/WarHudIcon';
+import { earnedByRarity, useMilestones } from '@/hooks/use-milestones';
 import { BadgeMuseumSheet, MedalPodium } from '@/components/app/profile/BadgeMuseum';
 import { formatCount } from '@/lib/format-count';
 import { cn } from '@/lib/utils';
@@ -17,55 +19,40 @@ import { SETTINGS_LABEL_CLASS } from './SettingsRow';
  * so it shows here and nowhere else until "Show Badge Museum on my profile"
  * is switched on. "View my Badge Museum" opens the full museum (earned and
  * locked, with progress) for yourself either way.
-
  */
 export function BadgeMuseumSetting({ previewAddress }: { /** State gallery: draw for this address, switch saves nothing. */ previewAddress?: string } = {}) {
   const { t } = useTranslation();
   const auth = useContext(AuthContext);
   const address = previewAddress ?? auth?.user?.address;
   const queryClient = useQueryClient();
-  const [preference, setPreference] = useState<{ address: string; shown: boolean } | null>(null);
-  const shown = preference?.address === address ? preference?.shown ?? null : null;
-  const [saving, setSaving] = useState(false);
+  const [previewShown, setPreviewShown] = useState(false);
   const [open, setOpen] = useState(false);
-  const { data } = useMilestones(address);
-
-  useEffect(() => {
-    if (!address) return;
-    if (previewAddress) {
-      setPreference({ address, shown: false });
-      return;
-    }
-    let cancelled = false;
-    getAccountInfo(address)
-      .then((info) => {
-        if (!cancelled) setPreference({ address, shown: badgeMuseumIsShown(info?.customs) });
-      })
-      .catch(() => {
-        if (!cancelled) setPreference(null);
+  const { data, isFetching, isError } = useMilestones(address, { refreshOnMount: !previewAddress });
+  const mutationKey = ['badge-museum-visibility', address?.toLowerCase()];
+  const saving = useIsMutating({ mutationKey }) > 0;
+  const busy = !previewAddress && (isFetching || saving);
+  const disabled = !previewAddress && (busy || isError || typeof data?.hidden !== 'boolean');
+  const shown = previewAddress ? previewShown : data?.hidden === false;
+  const { mutate } = useMutation({
+    mutationKey,
+    mutationFn: async ({ viewer, show }: { viewer: string; show: boolean }) => {
+      const response = await updateProfile({
+        badgeMuseumVisibility: show ? 'public' : 'hidden',
+        badgeMuseumViewer: viewer,
       });
-    return () => {
-      cancelled = true;
-    };
-  }, [address, previewAddress]);
+      if (response?.result !== true) throw new Error('Badge Museum update failed');
+    },
+    onError: () => toast.error(t('badgeMuseum.saveFailed', 'Could not save. Try again.')),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['profile-milestones'] }),
+  });
 
   if (!address) return null;
 
-  const toggle = async (next: boolean) => {
-    if (shown === null || saving) return;
-    const before = shown;
-    setPreference({ address, shown: next });
-    if (previewAddress) return;
-    setSaving(true);
-    try {
-      await updateProfile({ badgeMuseumVisibility: next ? 'public' : 'hidden' });
-      void queryClient.invalidateQueries({ queryKey: ['profile-milestones'] });
-      void queryClient.invalidateQueries({ queryKey: ['dehub-profile'] });
-    } catch {
-      setPreference((current) => current?.address === address ? { address, shown: before } : current);
-      toast.error(t('badgeMuseum.saveFailed', 'Could not save. Try again.'));
-    } finally {
-      setSaving(false);
+  const toggle = (next: boolean) => {
+    if (previewAddress) {
+      setPreviewShown(next);
+    } else if (!disabled && !queryClient.isMutating({ mutationKey })) {
+      mutate({ viewer: address, show: next });
     }
   };
 
@@ -77,7 +64,7 @@ export function BadgeMuseumSetting({ previewAddress }: { /** State gallery: draw
       <div className="flex items-center gap-3">
         <div className="min-w-0 flex-1">
           <span className={cn(SETTINGS_LABEL_CLASS, 'mb-0.5')}>{title}</span>
-          <p className="text-xs text-zinc-400">
+          <p className="text-sm text-muted-foreground">
             {data
               ? t('badgeMuseum.summary', {
                   defaultValue: '{{earned}} of {{total}} badges earned',
@@ -88,42 +75,46 @@ export function BadgeMuseumSetting({ previewAddress }: { /** State gallery: draw
           </p>
         </div>
         {earned.length > 0 && (
-          <button
+          <Button
             type="button"
+            variant="ghost"
             onClick={() => setOpen(true)}
             aria-label={t('badgeMuseum.viewMine', 'View my Badge Museum')}
-            className="flex-none rounded-xl"
+            className="h-auto min-h-11 flex-none p-1"
           >
             <MedalPodium medals={earned.slice(0, 3)} sizes={[28, 36]} />
-          </button>
+          </Button>
         )}
       </div>
 
       <div className="flex items-center justify-between gap-4">
         <div>
-          <label htmlFor="settings-badge-museum" className="block text-sm text-white">
+          <label htmlFor="settings-badge-museum" className="block text-sm text-foreground">
             {t('badgeMuseum.showSetting', 'Show Badge Museum on my profile')}
           </label>
-          <p className="mt-0.5 text-sm text-zinc-400">{t('badgeMuseum.showSettingHint', 'Off: only you can see it here.')}</p>
+          <p id="settings-badge-museum-hint" className="mt-0.5 text-sm text-muted-foreground">{t('badgeMuseum.showSettingHint', 'Off: only you can see it here.')}</p>
         </div>
         <Switch
           id="settings-badge-museum"
-          checked={!!shown}
-          disabled={shown === null || saving}
-          onCheckedChange={(next) => void toggle(next)}
+          aria-describedby="settings-badge-museum-hint"
+          aria-busy={busy}
+          checked={shown}
+          disabled={disabled}
+          onCheckedChange={toggle}
         />
       </div>
 
-      <button
+      <Button
         type="button"
+        variant="ghost"
         data-badge-museum-view
         onClick={() => setOpen(true)}
-        className="-mx-2 flex w-[calc(100%+1rem)] items-center gap-2.5 rounded-xl px-2 py-2.5 text-left text-sm font-medium text-white transition-colors hover:bg-white/[0.06]"
+        className="-mx-2 h-auto min-h-11 w-[calc(100%+1rem)] justify-start gap-2.5 whitespace-normal px-2 py-2.5 text-left text-foreground"
       >
-        <Landmark aria-hidden className="h-[18px] w-[18px] flex-none text-zinc-400" />
+        <ThemedIcon icon="dao" aria-hidden className="size-[18px] flex-none text-muted-foreground" />
         {t('badgeMuseum.viewMine', 'View my Badge Museum')}
-        <ChevronRight aria-hidden className="ml-auto h-4 w-4 flex-none text-zinc-500" />
-      </button>
+        <ChevronRight aria-hidden className="ml-auto flex-none text-muted-foreground" />
+      </Button>
 
       <BadgeMuseumSheet address={address} open={open} onOpenChange={setOpen} />
     </div>

@@ -3,33 +3,34 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { getAccountSummaries } from '@/lib/api/dehub/users';
 import {
-  rankBuilders, periodStart,
+  fetchBuilderRows, rankBuilders, periodStart,
   type BuilderPeriod, type BuilderRequestRow, type BuilderCommentRow, type TopBuilder,
 } from '@/lib/top-builders';
 
-/**
- * Raw rows for the Top builders card. The board is a few hundred rows, so the
- * whole thing is read once (only the columns the score needs) and ranked here.
- */
+/** Read the activity needed to rank both periods. */
 export function useTopBuilderRows(enabled = true) {
   return useQuery({
     queryKey: ['feature-top-builders', 'profiles'],
     enabled,
     queryFn: async () => {
-      const [reqs, comments] = await Promise.all([
-        supabase
-          .from('feature_requests')
-          .select('id,author_wallet_address,status,vote_count,created_at,updated_at')
-          .limit(5000),
-        supabase
-          .from('feature_request_comments')
-          .select('wallet_address,feature_request_id,created_at')
-          .limit(10000),
+      const [requests, commentRows]: [BuilderRequestRow[], BuilderCommentRow[]] = await Promise.all([
+        fetchBuilderRows((limit, afterId) => {
+          const query = supabase
+            .from('feature_requests')
+            .select('id,author_wallet_address,status,vote_count,created_at,updated_at')
+            .order('id')
+            .limit(limit);
+          return afterId === null ? query : query.gt('id', afterId);
+        }),
+        fetchBuilderRows((limit, afterId) => {
+          const query = supabase
+            .from('feature_request_comments')
+            .select('id,wallet_address,feature_request_id,created_at')
+            .order('id')
+            .limit(limit);
+          return afterId === null ? query : query.gt('id', afterId);
+        }),
       ]);
-      if (reqs.error) throw reqs.error;
-      if (comments.error) throw comments.error;
-      const requests: BuilderRequestRow[] = reqs.data ?? [];
-      const commentRows: BuilderCommentRow[] = comments.data ?? [];
       const profiles = await getAccountSummaries([
         ...requests.map(row => row.author_wallet_address),
         ...commentRows.map(row => row.wallet_address),

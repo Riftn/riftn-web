@@ -1037,6 +1037,7 @@ export default function FeaturesPage() {
     onFeaturesSortScroll();
   }, [onFeaturesCatScroll, onFeaturesSortScroll]);
   const [searchInput, setSearchInput] = useSurfaceDraft("src/pages/app/FeaturesPage.tsx:searchInput", '');
+  const searchLabel = t('features.promptSearch', 'Search prompts…');
   const search = useDebouncedValue(searchInput, 300);
   const [composerFocus, setComposerFocus] = useState(0);
   const [initialCategory, setInitialCategory] = useState<FeatureCategory | undefined>(undefined);
@@ -1239,12 +1240,14 @@ export default function FeaturesPage() {
         {/* Search */}
         <div className="mb-3 flex items-center gap-2">
           <div className="relative min-w-0 flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+            <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder={t('features.promptSearch', 'Search prompts…')}
+              data-search-surface
+              aria-label={searchLabel}
+              placeholder={searchLabel}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="pl-10 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 rounded-xl"
+              className="block rounded-xl py-0 pl-10 text-foreground"
             />
           </div>
           {wallet && (

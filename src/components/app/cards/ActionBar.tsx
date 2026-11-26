@@ -32,6 +32,8 @@ import Repeat2 from "@/components/ui/cut-icons/repost";
 import Send from "@/components/ui/cut-icons/send";
 import PublicChatIcon from "@/components/ui/cut-icons/chat";
 import { Button } from '@/components/ui/button';
+import { MomentAdd } from '@/components/app/stories/moment-icons';
+import { useStoriesStore } from '@/store/storiesStore';
 
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -196,6 +198,8 @@ interface ActionBarProps {
   disabled?: boolean;
   /** Handler for share-as-image action (text posts only) */
   onShareAsImage?: () => Promise<void>;
+  /** A public stream that can be shared as a linked Moment. */
+  streamMomentTokenId?: number;
   /** Numeric token ID for pin functionality */
   tokenId?: number;
   /**
@@ -414,6 +418,7 @@ export function ActionBar({
   onTip,
   onSeeEngagements,
   onShareAsImage,
+  streamMomentTokenId,
   disabled: externalDisabled = false,
   tokenId,
   isOwnPost = false,
@@ -1053,6 +1058,23 @@ export function ActionBar({
           <ImageDown className="w-5 h-5" />
           <span className="font-medium">{isSharingImage ? _copy("copy.58c753bf3fe8", { defaultValue: "Capturing..." }) : _copy("copy.c431035b32d3", { defaultValue: "Share as Image" })}</span>
         </button>
+      )}
+      {streamMomentTokenId != null && (
+        <Button
+          type="button"
+          variant="ghost"
+          className="h-auto min-h-11 w-full justify-start gap-3 p-4 text-base text-zinc-200 hover:text-white focus-visible:ring-current focus-visible:ring-offset-0 [&_svg]:size-5"
+          onClick={(e) => {
+            e.stopPropagation();
+            setSheetOpen(false);
+            const open = () => useStoriesStore.getState().openPostMoment(streamMomentTokenId);
+            if (isAuthenticated) open();
+            else openLoginModal({ then: open });
+          }}
+        >
+          <MomentAdd />
+          {_copy('stories.shareToMoment', 'Share to Moment')}
+        </Button>
       )}
       {onSeeEngagements && (
         <button

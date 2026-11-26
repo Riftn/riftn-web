@@ -1082,7 +1082,7 @@ function ArticleGallery({ onAction }: { onAction: () => void }) {
           <p className="px-4 pt-3 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">{_copy("copy.3ab556ac9956", { defaultValue: "Writing an article" })}</p>
           <ArticleComposer
             title={title} setTitle={setTitle} summary={summary} setSummary={setSummary} body={body} setBody={setBody}
-            coverPreview={SAMPLE_ARTICLE.cover} onCoverChange={onAction} onSaveDraft={onAction} onPublish={onAction}
+            coverPreview={SAMPLE_ARTICLE.cover} onCoverChange={onAction} onOpenFreeImages={onAction} onSaveDraft={onAction} onPublish={onAction}
             formReady isPosting={false} uploadProgress={0} mintAwaitingWallet={false} onAbandonMint={onAction}
           />
         </div>
