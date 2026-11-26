@@ -312,6 +312,8 @@ export function FullscreenImageViewer({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
           data-overlay-content
+          data-fullscreen-image-viewer
+          data-swipe-back-ignore
           className="pointer-events-auto fixed inset-0 z-[200] flex items-center justify-center"
           style={{ backgroundColor: `rgba(0, 0, 0, ${bgOpacity * 0.95})` }}
           onClick={onClose}
