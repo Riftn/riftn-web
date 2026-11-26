@@ -1002,6 +1002,7 @@ export function GoLiveBroadcaster({
       }
       stream.addTrack(track);
       track.enabled = videoOnRef.current;
+      session.syncVideoEnabled();
       if (videoRef.current) videoRef.current.srcObject = stream;
       return true;
     },
@@ -2038,6 +2039,7 @@ export function GoLiveBroadcaster({
     // would leave the camera capturing — and its indicator light on — behind a
     // black frame. The source has to follow it down.
     if (lookSourceRef.current) lookSourceRef.current.enabled = track.enabled;
+    sessionRef.current?.syncVideoEnabled();
     setVideoOn(track.enabled);
   };
 
