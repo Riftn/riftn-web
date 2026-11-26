@@ -1069,6 +1069,11 @@ function getNavigationLink(notification: DeHubNotification): string | null {
   }
 
   switch (notification.type) {
+    case 'new_message': {
+      const conversation = notification.metadata?.conversationId
+        || notification.metadata?.deepLink?.match(/^\/dm\/([^/?#]+)/)?.[1];
+      return conversation ? `/app/messages?conversation=${encodeURIComponent(conversation)}` : '/app/messages';
+    }
     case 'like':
     case 'comment':
     case 'comment_reply':
