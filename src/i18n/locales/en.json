@@ -1088,6 +1088,7 @@
     "heading": "Riftn Shorts"
   },
   "settings": {
+    "notifyLikedRequestCompletion": "Notify me when a liked request is completed.",
     "notificationShowCount": "Show the number on the bell",
     "notificationShowCountDesc": "See how many notifications are unread instead of just the glow",
     "messagesShowCount": "Show the number on Messages",
