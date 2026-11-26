@@ -49,8 +49,11 @@ import { TeamUpDrawer } from '@/components/app/TeamUpDrawer';
 import { LiveGiftBuyDrawer } from '@/components/app/live/LiveGiftBuyDrawer';
 
 /** Chrome type, the brand's one accent. */
-const CHROME_TEXT =
-  'bg-[linear-gradient(180deg,#fff_0%,#cfd3d8_38%,#7d838b_52%,#e9ecef_70%,#9aa0a7_100%)] bg-clip-text text-transparent';
+const CHROME_TEXT = cn(
+  'bg-[linear-gradient(180deg,#fff_0%,#cfd3d8_38%,#7d838b_52%,#e9ecef_70%,#9aa0a7_100%)] bg-clip-text text-transparent',
+  '[html:is([data-theme=light],[data-system-tone=light])_&]:bg-none',
+  '[html:is([data-theme=light],[data-system-tone=light])_&]:text-foreground',
+);
 
 const POWER_ACTION_FOCUS = 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring';
 const POWER_ACTION = `min-w-0 flex-1 whitespace-normal px-4 text-center sm:flex-none ${POWER_ACTION_FOCUS}`;
@@ -454,7 +457,7 @@ export default function SuperPowersPage() {
                         }
                         disabled={cancelBoost.isPending}
                         loading={cancelBoost.isPending && cancelBoost.variables === booking.id}
-                        className={cn("shrink-0", POWER_ACTION_FOCUS)}
+                        className={cn("relative shrink-0 pl-9 [&>[data-dehub-loader]]:absolute [&>[data-dehub-loader]]:left-3", POWER_ACTION_FOCUS)}
                       >
                         {t('common.cancel')}
                       </Button>
