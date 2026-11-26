@@ -116,10 +116,12 @@ async function verify(theme, width, phone) {
       assert.equal(await close.locator('svg').evaluate(icon => getComputedStyle(icon).color), 'rgb(255, 255, 255)');
     }
     const size = await close.evaluate(button => {
-      const { width, height } = button.getBoundingClientRect();
-      return { width, height, radius: getComputedStyle(button).borderTopLeftRadius };
+      // The pointer can already be over the close button when it opens. Its
+      // hover scale changes the painted bounds without changing its target.
+      const { width, height, borderTopLeftRadius: radius } = getComputedStyle(button);
+      return { width, height, radius };
     });
-    assert.deepEqual(size, { width: 44, height: 44, radius: '12px' });
+    assert.deepEqual(size, { width: '44px', height: '44px', radius: '12px' });
     await page.screenshot({ path: `${output}/${name}-photos.png`, animations: 'disabled' });
 
     if (phone) {
