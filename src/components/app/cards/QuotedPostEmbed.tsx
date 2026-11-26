@@ -26,7 +26,8 @@ import Play from "@/components/ui/cut-icons/play";
 
 import { getMediaUrl } from '@/lib/api/dehub/core';
 import { DEHUB_CDN_BASE } from '@/lib/api/dehub';
-import { buildAvatarUrl, extractAvatarPath, buildFeedImageUrls, buildImageUrl } from '@/lib/media-url';
+import { buildAvatarUrl, extractAvatarPath, buildFeedImageUrls, buildImageUrl, cdnImage, cdnImageSource, cdnImageSrcSet } from '@/lib/media-url';
+import { hintedImageRatio } from '@/lib/image-size-hints';
 import { isHoldGated, isSubscriberGated } from '@/lib/content-gate';
 import { isTokenUnlocked } from '@/lib/unlocked-tokens-store';
 import { BadgedName } from '@/components/app/BadgedName';
@@ -89,25 +90,42 @@ export function resolveQuotedPostMedia(post: DeHubNFT) {
 }
 
 /** The media block of an embedded post — thumbnail, play glyph, image count, gate. */
-export function QuotedPostMedia({ post, className }: { post: DeHubNFT; className?: string }) {
+export function QuotedPostMedia({ post, className, prominent = false }: { post: DeHubNFT; className?: string; prominent?: boolean }) {
   const { t: _copy } = _useCopy();
   const { hasVideo, hasImage, thumbnailUrl: firstUrl, fallbackUrl, isLive, imageCount, gated, isPPV } = resolveQuotedPostMedia(post);
   const [failed, setFailed] = useState<string[]>([]);
-  const thumbnailUrl = [firstUrl, fallbackUrl].find((url): url is string => !!url && !failed.includes(url));
+  const [loadedPhoto, setLoadedPhoto] = useState<{ url: string; ratio: number }>();
+  const showPhoto = prominent && hasImage && !hasVideo && !isLive && !gated;
+  const preferredUrl = showPhoto ? cdnImage(firstUrl, { width: 1080, quality: 88 }) : firstUrl;
+  const thumbnailUrl = [preferredUrl, showPhoto ? cdnImageSource(firstUrl) : undefined, fallbackUrl]
+    .find((url): url is string => !!url && !failed.includes(url));
   // Only draw the media box when there is something to put in it. Text and
   // poll posts can still come back typed as "image" with no image URL, which
   // used to leave an empty grey block above the quoted text. A live whose
   // pictures all failed is dropped the same way.
   if (!thumbnailUrl && !hasVideo) return null;
   const showPlay = hasVideo || isLive;
+  const photoRatio = showPhoto && thumbnailUrl
+    ? hintedImageRatio(thumbnailUrl) ?? (loadedPhoto?.url === thumbnailUrl ? loadedPhoto.ratio : 1)
+    : undefined;
+  const srcSet = showPhoto && thumbnailUrl === preferredUrl ? cdnImageSrcSet(thumbnailUrl, [640, 1080, 1440]) : undefined;
   return (
-    <div className={`relative w-full aspect-video max-h-[200px] sm:max-h-[240px] bg-zinc-900 overflow-hidden ${className || ''}`}>
+    <div
+      className={`relative w-full overflow-hidden ${showPhoto ? 'max-h-[420px] bg-black/5 dark:bg-white/5' : 'aspect-video max-h-[200px] bg-zinc-900 sm:max-h-[240px]'} ${className || ''}`}
+      style={{ aspectRatio: photoRatio }}
+    >
       {thumbnailUrl && (
         <img
           src={thumbnailUrl}
+          srcSet={srcSet}
+          sizes={srcSet ? 'auto, (max-width: 640px) 100vw, 600px' : undefined}
           alt=""
-          className={`w-full h-full object-cover rounded-lg ${gated ? 'blur-2xl scale-110 select-none pointer-events-none' : ''}`}
+          className={`w-full h-full ${showPhoto ? 'absolute inset-0 object-contain' : 'object-cover rounded-lg'} ${gated ? 'blur-2xl scale-110 select-none pointer-events-none' : ''}`}
           loading="lazy"
+          onLoad={showPhoto && !hintedImageRatio(thumbnailUrl) ? (event) => {
+            const { naturalWidth, naturalHeight } = event.currentTarget;
+            if (naturalWidth && naturalHeight) setLoadedPhoto({ url: thumbnailUrl, ratio: naturalWidth / naturalHeight });
+          } : undefined}
           onError={() => setFailed((list) => (list.includes(thumbnailUrl) ? list : [...list, thumbnailUrl]))}
         />
       )}
@@ -276,18 +294,15 @@ export const QuotedPostEmbed = memo(function QuotedPostEmbed({ quotedPost, class
     <div
       onClick={handleClick}
       data-glass-embed
-      className={`border border-zinc-700/60 rounded-2xl overflow-hidden cursor-pointer hover:bg-white/[0.03] transition-colors ${className || ''}`}
+      className={`border border-foreground/20 rounded-2xl overflow-hidden cursor-pointer bg-foreground/[0.04] hover:bg-foreground/[0.07] transition-colors ${className || ''}`}
     >
-      {/* Media thumbnail (top, like Twitter) */}
-      <QuotedPostMedia post={quotedPost} />
-
       {/* Content area */}
-      <div className="p-3">
+      <div className="p-3 sm:p-4">
         {/* Author row */}
-        <div className="flex items-center gap-1.5 mb-1">
-          <Avatar className="w-5 h-5">
+        <div className="flex items-center gap-2 mb-2 min-w-0">
+          <Avatar className="w-8 h-8 shrink-0">
             <AvatarImage src={resolvedAvatar || undefined} />
-            <AvatarFallback className="text-[8px] bg-zinc-700 text-zinc-300">
+            <AvatarFallback className="text-xs bg-zinc-700 text-zinc-300">
               {displayName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
@@ -300,7 +315,7 @@ export const QuotedPostEmbed = memo(function QuotedPostEmbed({ quotedPost, class
           </BadgedName>
           <NewMemberChip address={avatarAddress || undefined} />
           <CheckCircle className="w-3.5 h-3.5 text-white shrink-0 hidden" />
-          <span className="text-[13px] leading-5 text-zinc-500 truncate">@{handle}</span>
+          {handle && <span className="text-[13px] leading-5 text-muted-foreground truncate">@{handle}</span>}
           {isQuotedAuthor && (
             <button
               type="button"
@@ -318,12 +333,13 @@ export const QuotedPostEmbed = memo(function QuotedPostEmbed({ quotedPost, class
         {quotedPost.articleBody && <span className="mb-1 block text-xs font-semibold uppercase tracking-widest text-white/60">{_copy("copy.29d94922512b", { defaultValue: "Article" })}</span>}
         {quotedPost.articleBody && quotedPost.name?.trim() && <h3 className="text-lg font-semibold text-white">{quotedPost.name}</h3>}
         {content && (
-          <p className="text-[15px] leading-[22px] text-zinc-300 whitespace-pre-wrap">{content}</p>
+          <p className="text-base leading-6 text-foreground whitespace-pre-wrap break-words">{content}</p>
         )}
 
         {/* Poll attached to the quoted post */}
         <QuotedPollPreview tokenId={Number(quotedPost.tokenId) || 0} />
       </div>
+      <QuotedPostMedia post={quotedPost} prominent />
     </div>
   );
 });
