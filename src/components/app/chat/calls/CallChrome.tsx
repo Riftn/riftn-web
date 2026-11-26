@@ -108,12 +108,12 @@ export function CallStage({
           </>
         )}
         {onMinimize ? (
-          <Button type="button" variant="ghost" size="icon" className="call-stage__min" onClick={onMinimize} aria-label={minimizeLabel} title={minimizeLabel}>
+          <Button type="button" variant="ghost" size="icon" data-keep-dark={direct && live || undefined} className="call-stage__min" onClick={onMinimize} aria-label={minimizeLabel} title={minimizeLabel}>
             <ChevronDown />
           </Button>
         ) : null}
         {onMessage ? (
-          <Button type="button" variant="ghost" size="icon" className="call-stage__min call-stage__message" onClick={onMessage} aria-label={messageLabel} title={messageLabel}>
+          <Button type="button" variant="ghost" size="icon" data-keep-dark={live || undefined} className="call-stage__min call-stage__message" onClick={onMessage} aria-label={messageLabel} title={messageLabel}>
             <ChatIcon />
           </Button>
         ) : null}
