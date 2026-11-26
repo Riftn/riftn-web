@@ -21479,6 +21479,11 @@
     "followFailed": "Takip edilemedi. Tekrar dene."
   },
   "appTokens": {
+    "reviewTransfer": "Transferi incele",
+    "transferComplete": "Transfer tamamlandı",
+    "balanceAfterSend": "Gönderimden sonra: {{amount}} {{symbol}}",
+    "addNote": "Not ekle",
+    "minimumTransfer": "En az 1 RIFT transfer edebilirsin.",
     "kindStaked": "Stake edildi",
     "kindUnstaked": "Stake çözüldü",
     "stakedBalance": "{{amount}} stake edildi",

@@ -21479,6 +21479,11 @@
     "followFailed": "No se pudo seguir. Inténtalo de nuevo."
   },
   "appTokens": {
+    "reviewTransfer": "Revisar transferencia",
+    "transferComplete": "Transferencia completada",
+    "balanceAfterSend": "Después del envío: {{amount}} {{symbol}}",
+    "addNote": "Añadir una nota",
+    "minimumTransfer": "La transferencia mínima es de 1 RIFT.",
     "kindStaked": "Depositado",
     "kindUnstaked": "Retirado",
     "stakedBalance": "{{amount}} depositados",
