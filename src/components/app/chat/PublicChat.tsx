@@ -30,6 +30,8 @@ import { useHiddenLines } from '@/lib/public-chat-hidden';
 import { RoomSettingsModal } from './RoomSettingsModal';
 import { useLiveChatRooms, useLiveChatMessages, useLiveChatRoomDetails, useLiveChatPresence, type SupabaseLiveChatMessage } from '@/hooks/use-livechat';
 import { getMediaUrl, banLiveChatUser, unbanLiveChatUser, uploadChatImage, uploadLiveChatVoice, pinLiveChatMessage, unpinLiveChatMessage, type LiveChatRoom } from '@/lib/api/dehub';
+import { getNFTInfo } from '@/lib/api/dehub/feed';
+import { canDraftPublicLivePost } from '@/lib/live-public-chat-share';
 import { Pin, X as XIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { buildAvatarUrl } from '@/lib/media-url';
@@ -169,12 +171,29 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
   const location = useLocation();
   const navigate = useNavigate();
   const shareTokenId = location.state?.shareLiveTokenId;
-  const sharedLiveUrl = !embedded && isAuthenticated && typeof shareTokenId === 'string' && /^[1-9]\d*$/.test(shareTokenId)
-    ? dehubLinkFor.post(shareTokenId)
-    : undefined;
+  const pendingShareId = !embedded && isAuthenticated && typeof shareTokenId === 'string' && /^[1-9]\d*$/.test(shareTokenId)
+    ? shareTokenId : undefined;
+  const [confirmedShare, setConfirmedShare] = useState<{ key: string; account: string | null | undefined; url: string } | null>(null);
+  const sharedLiveUrl = pendingShareId && confirmedShare?.key === location.key && confirmedShare.account === walletAddress
+    ? confirmedShare.url : undefined;
   const clearSharedLive = useCallback(() => {
     navigate({ pathname: location.pathname, search: location.search }, { replace: true, preventScrollReset: true, state: null });
   }, [location.pathname, location.search, navigate]);
+  useEffect(() => {
+    if (!pendingShareId) return;
+    let cancelled = false;
+    const unavailable = () => {
+      if (cancelled) return;
+      toast.error(t('profile.replyThread.postUnavailable'));
+      clearSharedLive();
+    };
+    void getNFTInfo(pendingShareId).then(post => {
+      if (cancelled) return;
+      if (!canDraftPublicLivePost(post, pendingShareId)) { unavailable(); return; }
+      setConfirmedShare({ key: location.key, account: walletAddress, url: dehubLinkFor.post(pendingShareId) });
+    }, unavailable);
+    return () => { cancelled = true; };
+  }, [pendingShareId, location.key, walletAddress, clearSharedLive, t]);
 
   // Signed out, the room reads but does not write. Anything that would write
   // opens the sign-in sheet, and signing in lands back here in this room.
@@ -217,7 +236,7 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
   // link names.
   useEffect(() => {
     if (!rooms.length) return;
-    if (sharedLiveUrl) {
+    if (pendingShareId) {
       setSelectedRoomId(rooms[0].id);
       return;
     }
@@ -225,7 +244,7 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
     const linkedRoom = linked?.kind === 'public' && linked.roomId && rooms.some((r) => r.id === linked.roomId) ? linked.roomId : null;
     if (linkedRoom && linkedRoom !== selectedRoomId) setSelectedRoomId(linkedRoom);
     else if (!selectedRoomId) setSelectedRoomId(rooms[0].id);
-  }, [rooms, selectedRoomId, sharedLiveUrl]);
+  }, [rooms, selectedRoomId, pendingShareId]);
 
   const {
     messages: apiMessages, isLoading: messagesLoading, isBanned,
@@ -1152,6 +1171,9 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
       
       {/* Input Area */}
       <div className={isSearchOpen ? 'hidden' : 'relative'}>
+        {pendingShareId && (!sharedLiveUrl || !selectedRoomId) && (
+          <p role="status" className="px-4 py-2 text-sm text-muted-foreground">{t('common.loading')}</p>
+        )}
         <ChatInput
         voiceMaxDuration={29}
           onSendMessage={handleSendMessage}
