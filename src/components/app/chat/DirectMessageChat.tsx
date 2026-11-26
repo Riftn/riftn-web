@@ -40,10 +40,10 @@ import { useTranslation as useI18n } from 'react-i18next';
 import { useDmEncryption } from '@/hooks/use-dm-encryption';
 import { prepareOutgoing } from '@/lib/dm-e2ee/keys';
 import { languageName, peerLanguage, translateOutgoing } from '@/lib/dm-translate-out';
-import { encodeMediaDescriptor, type MediaDescriptor } from '@/lib/dm-e2ee/media';
+import { encodeMediaDescriptor, photoMediaKey, type MediaDescriptor } from '@/lib/dm-e2ee/media';
 import { encryptedMediaLabel } from '@/lib/dm-e2ee/media-label';
 import { loadDecryptedBlob, loadDecryptedMedia } from '@/lib/dm-e2ee/media-cache';
-import { MAX_ENVELOPE_CHARS, uploadDmMedia } from '@/lib/dm-e2ee/media-send';
+import { MAX_ENVELOPE_CHARS, uploadDmMedia, uploadDmPhotos } from '@/lib/dm-e2ee/media-send';
 import { useDecryptedMedia } from '@/hooks/use-decrypted-media';
 import dehubCoin from '@/assets/dehub-coin.png';
 import { Button } from '@/components/ui/button';
@@ -331,6 +331,17 @@ function EncryptedMediaPlaceholder({
  * shown from a local blob. Photos and voice open as soon as they render;
  * videos and files wait for a tap, so scrolling past them downloads nothing.
  */
+function DmPhotoButton({ label, src, onClick }: { label: string; src: string; onClick?: () => void }) {
+  return (
+    <Button type="button" variant="ghost" aria-label={label} onClick={onClick}
+      className="relative h-auto aspect-square min-w-0 overflow-hidden bg-muted p-0 cursor-zoom-in focus-visible:ring-inset">
+      <SettledImg src={src} alt="" className="absolute inset-0 size-full object-cover" />
+    </Button>
+  );
+}
+
+const photoGridClass = 'grid w-[20rem] max-w-full grid-cols-2 gap-1';
+
 function EncryptedMediaBody({
   messageId,
   media,
@@ -340,10 +351,12 @@ function EncryptedMediaBody({
   isOwn,
   destruct,
   onCameraFile,
+  photoTile,
 }: {
   /** Recipient of a view-once / on-open photo: answer it with the camera once opened. */
   onCameraFile?: (file: File) => void;
   messageId: string;
+  photoTile?: boolean;
   isOwn?: boolean;
   destruct?: DmDestruct | null;
   media: MediaDescriptor;
@@ -494,6 +507,21 @@ function EncryptedMediaBody({
           </span>
         )}
       </EncryptedMediaPlaceholder>
+    );
+  }
+
+  if (photoTile) {
+    const label = _copy("copy.f9c984552075", { defaultValue: "Shared image" });
+    if (url) return <DmPhotoButton src={url} label={label} onClick={() => onOpenImage?.(url)} />;
+    const failed = status === 'error';
+    return (
+      <Button type="button" variant="ghost" disabled={!failed}
+        aria-label={failed ? _copy("copy.ca1844969742", { defaultValue: "Unavailable" }) : label}
+        aria-busy={!failed}
+        onClick={retry}
+        className="h-auto aspect-square min-w-0 bg-muted p-0 text-muted-foreground focus-visible:ring-inset disabled:opacity-100">
+        {failed ? <RotateCcw /> : <Loader2 className="animate-spin motion-reduce:animate-none" />}
+      </Button>
     );
   }
 
@@ -693,7 +721,11 @@ const MessageBubble = memo(function MessageBubble({
   // without one (sealed to a key this device lacks) is never rendered; the
   // "can't be opened" line below stands in for it.
   const encMedia = message.encMedia;
+  const encryptedPhotos = encMedia?.photos?.length ? [encMedia, ...encMedia.photos] : null;
+  const plainPhotos = !encMedia && !message.lock && !message.destruct && message.mediaUrls?.length > 1
+    && message.mediaUrls.every(item => item.type === 'image' && !item.encrypted && item.url) ? message.mediaUrls : null;
   const isLockedMedia = !encMedia && !!primaryMedia?.encrypted;
+  const albumUploading = !!(plainPhotos || encryptedPhotos) && message.uploadStatus === 'pending';
   const privatePhoto = isPrivatePhoto(message);
   const ownPrivatePhoto = isOwnMessage && privatePhoto;
   const openPlainPhoto = (url: string) => {
@@ -1328,7 +1360,17 @@ const MessageBubble = memo(function MessageBubble({
             {/* Media (image or document) — loading state while mediaUrls is empty */}
             {message.msgType === 'media' && !ownPrivatePhoto && encMedia && (
               <div>
-                {message.destruct?.mode === 'open' && isOwnMessage ? (
+                {message.uploadStatus === 'failed' ? (
+                  <p className="px-2 text-sm text-muted-foreground">{_copy("copy.ca1844969742", { defaultValue: "Unavailable" })}</p>
+                ) : encryptedPhotos ? (
+                  <div className={photoGridClass}>
+                    {encryptedPhotos.map((photo, index) => (
+                      <EncryptedMediaBody key={photo.k} messageId={photoMediaKey(message._id, index)}
+                        photoTile media={photo} mediaUrl={message.mediaUrls?.[index]?.encrypted ? message.mediaUrls[index].url : undefined}
+                        isOwn={isOwnMessage} onOpenImage={onOpenImage} />
+                    ))}
+                  </div>
+                ) : message.destruct?.mode === 'open' && isOwnMessage ? (
                   <DmOpenTimerMedia messageId={message._id} mine destruct={message.destruct} kind={encMedia.kind === 'video' ? 'video' : 'image'}>
                     <EncryptedMediaBody
                       messageId={message._id}
@@ -1364,7 +1406,25 @@ const MessageBubble = memo(function MessageBubble({
             )}
             {message.msgType === 'media' && !ownPrivatePhoto && !message.lock && !encMedia && !isLockedMedia && (
               <div>
-                {primaryMediaUrl && isFileMedia ? (
+                {message.uploadStatus === 'failed' ? (
+                  <p className="px-2 text-sm text-muted-foreground">{_copy("copy.ca1844969742", { defaultValue: "Unavailable" })}</p>
+                ) : plainPhotos ? (
+                  <>
+                    <div className={photoGridClass}>
+                      {plainPhotos.map(photo => {
+                        const url = getMediaUrl(photo.url) || photo.url;
+                        return <DmPhotoButton key={photo.url} src={url}
+                          label={_copy("copy.f9c984552075", { defaultValue: "Shared image" })}
+                          onClick={() => openPlainPhoto(url)} />;
+                      })}
+                    </div>
+                    {message.content && (
+                      <p dir="auto" className="text-sm mt-1 break-words whitespace-pre-wrap text-left">
+                        {renderChatTextWithLinks(isTranslated ? translatedText : message.content)}
+                      </p>
+                    )}
+                  </>
+                ) : primaryMediaUrl && isFileMedia ? (
                   <>
                     <a
                       href={getMediaUrl(primaryMediaUrl)!}
@@ -1634,7 +1694,7 @@ const MessageBubble = memo(function MessageBubble({
                   aria-label={tr('dmSchedule.whenOnlineTick', { defaultValue: 'Waiting for them to come online. Turns into two ticks when read.' })}
                 />
               )}
-              {message.sendState === 'sending'
+              {message.sendState === 'sending' || albumUploading
                 ? <SendStatus state="sending" />
                 : (message.isRead ? "✓✓" : "✓")}
             </span>
@@ -2699,6 +2759,17 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
       const wire = await prepareOutgoing(targetPeer, encodeMediaDescriptor(media));
       if (wire.encrypted && wire.content.length <= MAX_ENVELOPE_CHARS) {
         await forwardDmMessage(message._id, targetConversationId, wire.content);
+      } else if (media.photos?.length) {
+        const photos: File[] = [];
+        for (const [index, photo] of [media, ...media.photos].entries()) {
+          const entry = message.mediaUrls[index];
+          if (!entry?.encrypted) throw new Error(_copy("copy.731440416c31", { defaultValue: "This attachment is still uploading." }));
+          const blob = await loadDecryptedBlob(entry.url, photo, photoMediaKey(message._id, index));
+          photos.push(new File([blob], 'photo', { type: photo.mime }));
+        }
+        await uploadDmPhotos(photos, targetConversationId, user?._id || walletAddress || '', {
+          peerAddress: targetPeer, caption: media.caption || '', batchId: crypto.randomUUID().replace(/-/g, ''),
+        });
       } else {
         const blob = await loadDecryptedBlob(stored, media, message._id);
         const file = new File([blob], media.name || 'file', { type: media.mime });
@@ -2953,6 +3024,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     content,
     type,
     mediaFile,
+    photoBatch,
     gifUrl,
     duration,
     mediaOptions,
@@ -2963,6 +3035,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     content: string;
     type: 'msg' | 'media' | 'gif' | 'voice';
     mediaFile?: File;
+    photoBatch?: ChatInputSendArgs['photoBatch'];
     gifUrl?: string;
     duration?: number;
     mediaOptions?: DmVideoOptions;
@@ -3183,6 +3256,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
         content,
         msgType: type,
         mediaFile,
+        photoBatch,
         gifUrl,
         voiceDuration: duration,
         txHash: feeTxHash,
@@ -3896,6 +3970,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
         thread={smartReplyThread}
         peerName={displayName}
         onSendMessage={handleSendMessage}
+        groupPhotos={!feeRequired}
         allowLock
         replyTo={composerReplyTo}
         incomingFile={cameraFile}

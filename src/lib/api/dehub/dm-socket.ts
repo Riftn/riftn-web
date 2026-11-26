@@ -508,6 +508,17 @@ export function emitDownloadReceipt(dmId: string, messageId: string): Promise<vo
 
 // ─── Event listeners (all return an unsubscribe fn for useEffect cleanup) ─────
 
+export function onDmPhotoUpload(cb: (message: DmMessage) => void): () => void {
+  return addPersistentListener('jobMessageId', (data: { photoBatch?: boolean; dmId?: string; message?: DmMessage; status?: string }) => {
+    if (!data?.photoBatch || !data.message?._id) return;
+    cb({
+      ...data.message,
+      conversation: data.dmId || data.message.conversation,
+      uploadStatus: data.status === 'failure' ? 'failed' : data.message.uploadStatus,
+    });
+  });
+}
+
 export function onDmSendMessage(cb: (msg: DmMessage) => void): () => void {
   return addPersistentListener('sendMessage', cb as AnyFn);
 }

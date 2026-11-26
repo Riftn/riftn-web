@@ -36,7 +36,7 @@ import {
   newFileKey,
   type MediaDescriptor,
 } from '../media';
-import { uploadDmMedia, type MediaSendDeps } from '../media-send';
+import { uploadDmMedia, uploadDmPhotos, type MediaSendDeps } from '../media-send';
 import type { DmMessage } from '@/lib/api/dehub/dm';
 
 type UploadOpts = Parameters<MediaSendDeps['upload']>[3];
@@ -191,6 +191,31 @@ describe('sending an attachment', () => {
     expect(message.content).toBe('hi');
     expect(message.encMedia).toEqual(descriptor);
     expect(await readBytes(plain!)).toEqual(original);
+  });
+
+  it('uploads both photos together in order using independent file keys', async () => {
+    const first = photo();
+    const second = new File([pattern(4) as BlobPart], 'next.png', { type: 'image/png' });
+    const upload = vi.fn(async (_files: File | File[], conversation: string, _sender: string, opts: UploadOpts) => ({
+      _id: 'album', conversation, content: opts?.content, mediaUrls: [],
+    }) as DmMessage);
+    const { deps: d } = deps({
+      upload,
+      prepare: async (file) => ({ bytes: await readBytes(file), descriptor: { kind: 'image', mime: file.type, size: file.size } }),
+    });
+    const { message } = await uploadDmPhotos([first, second], 'c1', 'u1', {
+      peerAddress: '0xpeer', batchId: 'a'.repeat(32), caption: 'Both photos',
+    }, d);
+    expect(upload).toHaveBeenCalledTimes(1);
+    const [files, , , opts] = upload.mock.calls[0];
+    expect(opts?.batchId).toBe('a'.repeat(32));
+    const descriptor = decodeMediaDescriptor(decryptText(opts?.content || '', sessionKey))!;
+    expect(descriptor.caption).toBe('Both photos');
+    const next = descriptor.photos![0];
+    expect(next.k).not.toBe(descriptor.k);
+    expect(decryptMediaBytes(await readBytes((files as File[])[0]), fileKeyOf(descriptor))).toEqual(original);
+    expect(decryptMediaBytes(await readBytes((files as File[])[1]), fileKeyOf(next))).toEqual(pattern(4));
+    expect(message.encMedia).toEqual(descriptor);
   });
 
   it('a locked photo goes up as the original file with its price, caption still sealed', async () => {

@@ -50,6 +50,7 @@ import {
   onDmDeleteMessage,
   onDmDestructOpened,
   onReValidateMessage,
+  onDmPhotoUpload,
   onFeeConfirmed,
   onReadReceipt,
   onDmReactionUpdated,
@@ -485,7 +486,7 @@ export function useMessages(conversationId: string | null) {
   useEffect(() => {
     if (!isAuthenticated || !conversationId) return;
 
-    const unsubSend = onDmSendMessage((incoming) => {
+    const receiveMessage = (incoming: DmMessage, photoUpload = false) => {
       // Decrypt before anything looks at `content`: the optimistic reconcile
       // below compares text, and the cache must never hold ciphertext.
       void decryptThread(queryClient, conversationId, walletAddressRef.current, [incoming]).then(([msg]) => {
@@ -523,7 +524,7 @@ export function useMessages(conversationId: string | null) {
         (!!senderAddress && !!meAddr && senderAddress === meAddr) ||
         (!!senderUserId && !!meId && senderUserId === meId);
       const isFromOther = !isOwnMsg;
-      if (isFromOther) {
+      if (isFromOther && !photoUpload) {
         const msgTime = new Date(msg.createdAt ?? '').getTime();
         queryClient.setQueryData(messagesKeys.messages(conversationId), (old: any) => {
           if (!old?.pages) return old;
@@ -587,6 +588,7 @@ export function useMessages(conversationId: string | null) {
             const optimisticIdx = firstItems.findIndex((candidate) => {
               // A failed send is waiting on the user's Retry, not on this echo.
               if (!candidate._id?.startsWith('temp-') || candidate.sendState === 'failed') return false;
+              if (photoUpload || (candidate.msgType === 'media' && candidate.mediaUrls.length > 1)) return false;
 
               const sameType = (candidate.msgType ?? 'msg') === (normalizedMsg.msgType ?? 'msg');
               if (!sameType) return false;
@@ -650,7 +652,9 @@ export function useMessages(conversationId: string | null) {
         }
       );
       });
-    });
+    };
+    const unsubSend = onDmSendMessage(receiveMessage);
+    const unsubPhotoUpload = onDmPhotoUpload(message => receiveMessage(message, true));
 
     const unsubEdit = onEditMessage((data) => {
       const applyEdit = (content: string, undecryptable = false) => queryClient.setQueryData(
@@ -815,6 +819,7 @@ export function useMessages(conversationId: string | null) {
 
     return () => {
       unsubSend();
+      unsubPhotoUpload();
       unsubEdit();
       unsubDelete();
       unsubDestructOpened();
@@ -931,6 +936,7 @@ type SendVariables = {
   msgType?: DmMsgType;
   gifUrl?: string;
   mediaFile?: File;
+  photoBatch?: { files: File[]; id: string };
   voiceDuration?: number;
   replyTo?: string;
   /** The quoted message as it should show on the pending bubble — the id alone renders nothing until the echo. */
@@ -990,7 +996,7 @@ export function useSendMessage(conversationId: string) {
    * line in the thread yet.
    */
   const insertOptimistic = (variables: SendVariables): string => {
-    const { content, msgType, gifUrl, mediaFile, voiceDuration, replyPreview, mediaOptions, destruct, lockPrice, whenOnline } = variables;
+    const { content, msgType, gifUrl, mediaFile, photoBatch, voiceDuration, replyPreview, mediaOptions, destruct, lockPrice, whenOnline } = variables;
     const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     pendingSends.set(tempId, variables);
     // Optimistic: prepend temp message, drawn exactly as it will look delivered.
@@ -1008,7 +1014,9 @@ export function useSendMessage(conversationId: string) {
       },
       content,
       msgType: msgType || 'msg',
-      mediaUrls: mediaFile
+      mediaUrls: photoBatch
+        ? photoBatch.files.map(file => ({ url: createTransientBlobUrl(file), type: 'image', mimeType: file.type }))
+        : mediaFile
         ? [{
             url: createTransientBlobUrl(mediaFile),
             // A document has no renderable preview, so it must not be typed
@@ -1072,6 +1080,7 @@ export function useSendMessage(conversationId: string) {
       msgType = 'msg',
       gifUrl,
       mediaFile,
+      photoBatch,
       voiceDuration,
       replyTo,
       replyPreview,
@@ -1081,26 +1090,7 @@ export function useSendMessage(conversationId: string) {
       destruct,
       lockPrice,
       whenOnline,
-    }: {
-      content: string;
-      msgType?: DmMsgType;
-      gifUrl?: string;
-      mediaFile?: File;
-      voiceDuration?: number;
-      replyTo?: string;
-      /** The quoted message as it should show on the pending bubble — the id alone renders nothing until the echo. */
-      replyPreview?: DmMessage['replyTo'];
-      txHash?: string;
-      forwardedFrom?: { messageId: string };
-      mediaOptions?: DmVideoOptions;
-      destruct?: DmDestructChoice;
-      /** Pay-to-unlock price for a photo or video. */
-      lockPrice?: number;
-      /** Text only: delivered when the other person next comes online. */
-      whenOnline?: boolean;
-      /** Resend a failed line in place: the clientKey of the bubble already on screen. */
-      retryKey?: string;
-    }): Promise<DmMessage> => {
+    }: SendVariables): Promise<DmMessage> => {
       // Virtual conversations need createAndStart first to get real ID (applies to all message types)
       const isVirtual = conversationId.startsWith('new_') || /^0x[0-9a-fA-F]{40}$/i.test(conversationId);
       let resolvedId = conversationId;
@@ -1130,6 +1120,24 @@ export function useSendMessage(conversationId: string) {
       // Media/voice: upload file then return — resolvedId is now guaranteed real.
       // The file itself is encrypted on the same terms as the caption.
       if (msgType === 'media' || msgType === 'voice') {
+        if (photoBatch) {
+          const [{ uploadDmPhotos }, { seedSentMedia }, { photoMediaKey }] = await Promise.all([
+            import('@/lib/dm-e2ee/media-send'),
+            import('@/lib/dm-e2ee/media-cache'),
+            import('@/lib/dm-e2ee/media'),
+          ]);
+          const { message, plaintext } = await uploadDmPhotos(photoBatch.files, resolvedId, user?._id || walletAddress || '', {
+            peerAddress, caption: content, batchId: photoBatch.id, replyTo, txHash,
+          });
+          plaintext.forEach((blob, index) => seedSentMedia(photoMediaKey(message._id, index), blob));
+          const opened = isEncryptedContent(message.content) && !message.encMedia
+            ? await decryptMessageInPlace(message, peerAddress)
+            : message;
+          return { ...opened, author: 'me', sender: opened.sender._id ? opened.sender : {
+            _id: user?._id || '', username: user?.username || '', address: walletAddress || '',
+            displayName: user?.displayName || user?.display_name || '', avatarImageUrl: user?.avatarImageUrl || '',
+          }, replyTo: opened.replyTo?.sender ? opened.replyTo : (replyPreview ?? opened.replyTo) };
+        }
         if (!mediaFile) throw new Error('No file provided for media/voice message');
         const senderId = user?._id || walletAddress || '';
         // Loaded on first send: none of this is needed to paint the app.
@@ -1217,7 +1225,7 @@ export function useSendMessage(conversationId: string) {
         patchByClientKey(old, context.optimisticId, { sendState: 'failed' }));
     },
 
-    onSuccess: (sent, _variables, context) => {
+    onSuccess: (sent, variables, context) => {
       const key = context?.optimisticId;
       if (key) pendingSends.delete(key);
       markRecentlySent(sent._id);
@@ -1225,6 +1233,10 @@ export function useSendMessage(conversationId: string) {
         const pages = old?.pages ?? [{ items: [], totalCount: 0, hasMore: false }];
         // Update the pending line in place (it may already carry the server id
         // if the socket echo got there first), so its element is never swapped.
+        const completed = variables.photoBatch && sent.uploadStatus === 'pending'
+          ? pages.flatMap((page: { items: DmMessage[] }) => page.items)
+            .find((m: DmMessage) => m._id === sent._id && (m.uploadStatus === 'success' || m.uploadStatus === 'failed'))
+          : undefined;
         let placed = false;
         const updated = pages.map((page: any) => ({
           ...page,
@@ -1233,7 +1245,12 @@ export function useSendMessage(conversationId: string) {
             if (!mine) return [m];
             if (placed) return [];
             placed = true;
-            return [{ ...m, ...sent, clientKey: key ?? m.clientKey, sendState: undefined }];
+            const keepPreview = variables.photoBatch && sent.uploadStatus === 'pending' && !sent.encMedia && !sent.mediaUrls.length;
+            // A progress event can beat the upload response to this cache.
+            return [{
+              ...m, ...(completed ?? sent), ...(keepPreview && !completed ? { mediaUrls: m.mediaUrls } : {}),
+              clientKey: key ?? m.clientKey, sendState: undefined,
+            }];
           }),
         }));
         if (!placed) updated[0] = { ...updated[0], items: [{ ...sent, clientKey: key }, ...updated[0].items] };

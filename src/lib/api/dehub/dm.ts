@@ -369,7 +369,7 @@ function parseDmMessage(raw: any, myAddress: string): DmMessage {
     content: raw.content || '',
     msgType,
     mediaUrls: Array.isArray(raw.mediaUrls) ? raw.mediaUrls : [],
-    uploadStatus: raw.uploadStatus ?? undefined,
+    uploadStatus: raw.uploadStatus === 'failure' ? 'failed' : raw.uploadStatus ?? undefined,
     voiceDuration: raw.voiceDuration ?? null,
     isRead: raw.isRead ?? false,
     isEdited: raw.isEdited ?? false,
@@ -707,11 +707,12 @@ export async function getMessages(
  * Uses POST /dm/upload (Riftn CDN).
  */
 export async function uploadAndSendMedia(
-  file: File,
+  file: File | File[],
   conversationId: string,
   senderId: string,
   opts?: {
     content?: string;
+    batchId?: string;
     msgType?: 'media' | 'voice';
     voiceDuration?: number;
     replyTo?: string;
@@ -729,10 +730,14 @@ export async function uploadAndSendMedia(
     lockPrice?: number;
   }
 ): Promise<DmMessage> {
-  console.log('[DM API] uploadAndSendMedia called', { fileName: file.name, size: file.size, conversationId });
-
   const formData = new FormData();
-  formData.append('file', file, file.name);
+  const photos = Array.isArray(file);
+  if (photos) {
+    for (const photo of file) formData.append('files', photo, photo.name);
+    if (opts?.batchId) formData.append('batchId', opts.batchId);
+  } else {
+    formData.append('file', file, file.name);
+  }
   formData.append('conversationId', conversationId);
   formData.append('senderId', senderId);
   if (opts?.content) formData.append('content', opts.content);
@@ -749,7 +754,7 @@ export async function uploadAndSendMedia(
     formData.append('lockPrice', String(Math.max(1, Math.ceil(opts.lockPrice / DHB_PRELISTING_USD))));
   }
 
-  const raw = await authedUpload<Record<string, unknown>>('/api/dm/upload', formData, {
+  const raw = await authedUpload<Record<string, unknown>>(photos ? '/api/dm/upload-photos' : '/api/dm/upload', formData, {
     unwrapResult: true,
   });
   const myAddress = localStorage.getItem('dehub_wallet')?.toLowerCase() || '';

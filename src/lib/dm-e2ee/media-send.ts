@@ -13,6 +13,7 @@ import type { DmDestructChoice } from '@/lib/dm-destruct';
 import type { DmVideoOptions } from '@/lib/dm-video-options';
 import { isEncryptedContent } from './crypto';
 import { canEncryptToPeer, prepareOutgoing } from './keys';
+import { isChatEncrypted, wantsEncryptionTo } from './encrypt-choice';
 import {
   encodeMediaDescriptor,
   encryptMediaBytes,
@@ -20,6 +21,7 @@ import {
   newFileKey,
   type MediaDescriptor,
   type MediaKind,
+  type PhotoDescriptor,
 } from './media';
 import { mediaKindOf, prepareMediaPlaintext, type PreparedMedia } from './media-prepare';
 
@@ -155,4 +157,49 @@ export async function uploadDmMedia(
   // The upload response echoes what we sent; keep the plaintext caption.
   const withOptions = mediaOptions && !sent.mediaOptions ? { ...sent, mediaOptions } : sent;
   return { message: wire.encrypted ? { ...withOptions, content: caption, encrypted: true } : withOptions };
+}
+
+/** One envelope carries the caption and the independently sealed photos. */
+export async function uploadDmPhotos(
+  files: File[],
+  conversationId: string,
+  senderId: string,
+  opts: { peerAddress?: string | null; caption: string; batchId: string; replyTo?: string; txHash?: string },
+  deps: Partial<MediaSendDeps> = {},
+): Promise<{ message: DmMessage; plaintext: Blob[] }> {
+  const d = { ...defaultDeps, ...deps };
+  const { peerAddress, caption, batchId, replyTo, txHash } = opts;
+  const upload = { batchId, msgType: 'media' as const, replyTo, txHash };
+  if (!peerAddress || !(await d.canEncrypt(peerAddress))) {
+    if (isChatEncrypted(conversationId) || await wantsEncryptionTo(peerAddress)) {
+      throw new Error('Could not encrypt the photo batch.');
+    }
+    const wire = await d.seal(peerAddress, caption);
+    const sent = await d.upload(files, conversationId, senderId, { ...upload, content: wire.content });
+    return { message: { ...sent, content: caption, encrypted: wire.encrypted }, plaintext: [] };
+  }
+
+  const descriptors: PhotoDescriptor[] = [];
+  const plaintext: Blob[] = [];
+  const ciphertext: File[] = [];
+  for (const file of files) {
+    const prepared = await d.prepare(file, 'image', {});
+    const key = newFileKey();
+    const { mime, w, h } = prepared.descriptor;
+    descriptors.push({ kind: 'image', k: fileKeyToString(key), mime, w, h, size: prepared.bytes.length });
+    plaintext.push(new Blob([prepared.bytes as BlobPart], { type: mime }));
+    ciphertext.push(new File([encryptMediaBytes(prepared.bytes, key) as BlobPart], 'media.bin', { type: 'application/octet-stream' }));
+  }
+  const [first, ...photos] = descriptors;
+  const descriptor: MediaDescriptor = { ...first, photos, ...(caption ? { caption } : {}) };
+  const wire = await d.seal(peerAddress, encodeMediaDescriptor(descriptor));
+  if (!wire.encrypted || !isEncryptedContent(wire.content) || wire.content.length > MAX_ENVELOPE_CHARS) {
+    throw new Error('Could not encrypt the photo batch.');
+  }
+
+  const sent = await d.upload(ciphertext, conversationId, senderId, { ...upload, content: wire.content, encryptedKind: 'image' });
+  // A retried request can return the original encrypted envelope. Its keys
+  // also describe this device's copies, so prefer that descriptor on retries.
+  if (sent.content && sent.content !== wire.content) return { message: sent, plaintext: [] };
+  return { message: { ...sent, content: caption, encrypted: true, undecryptable: false, encMedia: descriptor }, plaintext };
 }
