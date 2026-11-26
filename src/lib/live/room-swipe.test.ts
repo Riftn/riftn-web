@@ -3,9 +3,19 @@ import type { LiveStream } from '@/lib/api/dehub/livestream';
 import { liveSwipeDirection, liveSwipeRoomIds } from './room-swipe';
 
 const id = (n: number) => String(n).padStart(24, '0');
-const row = (n: number, extra = {}): LiveStream => ({
-  _id: id(n), status: 'live', playbackId: 'public', address: 'viewer', ...extra,
-} as LiveStream);
+const row = (n: number, extra: Partial<LiveStream> & Record<string, unknown> = {}) => ({
+  _id: id(n),
+  streamId: id(n),
+  status: 'live' as const,
+  playbackId: 'public',
+  address: 'viewer',
+  title: 'Live',
+  viewerCount: 0,
+  likeCount: 0,
+  createdAt: '2026-11-25T19:00:00Z',
+  updatedAt: '2026-11-25T19:00:00Z',
+  ...extra,
+});
 
 describe('live room swiping', () => {
   it('keeps public room order and skips replays, duplicates, blocked creators and access gates', () => {
