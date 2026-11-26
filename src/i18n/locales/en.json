@@ -1272,6 +1272,8 @@
     "newFollowers": "New Followers",
     "newFollowersDesc": "When someone follows you",
     "directMessages": "Direct Messages",
+    "privateMessagePushOnly": "Private messages: push only",
+    "privateMessagePushOnlyDesc": "Send new one-to-one message alerts as push only. Alerts already in your inbox stay there.",
     "directMessagesDesc": "When you receive new messages",
     "quietHours": "Quiet Hours",
     "enableQuietHours": "Enable Quiet Hours",
