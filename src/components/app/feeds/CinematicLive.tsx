@@ -1,3 +1,4 @@
+import { LiveDot } from '@/components/app/live/LiveDot';
 import { useTranslation as _useCopy } from 'react-i18next';
 /**
  * Cinematic Live (System theme, phones)
@@ -36,10 +37,13 @@ function Avatar({ src, name, className }: { src?: string; name: string; classNam
   );
 }
 
-function LiveBadge({ className }: { className?: string }) {
+function LiveBadge({ active, className }: { active: boolean; className?: string }) {
   const { t: _copy } = _useCopy();
   return (
-    <span className={cn('rounded-[5px] bg-red-500 px-1.5 py-px text-[10px] font-bold uppercase tracking-wide text-white', className)}>{_copy("copy.b64ac05f17e6", { defaultValue: "Live" })}</span>
+    <span data-on-media className={cn('inline-flex items-center gap-1 rounded-[5px] bg-black/80 px-1.5 py-px text-[10px] font-bold uppercase tracking-wide text-white', className)}>
+      {active && <LiveDot className="size-[5px]" />}
+      {_copy("copy.b64ac05f17e6", { defaultValue: "Live" })}
+    </span>
   );
 }
 
@@ -103,7 +107,7 @@ function StreamTile({ stream, onClick }: { stream: LiveStream; onClick: () => vo
           </>
         )}
         {stream.isLive ? (
-          <LiveBadge className="absolute left-1.5 top-1.5" />
+          <LiveBadge active={stream.liveStatus?.toUpperCase() !== 'PAUSED'} className="absolute left-1.5 top-1.5" />
         ) : stream.replayUrl ? (
           <span className="absolute left-1.5 top-1.5 rounded-[5px] bg-black/65 px-1.5 py-px text-[10px] font-bold uppercase tracking-wide text-white">{_copy("copy.92d23f5381ea", { defaultValue: "REPLAY" })}</span>
         ) : null}
@@ -168,7 +172,7 @@ export function CinematicLive({ streams, isLoading, tvChannels, emptyState, show
               <button key={s.id} onClick={() => openStream(s)} className="w-[66px] shrink-0 text-center">
                 <span className="relative mx-auto block h-[62px] w-[62px] rounded-[14px] bg-[linear-gradient(135deg,#ef4444,#f97316)] p-[2px]">
                   <Avatar src={s.avatar} name={s.streamer} className="h-full w-full rounded-xl border-2 border-black" />
-                  <LiveBadge className="absolute -bottom-[7px] left-1/2 -translate-x-1/2 text-[9px]" />
+                  <LiveBadge active={s.liveStatus?.toUpperCase() !== 'PAUSED'} className="absolute -bottom-[7px] left-1/2 -translate-x-1/2 text-[9px]" />
                 </span>
                 <span className="mt-2.5 block truncate text-[11px] text-zinc-300">{s.streamer}</span>
               </button>

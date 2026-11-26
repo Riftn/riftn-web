@@ -17,6 +17,7 @@
  *
  * @module components/app/live/LiveMiniPlayer
  */
+import { LiveDot } from '@/components/app/live/LiveDot';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -518,10 +519,10 @@ function CornerWindow({
       <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-14" style={{ background: 'linear-gradient(to top, rgb(0 0 0 / 0.5), transparent)' }} />
 
       <span
-        className="pointer-events-none absolute left-2 top-2 inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold leading-none text-white"
-        style={{ background: '#EF4444' }}
+        className="pointer-events-none absolute left-2 top-2 inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold leading-none text-white bg-black/80"
+        data-on-media
       >
-        <span className="size-1.5 rounded-full bg-white" />
+        <LiveDot />
         {t('stages.liveBadge', 'LIVE')}
       </span>
 
@@ -615,7 +616,7 @@ function ListenBar({ mini, playing, loading, onOpen, onTogglePlay, onShowPicture
           <span className="min-w-0 flex-1">
             <span className="block truncate text-[13px] font-semibold leading-5 text-white">{mini.title || mini.host}</span>
             <span className="flex items-center gap-1.5 truncate text-[11px] leading-4 text-white/55">
-              <span className="size-1.5 shrink-0 rounded-full" style={{ background: '#EF4444' }} />
+              <LiveDot />
               <span className="truncate">{`${t('stages.liveBadge', 'LIVE')} · ${mini.host}`}</span>
             </span>
           </span>

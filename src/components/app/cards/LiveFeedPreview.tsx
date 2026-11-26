@@ -1,3 +1,4 @@
+import { LiveDot } from '@/components/app/live/LiveDot';
 import { useTranslation as _useCopy } from 'react-i18next';
 /**
  * Live Feed Preview
@@ -408,8 +409,22 @@ export function LiveFeedPreview({ eager = false, urls, thumbnail, className, fal
     };
   }, [transport, src, visible, postOpen, failed, selfHosted, bigEvent, broadcastEnded]);
 
-  if (!src || broadcastEnded) {
-    return <LiveEndedMedia thumbnail={thumbnail} label={broadcastEnded ? undefined : fallbackLabel} />;
+  if (broadcastEnded) return <LiveEndedMedia thumbnail={thumbnail} />;
+
+  const liveBadge = !broadcastPaused && (
+    <span data-on-media className="pointer-events-none absolute left-2 top-2 z-10 inline-flex items-center gap-1.5 rounded-full border border-white/30 bg-black/80 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-white">
+      <LiveDot />
+      {_copy("copy.35e0d0360a0a", { defaultValue: "LIVE" })}
+    </span>
+  );
+
+  if (!src) {
+    return (
+      <div className="absolute inset-0">
+        <LiveEndedMedia thumbnail={thumbnail} label={fallbackLabel} />
+        {liveBadge}
+      </div>
+    );
   }
 
   return (
@@ -448,6 +463,7 @@ export function LiveFeedPreview({ eager = false, urls, thumbnail, className, fal
         onPause={() => { setPaused(true); setLoading(false); }}
         onEnded={() => { setPaused(true); setPlaying(false); setLoading(false); }}
       />
+      {liveBadge}
       <LiveReactionFlow streamId={streamId} enabled={visible && !postOpen} self={selfReaction} bottom={56} />
       {visible && !postOpen && (loading || broadcastPaused || failed || (paused && playing)) && (
         <div role="status" aria-label={broadcastPaused || (paused && playing) ? _copy("copy.91b75d1b48f9", { defaultValue: "Live paused" }) : failed || waitingTooLong ? _copy("copy.510db6ad26be", { defaultValue: "Waiting for live video" }) : _copy("copy.dc380888c4e2", { defaultValue: "Loading" })} className="absolute inset-0 pointer-events-none flex items-center justify-center">
@@ -470,7 +486,6 @@ export function LiveFeedPreview({ eager = false, urls, thumbnail, className, fal
           }}>
             {paused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
           </button>
-          <span className="text-xs font-semibold text-white">{_copy("copy.35e0d0360a0a", { defaultValue: "LIVE" })}</span>
           <div className="flex-1" />
           {onToggleMute && <button type="button" aria-label={muted ? _copy("copy.ce4ee4efc5e3", { defaultValue: "Unmute" }) : _copy("copy.8dd6857baf02", { defaultValue: "Mute" })} onClick={onToggleMute} className="h-8 w-8 rounded-xl bg-black/40 border border-white/10 text-white flex items-center justify-center">
             {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
