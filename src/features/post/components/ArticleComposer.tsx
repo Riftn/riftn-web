@@ -20,6 +20,8 @@ import {
 import { uploadArticleImage } from '../lib/articleImages';
 import { ArticleBody } from '@/components/app/article/ArticleBody';
 import { ThemedIcon } from '@/components/app/war/WarHudIcon';
+import { Button } from '@/components/ui/button';
+import Images from '@/components/ui/cut-icons/images';
 
 interface ArticleComposerProps {
   title: string;
@@ -31,6 +33,7 @@ interface ArticleComposerProps {
   setBody: (v: string) => void;
   coverPreview: string;
   onCoverChange: (file: File | null) => void;
+  onOpenFreeImages: React.MouseEventHandler<HTMLButtonElement>;
   onSaveDraft: () => void;
   onPublish: () => void;
   /** Everything else the form needs to post (wallet, quota, media) is ready. */
@@ -73,7 +76,7 @@ export function ArticleComposer(props: ArticleComposerProps) {
   const { t: _copy } = _useCopy();
   const {
     title, setTitle, summary, setSummary, body, setBody, coverPreview, onCoverChange,
-    onSaveDraft, onPublish, formReady, isPosting, uploadProgress, mintAwaitingWallet, onAbandonMint,
+    onOpenFreeImages, onSaveDraft, onPublish, formReady, isPosting, uploadProgress, mintAwaitingWallet, onAbandonMint,
   } = props;
   const { t } = useTranslation();
   const [step, setStep] = useState<'write' | 'publish'>('write');
@@ -254,6 +257,10 @@ export function ArticleComposer(props: ArticleComposerProps) {
             <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={e => onCoverChange(e.target.files?.[0] || null)} />
           </label>
         )}
+        <Button type="button" variant="secondary" className="mt-2 min-h-11 max-w-full whitespace-normal" onClick={onOpenFreeImages}>
+          <Images aria-hidden="true" />
+          {t('freeImages.title', { defaultValue: 'Free images' })}
+        </Button>
 
         {preview ? (
           <div className="pt-5">

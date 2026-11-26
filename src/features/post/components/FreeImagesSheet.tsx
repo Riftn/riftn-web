@@ -5,7 +5,7 @@ import { Loader2 } from 'lucide-react';
 import Search from '@/components/ui/cut-icons/search';
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
-import { downloadFreeAsset, searchFreeAssets, type FreeAsset } from '@/lib/editor/freeAssets';
+import { downloadFreeAsset, searchFreeAssets, searchFreeCoverPhotos, type FreeAsset } from '@/lib/editor/freeAssets';
 import { cn } from '@/lib/utils';
 
 interface FreeImagesSheetProps {
@@ -13,6 +13,8 @@ interface FreeImagesSheetProps {
   onOpenChange: (open: boolean) => void;
   /** Starting search, usually the first words of the caption. */
   initialQuery?: string;
+  /** Article covers and their link previews have no credit field. */
+  forArticleCover?: boolean;
   /** The picked photo, ready to join the post, plus its credit line. */
   onPick: (file: File, credit: string | null) => void;
 }
@@ -22,14 +24,16 @@ interface FreeImagesSheetProps {
  * Pexels and Pixabay library the blog editor uses, so a picture can sit next
  * to a post without being in the phone's gallery first.
  */
-export function FreeImagesSheet({ open, onOpenChange, initialQuery, onPick }: FreeImagesSheetProps) {
+export function FreeImagesSheet({ open, onOpenChange, initialQuery, forArticleCover = false, onPick }: FreeImagesSheetProps) {
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [submitted, setSubmitted] = useState('');
   const [items, setItems] = useState<FreeAsset[]>([]);
   const [loading, setLoading] = useState(false);
   const [picking, setPicking] = useState<string | null>(null);
-  const abortRef = useRef<AbortController | null>(null);
+  const download = useRef<AbortController | null>(null);
+
+  useEffect(() => () => download.current?.abort(), []);
 
   useEffect(() => {
     if (!open) return;
@@ -40,37 +44,43 @@ export function FreeImagesSheet({ open, onOpenChange, initialQuery, onPick }: Fr
 
   useEffect(() => {
     if (!open || !submitted) return;
-    abortRef.current?.abort();
     const controller = new AbortController();
-    abortRef.current = controller;
     setLoading(true);
-    searchFreeAssets({ kind: 'photo', query: submitted, signal: controller.signal })
-      .then((result) => { if (!controller.signal.aborted) setItems(result.items); })
+    const results = forArticleCover
+      ? searchFreeCoverPhotos(submitted, controller.signal)
+      : searchFreeAssets({ kind: 'photo', query: submitted, signal: controller.signal }).then(result => result.items);
+    results
+      .then((photos) => { if (!controller.signal.aborted) setItems(photos); })
       .catch(() => { if (!controller.signal.aborted) setItems([]); })
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
-  }, [open, submitted]);
+  }, [open, submitted, forArticleCover]);
 
   const pick = async (asset: FreeAsset) => {
-    if (picking) return;
+    if (download.current) return;
+    const controller = new AbortController();
+    download.current = controller;
     setPicking(asset.id);
     try {
-      const file = await downloadFreeAsset(asset);
+      const file = await downloadFreeAsset(asset, controller.signal);
+      if (controller.signal.aborted) return;
+      if (forArticleCover && !/^image\/(?:jpeg|png|webp)$/.test(file.type)) throw new Error('Unsupported cover image type');
       const credit = asset.attributionRequired && asset.creator
         ? t('freeImages.credit', { defaultValue: 'Photo: {{creator}} ({{license}})', creator: asset.creator, license: asset.license })
         : null;
       onPick(file, credit);
       onOpenChange(false);
     } catch {
-      toast.error(t('freeImages.failed', { defaultValue: "Couldn't add that photo. Try another one." }));
+      if (!controller.signal.aborted) toast.error(t('freeImages.failed', { defaultValue: "Couldn't add that photo. Try another one." }));
     } finally {
-      setPicking(null);
+      download.current = null;
+      if (!controller.signal.aborted) setPicking(null);
     }
   };
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent column glass className="max-h-[85dvh] text-white">
+      <DrawerContent column glass className="max-h-[85dvh] text-white" {...(forArticleCover && { 'aria-describedby': undefined })}>
         <DrawerHeader className="shrink-0 border-b border-white/10">
           <DrawerTitle className="text-start">{t('freeImages.title', { defaultValue: 'Free images' })}</DrawerTitle>
         </DrawerHeader>
@@ -90,9 +100,11 @@ export function FreeImagesSheet({ open, onOpenChange, initialQuery, onPick }: Fr
               className="h-11 rounded-xl border-0 bg-transparent pl-9 text-white placeholder:text-white/60 rtl:pl-3 rtl:pr-9"
             />
           </div>
-          <DrawerDescription className="ps-9 text-[13px] leading-[18px]">
-            {t('freeImages.note', { defaultValue: 'Free to use photos. A credit is added when the owner asks for one.' })}
-          </DrawerDescription>
+          {!forArticleCover && (
+            <DrawerDescription className="ps-9 text-[13px] leading-[18px]">
+              {t('freeImages.note', { defaultValue: 'Free to use photos. A credit is added when the owner asks for one.' })}
+            </DrawerDescription>
+          )}
         </form>
         <div className="min-h-[12rem] overflow-y-auto p-4">
           {loading ? (

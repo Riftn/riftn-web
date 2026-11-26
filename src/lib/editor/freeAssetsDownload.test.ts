@@ -1,9 +1,32 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { downloadFreeAsset, type FreeAsset } from './freeAssets';
+import { downloadFreeAsset, searchFreeCoverPhotos, type FreeAsset } from './freeAssets';
 
 const asset: FreeAsset = { id: 'audio', source: 'Openverse', kind: 'audio', title: 'Quiet morning', creator: 'Creator', thumbnailUrl: '', downloadUrl: 'https://media.example/track.mp3', landingUrl: 'https://media.example/credits', mimeType: 'audio/mpeg', license: 'CC0', attributionRequired: false, attributionText: '' };
 afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
 const respond = (response: Response) => vi.stubGlobal('fetch', vi.fn().mockResolvedValue(response));
+
+it('only offers supported Wikimedia photos explicitly marked CC0 and credit-free for covers', async () => {
+  const cc0 = 'https://creativecommons.org/publicdomain/zero/1.0/deed.en';
+  const photo = (pageid: number, license: string, credit: string | undefined, mime = 'image/jpeg') => ({
+    pageid,
+    title: `File:Photo ${pageid}.jpg`,
+    imageinfo: [{
+      url: `https://upload.wikimedia.org/photo-${pageid}.jpg`,
+      descriptionurl: `https://commons.wikimedia.org/wiki/File:Photo_${pageid}.jpg`,
+      mime,
+      extmetadata: { LicenseUrl: { value: license }, AttributionRequired: { value: credit } },
+    }],
+  });
+  respond(Response.json({ query: { pages: [
+    photo(1, cc0, 'false'),
+    photo(2, cc0, 'true'),
+    photo(3, cc0, undefined),
+    photo(4, 'https://creativecommons.org/licenses/by/4.0/', 'false'),
+    photo(5, cc0, 'false', 'image/gif'),
+  ] } }));
+  expect((await searchFreeCoverPhotos('nature')).map(item => item.id)).toEqual(['wikimedia:1']);
+  expect(new URL(String(vi.mocked(fetch).mock.calls[0][0])).searchParams.get('gsrsearch')).toBe('nature filetype:bitmap incategory:CC-Zero');
+});
 
 describe('stock media downloads', () => {
   it.each([['audio/x-wav; charset=binary', 'audio/wav', 'wav'], ['audio/mp4', 'audio/mp4', 'm4a'], ['audio/x-flac', 'audio/flac', 'flac'], ['application/ogg; codecs=vorbis', 'audio/ogg', 'ogg']])('imports the actual %s codec and its matching extension', async (reported, mime, extension) => {
