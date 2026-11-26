@@ -202,6 +202,8 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, openComm
   const moreButtonRef = useRef<HTMLButtonElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
   const commentsButtonRef = useRef<HTMLButtonElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const restoreCommentsFocus = useRef(false);
   const viewedRef = useRef(new Set<string>());
   const changedRef = useRef(false);
   const originalRequest = useRef<symbol | null>(null);
@@ -246,14 +248,19 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, openComm
   }, [authorIdx, itemIdx]);
 
   useEffect(() => {
-    if (!sheet) return;
-    sheetRef.current?.querySelector('button')?.focus({ preventScroll: true });
+    if (sheet) {
+      sheetRef.current?.querySelector('button')?.focus({ preventScroll: true });
+    } else if (restoreCommentsFocus.current) {
+      restoreCommentsFocus.current = false;
+      // The comments control is hidden until the drawer has closed.
+      (commentsButtonRef.current ?? closeButtonRef.current)?.focus({ preventScroll: true });
+    }
   }, [item?.id, sheet]);
 
   const dismissSheet = useCallback(() => {
+    restoreCommentsFocus.current = sheet === 'comments';
     setSheet(null);
     if (sheet === 'more') moreButtonRef.current?.focus({ preventScroll: true });
-    if (sheet === 'comments') commentsButtonRef.current?.focus({ preventScroll: true });
   }, [sheet]);
 
   // ── Counting the view ─────────────────────────────────────────────
@@ -721,7 +728,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, openComm
           <button ref={moreButtonRef} type="button" data-sv-icon onClick={() => setSheet('more')} aria-label={t('stories.moreActions', { defaultValue: 'Moment options' })} aria-expanded={sheet === 'more'}>
             <MoreVertical className="w-5 h-5" />
           </button>
-          <button type="button" data-sv-icon onClick={close} aria-label={t('common.close', { defaultValue: 'Close' })}>
+          <button ref={closeButtonRef} type="button" data-sv-icon onClick={close} aria-label={t('common.close', { defaultValue: 'Close' })}>
             <Close className="w-5 h-5" />
           </button>
         </div>
