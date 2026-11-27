@@ -3252,7 +3252,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           await wagmiDisconnectAsync();
         } catch { /* already gone */ }
         await new Promise(r => setTimeout(r, 100));
-      } else {
+      } else if (connector.type !== 'injected' || !isWalletInAppBrowser()) {
+        // Disconnecting an injected connector can revoke provider permissions
+        // even before wagmi connects. Keep the first request to an embedded
+        // wallet focused on connecting so its approval prompt can open.
         try {
           await connector.disconnect();
         } catch { /* ignore if not connected */ }

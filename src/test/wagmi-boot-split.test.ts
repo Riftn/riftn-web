@@ -63,6 +63,12 @@ describe('wagmi boot split', () => {
     expect(step.indexOf('if (!connectorsReady)')).toBeLessThan(step.indexOf('<RainbowKitProvider'));
   });
 
+  it('skips the connector reset on a first injected wallet connection inside a wallet browser', () => {
+    const auth = read('src/contexts/AuthProvider.tsx');
+    const connect = auth.slice(auth.indexOf('const connectWithWallet = async'));
+    expect(connect).toMatch(/else if \(connector\.type !== 'injected' \|\| !isWalletInAppBrowser\(\)\) \{[^}]*await connector\.disconnect\(\)/);
+  });
+
   it('a returning external-wallet session gets its connector before wagmi mounts', () => {
     const providers = read('src/components/app/WalletProviders.tsx');
     expect(providers).toContain('export async function loadWalletProviders');
